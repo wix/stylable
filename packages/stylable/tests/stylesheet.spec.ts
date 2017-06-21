@@ -78,22 +78,6 @@ describe('Stylesheet', function () {
 
     describe('process', function () {
 
-        it('create typedClasses definitions', function () {
-
-            var sheet = Stylesheet.fromCSS(`
-                .container {
-                    -sb-root: true;
-                    color: red;
-                }
-            `);
-
-            expect(sheet.typedClasses).to.eql({
-                container: {
-                    SbRoot: true
-                }
-            });
-
-        });
 
         it('throw when -sb-root used in complex selector', function () {
 

@@ -10,9 +10,9 @@ describe('styleable', function () {
         it('skips empty selectors', function () {
 
             var sheet = Stylesheet.fromCSS(`
-            .container { }
-            .image { }
-        `);
+                .container { }
+                .image { }
+            `);
 
             const css = styleable.generate(sheet)
 
@@ -23,10 +23,10 @@ describe('styleable', function () {
         it('generate css from single sheet', function () {
 
             var sheet = Stylesheet.fromCSS(`
-            .container {
-                color: black;
-            }
-        `);
+                .container {
+                    color: black;
+                }
+            `);
 
             const css = styleable.generate(sheet);
 
@@ -38,10 +38,10 @@ describe('styleable', function () {
         it('generate css from multiple sheets', function () {
 
             var sheetA = Stylesheet.fromCSS(`
-            .container {
-                color: black;
-            }
-        `);
+                .container {
+                    color: black;
+                }
+            `);
 
             var sheetB = Stylesheet.fromCSS(`
             .container {
