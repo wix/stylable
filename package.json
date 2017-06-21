@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",
+    "kebab-case": "^1.0.0",
     "postcss": "^6.0.2",
     "postcss-js": "^1.0.0",
     "postcss-whitespace": "^1.1.0"

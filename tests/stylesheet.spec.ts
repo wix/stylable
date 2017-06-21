@@ -94,7 +94,6 @@ describe('Stylesheet', function () {
 
         it('with empty css', function () {
             const sheet = Stylesheet.fromCSS(``);
-
             expect(sheet.classes).to.eql({});
             expect(sheet.typedClasses).to.eql({});
         });
@@ -184,6 +183,52 @@ describe('Stylesheet', function () {
             ]);
 
         });
+
+        it('with -sb-states', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    -sb-states: stateA, stateB;
+                }
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                container: {
+                    SbStates: ["stateA", "stateB"]
+                }
+            })
+        }); 
+
+        it('with empty -sb-states ', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    -sb-states: ;
+                }
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                container: {
+                    SbStates: []
+                }
+            })
+        });      
+
+
+        it('with -sb-type ', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/thing"){
+                    -sb-default: Thing;
+                }
+                .container {
+                    -sb-type: Thing;
+                }
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                container: {
+                    SbType: "Thing"
+                }
+            })
+        });     
 
     });
 
