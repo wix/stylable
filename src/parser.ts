@@ -1,3 +1,8 @@
+import { parse as parseCSS } from "postcss";
+const postjs = require("postcss-js");
+const tokenizer = require("css-selector-tokenizer");
+
+
 export declare type SelectorAstNode = {
     type: string;
     name: string;
@@ -5,6 +10,17 @@ export declare type SelectorAstNode = {
 };
 
 export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
+
+
+export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+
+export function objectifyCSS(css: string) {
+    return postjs.objectify(parseCSS(css));
+}
+
+export function parseSelector(selector: string) {
+    return tokenizer.parse(selector);
+}
 
 export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0): boolean | void {
     if (!node) { return }
