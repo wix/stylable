@@ -108,39 +108,6 @@ describe('Stylesheet', function () {
 
         });
 
-        xit('create import definitions', function () {
-            /*
-                
-                :import("./path/to/thing"){
-                    -sb-default: Name;
-                    -sb-named: Button as Btn, Icon;
-                    -sb-named-Name: MyName;
-                }
-
-                :import{
-                    -sb-from: "./path/to/thing";
-                    -sb-default: Name;
-                    -sb-named: Button as Btn, Icon;
-                    -sb-named-Name: MyName;
-                }
-
-             */
-            var sheet = Stylesheet.fromCSS(`
-                
-            `);
-
-            expect(sheet.typedClasses).to.eql({
-                container: {
-                    SbType: {
-                        from: "./button",
-                        default: "Button",
-                        named: {}
-                    }
-                }
-            });
-
-        });
-
         it('with empty css', function () {
             const sheet = Stylesheet.fromCSS(``);
 
@@ -190,6 +157,48 @@ describe('Stylesheet', function () {
                     SbRoot: false
                 }
             })
+        });
+
+        it('create import definitions (format A)', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                :import("./path/to/thing"){
+                    -sb-default: Name;
+                    -sb-named: Button as Btn, Icon;
+                    -sb-named-Name: MyName;
+                }
+            `);
+
+            expect(sheet.imports).to.eql([
+                {
+                    SbFrom: "./path/to/thing",
+                    SbDefault: "Name",
+                    SbNamed: {
+                        Button: "Btn",
+                        Icon: "Icon",
+                        Name: "MyName"
+                    }
+                }
+            ]);
+
+        });
+
+        it('create import definitions (format B)', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                :import {
+                    -sb-from: "./path/to/thing";
+                }
+            `);
+
+            expect(sheet.imports).to.eql([
+                {
+                    SbFrom: "./path/to/thing",
+                    SbDefault: "",
+                    SbNamed: {}
+                }
+            ]);
+
         });
 
     });

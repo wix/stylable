@@ -3,11 +3,17 @@ const postjs = require("postcss-js");
 const tokenizer = require("css-selector-tokenizer");
 
 
-export declare type SelectorAstNode = {
+export interface SelectorAstNode {
     type: string;
     name: string;
     nodes: SelectorAstNode[];
 };
+
+export interface PseudoSelectorAstNode extends SelectorAstNode  {
+    type: "pseudo-class"
+    content: string;
+};
+
 
 export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
 
@@ -34,12 +40,11 @@ export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: num
     }
 }
 
-export function isOnlyElementOrClassSelector(ast: SelectorAstNode) {
+export function createSimpleSelectorChecker() {
     let index = 0;
-
     const types = ['selectors', 'selector', ['element', 'class']];
-
-    const res = traverseNode(ast, (node) => {
+   
+    return (node: SelectorAstNode) => {
         const matcher = types[index];
         if (Array.isArray(matcher)) {
             return matcher.indexOf(node.type) !== -1;
@@ -51,7 +56,6 @@ export function isOnlyElementOrClassSelector(ast: SelectorAstNode) {
         }
         index++;
         return true;
-    });
+    }
 
-    return res === false ? false : true;
 }
