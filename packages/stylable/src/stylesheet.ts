@@ -24,7 +24,6 @@ export class InMemoryContext {
     constructor(public buffer: string[] = []) { }
 }
 
-
 export interface CSSImportRaw {
     SbDefault: string;
     SbNamed: string;
@@ -34,7 +33,7 @@ export interface CSSImportRaw {
 
 export class Import {
     static fromRawCSS(SbFrom: string, cssImportDef: CSSImportRaw) {
-
+        SbFrom = SbFrom || cssImportDef['SbFrom'];
         const namedMap: Pojo<string> = {};
 
         if (cssImportDef["SbNamed"]) {
@@ -60,7 +59,7 @@ export class Import {
     constructor(public SbFrom: string, public SbDefault: string = "", public SbNamed: Pojo<string> = {}) { }
 }
 
-const SBTypes = {
+const SBTypesParsers = {
     SbRoot: (value: string) => {
         return value === 'false' ? false : true
     },
@@ -100,13 +99,12 @@ export class Stylesheet {
             const ast = parseSelector(selector);
             const checker = createSimpleSelectorChecker();
             let isSimpleSelector = true;
-            debugger;
             traverseNode(ast, (node) => {
                 if (!checker(node)) { isSimpleSelector = false; }
                 const { type, name } = node;
                 if (type === "pseudo-class" && name === 'import') {
                     const { content } = node as PseudoSelectorAstNode;
-                    this.imports.push(Import.fromRawCSS(content || this.cssDefinition[selector]['SbFrom'], this.cssDefinition[selector]));
+                    this.imports.push(Import.fromRawCSS(content, this.cssDefinition[selector]));
                 } else if (node.type === 'class') {
                     this.addClassNameMapping(node.name);
                 }
@@ -115,18 +113,18 @@ export class Stylesheet {
         });
     }
     private addTypedClass(selector: string, isSimpleSelector: boolean) {
-        const rules: Pojo<string> = this.cssDefinition[selector];
-        this.addTypedRule(rules, isSimpleSelector, selector, 'SbRoot');
-        this.addTypedRule(rules, isSimpleSelector, selector, 'SbStates');
-        this.addTypedRule(rules, isSimpleSelector, selector, 'SbType');
+        this.addTypedRule(selector, isSimpleSelector, 'SbRoot');
+        this.addTypedRule(selector, isSimpleSelector, 'SbStates');
+        this.addTypedRule(selector, isSimpleSelector, 'SbType');
     }
-    private addTypedRule(rules: any, isSimpleSelector: boolean, selector: string, rule: keyof typeof SBTypes) {
+    private addTypedRule(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
+        const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
             if (isSimpleSelector) {
                 const name = selector.replace('.', '');
                 this.typedClasses[name] = {
                     ...this.typedClasses[name],
-                    [rule]: SBTypes[rule](rules[rule])
+                    [rule]: SBTypesParsers[rule](rules[rule])
                 };
             } else {
                 throw new Error(kebab(rule) + ' on complex selector: ' + selector);

@@ -148,7 +148,7 @@ describe('Stylesheet', function () {
                 :import("./path/to/thing"){
                     -sb-default: Name;
                     -sb-named: Button as Btn, Icon;
-                    -sb-named-Name: MyName;
+                    -sb-named-ExportName: MyName;
                 }
             `);
 
@@ -159,7 +159,7 @@ describe('Stylesheet', function () {
                     SbNamed: {
                         Button: "Btn",
                         Icon: "Icon",
-                        Name: "MyName"
+                        ExportName: "MyName"
                     }
                 }
             ]);
@@ -196,7 +196,7 @@ describe('Stylesheet', function () {
                     SbStates: ["stateA", "stateB"]
                 }
             })
-        }); 
+        });
 
         it('with empty -sb-states ', function () {
             const sheet = Stylesheet.fromCSS(`
@@ -210,7 +210,7 @@ describe('Stylesheet', function () {
                     SbStates: []
                 }
             })
-        });      
+        });
 
 
         it('with -sb-type ', function () {
@@ -228,7 +228,7 @@ describe('Stylesheet', function () {
                     SbType: "Thing"
                 }
             })
-        });     
+        });
 
     });
 
