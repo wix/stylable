@@ -44,10 +44,10 @@ describe('styleable', function () {
             `);
 
             var sheetB = Stylesheet.fromCSS(`
-            .container {
-                color: white;
-            }
-        `);
+                .container {
+                    color: white;
+                }
+            `);
 
             const css = styleable.generate(sheetA, sheetB);
 
