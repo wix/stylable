@@ -1,4 +1,5 @@
-import { Stylesheet, InMemoryContext } from "../src/stylesheet";
+import { Stylesheet } from "../src/stylesheet";
+import { InMemoryContext } from "../src/in-memory-context";
 import { expect } from "chai";
 
 describe('Stylesheet', function () {
@@ -237,7 +238,7 @@ describe('Stylesheet', function () {
         let ctx: InMemoryContext;
 
         beforeEach(() => {
-            ctx = new InMemoryContext();
+            ctx = new InMemoryContext("");
         });
 
         it('generate empty', function () {

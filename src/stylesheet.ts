@@ -7,21 +7,15 @@ import {
     PseudoSelectorAstNode,
     traverseNode,
 } from './parser';
-
+import { InMemoryContext } from "./in-memory-context";
 const kebab = require("kebab-case");
-const postjs = require("postcss-js");
-const postcss = require("postcss");
 
-const processor = postcss()
+
 
 export interface TypedClass {
     SbRoot: boolean;
     SbStates: string[];
     SbType: string;
-}
-
-export class InMemoryContext {
-    constructor(public buffer: string[] = []) { }
 }
 
 export interface CSSImportRaw {
@@ -76,21 +70,22 @@ export class Stylesheet {
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
     imports: Import[];
-    constructor(cssDefinition: any) {
+    namespace: string;
+    constructor(cssDefinition: any, namespace: string = "") {
         this.cssDefinition = cssDefinition;
+        this.namespace = namespace;
         this.classes = {};
         this.typedClasses = {};
         this.imports = [];
         this.process();
     }
-    static fromCSS(css: string) {
-        return new Stylesheet(objectifyCSS(css));
+    static fromCSS(css: string, namespace?: string) {
+        return new Stylesheet(objectifyCSS(css), namespace);
     }
     generate(ctx: InMemoryContext) {
         Object.keys(this.cssDefinition).forEach((selector) => {
             if (Object.keys(this.cssDefinition[selector]).length) {
-                var result = processor.process({ [selector]: this.cssDefinition[selector] }, { parser: postjs });
-                result.css && ctx.buffer.push(result.css);
+                ctx.add(selector, this.cssDefinition[selector], this.namespace);
             }
         });
     }
