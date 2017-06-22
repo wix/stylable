@@ -49,7 +49,7 @@ describe('styleable', function () {
                 }
             `);
 
-            const css = styleable.generate(sheetA, sheetB);
+            const css = styleable.generate([sheetA, sheetB]);
 
             expect(css).to.eql([
                 '.container {\n    color: black\n}',
@@ -57,6 +57,24 @@ describe('styleable', function () {
             ]);
 
         });
+
+
+        it('generate scoped selector', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                .container {
+                    color: white;
+                }
+            `, "TheNameSpace");
+
+            const css = styleable.generate(sheet, { namespaceDivider: "__THE_DIVIDER__" });
+
+            expect(css).to.eql([
+                '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
+            ]);
+
+        });
+
 
     });
 

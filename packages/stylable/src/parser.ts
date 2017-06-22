@@ -28,6 +28,10 @@ export function parseSelector(selector: string) {
     return tokenizer.parse(selector);
 }
 
+export function stringifySelector(ast: SelectorAstNode){
+    return tokenizer.stringify(ast)
+}
+
 export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0): boolean | void {
     if (!node) { return }
     let doNext = visitor(node, index);
