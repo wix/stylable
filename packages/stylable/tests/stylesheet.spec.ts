@@ -238,7 +238,7 @@ describe('Stylesheet', function () {
         let ctx: InMemoryContext;
 
         beforeEach(() => {
-            ctx = new InMemoryContext("");
+            ctx = new InMemoryContext({});
         });
 
         it('generate empty', function () {

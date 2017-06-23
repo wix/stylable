@@ -84,9 +84,7 @@ export class Stylesheet {
     }
     generate(ctx: InMemoryContext) {
         Object.keys(this.cssDefinition).forEach((selector) => {
-            if (Object.keys(this.cssDefinition[selector]).length) {
-                ctx.add(selector, this.cssDefinition[selector], this.namespace);
-            }
+            ctx.add(selector, this.cssDefinition[selector], this.namespace);
         });
     }
     private process() {
@@ -124,6 +122,7 @@ export class Stylesheet {
             } else {
                 throw new Error(kebab(rule) + ' on complex selector: ' + selector);
             }
+            delete rules[rule];
         }
     }
     private addClassNameMapping(originalName: string, mappedName: string = originalName) {
