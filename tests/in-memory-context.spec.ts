@@ -6,7 +6,7 @@ describe('in-memory-context', function () {
     
     it('generate scoped selector', function () {
 
-        const ctx = new InMemoryContext("__THE_GREAT_DIVIDER__");
+        const ctx = new InMemoryContext({namespaceDivider: "__THE_GREAT_DIVIDER__"});
 
         ctx.add('.container', {}, 'TheNameSpace')
 
@@ -17,7 +17,7 @@ describe('in-memory-context', function () {
 
     it('generate scoped selector with multiple classes', function () {
 
-        const ctx = new InMemoryContext("__THE_GREAT_DIVIDER__");
+        const ctx = new InMemoryContext({namespaceDivider: "__THE_GREAT_DIVIDER__"});
 
         ctx.add('.container .img', {}, 'TheNameSpace')
 

@@ -1,22 +1,29 @@
+import { PartialObject } from "./index.d";
 import { parseSelector, stringifySelector, traverseNode } from './parser';
+import { Stylesheet } from './stylesheet';
 
-const postjs = require("postcss-js");
 const postcss = require("postcss");
+const postcssConfig = { parser: require("postcss-js") };
 const processor = postcss();
-const config = { parser: postjs };
+
+export interface Config {
+    namespaceDivider: string;
+    resolver: { resolve: () => Stylesheet }
+}
 
 export class InMemoryContext {
-    constructor(public namespaceDivider: string, public buffer: string[] = []) { }
+    constructor(private config: PartialObject<Config>, public buffer: string[] = []) { }
     add(selector: string, rules: any, namespace: string) {
+        if (selector.match(/:import/)) { return; }
         this.buffer.push(processor.process({
             [this.scopeSelector(selector, namespace)]: rules
-        }, config).css);
+        }, postcssConfig).css);
     }
     scopeSelector(selector: string, namespace: string) {
         const ast = parseSelector(selector);
         traverseNode(ast, (node) => {
             if (node.type === 'class' && namespace) {
-                node.name = namespace + this.namespaceDivider + node.name
+                node.name = namespace + this.config.namespaceDivider + node.name
             }
         });
         return stringifySelector(ast);
