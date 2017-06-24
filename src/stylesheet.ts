@@ -7,7 +7,7 @@ import {
     PseudoSelectorAstNode,
     traverseNode,
 } from './parser';
-import { InMemoryContext } from "./in-memory-context";
+import { Generator } from "./generator";
 const kebab = require("kebab-case");
 
 
@@ -82,7 +82,7 @@ export class Stylesheet {
     static fromCSS(css: string, namespace?: string) {
         return new Stylesheet(objectifyCSS(css), namespace);
     }
-    generate(ctx: InMemoryContext) {
+    generate(ctx: Generator) {
         Object.keys(this.cssDefinition).forEach((selector) => {
             ctx.add(selector, this.cssDefinition[selector], this.namespace);
         });

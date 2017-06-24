@@ -11,7 +11,7 @@ export interface Config {
     resolver: { resolve: () => Stylesheet }
 }
 
-export class InMemoryContext {
+export class Generator {
     constructor(private config: PartialObject<Config>, public buffer: string[] = []) { }
     add(selector: string, rules: any, namespace: string) {
         if (selector.match(/:import/)) { return; }
