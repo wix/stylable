@@ -1,12 +1,12 @@
 import { Stylesheet } from './stylesheet';
-import { InMemoryContext } from "./in-memory-context";
+import { Generator } from "./generator";
 
 
 
 export const styleable = {
-    generate(styles: Stylesheet | Stylesheet[], context: InMemoryContext = new InMemoryContext({ namespaceDivider: "💠" })) {
+    generate(styles: Stylesheet | Stylesheet[], generator: Generator = new Generator({ namespaceDivider: "💠" })) {
         if (!Array.isArray(styles)) { styles = [styles]; }
-        styles.forEach((style) => style.generate(context));
-        return context.buffer;
+        styles.forEach((style) => style.generate(generator));
+        return generator.buffer;
     }
 }

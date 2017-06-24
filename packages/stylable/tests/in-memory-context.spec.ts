@@ -1,12 +1,12 @@
-import { InMemoryContext } from '../src/in-memory-context';
+import { Generator } from '../src/generator';
 import { expect } from "chai";
 
 
-describe('in-memory-context', function () {
+describe('generator', function () {
     
     it('generate scoped selector', function () {
 
-        const ctx = new InMemoryContext({namespaceDivider: "__THE_GREAT_DIVIDER__"});
+        const ctx = new Generator({namespaceDivider: "__THE_GREAT_DIVIDER__"});
 
         ctx.add('.container', {}, 'TheNameSpace')
 
@@ -17,7 +17,7 @@ describe('in-memory-context', function () {
 
     it('generate scoped selector with multiple classes', function () {
 
-        const ctx = new InMemoryContext({namespaceDivider: "__THE_GREAT_DIVIDER__"});
+        const ctx = new Generator({namespaceDivider: "__THE_GREAT_DIVIDER__"});
 
         ctx.add('.container .img', {}, 'TheNameSpace')
 

@@ -1,4 +1,4 @@
-import { InMemoryContext } from '../src/in-memory-context';
+import { Generator } from '../src/generator';
 import { styleable } from '../src/styleable';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -68,7 +68,7 @@ describe('styleable', function () {
                 }
             `, "TheNameSpace");
 
-            const css = styleable.generate(sheet, new InMemoryContext({ namespaceDivider: "__THE_DIVIDER__" }));
+            const css = styleable.generate(sheet, new Generator({ namespaceDivider: "__THE_DIVIDER__" }));
 
             expect(css).to.eql([
                 '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
@@ -90,7 +90,7 @@ describe('styleable', function () {
                 }
             `, "TheNameSpace");
 
-            const css = styleable.generate(sheet, new InMemoryContext({ namespaceDivider: "__THE_DIVIDER__" }));
+            const css = styleable.generate(sheet, new Generator({ namespaceDivider: "__THE_DIVIDER__" }));
 
             expect(css).to.eql([
                 '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
@@ -119,7 +119,7 @@ describe('styleable', function () {
                 .containerB::icon { }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new InMemoryContext({
+            const css = styleable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: {
                     resolve() {

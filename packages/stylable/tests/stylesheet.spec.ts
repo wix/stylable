@@ -1,5 +1,5 @@
 import { Stylesheet } from "../src/stylesheet";
-import { InMemoryContext } from "../src/in-memory-context";
+import { Generator } from "../src/generator";
 import { expect } from "chai";
 
 describe('Stylesheet', function () {
@@ -235,10 +235,10 @@ describe('Stylesheet', function () {
 
     describe('generate', function () {
 
-        let ctx: InMemoryContext;
+        let ctx: Generator;
 
         beforeEach(() => {
-            ctx = new InMemoryContext({});
+            ctx = new Generator({});
         });
 
         it('generate empty', function () {
