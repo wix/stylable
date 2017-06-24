@@ -8,13 +8,26 @@ const processor = postcss();
 
 export interface Config {
     namespaceDivider: string;
-    resolver: { resolve: () => Stylesheet }
+    resolver: { resolve: () => Stylesheet | null }
 }
 
+const DEFAULT_CONFIG = {
+    namespaceDivider: "💠",
+    resolver: { resolve: () => null }
+};
+
 export class Generator {
-    constructor(private config: PartialObject<Config>, public buffer: string[] = []) { }
-    add(selector: string, rules: any, namespace: string) {
-        if (selector.match(/:import/)) { return; }
+    private config: Config;
+    constructor(config: PartialObject<Config>, public buffer: string[] = []) {
+        this.config = { ...DEFAULT_CONFIG, ...config };
+    }
+    add(sheet: Stylesheet) {
+        for (var selector in sheet.cssDefinition) {
+            this.addSelector(selector, sheet.cssDefinition[selector], sheet.namespace);
+        }
+    }
+    addSelector(selector: string, rules: any, namespace: string) {
+        if (selector.match(/^:import/)) { return; }
         this.buffer.push(processor.process({
             [this.scopeSelector(selector, namespace)]: rules
         }, postcssConfig).css);

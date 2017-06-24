@@ -1,5 +1,4 @@
 import { Stylesheet } from "../src/stylesheet";
-import { Generator } from "../src/generator";
 import { expect } from "chai";
 
 describe('Stylesheet', function () {
@@ -229,50 +228,6 @@ describe('Stylesheet', function () {
                     SbType: "Thing"
                 }
             })
-        });
-
-    });
-
-    describe('generate', function () {
-
-        let ctx: Generator;
-
-        beforeEach(() => {
-            ctx = new Generator({});
-        });
-
-        it('generate empty', function () {
-            const stylesheet = new Stylesheet({});
-            stylesheet.generate(ctx);
-            expect(ctx.buffer).to.eql([]);
-        });
-
-        it('generate with single rule', function () {
-            const stylesheet = new Stylesheet({
-                ".container": { color: "black" }
-            });
-            stylesheet.generate(ctx);
-            expect(ctx.buffer).to.eql([".container {\n    color: black\n}"]);
-        });
-
-        it('generate with multiple rules', function () {
-            const stylesheet = new Stylesheet({
-                ".container": { color: "black", background: "white" }
-            });
-            stylesheet.generate(ctx);
-            expect(ctx.buffer).to.eql([".container {\n    color: black;\n    background: white\n}"]);
-        });
-
-        it('generate with multiple selectors', function () {
-            const stylesheet = new Stylesheet({
-                ".container": { color: "black" },
-                ".wrapper": { background: "white" }
-            });
-            stylesheet.generate(ctx);
-            expect(ctx.buffer).to.eql([
-                ".container {\n    color: black\n}",
-                ".wrapper {\n    background: white\n}"
-            ]);
         });
 
     });
