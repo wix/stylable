@@ -2,7 +2,6 @@ import { parse as parseCSS } from "postcss";
 const postjs = require("postcss-js");
 const tokenizer = require("css-selector-tokenizer");
 
-
 export interface SelectorAstNode {
     type: string;
     name: string;
@@ -14,11 +13,19 @@ export interface PseudoSelectorAstNode extends SelectorAstNode  {
     content: string;
 };
 
-
-export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
-
-
 export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+
+export const SBTypesParsers = {
+    SbRoot: (value: string) => {
+        return value === 'false' ? false : true
+    },
+    SbStates: (value: string) => {
+        return value ? value.split(',').map((state) => state.trim()) : [];
+    },
+    SbType: (value: string) => {
+        return value ? value.trim() : "";
+    }
+}
 
 export function objectifyCSS(css: string) {
     return postjs.objectify(parseCSS(css));
@@ -32,6 +39,7 @@ export function stringifySelector(ast: SelectorAstNode){
     return tokenizer.stringify(ast)
 }
 
+export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
 export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0): boolean | void {
     if (!node) { return }
     let doNext = visitor(node, index);

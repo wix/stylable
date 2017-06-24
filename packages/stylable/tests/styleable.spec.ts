@@ -15,7 +15,7 @@ describe('styleable', function () {
                 .image {}
             `);
 
-            const css = styleable.generate(sheet)
+            const css = styleable.generate(sheet);
 
             expect(css).to.eql([".container {}", ".image {}"]);
 
@@ -58,7 +58,6 @@ describe('styleable', function () {
             ]);
 
         });
-
 
         it('generate scoped selector', function () {
 
