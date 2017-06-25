@@ -42,17 +42,23 @@ export class Generator {
         traverseNode(ast, (node) => {
             const { name, type } = node;
             if (type === 'class') {
-                node.name = this.addNamespace(name, current.namespace);
-                current = sheet.resolve(this.config.resolver, name);
+                const next = sheet.resolve(this.config.resolver, name);
+                if(next !== current){
+                    node.before = '.' + this.scope(name, current.namespace);
+                    node.name = this.scope(next.root, next.namespace);
+                    current = next;
+                } else {
+                    node.name = this.scope(name, current.namespace);
+                }
             } else if (type === 'pseudo-element') {
                 node.type = 'class';
-                node.before = ' .' + this.addNamespace(current.root, current.namespace) + ' ';
-                node.name = this.addNamespace(name, current.namespace);
+                node.before = ' ';
+                node.name = this.scope(name, current.namespace);
             }
         });
         return stringifySelector(ast);
     }
-    addNamespace(name: string, namespace: string) {
+    scope(name: string, namespace: string) {
         return namespace ? namespace + this.config.namespaceDivider + name : name;
     }
 }

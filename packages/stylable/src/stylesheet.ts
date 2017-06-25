@@ -77,14 +77,12 @@ export class Stylesheet {
         }
     }
     private getImportForSymbol(symbol: string) {
-        return this.imports.filter((_import) => {
-            return _import.containsSymbol(symbol)
-        })[0] || null;
+        return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
     }
     resolve(resolver: any, name: string) {
         const typedClass = this.typedClasses[name];
         const _import = typedClass ? this.getImportForSymbol(typedClass.SbType) : null;
-        return _import ? resolver.resolve(_import.SbFrom) : this;
+        return  _import ? resolver.resolve(_import.SbFrom) : this;
     }
 }
 
