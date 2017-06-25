@@ -1,5 +1,6 @@
 import { PartialObject } from './index.d';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './parser';
+import { InMemoryResolver } from './resolver';
 import { Stylesheet } from './stylesheet';
 
 const postcss = require("postcss");
@@ -8,12 +9,12 @@ const processor = postcss();
 
 export interface Config {
     namespaceDivider: string;
-    resolver: { resolve: (path: string) => Stylesheet | null }
+    resolver: InMemoryResolver;
 }
 
-const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG: Config = {
     namespaceDivider: "💠",
-    resolver: { resolve: () => null }
+    resolver: new InMemoryResolver({})
 };
 
 export class Generator {
@@ -23,7 +24,7 @@ export class Generator {
     }
     add(sheet: Stylesheet) {
 
-        sheet.imports.forEach((importDef)=>{
+        sheet.imports.forEach((importDef) => {
             const resolved = this.config.resolver.resolve(importDef.SbFrom);
             resolved && this.add(resolved);
         });
@@ -42,8 +43,8 @@ export class Generator {
         traverseNode(ast, (node) => {
             const { name, type } = node;
             if (type === 'class') {
-                const next = sheet.resolve(this.config.resolver, name);
-                if(next !== current){
+                const next = current.resolve(this.config.resolver, name);
+                if (next !== current) {
                     node.before = '.' + this.scope(name, current.namespace);
                     node.name = this.scope(next.root, next.namespace);
                     current = next;
@@ -54,6 +55,7 @@ export class Generator {
                 node.type = 'class';
                 node.before = ' ';
                 node.name = this.scope(name, current.namespace);
+                // current = current.resolve(this.config.resolver, name);
             }
         });
         return stringifySelector(ast);
