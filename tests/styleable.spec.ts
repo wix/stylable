@@ -129,6 +129,40 @@ describe('styleable', function () {
             expect(css.length).to.equal(res.length);
         });
 
+        
+        it('generate typed selector that extends root', function () {
+
+            var sheetA = Stylesheet.fromCSS(`
+                .containerA {
+                    -sb-root: true;
+                }
+            `, "TheNameSpace");
+
+            var sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.styleable.css"){
+                     -sb-default: Container;
+                }
+                .containerB {
+                    -sb-type: Container;
+                }
+            `, "TheGreatNameSpace");
+
+            const css = styleable.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new InMemoryResolver({
+                    "./relative/path/to/sheetA.styleable.css": sheetA
+                })
+            }));
+
+            const res = [
+                '.TheNameSpace__THE_DIVIDER__containerA {}',
+                '.TheGreatNameSpace__THE_DIVIDER__containerB.TheNameSpace__THE_DIVIDER__TheNameSpace {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
         it('generate resolve and transform pseudo-element form imported type', function () {
 
             var sheetA = Stylesheet.fromCSS(`
@@ -158,8 +192,8 @@ describe('styleable', function () {
             const res = [
                 '.TheNameSpace__THE_DIVIDER__containerA {}',
                 '.TheNameSpace__THE_DIVIDER__icon {}',
-                '.TheGreatNameSpace__THE_DIVIDER__containerB {}',
-                '.TheGreatNameSpace__THE_DIVIDER__containerB .TheNameSpace__THE_DIVIDER__TheNameSpace .TheNameSpace__THE_DIVIDER__icon {}'
+                '.TheGreatNameSpace__THE_DIVIDER__containerB.TheNameSpace__THE_DIVIDER__TheNameSpace {}',
+                '.TheGreatNameSpace__THE_DIVIDER__containerB.TheNameSpace__THE_DIVIDER__TheNameSpace .TheNameSpace__THE_DIVIDER__icon {}'
             ];
 
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));

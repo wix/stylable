@@ -17,7 +17,7 @@ export class Import {
                 if (parts.length === 1) {
                     namedMap[parts[0]] = parts[0];
                 } else if (parts.length === 2) {
-                    namedMap[parts[0]] = parts[1];
+                    namedMap[parts[1]] = parts[0];
                 }
             })
         }
@@ -25,14 +25,14 @@ export class Import {
         for (var key in cssImportDef) {
             const match = key.match(/^SbNamed(.+)/);
             if (match) {
-                namedMap[match[1]] = cssImportDef[key];
+                namedMap[cssImportDef[key]] = match[1];
             }
         }
 
         return new Import(SbFrom.slice(1, -1), cssImportDef.SbDefault, namedMap);
     }
     constructor(public SbFrom: string, public SbDefault: string = "", public SbNamed: Pojo<string> = {}) { }
-    containsSymbol(symbol: string) {
-        return symbol && this.SbDefault === symbol
+    containsSymbol(symbol: string): boolean {
+        return symbol ? (this.SbDefault === symbol || !!this.SbNamed[symbol]) : false;
     }
 }

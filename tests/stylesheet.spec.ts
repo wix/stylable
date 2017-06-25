@@ -155,9 +155,9 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.imports).to.eql([new Import("./path/to/thing", "Name", {
-                Button: "Btn",
+                Btn: "Button",
                 Icon: "Icon",
-                ExportName: "MyName"
+                MyName: "ExportName"
             })]);
 
 
@@ -223,13 +223,13 @@ describe('Stylesheet', function () {
 
     });
 
-    describe('resolve', function(){
+    describe('resolve', function () {
 
 
         it('get the import definition for the symbol', function () {
-            
+
             var sheetA = Stylesheet.fromCSS(``);
-            
+
             var sheetB = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
                     -sb-default: Name;
@@ -239,14 +239,14 @@ describe('Stylesheet', function () {
                 }
             `);
 
-            const resolver = new InMemoryResolver({"./path/to/thing": sheetA});
+            const resolver = new InMemoryResolver({ "./path/to/thing": sheetA });
 
             expect(sheetB.resolve(resolver, "class")).to.equal(sheetA);
             expect(sheetB.resolve(resolver, "NotExist")).to.equal(sheetB);
 
         });
 
-      
+
     })
 
 });
