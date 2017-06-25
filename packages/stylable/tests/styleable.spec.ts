@@ -1,4 +1,5 @@
 import { Generator } from '../src/generator';
+import { InMemoryResolver } from '../src/resolver';
 import { styleable } from '../src/styleable';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -97,22 +98,51 @@ describe('styleable', function () {
 
         });
 
-        it('generate scoped selector 222', function () {
+        it('generate append imports to the output', function () {
 
             var sheetA = Stylesheet.fromCSS(`
                 .containerA {
                     -sb-root: true;
                 }
-                .icon { }
             `, "TheNameSpace");
 
+            var sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.styleable.css"){}
+                .containerB {
+                    -sb-root: true;
+                }
+            `, "TheGreatNameSpace");
+
+            const css = styleable.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new InMemoryResolver({
+                    "./relative/path/to/sheetA.styleable.css": sheetA
+                })
+            }));
+
+            const res = [
+                '.TheNameSpace__THE_DIVIDER__containerA {}',
+                '.TheGreatNameSpace__THE_DIVIDER__containerB {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('generate resolve and transform pseudo-element form imported type', function () {
+
+            var sheetA = Stylesheet.fromCSS(`
+                .containerA {
+                    
+                }
+                .icon { }
+            `, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.styleable.css"){
                     -sb-default: Container;
                 }
                 .containerB {
-                    -sb-root: true;
                     -sb-type: Container;
                 }
                 .containerB::icon { }
@@ -120,24 +150,21 @@ describe('styleable', function () {
 
             const css = styleable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
-                resolver: {
-                    resolve() {
-                        return sheetA;
-                    }
-                }
+                resolver: new InMemoryResolver({
+                    "./relative/path/to/sheetA.styleable.css": sheetA
+                })
             }));
 
             const res = [
                 '.TheNameSpace__THE_DIVIDER__containerA {}',
                 '.TheNameSpace__THE_DIVIDER__icon {}',
                 '.TheGreatNameSpace__THE_DIVIDER__containerB {}',
-                '.TheGreatNameSpace__THE_DIVIDER__containerB .TheNameSpace__THE_DIVIDER__containerA .TheNameSpace__THE_DIVIDER__icon{}'
+                '.TheGreatNameSpace__THE_DIVIDER__containerB .TheNameSpace__THE_DIVIDER__TheNameSpace .TheNameSpace__THE_DIVIDER__icon {}'
             ];
 
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
-            expect(css).length.to.equal(res.length);
+            expect(css.length).to.equal(res.length);
         });
-
 
     });
 

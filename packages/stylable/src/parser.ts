@@ -6,9 +6,10 @@ export interface SelectorAstNode {
     type: string;
     name: string;
     nodes: SelectorAstNode[];
+    before?: string;
 };
 
-export interface PseudoSelectorAstNode extends SelectorAstNode  {
+export interface PseudoSelectorAstNode extends SelectorAstNode {
     type: "pseudo-class"
     content: string;
 };
@@ -35,7 +36,7 @@ export function parseSelector(selector: string) {
     return tokenizer.parse(selector);
 }
 
-export function stringifySelector(ast: SelectorAstNode){
+export function stringifySelector(ast: SelectorAstNode) {
     return tokenizer.stringify(ast)
 }
 
@@ -52,22 +53,27 @@ export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: num
     }
 }
 
-export function createSimpleSelectorChecker() {
-    let index = 0;
-    const types = ['selectors', 'selector', ['element', 'class']];
-   
-    return (node: SelectorAstNode) => {
-        const matcher = types[index];
-        if (Array.isArray(matcher)) {
-            return matcher.indexOf(node.type) !== -1;
-        } else if (matcher !== node.type) {
-            return false
-        }
-        if (types[index] !== node.type) {
-            return false;
-        }
-        index++;
-        return true;
-    }
 
+export function createChecker(types: Array<string | string[]>) {
+    return function () {
+        let index = 0;
+        return (node: SelectorAstNode) => {
+            const matcher = types[index];
+            if (Array.isArray(matcher)) {
+                return matcher.indexOf(node.type) !== -1;
+            } else if (matcher !== node.type) {
+                return false
+            }
+            if (types[index] !== node.type) {
+                return false;
+            }
+            index++;
+            return true;
+        }
+    }
 }
+
+
+export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
+export const importChecker = createChecker(['selectors', 'selector', "pseudo-class"])
+
