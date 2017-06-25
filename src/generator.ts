@@ -1,5 +1,5 @@
-import { PartialObject } from "./index.d";
-import { parseSelector, stringifySelector, traverseNode } from './parser';
+import { PartialObject } from './index.d';
+import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './parser';
 import { Stylesheet } from './stylesheet';
 
 const postcss = require("postcss");
@@ -8,7 +8,7 @@ const processor = postcss();
 
 export interface Config {
     namespaceDivider: string;
-    resolver: { resolve: () => Stylesheet | null }
+    resolver: { resolve: (path: string) => Stylesheet | null }
 }
 
 const DEFAULT_CONFIG = {
@@ -22,23 +22,43 @@ export class Generator {
         this.config = { ...DEFAULT_CONFIG, ...config };
     }
     add(sheet: Stylesheet) {
-        for (var selector in sheet.cssDefinition) {
-            this.addSelector(selector, sheet.cssDefinition[selector], sheet.namespace);
+
+        sheet.imports.forEach((importDef)=>{
+            const resolved = this.config.resolver.resolve(importDef.SbFrom);
+            resolved && this.add(resolved);
+        });
+
+        for (const selector in sheet.cssDefinition) {
+            const ast = parseSelector(selector);
+            const rules = sheet.cssDefinition[selector];
+            if (isImport(ast)) { continue; }
+            this.buffer.push(processor.process({
+                [this.scopeSelector(sheet, selector, ast)]: rules
+            }, postcssConfig).css);
         }
     }
-    addSelector(selector: string, rules: any, namespace: string) {
-        if (selector.match(/^:import/)) { return; }
-        this.buffer.push(processor.process({
-            [this.scopeSelector(selector, namespace)]: rules
-        }, postcssConfig).css);
-    }
-    scopeSelector(selector: string, namespace: string) {
-        const ast = parseSelector(selector);
+    scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode) {
+        let current = sheet;
         traverseNode(ast, (node) => {
-            if (node.type === 'class' && namespace) {
-                node.name = namespace + this.config.namespaceDivider + node.name
+            const { name, type } = node;
+            if (type === 'class') {
+                node.name = this.addNamespace(name, current.namespace);
+                current = sheet.resolve(this.config.resolver, name);
+            } else if (type === 'pseudo-element') {
+                node.type = 'class';
+                node.before = ' .' + this.addNamespace(current.root, current.namespace) + ' ';
+                node.name = this.addNamespace(name, current.namespace);
             }
         });
         return stringifySelector(ast);
     }
+    addNamespace(name: string, namespace: string) {
+        return namespace ? namespace + this.config.namespaceDivider + name : name;
+    }
+}
+
+function isImport(ast: SelectorAstNode): boolean {
+    const selectors = ast.nodes[0];
+    const selector = selectors && selectors.nodes[0];
+    return selector && selector.type === "pseudo-class" && selector.name === 'import';
 }

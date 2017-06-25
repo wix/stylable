@@ -49,30 +49,41 @@ describe('generator', function () {
 
     });
 
-    describe('generator.addSelector', function(){
+    describe('generator with namespace', function () {
+        let generator: Generator;
+
+        beforeEach(() => {
+            generator = new Generator({namespaceDivider: "__THE_GREAT_DIVIDER__"});
+        });
+
 
         it('generate scoped selector', function () {
-
-            const generator = new Generator({ namespaceDivider: "__THE_GREAT_DIVIDER__" });
-
-            generator.addSelector('.container', {}, 'TheNameSpace')
-
+            
+            const stylesheet = new Stylesheet({
+                ".container": { }
+            }, 'TheNameSpace');
+            
+            generator.add(stylesheet);
+            
             expect(generator.buffer[0]).to.eql('.TheNameSpace__THE_GREAT_DIVIDER__container {}');
 
         });
 
         it('generate scoped selector with multiple classes', function () {
 
-            const ctx = new Generator({ namespaceDivider: "__THE_GREAT_DIVIDER__" });
-
-            ctx.addSelector('.container .img', {}, 'TheNameSpace')
-
-            expect(ctx.buffer[0]).to.eql('.TheNameSpace__THE_GREAT_DIVIDER__container .TheNameSpace__THE_GREAT_DIVIDER__img {}');
+            
+            const stylesheet = new Stylesheet({
+                ".container .img": { }
+            }, 'TheNameSpace');
+            
+            generator.add(stylesheet);
+            
+            expect(generator.buffer[0]).to.eql('.TheNameSpace__THE_GREAT_DIVIDER__container .TheNameSpace__THE_GREAT_DIVIDER__img {}');
 
         });
 
     });
-    
+
 });
 
 

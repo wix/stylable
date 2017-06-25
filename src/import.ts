@@ -1,6 +1,5 @@
 import { Pojo } from './index.d';
 
-
 export interface CSSImportRaw {
     SbDefault: string;
     SbNamed: string;
@@ -33,4 +32,7 @@ export class Import {
         return new Import(SbFrom.slice(1, -1), cssImportDef.SbDefault, namedMap);
     }
     constructor(public SbFrom: string, public SbDefault: string = "", public SbNamed: Pojo<string> = {}) { }
+    containsSymbol(symbol: string) {
+        return symbol && this.SbDefault === symbol
+    }
 }

@@ -24,12 +24,14 @@ export class Stylesheet {
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
     imports: Import[];
+    root: string;
     constructor(cssDefinition: any, namespace: string = "") {
         this.cssDefinition = cssDefinition;
         this.namespace = namespace;
         this.classes = {};
         this.typedClasses = {};
         this.imports = [];
+        this.root = namespace;
         this.process();
     }
     static fromCSS(css: string, namespace?: string) {
@@ -44,10 +46,10 @@ export class Stylesheet {
                 if (!checker(node)) { isSimpleSelector = false; }
                 const { type, name } = node;
                 if (type === "pseudo-class" && name === 'import') {
-                    const { content } = node as PseudoSelectorAstNode;
+                    const { content } = <PseudoSelectorAstNode>node;
                     this.imports.push(Import.fromImportObject(content, this.cssDefinition[selector]));
                 } else if (type === 'class') {
-                    this.addClassNameMapping(node.name);
+                    this.classes[node.name] = node.name;
                 }
             });
             this.addTypedClasses(selector, isSimpleSelector);
@@ -61,6 +63,7 @@ export class Stylesheet {
     private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
+
             if (isSimpleSelector) {
                 const name = selector.replace('.', '');
                 this.typedClasses[name] = {
@@ -73,8 +76,15 @@ export class Stylesheet {
             delete rules[rule];
         }
     }
-    private addClassNameMapping(originalName: string, mappedName: string = originalName) {
-        this.classes[originalName] = mappedName;
+    private getImportForSymbol(symbol: string) {
+        return this.imports.filter((_import) => {
+            return _import.containsSymbol(symbol)
+        })[0] || null;
+    }
+    resolve(resolver: any, name: string) {
+        const typedClass = this.typedClasses[name];
+        const _import = typedClass ? this.getImportForSymbol(typedClass.SbType) : null;
+        return _import ? resolver.resolve(_import.SbFrom) : this;
     }
 }
 

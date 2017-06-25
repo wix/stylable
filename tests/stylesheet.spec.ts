@@ -1,4 +1,6 @@
-import { Stylesheet } from "../src/stylesheet";
+import { Import } from '../src/import';
+import { InMemoryResolver } from '../src/resolver';
+import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
 describe('Stylesheet', function () {
@@ -144,7 +146,7 @@ describe('Stylesheet', function () {
 
         it('create import definitions (format A)', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
                     -sb-default: Name;
                     -sb-named: Button as Btn, Icon;
@@ -152,17 +154,12 @@ describe('Stylesheet', function () {
                 }
             `);
 
-            expect(sheet.imports).to.eql([
-                {
-                    SbFrom: "./path/to/thing",
-                    SbDefault: "Name",
-                    SbNamed: {
-                        Button: "Btn",
-                        Icon: "Icon",
-                        ExportName: "MyName"
-                    }
-                }
-            ]);
+            expect(sheet.imports).to.eql([new Import("./path/to/thing", "Name", {
+                Button: "Btn",
+                Icon: "Icon",
+                ExportName: "MyName"
+            })]);
+
 
         });
 
@@ -174,13 +171,7 @@ describe('Stylesheet', function () {
                 }
             `);
 
-            expect(sheet.imports).to.eql([
-                {
-                    SbFrom: "./path/to/thing",
-                    SbDefault: "",
-                    SbNamed: {}
-                }
-            ]);
+            expect(sheet.imports).to.eql([new Import("./path/to/thing", "", {})]);
 
         });
 
@@ -231,6 +222,32 @@ describe('Stylesheet', function () {
         });
 
     });
+
+    describe('resolve', function(){
+
+
+        it('get the import definition for the symbol', function () {
+            
+            var sheetA = Stylesheet.fromCSS(``);
+            
+            var sheetB = Stylesheet.fromCSS(`
+                :import("./path/to/thing"){
+                    -sb-default: Name;
+                }
+                .class {
+                    -sb-type: Name;
+                }
+            `);
+
+            const resolver = new InMemoryResolver({"./path/to/thing": sheetA});
+
+            expect(sheetB.resolve(resolver, "class")).to.equal(sheetA);
+            expect(sheetB.resolve(resolver, "NotExist")).to.equal(sheetB);
+
+        });
+
+      
+    })
 
 });
 
