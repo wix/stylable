@@ -53,7 +53,6 @@ export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: num
     }
 }
 
-
 export function createChecker(types: Array<string | string[]>) {
     return function () {
         let index = 0;
@@ -73,7 +72,5 @@ export function createChecker(types: Array<string | string[]>) {
     }
 }
 
-
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
-export const importChecker = createChecker(['selectors', 'selector', "pseudo-class"])
 

@@ -63,7 +63,6 @@ export class Stylesheet {
     private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
-
             if (isSimpleSelector) {
                 const name = selector.replace('.', '');
                 this.typedClasses[name] = {
