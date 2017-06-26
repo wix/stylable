@@ -2,10 +2,10 @@ var glob = require('glob');
 
 module.exports = {
     entry: {
-        test: glob.sync("./tests/**/*.spec.ts")
+        tests: glob.sync("./tests/**/*.spec.ts")
     },
     output: {
-        filename: '[name]-bundle.js'
+        filename: '[name].bundle.js'
     },
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
