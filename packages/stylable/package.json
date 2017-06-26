@@ -1,34 +1,35 @@
 {
-  "name": "styleable",
+  "name": "stylable",
   "version": "0.0.1",
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "ts-mocha ./tests/**/*.spec.ts",
-    "webtest": "webpack-dev-server --hot --inline"
+    "start": "webpack-dev-server --hot --inline",
+    "test": "npm run test:node",
+    "test:node": "ts-mocha ./tests/**/*.spec.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/chai": "^4.0.1",
     "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.31",
+    "@types/node": "^8.0.2",
     "chai": "^4.0.2",
     "glob": "^7.1.2",
     "mocha": "^3.4.2",
     "mocha-loader": "^1.1.1",
-    "ts-loader": "^2.1.0",
+    "ts-loader": "^2.2.0",
     "ts-mocha": "^1.0.3",
     "typescript": "^2.3.4",
-    "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "webpack": "^3.0.0",
+    "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",
     "kebab-case": "^1.0.0",
-    "postcss": "^6.0.2",
-    "postcss-js": "^1.0.0",
-    "postcss-whitespace": "^1.1.0"
+    "postcss": "^6.0.3",
+    "postcss-js": "^1.0.0"
   }
 }
