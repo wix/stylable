@@ -2,12 +2,12 @@ import { Pojo } from './';
 import { Stylesheet } from './stylesheet';
 
 
-export class InMemoryResolver {
+export class Resolver {
     private zMap: Pojo<Stylesheet> = {};
     constructor(initialMap: Pojo<Stylesheet>) {
         this.zMap = { ...initialMap };
     }
-    resolve(path: string) {
+    resolveModule(path: string) {
         const value = this.zMap[path];
         if (!value) {
             throw new Error("can't resolve " + path);

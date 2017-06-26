@@ -15,7 +15,7 @@ describe('generator', function () {
 
         it('generate empty', function () {
             const stylesheet = new Stylesheet({});
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([]);
         });
 
@@ -23,7 +23,7 @@ describe('generator', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black" }
             });
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([".container {\n    color: black\n}"]);
         });
 
@@ -31,7 +31,7 @@ describe('generator', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black", background: "white" }
             });
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([".container {\n    color: black;\n    background: white\n}"]);
         });
 
@@ -40,7 +40,7 @@ describe('generator', function () {
                 ".container": { color: "black" },
                 ".wrapper": { background: "white" }
             });
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([
                 ".container {\n    color: black\n}",
                 ".wrapper {\n    background: white\n}"
@@ -63,7 +63,7 @@ describe('generator', function () {
                 ".container": { }
             }, 'TheNameSpace');
             
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             
             expect(generator.buffer[0]).to.eql('.TheNameSpace__THE_GREAT_DIVIDER__container {}');
 
@@ -76,7 +76,7 @@ describe('generator', function () {
                 ".container .img": { }
             }, 'TheNameSpace');
             
-            generator.add(stylesheet);
+            generator.addEntry(stylesheet);
             
             expect(generator.buffer[0]).to.eql('.TheNameSpace__THE_GREAT_DIVIDER__container .TheNameSpace__THE_GREAT_DIVIDER__img {}');
 
