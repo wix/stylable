@@ -6,6 +6,7 @@ export interface SelectorAstNode {
     type: string;
     name: string;
     nodes: SelectorAstNode[];
+    content?: string;
     before?: string;
 };
 

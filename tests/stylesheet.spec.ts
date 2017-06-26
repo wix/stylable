@@ -1,5 +1,5 @@
 import { Import } from '../src/import';
-import { InMemoryResolver } from '../src/resolver';
+import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
@@ -239,7 +239,7 @@ describe('Stylesheet', function () {
                 }
             `);
 
-            const resolver = new InMemoryResolver({ "./path/to/thing": sheetA });
+            const resolver = new Resolver({ "./path/to/thing": sheetA });
 
             expect(sheetB.resolve(resolver, "class")).to.equal(sheetA);
             expect(sheetB.resolve(resolver, "NotExist")).to.equal(sheetB);
@@ -249,5 +249,23 @@ describe('Stylesheet', function () {
 
     })
 
+    describe('generateStateAttribute', function () {
+
+
+        it('generate data attribute from namespace and state name', function () {
+            var sheet = new Stylesheet({}, "namespace");
+            const attr = sheet.generateStateAttribute('my-state')
+            expect(attr).to.equal('data-namespace-my-state');
+        });
+
+        it('generate non case sensitive data attribute', function () {
+
+            var sheet = new Stylesheet({}, "NameSpace");
+            const attr = sheet.generateStateAttribute('My-State')
+            expect(attr).to.equal('data-namespace-my-state');
+
+        });
+
+    })
 });
 

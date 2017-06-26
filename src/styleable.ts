@@ -4,7 +4,7 @@ import { Generator } from "./generator";
 export const styleable = {
     generate(styles: Stylesheet | Stylesheet[], generator: Generator = new Generator({ namespaceDivider: "💠" })) {
         if (!Array.isArray(styles)) { styles = [styles]; }
-        styles.forEach((style) => generator.add(style));
+        styles.forEach((style) => generator.addEntry(style));
         return generator.buffer;
     }
 }

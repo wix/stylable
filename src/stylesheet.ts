@@ -9,6 +9,7 @@ import {
     SBTypesParsers,
     traverseNode,
 } from './parser';
+import { Resolver } from './resolver';
 
 const kebab = require("kebab-case");
 
@@ -31,7 +32,7 @@ export class Stylesheet {
         this.classes = {};
         this.typedClasses = {};
         this.imports = [];
-        this.root = namespace;
+        this.root = 'root';
         this.process();
     }
     static fromCSS(css: string, namespace?: string) {
@@ -78,10 +79,13 @@ export class Stylesheet {
     private getImportForSymbol(symbol: string) {
         return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
     }
-    resolve(resolver: any, name: string) {
+    generateStateAttribute(stateName: string){
+        return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
+    }
+    resolve(resolver: Resolver, name: string) {
         const typedClass = this.typedClasses[name];
         const _import = typedClass ? this.getImportForSymbol(typedClass.SbType) : null;
-        return  _import ? resolver.resolve(_import.SbFrom) : this;
+        return  _import ? resolver.resolveModule(_import.SbFrom) : this;
     }
 }
 
