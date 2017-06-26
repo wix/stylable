@@ -1,11 +1,11 @@
 import { Generator } from '../src/generator';
 import { Resolver } from '../src/resolver';
-import { styleable } from '../src/styleable';
+import { stylable } from '../src/stylable';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
 
-describe('styleable', function () {
+describe('stylable', function () {
 
     describe('generate', function () {
 
@@ -16,7 +16,7 @@ describe('styleable', function () {
                 .image {}
             `);
 
-            const css = styleable.generate(sheet);
+            const css = stylable.generate(sheet);
 
             expect(css).to.eql([".container {}", ".image {}"]);
 
@@ -30,7 +30,7 @@ describe('styleable', function () {
                 }
             `);
 
-            const css = styleable.generate(sheet);
+            const css = stylable.generate(sheet);
 
             expect(css).to.eql(['.container {\n    color: black\n}']);
 
@@ -50,7 +50,7 @@ describe('styleable', function () {
                 }
             `);
 
-            const css = styleable.generate([sheetA, sheetB]);
+            const css = stylable.generate([sheetA, sheetB]);
 
             expect(css).to.eql([
                 '.container {\n    color: black\n}',
@@ -67,7 +67,7 @@ describe('styleable', function () {
                 }
             `, "TheNameSpace");
 
-            const css = styleable.generate(sheet, new Generator({ namespaceDivider: "__THE_DIVIDER__" }));
+            const css = stylable.generate(sheet, new Generator({ namespaceDivider: "__THE_DIVIDER__" }));
 
             expect(css).to.eql([
                 '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
@@ -78,10 +78,10 @@ describe('styleable', function () {
         it('generate do not output :import', function () {
 
             var sheet = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: ContainerA;
                 }
-                :import("./relative/path/to/sheetB.styleable.css"){
+                :import("./relative/path/to/sheetB.stylable.css"){
                     -sb-default: ContainerB;
                 }
                 .container {
@@ -89,11 +89,11 @@ describe('styleable', function () {
                 }
             `, "TheNameSpace");
 
-            const css = styleable.generate(sheet, new Generator({ 
+            const css = stylable.generate(sheet, new Generator({ 
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": new Stylesheet({}),
-                    "./relative/path/to/sheetB.styleable.css": new Stylesheet({})
+                    "./relative/path/to/sheetA.stylable.css": new Stylesheet({}),
+                    "./relative/path/to/sheetB.stylable.css": new Stylesheet({})
                 })
             }));
 
@@ -112,16 +112,16 @@ describe('styleable', function () {
             `, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){}
+                :import("./relative/path/to/sheetA.stylable.css"){}
                 .containerB {
                     -sb-root: true;
                 }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -139,7 +139,7 @@ describe('styleable', function () {
             var sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }
                 .containerB {
@@ -147,10 +147,10 @@ describe('styleable', function () {
                 }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -167,7 +167,7 @@ describe('styleable', function () {
             var sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }                
                 container {
@@ -175,10 +175,10 @@ describe('styleable', function () {
                 }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -197,7 +197,7 @@ describe('styleable', function () {
             `, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }                
                 container {
@@ -208,10 +208,10 @@ describe('styleable', function () {
                 }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -235,7 +235,7 @@ describe('styleable', function () {
             `, "TheNameSpace");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: Container;
                 }
                 .containerB {
@@ -244,10 +244,10 @@ describe('styleable', function () {
                 .containerB::icon { }
             `, "TheGreatNameSpace");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -269,7 +269,7 @@ describe('styleable', function () {
             `, "Text");
 
             var Button = Stylesheet.fromCSS(`
-                :import("./Text.styleable.css"){
+                :import("./Text.stylable.css"){
                     -sb-default: Text;
                 }
                 .button { }
@@ -277,7 +277,7 @@ describe('styleable', function () {
             `, "Button");
 
             var App = Stylesheet.fromCSS(`
-                :import("./Button.styleable.css"){
+                :import("./Button.stylable.css"){
                     -sb-default: Button;
                 }
                 .app {
@@ -286,11 +286,11 @@ describe('styleable', function () {
                 .app::text::first-letter { }
             `, "App");
 
-            const css = styleable.generate([App], new Generator({
+            const css = stylable.generate([App], new Generator({
                 namespaceDivider: "__",
                 resolver: new Resolver({
-                    "./Text.styleable.css": Text,
-                    "./Button.styleable.css": Button
+                    "./Text.stylable.css": Text,
+                    "./Button.stylable.css": Button
                 })
             }));
 
@@ -313,7 +313,7 @@ describe('styleable', function () {
             `, "Text");
 
             var Button = Stylesheet.fromCSS(`
-                :import("./Text.styleable.css"){
+                :import("./Text.stylable.css"){
                     -sb-default: Text;
                 }
                 .button { }
@@ -321,7 +321,7 @@ describe('styleable', function () {
             `, "Button");
 
             var App = Stylesheet.fromCSS(`
-                :import("./Button.styleable.css"){
+                :import("./Button.stylable.css"){
                     -sb-default: Button;
                 }
                 .app {
@@ -330,11 +330,11 @@ describe('styleable', function () {
                 .app::text::first-letter, .gallery { }
             `, "App");
 
-            const css = styleable.generate([App], new Generator({
+            const css = stylable.generate([App], new Generator({
                 namespaceDivider: "__",
                 resolver: new Resolver({
-                    "./Text.styleable.css": Text,
-                    "./Button.styleable.css": Button
+                    "./Text.stylable.css": Text,
+                    "./Button.stylable.css": Button
                 })
             }));
 
@@ -359,7 +359,7 @@ describe('styleable', function () {
                 .my-class:my-state {}
             `, "Style");
 
-            const css = styleable.generate([sheet], new Generator({
+            const css = stylable.generate([sheet], new Generator({
                 namespaceDivider: "__"
             }));
 
@@ -381,7 +381,7 @@ describe('styleable', function () {
             `, "StyleA");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: SheetA;
                 }
                 .my-class { 
@@ -390,10 +390,10 @@ describe('styleable', function () {
                 .my-class::container:my-state {}
             `, "StyleB");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 
@@ -416,7 +416,7 @@ describe('styleable', function () {
             `, "StyleA");
 
             var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.styleable.css"){
+                :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: SheetA;
                 }
                 .my-class { 
@@ -425,10 +425,10 @@ describe('styleable', function () {
                 .my-class::container:my-state {}
             `, "StyleB");
 
-            const css = styleable.generate([sheetB], new Generator({
+            const css = stylable.generate([sheetB], new Generator({
                 namespaceDivider: "__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.styleable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
 

@@ -20,7 +20,10 @@ const DEFAULT_CONFIG: Config = {
 export class Generator {
     private config: Config;
     constructor(config: PartialObject<Config>, public buffer: string[] = []) {
-        this.config = { ...DEFAULT_CONFIG, ...config };
+        this.config = { 
+            namespaceDivider: config.namespaceDivider || DEFAULT_CONFIG.namespaceDivider,
+            resolver: config.resolver || DEFAULT_CONFIG.resolver
+        };
     }
     addEntry(sheet: Stylesheet) {
         this.addImports(sheet);
