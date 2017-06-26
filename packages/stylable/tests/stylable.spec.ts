@@ -7,24 +7,11 @@ import { expect } from "chai";
 
 describe('stylable', function () {
 
-    describe('generate', function () {
+    describe('generate() - raw css string from entry', function () {
 
-        it('include empty selectors', function () {
+        it('accepts single stylesheet as input', function () {
 
-            var sheet = Stylesheet.fromCSS(`
-                .container {}
-                .image {}
-            `);
-
-            const css = stylable.generate(sheet);
-
-            expect(css).to.eql([".container {}", ".image {}"]);
-
-        });
-
-        it('generate css from single sheet', function () {
-
-            var sheet = Stylesheet.fromCSS(`
+            const sheet = Stylesheet.fromCSS(`
                 .container {
                     color: black;
                 }
@@ -36,15 +23,28 @@ describe('stylable', function () {
 
         });
 
-        it('generate css from multiple sheets', function () {
+        it('includes empty selectors', function () {
 
-            var sheetA = Stylesheet.fromCSS(`
+            const sheet = Stylesheet.fromCSS(`
+                .container {}
+                .image {}
+            `);
+
+            const css = stylable.generate(sheet);
+
+            expect(css).to.eql([".container {}", ".image {}"]);
+
+        });
+
+        it('css from multiple sheets', function () {
+
+            const sheetA = Stylesheet.fromCSS(`
                 .container {
                     color: black;
                 }
             `);
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetB = Stylesheet.fromCSS(`
                 .container {
                     color: white;
                 }
@@ -59,9 +59,9 @@ describe('stylable', function () {
 
         });
 
-        it('generate scoped selector', function () {
+        it('scope class selectors', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            const sheet = Stylesheet.fromCSS(`
                 .container {
                     color: white;
                 }
@@ -75,9 +75,9 @@ describe('stylable', function () {
 
         });
 
-        it('generate do not output :import', function () {
+        it('do not output :import', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            const sheet = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: ContainerA;
                 }
@@ -89,7 +89,7 @@ describe('stylable', function () {
                 }
             `, "TheNameSpace");
 
-            const css = stylable.generate(sheet, new Generator({ 
+            const css = stylable.generate(sheet, new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
                     "./relative/path/to/sheetA.stylable.css": new Stylesheet({}),
@@ -103,15 +103,15 @@ describe('stylable', function () {
 
         });
 
-        it('generate append imports to the output', function () {
+        it('append imports to the output', function () {
 
-            var sheetA = Stylesheet.fromCSS(`
+            const sheetA = Stylesheet.fromCSS(`
                 .containerA {
                     -sb-root: true;
                 }
             `, "TheNameSpace");
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){}
                 .containerB {
                     -sb-root: true;
@@ -133,12 +133,12 @@ describe('stylable', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-        
-        it('generate scoped typed selector that extends root', function () {
 
-            var sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+        it('scoped typed selector that extends root', function () {
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }
@@ -161,12 +161,12 @@ describe('stylable', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-                
-        it('generate component/tag typed selector that extends root', function () {
 
-            var sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+        it('component/tag typed selector that extends root', function () {
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }                
@@ -190,13 +190,13 @@ describe('stylable', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('generate component/tag typed selector that extends root with inner class targeting', function () {
+        it('component/tag typed selector that extends root with inner class targeting', function () {
 
-            var sheetA = Stylesheet.fromCSS(`
+            const sheetA = Stylesheet.fromCSS(`
                 .inner { }
             `, "TheNameSpace");
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -sb-default: Container;
                 }                
@@ -225,16 +225,16 @@ describe('stylable', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('generate resolve and transform pseudo-element from imported type', function () {
+        it('resolve and transform pseudo-element from imported type', function () {
 
-            var sheetA = Stylesheet.fromCSS(`
+            const sheetA = Stylesheet.fromCSS(`
                 .containerA {
                     
                 }
                 .icon { }
             `, "TheNameSpace");
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: Container;
                 }
@@ -261,14 +261,14 @@ describe('stylable', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-       
-        it('generate resolve and transform pseudo-element from deeply imported type', function () {
 
-            var Text = Stylesheet.fromCSS(`
+        it('resolve and transform pseudo-element from deeply imported type', function () {
+
+            const Text = Stylesheet.fromCSS(`
                 .first-letter { }
             `, "Text");
 
-            var Button = Stylesheet.fromCSS(`
+            const Button = Stylesheet.fromCSS(`
                 :import("./Text.stylable.css"){
                     -sb-default: Text;
                 }
@@ -276,7 +276,7 @@ describe('stylable', function () {
                 .text { -sb-type: Text; }
             `, "Button");
 
-            var App = Stylesheet.fromCSS(`
+            const App = Stylesheet.fromCSS(`
                 :import("./Button.stylable.css"){
                     -sb-default: Button;
                 }
@@ -305,14 +305,14 @@ describe('stylable', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-        
-        it('generate resolve and transform pseudo-element from deeply imported type (selector with , separator)', function () {
 
-            var Text = Stylesheet.fromCSS(`
+        it('resolve and transform pseudo-element from deeply imported type (selector with , separator)', function () {
+
+            const Text = Stylesheet.fromCSS(`
                 .first-letter { }
             `, "Text");
 
-            var Button = Stylesheet.fromCSS(`
+            const Button = Stylesheet.fromCSS(`
                 :import("./Text.stylable.css"){
                     -sb-default: Text;
                 }
@@ -320,7 +320,7 @@ describe('stylable', function () {
                 .text { -sb-type: Text; }
             `, "Button");
 
-            var App = Stylesheet.fromCSS(`
+            const App = Stylesheet.fromCSS(`
                 :import("./Button.stylable.css"){
                     -sb-default: Button;
                 }
@@ -349,10 +349,10 @@ describe('stylable', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-        
-        it('generate transform custom states inline', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+        it('custom states inline', function () {
+
+            const sheet = Stylesheet.fromCSS(`
                 .my-class { 
                     -sb-states: my-state;
                 }
@@ -372,15 +372,87 @@ describe('stylable', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        
-        it('generate transform custom states on inner pseudo-class', function () {
-            var sheetA = Stylesheet.fromCSS(`
+
+        it('custom states from imported type', function () {
+            const sheetA = Stylesheet.fromCSS(`
+                .root { 
+                    -sb-states: my-state;
+                }
+            `, "StyleA");
+
+            const sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -sb-default: SheetA;
+                }
+                .my-class { 
+                    -sb-type: SheetA;
+                }
+                .my-class:my-state {}
+            `, "StyleB");
+
+            const css = stylable.generate([sheetB], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA
+                })
+            }));
+
+            const res = [
+                '.StyleA__root {}',
+                '.StyleB__my-class.StyleA__root {}',
+                '.StyleB__my-class.StyleA__root[data-stylea-my-state] {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+
+        it('custom states lookup order', function () {
+            const sheetA = Stylesheet.fromCSS(`
+                .root { 
+                    -sb-states: my-state;
+                }
+            `, "StyleA");
+
+            const sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -sb-default: SheetA;
+                }
+                .my-class { 
+                    -sb-states: my-state;
+                    -sb-type: SheetA;
+                }
+                .my-class:my-state {}
+            `, "StyleB");
+
+            const css = stylable.generate([sheetB], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA
+                })
+            }));
+
+            const res = [
+                '.StyleA__root {}',
+                '.StyleB__my-class.StyleA__root {}',
+                '.StyleB__my-class.StyleA__root[data-styleb-my-state] {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+
+
+        it('custom states form imported type on inner pseudo-class', function () {
+            const sheetA = Stylesheet.fromCSS(`
                 .container { 
                     -sb-states: my-state;
                 }
             `, "StyleA");
 
-            var sheetB = Stylesheet.fromCSS(`
+            const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: SheetA;
                 }
@@ -407,40 +479,7 @@ describe('stylable', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        
-        it('generate transform custom states on inner pseudo-class', function () {
-            var sheetA = Stylesheet.fromCSS(`
-                .container { 
-                    -sb-states: my-state;
-                }
-            `, "StyleA");
 
-            var sheetB = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: SheetA;
-                }
-                .my-class { 
-                    -sb-type: SheetA;
-                }
-                .my-class::container:my-state {}
-            `, "StyleB");
-
-            const css = stylable.generate([sheetB], new Generator({
-                namespaceDivider: "__",
-                resolver: new Resolver({
-                    "./relative/path/to/sheetA.stylable.css": sheetA
-                })
-            }));
-
-            const res = [
-                '.StyleA__container {}',
-                '.StyleB__my-class.StyleA__root {}',
-                '.StyleB__my-class.StyleA__root .StyleA__container[data-stylea-my-state] {}',
-            ];
-
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
-            expect(css.length).to.equal(res.length);
-        });
 
     });
 
