@@ -100,7 +100,6 @@ export class Generator {
         return sheet.resolve(this.config.resolver, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
-        debugger;
         let current = element ? sheet : sheetOrigin;
         let localName = element ? element : typedClassName;
         while (current) {
@@ -118,20 +117,6 @@ export class Generator {
                 break;
             } 
         }
-
-        // if(sheetOrigin !== sheet){
-
-        // }
-        // let current = sheet;
-        // let localName = sheetOrigin !== sheet ? 'root' : typedClassName
-
-        // const typedClass = current.typedClasses[localName];
-        // if (typedClass && typedClass.SbStates && typedClass.SbStates.indexOf(name) !== -1) {
-        //     node.type = 'attribute';
-        //     node.content = `${current.generateStateAttribute(name)}`
-            
-        // }
-
         return sheet;
     }
     scope(name: string, namespace: string) {
