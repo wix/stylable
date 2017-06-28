@@ -27,9 +27,11 @@
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
+    "camelcase-css": "^1.0.1",
     "css-selector-tokenizer": "^0.7.0",
     "kebab-case": "^1.0.0",
     "postcss": "^6.0.3",
-    "postcss-js": "^1.0.0"
+    "postcss-js": "^1.0.0",
+    "stylis": "^3.1.9"
   }
 }
