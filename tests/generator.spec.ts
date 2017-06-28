@@ -3,7 +3,7 @@ import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
 
-describe('generator', function () {
+describe('Generator', function () {
 
     describe('generator.add', function () {
 

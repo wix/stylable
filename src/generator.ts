@@ -1,11 +1,7 @@
 import { PartialObject } from './index.d';
-import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './parser';
+import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet } from './stylesheet';
-
-const postcss = require("postcss");
-const postcssConfig = { parser: require("postcss-js") };
-const processor = postcss();
 
 export interface Config {
     namespaceDivider: string;
@@ -40,9 +36,10 @@ export class Generator {
             const ast = parseSelector(selector);
             const rules = sheet.cssDefinition[selector];
             if (isImport(ast)) { continue; }
-            this.buffer.push(processor.process({
+
+            this.buffer.push(stringifyCSSObject({
                 [this.scopeSelector(sheet, selector, ast)]: rules
-            }, postcssConfig).css);
+            }));
         }
     }
     scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode) {
@@ -110,12 +107,12 @@ export class Generator {
                 break;
             }
             const next = current.resolve(this.config.resolver, localName);
-            if(next !== current){
+            if (next !== current) {
                 current = next;
                 localName = current.root;
             } else {
                 break;
-            } 
+            }
         }
         return sheet;
     }
