@@ -1,7 +1,7 @@
 import { PartialObject } from './index.d';
 import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
 import { Resolver } from './resolver';
-import { Stylesheet } from './stylesheet';
+import { Stylesheet, TypedClass } from './stylesheet';
 
 export interface Config {
     namespaceDivider: string;
@@ -22,6 +22,7 @@ export class Generator {
         };
     }
     addEntry(sheet: Stylesheet) {
+        //prevent duplicates
         this.addImports(sheet);
         this.addSelectors(sheet);
     }
@@ -36,7 +37,6 @@ export class Generator {
             const ast = parseSelector(selector);
             const rules = sheet.cssDefinition[selector];
             if (isImport(ast)) { continue; }
-
             this.buffer.push(stringifyCSSObject({
                 [this.scopeSelector(sheet, selector, ast)]: rules
             }));
@@ -91,6 +91,7 @@ export class Generator {
         return sheet;
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
+        //TODO: only transform what is found
         node.type = 'class';
         node.before = ' ';
         node.name = this.scope(name, sheet.namespace);
@@ -101,9 +102,9 @@ export class Generator {
         let localName = element ? element : typedClassName;
         while (current) {
             const typedClass = current.typedClasses[localName];
-            if (typedClass && typedClass.SbStates && typedClass.SbStates.indexOf(name) !== -1) {
+            if (hasState(typedClass, name)) {
                 node.type = 'attribute';
-                node.content = `${current.generateStateAttribute(name)}`
+                node.content = current.generateStateAttribute(name);
                 break;
             }
             const next = current.resolve(this.config.resolver, localName);
@@ -116,9 +117,13 @@ export class Generator {
         }
         return sheet;
     }
-    scope(name: string, namespace: string) {
-        return namespace ? namespace + this.config.namespaceDivider + name : name;
+    scope(name: string, namespace: string, separator: string = this.config.namespaceDivider) {
+        return namespace ? namespace + separator + name : name;
     }
+}
+
+function hasState(typedClass: TypedClass, name: string){
+    return typedClass && typedClass.SbStates && typedClass.SbStates.indexOf(name) !== -1;
 }
 
 function isImport(ast: SelectorAstNode): boolean {
