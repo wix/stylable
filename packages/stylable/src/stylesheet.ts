@@ -11,7 +11,7 @@ import {
 } from './parser';
 import { Resolver } from './resolver';
 
-const kebab = require("kebab-case");
+const camelcaseCSS = require("camelcase-css");
 
 export interface TypedClass {
     SbRoot: boolean;
@@ -36,7 +36,7 @@ export class Stylesheet {
         this.process();
     }
     static fromCSS(css: string, namespace?: string) {
-        return new Stylesheet(objectifyCSS(css), namespace);
+        return new this(objectifyCSS(css), namespace);
     }
     private process() {
         Object.keys(this.cssDefinition).forEach((selector: string) => {
@@ -64,15 +64,14 @@ export class Stylesheet {
     private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
-            if (isSimpleSelector) {
-                const name = selector.replace('.', '');
-                this.typedClasses[name] = {
-                    ...this.typedClasses[name],
-                    [rule]: SBTypesParsers[rule](rules[rule])
-                };
-            } else {
-                throw new Error(kebab(rule) + ' on complex selector: ' + selector);
+            if (!isSimpleSelector) {
+                throw new Error(camelcaseCSS(rule) + ' on complex selector: ' + selector);
             }
+            const name = selector.replace('.', '');
+            this.typedClasses[name] = {
+                ...this.typedClasses[name],
+                [rule]: SBTypesParsers[rule](rules[rule])
+            };
             delete rules[rule];
         }
     }
@@ -81,6 +80,12 @@ export class Stylesheet {
     }
     generateStateAttribute(stateName: string){
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
+    }
+    cssStates(stateMapping?: Pojo<boolean>) {
+        return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
+            if (stateMapping[key]) { states[this.generateStateAttribute(key)] = true; }
+            return states;
+        }, {}) : {};
     }
     resolve(resolver: Resolver, name: string) {
         const typedClass = this.typedClasses[name];
