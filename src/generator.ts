@@ -3,15 +3,13 @@ import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, 
 import { Resolver } from './resolver';
 import { Stylesheet, TypedClass } from './stylesheet';
 
-export interface Config {
-    namespaceDivider: string;
-    resolver: Resolver;
-}
 
-const DEFAULT_CONFIG: Config = {
+export const DEFAULT_CONFIG = {
     namespaceDivider: "💠",
     resolver: new Resolver({})
 };
+
+export declare type Config = typeof DEFAULT_CONFIG
 
 export class Generator {
     private config: Config;
