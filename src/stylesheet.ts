@@ -11,7 +11,7 @@ import {
 } from './parser';
 import { Resolver } from './resolver';
 
-const camelcaseCSS = require("camelcase-css");
+const kebab = require("kebab-case");
 
 export interface TypedClass {
     SbRoot: boolean;
@@ -65,7 +65,7 @@ export class Stylesheet {
         const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
             if (!isSimpleSelector) {
-                throw new Error(camelcaseCSS(rule) + ' on complex selector: ' + selector);
+                throw new Error(kebab(rule) + ' on complex selector: ' + selector);
             }
             const name = selector.replace('.', '');
             this.typedClasses[name] = {

@@ -273,7 +273,7 @@ describe('Stylesheet', function () {
         it('generate data attribute from namespace and state name', function () {
             var sheet = new Stylesheet({}, "namespace");
             const attrs = sheet.cssStates({state1: true, state2: false})
-            expect(attrs).to.equal({
+            expect(attrs).to.eql({
                 'data-namespace-state1': true
             });
         });
