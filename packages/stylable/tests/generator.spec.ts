@@ -47,6 +47,20 @@ describe('Generator', function () {
             ]);
         });
 
+        
+        it('generate dose not add the same sheet twice', function () {
+            const stylesheet = new Stylesheet({
+                ".container": { color: "black" },
+                ".wrapper": { background: "white" }
+            });
+            generator.addEntry(stylesheet);
+            generator.addEntry(stylesheet);
+            expect(generator.buffer).to.eql([
+                ".container {\n    color: black\n}",
+                ".wrapper {\n    background: white\n}"
+            ]);
+        });
+
     });
 
     describe('generator with namespace', function () {

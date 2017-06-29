@@ -15,16 +15,21 @@ const DEFAULT_CONFIG: Config = {
 
 export class Generator {
     private config: Config;
+    private generated: Set<Stylesheet>;
     constructor(config: PartialObject<Config>, public buffer: string[] = []) {
         this.config = {
             namespaceDivider: config.namespaceDivider || DEFAULT_CONFIG.namespaceDivider,
             resolver: config.resolver || DEFAULT_CONFIG.resolver
         };
+        this.generated = new Set();
     }
     addEntry(sheet: Stylesheet) {
         //prevent duplicates
-        this.addImports(sheet);
-        this.addSelectors(sheet);
+        if(!this.generated.has(sheet)){
+            this.generated.add(sheet);
+            this.addImports(sheet);
+            this.addSelectors(sheet);
+        }
     }
     addImports(sheet: Stylesheet) {
         sheet.imports.forEach((importDef) => {
