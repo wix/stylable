@@ -9,7 +9,7 @@
     "test": "npm run test:node",
     "build": "tsc && ncp ./modules ./dist/modules",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
-    "typedoc": "typedoc --out documentation ./src"
+    "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
   },
   "keywords": [],
   "author": "",

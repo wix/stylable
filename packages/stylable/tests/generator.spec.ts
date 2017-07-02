@@ -105,13 +105,13 @@ describe('Generator', function () {
             const generator = new Generator({});
             const stylesheet = new Stylesheet({}, 'NS');
             const node: SelectorAstNode = {
-                name: 'myelement',
+                name: 'my-element',
                 type: 'pseudo-element',
                 nodes: []
             };
-            const resolved = generator.handlePseudoElement(stylesheet, node, 'myelement');
-            expect(node).to.contain({ name: 'myelement', type: 'pseudo-element' });
-            expect(node.name).to.equal('myelement');
+            const resolved = generator.handlePseudoElement(stylesheet, node, 'my-element');
+            expect(node).to.contain({ name: 'my-element', type: 'pseudo-element' });
+            expect(node.name).to.equal('my-element');
             expect(resolved).to.equal(stylesheet);
         });
 
@@ -120,17 +120,17 @@ describe('Generator', function () {
             const generator = new Generator({});
             
             const stylesheet = new Stylesheet({
-                "myelement": {}
+                "my-element": {}
             }, 'NS');
 
             const node: SelectorAstNode = {
-                name: 'myelement',
+                name: 'my-element',
                 type: 'pseudo-element',
                 nodes: []
             };
-            const resolved = generator.handlePseudoElement(stylesheet, node, 'myelement');
-            expect(node).to.contain({ name: 'myelement', type: 'pseudo-element' });
-            expect(node.name).to.equal('myelement');
+            const resolved = generator.handlePseudoElement(stylesheet, node, 'my-element');
+            expect(node).to.contain({ name: 'my-element', type: 'pseudo-element' });
+            expect(node.name).to.equal('my-element');
             expect(resolved).to.equal(stylesheet);
         });
 
