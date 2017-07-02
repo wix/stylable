@@ -49,29 +49,30 @@ function setOrPush(target, key, value) {
 //handlers
 
 function handleDecl(rule, content, id) {
-    var index, name, value, node, type, deli;
-    content.charCodeAt(0) !== 64 ? (deli = ':', type = 'decl') : (deli = ' ', rule = null, type = '@at-rule')
-    index = content.indexOf(deli);
-    name = content.substring(0, index);
-    value = content.substring(index + 1).trim();
-    node = type === 'decl' ? new Declaration(name, value) : new AtRule(content);
+    var node;
+    if (content.charCodeAt(0) !== 64) {
+        var index = content.indexOf(':');
+        var name = content.substring(0, index);
+        var value = content.substring(index + 1).trim();
+        node = new Declaration(name, value);
+    } else {
+        rule = null;
+        node = new AtRule(content);
+    }
     stack.push({ id, rule, node });
 }
 
 function handleRule(rule, id) {
     var node = new Rule(rule);
     var size = stack.length;
+    if (!rule && id === 0) { return; }
     while (size--) {
-        if (stack[size].rule === rule) {
-            if (stack[size].node.type === 'rule') {
-                node.decl = node.decl.concat(stack.splice(size, 1)[0].node.decl);
-            } else {
-                node.decl.push(stack.splice(size, 1)[0].node);
-            }
+        if (stack[size].rule !== rule) { continue; }
+        if (stack[size].node.type === 'rule') {
+            node.decl = node.decl.concat(stack.splice(size, 1)[0].node.decl);
+        } else {
+            node.decl.push(stack.splice(size, 1)[0].node);
         }
-    }
-    if (!rule && !node.decl.length) {
-        return;
     }
     node.decl.reverse();
     stack.push({ id, rule, node });
@@ -104,6 +105,7 @@ module.exports = function (context, content, selectors, parents, line, column, l
     switch (context) {
         case -1:
             stack = [];
+            break
         case -2:
             return objectify(stack.map(_ => _.node));
         case 1:

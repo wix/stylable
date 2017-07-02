@@ -2,11 +2,12 @@
   "name": "stylable",
   "version": "0.0.1",
   "description": "",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "scripts": {
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
+    "build": "tsc && ncp ./modules ./dist/modules",
     "test:node": "ts-mocha ./tests/**/*.spec.ts"
   },
   "keywords": [],
@@ -20,6 +21,7 @@
     "glob": "^7.1.2",
     "mocha": "^3.4.2",
     "mocha-loader": "^1.1.1",
+    "ncp": "^2.0.0",
     "ts-loader": "^2.2.0",
     "ts-mocha": "^1.0.3",
     "typescript": "^2.3.4",
@@ -32,6 +34,11 @@
     "kebab-case": "^1.0.0",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
+    "postcss-nested": "^2.0.2",
     "stylis": "^3.1.9"
-  }
+  },
+  "files": [
+    "dist",
+    "src"
+  ]
 }

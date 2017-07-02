@@ -1,4 +1,4 @@
-import { Pojo } from './index.d';
+import { Pojo } from './types';
 
 export interface CSSImportRaw {
     SbDefault: string;
