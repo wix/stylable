@@ -311,6 +311,33 @@ function objectifyTests(objectify: (css: string) => any) {
 
     });
 
+    describe('nesting', function () {
+
+        it('should create empty selectors', function () {
+            //this is useful because the empty elements can be pseudo-elements for other stylesheet 
+            const actual = objectify(`
+                .container {
+                    .icon{
+                        color: red;
+                    }
+                    &:hover {
+
+                    }    
+                }
+            `);
+            
+            const expected = {
+                ".container": {},
+                ".container:hover": {},
+                ".container .icon": { color: 'red' }
+            }
+            
+            expect(actual).to.eql(expected);
+
+        });
+
+    })
+
     xit('big css', function () {
         var count = 100;
         while (count--) {

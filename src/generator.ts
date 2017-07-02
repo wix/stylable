@@ -1,12 +1,17 @@
-import { PartialObject } from './index.d';
+import { PartialObject, Pojo } from './types';
 import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet, TypedClass } from './stylesheet';
 
+export enum Mode {
+    DEV,
+    PROD
+}
 
 export const DEFAULT_CONFIG = {
     namespaceDivider: "💠",
-    resolver: new Resolver({})
+    resolver: new Resolver({}),
+    mode: Mode.DEV
 };
 
 export declare type Config = typeof DEFAULT_CONFIG
@@ -17,13 +22,14 @@ export class Generator {
     constructor(config: PartialObject<Config>, public buffer: string[] = []) {
         this.config = {
             namespaceDivider: config.namespaceDivider || DEFAULT_CONFIG.namespaceDivider,
-            resolver: config.resolver || DEFAULT_CONFIG.resolver
+            resolver: config.resolver || DEFAULT_CONFIG.resolver,
+            mode: config.mode || DEFAULT_CONFIG.mode
         };
         this.generated = new Set();
     }
     addEntry(sheet: Stylesheet) {
         //prevent duplicates
-        if(!this.generated.has(sheet)){
+        if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
             this.addImports(sheet);
             this.addSelectors(sheet);
@@ -37,8 +43,11 @@ export class Generator {
     }
     addSelectors(sheet: Stylesheet) {
         for (const selector in sheet.cssDefinition) {
-            const ast = parseSelector(selector);
             const rules = sheet.cssDefinition[selector];
+            if (this.config.mode === Mode.PROD && !hasKeys(rules)) {
+                continue;
+            }
+            const ast = parseSelector(selector);
             if (isImport(ast)) { continue; }
             this.buffer.push(stringifyCSSObject({
                 [this.scopeSelector(sheet, selector, ast)]: rules
@@ -89,15 +98,16 @@ export class Generator {
             node.before = '.' + this.scope(sheet.root, sheet.namespace) + ' ';
             node.name = this.scope(next.root, next.namespace);
             node.type = 'class';
-            sheet = next;
         }
-        return sheet;
+        return next;
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         //TODO: only transform what is found
-        node.type = 'class';
-        node.before = ' ';
-        node.name = this.scope(name, sheet.namespace);
+        if (sheet.classes[name]) {
+            node.type = 'class';
+            node.before = ' ';
+            node.name = this.scope(name, sheet.namespace);
+        }
         return sheet.resolve(this.config.resolver, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
@@ -125,7 +135,7 @@ export class Generator {
     }
 }
 
-function hasState(typedClass: TypedClass, name: string){
+function hasState(typedClass: TypedClass, name: string) {
     return typedClass && typedClass.SbStates && typedClass.SbStates.indexOf(name) !== -1;
 }
 
@@ -133,4 +143,13 @@ function isImport(ast: SelectorAstNode): boolean {
     const selectors = ast.nodes[0];
     const selector = selectors && selectors.nodes[0];
     return selector && selector.type === "pseudo-class" && selector.name === 'import';
+}
+
+function hasKeys(o: Pojo<any>) {
+    for (var k in o) {
+        if (o.hasOwnProperty(k)) {
+            return true;
+        }
+    }
+    return false;
 }

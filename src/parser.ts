@@ -2,8 +2,8 @@
 // const postjs = require("postcss-js");
 const tokenizer = require("css-selector-tokenizer");
 
-const stylis = require("../stylis");
-const plugin = require("../plugin");
+const stylis = require("../modules/stylis");
+const plugin = require("../modules/plugin");
 
 stylis.set({ compress: false, lossless: true });
 stylis.use(false);
@@ -11,9 +11,10 @@ stylis.use(plugin);
 
 
 const postcssjs = require("postcss-js");
+const postcssNested = require("postcss-nested");
 const postcss = require("postcss");
 const postcssConfig = { parser: postcssjs };
-const processor = postcss();
+const processor = postcss([postcssNested]);
 
 
 export interface SelectorAstNode {
@@ -53,7 +54,8 @@ export function objectifyCSSStylis(css: string) {
 }
 
 export function objectifyCSS(css: string) {
-    return postcssjs.objectify(postcss.parse(css));
+    return objectifyCSSStylis(css);
+    // return postcssjs.objectify(postcss.parse(css));
 }
 
 export function parseSelector(selector: string) {
