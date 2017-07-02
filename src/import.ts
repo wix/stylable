@@ -8,6 +8,7 @@ export interface CSSImportRaw {
 
 export class Import {
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
+        //TODO: handle " and ' strings in SbFrom
         SbFrom = SbFrom || cssImportDef['SbFrom'];
         const namedMap: Pojo<string> = {};
 
