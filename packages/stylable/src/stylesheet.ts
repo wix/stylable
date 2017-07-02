@@ -1,5 +1,5 @@
 import { Import } from './import';
-import { Pojo } from './index.d';
+import { Pojo } from './types';
 import {
     createSimpleSelectorChecker,
     hasOwn,

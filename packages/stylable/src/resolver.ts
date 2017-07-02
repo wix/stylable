@@ -1,4 +1,4 @@
-import { Pojo } from './';
+import { Pojo } from './types';
 import { Stylesheet } from './stylesheet';
 
 
