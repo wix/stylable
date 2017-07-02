@@ -27,6 +27,11 @@ export class Generator {
         };
         this.generated = new Set();
     }
+    static generate(styles: Stylesheet | Stylesheet[], generator: Generator = new Generator({})) {
+        if (!Array.isArray(styles)) { styles = [styles]; }
+        styles.forEach((style) => generator.addEntry(style));
+        return generator.buffer;
+    }
     addEntry(sheet: Stylesheet) {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
