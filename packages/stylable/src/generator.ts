@@ -54,7 +54,7 @@ export class Generator {
             }));
         }
     }
-    scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode) {
+    scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode): string {
         let current = sheet;
         let typedClass: string;
         let element: string;

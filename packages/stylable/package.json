@@ -8,7 +8,8 @@
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
     "build": "tsc && ncp ./modules ./dist/modules",
-    "test:node": "ts-mocha ./tests/**/*.spec.ts"
+    "test:node": "ts-mocha ./tests/**/*.spec.ts",
+    "typedoc": "typedoc --out documentation ./src"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,7 @@
     "ncp": "^2.0.0",
     "ts-loader": "^2.2.0",
     "ts-mocha": "^1.0.3",
+    "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.5.0"

@@ -1,5 +1,5 @@
 import { Import } from './import';
-import { Pojo } from './types';
+import { Pojo, CSSObject } from './types';
 import {
     createSimpleSelectorChecker,
     hasOwn,
@@ -20,13 +20,13 @@ export interface TypedClass {
 }
 
 export class Stylesheet {
-    cssDefinition: any;
+    cssDefinition: CSSObject;
     namespace: string;
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
     imports: Import[];
     root: string;
-    constructor(cssDefinition: any, namespace: string = "") {
+    constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
         this.namespace = namespace;
         this.classes = {};

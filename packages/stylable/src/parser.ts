@@ -1,5 +1,5 @@
-// import { parse as parseCSS } from "postcss";
-// const postjs = require("postcss-js");
+import { CSSObject } from "./types";
+
 const tokenizer = require("css-selector-tokenizer");
 
 const stylis = require("../modules/stylis");
@@ -10,10 +10,10 @@ stylis.use(false);
 stylis.use(plugin);
 
 
-const postcssjs = require("postcss-js");
+const postcssJS = require("postcss-js");
 const postcssNested = require("postcss-nested");
 const postcss = require("postcss");
-const postcssConfig = { parser: postcssjs };
+const postcssConfig = { parser: postcssJS };
 const processor = postcss([postcssNested]);
 
 
@@ -44,25 +44,25 @@ export const SBTypesParsers = {
     }
 }
 
-export function stringifyCSSObject(cssObject: any): string {
+export function stringifyCSSObject(cssObject: CSSObject): string {
     return processor.process(cssObject, postcssConfig).css;
 }
 
 
-export function objectifyCSSStylis(css: string) {
+export function objectifyCSSStylis(css: string): CSSObject {
     return stylis('', css);
 }
 
-export function objectifyCSS(css: string) {
-    return objectifyCSSStylis(css);
-    // return postcssjs.objectify(postcss.parse(css));
+export function objectifyCSS(css: string): CSSObject {
+    return stylis('', css);
+    // return postcssJS.objectify(postcss.parse(css));
 }
 
-export function parseSelector(selector: string) {
+export function parseSelector(selector: string): SelectorAstNode {
     return tokenizer.parse(selector);
 }
 
-export function stringifySelector(ast: SelectorAstNode) {
+export function stringifySelector(ast: SelectorAstNode): string {
     return tokenizer.stringify(ast)
 }
 
