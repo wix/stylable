@@ -13,7 +13,6 @@ import { Resolver } from './resolver';
 
 const kebab = require("kebab-case");
 
-
 export interface TypedClass {
     "-sb-root": boolean;
     "-sb-states": string[];
@@ -31,6 +30,7 @@ export class Stylesheet {
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
     mixinSelectors: Pojo<Mixin[]>;
+    resolvedSymbols: Pojo<any>;
     imports: Import[];
     root: string;
     constructor(cssDefinition: CSSObject, namespace: string = "") {
@@ -46,6 +46,7 @@ export class Stylesheet {
     static fromCSS(css: string, namespace?: string) {
         return new this(objectifyCSS(css), namespace);
     }
+    /******** can be moved to own class *********/
     private process() {
         Object.keys(this.cssDefinition).forEach((selector: string) => {
             const ast = parseSelector(selector);
@@ -99,7 +100,7 @@ export class Stylesheet {
                 delete rules[rule];
             }
         }
-        
+
         for (const type in map) {
             bucket.push({ type, options: map[type] });
         }
@@ -109,22 +110,35 @@ export class Stylesheet {
         }
 
     }
-    private getImportForSymbol(symbol: string) {
+    /********************************************/
+
+    getImportForSymbol(symbol: string) {
         return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
     }
-    //TODO: maybe move to resolver
+    resolveImports(resolver: Resolver) {
+        //TODO: add support __esModule support?
+        return this.imports.reduce((acc, importDef) => {
+            const m = resolver.resolveModule(importDef.from);
+            acc[importDef.defaultExport || importDef.from] = m.default || m;
+            for (const name in importDef.named) {
+                acc[name] = m[name];
+            }
+            return acc;
+        }, {} as Pojo);
+    }
     resolve(resolver: Resolver, name: string) {
         const typedClass = this.typedClasses[name];
         const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type']) : null;
         return _import ? resolver.resolveModule(_import.from) : this;
     }
 
-    public generateStateAttribute(stateName: string) {
+    public stateAttr(stateName: string) {
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }
+
     public cssStates(stateMapping?: Pojo<boolean>) {
         return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
-            if (stateMapping[key]) { states[this.generateStateAttribute(key)] = true; }
+            if (stateMapping[key]) { states[this.stateAttr(key)] = true; }
             return states;
         }, {}) : {};
     }
