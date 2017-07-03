@@ -1,3 +1,3 @@
-export { Stylesheet, TypedClass } from "./stylesheet";
-export { Config, DEFAULT_CONFIG, Generator } from "./generator";
 export { Resolver } from "./resolver";
+export { Stylesheet, TypedClass } from "./stylesheet";
+export { Generator, DEFAULT_CONFIG, Config } from "./generator";

@@ -311,7 +311,7 @@ function objectifyTests(objectify: (css: string) => any) {
 
     });
 
-    describe('nesting', function () {
+    xdescribe('nesting', function () {
 
         it('should create empty selectors', function () {
             //this is useful because the empty elements can be pseudo-elements for other stylesheet 
@@ -330,6 +330,30 @@ function objectifyTests(objectify: (css: string) => any) {
                 ".container": {},
                 ".container:hover": {},
                 ".container .icon": { color: 'red' }
+            }
+            
+            expect(actual).to.eql(expected);
+
+        });
+
+    });
+
+    describe('noCamel option', function () {
+
+        it('should not camel case matching rules', function () {
+
+            const actual = objectify(`
+                .container {
+                   -sb-something: true;
+                   background-color: red;
+                }
+            `);
+            
+            const expected = {
+                ".container": {
+                    "-sb-something": "true",
+                    backgroundColor: "red"
+                }            
             }
             
             expect(actual).to.eql(expected);
@@ -489,7 +513,6 @@ function objectifyTests(objectify: (css: string) => any) {
     });
 
 }
-
 
 
 

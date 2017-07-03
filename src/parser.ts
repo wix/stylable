@@ -2,13 +2,17 @@ import { CSSObject } from "./types";
 
 const tokenizer = require("css-selector-tokenizer");
 
+const objectify = require("../modules/post-css-objectify");
 const stylis = require("../modules/stylis");
 const plugin = require("../modules/plugin");
+const stylableObjectifyConfig = {
+    noCamel: [/^-sb-/]
+};
 
 stylis.set({ compress: false, lossless: true });
 stylis.use(false);
-stylis.use(plugin);
 
+stylis.use(plugin(stylableObjectifyConfig));
 
 const postcssJS = require("postcss-js");
 const postcssNested = require("postcss-nested");
@@ -33,14 +37,17 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
 export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 
 export const SBTypesParsers = {
-    SbRoot: (value: string) => {
+    "-sb-root"(value: string) {
         return value === 'false' ? false : true
     },
-    SbStates: (value: string) => {
+    "-sb-states"(value: string) {
         return value ? value.split(',').map((state) => state.trim()) : [];
     },
-    SbType: (value: string) => {
+    "-sb-type"(value: string) {
         return value ? value.trim() : "";
+    },
+    "-sb-mixin"(value: string) {
+        return value ? value.split(/(.*?\(.*?\))\s*,\s*?/).map((state) => state.trim()).filter((x)=>x) : [];
     }
 }
 
@@ -48,14 +55,13 @@ export function stringifyCSSObject(cssObject: CSSObject): string {
     return processor.process(cssObject, postcssConfig).css;
 }
 
-
 export function objectifyCSSStylis(css: string): CSSObject {
     return stylis('', css);
 }
 
 export function objectifyCSS(css: string): CSSObject {
-    return stylis('', css);
-    // return postcssJS.objectify(postcss.parse(css));
+    // return stylis('', css);
+    return objectify(postcss.parse(css), stylableObjectifyConfig);
 }
 
 export function parseSelector(selector: string): SelectorAstNode {

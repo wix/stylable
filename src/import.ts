@@ -1,19 +1,19 @@
 import { Pojo } from './types';
 
 export interface CSSImportRaw {
-    SbDefault: string;
-    SbNamed: string;
+    ["-sb-default"]: string;
+    ["-sb-named"]: string;
     [key: string]: string;
 }
 
 export class Import {
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
         //TODO: handle " and ' strings in SbFrom
-        SbFrom = SbFrom || cssImportDef['SbFrom'];
+        SbFrom = SbFrom || cssImportDef['-sb-from'];
         const namedMap: Pojo<string> = {};
 
-        if (cssImportDef["SbNamed"]) {
-            cssImportDef["SbNamed"].split(',').forEach((name) => {
+        if (cssImportDef["-sb-named"]) {
+            cssImportDef["-sb-named"].split(',').forEach((name) => {
                 const parts = name.trim().split(/\s+as\s+/);
                 if (parts.length === 1) {
                     namedMap[parts[0]] = parts[0];
@@ -24,16 +24,16 @@ export class Import {
         }
 
         for (var key in cssImportDef) {
-            const match = key.match(/^SbNamed(.+)/);
+            const match = key.match(/^-sb-named-(.+)/);
             if (match) {
                 namedMap[cssImportDef[key]] = match[1];
             }
         }
 
-        return new Import(SbFrom.slice(1, -1), cssImportDef.SbDefault, namedMap);
+        return new Import(SbFrom.slice(1, -1), cssImportDef['-sb-default'], namedMap);
     }
-    constructor(public SbFrom: string, public SbDefault: string = "", public SbNamed: Pojo<string> = {}) { }
+    constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) { }
     containsSymbol(symbol: string): boolean {
-        return symbol ? (this.SbDefault === symbol || !!this.SbNamed[symbol]) : false;
+        return symbol ? (this.defaultExport === symbol || !!this.named[symbol]) : false;
     }
 }
