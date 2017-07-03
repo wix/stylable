@@ -278,14 +278,14 @@ describe('Stylesheet', function () {
 
         it('generate data attribute from namespace and state name', function () {
             var sheet = new Stylesheet({}, "namespace");
-            const attr = sheet.generateStateAttribute('my-state')
+            const attr = sheet.stateAttr('my-state')
             expect(attr).to.equal('data-namespace-my-state');
         });
 
         it('generate non case sensitive data attribute', function () {
 
             var sheet = new Stylesheet({}, "NameSpace");
-            const attr = sheet.generateStateAttribute('My-State')
+            const attr = sheet.stateAttr('My-State')
             expect(attr).to.equal('data-namespace-my-state');
 
         });
@@ -302,6 +302,82 @@ describe('Stylesheet', function () {
             });
         });
 
+    });
+
+    describe('resolveImports', function () {
+
+        it('should resolve default symbols', function () {
+
+            const resolvedModule = { resolved: 'name1' };
+
+            var sheet = new Stylesheet({
+                ":import('./path')": {
+                    "-sb-default": "name1"
+                }
+            }, "namespace");
+
+            const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
+
+            expect(resolved).to.eql({name1: resolvedModule});
+        });
+
+        it('should handle nameless default by using the path', function () {
+
+            const resolvedModule = { resolved: 'name1' };
+
+            var sheet = new Stylesheet({
+                ":import('./path')": {}
+            }, "namespace");
+
+            const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
+
+            expect(resolved).to.eql({'./path': resolvedModule});
+        });
+
+        it('should resolve named symbols', function () {
+
+            const resolvedModule1 = { resolved: 'name1' };
+            const resolvedModule2 = { resolved: 'name2' };
+
+            var sheet = new Stylesheet({
+                ":import('./path/1')": {
+                    "-sb-named": "name1"
+                },
+                ":import('./path/2')": {
+                    "-sb-named": "name2"
+                }
+            }, "namespace");
+
+            const resolved = sheet.resolveImports(new Resolver({ 
+                "./path/1": {name1: resolvedModule1}, 
+                "./path/2": {name2: resolvedModule2} 
+            }));
+
+            expect(resolved).to.contain({name1: resolvedModule1, name2: resolvedModule2});
+        });
+
+
+        it('should take last defiled name export', function () {
+
+            const resolvedModule1 = { resolved: 'name1' };
+            const resolvedModule2 = { resolved: 'name1' };
+
+            var sheet = new Stylesheet({
+                ":import('./path/1')": {
+                    "-sb-named": "name1"
+                },
+                ":import('./path/2')": {
+                    "-sb-named": "name1"
+                }
+            }, "namespace");
+            
+            const resolved = sheet.resolveImports(new Resolver({ 
+                "./path/1": {name1: resolvedModule1}, 
+                "./path/2": {name1: resolvedModule2} 
+            }));
+
+            expect(resolved).to.contain({name1: resolvedModule2});
+        });
     });
 
 });

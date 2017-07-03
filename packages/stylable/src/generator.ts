@@ -36,27 +36,62 @@ export class Generator {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
-            this.addImports(sheet);
-            this.addSelectors(sheet);
+            const resolvedSymbols = sheet.resolveImports(this.config.resolver);
+            this.addImports(resolvedSymbols);
+            this.addSelectors(sheet, resolvedSymbols);
         }
     }
-    addImports(sheet: Stylesheet) {
-        sheet.imports.forEach((importDef) => {
-            const resolved = this.config.resolver.resolveModule(importDef.from);
-            resolved && this.addEntry(resolved);
-        });
-    }
-    addSelectors(sheet: Stylesheet) {
-        for (const selector in sheet.cssDefinition) {
-            const rules = sheet.cssDefinition[selector];
-            if (this.config.mode === Mode.PROD && !hasKeys(rules)) {
-                continue;
+    //TODO: replace Pojo with "ModuleMap"
+    addImports(resolvedSymbols: Pojo) {
+        for (const symbol in resolvedSymbols) {
+            const exportValue = resolvedSymbols[symbol];
+            if (exportValue instanceof Stylesheet) {
+                this.addEntry(exportValue);
             }
-            const ast = parseSelector(selector);
-            if (isImport(ast)) { continue; }
-            this.buffer.push(stringifyCSSObject({
-                [this.scopeSelector(sheet, selector, ast)]: rules
-            }));
+        }
+    }
+    prepareSelector(sheet: Stylesheet, selector: string, resolvedSymbols: Pojo, stack: string[] = []) {
+        let rules = sheet.cssDefinition[selector];
+        const mixins = sheet.mixinSelectors[selector];
+        const selectorObject: Pojo = {};
+
+        if (mixins) {
+            rules = { ...rules };
+            mixins.forEach((mixin) => {
+                const mixinFunction = resolvedSymbols[mixin.type];
+                const cssMixin = mixinFunction(mixin.options);
+
+                for (var key in cssMixin) {
+                    var value = cssMixin[key];
+                    if (typeof value === 'string') {
+                        rules[key] = value;
+                    } else {
+                        sheet.cssDefinition[selector + ' ' + key] = value;
+                        stack.push(selector + ' ' + key);
+                    }
+                }
+
+            });
+        }
+
+        if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
+
+        const ast = parseSelector(selector);
+
+        if (isImport(ast)) { return null; }
+
+        const scopedSelector = this.scopeSelector(sheet, selector, ast);
+        selectorObject[scopedSelector] = rules;
+        return selectorObject;
+
+    }
+    addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
+        const stack = Object.keys(sheet.cssDefinition).reverse();
+        while (stack.length) {
+            const selector = stack.pop() as string;
+            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, stack);
+            if (!selectorObject) { continue; }
+            this.buffer.push(stringifyCSSObject(selectorObject));
         }
     }
     scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode): string {
@@ -122,7 +157,7 @@ export class Generator {
             const typedClass = current.typedClasses[localName];
             if (hasState(typedClass, name)) {
                 node.type = 'attribute';
-                node.content = current.generateStateAttribute(name);
+                node.content = current.stateAttr(name);
                 break;
             }
             const next = current.resolve(this.config.resolver, localName);

@@ -116,7 +116,7 @@ describe('static Generator.generate', function () {
                     -sb-root: true;
                 }
             `, "TheGreatNameSpace");
-
+        
             const css = Generator.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
@@ -477,8 +477,6 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-
-
 
     });
 

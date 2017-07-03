@@ -1,10 +1,15 @@
-import { Pojo } from './types';
-import { Stylesheet } from './stylesheet';
 
+import { Pojo } from './types';
+
+export interface Module {
+    default: any;
+    [key: string]: any;
+}
 
 export class Resolver {
-    private zMap: Pojo<Stylesheet> = {};
-    constructor(initialMap: Pojo<Stylesheet>) {
+    //TODO: replace any with Module
+    private zMap: Pojo<any> = {};
+    constructor(initialMap: Pojo<any>) {
         this.zMap = { ...initialMap };
     }
     resolveModule(path: string) {
