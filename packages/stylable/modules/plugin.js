@@ -20,18 +20,21 @@ function AtRule(rule) {
     this.children = [];
 }
 
+function shouldCamel(noCamel, name) {
+    return !noCamel.some((matcher) => name.match(matcher));
+}
 
-function objectify(nodes, out) {
+function objectify(nodes, out, options) {
     return nodes.length ? nodes.reduce((out, node) => {
         return setOrPush(out, node.rule, node.type === '@at-type' ?
-            objectify(node.children) :
-            objectifyDeclarations(node.decl));
+            objectify(node.children, null, options) :
+            objectifyDeclarations(node.decl, null, options));
     }, out || {}) : true;
 }
 
-function objectifyDeclarations(decl, out) {
+function objectifyDeclarations(decl, out, options) {
     return decl.reduce((out, node) => {
-        return setOrPush(out, camelCaseCSS(node.name), node.value);
+        return setOrPush(out, shouldCamel(options.noCamel, node.name) ? camelCaseCSS(node.name) : node.name, node.value);
     }, out || {});
 }
 
@@ -98,24 +101,28 @@ function handleAtRule(rule, id) {
 
 }
 
-module.exports = function (context, content, selectors, parents, line, column, length, id) {
 
-    var rule = selectors.join(', ');
+module.exports = function (options) {
+    options = options || {};
+    options.noCamel = options.noCamel || [];
+    return function plugin(context, content, selectors, parents, line, column, length, id) {
+        var rule = selectors.join(', ');
 
-    switch (context) {
-        case -1:
-            stack = [];
-            break
-        case -2:
-            return objectify(stack.map(_ => _.node));
-        case 1:
-            handleDecl(rule, content, id);
-            break
-        case 2:
-            handleRule(rule, id);
-            break
-        case 3:
-            handleAtRule(rule, id);
-            break
+        switch (context) {
+            case -1:
+                stack = [];
+                break
+            case -2:
+                return objectify(stack.map(_ => _.node), null, options);
+            case 1:
+                handleDecl(rule, content, id);
+                break
+            case 2:
+                handleRule(rule, id);
+                break
+            case 3:
+                handleAtRule(rule, id);
+                break
+        }
     }
 }

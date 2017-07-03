@@ -13,10 +13,16 @@ import { Resolver } from './resolver';
 
 const kebab = require("kebab-case");
 
+
 export interface TypedClass {
-    SbRoot: boolean;
-    SbStates: string[];
-    SbType: string;
+    "-sb-root": boolean;
+    "-sb-states": string[];
+    "-sb-type": string;
+}
+
+export interface Mixin {
+    type: string;
+    options: Pojo;
 }
 
 export class Stylesheet {
@@ -24,6 +30,7 @@ export class Stylesheet {
     namespace: string;
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
+    mixinSelectors: Pojo<Mixin[]>;
     imports: Import[];
     root: string;
     constructor(cssDefinition: CSSObject, namespace: string = "") {
@@ -31,6 +38,7 @@ export class Stylesheet {
         this.namespace = namespace;
         this.classes = {};
         this.typedClasses = {};
+        this.mixinSelectors = {};
         this.imports = [];
         this.root = 'root';
         this.process();
@@ -43,6 +51,7 @@ export class Stylesheet {
             const ast = parseSelector(selector);
             const checker = createSimpleSelectorChecker();
             let isSimpleSelector = true;
+            this.addMixins(selector);
             traverseNode(ast, (node) => {
                 if (!checker(node)) { isSimpleSelector = false; }
                 const { type, name } = node;
@@ -57,9 +66,9 @@ export class Stylesheet {
         });
     }
     private addTypedClasses(selector: string, isSimpleSelector: boolean) {
-        this.addTypedClass(selector, isSimpleSelector, 'SbRoot');
-        this.addTypedClass(selector, isSimpleSelector, 'SbStates');
-        this.addTypedClass(selector, isSimpleSelector, 'SbType');
+        this.addTypedClass(selector, isSimpleSelector, '-sb-root');
+        this.addTypedClass(selector, isSimpleSelector, '-sb-states');
+        this.addTypedClass(selector, isSimpleSelector, '-sb-type');
     }
     private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         const rules: Pojo<string> = this.cssDefinition[selector];
@@ -75,22 +84,50 @@ export class Stylesheet {
             delete rules[rule];
         }
     }
+    private addMixins(selector: string) {
+        const rules: Pojo<string> = this.cssDefinition[selector];
+        const bucket = this.mixinSelectors[selector] || [];
+        const map = Object.create(null);
+
+        for (var rule in rules) {
+            const match = rule.match('-sb-mixin-(.*?)-(.*)');
+            if (match) {
+                const type = match[1];
+                const option = match[2];
+                map[type] = map[type] || {};
+                map[type][option] = rules[rule];
+                delete rules[rule];
+            }
+        }
+        
+        for (const type in map) {
+            bucket.push({ type, options: map[type] });
+        }
+
+        if (bucket.length) {
+            this.mixinSelectors[selector] = bucket;
+        }
+
+    }
     private getImportForSymbol(symbol: string) {
         return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
     }
-    generateStateAttribute(stateName: string){
+    //TODO: maybe move to resolver
+    resolve(resolver: Resolver, name: string) {
+        const typedClass = this.typedClasses[name];
+        const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type']) : null;
+        return _import ? resolver.resolveModule(_import.from) : this;
+    }
+
+    public generateStateAttribute(stateName: string) {
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }
-    cssStates(stateMapping?: Pojo<boolean>) {
+    public cssStates(stateMapping?: Pojo<boolean>) {
         return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
             if (stateMapping[key]) { states[this.generateStateAttribute(key)] = true; }
             return states;
         }, {}) : {};
     }
-    resolve(resolver: Resolver, name: string) {
-        const typedClass = this.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(typedClass.SbType) : null;
-        return  _import ? resolver.resolveModule(_import.SbFrom) : this;
-    }
+
 }
 

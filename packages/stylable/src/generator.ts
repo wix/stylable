@@ -42,7 +42,7 @@ export class Generator {
     }
     addImports(sheet: Stylesheet) {
         sheet.imports.forEach((importDef) => {
-            const resolved = this.config.resolver.resolveModule(importDef.SbFrom);
+            const resolved = this.config.resolver.resolveModule(importDef.from);
             resolved && this.addEntry(resolved);
         });
     }
@@ -141,7 +141,7 @@ export class Generator {
 }
 
 function hasState(typedClass: TypedClass, name: string) {
-    return typedClass && typedClass.SbStates && typedClass.SbStates.indexOf(name) !== -1;
+    return typedClass && typedClass['-sb-states'] && typedClass['-sb-states'].indexOf(name) !== -1;
 }
 
 function isImport(ast: SelectorAstNode): boolean {

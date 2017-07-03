@@ -110,7 +110,7 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbRoot: true
+                    "-sb-root": true
                 }
             });
 
@@ -125,7 +125,7 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbRoot: true
+                    "-sb-root": true
                 }
             })
         });
@@ -139,7 +139,7 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbRoot: false
+                    "-sb-root": false
                 }
             })
         });
@@ -184,7 +184,7 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbStates: ["stateA", "stateB"]
+                    "-sb-states": ["stateA", "stateB"]
                 }
             })
         });
@@ -198,13 +198,13 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbStates: []
+                    "-sb-states": []
                 }
             })
         });
 
 
-        it('with -sb-type ', function () {
+        it('with -sb-type', function () {
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
                     -sb-default: Thing;
@@ -216,8 +216,32 @@ describe('Stylesheet', function () {
 
             expect(sheet.typedClasses).to.eql({
                 container: {
-                    SbType: "Thing"
+                    "-sb-type": "Thing"
                 }
+            })
+        });
+
+
+
+        it('with -sb-mixin', function () {
+
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -sb-named: MyMixin1, MyMixin2;
+                }
+                .container {
+                    -sb-mixin-MyMixin1-colorOne-x: red;
+                    -sb-mixin-MyMixin1-Count: 2;
+                    -sb-mixin-MyMixin2-color: green;
+                    -sb-mixin-MyMixin2-count: 4;
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: { "colorOne-x": 'red', Count: '2' } },
+                    { type: "MyMixin2", options: { color: 'green', count: '4' } }
+                ]
             })
         });
 
@@ -267,18 +291,18 @@ describe('Stylesheet', function () {
         });
 
     });
-    
+
     describe('cssStates', function () {
 
         it('generate data attribute from namespace and state name', function () {
             var sheet = new Stylesheet({}, "namespace");
-            const attrs = sheet.cssStates({state1: true, state2: false})
+            const attrs = sheet.cssStates({ state1: true, state2: false })
             expect(attrs).to.eql({
                 'data-namespace-state1': true
             });
         });
 
     });
-    
+
 });
 
