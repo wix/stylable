@@ -9,7 +9,6 @@ export class StylableContext {
     style: any = null;
     public generator: Generator;
     public resolver: Resolver;
-    private inMemoryModules: Pojo;
     constructor(config: Partial<Config>) { 
         this.resolver = new Resolver({});
         this.generator = new Generator({...config, resolver: this.resolver});
