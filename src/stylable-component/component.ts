@@ -90,7 +90,11 @@ export function createSBComponentFactory(Stylesheet: StylesheetWithContext) {
     }
 
     function defineMixin<T>(name: string, mixinFunction: (options: T) => object){
-        Stylesheet.context.registerMixin(name, mixinFunction);
+        const mixinId = "@Mixins/" + name;
+        Stylesheet.context.registerMixin(mixinId, mixinFunction);
+        (mixinFunction as any).toString = function(){
+            return mixinId;
+        }
         return mixinFunction;
     }
 

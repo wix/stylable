@@ -11,8 +11,7 @@ export class StylableContext {
     public resolver: Resolver;
     private inMemoryModules: Pojo;
     constructor(config: Partial<Config>) { 
-        this.inMemoryModules = {};
-        this.resolver = new Resolver(this.inMemoryModules);
+        this.resolver = new Resolver({});
         this.generator = new Generator({...config, resolver: this.resolver});
     }
     add(sheet: Stylesheet) {
@@ -20,7 +19,7 @@ export class StylableContext {
         this.sheets.push(sheet);
     }
     registerMixin(name: string, mixin: Function) {
-        this.inMemoryModules['Mixins/' + name] = mixin;
+        this.resolver.add(name, mixin);
     }
     attach(theme?: Pojo<string>) {
         const style = this.style || (this.style = document.createElement('style'));

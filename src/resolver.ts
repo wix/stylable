@@ -12,6 +12,9 @@ export class Resolver {
     constructor(initialMap: Pojo<any>) {
         this.zMap = { ...initialMap };
     }
+    add(name: string, value: any){
+        this.zMap[name] = value;
+    }
     resolveModule(path: string) {
         const value = this.zMap[path];
         if (!value) {
