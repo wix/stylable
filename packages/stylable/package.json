@@ -48,6 +48,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "./react.js",
+    "./react.d.ts"
   ]
 }
