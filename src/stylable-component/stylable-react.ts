@@ -4,7 +4,7 @@ import { createStyleableStylesheet, StylableContext } from "./create-styleable-s
 
 export { StylableContext, StyleableStylesheet };
 
-export const { SBComponent, SBStateless, Stylesheet } = createSBComponentFactory(createStyleableStylesheet());
+export const { SBComponent, SBStateless, Stylesheet, defineMixin } = createSBComponentFactory(createStyleableStylesheet());
 
 declare module 'react' {
     interface HTMLAttributes<T> extends SBComponentProps { }
