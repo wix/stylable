@@ -14,7 +14,7 @@ export class StylableContext {
         this.generator = new Generator({...config, resolver: this.resolver});
     }
     add(sheet: Stylesheet) {
-        (this.generator as any).config.resolver.zMap[sheet.namespace] = sheet;
+        this.resolver.add(sheet.namespace, sheet);
         this.sheets.push(sheet);
     }
     registerMixin(name: string, mixin: Function) {
