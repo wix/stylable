@@ -2,6 +2,12 @@ import { PartialObject, Pojo } from './types';
 import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet, TypedClass } from './stylesheet';
+const cssflat = require('unistyle-flat');
+
+export interface ExtendedSelector { 
+    selector: string, 
+    rules: Pojo<string> 
+} 
 
 export enum Mode {
     DEV,
@@ -50,8 +56,10 @@ export class Generator {
             }
         }
     }
-    prepareSelector(sheet: Stylesheet, selector: string, resolvedSymbols: Pojo, stack: string[] = []) {
-        let rules = sheet.cssDefinition[selector];
+    prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
+
+        let rules = typeof selector !== 'string' ? selector.rules : sheet.cssDefinition[selector];
+        selector = typeof selector !== 'string' ? selector.selector : selector;
         const mixins = sheet.mixinSelectors[selector];
         const selectorObject: Pojo = {};
 
@@ -59,25 +67,27 @@ export class Generator {
             rules = { ...rules };
             mixins.forEach((mixin) => {
                 const mixinFunction = resolvedSymbols[mixin.type];
-                const cssMixin = mixinFunction(mixin.options);
-
+                const cssMixin = cssflat(mixinFunction(mixin.options));
                 for (var key in cssMixin) {
                     var value = cssMixin[key];
                     if (typeof value === 'string') {
                         rules[key] = value;
                     } else {
-                        sheet.cssDefinition[selector + ' ' + key] = value;
-                        stack.push(selector + ' ' + key);
+                        const spacing = key.charAt(0) === '&' ? '' : ' ';
+                        const extendedSelector = selector + spacing + key.replace(/^&/, '');
+                        // sheet.cssDefinition[extendedSelector] = value;
+                        stack.push({selector: extendedSelector, rules: value});
                     }
                 }
-
             });
         }
 
+        //don't emit empty selectors in production
         if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
 
         const ast = parseSelector(selector);
 
+        //don't emit imports
         if (isImport(ast)) { return null; }
 
         const scopedSelector = this.scopeSelector(sheet, selector, ast);
@@ -88,7 +98,7 @@ export class Generator {
     addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
         const stack = Object.keys(sheet.cssDefinition).reverse();
         while (stack.length) {
-            const selector = stack.pop() as string;
+            const selector = stack.pop()!;
             const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, stack);
             if (!selectorObject) { continue; }
             this.buffer.push(stringifyCSSObject(selectorObject));
