@@ -66,14 +66,8 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
 
 export function createSBComponentFactory(Stylesheet: StylesheetWithContext) {
 
-    function SBStateless<T, C = object>(renderFunction: StateLess<T, C>, def: string | Stylesheet): SBStatelessComponent<T> {
-        const stylesheet = ((def as any)._kind === 'Stylesheet' ? def : Stylesheet.fromCSS(def as string));
-        return wrapSBRender(renderFunction, stylesheet);
-    }
-
     function SBComponent<T extends React.ComponentClass<any>>(Base: T, def: string | Stylesheet): StylableComponent<T>;
     function SBComponent<T>(def: string | Stylesheet): Function;
-
     function SBComponent<T extends React.ComponentClass<any>>(Base: any, def?: any) {
         if (!def) {
             return function(Component: T): StylableComponent<T> {
@@ -90,10 +84,21 @@ export function createSBComponentFactory(Stylesheet: StylesheetWithContext) {
         return returnType;
     }
 
+    function SBStateless<T, C = object>(renderFunction: StateLess<T, C>, def: string | Stylesheet): SBStatelessComponent<T> {
+        const stylesheet = ((def as any)._kind === 'Stylesheet' ? def : Stylesheet.fromCSS(def as string));
+        return wrapSBRender(renderFunction, stylesheet);
+    }
+
+    function defineMixin<T>(name: string, mixinFunction: (options: T) => object){
+        Stylesheet.context.registerMixin(name, mixinFunction);
+        return mixinFunction;
+    }
+
     return {
         SBStateless: copyContext(SBStateless, Stylesheet),
         SBComponent: copyContext(SBComponent, Stylesheet),
-        Stylesheet
+        Stylesheet,
+        defineMixin
     };
 }
 

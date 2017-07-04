@@ -30,7 +30,7 @@ export interface SelectorAstNode {
 };
 
 export interface PseudoSelectorAstNode extends SelectorAstNode {
-    type: "pseudo-class"
+    type: "pseudo-class";
     content: string;
 };
 
