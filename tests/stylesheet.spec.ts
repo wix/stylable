@@ -432,5 +432,28 @@ describe('Stylesheet', function () {
         });
     });
 
+
+    describe('namespace', function(){
+        
+        it('should be empty when no namespace is provided', function(){
+            var style = new Stylesheet({})
+            expect(style.namespace).to.equal('');
+        });
+        
+        it('should be set when provided', function(){
+            var style = new Stylesheet({}, 'mynamespace');
+            expect(style.namespace).to.equal('mynamespace');
+        });
+
+        it('should be set from definition', function(){
+            var style = new Stylesheet({"@namespace": "mynamespace"});
+            expect(style.namespace).to.equal('mynamespace');
+        });
+        it('should be set from definition', function(){
+            var style = new Stylesheet({"@namespace": ["mynamespace", "mylastnamespace"]});
+            expect(style.namespace).to.equal('mylastnamespace');
+        });
+    })
+
 });
 

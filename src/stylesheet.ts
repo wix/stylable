@@ -35,16 +35,28 @@ export class Stylesheet {
     root: string;
     constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
-        this.namespace = namespace;
         this.classes = {};
         this.typedClasses = {};
         this.mixinSelectors = {};
         this.imports = [];
+        this.namespace = this.getNamespace(namespace);
         this.root = 'root';
         this.process();
     }
     static fromCSS(css: string, namespace?: string) {
         return new this(objectifyCSS(css), namespace);
+    }
+    private getNamespace(strongNamespace = "") {
+        if (strongNamespace) { return strongNamespace; }
+        const value = this.cssDefinition["@namespace"];
+        if(Array.isArray(value)){
+            return value[value.length - 1];
+        } else if(value){
+            return value;
+        } else {
+            //TODO: maybe auto generate here.
+            return '';
+        }
     }
     /******** can be moved to own class *********/
     private process() {
@@ -88,9 +100,9 @@ export class Stylesheet {
     private addMixins(selector: string) {
         const rules: Pojo<string> = this.cssDefinition[selector];
         let mixin: string | string[] = rules["-sb-mixin"];
-        if(mixin && !Array.isArray(mixin)){ mixin = [mixin]; }        
+        if (mixin && !Array.isArray(mixin)) { mixin = [mixin]; }
 
-        if(mixin){
+        if (mixin) {
             const last = mixin[mixin.length - 1];
             this.mixinSelectors[selector] = SBTypesParsers["-sb-mixin"](last);
             delete rules["-sb-mixin"];

@@ -182,14 +182,28 @@ function objectifyTests(objectify: (css: string) => any) {
     it('@namespace', function () {
 
         const actual = objectify(`
-            @namespace value
+            @namespace value;
         `)
         const expected = {
-            "@namespace value": true
+            "@namespace": "value"
         }
 
         expect(actual).to.eql(expected);
     });
+
+    it('@namespace2', function () {
+
+        const actual = objectify(`
+            @namespace value;
+            @namespace value2;
+        `)
+        const expected = {
+            "@namespace": ["value", "value2"]
+        }
+
+        expect(actual).to.eql(expected);
+    });
+
 
 
     it('@media query', function () {
