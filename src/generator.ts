@@ -83,6 +83,8 @@ export class Generator {
             aSelector = selector.selector;
         }
 
+        if (selector === '@namespace') { return null; }
+
         //don't emit empty selectors in production
         if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
 
