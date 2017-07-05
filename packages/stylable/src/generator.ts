@@ -2,12 +2,12 @@ import { PartialObject, Pojo } from './types';
 import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet, TypedClass } from './stylesheet';
-const cssflat = require('unistyle-flat');
+const cssflat = require('../modules/flat-css');
 
-export interface ExtendedSelector { 
-    selector: string, 
-    rules: Pojo<string> 
-} 
+export interface ExtendedSelector {
+    selector: string,
+    rules: Pojo<string>
+}
 
 export enum Mode {
     DEV,
@@ -57,40 +57,42 @@ export class Generator {
         }
     }
     prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
-
-        let rules = typeof selector !== 'string' ? selector.rules : sheet.cssDefinition[selector];
-        selector = typeof selector !== 'string' ? selector.selector : selector;
-        const mixins = sheet.mixinSelectors[selector];
-        const selectorObject: Pojo = {};
-
-        if (mixins) {
-            rules = { ...rules };
-            mixins.forEach((mixin) => {
-                const mixinFunction = resolvedSymbols[mixin.type];
-                const cssMixin = cssflat(mixinFunction(mixin.options));
-                for (var key in cssMixin) {
-                    var value = cssMixin[key];
-                    if (typeof value === 'string') {
-                        rules[key] = value;
-                    } else {
-                        const spacing = key.charAt(0) === '&' ? '' : ' ';
-                        const extendedSelector = selector + spacing + key.replace(/^&/, '');
-                        // sheet.cssDefinition[extendedSelector] = value;
-                        stack.push({selector: extendedSelector, rules: value});
+        let rules: Pojo, aSelector: string;
+        if (typeof selector === 'string') {
+            rules = sheet.cssDefinition[selector];
+            aSelector = selector;
+            const mixins = sheet.mixinSelectors[aSelector];
+            if (mixins) {
+                rules = { ...rules };
+                mixins.forEach((mixin) => {
+                    const mixinFunction = resolvedSymbols[mixin.type];
+                    const cssMixin = cssflat({
+                        [aSelector]: {
+                            ...rules,
+                            ...mixinFunction(mixin.options)
+                        }
+                    });
+                    for (var key in cssMixin) {
+                        stack.push({ selector: key, rules: cssMixin[key] });
                     }
-                }
-            });
+                });
+                return null;
+            }
+        } else {
+            rules =  selector.rules;
+            aSelector = selector.selector;
         }
+        const selectorObject: Pojo = {};
 
         //don't emit empty selectors in production
         if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
 
-        const ast = parseSelector(selector);
+        const ast = parseSelector(aSelector);
 
         //don't emit imports
         if (isImport(ast)) { return null; }
 
-        const scopedSelector = this.scopeSelector(sheet, selector, ast);
+        const scopedSelector = this.scopeSelector(sheet, aSelector, ast);
         selectorObject[scopedSelector] = rules;
         return selectorObject;
 

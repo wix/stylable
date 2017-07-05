@@ -47,7 +47,27 @@ export const SBTypesParsers = {
         return value ? value.trim() : "";
     },
     "-sb-mixin"(value: string) {
-        return value ? value.split(/(.*?\(.*?\))\s*,\s*?/).map((state) => state.trim()).filter((x)=>x) : [];
+
+        const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)|([A-Za-z$_][$_\w]*\s*)/g);
+        if (!parts || parts.join('').length !== value.replace(/\s*/, '').length) {
+            throw new Error('-sb-mixin: not a valid mixin value: ' + value);
+        }
+
+        return parts.map((mix) => {
+            let type: string, options: string[], match;
+
+            if (mix.indexOf('(') === -1) {
+                type = mix.trim();
+                options = [];
+            } else if (match = mix.match(/(.*?)\((.*?)\)/)) {
+                type = match[1].trim();
+                options = match[2] ? match[2].split(',').map(x => x.trim()) : [];
+            } else {
+                throw new Error('Invalid mixin call:' + mix);
+            }
+            return { type, options }
+        });
+
     }
 }
 

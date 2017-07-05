@@ -227,20 +227,72 @@ describe('Stylesheet', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/mixin"){
-                    -sb-named: MyMixin1, MyMixin2;
+                    -sb-named: MyMixin1;
                 }
                 .container {
-                    -sb-mixin-MyMixin1-colorOne-x: red;
-                    -sb-mixin-MyMixin1-Count: 2;
-                    -sb-mixin-MyMixin2-color: green;
-                    -sb-mixin-MyMixin2-count: 4;
+                    -sb-mixin: MyMixin1;
                 }
             `);
 
             expect(sheet.mixinSelectors).to.eql({
                 ".container": [
-                    { type: "MyMixin1", options: { "colorOne-x": 'red', Count: '2' } },
-                    { type: "MyMixin2", options: { color: 'green', count: '4' } }
+                    { type: "MyMixin1", options: [] }
+                ]
+            })
+        });
+
+        it('with -sb-mixin with params', function () {
+
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -sb-named: MyMixin1;
+                }
+                .container {
+                    -sb-mixin: MyMixin1(100px, 50);
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: ["100px", "50"] }
+                ]
+            })
+        });
+
+        it('with -sb-mixin with multiple mixins', function () {
+
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -sb-named: MyMixin1, MyMixin2;
+                }
+                .container {
+                    -sb-mixin:  MyMixin1(100px, 50)  MyMixin2();
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: ["100px", "50"] },
+                    { type: "MyMixin2", options: [] }
+                ]
+            })
+        });
+
+        it('with -sb-mixin no params multiple defs', function () {
+
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -sb-named: MyMixin1, MyMixin2;
+                }
+                .container {
+                    -sb-mixin: MyMixin1;
+                    -sb-mixin: MyMixin2;
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin2", options: [] }
                 ]
             })
         });
