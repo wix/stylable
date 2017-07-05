@@ -79,10 +79,9 @@ export class Generator {
                 return null;
             }
         } else {
-            rules =  selector.rules;
+            rules = selector.rules;
             aSelector = selector.selector;
         }
-        const selectorObject: Pojo = {};
 
         //don't emit empty selectors in production
         if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
@@ -92,9 +91,9 @@ export class Generator {
         //don't emit imports
         if (isImport(ast)) { return null; }
 
-        const scopedSelector = this.scopeSelector(sheet, aSelector, ast);
-        selectorObject[scopedSelector] = rules;
-        return selectorObject;
+        return {
+            [this.scopeSelector(sheet, aSelector, ast)]: rules
+        };
 
     }
     addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
