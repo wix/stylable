@@ -14,22 +14,25 @@ function Rule(rule) {
     this.decl = [];
 }
 
-function AtRule(rule) {
+function AtRule(rule, value) {
     this.type = '@at-type';
     this.rule = rule;
+    this.value = value || true;
     this.children = [];
 }
+
+
 
 function shouldCamel(noCamel, name) {
     return !noCamel.some((matcher) => name.match(matcher));
 }
 
-function objectify(nodes, out, options) {
+function objectify(nodes, out, options, value) {
     return nodes.length ? nodes.reduce((out, node) => {
         return setOrPush(out, node.rule, node.type === '@at-type' ?
-            objectify(node.children, null, options) :
+            objectify(node.children, null, options, node.value) :
             objectifyDeclarations(node.decl, null, options));
-    }, out || {}) : true;
+    }, out || {}) : value;
 }
 
 function objectifyDeclarations(decl, out, options) {
@@ -60,7 +63,10 @@ function handleDecl(rule, content, id) {
         node = new Declaration(name, value);
     } else {
         rule = null;
-        node = new AtRule(content);
+        var index = content.indexOf(' ');
+        var name = content.substring(0, index);
+        var value = content.substring(index + 1).trim();
+        node = new AtRule(name, value);
     }
     stack.push({ id, rule, node });
 }
@@ -82,6 +88,7 @@ function handleRule(rule, id) {
 }
 
 function handleAtRule(rule, id) {
+    debugger;
     var node = new AtRule(rule);
     var size = stack.length;
     while (size--) {

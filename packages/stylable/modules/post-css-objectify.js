@@ -2,7 +2,7 @@ var camelcase = require('camelcase-css');
 
 function atRule(node, options) {
     if (typeof node.nodes === 'undefined') {
-        return true;
+        return node.params;
     } else {
         return process(node, options);
     }
@@ -35,7 +35,8 @@ function process(node, options) {
 
         if (child.type === 'atrule') {
             name = '@' + child.name;
-            if (child.params) name += ' ' + child.params;
+            if (child.params && child.nodes) name += ' ' + child.params;
+            
             if (typeof result[name] === 'undefined') {
                 result[name] = atRule(child, options);
             } else if (Array.isArray(result[name])) {
