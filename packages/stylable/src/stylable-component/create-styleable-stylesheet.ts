@@ -40,7 +40,7 @@ export function createStyleableStylesheet(config?: object): StylesheetWithContex
         }
         constructor(public styleDef: any) {
             super(styleDef);
-            this.namespace = 's' + (StylableContext.globalSheetCounter++);
+            this.namespace = this.namespace || ('s' + (StylableContext.globalSheetCounter++));
             StylableStylesheet.context.add(this);
         }
     }
