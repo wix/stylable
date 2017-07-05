@@ -84,7 +84,7 @@ export class Generator {
         }
 
         if (selector === '@namespace') { return null; }
-
+        if (selector === ':vars') { return null; }
         //don't emit empty selectors in production
         if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
 
@@ -93,8 +93,13 @@ export class Generator {
         //don't emit imports
         if (isImport(ast)) { return null; }
 
+        const processedRules: Pojo<string> = {};
+        for (var k in rules) {
+            processedRules[k] = valueTemplate(rules[k], sheet.vars)
+        }
+
         return {
-            [this.scopeSelector(sheet, aSelector, ast)]: rules
+            [this.scopeSelector(sheet, aSelector, ast)]: processedRules
         };
 
     }
@@ -205,4 +210,12 @@ function hasKeys(o: Pojo<any>) {
         }
     }
     return false;
+}
+
+function valueTemplate(value: string, data: Pojo, thorwCondition = 0): string {
+    return value.replace(/value\((.*?)\)/g, function (match: string, name: string) {
+        if(thorwCondition > 1){throw new Error('Unresolveable variable: ' + name)}
+        const res = valueTemplate(data[name], data, thorwCondition + 1);
+        return res !== undefined ? res : match;
+    });
 }

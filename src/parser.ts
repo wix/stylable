@@ -6,7 +6,8 @@ const objectify = require("../modules/post-css-objectify");
 const stylis = require("../modules/stylis");
 const plugin = require("../modules/plugin");
 const stylableObjectifyConfig = {
-    noCamel: [/^-sb-/]
+    noCamel: [/^-sb-/],
+    noCamelSelector: [/^:vars$/]
 };
 
 stylis.set({ compress: false, lossless: true });
