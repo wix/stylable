@@ -31,11 +31,13 @@ export class Stylesheet {
     typedClasses: Pojo<TypedClass>;
     mixinSelectors: Pojo<Mixin[]>;
     resolvedSymbols: Pojo<any>;
+    vars: Pojo<string>;
     imports: Import[];
     root: string;
     constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
         this.classes = {};
+        this.vars = {};
         this.typedClasses = {};
         this.mixinSelectors = {};
         this.imports = [];
@@ -68,9 +70,13 @@ export class Stylesheet {
             traverseNode(ast, (node) => {
                 if (!checker(node)) { isSimpleSelector = false; }
                 const { type, name } = node;
-                if (type === "pseudo-class" && name === 'import') {
-                    const { content } = <PseudoSelectorAstNode>node;
-                    this.imports.push(Import.fromImportObject(content, this.cssDefinition[selector]));
+                if (type === "pseudo-class") {
+                    if(name === 'import'){
+                        const { content } = <PseudoSelectorAstNode>node;
+                        this.imports.push(Import.fromImportObject(content, this.cssDefinition[selector]));
+                    } else if(name === 'vars'){
+                        this.vars = this.cssDefinition[selector];
+                    }
                 } else if (type === 'class') {
                     this.classes[node.name] = node.name;
                 }

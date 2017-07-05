@@ -374,7 +374,29 @@ function objectifyTests(objectify: (css: string) => any) {
 
         });
 
-    })
+    });
+
+    
+    describe('noCamelSelector in selector option (variables)', function () {
+        it('should not camel case matching rules in a selector', function () {
+
+            const actual = objectify(`
+                :vars {
+                   AbCd-EfG: true;
+                }
+            `);
+            
+            const expected = {
+                ":vars": {
+                     "AbCd-EfG": "true"
+                }            
+            }
+            
+            expect(actual).to.eql(expected);
+
+        });
+        
+    });
 
     xit('big css', function () {
         var count = 100;

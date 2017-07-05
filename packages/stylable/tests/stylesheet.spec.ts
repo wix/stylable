@@ -455,5 +455,63 @@ describe('Stylesheet', function () {
         });
     })
 
+
+    describe('variables', function(){
+        
+        it('should be collected from :vars selector', function(){
+            var style = new Stylesheet({
+                ":vars": {
+                    name: 'value'
+                }
+            });
+
+            expect(style.vars).to.eql({
+                name: 'value'
+            });
+            
+        });
+
+                
+        it('should not by modified', function(){
+ 
+            var styleCSS = Stylesheet.fromCSS(`
+                :vars{
+                    my-Name: value;
+                }
+            `);
+
+            const expected = {
+                "my-Name": 'value'
+            };
+
+            expect(styleCSS.vars).to.eql(expected);
+            
+        });
+
+        
+                
+        it('should not by modified', function(){
+ 
+            var styleCSS = Stylesheet.fromCSS(`
+                :vars{
+                    my-Name: value;
+                }
+                :vars{
+                    my-Name: value2;
+                    my-Other: value3;
+                }
+            `);
+
+            const expected = {
+                "my-Name": ['value', 'value2'],
+                "my-Other": 'value3'
+            };
+
+            expect(styleCSS.vars).to.eql(expected);
+            
+        });
+        
+    })
+
 });
 

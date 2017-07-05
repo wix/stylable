@@ -23,21 +23,22 @@ function AtRule(rule, value) {
 
 
 
-function shouldCamel(noCamel, name) {
-    return !noCamel.some((matcher) => name.match(matcher));
+
+function shouldCamel(options, name, selector) {
+    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher)=>selector.match(matcher)));
 }
 
 function objectify(nodes, out, options, value) {
     return nodes.length ? nodes.reduce((out, node) => {
         return setOrPush(out, node.rule, node.type === '@at-type' ?
             objectify(node.children, null, options, node.value) :
-            objectifyDeclarations(node.decl, null, options));
+            objectifyDeclarations(node.decl, null, options, node));
     }, out || {}) : value;
 }
 
-function objectifyDeclarations(decl, out, options) {
+function objectifyDeclarations(decl, out, options, parent) {
     return decl.reduce((out, node) => {
-        return setOrPush(out, shouldCamel(options.noCamel, node.name) ? camelCaseCSS(node.name) : node.name, node.value);
+        return setOrPush(out, shouldCamel(options, node.name, parent.rule) ? camelCaseCSS(node.name) : node.name, node.value);
     }, out || {});
 }
 
@@ -88,7 +89,6 @@ function handleRule(rule, id) {
 }
 
 function handleAtRule(rule, id) {
-    debugger;
     var node = new AtRule(rule);
     var size = stack.length;
     while (size--) {
@@ -112,6 +112,7 @@ function handleAtRule(rule, id) {
 module.exports = function (options) {
     options = options || {};
     options.noCamel = options.noCamel || [];
+    options.noCamelSelector = options.noCamelSelector || [];
     return function plugin(context, content, selectors, parents, line, column, length, id) {
         var rule = selectors.join(', ');
 

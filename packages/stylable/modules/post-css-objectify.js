@@ -9,8 +9,8 @@ function atRule(node, options) {
 }
 
 
-function shouldCamel(noCamel, name) {
-    return !noCamel.some((matcher) => name.match(matcher));
+function shouldCamel(options, name, selector) {
+    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher)=>selector.match(matcher)));
 }
 
 function process(node, options) {
@@ -18,6 +18,7 @@ function process(node, options) {
     var result = {};
     options = options || {};
     options.noCamel = options.noCamel || [];
+    options.noCamelSelector = options.noCamelSelector || [];
     node.each(function (child) {
         var rules = {};
         node.each(function (rule) {
@@ -49,7 +50,7 @@ function process(node, options) {
             result[child.selector] = process(child, options);
 
         } else if (child.type === 'decl') {
-            name = shouldCamel(options.noCamel, child.prop) ? camelcase(child.prop) : child.prop;
+            name = shouldCamel(options, child.prop, child.parent.selector || '') ? camelcase(child.prop) : child.prop;
             child.value = child.important ?
                 child.value + ' !important' : child.value;
             if (typeof result[name] === 'undefined') {
