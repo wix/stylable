@@ -87,28 +87,14 @@ export class Stylesheet {
     }
     private addMixins(selector: string) {
         const rules: Pojo<string> = this.cssDefinition[selector];
-        const bucket = this.mixinSelectors[selector] || [];
-        const map = Object.create(null);
+        let mixin: string | string[] = rules["-sb-mixin"];
+        if(mixin && !Array.isArray(mixin)){ mixin = [mixin]; }        
 
-        for (var rule in rules) {
-            const match = rule.match('-sb-mixin-(.*?)-(.*)');
-            if (match) {
-                const type = match[1];
-                const option = match[2];
-                map[type] = map[type] || {};
-                map[type][option] = rules[rule];
-                delete rules[rule];
-            }
+        if(mixin){
+            const last = mixin[mixin.length - 1];
+            this.mixinSelectors[selector] = SBTypesParsers["-sb-mixin"](last);
+            delete rules["-sb-mixin"];
         }
-
-        for (const type in map) {
-            bucket.push({ type, options: map[type] });
-        }
-
-        if (bucket.length) {
-            this.mixinSelectors[selector] = bucket;
-        }
-
     }
     /********************************************/
 

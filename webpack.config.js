@@ -1,6 +1,7 @@
 var glob = require('glob');
 
 module.exports = {
+    devtool: 'eval',
     entry: {
         tests: glob.sync("./tests/**/*.spec.ts")
     },

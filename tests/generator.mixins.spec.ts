@@ -7,9 +7,9 @@ describe('static Generator mixins', function () {
 
     it('should add rules to the root selector', function () {
 
-        function mixin(options: any) {
+        function mixin(options: string[]) {
             return {
-                color: options.param1
+                color: options[0]
             }
         }
 
@@ -18,7 +18,7 @@ describe('static Generator mixins', function () {
                 -sb-default: MyMixin;
             }
             .container { 
-                -sb-mixin-MyMixin-param1: red;                
+                -sb-mixin: MyMixin(red);                
             }
         `, "StyleA");
 
@@ -27,12 +27,15 @@ describe('static Generator mixins', function () {
             namespaceDivider: "__"
         });
 
-        const selectorObject = gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin
-        }, []);
+        const stack: any = [];
 
-        expect(selectorObject).to.eql({
-            ".StyleA__container": {
+        gen.prepareSelector(sheet, '.container', {
+            MyMixin: mixin
+        }, stack);
+        
+        expect(stack[0]).to.eql({
+            selector: '.container',
+            rules: {
                 color: "red"
             }
         });
@@ -42,10 +45,10 @@ describe('static Generator mixins', function () {
 
     it('should add child selectors', function () {
 
-        function mixin(options: any) {
+        function mixin(options: string[]) {
             return {
                 ":hover": {
-                    color: options.param1
+                    color: options[0]
                 }
             }
         }
@@ -55,7 +58,7 @@ describe('static Generator mixins', function () {
                 -sb-default: MyMixin;
             }
             .container { 
-                -sb-mixin-MyMixin-param1: red;
+                -sb-mixin: MyMixin(red);
             }
         `, "StyleA");
 
@@ -70,7 +73,6 @@ describe('static Generator mixins', function () {
             MyMixin: mixin
         }, stack);
 
-
         expect(stack[0]).to.eql({
             selector: '.container :hover',
             rules: {
@@ -83,10 +85,10 @@ describe('static Generator mixins', function () {
 
     it('should add extended selectors (&) in the first level', function () {
 
-        function mixin(options: any) {
+        function mixin(options: string[]) {
             return {
                 "&:hover": {
-                    color: options.param1
+                    color: options[0]
                 }
             }
         }
@@ -96,7 +98,7 @@ describe('static Generator mixins', function () {
                 -sb-default: MyMixin;
             }
             .container { 
-                -sb-mixin-MyMixin-param1: red;
+                -sb-mixin: MyMixin(red);
             }
         `, "StyleA");
 
@@ -120,21 +122,22 @@ describe('static Generator mixins', function () {
 
     it('should handle nested mixins', function () {
 
-        function colorMixin(options: any) {
+        function colorMixin(options: string[]) {
             return {
-                color: options.param1,
+                color: options[0],
                 "&:hover": {
-                    color: options.param2
+                    color: options[1]
                 }
             }
         }
 
         
-        function mixin(options: any) {
+        function mixin(options: string[]) {
             return {
                 "& > *": {
-                    background: options.param1,
-                    ...colorMixin({param1: 'red', param2: 'green'})
+                    background: options[0],
+                    border: options[1],
+                    ...colorMixin(['red', 'green'])
                 },
                 
             }
@@ -145,7 +148,7 @@ describe('static Generator mixins', function () {
                 -sb-default: MyMixin;
             }
             .container { 
-                -sb-mixin-MyMixin-param1: red;
+                -sb-mixin: MyMixin(red, 10px solid black);
             }
         `, "StyleA");
 
@@ -163,7 +166,7 @@ describe('static Generator mixins', function () {
         expect(stack).to.eql([
             {
                 selector: ".container > *",
-                rules: { background: "red", color: "red" }
+                rules: { background: "red", border: "10px solid black", color: "red" }
             },
             {
                 selector: ".container > *:hover",
