@@ -49,7 +49,7 @@
   "files": [
     "dist",
     "src",
-    "./react.js",
-    "./react.d.ts"
+    "react.js",
+    "react.d.ts"
   ]
 }
