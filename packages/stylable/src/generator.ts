@@ -69,7 +69,7 @@ export class Generator {
                     const cssMixin = cssflat({
                         [aSelector]: {
                             ...rules,
-                            ...mixinFunction(mixin.options)
+                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, sheet.vars)))
                         }
                     });
                     for (var key in cssMixin) {
@@ -212,10 +212,10 @@ function hasKeys(o: Pojo<any>) {
     return false;
 }
 
-function valueTemplate(value: string, data: Pojo, thorwCondition = 0): string {
+function valueTemplate(value: string, data: Pojo, throwCondition = 0): string {
     return value.replace(/value\((.*?)\)/g, function (match: string, name: string) {
-        if(thorwCondition > 1){throw new Error('Unresolveable variable: ' + name)}
-        const res = valueTemplate(data[name], data, thorwCondition + 1);
+        if(throwCondition > 1){throw new Error('Unresolvable variable: ' + name)}
+        const res = valueTemplate(data[name], data, throwCondition + 1);
         return res !== undefined ? res : match;
     });
 }

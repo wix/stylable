@@ -49,7 +49,7 @@ export const SBTypesParsers = {
     },
     "-sb-mixin"(value: string) {
 
-        const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)|([A-Za-z$_][$_\w]*\s*)/g);
+        const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);
         if (!parts || parts.join('').length !== value.replace(/\s*/, '').length) {
             throw new Error('-sb-mixin: not a valid mixin value: ' + value);
         }
@@ -60,7 +60,7 @@ export const SBTypesParsers = {
             if (mix.indexOf('(') === -1) {
                 type = mix.trim();
                 options = [];
-            } else if (match = mix.match(/(.*?)\((.*?)\)/)) {
+            } else if (match = mix.match(/(.*?)\((.*?\)?)\)/)) {
                 type = match[1].trim();
                 options = match[2] ? match[2].split(',').map(x => x.trim()) : [];
             } else {

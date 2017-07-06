@@ -84,8 +84,79 @@ describe('Generator variables interpolation', function () {
         
         expect(function(){
             Generator.generate([sheet], new Generator({}));
-        }).to.throw('Unresolveable variable');
+        }).to.throw('Unresolvable variable');
 
     });
 
+
+    it('should resolve value() usage in mixin call', function () {
+        function mixin(options: string[]) {
+            return {
+                color: options[0],
+            };
+        }
+
+        function otherMixin(options: string[]) {
+            return {
+                backgroundColor: options[0],
+            };
+        }
+
+        function noParamsMixin() {
+            return {
+                borderColor: 'orange',
+            };
+        }
+
+        const sheet = Stylesheet.fromCSS(`
+            :import("./relative/path/to/mixin.js") {
+                -sb-default: MyMixin;
+            }
+            :import("./relative/path/to/mixin.js") {
+                -sb-default: OtherMixin;
+            }
+            :import("./relative/path/to/mixin.js") {
+                -sb-default: NoParamsMixin;
+            }
+            :vars {
+                param: red;
+            }
+            .container {
+                -sb-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
+            }
+        `, "");
+
+        const gen = new Generator({
+            namespaceDivider: "__"
+        });
+
+        const stack: any = [];
+
+        gen.prepareSelector(sheet, '.container', {
+            MyMixin: mixin,
+            OtherMixin: otherMixin,
+            NoParamsMixin: noParamsMixin,
+        }, stack);
+
+        expect(stack[0]).to.eql({
+            selector: '.container',
+            rules: {
+                color: "red",
+            }
+        });
+
+        expect(stack[1]).to.eql({
+            selector: '.container',
+            rules: {
+                borderColor: "orange",
+            }
+        });
+
+        expect(stack[2]).to.eql({
+            selector: '.container',
+            rules: {
+                backgroundColor: "blue",
+            }
+        });
+    });
 });
