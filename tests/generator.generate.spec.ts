@@ -478,6 +478,19 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
+        it('supports multiple appearances of the same css rule', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    color: black;
+                    color: red;
+                }
+            `);
+
+            const css = Generator.generate(sheet);
+
+            expect(css).to.eql(['.container {\n    color: red\n}']);
+
+        });
     });
 
 });

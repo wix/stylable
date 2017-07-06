@@ -95,7 +95,8 @@ export class Generator {
 
         const processedRules: Pojo<string> = {};
         for (var k in rules) {
-            processedRules[k] = valueTemplate(rules[k], sheet.vars)
+            let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
+            processedRules[k] = valueTemplate(value, sheet.vars);
         }
 
         return {
