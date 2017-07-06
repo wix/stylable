@@ -266,14 +266,15 @@ describe('Stylesheet', function () {
                     -sb-named: MyMixin1, MyMixin2;
                 }
                 .container {
-                    -sb-mixin:  MyMixin1(100px, 50)  MyMixin2();
+                    -sb-mixin:  MyMixin1(100px, 50) MyMixin2  MyMixin3();
                 }
             `);
 
             expect(sheet.mixinSelectors).to.eql({
                 ".container": [
                     { type: "MyMixin1", options: ["100px", "50"] },
-                    { type: "MyMixin2", options: [] }
+                    { type: "MyMixin2", options: [] },
+                    { type: "MyMixin3", options: [] },
                 ]
             })
         });
