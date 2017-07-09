@@ -88,6 +88,29 @@ describe('Generator variables interpolation', function () {
 
     });
 
+    it('should support default value', function () {
+        const sheet = Stylesheet.fromCSS(`
+            :vars {
+                param: red;
+                param2: blue
+            }
+            .container {
+                background-color: value(param, blue);
+                color: value(param3, green);
+            }
+        `, "");
+
+        const css = Generator.generate([sheet], new Generator({
+            namespaceDivider: "__"
+        }));
+
+        const res = [
+            '.container {\n    background-color: red;\n    color: green\n}'
+        ];
+
+        css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+        expect(css.length).to.equal(res.length);
+    });
 
     it('should resolve value() usage in mixin call', function () {
         function mixin(options: string[]) {
