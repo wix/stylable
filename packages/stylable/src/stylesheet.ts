@@ -48,6 +48,9 @@ export class Stylesheet {
     static fromCSS(css: string, namespace?: string) {
         return new this(objectifyCSS(css), namespace);
     }
+    static isStylesheet(maybeStylesheet: any) {
+        return maybeStylesheet instanceof Stylesheet;
+    }
     private getNamespace(strongNamespace = "") {
         if (strongNamespace) { return strongNamespace; }
         const value = this.cssDefinition["@namespace"];
@@ -128,8 +131,9 @@ export class Stylesheet {
         return this.imports.reduce((acc, importDef) => {
             const m = resolver.resolveModule(importDef.from);
             acc[importDef.defaultExport || importDef.from] = m.default || m;
+            const isStylesheet = Stylesheet.isStylesheet(m);
             for (const name in importDef.named) {
-                acc[name] = m[name];
+                acc[name] = isStylesheet ? m.vars[name] : m[name];
             }
             return acc;
         }, {} as Pojo);
