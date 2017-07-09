@@ -42,7 +42,7 @@ export class Generator {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
-            const resolvedSymbols = sheet.resolveImports(this.config.resolver);
+            const resolvedSymbols = sheet.resolveSymbols(this.config.resolver);
             this.addImports(resolvedSymbols);
             this.addSelectors(sheet, resolvedSymbols);
         }
@@ -51,7 +51,7 @@ export class Generator {
     addImports(resolvedSymbols: Pojo) {
         for (const symbol in resolvedSymbols) {
             const exportValue = resolvedSymbols[symbol];
-            if (exportValue instanceof Stylesheet) {
+            if (Stylesheet.isStylesheet(exportValue)) {
                 this.addEntry(exportValue);
             }
         }
@@ -69,7 +69,7 @@ export class Generator {
                     const cssMixin = cssflat({
                         [aSelector]: {
                             ...rules,
-                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, sheet.vars)))
+                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols)))
                         }
                     });
                     for (var key in cssMixin) {
@@ -96,7 +96,7 @@ export class Generator {
         const processedRules: Pojo<string> = {};
         for (var k in rules) {
             let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
-            processedRules[k] = valueTemplate(value, sheet.vars);
+            processedRules[k] = valueTemplate(value, resolvedSymbols);
         }
 
         return {
