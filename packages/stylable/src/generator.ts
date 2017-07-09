@@ -133,6 +133,11 @@ export class Generator {
                 current = this.handlePseudoElement(current, node, name);
             } else if (type === 'pseudo-class') {
                 current = this.handlePseudoClass(current, node, name, sheet, typedClass, element);
+            } else if (type === 'nested-pseudo-class') {
+                if(name === 'global') {
+                    node.type = 'selector';
+                    return true;
+                }
             }
         });
         return stringifySelector(ast);

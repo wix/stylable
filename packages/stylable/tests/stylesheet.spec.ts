@@ -371,7 +371,7 @@ describe('Stylesheet', function () {
 
             const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
 
-            expect(resolved).to.eql({name1: resolvedModule});
+            expect(resolved).to.eql({ name1: resolvedModule });
         });
 
         it('should handle nameless default by using the path', function () {
@@ -384,7 +384,7 @@ describe('Stylesheet', function () {
 
             const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
 
-            expect(resolved).to.eql({'./path': resolvedModule});
+            expect(resolved).to.eql({ './path': resolvedModule });
         });
 
         it('should resolve named symbols', function () {
@@ -401,12 +401,12 @@ describe('Stylesheet', function () {
                 }
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({ 
-                "./path/1": {name1: resolvedModule1}, 
-                "./path/2": {name2: resolvedModule2} 
+            const resolved = sheet.resolveImports(new Resolver({
+                "./path/1": { name1: resolvedModule1 },
+                "./path/2": { name2: resolvedModule2 }
             }));
 
-            expect(resolved).to.contain({name1: resolvedModule1, name2: resolvedModule2});
+            expect(resolved).to.contain({ name1: resolvedModule1, name2: resolvedModule2 });
         });
 
 
@@ -423,43 +423,43 @@ describe('Stylesheet', function () {
                     "-sb-named": "name1"
                 }
             }, "namespace");
-            
-            const resolved = sheet.resolveImports(new Resolver({ 
-                "./path/1": {name1: resolvedModule1}, 
-                "./path/2": {name1: resolvedModule2} 
+
+            const resolved = sheet.resolveImports(new Resolver({
+                "./path/1": { name1: resolvedModule1 },
+                "./path/2": { name1: resolvedModule2 }
             }));
 
-            expect(resolved).to.contain({name1: resolvedModule2});
+            expect(resolved).to.contain({ name1: resolvedModule2 });
         });
     });
 
 
-    describe('namespace', function(){
-        
-        it('should be empty when no namespace is provided', function(){
+    describe('namespace', function () {
+
+        it('should be empty when no namespace is provided', function () {
             var style = new Stylesheet({})
             expect(style.namespace).to.equal('');
         });
-        
-        it('should be set when provided', function(){
+
+        it('should be set when provided', function () {
             var style = new Stylesheet({}, 'mynamespace');
             expect(style.namespace).to.equal('mynamespace');
         });
 
-        it('should be set from definition', function(){
-            var style = new Stylesheet({"@namespace": "mynamespace"});
+        it('should be set from definition', function () {
+            var style = new Stylesheet({ "@namespace": "mynamespace" });
             expect(style.namespace).to.equal('mynamespace');
         });
-        it('should be set from definition', function(){
-            var style = new Stylesheet({"@namespace": ["mynamespace", "mylastnamespace"]});
+        it('should be set from definition', function () {
+            var style = new Stylesheet({ "@namespace": ["mynamespace", "mylastnamespace"] });
             expect(style.namespace).to.equal('mylastnamespace');
         });
     })
 
 
-    describe('variables', function(){
-        
-        it('should be collected from :vars selector', function(){
+    describe('variables', function () {
+
+        it('should be collected from :vars selector', function () {
             var style = new Stylesheet({
                 ":vars": {
                     name: 'value'
@@ -469,12 +469,12 @@ describe('Stylesheet', function () {
             expect(style.vars).to.eql({
                 name: 'value'
             });
-            
+
         });
 
-                
-        it('should not by modified', function(){
- 
+
+        it('should not by modified', function () {
+
             var styleCSS = Stylesheet.fromCSS(`
                 :vars{
                     my-Name: value;
@@ -486,13 +486,13 @@ describe('Stylesheet', function () {
             };
 
             expect(styleCSS.vars).to.eql(expected);
-            
+
         });
 
-        
-                
-        it('should not by modified', function(){
- 
+
+
+        it('should not by modified', function () {
+
             var styleCSS = Stylesheet.fromCSS(`
                 :vars{
                     my-Name: value;
@@ -509,9 +509,62 @@ describe('Stylesheet', function () {
             };
 
             expect(styleCSS.vars).to.eql(expected);
-            
+
         });
-        
+
+    })
+
+    describe('global', function () {
+        it('should not by modified', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                :global(.myselector){
+                    color: red;
+                }
+            `);
+
+            expect(sheet.classes).to.not.contain({
+                myselector: 'myselector'
+            });
+
+        });
+
+        it('should not by modified and keep scoping after', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                :global(.myselector) .myclass{
+                    color: red;
+                }
+            `);
+
+            expect(sheet.classes).to.not.contain({
+                myselector: 'myselector'
+            });
+
+            expect(sheet.classes).to.not.contain({
+                myselector: 'myselector'
+            });
+
+        });
+
+        it('should not by modified complex global selector', function () {
+
+            var sheet = Stylesheet.fromCSS(`
+                :global(.myselector .otherselector){
+                    color: red;
+                }
+            `);
+
+            expect(sheet.classes).to.not.contain({
+                myselector: 'myselector'
+            });
+
+            expect(sheet.classes).to.not.contain({
+                otherselector: 'otherselector'
+            });
+
+        });
+
     })
 
 });

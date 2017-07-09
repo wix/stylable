@@ -51,9 +51,9 @@ export class Stylesheet {
     private getNamespace(strongNamespace = "") {
         if (strongNamespace) { return strongNamespace; }
         const value = this.cssDefinition["@namespace"];
-        if(Array.isArray(value)){
+        if (Array.isArray(value)) {
             return value[value.length - 1];
-        } else if(value){
+        } else if (value) {
             return value;
         } else {
             //TODO: maybe auto generate here.
@@ -71,14 +71,18 @@ export class Stylesheet {
                 if (!checker(node)) { isSimpleSelector = false; }
                 const { type, name } = node;
                 if (type === "pseudo-class") {
-                    if(name === 'import'){
+                    if (name === 'import') {
                         const { content } = <PseudoSelectorAstNode>node;
                         this.imports.push(Import.fromImportObject(content, this.cssDefinition[selector]));
-                    } else if(name === 'vars'){
+                    } else if (name === 'vars') {
                         this.vars = this.cssDefinition[selector];
                     }
                 } else if (type === 'class') {
                     this.classes[node.name] = node.name;
+                } else if (type === 'nested-pseudo-class') {
+                    if(name === 'global'){
+                        return true;
+                    }
                 }
             });
             this.addTypedClasses(selector, isSimpleSelector);
