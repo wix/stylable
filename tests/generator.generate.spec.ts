@@ -493,4 +493,67 @@ describe('static Generator.generate', function () {
         });
     });
 
+    describe('global', function(){
+        it('should not scope global selectors and remove :global', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    color: black;
+                }
+                :global(.container) {
+                    color: red;
+                }
+            `, 'Style');
+
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                '.Style__container {\n    color: black\n}',
+                '.container {\n    color: red\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('should work with other chunks after', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :global(.container) .container {
+                    color: red;
+                }
+            `, 'Style');
+
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                '.container .Style__container {\n    color: red\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+        
+        it('should work with multiple selectors inline', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :global(.container),.container {
+                    color: red;
+                }
+            `, 'Style');
+
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                '.container,.Style__container {\n    color: red\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+    })
+
 });

@@ -10,7 +10,7 @@ const stylableObjectifyConfig = {
     noCamelSelector: [/^:vars$/]
 };
 
-stylis.set({ compress: false, lossless: true });
+stylis.set({ compress: false, lossless: true, global: false });
 stylis.use(false);
 
 stylis.use(plugin(stylableObjectifyConfig));
@@ -98,9 +98,11 @@ export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: num
     if (!node) { return }
     let doNext = visitor(node, index);
     if (doNext === false) { return false; }
+    if (doNext === true) { return true; }
     if (node.nodes) {
         for (var i = 0; i < node.nodes.length; i++) {
             doNext = traverseNode(node.nodes[i], visitor, i);
+            if (doNext === true) { continue; }
             if (doNext === false) { return false; }
         }
     }
