@@ -357,7 +357,7 @@ describe('Stylesheet', function () {
 
     });
 
-    describe('resolveImports', function () {
+    describe('resolveSymbols', function () {
 
         it('should resolve default symbols', function () {
 
@@ -369,7 +369,7 @@ describe('Stylesheet', function () {
                 }
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
+            const resolved = sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
 
             expect(resolved).to.eql({ name1: resolvedModule });
         });
@@ -382,7 +382,7 @@ describe('Stylesheet', function () {
                 ":import('./path')": {}
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({ "./path": resolvedModule }));
+            const resolved = sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
 
             expect(resolved).to.eql({ './path': resolvedModule });
         });
@@ -401,7 +401,7 @@ describe('Stylesheet', function () {
                 }
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({
+            const resolved = sheet.resolveSymbols(new Resolver({
                 "./path/1": { name1: resolvedModule1 },
                 "./path/2": { name2: resolvedModule2 }
             }));
@@ -422,13 +422,40 @@ describe('Stylesheet', function () {
                 ":import('./path')": {
                     "-sb-named": "param1, param2", 
                 },
+                ":vars": {
+                    "param3": "green",
+                },
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({
+            const resolved = sheet.resolveSymbols(new Resolver({
                 "./path": resolvedModule,
             }));
 
-            expect(resolved).to.contain({ param1: "red", param2: "blue" });
+            expect(resolved).to.contain({ param1: "red", param2: "blue", param3: "green" });
+        });
+
+        it('should throw error on var name conflict', function () {
+
+            const resolvedModule = new Stylesheet({
+                ":vars": {
+                    "param1": "red",
+                    "param2": "blue",
+                }
+            });
+
+            var sheet = new Stylesheet({
+                ":import('./path')": {
+                    "-sb-named": "param1, param2",
+                },
+                ":vars": {
+                    "param": "orange",
+                    "param1": "purple",
+                },
+            }, "namespace");
+
+            expect(function resolveSymbols() {
+                sheet.resolveSymbols(new Resolver({"./path": resolvedModule}));
+            }).to.throw('resolveSymbols: Name param1 already set');
         });
 
         it('should take last defiled name export', function () {
@@ -445,7 +472,7 @@ describe('Stylesheet', function () {
                 }
             }, "namespace");
 
-            const resolved = sheet.resolveImports(new Resolver({
+            const resolved = sheet.resolveSymbols(new Resolver({
                 "./path/1": { name1: resolvedModule1 },
                 "./path/2": { name1: resolvedModule2 }
             }));

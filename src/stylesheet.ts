@@ -126,9 +126,9 @@ export class Stylesheet {
     getImportForSymbol(symbol: string) {
         return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
     }
-    resolveImports(resolver: Resolver) {
+    resolveSymbols(resolver: Resolver) {
         //TODO: add support __esModule support?
-        return this.imports.reduce((acc, importDef) => {
+        const imports = this.imports.reduce((acc, importDef) => {
             const m = resolver.resolveModule(importDef.from);
             acc[importDef.defaultExport || importDef.from] = m.default || m;
             const isStylesheet = Stylesheet.isStylesheet(m);
@@ -137,6 +137,14 @@ export class Stylesheet {
             }
             return acc;
         }, {} as Pojo);
+        let symbols = {...imports};
+        Object.keys(this.vars).forEach(varName => {
+            if (symbols[varName]) {
+                throw Error(`resolveSymbols: Name ${varName} already set`);
+            }
+            symbols[varName] = this.vars[varName];
+        });
+        return symbols;
     }
     resolve(resolver: Resolver, name: string) {
         const typedClass = this.typedClasses[name];

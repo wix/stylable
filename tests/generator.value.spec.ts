@@ -1,4 +1,5 @@
 import { Generator } from '../src/generator';
+import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
@@ -113,6 +114,38 @@ describe('Generator variables interpolation', function () {
         expect(css.length).to.equal(res.length);
     });
 
+    it('should support imported vars', function () {
+        const importedModule = new Stylesheet({
+            ":vars": {
+                "param1": "red",
+                "param2": "blue",
+            }
+        });
+        const sheet = Stylesheet.fromCSS(`
+            :import('./path') {
+                -sb-named: param1, param2;
+            }
+            :vars {
+                param: value(param1);
+            }
+            .container {
+                color: value(param);
+                background-color: value(param2)
+            }
+            `, "");
+
+        const css = Generator.generate(sheet, new Generator({
+            namespaceDivider: "__",
+            resolver: new Resolver({
+                "./path": importedModule,
+            })
+        }));
+
+        expect(css).to.eql([
+            '.container {\n    color: red;\n    background-color: blue\n}'
+        ]);
+    });
+
     it('should resolve value() usage in mixin call', function () {
         function mixin(options: string[]) {
             return {
@@ -160,6 +193,7 @@ describe('Generator variables interpolation', function () {
             MyMixin: mixin,
             OtherMixin: otherMixin,
             NoParamsMixin: noParamsMixin,
+            param: 'red',
         }, stack);
 
         expect(stack[0]).to.eql({
