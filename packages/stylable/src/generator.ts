@@ -221,7 +221,14 @@ function hasKeys(o: Pojo<any>) {
 function valueTemplate(value: string, data: Pojo, throwCondition = 0): string {
     return value.replace(/value\((.*?)\)/g, function (match: string, name: string) {
         if(throwCondition > 1){throw new Error('Unresolvable variable: ' + name)}
-        const res = valueTemplate(data[name], data, throwCondition + 1);
+        let translatedValue = data[name];
+        if (~name.indexOf(',')) {
+            const nameParts = name.split(',');
+            const variableName = nameParts[0].trim();
+            const defaultValue = nameParts[1].trim();
+            translatedValue = data[variableName] || defaultValue;
+        }
+        const res = valueTemplate(translatedValue, data, throwCondition + 1);
         return res !== undefined ? res : match;
     });
 }
