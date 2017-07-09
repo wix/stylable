@@ -409,6 +409,27 @@ describe('Stylesheet', function () {
             expect(resolved).to.contain({ name1: resolvedModule1, name2: resolvedModule2 });
         });
 
+        it('should resolve stylesheets', function () {
+
+            const resolvedModule = new Stylesheet({
+                ":vars": {
+                    "param1": "red", 
+                    "param2": "blue", 
+                }
+            });
+
+            var sheet = new Stylesheet({
+                ":import('./path')": {
+                    "-sb-named": "param1, param2", 
+                },
+            }, "namespace");
+
+            const resolved = sheet.resolveImports(new Resolver({
+                "./path": resolvedModule,
+            }));
+
+            expect(resolved).to.contain({ param1: "red", param2: "blue" });
+        });
 
         it('should take last defiled name export', function () {
 
@@ -473,7 +494,7 @@ describe('Stylesheet', function () {
         });
 
 
-        it('should not by modified', function () {
+        it('name should not by modified', function () {
 
             var styleCSS = Stylesheet.fromCSS(`
                 :vars{
@@ -491,7 +512,7 @@ describe('Stylesheet', function () {
 
 
 
-        it('should not by modified', function () {
+        it('should support multiple declarations', function () {
 
             var styleCSS = Stylesheet.fromCSS(`
                 :vars{
