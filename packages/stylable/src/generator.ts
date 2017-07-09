@@ -225,7 +225,8 @@ function valueTemplate(value: string, data: Pojo, throwCondition = 0): string {
         if (~name.indexOf(',')) {
             const nameParts = name.split(',');
             const variableName = nameParts[0].trim();
-            const defaultValue = nameParts[1].trim();
+            let defaultValue = nameParts[1].trim();
+            defaultValue = data[defaultValue] || defaultValue;
             translatedValue = data[variableName] || defaultValue;
         }
         const res = valueTemplate(translatedValue, data, throwCondition + 1);

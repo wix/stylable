@@ -95,8 +95,9 @@ describe('Generator variables interpolation', function () {
                 param2: blue
             }
             .container {
-                background-color: value(param, blue);
+                border: 1px solid value(param, blue);
                 color: value(param3, green);
+                background-color: value(param3, param2);
             }
         `, "");
 
@@ -105,7 +106,7 @@ describe('Generator variables interpolation', function () {
         }));
 
         const res = [
-            '.container {\n    background-color: red;\n    color: green\n}'
+            '.container {\n    border: 1px solid red;\n    color: green;\n    background-color: blue\n}'
         ];
 
         css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
