@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -9,7 +9,8 @@
     "test": "npm run test:node",
     "build": "tsc && ncp ./modules ./dist/modules",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
-    "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
+    "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules",
+    "patch-publish": "npm run build; npm version patch; npm publish"
   },
   "keywords": [],
   "author": "",
