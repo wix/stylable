@@ -1,0 +1,8 @@
+.Component__root {
+    color: goldenrod;
+}
+
+.Component__Label {
+    background: firebrick;
+    border: 1px solid red; /*Hot*/
+}

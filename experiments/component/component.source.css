@@ -1,0 +1,22 @@
+:import("party") {
+    -sb-defualt: Party;
+    -sb-named: Hot, gaga;
+}
+
+:vars {
+    myvar: value(gaga);
+}
+
+:override {
+    gaga: value(myvar);
+}
+
+.root {
+    color: value(gaga);
+}
+
+.Label {
+    -sb-type: Party;
+    -sb-apply: Hot;
+    background: firebrick;
+}
