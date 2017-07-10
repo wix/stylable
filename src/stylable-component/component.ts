@@ -29,7 +29,7 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
         context = context || this.context || {}
         const ReactSpooned = React as any;
         const sbCreateElement = ReactSpooned.createElement;
-        let root = null;
+        let root: JSX.Element | null = null;
         try {
             ReactSpooned.createElement = function (type: any, props: any, ...children: any[]) {
                 if (props) {
@@ -56,7 +56,7 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
         } finally {
             ReactSpooned.createElement = sbCreateElement;
         }
-        return root as JSX.Element;
+        return root;
     } as SBStatelessComponent<T>
 
     Component.stylesheet = sheet;
