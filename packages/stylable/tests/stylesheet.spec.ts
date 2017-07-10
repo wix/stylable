@@ -80,7 +80,6 @@ describe('Stylesheet', function () {
 
     describe('process', function () {
 
-
         it('throw when -sb-root used in complex selector', function () {
 
             expect(function () {
@@ -97,7 +96,9 @@ describe('Stylesheet', function () {
         it('with empty css', function () {
             const sheet = Stylesheet.fromCSS(``);
             expect(sheet.classes).to.eql({});
-            expect(sheet.typedClasses).to.eql({});
+            expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true }
+            });
         });
 
         it('with typed class -sb-root true', function () {
@@ -109,6 +110,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-root": true
                 }
@@ -124,6 +126,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-root": true
                 }
@@ -138,6 +141,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-root": false
                 }
@@ -183,6 +187,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-states": ["stateA", "stateB"]
                 }
@@ -197,6 +202,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-states": []
                 }
@@ -215,6 +221,7 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses).to.eql({
+                root: { "-sb-root": true },
                 container: {
                     "-sb-type": "Thing"
                 }
@@ -413,14 +420,14 @@ describe('Stylesheet', function () {
 
             const resolvedModule = new Stylesheet({
                 ":vars": {
-                    "param1": "red", 
-                    "param2": "blue", 
+                    "param1": "red",
+                    "param2": "blue",
                 }
             });
 
             var sheet = new Stylesheet({
                 ":import('./path')": {
-                    "-sb-named": "param1, param2", 
+                    "-sb-named": "param1, param2",
                 },
                 ":vars": {
                     "param3": "green",
@@ -454,7 +461,7 @@ describe('Stylesheet', function () {
             }, "namespace");
 
             expect(function resolveSymbols() {
-                sheet.resolveSymbols(new Resolver({"./path": resolvedModule}));
+                sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
             }).to.throw('resolveSymbols: Name param1 already set');
         });
 
