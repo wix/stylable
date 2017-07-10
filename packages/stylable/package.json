@@ -42,14 +42,13 @@
     "kebab-case": "^1.0.0",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
-    "postcss-nested": "^2.0.2",
-    "stylis": "^3.1.9",
-    "unistyle-flat": "^1.1.1"
+    "postcss-nested": "^2.0.2"
   },
   "files": [
     "dist",
     "src",
     "react.js",
-    "react.d.ts"
+    "react.d.ts",
+    "tsconfig.json"
   ]
 }
