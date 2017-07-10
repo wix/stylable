@@ -154,7 +154,7 @@ export class Stylesheet {
         return _import ? resolver.resolveModule(_import.from) : this;
     }
     public get(name: string) {
-        return this.classes[name];
+        return this.classes[name] || null;
     }
     public stateAttr(stateName: string) {
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
