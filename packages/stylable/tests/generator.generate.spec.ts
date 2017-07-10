@@ -493,6 +493,56 @@ describe('static Generator.generate', function () {
         });
     });
 
+    describe('classes rewrite', function(){
+
+        it('should update the scoped classnames on the stylesheet', function(){
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    color: black;
+                    color: red;
+                }
+            `, "Sheet");
+
+            Generator.generate(sheet, new Generator({
+                namespaceDivider: "__"
+            }));
+
+            expect(sheet.classes['container']).to.equal('Sheet__container');
+        });
+
+        
+        it('should update the scoped classnames on depended stylesheet', function(){
+                       
+            const sheetA = Stylesheet.fromCSS(`
+                .container {
+                    color: black;
+                    color: red;
+                }
+            `, "sheetA");
+            
+            const sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -sb-default: SheetA;
+                }
+                .container {
+                    color: black;
+                    color: red;
+                }
+            `, "sheetB");
+
+            Generator.generate(sheetB, new Generator({
+                namespaceDivider: "__",
+                 resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA
+                })
+            }));
+
+            expect(sheetA.classes['container']).to.equal('sheetA__container');
+            expect(sheetB.classes['container']).to.equal('sheetB__container');
+        });
+
+    });
+
     describe('global', function(){
         it('should not scope global selectors and remove :global', function () {
             const sheet = Stylesheet.fromCSS(`

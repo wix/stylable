@@ -37,17 +37,13 @@ export class Stylesheet {
     _kind = "Stylesheet";
     constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
-        this.classes = {
-            root: 'root'
-        };
+        this.root = 'root';
+        this.classes = { root: this.root };
+        this.typedClasses = { root: { "-sb-root": true } };
         this.vars = {};
-        this.typedClasses = {
-            root: { "-sb-root": true }
-        };
         this.mixinSelectors = {};
         this.imports = [];
         this.namespace = this.getNamespace(namespace);
-        this.root = 'root';
         this.process();
     }
     static fromCSS(css: string, namespace?: string) {
@@ -57,12 +53,12 @@ export class Stylesheet {
         return maybeStylesheet instanceof Stylesheet;
     }
     private getNamespace(strongNamespace = "") {
-        if (strongNamespace) { return strongNamespace; }
+        if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
         const value = this.cssDefinition["@namespace"];
         if (Array.isArray(value)) {
-            return value[value.length - 1];
+            return value[value.length - 1].replace(/'|"/g, '');
         } else if (value) {
-            return value;
+            return value.replace(/'|"/g, '');
         } else {
             //TODO: maybe auto generate here.
             return '';
@@ -88,7 +84,7 @@ export class Stylesheet {
                 } else if (type === 'class') {
                     this.classes[node.name] = node.name;
                 } else if (type === 'nested-pseudo-class') {
-                    if(name === 'global'){
+                    if (name === 'global') {
                         return true;
                     }
                 }
@@ -143,7 +139,7 @@ export class Stylesheet {
             }
             return acc;
         }, {} as Pojo);
-        let symbols = {...imports};
+        let symbols = { ...imports };
         Object.keys(this.vars).forEach(varName => {
             if (symbols[varName]) {
                 throw Error(`resolveSymbols: Name ${varName} already set`);
@@ -157,7 +153,9 @@ export class Stylesheet {
         const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type'] || "") : null;
         return _import ? resolver.resolveModule(_import.from) : this;
     }
-
+    public get(name: string) {
+        return this.classes[name];
+    }
     public stateAttr(stateName: string) {
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }

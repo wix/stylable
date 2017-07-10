@@ -29,6 +29,7 @@ describe('Stylesheet', function () {
             `)
 
             expect(sheet.classes).to.eql({
+                root: 'root',
                 container: "container"
             });
 
@@ -42,6 +43,7 @@ describe('Stylesheet', function () {
             `)
 
             expect(sheet.classes).to.eql({
+                root: 'root',
                 container: "container",
                 image: "image"
             });
@@ -55,6 +57,7 @@ describe('Stylesheet', function () {
             `)
 
             expect(sheet.classes).to.eql({
+                root: 'root',
                 container: "container",
                 image: "image"
             });
@@ -69,6 +72,7 @@ describe('Stylesheet', function () {
             `)
 
             expect(sheet.classes).to.eql({
+                root: 'root',
                 container: "container",
                 image: "image",
                 wrapper: "wrapper"
@@ -95,7 +99,7 @@ describe('Stylesheet', function () {
 
         it('with empty css', function () {
             const sheet = Stylesheet.fromCSS(``);
-            expect(sheet.classes).to.eql({});
+            expect(sheet.classes).to.eql({root: 'root'});
             expect(sheet.typedClasses).to.eql({
                 root: { "-sb-root": true }
             });
@@ -505,10 +509,22 @@ describe('Stylesheet', function () {
             var style = new Stylesheet({ "@namespace": "mynamespace" });
             expect(style.namespace).to.equal('mynamespace');
         });
-        it('should be set from definition', function () {
+        it('should be set from multiple definitions', function () {
             var style = new Stylesheet({ "@namespace": ["mynamespace", "mylastnamespace"] });
             expect(style.namespace).to.equal('mylastnamespace');
         });
+
+        
+        it('should be set when provided with string ("") wrapping', function () {
+            var style = new Stylesheet({}, '"mynamespace"');
+            expect(style.namespace).to.equal('mynamespace');
+        });
+
+        it("should be set when provided with string ('') wrapping", function () {
+            var style = new Stylesheet({}, "'mynamespace'");
+            expect(style.namespace).to.equal('mynamespace');
+        });
+        
     })
 
 
