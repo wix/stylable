@@ -34,6 +34,7 @@ export class Stylesheet {
     vars: Pojo<string>;
     imports: Import[];
     root: string;
+    _kind = "Stylesheet";
     constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
         this.classes = {};
@@ -87,6 +88,7 @@ export class Stylesheet {
                         return true;
                     }
                 }
+                return undefined;
             });
             this.addTypedClasses(selector, isSimpleSelector);
         });
