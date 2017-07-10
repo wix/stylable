@@ -37,7 +37,9 @@ export class Stylesheet {
     _kind = "Stylesheet";
     constructor(cssDefinition: CSSObject, namespace: string = "") {
         this.cssDefinition = cssDefinition;
-        this.classes = {};
+        this.classes = {
+            root: 'root'
+        };
         this.vars = {};
         this.typedClasses = {
             root: { "-sb-root": true }
