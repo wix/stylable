@@ -25,15 +25,15 @@ export class StylableContext {
         Generator.generate(this.sheets, this.generator).forEach((css) => {
             style.appendChild(document.createTextNode(css));
         });
+        style.$theme = theme;
         document.head.appendChild(this.style);
     }
 }
 
-export function createStyleableStylesheet(config?: object): StylesheetWithContext {
+export function createStyleableStylesheet(): StylesheetWithContext {
 
     return class StylableStylesheet extends Stylesheet {
         static context = new StylableContext({ namespaceDivider: "▪" });
-        _kind = "Stylesheet";
         get(name: string) {
             const n = this.classes[name];
             return n ? StylableStylesheet.context.generator.scope(name, this.namespace) : null;

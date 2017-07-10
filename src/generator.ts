@@ -100,7 +100,7 @@ export class Generator {
         }
 
         return {
-            [this.scopeSelector(sheet, aSelector, ast)]: processedRules
+            [this.scopeSelector(sheet, ast)]: processedRules
         };
 
     }
@@ -113,7 +113,7 @@ export class Generator {
             this.buffer.push(stringifyCSSObject(selectorObject));
         }
     }
-    scopeSelector(sheet: Stylesheet, selector: string, ast: SelectorAstNode): string {
+    scopeSelector(sheet: Stylesheet, ast: SelectorAstNode): string {
         let current = sheet;
         let typedClass: string;
         let element: string;
@@ -139,6 +139,8 @@ export class Generator {
                     return true;
                 }
             }
+            /* do nothing */
+            return undefined;
         });
         return stringifySelector(ast);
     }
