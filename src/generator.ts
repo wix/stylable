@@ -134,7 +134,7 @@ export class Generator {
             } else if (type === 'pseudo-class') {
                 current = this.handlePseudoClass(current, node, name, sheet, typedClass, element);
             } else if (type === 'nested-pseudo-class') {
-                if(name === 'global') {
+                if (name === 'global') {
                     node.type = 'selector';
                     return true;
                 }
@@ -155,6 +155,7 @@ export class Generator {
             //not type
             node.name = this.scope(name, sheet.namespace);
         }
+        sheet.classes[name] = node.name;
         return sheet;
     }
     handleElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
@@ -223,7 +224,7 @@ function hasKeys(o: Pojo<any>) {
 
 function valueTemplate(value: string, data: Pojo, throwCondition = 0): string {
     return value.replace(/value\((.*?)\)/g, function (match: string, name: string) {
-        if(throwCondition > 1){throw new Error('Unresolvable variable: ' + name)}
+        if (throwCondition > 1) { throw new Error('Unresolvable variable: ' + name) }
         let translatedValue = data[name];
         if (~name.indexOf(',')) {
             const nameParts = name.split(',');
