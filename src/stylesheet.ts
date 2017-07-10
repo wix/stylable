@@ -14,9 +14,9 @@ import { Resolver } from './resolver';
 const kebab = require("kebab-case");
 
 export interface TypedClass {
-    "-sb-root": boolean;
-    "-sb-states": string[];
-    "-sb-type": string;
+    "-sb-root"?: boolean;
+    "-sb-states"?: string[];
+    "-sb-type"?: string;
 }
 
 export interface Mixin {
@@ -39,7 +39,9 @@ export class Stylesheet {
         this.cssDefinition = cssDefinition;
         this.classes = {};
         this.vars = {};
-        this.typedClasses = {};
+        this.typedClasses = {
+            root: { "-sb-root": true }
+        };
         this.mixinSelectors = {};
         this.imports = [];
         this.namespace = this.getNamespace(namespace);
@@ -150,7 +152,7 @@ export class Stylesheet {
     }
     resolve(resolver: Resolver, name: string) {
         const typedClass = this.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type']) : null;
+        const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type'] || "") : null;
         return _import ? resolver.resolveModule(_import.from) : this;
     }
 

@@ -202,7 +202,8 @@ export class Generator {
 }
 
 function hasState(typedClass: TypedClass, name: string) {
-    return typedClass && typedClass['-sb-states'] && typedClass['-sb-states'].indexOf(name) !== -1;
+    const states = typedClass && typedClass['-sb-states'];
+    return states ? states.indexOf(name) !== -1 : false;
 }
 
 function isImport(ast: SelectorAstNode): boolean {
