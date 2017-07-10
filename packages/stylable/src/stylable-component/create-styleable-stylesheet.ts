@@ -38,8 +38,8 @@ export function createStyleableStylesheet(): StylesheetWithContext {
             const n = this.classes[name];
             return n ? StylableStylesheet.context.generator.scope(name, this.namespace) : null;
         }
-        constructor(public styleDef: any) {
-            super(styleDef);
+        constructor(public styleDef: any, namespace: string) {
+            super(styleDef, namespace);
             this.namespace = this.namespace || ('s' + (StylableContext.globalSheetCounter++));
             StylableStylesheet.context.add(this);
         }
