@@ -638,5 +638,23 @@ describe('Stylesheet', function () {
 
     })
 
+    describe('source', function(){
+        it('should contain source string', function(){
+            var source = "source string";
+            var sheet = new Stylesheet({}, '', source);
+            expect(sheet.source).to.equal(source);
+        });
+        it('should contain source string fromCSS', function(){
+            var source = "source string";
+            var sheet = Stylesheet.fromCSS(`
+                :global(.myselector .otherselector){
+                    color: red;
+                }
+            `, '', source);
+
+            expect(sheet.source).to.equal(source);
+        });
+    });
+
 });
 

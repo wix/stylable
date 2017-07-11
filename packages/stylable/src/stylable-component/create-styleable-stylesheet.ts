@@ -15,6 +15,9 @@ export class StylableContext {
     }
     add(sheet: Stylesheet) {
         this.resolver.add(sheet.namespace, sheet);
+        if(sheet.source){
+            this.resolver.add(sheet.source, sheet);
+        }
         this.sheets.push(sheet);
     }
     registerMixin(name: string, mixin: Function) {
@@ -38,8 +41,8 @@ export function createStyleableStylesheet(): StylesheetWithContext {
             const n = this.classes[name];
             return n ? StylableStylesheet.context.generator.scope(name, this.namespace) : null;
         }
-        constructor(public styleDef: any, namespace: string) {
-            super(styleDef, namespace);
+        constructor(public styleDef: any, namespace: string, source?: string) {
+            super(styleDef, namespace, source);
             this.namespace = this.namespace || ('s' + (StylableContext.globalSheetCounter++));
             StylableStylesheet.context.add(this);
         }

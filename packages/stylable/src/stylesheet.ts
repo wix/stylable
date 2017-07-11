@@ -34,8 +34,10 @@ export class Stylesheet {
     vars: Pojo<string>;
     imports: Import[];
     root: string;
+    source: string;
     _kind = "Stylesheet";
-    constructor(cssDefinition: CSSObject, namespace: string = "") {
+    constructor(cssDefinition: CSSObject, namespace: string = "", source: string = "") {
+        this.source = source;
         this.cssDefinition = cssDefinition;
         this.root = 'root';
         this.classes = { root: this.root };
@@ -46,8 +48,8 @@ export class Stylesheet {
         this.namespace = this.getNamespace(namespace);
         this.process();
     }
-    static fromCSS(css: string, namespace?: string) {
-        return new this(objectifyCSS(css), namespace);
+    static fromCSS(css: string, namespace?: string, source?: string) {
+        return new this(objectifyCSS(css), namespace, source);
     }
     static isStylesheet(maybeStylesheet: any) {
         return maybeStylesheet instanceof Stylesheet;
@@ -159,7 +161,6 @@ export class Stylesheet {
     public stateAttr(stateName: string) {
         return `data-${this.namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }
-
     public cssStates(stateMapping?: Pojo<boolean>) {
         return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
             if (stateMapping[key]) { states[this.stateAttr(key)] = true; }
