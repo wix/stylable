@@ -68,6 +68,7 @@ export class Stylesheet {
     }
     /******** can be moved to own class *********/
     private process() {
+        
         Object.keys(this.cssDefinition).forEach((selector: string) => {
             const ast = parseSelector(selector);
             const checker = createSimpleSelectorChecker();

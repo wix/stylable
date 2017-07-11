@@ -112,6 +112,9 @@ export class Generator {
             if (!selectorObject) { continue; }
             this.buffer.push(stringifyCSSObject(selectorObject));
         }
+        if(!sheet.cssDefinition['.root']){
+            this.handleClass(sheet, {type: 'class', name: 'root', nodes: []}, 'root');
+        }
     }
     scopeSelector(sheet: Stylesheet, ast: SelectorAstNode): string {
         let current = sheet;
