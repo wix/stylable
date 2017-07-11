@@ -3,14 +3,14 @@ import { CSSObject } from "./types";
 const tokenizer = require("css-selector-tokenizer");
 
 const objectify = require("../modules/post-css-objectify");
-const stylis = require("../modules/stylis");
+const stylis = require("stylis");
 const plugin = require("../modules/plugin");
 const stylableObjectifyConfig = {
     noCamel: [/^-sb-/],
     noCamelSelector: [/^:vars$/]
 };
 
-stylis.set({ compress: false, lossless: true, global: false });
+stylis.set({ compress: false, lossless: true, global: false, preserve: true });
 stylis.use(false);
 
 stylis.use(plugin(stylableObjectifyConfig));
