@@ -150,6 +150,7 @@ export class Generator {
     handleClass(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         const next = sheet.resolve(this.config.resolver, name);
         const localName = this.scope(name, sheet.namespace);
+        sheet.classes[name] = localName;
         if (next !== sheet) {
             //root to root
             node.before = '.' + localName;
@@ -159,8 +160,6 @@ export class Generator {
             //not type
             node.name = localName;
         }
-        sheet.classes[name] = localName;
-        
         return sheet;
     }
     handleElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
