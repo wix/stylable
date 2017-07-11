@@ -37,10 +37,6 @@ export function createStyleableStylesheet(): StylesheetWithContext {
 
     return class StylableStylesheet extends Stylesheet {
         static context = new StylableContext({ namespaceDivider: "▪" });
-        get(name: string) {
-            const n = this.classes[name];
-            return n ? StylableStylesheet.context.generator.scope(name, this.namespace) : null;
-        }
         constructor(public styleDef: any, namespace: string, source?: string) {
             super(styleDef, namespace, source);
             this.namespace = this.namespace || ('s' + (StylableContext.globalSheetCounter++));
