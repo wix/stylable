@@ -149,16 +149,18 @@ export class Generator {
     }
     handleClass(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         const next = sheet.resolve(this.config.resolver, name);
+        const localName = this.scope(name, sheet.namespace);
         if (next !== sheet) {
             //root to root
-            node.before = '.' + this.scope(name, sheet.namespace);
+            node.before = '.' + localName;
             node.name = this.scope(next.root, next.namespace);
             sheet = next;
         } else {
             //not type
-            node.name = this.scope(name, sheet.namespace);
+            node.name = localName;
         }
-        sheet.classes[name] = node.name;
+        sheet.classes[name] = localName;
+        
         return sheet;
     }
     handleElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
