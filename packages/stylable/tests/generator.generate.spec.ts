@@ -541,6 +541,17 @@ describe('static Generator.generate', function () {
             expect(sheetB.classes['container']).to.equal('sheetB__container');
         });
 
+        
+        it('should update root classname evan if there is no root defined', function(){
+            const sheet = Stylesheet.fromCSS(``, "Sheet");
+
+            Generator.generate(sheet, new Generator({
+                namespaceDivider: "__"
+            }));
+
+            expect(sheet.classes['root']).to.equal('Sheet__root');
+        });
+
     });
 
     describe('global', function(){

@@ -42,7 +42,8 @@
     "kebab-case": "^1.0.0",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
-    "postcss-nested": "^2.0.2"
+    "postcss-nested": "^2.0.2",
+    "stylis": "^3.2.3"
   },
   "files": [
     "dist",
