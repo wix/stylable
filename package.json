@@ -50,6 +50,7 @@
     "src",
     "react.js",
     "react.d.ts",
-    "tsconfig.json"
+    "tsconfig.json",
+    "webpack.pack.config.js"
   ]
 }
