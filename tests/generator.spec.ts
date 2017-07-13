@@ -2,6 +2,7 @@ import { Generator, Mode } from '../src/generator';
 import { SelectorAstNode } from '../src/parser';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
+import { Resolver } from "../src/resolver";
 
 
 describe('Generator', function () {
@@ -23,7 +24,7 @@ describe('Generator', function () {
         it('generate with single rule', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black" }
-            });
+            }, "''");
             generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([".container {\n    color: black\n}"]);
         });
@@ -31,7 +32,7 @@ describe('Generator', function () {
         it('generate with multiple rules', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black", background: "white" }
-            });
+            }, "''");
             generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([".container {\n    color: black;\n    background: white\n}"]);
         });
@@ -40,7 +41,7 @@ describe('Generator', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black" },
                 ".wrapper": { background: "white" }
-            });
+            }, "''");
             generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([
                 ".container {\n    color: black\n}",
@@ -53,7 +54,7 @@ describe('Generator', function () {
             const stylesheet = new Stylesheet({
                 ".container": { color: "black" },
                 ".wrapper": { background: "white" }
-            });
+            }, "''");
             generator.addEntry(stylesheet);
             generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([
@@ -144,6 +145,31 @@ describe('Generator', function () {
             });
             generator.addEntry(stylesheet);
             expect(generator.buffer).to.eql([]);
+        });
+    });
+
+    describe('addEntry', function () {
+        it('should not add imported stylesheets to css output', function () {
+            const sheetA = new Stylesheet({
+                ".myClass": {color: 'red'}
+            });
+
+            const stylesheet = new Stylesheet({
+                ":import": {
+                    "-sb-from": "./relative/path/to/sheetA.stylable.css"
+                },
+                ".container": {}
+            });
+
+            const generator = new Generator({
+                 resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA
+                })
+            });
+
+            generator.addEntry(stylesheet, false);
+
+            expect(generator.buffer.length).to.eql(1);
         });
     });
 

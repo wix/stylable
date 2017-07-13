@@ -14,7 +14,7 @@ describe('static Generator.generate', function () {
                 .container {
                     color: black;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 
@@ -27,7 +27,7 @@ describe('static Generator.generate', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {}
                 .image {}
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 
@@ -41,13 +41,13 @@ describe('static Generator.generate', function () {
                 .container {
                     color: black;
                 }
-            `);
+            `, "''");
 
             const sheetB = Stylesheet.fromCSS(`
                 .container {
                     color: white;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate([sheetA, sheetB]);
 
@@ -484,7 +484,7 @@ describe('static Generator.generate', function () {
                     color: black;
                     color: red;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 

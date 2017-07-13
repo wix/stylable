@@ -38,12 +38,14 @@ export class Generator {
         styles.forEach((style) => generator.addEntry(style));
         return generator.buffer;
     }
-    addEntry(sheet: Stylesheet) {
+    addEntry(sheet: Stylesheet, addImports:boolean = true) {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
             const resolvedSymbols = sheet.resolveSymbols(this.config.resolver);
-            this.addImports(resolvedSymbols);
+            if(addImports){
+                this.addImports(resolvedSymbols);
+            }
             this.addSelectors(sheet, resolvedSymbols);
         }
     }
