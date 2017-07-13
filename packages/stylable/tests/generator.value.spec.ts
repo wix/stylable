@@ -32,7 +32,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -57,7 +57,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -81,7 +81,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
         
         expect(function(){
             Generator.generate([sheet], new Generator({}));
@@ -100,7 +100,7 @@ describe('Generator variables interpolation', function () {
                 color: value(param3, green);
                 background-color: value(param3, param2);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -132,7 +132,7 @@ describe('Generator variables interpolation', function () {
                 color: value(param);
                 background-color: value(param2)
             }
-            `, "");
+            `, "''");
 
         const css = Generator.generate(sheet, new Generator({
             namespaceDivider: "__",
@@ -181,7 +181,7 @@ describe('Generator variables interpolation', function () {
             .container {
                 -sb-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
             }
-        `, "");
+        `, "''");
 
         const gen = new Generator({
             namespaceDivider: "__"

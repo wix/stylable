@@ -496,7 +496,7 @@ describe('Stylesheet', function () {
     describe('namespace', function () {
 
         it('should be empty when no namespace is provided', function () {
-            var style = new Stylesheet({})
+            var style = new Stylesheet({}, "''")
             expect(style.namespace).to.equal('');
         });
 

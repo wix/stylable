@@ -36,6 +36,7 @@ export class Stylesheet {
     root: string;
     source: string;
     _kind = "Stylesheet";
+    static globalCounter: number = 0;
     constructor(cssDefinition: CSSObject, namespace: string = "", source: string = "") {
         this.source = source;
         this.cssDefinition = cssDefinition;
@@ -61,9 +62,9 @@ export class Stylesheet {
             return value[value.length - 1].replace(/'|"/g, '');
         } else if (value) {
             return value.replace(/'|"/g, '');
-        } else {
+        } else {            
             //TODO: maybe auto generate here.
-            return '';
+            return 's' + Stylesheet.globalCounter++;
         }
     }
     /******** can be moved to own class *********/
