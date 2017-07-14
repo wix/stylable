@@ -1,7 +1,10 @@
 import { PartialObject, Pojo } from './types';
-import { parseSelector, SelectorAstNode, stringifyCSSObject, stringifySelector, traverseNode } from './parser';
+import { stringifyCSSObject } from './parser';
 import { Resolver } from './resolver';
-import { Stylesheet, TypedClass } from './stylesheet';
+import { Stylesheet } from './stylesheet';
+import { SelectorAstNode, parseSelector, traverseNode, stringifySelector } from "./selector-utils";
+import { valueTemplate } from "./value-template";
+import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 const cssflat = require('../modules/flat-css');
 
 export interface ExtendedSelector {
@@ -83,7 +86,7 @@ export class Generator {
                     const cssMixin = cssflat({
                         [aSelector]: {
                             ...rules,
-                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols)))
+                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.config.mode === Mode.DEV)))
                         }
                     });
                     for (var key in cssMixin) {
@@ -102,7 +105,7 @@ export class Generator {
 
         const processedRules: Pojo<string> = {};
         for (var k in rules) {
-            if (k.match(/^-sb-/)) { continue; }
+            if (k.match(STYLABLE_VALUE_MATCHER)) { continue; }
             let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
             processedRules[k] = valueTemplate(value, resolvedSymbols);
         }
@@ -212,7 +215,7 @@ export class Generator {
 }
 
 function hasState(typedClass: TypedClass, name: string) {
-    const states = typedClass && typedClass['-sb-states'];
+    const states = typedClass && typedClass[valueMapping.states];
     return states ? states.indexOf(name) !== -1 : false;
 }
 
@@ -229,20 +232,4 @@ function hasKeys(o: Pojo<any>) {
         }
     }
     return false;
-}
-
-function valueTemplate(value: string, data: Pojo, throwCondition = 0): string {
-    return value.replace(/value\((.*?)\)/g, function (match: string, name: string) {
-        if (throwCondition > 1) { throw new Error('Unresolvable variable: ' + name) }
-        let translatedValue = data[name];
-        if (~name.indexOf(',')) {
-            const nameParts = name.split(',');
-            const variableName = nameParts[0].trim();
-            let defaultValue = nameParts[1].trim();
-            defaultValue = data[defaultValue] || defaultValue;
-            translatedValue = data[variableName] || defaultValue;
-        }
-        const res = valueTemplate(translatedValue, data, throwCondition + 1);
-        return res !== undefined ? res : match;
-    });
 }
