@@ -1,32 +1,17 @@
 import { Import } from './import';
 import { Pojo, CSSObject } from './types';
-import {
-    createSimpleSelectorChecker,
-    hasOwn,
-    objectifyCSS,
-    parseSelector,
-    PseudoSelectorAstNode,
-    SBTypesParsers,
-    traverseNode,
-} from './parser';
+import { SBTypesParsers, valueMapping, MixinValue, TypedClass } from "./stylable-value-parsers";
+import { hasOwn, objectifyCSS } from './parser';
+import { parseSelector, PseudoSelectorAstNode, createSimpleSelectorChecker, traverseNode } from "./selector-utils";
 
-export interface TypedClass {
-    "-sb-root"?: boolean;
-    "-sb-states"?: string[];
-    "-sb-type"?: string;
-}
-
-export interface Mixin {
-    type: string;
-    options: Pojo;
-}
+const mixMixin = SBTypesParsers[valueMapping.mixin];
 
 export class Stylesheet {
     cssDefinition: CSSObject;
     namespace: string;
     classes: Pojo<string>;
     typedClasses: Pojo<TypedClass>;
-    mixinSelectors: Pojo<Mixin[]>;
+    mixinSelectors: Pojo<MixinValue[]>;
     resolvedSymbols: Pojo<any>;
     vars: Pojo<string>;
     imports: Import[];
@@ -39,7 +24,7 @@ export class Stylesheet {
         this.cssDefinition = cssDefinition;
         this.root = 'root';
         this.classes = { root: this.root };
-        this.typedClasses = { root: { "-sb-root": true } };
+        this.typedClasses = { root: { [valueMapping.root]: true } };
         this.vars = {};
         this.mixinSelectors = {};
         this.imports = [];
@@ -59,14 +44,14 @@ export class Stylesheet {
             return value[value.length - 1].replace(/'|"/g, '');
         } else if (value) {
             return value.replace(/'|"/g, '');
-        } else {            
+        } else {
             //TODO: maybe auto generate here.
             return 's' + Stylesheet.globalCounter++;
         }
     }
     /******** can be moved to own class *********/
     private process() {
-        
+
         Object.keys(this.cssDefinition).forEach((selector: string) => {
             const ast = parseSelector(selector);
             const checker = createSimpleSelectorChecker();
@@ -95,9 +80,9 @@ export class Stylesheet {
         });
     }
     private addTypedClasses(selector: string, isSimpleSelector: boolean) {
-        this.addTypedClass(selector, isSimpleSelector, '-sb-root');
-        this.addTypedClass(selector, isSimpleSelector, '-sb-states');
-        this.addTypedClass(selector, isSimpleSelector, '-sb-type');
+        this.addTypedClass(selector, isSimpleSelector, valueMapping.root);
+        this.addTypedClass(selector, isSimpleSelector, valueMapping.states);
+        this.addTypedClass(selector, isSimpleSelector, valueMapping.type);
     }
     private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         const rules: Pojo<string> = this.cssDefinition[selector];
@@ -114,12 +99,12 @@ export class Stylesheet {
     }
     private addMixins(selector: string) {
         const rules: Pojo<string> = this.cssDefinition[selector];
-        let mixin: string | string[] = rules["-sb-mixin"];
+        let mixin: string | string[] = rules[valueMapping.mixin];
         if (mixin && !Array.isArray(mixin)) { mixin = [mixin]; }
 
         if (mixin) {
             const last = mixin[mixin.length - 1];
-            this.mixinSelectors[selector] = SBTypesParsers["-sb-mixin"](last);
+            this.mixinSelectors[selector] = mixMixin(last);
         }
     }
     /********************************************/

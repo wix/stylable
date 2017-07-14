@@ -1,5 +1,5 @@
 import { Generator, Mode } from '../src/generator';
-import { SelectorAstNode } from '../src/parser';
+import { SelectorAstNode } from '../src/selector-utils';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 import { Resolver } from "../src/resolver";

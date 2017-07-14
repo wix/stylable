@@ -2,6 +2,7 @@
 import { Import } from './import';
 import { Stylesheet } from './stylesheet';
 import { Pojo } from './types';
+import { valueMapping } from './stylable-value-parsers';
 
 export interface Module {
     default: any;
@@ -29,7 +30,7 @@ export class Resolver {
     }
     resolve(sheet: Stylesheet, name: string) {
         const typedClass = sheet.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(sheet, typedClass['-sb-type'] || "") : null;
+        const _import = typedClass ? this.getImportForSymbol(sheet, typedClass[valueMapping.type] || "") : null;
         return _import ? this.resolveModule(_import.from) : sheet;
     }
     resolveSymbols(sheet: Stylesheet) {

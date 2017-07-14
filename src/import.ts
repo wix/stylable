@@ -1,28 +1,20 @@
 import { Pojo } from './types';
-
-export const SB_FROM = '-sb-from';
-const SB_NAMED = '-sb-named';
-const SB_DEFAULT = '-sb-default';
-const SB_NAMED_MATCHER = new RegExp(`^${SB_NAMED}-(.+)`);
+import { valueMapping, STYLABLE_NAMED_MATCHER } from './stylable-value-parsers';
 
 export interface CSSImportRaw {
-    "-sb-from": string;
-    "-sb-named": string;
     [key: string]: string;
 }
 
 export class Import {
-    constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) {
-
-    }
+    constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) { }
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
         //TODO: handle " and ' strings in SbFrom
         const namedMap: Pojo<string> = {};
 
-        SbFrom = SbFrom || cssImportDef[SB_FROM];
+        SbFrom = SbFrom || cssImportDef[valueMapping.from];
 
-        if (cssImportDef[SB_NAMED]) {
-            cssImportDef[SB_NAMED].split(',').forEach((name) => {
+        if (cssImportDef[valueMapping.named]) {
+            cssImportDef[valueMapping.named].split(',').forEach((name) => {
                 const parts = name.trim().split(/\s+as\s+/);
                 if (parts.length === 1) {
                     namedMap[parts[0]] = parts[0];
@@ -33,7 +25,7 @@ export class Import {
         }
 
         for (const key in cssImportDef) {
-            const match = key.match(SB_NAMED_MATCHER);
+            const match = key.match(STYLABLE_NAMED_MATCHER);
             if (match) {
                 namedMap[cssImportDef[key]] = match[1];
             }
@@ -43,7 +35,7 @@ export class Import {
             SbFrom = SbFrom.slice(1, -1);
         }
 
-        return new Import(SbFrom, cssImportDef[SB_DEFAULT], namedMap);
+        return new Import(SbFrom, cssImportDef[valueMapping.default], namedMap);
     }
     containsSymbol(symbol: string): boolean {
         return symbol ? (this.defaultExport === symbol || !!this.named[symbol]) : false;
