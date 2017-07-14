@@ -38,12 +38,12 @@ export class Generator {
         styles.forEach((style) => generator.addEntry(style));
         return generator.buffer;
     }
-    addEntry(sheet: Stylesheet, addImports:boolean = true) {
+    addEntry(sheet: Stylesheet, addImports: boolean = true) {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
-            const resolvedSymbols = sheet.resolveSymbols(this.config.resolver);
-            if(addImports){
+            const resolvedSymbols = this.config.resolver.resolveSymbols(sheet);
+            if (addImports) {
                 this.addImports(resolvedSymbols);
             }
             this.addSelectors(sheet, resolvedSymbols);
@@ -56,6 +56,18 @@ export class Generator {
             if (Stylesheet.isStylesheet(exportValue)) {
                 this.addEntry(exportValue);
             }
+        }
+    }
+    addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
+        const stack = Object.keys(sheet.cssDefinition).reverse();
+        while (stack.length) {
+            const selector = stack.pop()!;
+            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, stack);
+            if (!selectorObject) { continue; }
+            this.buffer.push(stringifyCSSObject(selectorObject));
+        }
+        if (!sheet.cssDefinition['.root']) {
+            this.handleClass(sheet, { type: 'class', name: 'root', nodes: [] }, 'root');
         }
     }
     prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
@@ -87,36 +99,27 @@ export class Generator {
 
         if (selector === '@namespace') { return null; }
         if (selector === ':vars') { return null; }
+
+        const processedRules: Pojo<string> = {};
+        for (var k in rules) {
+            if (k.match(/^-sb-/)) { continue; }
+            let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
+            processedRules[k] = valueTemplate(value, resolvedSymbols);
+        }
+
         //don't emit empty selectors in production
-        if (this.config.mode === Mode.PROD && !hasKeys(rules)) { return null; }
+        if (this.config.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
 
         const ast = parseSelector(aSelector);
 
         //don't emit imports
         if (isImport(ast)) { return null; }
 
-        const processedRules: Pojo<string> = {};
-        for (var k in rules) {
-            let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
-            processedRules[k] = valueTemplate(value, resolvedSymbols);
-        }
 
         return {
             [this.scopeSelector(sheet, ast)]: processedRules
         };
 
-    }
-    addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
-        const stack = Object.keys(sheet.cssDefinition).reverse();
-        while (stack.length) {
-            const selector = stack.pop()!;
-            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, stack);
-            if (!selectorObject) { continue; }
-            this.buffer.push(stringifyCSSObject(selectorObject));
-        }
-        if(!sheet.cssDefinition['.root']){
-            this.handleClass(sheet, {type: 'class', name: 'root', nodes: []}, 'root');
-        }
     }
     scopeSelector(sheet: Stylesheet, ast: SelectorAstNode): string {
         let current = sheet;
@@ -150,7 +153,7 @@ export class Generator {
         return stringifySelector(ast);
     }
     handleClass(sheet: Stylesheet, node: SelectorAstNode, name: string) {
-        const next = sheet.resolve(this.config.resolver, name);
+        const next = this.config.resolver.resolve(sheet, name);
         const localName = this.scope(name, sheet.namespace);
         sheet.classes[name] = localName;
         if (next !== sheet) {
@@ -165,7 +168,7 @@ export class Generator {
         return sheet;
     }
     handleElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
-        const next = sheet.resolve(this.config.resolver, name);
+        const next = this.config.resolver.resolve(sheet, name);
         if (next !== sheet) {
             //element selector root to root
             node.before = '.' + this.scope(sheet.root, sheet.namespace) + ' ';
@@ -181,7 +184,7 @@ export class Generator {
             node.before = ' ';
             node.name = this.scope(name, sheet.namespace);
         }
-        return sheet.resolve(this.config.resolver, name);
+        return this.config.resolver.resolve(sheet, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
@@ -193,7 +196,7 @@ export class Generator {
                 node.content = current.stateAttr(name);
                 break;
             }
-            const next = current.resolve(this.config.resolver, localName);
+            const next = this.config.resolver.resolve(current, localName);
             if (next !== current) {
                 current = next;
                 localName = current.root;

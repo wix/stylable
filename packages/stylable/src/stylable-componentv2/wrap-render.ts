@@ -13,6 +13,8 @@ export function classNames(...nodes: Array<string | undefined | null>): string {
  * but it works for testing....;) 
  */
 export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: C) => JSX.Element | null, sheet: any): SBStatelessComponent<T> {
+    
+    const createEl = createCreateElement(sheet);
 
     const Component = function (this: any, props: any, context: C) {
         props = props || this.props || {}
@@ -21,22 +23,7 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
         const sbCreateElement = ReactSpooned.createElement;
         let root: JSX.Element | null = null;
         try {
-            ReactSpooned.createElement = function (type: any, props: any, ...children: any[]) {
-                if (props) {
-                    if (typeof props.className === 'string') {
-                        props.className = props.className.split(' ').map((name: string) => sheet.get(name) || name).join(' ');
-                    } else if (typeof props.className === 'object') {
-                        props.className = Object.keys(props.className)
-                            .filter((className) => props.className[className])
-                            .map((name: string) => sheet.get(name) || name).join(' ');
-                    }
-                    if (typeof type === 'string' && props.cssStates) {
-                        const {cssStates, ...otherProps} = props;
-                        props = { ...sheet.cssStates(cssStates), ...otherProps }
-                    }
-                }
-                return sbCreateElement(type, props, ...children);
-            }
+            ReactSpooned.createElement = createEl;
             root = renderFunction.call(this, props, context);
             root = root && React.cloneElement(root, {
                 ...sheet.cssStates({ ...root.props.cssStates, ...props.cssStates }),
@@ -52,4 +39,26 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
     Component.stylesheet = sheet;
 
     return Component;
+}
+
+
+const originalCreateElement = React.createElement;
+function createCreateElement(sheet: any) {
+    return function reactCreateElement(type: any, props: any, ...children: any[]) {
+        
+        if (props) {
+            if (typeof props.className === 'string') {
+                props.className = props.className.split(' ').map((name: string) => sheet.get(name) || name).join(' ');
+            } else if (typeof props.className === 'object') {
+                props.className = Object.keys(props.className)
+                    .filter((className) => props.className[className])
+                    .map((name: string) => sheet.get(name) || name).join(' ');
+            }
+            if (typeof type === 'string' && props.cssStates) {
+                const { cssStates, ...otherProps } = props;
+                props = { ...sheet.cssStates(cssStates), ...otherProps }
+            }
+        }
+        return originalCreateElement(type, props, ...children);
+    }
 }

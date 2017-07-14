@@ -32,10 +32,11 @@ describe('static Generator mixins', function () {
         gen.prepareSelector(sheet, '.container', {
             MyMixin: mixin
         }, stack);
-        
+
         expect(stack[0]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(red)",
                 color: "red"
             }
         });
@@ -73,12 +74,20 @@ describe('static Generator mixins', function () {
             MyMixin: mixin
         }, stack);
 
-        expect(stack[0]).to.eql({
-            selector: '.container :hover',
-            rules: {
-                color: "red"
+        expect(stack).to.eql([
+            {
+                selector: '.container',
+                rules: {
+                    '-sb-mixin': "MyMixin(red)"
+                }
+            },
+            {
+                selector: '.container :hover',
+                rules: {
+                    color: "red"
+                }
             }
-        });
+        ]);
 
     });
 
@@ -113,7 +122,7 @@ describe('static Generator mixins', function () {
             MyMixin: mixin
         }, stack);
 
-        expect(stack[0]).to.eql({
+        expect(stack[1]).to.eql({
             selector: ".container:hover",
             rules: { color: "red" }
         });
@@ -131,7 +140,7 @@ describe('static Generator mixins', function () {
             }
         }
 
-        
+
         function mixin(options: string[]) {
             return {
                 "& > *": {
@@ -139,7 +148,7 @@ describe('static Generator mixins', function () {
                     border: options[1],
                     ...colorMixin(['red', 'green'])
                 },
-                
+
             }
         }
 
@@ -164,6 +173,10 @@ describe('static Generator mixins', function () {
         }, stack);
 
         expect(stack).to.eql([
+            {
+                selector: ".container",
+                rules: { "-sb-mixin": "MyMixin(red, 10px solid black)" }
+            },
             {
                 selector: ".container > *",
                 rules: { background: "red", border: "10px solid black", color: "red" }
