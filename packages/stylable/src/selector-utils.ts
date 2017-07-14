@@ -6,12 +6,12 @@ export interface SelectorAstNode {
     nodes: SelectorAstNode[];
     content?: string;
     before?: string;
-};
+}
 
 export interface PseudoSelectorAstNode extends SelectorAstNode {
     type: "pseudo-class";
     content: string;
-};
+}
 
 export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
 

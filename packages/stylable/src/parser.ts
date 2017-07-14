@@ -1,8 +1,13 @@
 import { CSSObject } from "./types";
 import { STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";  
+
 const objectify = require("../modules/post-css-objectify");
 const stylis = require("stylis");
 const plugin = require("../modules/plugin");
+const postcssJS = require("postcss-js");
+const postcssNested = require("postcss-nested");
+const postcss = require("postcss");
+
 
 const stylableObjectifyConfig = {
     noCamel: [STYLABLE_VALUE_MATCHER],
@@ -11,12 +16,8 @@ const stylableObjectifyConfig = {
 
 stylis.set({ compress: false, lossless: true, global: false, preserve: true });
 stylis.use(false);
-
 stylis.use(plugin(stylableObjectifyConfig));
 
-const postcssJS = require("postcss-js");
-const postcssNested = require("postcss-nested");
-const postcss = require("postcss");
 const postcssConfig = { parser: postcssJS };
 const processor = postcss([postcssNested]);
 
