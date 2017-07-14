@@ -199,6 +199,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[0]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 color: "red",
             }
         });
@@ -206,6 +207,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[1]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 borderColor: "orange",
             }
         });
@@ -213,6 +215,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[2]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 backgroundColor: "blue",
             }
         });

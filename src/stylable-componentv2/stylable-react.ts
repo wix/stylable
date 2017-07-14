@@ -17,17 +17,20 @@ function SBComponent<T extends React.ComponentClass<any>>(Base: T | Stylesheet, 
     }    
     context.add(stylesheet);
     const Class = Base as any;
-    Class.stylesheet = stylesheet;
     Class.prototype.render = wrapSBRender(Class.prototype.render, stylesheet);
     Class.toString = function(){
-        return Class.stylesheet.namespace
+        return stylesheet.namespace
     }    
     return Class;
 }
 
 function SBStateless<T, C = object>(renderFunction: StateLess<T, C>, stylesheet: Stylesheet): SBStatelessComponent<T> {
     context.add(stylesheet);
-    return wrapSBRender(renderFunction as StateLess<T, C>, stylesheet);
+    const wrapped = wrapSBRender(renderFunction as StateLess<T, C>, stylesheet);
+    wrapped.toString = function(){
+        return stylesheet.namespace;
+    }
+    return wrapped;
 }
 
 function defineMixin<T>(name: string, mixinFunction: (options: T) => object){
@@ -42,6 +45,7 @@ function defineMixin<T>(name: string, mixinFunction: (options: T) => object){
 export const attach = context.attach.bind(context);
 
 export { SBComponent, SBStateless, defineMixin };
+
 declare module 'react' {
     interface HTMLAttributes<T> extends SBComponentProps { }
 }

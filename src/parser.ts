@@ -1,10 +1,11 @@
-import { CSSObject } from "./types";
-
 const tokenizer = require("css-selector-tokenizer");
 
+
+import { CSSObject } from "./types";
 const objectify = require("../modules/post-css-objectify");
 const stylis = require("stylis");
 const plugin = require("../modules/plugin");
+
 const stylableObjectifyConfig = {
     noCamel: [/^-sb-/],
     noCamelSelector: [/^:vars$/]

@@ -9,9 +9,6 @@ import {
     SBTypesParsers,
     traverseNode,
 } from './parser';
-import { Resolver } from './resolver';
-
-const kebab = require("kebab-case");
 
 export interface TypedClass {
     "-sb-root"?: boolean;
@@ -106,14 +103,13 @@ export class Stylesheet {
         const rules: Pojo<string> = this.cssDefinition[selector];
         if (hasOwn(rules, rule)) {
             if (!isSimpleSelector) {
-                throw new Error(kebab(rule) + ' on complex selector: ' + selector);
+                throw new Error(rule + ' on complex selector: ' + selector);
             }
             const name = selector.replace('.', '');
             this.typedClasses[name] = {
                 ...this.typedClasses[name],
                 [rule]: SBTypesParsers[rule](rules[rule])
             };
-            delete rules[rule];
         }
     }
     private addMixins(selector: string) {
@@ -124,39 +120,10 @@ export class Stylesheet {
         if (mixin) {
             const last = mixin[mixin.length - 1];
             this.mixinSelectors[selector] = SBTypesParsers["-sb-mixin"](last);
-            delete rules["-sb-mixin"];
         }
     }
     /********************************************/
 
-    getImportForSymbol(symbol: string) {
-        return this.imports.filter((_import) => _import.containsSymbol(symbol))[0] || null;
-    }
-    resolveSymbols(resolver: Resolver) {
-        //TODO: add support __esModule support?
-        const imports = this.imports.reduce((acc, importDef) => {
-            const m = resolver.resolveModule(importDef.from);
-            acc[importDef.defaultExport || importDef.from] = m.default || m;
-            const isStylesheet = Stylesheet.isStylesheet(m);
-            for (const name in importDef.named) {
-                acc[name] = isStylesheet ? m.vars[name] : m[name];
-            }
-            return acc;
-        }, {} as Pojo);
-        let symbols = { ...imports };
-        Object.keys(this.vars).forEach(varName => {
-            if (symbols[varName]) {
-                throw Error(`resolveSymbols: Name ${varName} already set`);
-            }
-            symbols[varName] = this.vars[varName];
-        });
-        return symbols;
-    }
-    resolve(resolver: Resolver, name: string) {
-        const typedClass = this.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(typedClass['-sb-type'] || "") : null;
-        return _import ? resolver.resolveModule(_import.from) : this;
-    }
     public get(name: string) {
         return this.classes[name] || null;
     }
