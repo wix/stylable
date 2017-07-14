@@ -6,7 +6,7 @@ export interface TypedClass {
     "-sb-type"?: string;
 }
 
-export interface MixinValue<T = {}> {
+export interface MixinValue<T = any[]> {
     type: string;
     options: T;
 }
