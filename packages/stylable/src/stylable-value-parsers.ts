@@ -1,5 +1,3 @@
-
-
 export interface TypedClass {
     "-sb-root"?: boolean;
     "-sb-states"?: string[];

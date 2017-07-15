@@ -22,7 +22,7 @@ export const DEFAULT_CONFIG = {
     namespaceDivider: "💠",
     resolver: new Resolver({}),
     mode: Mode.DEV
-};
+}
 
 export declare type Config = typeof DEFAULT_CONFIG
 
