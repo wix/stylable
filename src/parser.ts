@@ -21,8 +21,6 @@ stylis.use(plugin(stylableObjectifyConfig));
 const postcssConfig = { parser: postcssJS };
 const processor = postcss([postcssNested]);
 
-export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-
 export function stringifyCSSObject(cssObject: CSSObject): string {
     return processor.process(cssObject, postcssConfig).css;
 }
