@@ -69,8 +69,8 @@ export class Generator {
             if (!selectorObject) { continue; }
             this.buffer.push(stringifyCSSObject(selectorObject));
         }
-        if (!sheet.cssDefinition['.root']) {
-            this.handleClass(sheet, { type: 'class', name: 'root', nodes: [] }, 'root');
+        if (!sheet.cssDefinition['.' + sheet.root]) {
+            sheet.classes[sheet.root] = this.scope(sheet.root, sheet.namespace);
         }
     }
     prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
@@ -100,6 +100,7 @@ export class Generator {
             aSelector = selector.selector;
         }
 
+        /* don't emit */
         if (selector === '@namespace') { return null; }
         if (selector === ':vars') { return null; }
 
@@ -126,16 +127,16 @@ export class Generator {
     }
     scopeSelector(sheet: Stylesheet, ast: SelectorAstNode): string {
         let current = sheet;
-        let typedClass: string;
+        let classname: string;
         let element: string;
 
         traverseNode(ast, (node) => {
             const { name, type } = node;
             if (type === 'selector') {
                 current = sheet;
-                typedClass = sheet.root;
+                classname = sheet.root;
             } else if (type === 'class') {
-                typedClass = name;
+                classname = name;
                 current = this.handleClass(current, node, name);
             } else if (type === 'element') {
                 current = this.handleElement(current, node, name);
@@ -143,7 +144,7 @@ export class Generator {
                 element = name;
                 current = this.handlePseudoElement(current, node, name);
             } else if (type === 'pseudo-class') {
-                current = this.handlePseudoClass(current, node, name, sheet, typedClass, element);
+                current = this.handlePseudoClass(current, node, name, sheet, classname, element);
             } else if (type === 'nested-pseudo-class') {
                 if (name === 'global') {
                     node.type = 'selector';
@@ -153,6 +154,7 @@ export class Generator {
             /* do nothing */
             return undefined;
         });
+
         return stringifySelector(ast);
     }
     handleClass(sheet: Stylesheet, node: SelectorAstNode, name: string) {
