@@ -36,21 +36,24 @@ export class Resolver {
     resolveSymbols(sheet: Stylesheet) {
         //TODO: add support __esModule support?
         const imports = sheet.imports.reduce((acc, importDef) => {
-            const m = this.resolveModule(importDef.from);
-            acc[importDef.defaultExport || importDef.from] = m.default || m;
-            const isStylesheet = Stylesheet.isStylesheet(m);
+            const resolved = this.resolveModule(importDef.from);
+            acc[importDef.defaultExport || importDef.from] = resolved.default || resolved;
+            const isStylesheet = Stylesheet.isStylesheet(resolved);
             for (const name in importDef.named) {
-                acc[name] = isStylesheet ? m.vars[name] : m[name];
+                acc[name] = isStylesheet ? resolved.vars[name] : resolved[name];
             }
             return acc;
         }, {} as Pojo);
-        let symbols = { ...imports };
-        Object.keys(sheet.vars).forEach(varName => {
+
+        const symbols = { ...imports };
+
+        for (const varName in sheet.vars) {
             if (symbols[varName]) {
                 throw Error(`resolveSymbols: Name ${varName} already set`);
             }
             symbols[varName] = sheet.vars[varName];
-        });
+        }
+
         return symbols;
     }
 }
