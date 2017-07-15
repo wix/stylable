@@ -1,5 +1,5 @@
 import { Import } from './import';
-import { Pojo, CSSObject } from './types';
+import { Pojo, CSSObject, CSSRulesObject } from './types';
 import { SBTypesParsers, valueMapping, MixinValue, TypedClass } from "./stylable-value-parsers";
 import { hasOwn, objectifyCSS } from './parser';
 import { parseSelector, PseudoSelectorAstNode, createSimpleSelectorChecker, traverseNode } from "./selector-utils";
@@ -23,12 +23,12 @@ export class Stylesheet {
         this.source = source;
         this.cssDefinition = cssDefinition;
         this.root = 'root';
-        this.classes = { root: this.root };
-        this.typedClasses = { root: { [valueMapping.root]: true } };
+        this.classes = {};
+        this.typedClasses = {};
         this.vars = {};
         this.mixinSelectors = {};
         this.imports = [];
-        this.namespace = this.getNamespace(namespace);
+        this.namespace = this.getNamespace(namespace, cssDefinition['@namespace']);
         this.process();
     }
     static fromCSS(css: string, namespace?: string, source?: string) {
@@ -37,55 +37,48 @@ export class Stylesheet {
     static isStylesheet(maybeStylesheet: any) {
         return maybeStylesheet instanceof Stylesheet;
     }
-    private getNamespace(strongNamespace = "") {
-        if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
-        const value = this.cssDefinition["@namespace"];
-        if (Array.isArray(value)) {
-            return value[value.length - 1].replace(/'|"/g, '');
-        } else if (value) {
-            return value.replace(/'|"/g, '');
-        } else {
-            //TODO: maybe auto generate here.
-            return 's' + Stylesheet.globalCounter++;
-        }
-    }
     /******** can be moved to own class *********/
     private process() {
-
-        Object.keys(this.cssDefinition).forEach((selector: string) => {
-            const ast = parseSelector(selector);
-            const checker = createSimpleSelectorChecker();
-            let isSimpleSelector = true;
-            this.addMixins(selector);
-            traverseNode(ast, (node) => {
-                if (!checker(node)) { isSimpleSelector = false; }
-                const { type, name } = node;
-                if (type === "pseudo-class") {
-                    if (name === 'import') {
-                        const { content } = <PseudoSelectorAstNode>node;
-                        this.imports.push(Import.fromImportObject(content, this.cssDefinition[selector]));
-                    } else if (name === 'vars') {
-                        this.vars = this.cssDefinition[selector];
-                    }
-                } else if (type === 'class') {
-                    this.classes[node.name] = node.name;
-                } else if (type === 'nested-pseudo-class') {
-                    if (name === 'global') {
-                        return true;
-                    }
+        for (const selector in this.cssDefinition) {
+            this.processDefinition(selector, this.cssDefinition[selector]);
+        }
+        if(!this.typedClasses[this.root]){
+            this.classes.root = this.root;
+            this.typedClasses.root = { [valueMapping.root]: true };
+        }
+    }
+    private processDefinition(selector: string, rules: CSSRulesObject) {
+        const ast = parseSelector(selector);
+        const checker = createSimpleSelectorChecker();
+        let isSimpleSelector = true;
+        this.addMixins(selector, rules);
+        traverseNode(ast, (node) => {
+            if (!checker(node)) { isSimpleSelector = false; }
+            const { type, name } = node;
+            if (type === "pseudo-class") {
+                if (name === 'import') {
+                    const { content } = <PseudoSelectorAstNode>node;
+                    this.imports.push(Import.fromImportObject(content, rules));
+                } else if (name === 'vars') {
+                    this.vars = rules;
                 }
-                return undefined;
-            });
-            this.addTypedClasses(selector, isSimpleSelector);
+            } else if (type === 'class') {
+                this.classes[node.name] = node.name;
+            } else if (type === 'nested-pseudo-class') {
+                if (name === 'global') {
+                    return true;
+                }
+            }
+            return undefined;
         });
+        this.addTypedClasses(selector, rules, isSimpleSelector);
     }
-    private addTypedClasses(selector: string, isSimpleSelector: boolean) {
-        this.addTypedClass(selector, isSimpleSelector, valueMapping.root);
-        this.addTypedClass(selector, isSimpleSelector, valueMapping.states);
-        this.addTypedClass(selector, isSimpleSelector, valueMapping.type);
+    private addTypedClasses(selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
+        this.addTypedClass(selector, rules, isSimpleSelector, valueMapping.root);
+        this.addTypedClass(selector, rules, isSimpleSelector, valueMapping.states);
+        this.addTypedClass(selector, rules, isSimpleSelector, valueMapping.type);
     }
-    private addTypedClass(selector: string, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
-        const rules: Pojo<string> = this.cssDefinition[selector];
+    private addTypedClass(selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, rule: keyof typeof SBTypesParsers) {
         if (hasOwn(rules, rule)) {
             if (!isSimpleSelector) {
                 throw new Error(rule + ' on complex selector: ' + selector);
@@ -97,14 +90,21 @@ export class Stylesheet {
             };
         }
     }
-    private addMixins(selector: string) {
-        const rules: Pojo<string> = this.cssDefinition[selector];
+    private addMixins(selector: string, rules: CSSRulesObject) {
         let mixin: string | string[] = rules[valueMapping.mixin];
         if (mixin && !Array.isArray(mixin)) { mixin = [mixin]; }
-
         if (mixin) {
-            const last = mixin[mixin.length - 1];
-            this.mixinSelectors[selector] = mixMixin(last);
+            this.mixinSelectors[selector] = mixMixin(mixin[mixin.length - 1]);
+        }
+    }
+    private getNamespace(strongNamespace = "", weakNamespace: string | string[] = "") {
+        if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
+        if (Array.isArray(weakNamespace)) {
+            return weakNamespace[weakNamespace.length - 1].replace(/'|"/g, '');
+        } else if (weakNamespace) {
+            return weakNamespace.replace(/'|"/g, '');
+        } else {
+            return 's' + Stylesheet.globalCounter++;
         }
     }
     /********************************************/
