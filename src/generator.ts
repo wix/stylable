@@ -26,14 +26,14 @@ export const DEFAULT_CONFIG = {
 export declare type Config = typeof DEFAULT_CONFIG
 
 export class Generator {
-    private config: Config;
     private generated: Set<Stylesheet>;
+    private namespaceDivider: string;
+    private resolver: Resolver;
+    private mode: Mode;
     constructor(config: PartialObject<Config>, public buffer: string[] = []) {
-        this.config = {
-            namespaceDivider: config.namespaceDivider || DEFAULT_CONFIG.namespaceDivider,
-            resolver: config.resolver || DEFAULT_CONFIG.resolver,
-            mode: config.mode || DEFAULT_CONFIG.mode
-        };
+        this.namespaceDivider = config.namespaceDivider || DEFAULT_CONFIG.namespaceDivider;
+        this.resolver = config.resolver || DEFAULT_CONFIG.resolver;
+        this.mode = config.mode || DEFAULT_CONFIG.mode;
         this.generated = new Set();
     }
     static generate(styles: Stylesheet | Stylesheet[], generator: Generator = new Generator({})) {
@@ -45,7 +45,7 @@ export class Generator {
         //prevent duplicates
         if (!this.generated.has(sheet)) {
             this.generated.add(sheet);
-            const resolvedSymbols = this.config.resolver.resolveSymbols(sheet);
+            const resolvedSymbols = this.resolver.resolveSymbols(sheet);
             if (addImports) {
                 this.addImports(resolvedSymbols);
             }
@@ -86,7 +86,7 @@ export class Generator {
                     const cssMixin = cssflat({
                         [aSelector]: {
                             ...rules,
-                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.config.mode === Mode.DEV)))
+                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.mode === Mode.DEV)))
                         }
                     });
                     for (var key in cssMixin) {
@@ -112,7 +112,7 @@ export class Generator {
         }
 
         //don't emit empty selectors in production
-        if (this.config.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
+        if (this.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
 
         const ast = parseSelector(aSelector);
 
@@ -158,7 +158,7 @@ export class Generator {
         return stringifySelector(ast);
     }
     handleClass(sheet: Stylesheet, node: SelectorAstNode, name: string) {
-        const next = this.config.resolver.resolve(sheet, name);
+        const next = this.resolver.resolve(sheet, name);
         const localName = this.scope(name, sheet.namespace);
         sheet.classes[name] = localName;
         if (next !== sheet) {
@@ -173,7 +173,7 @@ export class Generator {
         return sheet;
     }
     handleElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
-        const next = this.config.resolver.resolve(sheet, name);
+        const next = this.resolver.resolve(sheet, name);
         if (next !== sheet) {
             //element selector root to root
             node.before = '.' + this.scope(sheet.root, sheet.namespace) + ' ';
@@ -189,7 +189,7 @@ export class Generator {
             node.before = ' ';
             node.name = this.scope(name, sheet.namespace);
         }
-        return this.config.resolver.resolve(sheet, name);
+        return this.resolver.resolve(sheet, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
@@ -201,7 +201,7 @@ export class Generator {
                 node.content = current.stateAttr(name);
                 break;
             }
-            const next = this.config.resolver.resolve(current, localName);
+            const next = this.resolver.resolve(current, localName);
             if (next !== current) {
                 current = next;
                 localName = current.root;
@@ -211,7 +211,7 @@ export class Generator {
         }
         return sheet;
     }
-    scope(name: string, namespace: string, separator: string = this.config.namespaceDivider) {
+    scope(name: string, namespace: string, separator: string = this.namespaceDivider) {
         return namespace ? namespace + separator + name : name;
     }
 }
