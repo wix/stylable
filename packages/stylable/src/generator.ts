@@ -2,9 +2,10 @@ import { PartialObject, Pojo } from './types';
 import { stringifyCSSObject } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet } from './stylesheet';
-import { SelectorAstNode, parseSelector, traverseNode, stringifySelector } from "./selector-utils";
+import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport } from "./selector-utils";
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
+import { hasKeys } from "./utils";
 const cssflat = require('../modules/flat-css');
 
 export interface ExtendedSelector {
@@ -219,19 +220,4 @@ export class Generator {
 function hasState(typedClass: TypedClass, name: string) {
     const states = typedClass && typedClass[valueMapping.states];
     return states ? states.indexOf(name) !== -1 : false;
-}
-
-function isImport(ast: SelectorAstNode): boolean {
-    const selectors = ast.nodes[0];
-    const selector = selectors && selectors.nodes[0];
-    return selector && selector.type === "pseudo-class" && selector.name === 'import';
-}
-
-function hasKeys(o: Pojo<any>) {
-    for (var k in o) {
-        if (o.hasOwnProperty(k)) {
-            return true;
-        }
-    }
-    return false;
 }

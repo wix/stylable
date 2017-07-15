@@ -58,3 +58,9 @@ export function createChecker(types: Array<string | string[]>) {
 
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
 
+export function isImport(ast: SelectorAstNode): boolean {
+    const selectors = ast.nodes[0];
+    const selector = selectors && selectors.nodes[0];
+    return selector && selector.type === "pseudo-class" && selector.name === 'import';
+}
+
