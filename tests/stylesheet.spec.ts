@@ -209,7 +209,7 @@ describe('Stylesheet', function () {
                     "-sb-states": []
                 }
             })
-        });
+        })
 
 
         it('with -sb-type', function () {
@@ -228,7 +228,7 @@ describe('Stylesheet', function () {
                     "-sb-type": "Thing"
                 }
             })
-        });
+        })
 
 
 
@@ -248,7 +248,7 @@ describe('Stylesheet', function () {
                     { type: "MyMixin1", options: [] }
                 ]
             })
-        });
+        })
 
         it('with -sb-mixin with params', function () {
 
@@ -286,7 +286,7 @@ describe('Stylesheet', function () {
                     { type: "MyMixin3", options: [] },
                 ]
             })
-        });
+        })
 
         it('with -sb-mixin no params multiple defs', function () {
 
@@ -305,7 +305,7 @@ describe('Stylesheet', function () {
                     { type: "MyMixin2", options: [] }
                 ]
             })
-        });
+        })
 
     });
 
@@ -326,7 +326,7 @@ describe('Stylesheet', function () {
 
         });
 
-    });
+    })
 
     describe('cssStates', function () {
 
@@ -338,7 +338,7 @@ describe('Stylesheet', function () {
             });
         });
 
-    });
+    })
 
     describe('namespace', function () {
 
@@ -373,7 +373,6 @@ describe('Stylesheet', function () {
         });
         
     })
-
 
     describe('variables', function () {
 
@@ -501,7 +500,7 @@ describe('Stylesheet', function () {
 
             expect(sheet.source).to.equal(source);
         });
-    });
+    })
 
-});
+})
 
