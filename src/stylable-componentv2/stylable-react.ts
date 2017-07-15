@@ -11,34 +11,30 @@ function SBComponent<T extends React.ComponentClass<any>>(Base: T, stylesheet: S
 function SBComponent<T>(stylesheet: Stylesheet): Function;
 function SBComponent<T extends React.ComponentClass<any>>(Base: T | Stylesheet, stylesheet?: Stylesheet) {
     if (!stylesheet) {
-        return function(Component: T): StylableComponent<T> {
+        return function (Component: T): StylableComponent<T> {
             return SBComponent(Component, Base as Stylesheet);
         }
-    }    
-    context.add(stylesheet);
+    }
     const Class = Base as any;
     Class.prototype.render = wrapSBRender(Class.prototype.render, stylesheet);
-    Class.toString = function(){
-        return stylesheet.namespace
-    }    
+    Class.toString = function () { return stylesheet.namespace; }
+    context.add(stylesheet);
     return Class;
 }
 
 function SBStateless<T, C = object>(renderFunction: StateLess<T, C>, stylesheet: Stylesheet): SBStatelessComponent<T> {
     context.add(stylesheet);
     const wrapped = wrapSBRender(renderFunction as StateLess<T, C>, stylesheet);
-    wrapped.toString = function(){
+    wrapped.toString = function () {
         return stylesheet.namespace;
     }
     return wrapped;
 }
 
-function defineMixin<T>(name: string, mixinFunction: (options: T) => object){
+function defineMixin<T>(name: string, mixinFunction: (options: T) => object) {
     const mixinId = "@Mixins/" + name;
+    (mixinFunction as any).toString = function () { return mixinId; }
     context.registerMixin(mixinId, mixinFunction);
-    (mixinFunction as any).toString = function(){
-        return mixinId;
-    }
     return mixinFunction;
 }
 
