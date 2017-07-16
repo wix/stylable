@@ -14,7 +14,7 @@ export function classNames(...nodes: Array<string | undefined | null>): string {
  */
 export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: C) => JSX.Element | null, sheet: any): SBStatelessComponent<T> {
     
-    const createEl = createCreateElement(sheet);
+    const createEl = createStylableCreateElement(sheet);
 
     const Component = function (this: any, props: any, context: C) {
         props = props || this.props || {}
@@ -43,8 +43,8 @@ export function wrapSBRender<T, C = object>(renderFunction: (props: T, context: 
 
 
 const originalCreateElement = React.createElement;
-function createCreateElement(sheet: any) {
-    return function reactCreateElement(type: any, props: any, ...children: any[]) {
+function createStylableCreateElement(sheet: any) {
+    return function stylableCreateElement(type: any, props: any, ...children: any[]) {
         
         if (props) {
             if (typeof props.className === 'string') {
