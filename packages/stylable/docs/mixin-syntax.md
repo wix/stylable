@@ -11,7 +11,6 @@ Use cases:
 ## Example
 
 CSS API:
-
 ```css
 :import{
     -sb-from: "./my-mixins";
@@ -22,21 +21,7 @@ CSS API:
 }
 ```
 
-JS API:
-
-```js
-import {textTooltip} from "./my-mixins";
-Stylesheet.fromCSS(`
-    :import{
-        -sb-from: "${barak}???";
-        -sb-names: textTooltip;
-    }
-    .submit-button{
-        -sb-mixin: textTooltip(300, 'data-tooltip');
-    }
-```
 Might generate the CSS on the `.submit-button` that will pickup the `data-tooltip` text and display it on hover after 300ms.
-
 
 ## Syntax
 
@@ -64,7 +49,6 @@ Mixins may add CSS declarations to the CSS rule-set that they are applied to:
 * multiple mixins are applied according to the order that they are specified in
 
 CSS API:
-
 ```css
 .a{
     color:red;
@@ -75,8 +59,8 @@ CSS API:
     background:white;
 }
 ```
-CSS OUTPUT:
 
+CSS OUTPUT:
 ```css
 .a{
     color:red;

@@ -7,23 +7,12 @@ Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_s
 Targeting a native element will match any element with the queried tag name that is found under the prefix selector:
 
 CSS API:
-
 ```css
 form{ background:green; }
 .side-bar:hover form{ background:red; }
 ```
 
-JS API:
-
-```js
-Stylesheet.fromCSS(`
-  form{ background:green; }
-  .side-bar:hover form{ background:red; }
-`);
-```
-
 CSS OUTPUT:
-
 ```css
 /* namespaced to the stylesheet */
 .root form{ background:green;}
@@ -31,7 +20,6 @@ CSS OUTPUT:
 ```
 
 React
-
 ```jsx
 /* inside a stylable render */
 <div className="gallery">
@@ -56,28 +44,15 @@ CSS API:
 ToggleButton{ background:green; }
 .side-bar:hover ToggleButton{ background:red; }
 ```
-JS API:
 
-```js
-import ToggleButton from './toggle-button.css';
-Stylesheet.fromCSS(`
-    :import{
-        -sb-from: ${ToggleButton};
-        -sb-default: ToggleButton;
-    }
-    ToggleButton{ background:green; }
-    .side-bar:hover ToggleButton{ background:red; }
-`);
-```
 CSS OUTPUT:
-
 ```css
 /* namespaced to the stylesheet */
 .root .toggleButton_root{ background:green;}
 .root .side-bar:hover toggleButton_root{ background:red; }
 ```
-React
 
+React
 ```jsx
 /* Button component implements toggle-button.css */
 import ToggleButton from './toggle-button';

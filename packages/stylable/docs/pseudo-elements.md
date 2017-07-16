@@ -28,24 +28,6 @@ CSS API
 }
 ```
 
-JS API:
-```js
-import VideoPlayer from './video-player.css';
-Stylesheet.fromCSS(`
-    :import{
-        -sb-from: ${VideoPlayer};
-        -sb-default: VideoPlayer;
-    }
-    .main-video{
-        -sb-extends:VideoPlayer; /* define main-video as VideoPlayer */
-    }
-    .main-video::play-button{ /* override main-video play button */
-        background:green;
-        color:purple
-    }
-`);
-```
-
 CSS OUTPUT:
 ```css
 .videoPlayer_root .videoPlayer_play-button { background:black; color:white }
