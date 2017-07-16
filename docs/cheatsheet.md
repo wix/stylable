@@ -19,7 +19,7 @@
     * **[-sb-mixin](./mixin-syntax.md)**: apply mixins to CSS ruleset
     * **[-sb-variant](./variants.md)**: apply pre-made look and feel
 * **selectors**
-    * **[]()**: 
-    * **[]()**: 
-    * **[]()**: 
-    * **[]()**: 
+    * **[Pseudo-elements](./pseudo-elements.md)**: `::X` target internal part 
+    * **[Pseudo-classes](./pseudo-classes.md)**: `:X` target state
+    * **[Custom selectors](./custom-selectors)**: `:--X` selector shortcut
+    * **[Global selectors](./global-selectors)**: `:global(X)` keep selector global - not scoped
