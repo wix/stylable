@@ -13,12 +13,7 @@ CSS API:
 ```css
 .root{ background:red; } /* set component background to red */
 ```
-JS API:
-```js
-Stylesheet.fromCSS(`
-  .root{ background:red; } /* set component background to red */
-`);
-```
+
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet */
