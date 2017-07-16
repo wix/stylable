@@ -2,6 +2,9 @@
 
 Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), `tag selector` can match the qualified name of elements in the resulting DOM.
 
+> **Note:**
+> tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and root is added to the beginning of the selector. So the matching qualified name of a tag selector may target any element in the subtree of the component. In the future we might add scoped tag selector that will require additional integration with the view.
+
 ## Native element
 
 Targeting a native element will match any element with the queried tag name that is found under the prefix selector:
@@ -14,8 +17,8 @@ form{ background:green; }
 
 CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
-.root form{ background:green;}
+/* namespaced to the stylesheet - form is not namespaced */
+.root form{ background:green;} 
 .root .side-bar:hover form{ background:red; }
 ```
 
@@ -30,9 +33,9 @@ React
 </div>
 ```
 
-## Custom element [don't call it this; sounds liek Web Compnsents spec]
+## Component element
 
-In order to match another stylesheet that is rendered in the componenet view, the external stylesheet can be targeted by [importing](./imports.md) it (or the component implementing the stylesheet) and using the imported name as the tag selector:
+In order to target another component that is rendered in the view, the external component (stylesheet) is [imported](./imports.md) and its name can be used as a tag selector:
 
 CSS API:
 
@@ -47,7 +50,7 @@ ToggleButton{ background:green; }
 
 CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
+/* namespaced to the stylesheet - .toggleButton_root is not namespaced */
 .root .toggleButton_root{ background:green;}
 .root .side-bar:hover toggleButton_root{ background:red; }
 ```
@@ -65,5 +68,4 @@ import ToggleButton from './toggle-button';
 </div>
 ```
 
-> **Note:**
-> tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and root is added to the begining of the selector. So the matching qualified name of a tag selector may target any element in the subtree of the component.
+

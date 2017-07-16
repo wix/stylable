@@ -1,7 +1,7 @@
 
 # Variants
 
-A variant is a mixin described as part of a Stylable stylesheet that can be later applied on a CSS rule-set.
+A variant is a mixin described as part of a Stylable stylesheet that can be later applied on a CSS ruleset.
 
 A single component might offer multiple style variants for different themes or semantics.
 
@@ -26,7 +26,7 @@ CSS API :
 }
 ```
 
-The line `-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
+`-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
 
 ## Use variants
 
@@ -38,7 +38,7 @@ CSS API:
     -sb-names: SaleBtn;
 }
 .sale-form::submit {
-    -sb-extends: SaleBtn
+    -sb-extends: SaleBtn;
 }
 ```
 
@@ -52,7 +52,6 @@ CSS OUTPUT:
     color: pink;
 }
 ```
-
 
 ## Build-in variants
 
