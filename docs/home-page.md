@@ -103,8 +103,6 @@ Structural state dependencies
 
 [Global selectors](./global-selectors)
 
-[Formatters](./formatters)
-
 [Mixins](./mixin-syntax.md)
 
 [Variants](./variants.md)
