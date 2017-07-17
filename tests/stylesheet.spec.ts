@@ -502,5 +502,20 @@ describe('Stylesheet', function () {
         });
     })
 
+    describe('resilient', function(){
+
+        it('not break types on broken selector', function(){
+
+            var sheet = Stylesheet.fromCSS(`
+                .root{-sb-states: a, b;}
+                .root:
+            `);
+
+            expect(sheet.typedClasses[sheet.root]).to.eql({
+                "-sb-states": ["a", "b"]
+            });
+        });
+    })
+
 })
 
