@@ -43,3 +43,7 @@ function defineMixin<T>(name: string, mixinFunction: (options: T) => object) {
 export const attach = context.attach.bind(context);
 
 export { SBComponent, SBStateless, defineMixin };
+
+export { Resolver } from "../resolver";
+export { Generator, DEFAULT_CONFIG, Config } from "../generator";
+export { objectifyCSS } from "../parser";

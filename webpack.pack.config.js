@@ -3,7 +3,7 @@ var glob = require('glob');
 module.exports = {
     devtool: 'eval',
     entry: {
-        stylable: "./src/stylable-component/stylable-react.ts"
+        stylable: "./src/stylable-componentv2/stylable-react.ts"
     },
     output: {
         filename: '[name].bundle.js',
