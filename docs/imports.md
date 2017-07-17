@@ -1,17 +1,17 @@
 # Imports
 
-Similar to [JS Imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import), Stylable offers a way to import other stylesheets and modules.
+**Stylable** enables you to import other stylesheets and modules in a way that is similar to [JS Imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import). You can then use the stylesheet or module as it's been defined, or just one or more of its named values, in your own **Stylable** stylesheet.
 
-There are 3 directive rules that describe the `:import` config:
+You use the **Stylable** syntax beginning with `-sb-` for the  `:import` config:
 
- * ```-sb-from:``` Use with the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.
+ * ```-sb-from:``` Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.
  * ```-sb-default:``` Imports the default export of the module named in ```-sb-from:```. Use with the name by which to identify the imported value in the scoped stylesheet.
  * ```-sb-named:``` List of the named exports to import into the local scoped stylesheet from the file named in ```-sb-from:```.
 
- > Notice: 
- > * `:import` is a Stylable directive and not a selector. 
- > * Using import as part of a complex selector or inside a CSS ruleset will not import.
- > * Multiple imports may conflict and the last one wins.
+ > Note:
+ > * `:import` is a Stylable directive and not a selector.
+ > * Using `import` as part of a complex selector or inside a CSS ruleset does not import.
+ > * Multiple imports may conflict and the last one in the file wins.
 
  ## Examples:
 
@@ -33,7 +33,7 @@ ES6 equivalent
 
  #### Import named exports from a local JS module
 
-The values ```Gallery``` and ```Menu``` are imported from the local JavaScript module ```my-components```. We can now use these named exports imported into this scoped stylesheet.
+The values ```Gallery``` and ```Menu``` are imported from the local JavaScript module ```my-components```. These named exports are now imported into this scoped stylesheet.
 
  ```css
  :import{
@@ -49,7 +49,7 @@ The values ```Gallery``` and ```Menu``` are imported from the local JavaScript m
 
  #### Import named exports from a local JS module and locally refer to one of the export values as a different name
 
-The values ```Menu``` and ```Gallery``` are imported from the local JavaScript module ```my-components```. ```Menu``` can be used as is and ```Gallery``` has been renamed for use in this scoped stylesheet as ```ProductGallery```.
+The values ```Menu``` and ```Gallery``` are imported from the local JavaScript module ```my-components```. ```Menu``` is used as is and ```Gallery``` has been renamed for use in this scoped stylesheet as ```ProductGallery```. These components should be referred to as ```Menu``` and ```ProductGallery``` in this stylesheet.
 
  ```css
  :import{
