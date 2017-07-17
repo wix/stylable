@@ -51,6 +51,13 @@ function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObj
 }
 
 function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
+    Array.isArray(rules) ? rules.forEach((rules)=>{
+        mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
+    }) : mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
+}
+
+
+function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers){
     if (!hasOwn(rules, typedRule)) { return; }
     if (!isSimpleSelector) { throw new Error(typedRule + ' on complex selector: ' + selector); }
     const name = selector.replace('.', '');
