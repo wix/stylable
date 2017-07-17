@@ -3,7 +3,7 @@ import { wrapSBRender } from './wrap-render';
 import { StylableContext } from "./stylable-context";
 import { Stylesheet } from "../stylesheet";
 
-import { StylableComponent, SBStatelessComponent, StateLess, SBComponentProps } from "./types";
+import { StylableComponent, SBStatelessComponent, StateLess } from "./types";
 
 export type StylesheetInput = Stylesheet | {$stylesheet: Stylesheet};
 
@@ -43,8 +43,3 @@ function defineMixin<T>(name: string, mixinFunction: (options: T) => object) {
 export const attach = context.attach.bind(context);
 
 export { SBComponent, SBStateless, defineMixin };
-
-declare module 'react' {
-    interface HTMLAttributes<T> extends SBComponentProps { }
-}
-
