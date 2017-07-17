@@ -18,7 +18,7 @@ So what does **Stylable** do?
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 
-Viva CSS, and welcome **Stylable**. We hope you like it. Check out our [features](./features.md) and learn how to use it with step by step instructions and code examples.
+Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it with step by step instructions and code examples.
 
 [note somewhere that there is a JS API for advanced users]
 
@@ -32,7 +32,7 @@ simple example 2 components, 2 CSS files - show pseudo element and state
 
 ### Definitly Stylable
 
-Stylable stylesheet definitions, so you can use components that are not stylable in your stylable project.
+**Stylable** includes stylesheet definitions so you can use components that were not written with **Stylable** in your **Stylable** project.
 
 [Definitly Stylable](./definitly-stylable.md)
 
@@ -65,7 +65,7 @@ variables,
 variants,
 override varibales using styling
 
-[Debugging](./debugging.md)
+[Debug Your CSS](./debugging.md)
 
 [Specificity]()
 
@@ -81,7 +81,7 @@ Structural state dependencies
 
 [Configure a Component Library](./configurelibrary.md)
 
-[React Integration](./react-integration.md)
+[Integrate with React](./react-integration.md)
 
 ## References
 
