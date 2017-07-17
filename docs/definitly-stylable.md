@@ -6,7 +6,7 @@ Use [custom selectors](./custom-selectors), [global selector](./global-selectors
 
 For a [BEM](http://getbem.com/) toggle button with icon component:
 ```html
-<button class="btn"> /* potentially contain `.btn-toggled` class */
+<button class="btn"> /* potentially contain `.btn--toggled` class */
     <span class="btn__icon">
     <span class="btn__label">
 <button>
@@ -20,8 +20,8 @@ A separate "interface" stylesheet can help describe a way to style it:
 .root {/* ToDo: way to override root selector */
     -sb-states: toggled(".btn--toggled");
 }
-:--icon :global(.btn .btn__icon);
-:--label :global(.btn .btn__label);
+:--icon :global(.btn__icon);
+:--label :global(.btn__label);
 ```
 
 ### Usage
@@ -34,7 +34,7 @@ CSS api:
     -sb-from: "./external-toggle-button.css";
     -sb-default: ToggleBtn;
 }
-.my-btn { 
+.my-btn{ 
     -sb-extends: ToggleBtn;
     background: red;
 }
@@ -48,13 +48,13 @@ CSS api:
 
 CSS output:
 ```css
-.root? { 
+.my-btn { 
     background: red;
 }
-.root?.btn--toggled {
+.my-btn.btn--toggled {
     background: green;
 }
-.root? .btn btn__label {
+.my-btn .btn__label {
     font-size: 20px;
 }
 ```
