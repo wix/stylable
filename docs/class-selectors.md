@@ -1,8 +1,8 @@
 # CSS class Selectors
 
-[Normal CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) are scoped to the stylesheet by Stylable.
+Defines the local names of internal component parts (e.g. `.button` of a menu component).
 
-ToDo: add general use explanation (class selectors do not effect anything automatically, they are used by the view/component to mark specific nodes with)
+[CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) in Stylable are scoped to the [namespace](./namespace.md) of the stylesheet. And exported by name to reference the generated scoped value.
 
 CSS API:
 ```css
@@ -18,6 +18,7 @@ CSS OUTPUT:
 .root .thumbnail:hover{ background:blue; }
 .root .gallery:hover .thumbnail{ background:red; }
 ```
+
 React
 ```jsx
 /* inside a stylable render */
@@ -27,6 +28,6 @@ React
 </div>
 ```
 
-> `.root` is reserved for the main root in Stylable [link]
+> `.root` is reserved for the (main root)[./root.md] in Stylable
 
-> CSS class may define [states]() and [extend another component]().
+> CSS class may define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
