@@ -14,7 +14,7 @@ describe('static Generator.generate', function () {
                 .container {
                     color: black;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 
@@ -27,7 +27,7 @@ describe('static Generator.generate', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {}
                 .image {}
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 
@@ -41,13 +41,13 @@ describe('static Generator.generate', function () {
                 .container {
                     color: black;
                 }
-            `);
+            `, "''");
 
             const sheetB = Stylesheet.fromCSS(`
                 .container {
                     color: white;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate([sheetA, sheetB]);
 
@@ -116,7 +116,7 @@ describe('static Generator.generate', function () {
                     -sb-root: true;
                 }
             `, "TheGreatNameSpace");
-        
+
             const css = Generator.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
@@ -484,18 +484,18 @@ describe('static Generator.generate', function () {
                     color: black;
                     color: red;
                 }
-            `);
+            `, "''");
 
             const css = Generator.generate(sheet);
 
             expect(css).to.eql(['.container {\n    color: red\n}']);
 
         });
-    });
+    })
 
-    describe('classes rewrite', function(){
+    describe('classes rewrite', function () {
 
-        it('should update the scoped classnames on the stylesheet', function(){
+        it('should update the scoped classnames on the stylesheet', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
                     color: black;
@@ -510,16 +510,16 @@ describe('static Generator.generate', function () {
             expect(sheet.classes['container']).to.equal('Sheet__container');
         });
 
-        
-        it('should update the scoped classnames on depended stylesheet', function(){
-                       
+
+        it('should update the scoped classnames on depended stylesheet', function () {
+
             const sheetA = Stylesheet.fromCSS(`
                 .container {
                     color: black;
                     color: red;
                 }
             `, "sheetA");
-            
+
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -sb-default: SheetA;
@@ -532,7 +532,7 @@ describe('static Generator.generate', function () {
 
             Generator.generate(sheetB, new Generator({
                 namespaceDivider: "__",
-                 resolver: new Resolver({
+                resolver: new Resolver({
                     "./relative/path/to/sheetA.stylable.css": sheetA
                 })
             }));
@@ -541,8 +541,8 @@ describe('static Generator.generate', function () {
             expect(sheetB.classes['container']).to.equal('sheetB__container');
         });
 
-        
-        it('should update root classname evan if there is no root defined', function(){
+
+        it('should update root classname evan if there is no root defined', function () {
             const sheet = Stylesheet.fromCSS(``, "Sheet");
 
             Generator.generate(sheet, new Generator({
@@ -552,9 +552,9 @@ describe('static Generator.generate', function () {
             expect(sheet.classes['root']).to.equal('Sheet__root');
         });
 
-    });
+    })
 
-    describe('global', function(){
+    describe('global', function () {
         it('should not scope global selectors and remove :global', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
@@ -596,10 +596,10 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-        
+
         it('should work with multiple selectors inline', function () {
             const sheet = Stylesheet.fromCSS(`
-                :global(.container),.container {
+                :global(.container), .container {
                     color: red;
                 }
             `, 'Style');
@@ -609,7 +609,7 @@ describe('static Generator.generate', function () {
             }));
 
             const res = [
-                '.container,.Style__container {\n    color: red\n}'
+                '.container, .Style__container {\n    color: red\n}'
             ];
 
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
@@ -617,4 +617,40 @@ describe('static Generator.generate', function () {
         });
     })
 
-});
+    describe('@keyframes', function () {
+        it('handle @keyframes rules', function () {
+            var sheet = new Stylesheet({
+                "@keyframes name": {
+                    from: {},
+                    to: {}
+                }
+            });
+            debugger;
+            const css = Generator.generate(sheet);
+            const res = ['']
+            
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+
+        })
+    })
+
+    
+    describe('@media', function () {
+        it('handle @media rules', function () {
+            var sheet = new Stylesheet({
+                "@media (max-width: 300px)": {
+                    ".container": {}
+                }
+            });
+            
+            const css = Generator.generate(sheet);
+            const res = ['']
+            
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+
+        })
+    })
+
+})

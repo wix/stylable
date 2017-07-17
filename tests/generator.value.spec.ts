@@ -1,4 +1,4 @@
-import { Generator } from '../src/generator';
+import { Generator, Mode } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -32,7 +32,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -57,7 +57,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -81,7 +81,7 @@ describe('Generator variables interpolation', function () {
             .container { 
                 color: value(param);
             }
-        `, "");
+        `, "''");
         
         expect(function(){
             Generator.generate([sheet], new Generator({}));
@@ -100,7 +100,7 @@ describe('Generator variables interpolation', function () {
                 color: value(param3, green);
                 background-color: value(param3, param2);
             }
-        `, "");
+        `, "''");
 
         const css = Generator.generate([sheet], new Generator({
             namespaceDivider: "__"
@@ -132,7 +132,7 @@ describe('Generator variables interpolation', function () {
                 color: value(param);
                 background-color: value(param2)
             }
-            `, "");
+            `, "''");
 
         const css = Generator.generate(sheet, new Generator({
             namespaceDivider: "__",
@@ -181,10 +181,11 @@ describe('Generator variables interpolation', function () {
             .container {
                 -sb-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
             }
-        `, "");
+        `, "''");
 
         const gen = new Generator({
-            namespaceDivider: "__"
+            namespaceDivider: "__",
+            mode: Mode.PROD
         });
 
         const stack: any = [];
@@ -199,22 +200,25 @@ describe('Generator variables interpolation', function () {
         expect(stack[0]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 color: "red",
             }
-        });
+        }, '.container red');
 
         expect(stack[1]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 borderColor: "orange",
             }
-        });
+        }, '.container orange');
 
         expect(stack[2]).to.eql({
             selector: '.container',
             rules: {
+                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 backgroundColor: "blue",
             }
-        });
+        }, '.container blue');
     });
 });

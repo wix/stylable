@@ -1,1 +1,1 @@
-module.exports = require('./dist/src/stylable-component/stylable-react');
+module.exports = require('./dist/src/stylable-componentv2/stylable-react');

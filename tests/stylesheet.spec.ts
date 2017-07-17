@@ -1,5 +1,4 @@
 import { Import } from '../src/import';
-import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
@@ -63,7 +62,6 @@ describe('Stylesheet', function () {
             });
 
         });
-
 
         it('create a stylesheet from css with multiple selectors in the same declaration', function () {
 
@@ -211,7 +209,7 @@ describe('Stylesheet', function () {
                     "-sb-states": []
                 }
             })
-        });
+        })
 
 
         it('with -sb-type', function () {
@@ -230,7 +228,7 @@ describe('Stylesheet', function () {
                     "-sb-type": "Thing"
                 }
             })
-        });
+        })
 
 
 
@@ -250,7 +248,7 @@ describe('Stylesheet', function () {
                     { type: "MyMixin1", options: [] }
                 ]
             })
-        });
+        })
 
         it('with -sb-mixin with params', function () {
 
@@ -288,7 +286,7 @@ describe('Stylesheet', function () {
                     { type: "MyMixin3", options: [] },
                 ]
             })
-        });
+        })
 
         it('with -sb-mixin no params multiple defs', function () {
 
@@ -307,35 +305,9 @@ describe('Stylesheet', function () {
                     { type: "MyMixin2", options: [] }
                 ]
             })
-        });
+        })
 
     });
-
-    describe('resolve', function () {
-
-
-        it('get the import definition for the symbol', function () {
-
-            var sheetA = Stylesheet.fromCSS(``);
-
-            var sheetB = Stylesheet.fromCSS(`
-                :import("./path/to/thing"){
-                    -sb-default: Name;
-                }
-                .class {
-                    -sb-type: Name;
-                }
-            `);
-
-            const resolver = new Resolver({ "./path/to/thing": sheetA });
-
-            expect(sheetB.resolve(resolver, "class")).to.equal(sheetA);
-            expect(sheetB.resolve(resolver, "NotExist")).to.equal(sheetB);
-
-        });
-
-
-    })
 
     describe('generateStateAttribute', function () {
 
@@ -354,7 +326,7 @@ describe('Stylesheet', function () {
 
         });
 
-    });
+    })
 
     describe('cssStates', function () {
 
@@ -366,137 +338,12 @@ describe('Stylesheet', function () {
             });
         });
 
-    });
-
-    describe('resolveSymbols', function () {
-
-        it('should resolve default symbols', function () {
-
-            const resolvedModule = { resolved: 'name1' };
-
-            var sheet = new Stylesheet({
-                ":import('./path')": {
-                    "-sb-default": "name1"
-                }
-            }, "namespace");
-
-            const resolved = sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
-
-            expect(resolved).to.eql({ name1: resolvedModule });
-        });
-
-        it('should handle nameless default by using the path', function () {
-
-            const resolvedModule = { resolved: 'name1' };
-
-            var sheet = new Stylesheet({
-                ":import('./path')": {}
-            }, "namespace");
-
-            const resolved = sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
-
-            expect(resolved).to.eql({ './path': resolvedModule });
-        });
-
-        it('should resolve named symbols', function () {
-
-            const resolvedModule1 = { resolved: 'name1' };
-            const resolvedModule2 = { resolved: 'name2' };
-
-            var sheet = new Stylesheet({
-                ":import('./path/1')": {
-                    "-sb-named": "name1"
-                },
-                ":import('./path/2')": {
-                    "-sb-named": "name2"
-                }
-            }, "namespace");
-
-            const resolved = sheet.resolveSymbols(new Resolver({
-                "./path/1": { name1: resolvedModule1 },
-                "./path/2": { name2: resolvedModule2 }
-            }));
-
-            expect(resolved).to.contain({ name1: resolvedModule1, name2: resolvedModule2 });
-        });
-
-        it('should resolve stylesheets', function () {
-
-            const resolvedModule = new Stylesheet({
-                ":vars": {
-                    "param1": "red",
-                    "param2": "blue",
-                }
-            });
-
-            var sheet = new Stylesheet({
-                ":import('./path')": {
-                    "-sb-named": "param1, param2",
-                },
-                ":vars": {
-                    "param3": "green",
-                },
-            }, "namespace");
-
-            const resolved = sheet.resolveSymbols(new Resolver({
-                "./path": resolvedModule,
-            }));
-
-            expect(resolved).to.contain({ param1: "red", param2: "blue", param3: "green" });
-        });
-
-        it('should throw error on var name conflict', function () {
-
-            const resolvedModule = new Stylesheet({
-                ":vars": {
-                    "param1": "red",
-                    "param2": "blue",
-                }
-            });
-
-            var sheet = new Stylesheet({
-                ":import('./path')": {
-                    "-sb-named": "param1, param2",
-                },
-                ":vars": {
-                    "param": "orange",
-                    "param1": "purple",
-                },
-            }, "namespace");
-
-            expect(function resolveSymbols() {
-                sheet.resolveSymbols(new Resolver({ "./path": resolvedModule }));
-            }).to.throw('resolveSymbols: Name param1 already set');
-        });
-
-        it('should take last defiled name export', function () {
-
-            const resolvedModule1 = { resolved: 'name1' };
-            const resolvedModule2 = { resolved: 'name1' };
-
-            var sheet = new Stylesheet({
-                ":import('./path/1')": {
-                    "-sb-named": "name1"
-                },
-                ":import('./path/2')": {
-                    "-sb-named": "name1"
-                }
-            }, "namespace");
-
-            const resolved = sheet.resolveSymbols(new Resolver({
-                "./path/1": { name1: resolvedModule1 },
-                "./path/2": { name1: resolvedModule2 }
-            }));
-
-            expect(resolved).to.contain({ name1: resolvedModule2 });
-        });
-    });
-
+    })
 
     describe('namespace', function () {
 
         it('should be empty when no namespace is provided', function () {
-            var style = new Stylesheet({})
+            var style = new Stylesheet({}, "''")
             expect(style.namespace).to.equal('');
         });
 
@@ -526,7 +373,6 @@ describe('Stylesheet', function () {
         });
         
     })
-
 
     describe('variables', function () {
 
@@ -654,7 +500,22 @@ describe('Stylesheet', function () {
 
             expect(sheet.source).to.equal(source);
         });
-    });
+    })
 
-});
+    describe('resilient', function(){
+
+        it('not break types on broken selector', function(){
+
+            var sheet = Stylesheet.fromCSS(`
+                .root{-sb-states: a, b;}
+                .root:
+            `);
+
+            expect(sheet.typedClasses[sheet.root]).to.eql({
+                "-sb-states": ["a", "b"]
+            });
+        });
+    })
+
+})
 
