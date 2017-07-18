@@ -1,13 +1,15 @@
 # Root
 
-Every [Stylable stylesheet]() has a reserved class called root that targets the component root node. It should be placed on the root node of the component.
+Every [Stylable stylesheet]() has a reserved class called `root` that is applied to the component's root node.
 
-Refer to .root in this cases: 
-* Give default styling and behavior to the component
-* (Extend another stylesheet)[./extend-stylesheet.md]
-* Define (pseudo-classes)[./pseudo-classes.md] for the root of the component
+You can do the following on the `root` class of the component:
+* Apply default styling and behavior to the component. If you apply any kind of styling on the `root` class, it is cascaded down the component.
+* (Extend another stylesheet)[./extend-stylesheet.md] *<Need an example of this>*
+* Define (pseudo-classes)[./pseudo-classes.md] for the component. *<Need an example of this & is this the right place to talk about this?>*
 
-> auto added to root in [react integration](react-integration.md) - no need to write `className="root"`
+## Examples
+
+The `root` class is added automatically to root in [react integration](react-integration.md). No need to write `className="root"`.
 
 CSS API:
 ```css
@@ -16,6 +18,6 @@ CSS API:
 
 CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
+/* Namespaced to the stylesheet */
 .root{ background:red;}
 ```
