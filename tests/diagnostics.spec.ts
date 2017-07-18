@@ -13,14 +13,22 @@ const customButton = `
                     }
                     
                 `;
+const mixins = `
 
+
+`
 interface warning{
     message:string;
     file:string;
 }
+
+interface file{
+    content:string;
+    path:string;
+}
                     
-function expectWarnings(src:string,warnings:warning | warning[]){
-    console.log(src,warnings);
+function expectWarnings(src:string,warnings:warning | warning[],extraFiles?:file[]){
+    console.log(src,warnings,extraFiles);
 }
 
 describe('diagnostics: warnings and errors',function(){
@@ -222,8 +230,8 @@ describe('diagnostics: warnings and errors',function(){
                         -st-default:Comp;
                         -st-named:|variant|;
                     }
-                `,{message:'cannot find export "-st-variant" in "./file"',file:"main.css"})
-                const file = customButton;
+                `,{message:'cannot find export "-st-variant" in "./file"',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}]);
             });
             it('should return warning for non import rules inside imports',function(){
                 expectWarnings(`
@@ -233,8 +241,9 @@ describe('diagnostics: warnings and errors',function(){
                         -st-default:Comp;
                         |color|:red
                     }
-                `,{message:'"color" css attribute cannot be used inside import block',file:"main.css"})
-                const file = customButton;
+                `,{message:'"color" css attribute cannot be used inside import block',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
+   
             });
             
         });
@@ -249,9 +258,9 @@ describe('diagnostics: warnings and errors',function(){
                     .root:hover{
                         |-st-extend|:Comp;
                     }
-                `,{message:'cannot define "-sb-extend" inside complex selector',file:"main.css"})
+                `,{message:'cannot define "-sb-extend" inside complex selector',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
 
-                const file = customButton
             });
         });
     });
@@ -267,35 +276,35 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         color:|value(my-variant)|;
                     }
-                `,{message:'"my-variant" is a variant and cannot be used as a var',file:"main.css"})
+                `,{message:'"my-variant" is a variant and cannot be used as a var',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
 
-                const file = customButton
             });
             it('mixin cannot be used as var',function(){
                 expectWarnings(`
                     :import{
-                        -st-from:"./file";
+                        -st-from:"./mixins";
                         -st-named:my-mixin;
                     }
                     .root{
                         color:|value(my-mixin)|;
                     }
-                `,{message:'"my-mixin" is a mixin and cannot be used as a var',file:"main.css"})
+                `,{message:'"my-mixin" is a mixin and cannot be used as a var',file:"main.css"}
+                ,[{content:mixins,path:'mixins.ts'}])
 
-                const file = customButton
             });
             it('mixin cannot be used as stylesheet',function(){
                 expectWarnings(`
                     :import{
-                        -st-from:"./file";
+                        -st-from:"./mixins";
                         -st-named:my-mixin;
                     }
                     .root{
                         -st-extend:|my-mixin|;
                     }
-                `,{message:'"my-mixin" is a mixin and cannot be used as a stylesheet',file:"main.css"})
+                `,{message:'"my-mixin" is a mixin and cannot be used as a stylesheet',file:"main.css"}
+                ,[{content:mixins,path:'mixins.ts'}])
 
-                const file = customButton
             });
             it('stylesheet cannot be used as var',function(){
                 expectWarnings(`
@@ -305,9 +314,9 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         color:|value(Comp)|;
                     }
-                `,{message:'"Comp" is a stylesheet and cannot be used as a var',file:"main.css"})
+                `,{message:'"Comp" is a stylesheet and cannot be used as a var',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
 
-                const file = customButton
             });
             it('stylesheet cannot be used as mixin',function(){
                 expectWarnings(`
@@ -319,11 +328,11 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         -st-mixin:|Comp|;
                     }
-                `,{message:'"Comp" is a stylesheet and cannot be used as a mixin',file:"main.css"})
+                `,{message:'"Comp" is a stylesheet and cannot be used as a mixin',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
 
-                const file = customButton
             });
-            it('component mixins cannot be used for native node',function(){
+            it('component variant cannot be used for native node',function(){
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -334,11 +343,11 @@ describe('diagnostics: warnings and errors',function(){
                     .gaga{
                         -st-mixin:|my-variant|;
                     }
-                `,{message:'"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "@namespace of comp"',file:"main.css"})
+                `,{message:'"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "@namespace of comp"',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
 
-                const file = customButton
             });
-            it('mixins can only be used for a specific component',function(){
+            it('variants can only be used for a specific component',function(){
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -354,10 +363,9 @@ describe('diagnostics: warnings and errors',function(){
                         -st-extends:Comp;
                         -st-apply:|my-variant2|;
                     }
-                `,{message:'"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "@namespace of comp" and "my-variant" can only be spplied to "@namespace of Comp2"',file:"main.css"})
+                `,{message:'"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "@namespace of comp" and "my-variant" can only be spplied to "@namespace of Comp2"',file:"main.css"}
+                ,[{content:customButton,path:'file.css'},{content:customButton,path:'file2.css'}])
 
-                const file = customButton
-                const file2 = customButton
             });
             it('variant cannot be used with params',function(){
                 expectWarnings(`
@@ -372,7 +380,6 @@ describe('diagnostics: warnings and errors',function(){
                     }
                 `,{message:'invalid mixin arguments: "my-variant" is a variant and does not except arguments',file:"main.css"})
 
-                const file = customButton
             });
             it('mixins cant be used with wrong number of params',function(){
                 expectWarnings(`
@@ -383,11 +390,11 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         -st-mixin:|mixinWith2Args(param)|;
                     }
-                `,{message:'invalid mixin arguments: "mixinWith2Args" expects 2 arguments but recieved 1',file:"main.css"})
+                `,{message:'invalid mixin arguments: "mixinWith2Args" expects 2 arguments but recieved 1',file:"main.css"}
+            ,[{content:mixins,path:'mixins.ts'}])
 
             });
-
-                it('error running mixin',function(){
+            it('error running mixin',function(){
                 expectWarnings(`
                     :import{
                         -st-from:"./mixins";
@@ -396,7 +403,8 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         -st-mixin:|mixinThatExplodes(param)|;
                     }
-                `,{message:'"mixinThatExplodes" has thrown an error: error text',file:"main.css"})
+                `,{message:'"mixinThatExplodes" has thrown an error: error text',file:"main.css"}
+                ,[{content:mixins,path:'mixins.ts'}])
 
             });
         });
