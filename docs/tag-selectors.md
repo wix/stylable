@@ -1,37 +1,21 @@
 # CSS tag selector
 
-Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), `tag selector` can matches the name of elements in the resulting DOM.
+Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), `tag selector` can match the qualified name of elements in the resulting DOM.
 
 > **Note:**
 > tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and root is added to the beginning of the selector. So the matching qualified name of a tag selector may target any element in the subtree of the component. In the future we might add scoped tag selector that will require additional integration with the view.
 
 ## Native element
 
-
-CSS API:
-
-```css
-form {background:green;}
-```
-
-CSS OUTPUT:
-
-```css
-/*  form is not namespaced */
-.root form {background:green;} 
-```
-
 Targeting a native element will match any element with the queried tag name that is found under the prefix selector:
 
 CSS API:
-
 ```css
 form{ background:green; }
 .side-bar:hover form{ background:red; }
 ```
 
 CSS OUTPUT:
-
 ```css
 /* namespaced to the stylesheet - form is not namespaced */
 .root form{ background:green;} 
@@ -39,7 +23,6 @@ CSS OUTPUT:
 ```
 
 React
-
 ```jsx
 /* inside a stylable render */
 <div className="gallery">
@@ -61,16 +44,15 @@ CSS API:
     -sb-from: "./toggle-button.css";
     -sb-default: ToggleButton;
 }
-ToggleButton {background:green;}
-.side-bar:hover ToggleButton {background:red;}
+ToggleButton{ background:green; }
+.side-bar:hover ToggleButton{ background:red; }
 ```
 
 CSS OUTPUT:
-
 ```css
 /* namespaced to the stylesheet - .toggleButton_root is not namespaced */
-.root .toggleButton_root {background:green;}
-.root .side-bar:hover toggleButton_root {background:red;}
+.root .toggleButton_root{ background:green;}
+.root .side-bar:hover toggleButton_root{ background:red; }
 ```
 
 React
