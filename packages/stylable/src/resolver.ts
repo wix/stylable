@@ -33,8 +33,7 @@ export class Resolver {
         const _import = typedClass ? this.getImportForSymbol(sheet, typedClass[valueMapping.type] || "") : null;
         return _import ? this.resolveModule(_import.from) : sheet;
     }
-    resolveSymbols(sheet: Stylesheet) {
-        //TODO: add support __esModule support?
+    resolveImports(sheet: Stylesheet) {
         const imports = sheet.imports.reduce((acc, importDef) => {
             const resolved = this.resolveModule(importDef.from);
             acc[importDef.defaultExport || importDef.from] = resolved.default || resolved;
@@ -44,16 +43,17 @@ export class Resolver {
             }
             return acc;
         }, {} as Pojo);
-
-        const symbols = { ...imports };
-
+        return imports;
+    }
+    resolveSymbols(sheet: Stylesheet) {
+        //TODO: add support __esModule support?
+        const symbols = this.resolveImports(sheet);
         for (const varName in sheet.vars) {
             if (symbols[varName]) {
                 throw Error(`resolveSymbols: Name ${varName} already set`);
             }
             symbols[varName] = sheet.vars[varName];
         }
-
         return symbols;
     }
 }
