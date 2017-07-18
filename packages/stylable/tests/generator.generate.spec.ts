@@ -488,7 +488,7 @@ describe('static Generator.generate', function () {
 
             const css = Generator.generate(sheet);
 
-            expect(css).to.eql(['.container {\n    color: red\n}']);
+            expect(css[0]).to.equal('.container {\n    color: black;\n    color: red\n}');
 
         });
     })
@@ -618,16 +618,51 @@ describe('static Generator.generate', function () {
     })
 
     describe('@keyframes', function () {
-        it('handle @keyframes rules', function () {
+        it('handle @keyframes rules', function () {          
             var sheet = new Stylesheet({
                 "@keyframes name": {
                     from: {},
                     to: {}
                 }
-            });
-            debugger;
-            const css = Generator.generate(sheet);
-            const res = ['']
+            }, 's0');
+            
+            const css = Generator.generate(sheet, new Generator({
+                namespaceDivider: "__"
+            }));
+            
+            const res = ["@keyframes s0__name {\n    from {}\n    to {}\n}"];
+            
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+
+        });
+
+        it('scope animation and animation name', function () {
+    
+            var sheet = new Stylesheet({
+                "@keyframes name": {
+                    from: {},
+                    to: {}
+                },
+                "@keyframes name2": {
+                    from: {},
+                    to: {}
+                },
+                ".selector": {
+                    animation: '2s name infinite, 1s name2 infinite',
+                    animationName: 'name'
+                }
+            }, 's0');
+            
+            const css = Generator.generate(sheet, new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                "@keyframes s0__name {\n    from {}\n    to {}\n}",
+                "@keyframes s0__name2 {\n    from {}\n    to {}\n}",
+                ".s0__selector {\n    animation: 2s s0__name infinite, 1s s0__name2 infinite;\n    animation-name: s0__name\n}"
+            ];
             
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);

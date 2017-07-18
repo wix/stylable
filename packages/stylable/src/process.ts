@@ -1,5 +1,5 @@
 import { Import } from './import';
-import { createSimpleSelectorChecker, parseSelector, PseudoSelectorAstNode, traverseNode } from './selector-utils';
+import { createSimpleSelectorChecker, parseSelector, PseudoSelectorAstNode, matchAtKeyframes, traverseNode } from './selector-utils';
 import { SBTypesParsers, valueMapping } from './stylable-value-parsers';
 import { Stylesheet } from './stylesheet';
 import { CSSRulesObject } from './types';
@@ -18,10 +18,18 @@ export function process(sheet: Stylesheet) {
 }
 
 function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesObject) {
+    addMixins(sheet, selector, rules);
+    const keyframesMatch = matchAtKeyframes(selector);
+    if (keyframesMatch) {
+        // for (var k in rules) {
+        //     addMixins(sheet, selector + '{' + k + '}', rules[k]);
+        // }
+        keyframesMatch[1] && sheet.keyframes.push(keyframesMatch[1]);
+        return;
+    }
     const ast = parseSelector(selector);
     const checker = createSimpleSelectorChecker();
     let isSimpleSelector = true;
-    addMixins(sheet, selector, rules);
     traverseNode(ast, (node) => {
         if (!checker(node)) { isSimpleSelector = false; }
         const { type, name } = node;
@@ -51,13 +59,13 @@ function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObj
 }
 
 function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
-    Array.isArray(rules) ? rules.forEach((rules)=>{
+    Array.isArray(rules) ? rules.forEach((rules) => {
         mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
     }) : mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
 }
 
 
-function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers){
+function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
     if (!hasOwn(rules, typedRule)) { return; }
     if (!isSimpleSelector) { throw new Error(typedRule + ' on complex selector: ' + selector); }
     const name = selector.replace('.', '');
