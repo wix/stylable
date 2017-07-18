@@ -14,6 +14,7 @@ export class Stylesheet {
     vars: Pojo<string> = {};
     mixinSelectors: Pojo<MixinValue[]> = {};
     typedClasses: Pojo<TypedClass> = {};
+    keyframes: string[] = [];
     _kind = "Stylesheet";
     static globalCounter: number = 0;
     constructor(cssDefinition: CSSObject, namespace: string = "", source: string = "") {
