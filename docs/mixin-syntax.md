@@ -1,7 +1,7 @@
 
 # Mixins
 
-Apply complex style and behaviors to a CSS rule-set.
+Apply complex style and behaviors to a CSS ruleset.
 
 Use cases:
 * [layout](./create-layouts.md) - easily describe complex layout
@@ -17,13 +17,15 @@ CSS API:
     -sb-names: textTooltip;
 }
 .submit-button{
-    -sb-mixin: textTooltip(300, 'data-tooltip');
+    -sb-mixin: textTooltip(300, data-tooltip);
 }
 ```
 
 Might generate the CSS on the `.submit-button` that will pickup the `data-tooltip` text and display it on hover after 300ms.
 
 ## Syntax
+
+With and without params and with multiple mixins
 
 ```css
 .a{
@@ -40,9 +42,26 @@ Might generate the CSS on the `.submit-button` that will pickup the `data-toolti
 }
 ```
 
+Everything is a string:
+
+```css
+.a {
+    -sb-mixin: mix(300, xxx); /* ["300", "xxx"] */
+}
+.b {
+    -sb-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
+}
+.c { /* use quotations to include comma */
+    -sb-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
+}
+.d { /* escape slashes */
+    -sb-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
+}
+```
+
 ## Target
 
-Mixins may add CSS declarations to the CSS rule-set that they are applied to:
+Mixins may add CSS declarations to the CSS ruleset that they are applied to:
 
 * rules are added at the position that the `-sb-mixin` is declared
 * appended selectors are added directly after the rule-set that the mixin was applied to

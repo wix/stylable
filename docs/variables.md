@@ -30,7 +30,7 @@ CSS OUTPUT:
 }
 ```
 
-## Sharing variables
+## Import variables
 
 CSS API:
 ```css

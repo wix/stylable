@@ -1,7 +1,7 @@
 
 # Variants
 
-A variant is a mixin described as part of a Stylable stylesheet that can be later applied on a CSS rule-set.
+A variant is a mixin described as part of a Stylable stylesheet that can be later applied on a CSS ruleset.
 
 A single component might offer multiple style variants for different themes or semantics.
 
@@ -26,35 +26,10 @@ CSS API :
 }
 ```
 
-The line `-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
-
-## Use variants
-
-CSS API:
-```css
-/* page.css */
-:import {
-    -sb-from: "./theme.css";
-    -sb-names: SaleBtn;
-}
-.sale-form::submit {
-    -sb-extends: SaleBtn
-}
-```
-
-CSS OUTPUT:
-```css
-/* namespaced to page */
-.root .sale-form {
-    color: red;
-}
-.root .sale-form:hover {
-    color: pink;
-}
-```
+`-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
 
 
-## Build-in variants
+## Define inline variants
 
 It's handy when authoring a component to keep all its styles, and any variants you offer to consumers of your component, in one file.
 
@@ -74,3 +49,65 @@ For example, consider the following button, and its variant, BigButton
 ```
 
 > *Notice:* variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet.
+
+
+## Use variants
+
+CSS API:
+```css
+/* page.css */
+:import {
+    -sb-from: "./theme.css";
+    -sb-names: SaleBtn;
+}
+
+.sale-button {
+    -sb-mixin: SaleBtn;
+}
+```
+
+CSS OUTPUT:
+```css
+/* namespaced to page */
+.root .sale-button {
+    color: red;
+}
+.root .sale-button:hover {
+    color: pink;
+}
+```
+
+## Use variants with extends 
+
+When using variant with `-sb-extends` the class also inherits the variant type.
+
+CSS API:
+```css
+/* page.css */
+:import {
+    -sb-from: "./theme.css";
+    -sb-names: SaleBtn;
+}
+
+.sale-button {
+    -sb-extends: SaleBtn;
+}
+
+.sale-button::icon {
+    border: 2px solid green;
+}
+```
+
+CSS OUTPUT:
+```css
+/* namespaced to page */
+.root .sale-button {
+    color: red;
+}
+.root .sale-button:hover {
+    color: pink;
+}
+.root .sale-button .button-icon {
+    border: 2px solid green;
+}
+```
