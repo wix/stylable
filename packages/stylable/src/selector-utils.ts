@@ -68,3 +68,7 @@ export function isImport(ast: SelectorAstNode): boolean {
 export function matchAtKeyframes(selector: string){
     return selector.match(/^@keyframes\s*(.*)/);
 }
+
+export function matchAtMedia(selector: string){
+    return selector.match(/^@media\s*(.*)/);
+}

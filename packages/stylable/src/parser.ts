@@ -33,3 +33,7 @@ export function objectifyCSS(css: string): CSSObject {
     // return stylis('', css);
     return objectify(postcss.parse(css), stylableObjectifyConfig);
 }
+
+export function parse(css: string): CSSObject {
+    return postcss.parse(css);
+}
