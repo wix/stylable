@@ -1,11 +1,12 @@
-# CSS tag selector
+# CSS Tag Selector
 
-Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), `tag selector` can match name of elements in the DOM.
+Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match name of elements in the DOM.
 
-> **Note:**
-> tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and root is added to the beginning of the selector. So the matching qualified name of a tag selector may target any element in the subtree of the component. In the future we might add scoped tag selector that will require additional integration with the view.
+Tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and `root` is added to the beginning of the selector. *<Need clarification on this - isn't root what surrounds tag selector?>* The matching qualified name of a tag selector can therefore target any element in the subtree of the component. In the future we might add scoped tag selectors that will require additional integration with the view *<What view? DOM?>*.
 
 ## Native element
+
+Like CSS, targeting a native element also matches any element with the tag name that is found under a prefix selector:
 
 CSS API:
 
@@ -20,8 +21,6 @@ CSS OUTPUT:
 /* form is not namespaced */
 .root form {background:green;} 
 ```
-
-Like CSS, targeting a native element also matches any element with the tag name that is found under a prefix selector:
 
 CSS API:
 
@@ -51,7 +50,7 @@ React
 
 ## Component element
 
-In order to target another component that is rendered in the view, the external component (stylesheet) is [imported](./imports.md) and its name can be used as a tag selector:
+To target another component that is rendered in the view,*<Again what view?>* the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector:
 
 CSS API:
 
