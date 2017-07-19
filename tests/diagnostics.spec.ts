@@ -36,6 +36,14 @@ describe('diagnostics: warnings and errors',function(){
     describe('syntax',function(){
 
         describe('selectors',function(){
+            it('should return warning for unidentified tag selector',function(){
+                expectWarnings(`
+                    |Something| {
+
+                    }
+                `,{message:'"Something" is not a valud tag selector',file:"main.css"});
+            });
+            
             it('should return warning for unterminated "."',function(){
                 expectWarnings(`
                     .root{
@@ -98,8 +106,17 @@ describe('diagnostics: warnings and errors',function(){
                     .root{
                         |hello|:yossi;
                     }
-                `,{message:'unknown rule hello',file:"main.css"})
+                `,{message:'unknown rule "hello"',file:"main.css"})
             });
+
+            it('should warn when using illegal characters',function(){
+                expectWarnings(`
+                    <|{
+
+                    }
+                `,{message:'illegal character <',file:"main.css"})
+            });
+
             it('should return warning for unknown directive',function(){
                 expectWarnings(`
                     .gaga{
@@ -114,7 +131,7 @@ describe('diagnostics: warnings and errors',function(){
                     |:hover|{
 
                     }
-                `,{message:"global states are not supported, use .root:hover instead",file:"main.css"})
+                `,{message:'global states are not supported, use .root:hover instead',file:"main.css"})
             });
 
             it('should return warning for unknown state',function(){
@@ -122,24 +139,32 @@ describe('diagnostics: warnings and errors',function(){
                     .root:|shmover|{
 
                     }
-                `,{message:"unknown state shmover",file:"main.css"})
+                `,{message:'unknown state "shmover"',file:"main.css"})
             });
         });
         describe('pseudo selectors',function(){
-            it('should return warning for native pseudo selectors  without selector',function(){
+            it('should return warning for native pseudo elements without selector',function(){
                 expectWarnings(`
                     |::before|{
 
                     }
-                `,{message:"global pseudo selectors are not allowed, you can use .root::before instead",file:"main.css"})
+                `,{message:'global pseudo elements are not allowed, you can use ".root::before" instead',file:"main.css"})
             });
     
-            it('should return warning for unknown pseudo selector',function(){
+            it('should return warning for unknown pseudo element',function(){
                 expectWarnings(`
                     .root::|mybtn|{
 
                     }
-                `,{message:'unknow pseudo selector "mybtn"',file:"main.css"})
+                `,{message:'unknow pseudo element "mybtn"',file:"main.css"})
+            });
+
+            it('should return warning for unknown pseudo element',function(){
+                expectWarnings(`
+                    .root::|mybtn|{
+
+                    }
+                `,{message:'unknow pseudo element "mybtn"',file:"main.css"})
             });
         });
         
@@ -203,6 +228,14 @@ describe('diagnostics: warnings and errors',function(){
                     }
                 `,{message:'cannot define "-st-variant" inside complex selector',file:"main.css"})
             });
+
+            it('should return warning when -st-variant value is not true or false',function(){
+                expectWarnings(`
+                    .gaga:hover{
+                        -st-variant:|red|;
+                    }
+                `,{message:'-st-variant can only be true or false, the value "red" is illegal',file:"main.css"})
+            });
         });
         describe(':import',function(){
             it('should return warning for unknown file',function(){
@@ -230,7 +263,7 @@ describe('diagnostics: warnings and errors',function(){
                         -st-default:Comp;
                         -st-named:|variant|;
                     }
-                `,{message:'cannot find export "-st-variant" in "./file"',file:"main.css"}
+                `,{message:'cannot find export "-st-variant:variant" in "./file"',file:"main.css"}
                 ,[{content:customButton,path:'file.css'}]);
             });
             it('should return warning for non import rules inside imports',function(){
@@ -378,7 +411,7 @@ describe('diagnostics: warnings and errors',function(){
                         -st-extend:Comp;
                         -st-mixin:|my-variant(param)|;
                     }
-                `,{message:'invalid mixin arguments: "my-variant" is a variant and does not except arguments',file:"main.css"})
+                `,{message:'invalid mixin arguments: "my-variant" is a variant and does not accept arguments',file:"main.css"})
 
             });
             it('mixins cant be used with wrong number of params',function(){
