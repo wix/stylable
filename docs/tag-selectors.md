@@ -1,27 +1,43 @@
 # CSS Tag Selector
 
-Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match the qualified name of an element in the resulting DOM. You can use tag selectors to identify the value of imported components or stylesheets.
+Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match name of elements in the DOM.
 
 Tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and `root` is added to the beginning of the selector. *<Need clarification on this - isn't root what surrounds tag selector?>* The matching qualified name of a tag selector can therefore target any element in the subtree of the component. In the future we might add scoped tag selectors that will require additional integration with the view *<What view? DOM?>*.
 
 ## Native element
 
-Targeting a native element in the same stylesheet matches any element with the same queried tag name that is found under the prefix selector:
+Like CSS, targeting a native element also matches any element with the tag name that is found under a prefix selector:
 
 CSS API:
+
 ```css
-form{ background:green; }
-.side-bar:hover form{ background:red; }
+form {background:green;}
+
+```
+
+CSS OUTPUT:
+
+```css
+/* form is not namespaced */
+.root form {background:green;} 
+```
+
+CSS API:
+
+```css
+form {background:green;}
+.side-bar:hover form {background:red; }
 ```
 
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - form is not namespaced */
-.root form{ background:green;} 
-.root .side-bar:hover form{ background:red; }
+.root form {background:green;} 
+.root .side-bar:hover form {background:red; }
 ```
 
 React
+
 ```jsx
 /* inside a stylable render */
 <div className="gallery">
@@ -43,15 +59,15 @@ CSS API:
     -sb-from: "./toggle-button.css";
     -sb-default: ToggleButton;
 }
-ToggleButton{ background:green; }
-.side-bar:hover ToggleButton{ background:red; }
+ToggleButton {background:green;}
+.side-bar:hover ToggleButton {background:red;}
 ```
 
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - .toggleButton_root is not namespaced */
-.root .toggleButton_root{ background:green;}
-.root .side-bar:hover toggleButton_root{ background:red; }
+.root .toggleButton_root {background:green;}
+.root .side-bar:hover toggleButton_root {background:red;}
 ```
 
 React
