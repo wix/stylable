@@ -1,28 +1,43 @@
-# CSS tag selector
+# CSS Tag Selector
 
-Like CSS [type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), `tag selector` can match the qualified name of elements in the resulting DOM.
+Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match name of elements in the DOM.
 
-> **Note:**
-> tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and root is added to the beginning of the selector. So the matching qualified name of a tag selector may target any element in the subtree of the component. In the future we might add scoped tag selector that will require additional integration with the view.
+Tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and `root` is added to the beginning of the selector. *<Need clarification on this - isn't root what surrounds tag selector?>* The matching qualified name of a tag selector can therefore target any element in the subtree of the component. In the future we might add scoped tag selectors that will require additional integration with the view *<What view? DOM?>*.
 
 ## Native element
 
-Targeting a native element will match any element with the queried tag name that is found under the prefix selector:
+Like CSS, targeting a native element also matches any element with the tag name that is found under a prefix selector:
 
 CSS API:
+
 ```css
-form{ background:green; }
-.side-bar:hover form{ background:red; }
+form {background:green;}
+
+```
+
+CSS OUTPUT:
+
+```css
+/* form is not namespaced */
+.root form {background:green;} 
+```
+
+CSS API:
+
+```css
+form {background:green;}
+.side-bar:hover form {background:red; }
 ```
 
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - form is not namespaced */
-.root form{ background:green;} 
-.root .side-bar:hover form{ background:red; }
+.root form {background:green;} 
+.root .side-bar:hover form {background:red; }
 ```
 
 React
+
 ```jsx
 /* inside a stylable render */
 <div className="gallery">
@@ -35,7 +50,7 @@ React
 
 ## Component element
 
-In order to target another component that is rendered in the view, the external component (stylesheet) is [imported](./imports.md) and its name can be used as a tag selector:
+To target another component that is rendered in the view,*<Again what view?>* the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector:
 
 CSS API:
 
@@ -44,15 +59,15 @@ CSS API:
     -sb-from: "./toggle-button.css";
     -sb-default: ToggleButton;
 }
-ToggleButton{ background:green; }
-.side-bar:hover ToggleButton{ background:red; }
+ToggleButton {background:green;}
+.side-bar:hover ToggleButton {background:red;}
 ```
 
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - .toggleButton_root is not namespaced */
-.root .toggleButton_root{ background:green;}
-.root .side-bar:hover toggleButton_root{ background:red; }
+.root .toggleButton_root {background:green;}
+.root .side-bar:hover toggleButton_root {background:red;}
 ```
 
 React
