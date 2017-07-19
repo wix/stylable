@@ -2,7 +2,7 @@ import { PartialObject, Pojo } from './types';
 import { stringifyCSSObject } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet } from './stylesheet';
-import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport, matchAtKeyframes } from "./selector-utils";
+import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport, matchAtKeyframes, matchAtMedia } from "./selector-utils";
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 import { hasKeys } from "./utils";
@@ -96,7 +96,19 @@ export class Generator {
         if (selector === '@namespace') { return null; }
         if (selector === ':vars') { return null; }
 
-        processedRules = this.processRules(rules, resolvedSymbols, sheet);
+        if (matchAtMedia(aSelector)) {
+            processedRules = {}
+            for(var k in rules){
+                const d = this.prepareSelector(sheet, k, resolvedSymbols, []);
+                d && Object.assign(processedRules, d);
+            }
+            return {
+                [aSelector]: processedRules
+            };
+        } else {
+            processedRules = this.processRules(rules, resolvedSymbols, sheet);
+        }
+
 
         //don't emit empty selectors in production
         if (this.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }

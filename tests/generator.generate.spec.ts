@@ -677,10 +677,12 @@ describe('static Generator.generate', function () {
                 "@media (max-width: 300px)": {
                     ".container": {}
                 }
-            });
+            }, 's0');
             
-            const css = Generator.generate(sheet);
-            const res = ['']
+            const css = Generator.generate(sheet, new Generator({
+                namespaceDivider: "__"
+            }));
+            const res = ['@media (max-width: 300px) {\n    .s0__container {}\n}']
             
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
