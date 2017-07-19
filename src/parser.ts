@@ -35,5 +35,5 @@ export function objectifyCSS(css: string): CSSObject {
 }
 
 export function parse(css: string): CSSObject {
-    return postcss.parse(css);
+    return processor.parse(css);
 }
