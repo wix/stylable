@@ -41,7 +41,7 @@ describe('diagnostics: warnings and errors',function(){
                     |Something| {
 
                     }
-                `,{message:'"Something" is not a valud tag selector',file:"main.css"});
+                `,{message:'"Something" component is not imported',file:"main.css"});
             });
             
             it('should return warning for unterminated "."',function(){
@@ -156,7 +156,7 @@ describe('diagnostics: warnings and errors',function(){
                     .root::|mybtn|{
 
                     }
-                `,{message:'unknow pseudo element "mybtn"',file:"main.css"})
+                `,{message:'unknown pseudo element "mybtn"',file:"main.css"})
             });
 
             it('should return warning for unknown pseudo element',function(){
@@ -164,7 +164,7 @@ describe('diagnostics: warnings and errors',function(){
                     .root::|mybtn|{
 
                     }
-                `,{message:'unknow pseudo element "mybtn"',file:"main.css"})
+                `,{message:'unknown pseudo element "mybtn"',file:"main.css"})
             });
         });
         
@@ -231,7 +231,7 @@ describe('diagnostics: warnings and errors',function(){
 
             it('should return warning when -st-variant value is not true or false',function(){
                 expectWarnings(`
-                    .gaga:hover{
+                    .gaga {
                         -st-variant:|red|;
                     }
                 `,{message:'-st-variant can only be true or false, the value "red" is illegal',file:"main.css"})
@@ -263,7 +263,7 @@ describe('diagnostics: warnings and errors',function(){
                         -st-default:Comp;
                         -st-named:|variant|;
                     }
-                `,{message:'cannot find export "-st-variant:variant" in "./file"',file:"main.css"}
+                `,{message:'cannot find export "variant" in "./file"',file:"main.css"}
                 ,[{content:customButton,path:'file.css'}]);
             });
             it('should return warning for non import rules inside imports',function(){
