@@ -148,10 +148,10 @@ Syntax and Terminology Reference
 
 Term	Definiton	Link to Code Example
 -sb-from	gets the path to the module that's being imported	Code
--sb-default	defines a default export class, as well as namespaces it / names the default import	
--sb-named	defines and namespaces other exports from the same module	
+-sb-default	defines a default export class, as well as namespaces it / names the default import
+-sb-named	defines and namespaces other exports from the same module
 CLASSES		
--sb-root	one per component, declares the class that is describing the root level of the component. default is false of course	
+-sb-root	one per component, declares the class that is describing the root level of the component. default is false of course
 }"		
 -sb-from	gets the path to the module that's being imported }" -sb-default	defines a default export class, as well as namespaces it / names the default import -sb-named	defines and namespaces other exports from the same module NS Classes -sb-root	one per component, declares the class that is describing the root level of the component. default is false of course	"set root:
 
@@ -176,3 +176,52 @@ will apply a grid layout with the parameters 5 and 3 (probably cols and rows)" -
 then in a button instance
 
 .myButton { -sb-type: Button; -sb-mixin: grid(5,3), Button_large; background-color: white; }"
+
+## README
+
+Styable is a preprocessor that allows you to write style rules for components in CSS syntax, with some native extensions. It scopes styles to components, provides a style API for greater reusability, and uses mixins and variants. At build time Stylable converts into flat, static, valid, vanilla CSS that works cross-browser.
+
+Documentation
+
+Getting Started
+
+Prerequisites
+
+Installation
+
+2 scenarios Install for use with an existing project and create components with Stylable
+
+Install to create a project
+
+Export the project - to a 3rd party OR as an end project
+
+clone:
+
+git clone git@github.com:wixplosives/nscss-examples.git
+
+go to directory:
+
+cd nscss-examples
+
+yarn install v0.23.4
+
+start project:
+
+npm start
+
+open URL:
+
+http://localhost:8080/index.html
+
+In your project, install Stylable:
+
+npm install Stylable --save
+Then import into any of your component
+
+Admin Stuff
+
+Change Log
+
+How to Open Issues
+
+How to Contribute

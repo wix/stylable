@@ -71,7 +71,7 @@ CSS API:
 ```css
 .a{
     color:red;
-    -ms-mixin: golden;
+    -sb-mixin: golden;
     background:white;
 }
 .a:hover{
