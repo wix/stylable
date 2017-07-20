@@ -64,3 +64,11 @@ export function isImport(ast: SelectorAstNode): boolean {
     return selector && selector.type === "pseudo-class" && selector.name === 'import';
 }
 
+
+export function matchAtKeyframes(selector: string){
+    return selector.match(/^@keyframes\s*(.*)/);
+}
+
+export function matchAtMedia(selector: string){
+    return selector.match(/^@media\s*(.*)/);
+}

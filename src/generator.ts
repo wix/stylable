@@ -2,11 +2,13 @@ import { PartialObject, Pojo } from './types';
 import { stringifyCSSObject } from './parser';
 import { Resolver } from './resolver';
 import { Stylesheet } from './stylesheet';
-import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport } from "./selector-utils";
+import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport, matchAtKeyframes, matchAtMedia } from "./selector-utils";
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 import { hasKeys } from "./utils";
 const cssflat = require('../modules/flat-css');
+
+export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>
 
 export interface ExtendedSelector {
     selector: string,
@@ -50,7 +52,7 @@ export class Generator {
             if (addImports) {
                 this.addImports(resolvedSymbols);
             }
-            this.addSelectors(sheet, resolvedSymbols);
+            this.addSheet(sheet, resolvedSymbols);
         }
     }
     //TODO: replace Pojo with "ModuleMap"
@@ -62,7 +64,7 @@ export class Generator {
             }
         }
     }
-    addSelectors(sheet: Stylesheet, resolvedSymbols: Pojo) {
+    addSheet(sheet: Stylesheet, resolvedSymbols: Pojo) {
         const stack = Object.keys(sheet.cssDefinition).reverse();
         while (stack.length) {
             const selector = stack.pop()!;
@@ -75,25 +77,14 @@ export class Generator {
         }
     }
     prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
-        let rules: Pojo, aSelector: string;
+        let rules: Pojo, aSelector: string, processedRules: NestedRules;
+
         if (typeof selector === 'string') {
             rules = sheet.cssDefinition[selector];
             aSelector = selector;
             const mixins = sheet.mixinSelectors[aSelector];
             if (mixins) {
-                rules = { ...rules };
-                mixins.forEach((mixin) => {
-                    const mixinFunction = resolvedSymbols[mixin.type];
-                    const cssMixin = cssflat({
-                        [aSelector]: {
-                            ...rules,
-                            ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.mode === Mode.DEV)))
-                        }
-                    });
-                    for (var key in cssMixin) {
-                        stack.push({ selector: key, rules: cssMixin[key] });
-                    }
-                });
+                this.applyMixins(aSelector, rules, mixins, resolvedSymbols, stack);
                 return null;
             }
         } else {
@@ -105,12 +96,19 @@ export class Generator {
         if (selector === '@namespace') { return null; }
         if (selector === ':vars') { return null; }
 
-        const processedRules: Pojo<string> = {};
-        for (var k in rules) {
-            if (k.match(STYLABLE_VALUE_MATCHER)) { continue; }
-            let value = Array.isArray(rules[k]) ? rules[k][rules[k].length - 1] : rules[k];
-            processedRules[k] = valueTemplate(value, resolvedSymbols);
+        if (matchAtMedia(aSelector)) {
+            processedRules = {}
+            for(var k in rules){
+                const d = this.prepareSelector(sheet, k, resolvedSymbols, []);
+                d && Object.assign(processedRules, d);
+            }
+            return {
+                [aSelector]: processedRules
+            };
+        } else {
+            processedRules = this.processRules(rules, resolvedSymbols, sheet);
         }
+
 
         //don't emit empty selectors in production
         if (this.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
@@ -120,16 +118,58 @@ export class Generator {
         //don't emit imports
         if (isImport(ast)) { return null; }
 
-
         return {
-            [this.scopeSelector(sheet, ast)]: processedRules
+            [this.scopeSelector(sheet, ast, aSelector)]: processedRules
         };
 
     }
-    scopeSelector(sheet: Stylesheet, ast: SelectorAstNode): string {
+    applyMixins(aSelector: string, rules: NestedRules, mixins: any[], resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector>) {
+        mixins.forEach((mixin) => {
+            const mixinFunction = resolvedSymbols[mixin.type];
+            const cssMixin = cssflat({
+                [aSelector]: {
+                    ...rules,
+                    ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.mode === Mode.DEV)))
+                }
+            });
+            for (var key in cssMixin) {
+                stack.push({ selector: key, rules: cssMixin[key] });
+            }
+        });
+    }
+    processRules(rules: NestedRules, resolvedSymbols: Pojo, sheet: Stylesheet) {
+        const processedRules: NestedRules = {};
+        for (let key in rules) {
+            if (key.match(STYLABLE_VALUE_MATCHER)) { continue; }
+            const value: string | string[] | Pojo<string | string[]> = rules[key];
+            if (Array.isArray(value)) {
+                processedRules[key] = value.map((value: string) => this.scopeValue(key, value, resolvedSymbols, sheet));
+            } else if (value && typeof value === 'object') {
+                processedRules[key] = this.processRules(value, resolvedSymbols, sheet) as Pojo<string | string[]>
+            } else {
+                processedRules[key] = this.scopeValue(key, value, resolvedSymbols, sheet);
+            }
+        }
+        return processedRules;
+    }
+    scopeValue(key: string, value: string, resolvedSymbols: Pojo, sheet: Stylesheet) {
+        var value = valueTemplate(value, resolvedSymbols);
+        if (key === 'animation' || key === 'animationName') {
+            value = sheet.keyframes.reduce((value: string, keyframe: string) => {
+                return value.replace(new RegExp('\\b'+keyframe+'\\b', 'g'), this.scope(keyframe, sheet.namespace));
+            }, value);
+        }
+        return value;
+    }
+    scopeSelector(sheet: Stylesheet, ast: SelectorAstNode, selector: string): string {
         let current = sheet;
         let classname: string;
         let element: string;
+
+        const keyframeMatch = matchAtKeyframes(selector);
+        if(keyframeMatch){
+            return selector.replace(keyframeMatch[1], this.scope(keyframeMatch[1], sheet.namespace));
+        }
 
         traverseNode(ast, (node) => {
             const { name, type } = node;

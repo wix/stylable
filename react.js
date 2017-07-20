@@ -1,1 +1,0 @@
-module.exports = require('./dist/src/stylable-componentv2/stylable-react');
