@@ -3,7 +3,7 @@ import { Import } from './import';
 import { Stylesheet } from './stylesheet';
 import { Pojo } from './types';
 import { valueMapping } from './stylable-value-parsers';
-
+import { valueTemplate } from './value-template';
 export interface Module {
     default: any;
     [key: string]: any;
@@ -39,7 +39,7 @@ export class Resolver {
             acc[importDef.defaultExport || importDef.from] = resolved.default || resolved;
             const isStylesheet = Stylesheet.isStylesheet(resolved);
             for (const name in importDef.named) {
-                acc[name] = isStylesheet ? resolved.vars[name] : resolved[name];
+                acc[name] = isStylesheet ? valueTemplate(resolved.vars[name], resolved.vars) : resolved[name];
             }
             return acc;
         }, {} as Pojo);
