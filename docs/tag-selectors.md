@@ -1,12 +1,14 @@
 # CSS Tag Selector
 
-Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match name of elements in the DOM.
+Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match the names of elements in the DOM.
 
-Tag selectors are **not** scoped themselves. The prefix selector around them is scoped normally and `root` is added to the beginning of the selector. *<Need clarification on this - isn't root what surrounds tag selector?>* The matching qualified name of a tag selector can therefore target any element in the subtree of the component. In the future we might add scoped tag selectors that will require additional integration with the view *<What view? DOM?>*.
+Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped.  The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
+
+> **Note**: In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
 
 ## Native element
 
-Like CSS, targeting a native element also matches any element with the tag name that is found under a prefix selector:
+Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.
 
 CSS API:
 
@@ -50,7 +52,7 @@ React
 
 ## Component element
 
-To target another component that is rendered in the view,*<Again what view?>* the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector:
+To target another component, the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector.
 
 CSS API:
 

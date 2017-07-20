@@ -2,7 +2,7 @@
 
 You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to define the local name of internal component parts, for example you can define `.button` in a menu component.
 
-In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. You can also use the class name to export the value generated in the scope of the stylesheet.
+In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
 
 CSS API:
 ```css
@@ -27,6 +27,7 @@ React
     ...
 </div>
 ```
+
 Notes:
 > In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).
 

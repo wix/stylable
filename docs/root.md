@@ -1,11 +1,8 @@
 # Root
 
-Every [Stylable stylesheet]() has a reserved class called `root` that is applied to the component's root node.
+Every [Stylable stylesheet]() has a reserved class called `root` that is matches the root node of the component. 
 
-You can do the following on the `root` class of the component:
-* Apply default styling and behavior to the component. If you apply any kind of styling on the `root` class, it is cascaded down the component.
-* [Extend another stylesheet](./extend-stylesheet.md) *<Need an example of this>*
-* Define [pseudo-classes](./pseudo-classes.md) for the component. *<Need an example of this & is this the right place to talk about this?>*
+You can apply default styling and behavior to the component on the root class itself.
 
 ## Examples
 
@@ -21,3 +18,5 @@ CSS OUTPUT:
 /* Namespaced to the stylesheet */
 .root{ background:red;}
 ```
+
+> **Note**: Root can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
