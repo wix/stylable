@@ -95,6 +95,8 @@ Custom pseudo-classes are implemented using `data-*` attributes and need additio
 
 Stylable offers [React CSS state integration](./react-integration.md) to help components manage custom pseudo-states easily:
 
+{% raw %}
+
 ```jsx
 /* render of stylable component */
 render() {
@@ -105,3 +107,4 @@ render() {
 }
 ```
 
+{% endraw %}
