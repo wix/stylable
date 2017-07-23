@@ -49,7 +49,7 @@ The values ```Gallery``` and ```Menu``` are imported from the local JavaScript m
 
  #### Import named exports from a local JS module and locally refer to one of the export values as a different name
 
-The values ```Menu``` and ```Gallery``` are imported from the local JavaScript module ```my-components```. ```Menu``` is used as is and ```Gallery``` has been renamed for use in this scoped stylesheet as ```ProductGallery```. These components should be referred to as ```Menu``` and ```ProductGallery``` in this stylesheet.
+The values ```Menu``` and ```Gallery``` are imported from the local JavaScript module ```my-components```. `Menu` is used as is and ```Gallery``` has been renamed for use in this scoped stylesheet as ```ProductGallery```. These components should be referred to as ```Menu``` and ```ProductGallery``` in this stylesheet.
 
  ```css
  :import{
