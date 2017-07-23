@@ -34,38 +34,38 @@ simple example 2 components, 2 CSS files - show pseudo element and state
 
 **Stylable** includes stylesheet definitions so you can use components that were not written with **Stylable** in your **Stylable** project.
 
-[Definitly Stylable](./definitly-stylable.md)
+[Definitly Stylable](./components/definitly-stylable.md)
 
 ## Guides
 
-[Install, Configure & Build](./installconfigure.md)
+[Install, Configure & Build](./guides/installconfigure.md)
 w/ specific webpack instructions plus build
 
-[Create a Stylable Component](./createcomponent.md)
+[Create a Stylable Component](./guides/createcomponent.md)
 define a stylesheet - CSS
 React integration (auto-root, string classnames, states),
 
-[Use and Style Components](./usestylecomponents.md)
+[Use and Style Components](./guides/usestylecomponents.md)
 import
 tag selector v.s. class selector
 pseudo elements and pseudo classes
 
-[Use 3rd Party Components](./use3rdparty.md)
+[Use 3rd Party Components](./guides/use3rdparty.md)
 link to available known projects (when we have)
 install
 import
 ...same as source components...
 
-[Create Layouts Using Mixins](./create-layouts.md)
+[Create Layouts Using Mixins](./guides/create-layouts.md)
 base layouters,
 custom layouter - write your own
 
-[Theme Components](./themecomponents.md)
+[Theme Components](./guides/themecomponents.md)
 variables,
 variants,
 override varibales using styling
 
-[Debug Your CSS](./debugging.md)
+[Debug Your CSS](./guides/debugging.md)
 
 [Specificity]()
 
@@ -75,46 +75,46 @@ case: tooltip,
 timers,
 Structural state dependencies
 
-[Use Javascript API](./usejsapi.md)
+[Use Javascript API](./guides/usejsapi.md)
 
-[Configure a Web Application](./configurewebapp.md)
+[Configure a Web Application](./guides/configurewebapp.md)
 
-[Configure a Component Library](./configurelibrary.md)
+[Configure a Component Library](./guides/configurelibrary.md)
 
-[Integrate with React](./react-integration.md)
+[Integrate with React](./guides/react-integration.md)
 
 ## References
 
-[Imports](./imports.md)
+[Imports](./references/imports.md)
 
-[Root](./root.md)
+[Root](./references/root.md)
 
-[Class Selectors](./class-selectors.md)
+[Class Selectors](./references/class-selectors.md)
 
-[Tag Selectors](./tag-selectors.md)
+[Tag Selectors](./references/tag-selectors.md)
 
-[Extend stylesheet](./extend-stylesheet.md)
+[Extend stylesheet](./references/extend-stylesheet.md)
 
-[Pseudo-Classes](./pseudo-classes.md)
+[Pseudo-Classes](./references/pseudo-classes.md)
 
-[Pseudo-Elements](./pseudo-elements.md)
+[Pseudo-Elements](./references/pseudo-elements.md)
 
-[Custom selectors](./custom-selectors)
+[Custom selectors](./references/custom-selectors)
 
-[Global selectors](./global-selectors)
+[Global selectors](./references/global-selectors)
 
-[Formatters](./formatters)
+[Formatters](./references/formatters)
 
-[Mixins](./mixin-syntax.md)
+[Mixins](./references/mixin-syntax.md)
 
-[Variants](./variants.md)
+[Variants](./references/variants.md)
 
-[Variables](./variables.md)
+[Variables](./references/variables.md)
 
 ## Useful Information
-[Cheatsheet](./cheatsheet.md)
+[Cheatsheet](./usefulInfo/cheatsheet.md)
 
-[Overview](./Overview.md)
+[Overview](./usefulInfo/Overview.md)
 
 [Best practices to style components]() - ToDo
 
