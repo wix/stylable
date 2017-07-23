@@ -1,8 +1,8 @@
-# CSS class Selectors
+# CSS Class Selectors
 
-Defines the local names of internal component parts (e.g. `.button` of a menu component).
+You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to define the local name of internal component parts, for example you can define `.button` in a menu component.
 
-[CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) in Stylable are scoped to the [namespace](./namespace.md) of the stylesheet. And exported by name to reference the generated scoped value.
+In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. You can also use the class name to export the value generated in the scope of the stylesheet.
 
 CSS API:
 ```css
@@ -27,7 +27,7 @@ React
     ...
 </div>
 ```
+Notes:
+> In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).
 
-> `.root` is reserved for the (main root)[./root.md] in Stylable
-
-> CSS class may define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
+> CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
