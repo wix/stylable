@@ -1,0 +1,8 @@
+{
+    "plugins": ["highlight", "playground"], 
+    "pluginsConfig": {
+        "playground": {
+            "playgroundUrl": "http://localhost:4000/Playground.bundle.js"
+        }
+    }
+}
