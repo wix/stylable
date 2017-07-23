@@ -2,3 +2,5 @@ node_modules
 _book
 .idea
 yarn*
+vs
+Playground.bundle.js

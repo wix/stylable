@@ -4,7 +4,7 @@
   "description": "Stylable documentation GitBook",
   "main": "index.js",
   "scripts": {
-    "post install": "gitbook install",
+    "postinstall": "cp node_modules/generic-playground/build/Playground.bundle.js . && cp -r node_modules/generic-playground/build/vs . && gitbook install",
     "build": "gitbook build",
     "start": "gitbook serve",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,6 +15,7 @@
   "author": "talh@wix.com",
   "license": "ISC",
   "dependencies": {
+    "generic-playground": "^0.0.1",
     "gitbook-plugin-playground": "^0.0.10"
   }
 }
