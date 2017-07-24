@@ -4,7 +4,7 @@ Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_
 
 Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped.  The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
-> **Note**: In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
+> **Note**: In the future we may add scoped tag selectors which will require **Stylable** to include additional [DOM integration](./react-integration.md). 
 
 ## Native element
 
@@ -52,7 +52,7 @@ React
 
 ## Component element
 
-To target another component, the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector.
+To target another component, you can [import](./imports.md) the external component or stylesheet and its value's name can be used as a tag selector.
 
 CSS API:
 

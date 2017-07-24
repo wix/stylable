@@ -29,6 +29,6 @@ React
 ```
 
 Notes:
-> In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).
+> In **Stylable**, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).
 
 > CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
