@@ -16,11 +16,15 @@ The `-sb-states` directive rule can be defined only for simple selectors like [t
 
 Name `toggled` and `loading` as custom pseudo-classes and assign different colors to them. The [.root](./root.md) selector is added to the custom pseudo-class.
 
+To define custom states, you tell Stylable the list of possible custom states that the CSS declaration may be given, using the Stylable directive rule `-st-states`:
+
+> *Note*: `-st-states` directive rule may only be defined for simple selectors like [tag selector](./tag-selectors.md), [class selector](./class-selectors.md) and [root selector](./root.md).
+
 CSS API:
 ```css
 /* example1.css */
 .root{
-    -sb-states: toggled, loading;
+    -st-states: toggled, loading;
 }
 .root:toggled { color:red; }
 .root:loading { color:green; }
@@ -44,7 +48,7 @@ CSS API:
 ```css
 /* example-custom.css */
 .root{
-    -sb-states: toggled(".on"), loading("[data-spinner]");
+    -st-states: toggled(".on"), loading("[data-spinner]");
 }
 .root:toggled { color:red; }
 .root:loading { color:green; }
@@ -73,12 +77,12 @@ CSS API:
 ```css
 /* example2.css */
 :import {
-    -sb-from: "./example1.css"; /* stylesheet a previous example */
-    -sb-default: Comp1; /* import color1 and color2 variables */
+    -st-from: "./example1.css"; /* stylesheet a previous example */
+    -st-default: Comp1; /* import color1 and color2 variables */
 }
 .media-button{
-    -sb-extends: Comp1;
-    -sb-states: toggled, selected;
+    -st-extends: Comp1;
+    -st-states: toggled, selected;
 }
 .media-button:hover { border:10px solid black; }
 .media-button:toggled { color:gold;}

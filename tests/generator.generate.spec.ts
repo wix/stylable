@@ -78,10 +78,10 @@ describe('static Generator.generate', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: ContainerA;
+                    -st-default: ContainerA;
                 }
                 :import("./relative/path/to/sheetB.stylable.css"){
-                    -sb-default: ContainerB;
+                    -st-default: ContainerB;
                 }
                 .container {
                     color: white;
@@ -106,14 +106,14 @@ describe('static Generator.generate', function () {
 
             const sheetA = Stylesheet.fromCSS(`
                 .containerA {
-                    -sb-root: true;
+                    -st-root: true;
                 }
             `, "TheNameSpace");
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){}
                 .containerB {
-                    -sb-root: true;
+                    -st-root: true;
                 }
             `, "TheGreatNameSpace");
 
@@ -139,10 +139,10 @@ describe('static Generator.generate', function () {
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                     -sb-default: Container;
+                     -st-default: Container;
                 }
                 .containerB {
-                    -sb-type: Container;
+                    -st-extends: Container;
                 }
             `, "TheGreatNameSpace");
 
@@ -167,10 +167,10 @@ describe('static Generator.generate', function () {
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                     -sb-default: Container;
+                     -st-default: Container;
                 }                
                 container {
-                    -sb-type: Container;
+                    -st-extends: Container;
                 }
             `, "TheGreatNameSpace");
 
@@ -197,10 +197,10 @@ describe('static Generator.generate', function () {
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                     -sb-default: Container;
+                     -st-default: Container;
                 }                
                 container {
-                    -sb-type: Container;
+                    -st-extends: Container;
                 }
                 container::inner {
                     
@@ -235,10 +235,10 @@ describe('static Generator.generate', function () {
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: Container;
+                    -st-default: Container;
                 }
                 .containerB {
-                    -sb-type: Container;
+                    -st-extends: Container;
                 }
                 .containerB::icon { }
             `, "TheGreatNameSpace");
@@ -269,18 +269,18 @@ describe('static Generator.generate', function () {
 
             const Button = Stylesheet.fromCSS(`
                 :import("./Text.stylable.css"){
-                    -sb-default: Text;
+                    -st-default: Text;
                 }
                 .button { }
-                .text { -sb-type: Text; }
+                .text { -st-extends: Text; }
             `, "Button");
 
             const App = Stylesheet.fromCSS(`
                 :import("./Button.stylable.css"){
-                    -sb-default: Button;
+                    -st-default: Button;
                 }
                 .app {
-                    -sb-type: Button;
+                    -st-extends: Button;
                 }
                 .app::text::first-letter { }
             `, "App");
@@ -313,18 +313,18 @@ describe('static Generator.generate', function () {
 
             const Button = Stylesheet.fromCSS(`
                 :import("./Text.stylable.css"){
-                    -sb-default: Text;
+                    -st-default: Text;
                 }
                 .button { }
-                .text { -sb-type: Text; }
+                .text { -st-extends: Text; }
             `, "Button");
 
             const App = Stylesheet.fromCSS(`
                 :import("./Button.stylable.css"){
-                    -sb-default: Button;
+                    -st-default: Button;
                 }
                 .app {
-                    -sb-type: Button;
+                    -st-extends: Button;
                 }
                 .app::text::first-letter, .gallery { }
             `, "App");
@@ -353,7 +353,7 @@ describe('static Generator.generate', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 .my-class { 
-                    -sb-states: my-state;
+                    -st-states: my-state;
                 }
                 .my-class:my-state {}
             `, "Style");
@@ -375,16 +375,16 @@ describe('static Generator.generate', function () {
         it('custom states from imported type', function () {
             const sheetA = Stylesheet.fromCSS(`
                 .root { 
-                    -sb-states: my-state;
+                    -st-states: my-state;
                 }
             `, "StyleA");
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: SheetA;
+                    -st-default: SheetA;
                 }
                 .my-class { 
-                    -sb-type: SheetA;
+                    -st-extends: SheetA;
                 }
                 .my-class:my-state {}
             `, "StyleB");
@@ -410,17 +410,17 @@ describe('static Generator.generate', function () {
         it('custom states lookup order', function () {
             const sheetA = Stylesheet.fromCSS(`
                 .root { 
-                    -sb-states: my-state;
+                    -st-states: my-state;
                 }
             `, "StyleA");
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: SheetA;
+                    -st-default: SheetA;
                 }
                 .my-class { 
-                    -sb-states: my-state;
-                    -sb-type: SheetA;
+                    -st-states: my-state;
+                    -st-extends: SheetA;
                 }
                 .my-class:my-state {}
             `, "StyleB");
@@ -447,16 +447,16 @@ describe('static Generator.generate', function () {
         it('custom states form imported type on inner pseudo-class', function () {
             const sheetA = Stylesheet.fromCSS(`
                 .container { 
-                    -sb-states: my-state;
+                    -st-states: my-state;
                 }
             `, "StyleA");
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: SheetA;
+                    -st-default: SheetA;
                 }
                 .my-class { 
-                    -sb-type: SheetA;
+                    -st-extends: SheetA;
                 }
                 .my-class::container:my-state {}
             `, "StyleB");
@@ -522,7 +522,7 @@ describe('static Generator.generate', function () {
 
             const sheetB = Stylesheet.fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
-                    -sb-default: SheetA;
+                    -st-default: SheetA;
                 }
                 .container {
                     color: black;

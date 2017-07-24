@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "1.0.4",
+  "version": "2.0.1",
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -38,6 +38,7 @@
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
     "postcss-nested": "^2.0.2",
+    "postcss-safe-parser": "^3.0.1",
     "stylis": "^3.2.3"
   },
   "files": [

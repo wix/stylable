@@ -55,7 +55,7 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
 function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.root);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.states);
-    addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.type);
+    addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends);
 }
 
 function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {

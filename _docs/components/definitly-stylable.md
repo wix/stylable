@@ -18,7 +18,7 @@ A separate "interface" stylesheet can help describe a way to style it:
 ```css
 /* external-toggle-button.css */
 .root {/* ToDo: way to override root selector */
-    -sb-states: toggled(".btn--toggled");
+    -st-states: toggled(".btn--toggled");
 }
 :--icon :global(.btn__icon);
 :--label :global(.btn__label);
@@ -31,11 +31,11 @@ Use like any other Stylable stylesheet to style:
 CSS api:
 ```css
 :import {
-    -sb-from: "./external-toggle-button.css";
-    -sb-default: ToggleBtn;
+    -st-from: "./external-toggle-button.css";
+    -st-default: ToggleBtn;
 }
 .my-btn{ 
-    -sb-extends: ToggleBtn;
+    -st-extends: ToggleBtn;
     background: red;
 }
 .my-btn:toggled {
