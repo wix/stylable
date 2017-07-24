@@ -123,7 +123,7 @@ describe('Generator variables interpolation', function () {
         });
         const sheet = Stylesheet.fromCSS(`
             :import('./path') {
-                -sb-named: param1, param2;
+                -st-named: param1, param2;
             }
             :vars {
                 param: value(param1);
@@ -167,19 +167,19 @@ describe('Generator variables interpolation', function () {
 
         const sheet = Stylesheet.fromCSS(`
             :import("./relative/path/to/mixin.js") {
-                -sb-default: MyMixin;
+                -st-default: MyMixin;
             }
             :import("./relative/path/to/mixin.js") {
-                -sb-default: OtherMixin;
+                -st-default: OtherMixin;
             }
             :import("./relative/path/to/mixin.js") {
-                -sb-default: NoParamsMixin;
+                -st-default: NoParamsMixin;
             }
             :vars {
                 param: red;
             }
             .container {
-                -sb-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
+                -st-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
             }
         `, "''");
 
@@ -200,7 +200,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[0]).to.eql({
             selector: '.container',
             rules: {
-                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
+                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 color: "red",
             }
         }, '.container red');
@@ -208,7 +208,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[1]).to.eql({
             selector: '.container',
             rules: {
-                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
+                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 borderColor: "orange",
             }
         }, '.container orange');
@@ -216,7 +216,7 @@ describe('Generator variables interpolation', function () {
         expect(stack[2]).to.eql({
             selector: '.container',
             rules: {
-                "-sb-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
+                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
                 backgroundColor: "blue",
             }
         }, '.container blue');

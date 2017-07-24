@@ -10,14 +10,14 @@
 
 ## Stylable
 
- * **directive rule**: `-sb-*` rules that hint Stylable
-    * **[-sb-from](./imports.md)**: import location
-    * **[-sb-default](./imports.md)**: import default export
-    * **[-sb-named](./imports.md)**: import named exports
-    * **[-sb-extends](./extend-stylesheet.md)**: simple selector base class
-    * **[-sb-states](./pseudo-classes.md)**: define custom pseudo-classes
-    * **[-sb-mixin](./mixin-syntax.md)**: apply mixins to CSS ruleset
-    * **[-sb-variant](./variants.md)**: apply pre-made look and feel
+ * **directive rule**: `-st-*` rules that hint Stylable
+    * **[-st-from](./imports.md)**: import location
+    * **[-st-default](./imports.md)**: import default export
+    * **[-st-named](./imports.md)**: import named exports
+    * **[-st-extends](./extend-stylesheet.md)**: simple selector base class
+    * **[-st-states](./pseudo-classes.md)**: define custom pseudo-classes
+    * **[-st-mixin](./mixin-syntax.md)**: apply mixins to CSS ruleset
+    * **[-st-variant](./variants.md)**: apply pre-made look and feel
 * **selectors**
     * **[Pseudo-elements](./pseudo-elements.md)**: `::X` target internal part 
     * **[Pseudo-classes](./pseudo-classes.md)**: `:X` target state

@@ -13,11 +13,11 @@ Use cases:
 CSS API:
 ```css
 :import{
-    -sb-from: "./my-mixins";
-    -sb-names: textTooltip;
+    -st-from: "./my-mixins";
+    -st-names: textTooltip;
 }
 .submit-button{
-    -sb-mixin: textTooltip(300, data-tooltip);
+    -st-mixin: textTooltip(300, data-tooltip);
 }
 ```
 
@@ -30,15 +30,15 @@ With and without params and with multiple mixins
 ```css
 .a{
     /* no parameters */
-    -sb-mixin: noParams;
+    -st-mixin: noParams;
 }
 .b{
     /* multiple parameters */
-    -sb-mixin: multiParams(param1, param2);
+    -st-mixin: multiParams(param1, param2);
 }
 .c{
     /* apply multiple mixins */
-    -sb-mixin: noParams, multiParams(param1, param2);
+    -st-mixin: noParams, multiParams(param1, param2);
 }
 ```
 
@@ -46,16 +46,16 @@ Everything is a string:
 
 ```css
 .a {
-    -sb-mixin: mix(300, xxx); /* ["300", "xxx"] */
+    -st-mixin: mix(300, xxx); /* ["300", "xxx"] */
 }
 .b {
-    -sb-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
+    -st-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
 }
 .c { /* use quotations to include comma */
-    -sb-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
+    -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
 .d { /* escape slashes */
-    -sb-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
+    -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
 }
 ```
 
@@ -63,7 +63,7 @@ Everything is a string:
 
 Mixins may add CSS declarations to the CSS ruleset that they are applied to:
 
-* rules are added at the position that the `-sb-mixin` is declared
+* rules are added at the position that the `-st-mixin` is declared
 * appended selectors are added directly after the rule-set that the mixin was applied to
 * multiple mixins are applied according to the order that they are specified in
 
@@ -71,7 +71,7 @@ CSS API:
 ```css
 .a{
     color:red;
-    -sb-mixin: golden;
+    -st-mixin: golden;
     background:white;
 }
 .a:hover{
