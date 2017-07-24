@@ -1,14 +1,18 @@
 
 # Mixins
 
-Apply complex style and behaviors to a CSS ruleset.
+You can use **Stylable** to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets. 
 
-Use cases:
-* [layout](./create-layouts.md) - easily describe complex layout
-* [variants](./variants.md) - apply a component in a specific theme
-* helpers - color manipulations, easing functions, custom CSS shorthands / shortcuts
+Here are some use cases where you can use mixins with other **Stylable** features:
+* [Layouts](./create-layouts.md) - easily describe complex layouts.
+* [Variants](./variants.md) - apply a specific theme to a component.
+* Helpers - handle color manipulations, ease functions, use custom CSS shortcuts.
+
+You use the **Stylable** syntax `-sb-mixin` with or without parameters applied. You can also use multiple mixins in the same statement. 
 
 ## Example
+
+The value `textTooltip` of the external file `my-mixins` is imported. The class selector `.submit-button` uses the mixin syntax and applies parameters. In this case, to wait `300` milliseconds to display the `data-tooltip` hover text on the button. 
 
 CSS API:
 ```css
@@ -21,11 +25,9 @@ CSS API:
 }
 ```
 
-Might generate the CSS on the `.submit-button` that will pickup the `data-tooltip` text and display it on hover after 300ms.
-
 ## Syntax
 
-With and without params and with multiple mixins
+You can use mixins with parameters, without parameters, and with multiple mixins.
 
 ```css
 .a{
@@ -42,7 +44,7 @@ With and without params and with multiple mixins
 }
 ```
 
-Everything is a string:
+Any parameter you add to the mixin is considered a string.
 
 ```css
 .a {
@@ -59,13 +61,13 @@ Everything is a string:
 }
 ```
 
-## Target
+## How mixins are applied
 
-Mixins may add CSS declarations to the CSS ruleset that they are applied to:
+Mixins can add CSS declarations to the CSS rule set to which they are applied:
 
-* rules are added at the position that the `-sb-mixin` is declared
-* appended selectors are added directly after the rule-set that the mixin was applied to
-* multiple mixins are applied according to the order that they are specified in
+* Rules are added at the position in the CSS where the `-sb-mixin` is declared.
+* Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.
+* Multiple mixins are applied according to the order that they are specified.
 
 CSS API:
 ```css
