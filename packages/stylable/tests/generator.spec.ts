@@ -156,7 +156,7 @@ describe('Generator', function () {
 
             const stylesheet = new Stylesheet({
                 ":import": {
-                    "-sb-from": "./relative/path/to/sheetA.stylable.css"
+                    "-st-from": "./relative/path/to/sheetA.stylable.css"
                 },
                 ".container": {}
             });

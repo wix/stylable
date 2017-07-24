@@ -13,12 +13,12 @@ CSS API :
 ```css
 /* theme.css */
 :import {
-    -sb-from: "./button.css";
-    -sb-default: Button;
+    -st-from: "./button.css";
+    -st-default: Button;
 }
 .SaleBtn {
-    -sb-extends: Button;
-    -sb-variant: true;
+    -st-extends: Button;
+    -st-variant: true;
     color: red;
 }
 .SaleBtn:hover {
@@ -26,7 +26,7 @@ CSS API :
 }
 ```
 
-`-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
+`-st-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
 
 
 ## Define inline variants
@@ -43,7 +43,7 @@ For example, consider the following button, and its variant, BigButton
 }
 
 .BigButton {
-    -sb-variant: true;
+    -st-variant: true;
     height:5em;
 }
 ```
@@ -57,12 +57,12 @@ CSS API:
 ```css
 /* page.css */
 :import {
-    -sb-from: "./theme.css";
-    -sb-names: SaleBtn;
+    -st-from: "./theme.css";
+    -st-names: SaleBtn;
 }
 
 .sale-button {
-    -sb-mixin: SaleBtn;
+    -st-mixin: SaleBtn;
 }
 ```
 
@@ -79,18 +79,18 @@ CSS OUTPUT:
 
 ## Use variants with extends 
 
-When using variant with `-sb-extends` the class also inherits the variant type.
+When using variant with `-st-extends` the class also inherits the variant type.
 
 CSS API:
 ```css
 /* page.css */
 :import {
-    -sb-from: "./theme.css";
-    -sb-names: SaleBtn;
+    -st-from: "./theme.css";
+    -st-names: SaleBtn;
 }
 
 .sale-button {
-    -sb-extends: SaleBtn;
+    -st-extends: SaleBtn;
 }
 
 .sale-button::icon {

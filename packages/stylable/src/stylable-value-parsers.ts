@@ -1,7 +1,7 @@
 export interface TypedClass {
-    "-sb-root"?: boolean;
-    "-sb-states"?: string[];
-    "-sb-type"?: string;
+    "-st-root"?: boolean;
+    "-st-states"?: string[];
+    "-st-type"?: string;
 }
 
 export interface MixinValue<T = any[]> {
@@ -10,29 +10,29 @@ export interface MixinValue<T = any[]> {
 }
 
 export const valueMapping = {
-    from: '-sb-from' as "-sb-from",
-    named: '-sb-named' as "-sb-named",
-    default: '-sb-default' as "-sb-default",
-    root: '-sb-root' as "-sb-root",
-    states: '-sb-states' as "-sb-states",
-    type: '-sb-type' as "-sb-type",
-    mixin: '-sb-mixin' as "-sb-mixin"
+    from: '-st-from' as "-st-from",
+    named: '-st-named' as "-st-named",
+    default: '-st-default' as "-st-default",
+    root: '-st-root' as "-st-root",
+    states: '-st-states' as "-st-states",
+    type: '-st-type' as "-st-type",
+    mixin: '-st-mixin' as "-st-mixin"
 };
 
-export const STYLABLE_VALUE_MATCHER = /^-sb-/;
+export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
 export const SBTypesParsers = {
-    "-sb-root"(value: string) {
+    "-st-root"(value: string) {
         return value === 'false' ? false : true
     },
-    "-sb-states"(value: string) {
+    "-st-states"(value: string) {
         return value ? value.split(',').map((state) => state.trim()) : [];
     },
-    "-sb-type"(value: string) {
+    "-st-type"(value: string) {
         return value ? value.trim() : "";
     },
-    "-sb-mixin"(value: string) {
+    "-st-mixin"(value: string) {
 
         const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);
         if (!parts || parts.join('').length !== value.replace(/\s*/, '').length) {

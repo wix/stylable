@@ -358,14 +358,14 @@ function objectifyTests(objectify: (css: string) => any) {
 
             const actual = objectify(`
                 .container {
-                   -sb-something: true;
+                   -st-something: true;
                    background-color: red;
                 }
             `);
             
             const expected = {
                 ".container": {
-                    "-sb-something": "true",
+                    "-st-something": "true",
                     backgroundColor: "red"
                 }            
             }

@@ -147,35 +147,35 @@ Adds mixins allowing you to use component variants and create your own, use and 
 Syntax and Terminology Reference
 
 Term	Definiton	Link to Code Example
--sb-from	gets the path to the module that's being imported	Code
--sb-default	defines a default export class, as well as namespaces it / names the default import
--sb-named	defines and namespaces other exports from the same module
+-st-from	gets the path to the module that's being imported	Code
+-st-default	defines a default export class, as well as namespaces it / names the default import
+-st-named	defines and namespaces other exports from the same module
 CLASSES		
--sb-root	one per component, declares the class that is describing the root level of the component. default is false of course
+-st-root	one per component, declares the class that is describing the root level of the component. default is false of course
 }"		
--sb-from	gets the path to the module that's being imported }" -sb-default	defines a default export class, as well as namespaces it / names the default import -sb-named	defines and namespaces other exports from the same module NS Classes -sb-root	one per component, declares the class that is describing the root level of the component. default is false of course	"set root:
+-st-from	gets the path to the module that's being imported }" -st-default	defines a default export class, as well as namespaces it / names the default import -st-named	defines and namespaces other exports from the same module NS Classes -st-root	one per component, declares the class that is describing the root level of the component. default is false of course	"set root:
 
-.rootClass { -sb-root: true; color: blue; }" -sb-type	type of the component - has to be declared elsewhere above, or imported from an external source	"declare root as an exportable type:
+.rootClass { -st-root: true; color: blue; }" -st-type	type of the component - has to be declared elsewhere above, or imported from an external source	"declare root as an exportable type:
 
-.galleryRoot { -sb-root: true; -sb-type: Gallery; color: blue; }
+.galleryRoot { -st-root: true; -st-type: Gallery; color: blue; }
 
 implement an imported or existing type on a class:
 
-.galleryButton { -sb-type: Button; color: white; }" -sb-states	list of states that are available on our component (hover, loading, empty)	"expose a state on the root node:
+.galleryButton { -st-type: Button; color: white; }" -st-states	list of states that are available on our component (hover, loading, empty)	"expose a state on the root node:
 
-.galleryRoot { -sb-root: true; -sb-states: loading, error; color: blue; }
+.galleryRoot { -st-root: true; -st-states: loading, error; color: blue; }
 
 implement the state:
 
-.myGallery:loading { -sb-type: gallery; color: black; }" -sb-mixins	list of mixins we want to apply to our class	".submitButton { -sb-type: Button; -sb-mixin: grid(5,3); background-color: white; }
+.myGallery:loading { -st-type: gallery; color: black; }" -st-mixins	list of mixins we want to apply to our class	".submitButton { -st-type: Button; -st-mixin: grid(5,3); background-color: white; }
 
-will apply a grid layout with the parameters 5 and 3 (probably cols and rows)" -sb-preset	marks a class as a "preset". a mixin without parameters. it's a boolean.	"in Button we declare
+will apply a grid layout with the parameters 5 and 3 (probably cols and rows)" -st-preset	marks a class as a "preset". a mixin without parameters. it's a boolean.	"in Button we declare
 
-.Button_large { -sb-preset: true; font-size: larger; }
+.Button_large { -st-preset: true; font-size: larger; }
 
 then in a button instance
 
-.myButton { -sb-type: Button; -sb-mixin: grid(5,3), Button_large; background-color: white; }"
+.myButton { -st-type: Button; -st-mixin: grid(5,3), Button_large; background-color: white; }"
 
 ## README
 
