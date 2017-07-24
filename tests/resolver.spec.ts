@@ -16,7 +16,7 @@ describe('Resolver', function () {
                     -st-default: Name;
                 }
                 .class {
-                    -st-type: Name;
+                    -st-extends: Name;
                 }
             `);
 

@@ -155,19 +155,19 @@ CLASSES
 }"		
 -st-from	gets the path to the module that's being imported }" -st-default	defines a default export class, as well as namespaces it / names the default import -st-named	defines and namespaces other exports from the same module NS Classes -st-root	one per component, declares the class that is describing the root level of the component. default is false of course	"set root:
 
-.rootClass { -st-root: true; color: blue; }" -st-type	type of the component - has to be declared elsewhere above, or imported from an external source	"declare root as an exportable type:
+.rootClass { -st-root: true; color: blue; }" -st-extends	type of the component - has to be declared elsewhere above, or imported from an external source	"declare root as an exportable type:
 
-.galleryRoot { -st-root: true; -st-type: Gallery; color: blue; }
+.galleryRoot { -st-root: true; -st-extends: Gallery; color: blue; }
 
 implement an imported or existing type on a class:
 
-.galleryButton { -st-type: Button; color: white; }" -st-states	list of states that are available on our component (hover, loading, empty)	"expose a state on the root node:
+.galleryButton { -st-extends: Button; color: white; }" -st-states	list of states that are available on our component (hover, loading, empty)	"expose a state on the root node:
 
 .galleryRoot { -st-root: true; -st-states: loading, error; color: blue; }
 
 implement the state:
 
-.myGallery:loading { -st-type: gallery; color: black; }" -st-mixins	list of mixins we want to apply to our class	".submitButton { -st-type: Button; -st-mixin: grid(5,3); background-color: white; }
+.myGallery:loading { -st-extends: gallery; color: black; }" -st-mixins	list of mixins we want to apply to our class	".submitButton { -st-extends: Button; -st-mixin: grid(5,3); background-color: white; }
 
 will apply a grid layout with the parameters 5 and 3 (probably cols and rows)" -st-preset	marks a class as a "preset". a mixin without parameters. it's a boolean.	"in Button we declare
 
@@ -175,7 +175,7 @@ will apply a grid layout with the parameters 5 and 3 (probably cols and rows)" -
 
 then in a button instance
 
-.myButton { -st-type: Button; -st-mixin: grid(5,3), Button_large; background-color: white; }"
+.myButton { -st-extends: Button; -st-mixin: grid(5,3), Button_large; background-color: white; }"
 
 ## README
 

@@ -16,7 +16,7 @@
 }
 
 .Label {
-    -st-type: Party;
+    -st-extends: Party;
     -st-apply: Hot;
     background: firebrick;
 }

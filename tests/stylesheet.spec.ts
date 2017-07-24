@@ -212,20 +212,20 @@ describe('Stylesheet', function () {
         })
 
 
-        it('with -st-type', function () {
+        it('with -st-extends', function () {
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
                     -st-default: Thing;
                 }
                 .container {
-                    -st-type: Thing;
+                    -st-extends: Thing;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
                 root: { "-st-root": true },
                 container: {
-                    "-st-type": "Thing"
+                    "-st-extends": "Thing"
                 }
             })
         })
