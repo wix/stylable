@@ -36,8 +36,8 @@ CSS API:
 ```css
 /* example2.css */
 :import {
-    -sb-from: "./example1.css"; /* stylesheet a previous example */
-    -sb-named: color1, color2; /* import color1 and color2 variables */
+    -st-from: "./example1.css"; /* stylesheet a previous example */
+    -st-named: color1, color2; /* import color1 and color2 variables */
 }
 .root {
     border: 10px solid value(color1);
@@ -71,8 +71,8 @@ CSS API:
 ```css
 /* example3.css */
 :import {
-    -sb-from: "./example1.css"; /* stylesheet a previous example */
-    -sb-named: color1, color2;
+    -st-from: "./example1.css"; /* stylesheet a previous example */
+    -st-named: color1, color2;
 }
 :vars{
     border1: 10px solid value(color1); /* use color1 in complex value */
@@ -101,8 +101,8 @@ CSS API:
 ```css
 /* example4.css */
 :import {
-    -sb-from: "./example1.css"; /* stylesheet a previous example */
-    -sb-named: color1, color2;
+    -st-from: "./example1.css"; /* stylesheet a previous example */
+    -st-named: color1, color2;
 }
 :override {
     color1: yellow; /* modify color1 to yellow */

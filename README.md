@@ -20,7 +20,7 @@ React Component Usage:
     }, `
         .root {
             background: white;
-            -sb-states: my-state;
+            -st-states: my-state;
         }
     `);
 

@@ -13,10 +13,10 @@ describe('Resolver', function () {
 
             var sheetB = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
-                    -sb-default: Name;
+                    -st-default: Name;
                 }
                 .class {
-                    -sb-type: Name;
+                    -st-extends: Name;
                 }
             `);
 
@@ -38,7 +38,7 @@ describe('Resolver', function () {
             const resolvedModule = { resolved: 'name1' };
             const sheet = new Stylesheet({
                 ":import('./path')": {
-                    "-sb-default": "name1"
+                    "-st-default": "name1"
                 }
             }, "namespace");
 
@@ -68,10 +68,10 @@ describe('Resolver', function () {
 
             var sheet = new Stylesheet({
                 ":import('./path/1')": {
-                    "-sb-named": "name1"
+                    "-st-named": "name1"
                 },
                 ":import('./path/2')": {
-                    "-sb-named": "name2"
+                    "-st-named": "name2"
                 }
             }, "namespace");
 
@@ -94,7 +94,7 @@ describe('Resolver', function () {
 
             var sheet = new Stylesheet({
                 ":import('./path')": {
-                    "-sb-named": "param1, param2",
+                    "-st-named": "param1, param2",
                 },
                 ":vars": {
                     "param3": "green",
@@ -119,7 +119,7 @@ describe('Resolver', function () {
 
             var sheet = new Stylesheet({
                 ":import('./path')": {
-                    "-sb-named": "param1, param2",
+                    "-st-named": "param1, param2",
                 },
                 ":vars": {
                     "param": "orange",
@@ -139,10 +139,10 @@ describe('Resolver', function () {
 
             var sheet = new Stylesheet({
                 ":import('./path/1')": {
-                    "-sb-named": "name1"
+                    "-st-named": "name1"
                 },
                 ":import('./path/2')": {
-                    "-sb-named": "name1"
+                    "-st-named": "name1"
                 }
             }, "namespace");
 

@@ -25,12 +25,17 @@ function AtRule(rule, value) {
 
 
 function shouldCamel(options, name, selector) {
-    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher)=>selector.match(matcher)));
+    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher) => selector.match(matcher)));
 }
 
 function objectify(nodes, out, options, value) {
     return nodes.length ? nodes.reduce((out, node) => {
-        return setOrPush(out, node.rule, node.type === '@at-type' ?
+        var rule = node.rule;
+        var isAt = node.type === '@at-type';
+        if(rule !== '@font-face' && !isAt){
+            while (out[rule]) { rule += ' '; }
+        }
+        return setOrPush(out, rule, isAt ?
             objectify(node.children, null, options, node.value) :
             objectifyDeclarations(node.decl, null, options, node));
     }, out || {}) : value;
@@ -72,14 +77,16 @@ function handleDecl(rule, content, id) {
     stack.push({ id, rule, node });
 }
 
-function handleRule(rule, id) {
+function handleRule(rule, id, mergeSame) {
     var node = new Rule(rule);
     var size = stack.length;
     if (!rule && id === 0) { return; }
     while (size--) {
         if (stack[size].rule !== rule) { continue; }
         if (stack[size].node.type === 'rule') {
-            node.decl = node.decl.concat(stack.splice(size, 1)[0].node.decl);
+            if (mergeSame) {
+                node.decl = node.decl.concat(stack.splice(size, 1)[0].node.decl);
+            }
         } else {
             node.decl.push(stack.splice(size, 1)[0].node);
         }
@@ -113,6 +120,7 @@ module.exports = function (options) {
     options = options || {};
     options.noCamel = options.noCamel || [];
     options.noCamelSelector = options.noCamelSelector || [];
+    options.mergeSame = options.mergeSame === undefined ? true : options.mergeSame;
     return function plugin(context, content, selectors, parents, line, column, length, id) {
         var rule = selectors.join(', ');
 
@@ -126,7 +134,7 @@ module.exports = function (options) {
                 handleDecl(rule, content, id);
                 break
             case 2:
-                handleRule(rule, id);
+                handleRule(rule, id, options.mergeSame);
                 break
             case 3:
                 handleAtRule(rule, id);

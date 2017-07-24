@@ -12,11 +12,11 @@ Stylesheet can [import](./imports.md) a `video-player` component (stylesheet), e
 CSS API
 ```css
 :import {
-    -sb-from: './video-player.css';
-    -sb-default: VideoPlayer;
+    -st-from: './video-player.css';
+    -st-default: VideoPlayer;
 }
 .main-video {
-    -sb-extends: VideoPlayer; /* define main-video as VideoPlayer */
+    -st-extends: VideoPlayer; /* define main-video as VideoPlayer */
 }
 .main-video::play-button { /* override main-video play button */
     background: green;
@@ -58,11 +58,11 @@ CSS API
 ```css
 /* super-video-player.css */
 :import {
-    -sb-from: './video-player.css';
-    -sb-default: VideoPlayer;
+    -st-from: './video-player.css';
+    -st-default: VideoPlayer;
 }
 .root{
-    -sb-extends: VideoPlayer;
+    -st-extends: VideoPlayer;
 }
 .root::play-button {
     color: gold;
@@ -72,11 +72,11 @@ CSS API
 ```css
 /* page.css */
 :import {
-    -sb-from: './super-video-player.css';
-    -sb-default: SuperVideoPlayer;
+    -st-from: './super-video-player.css';
+    -st-default: SuperVideoPlayer;
 }
 .main-player {
-    -sb-extends: SuperVideoPlayer;
+    -st-extends: SuperVideoPlayer;
 }
 .main-player::play-button {
     color: silver;
@@ -103,11 +103,11 @@ CSS API
 ```css
 /* super-video-player.css */
 :import {
-    -sb-from: './video-player.css';
-    -sb-default: VideoPlayer;
+    -st-from: './video-player.css';
+    -st-default: VideoPlayer;
 }
 .root{
-    -sb-extends: VideoPlayer;
+    -st-extends: VideoPlayer;
 }
 .play-button { /* override VideoPlayer play-button */
     color: gold;

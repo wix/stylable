@@ -12,7 +12,8 @@ const safeParser = require("postcss-safe-parser");
 
 const stylableObjectifyConfig = {
     noCamel: [STYLABLE_VALUE_MATCHER],
-    noCamelSelector: [/^:vars$/]
+    noCamelSelector: [/^:vars$/],
+    mergeSame: false
 };
 
 stylis.set({ compress: false, lossless: true, global: false, preserve: true });

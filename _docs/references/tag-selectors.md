@@ -58,8 +58,8 @@ CSS API:
 
 ```css
 :import{
-    -sb-from: "./toggle-button.css";
-    -sb-default: ToggleButton;
+    -st-from: "./toggle-button.css";
+    -st-default: ToggleButton;
 }
 ToggleButton {background:green;}
 .side-bar:hover ToggleButton {background:red;}
