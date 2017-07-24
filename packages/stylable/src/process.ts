@@ -38,7 +38,7 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
                 const { content } = <PseudoSelectorAstNode>node;
                 sheet.imports.push(Import.fromImportObject(content, rules));
             } else if (name === 'vars') {
-                sheet.vars = rules;
+                Object.assign(sheet.vars, rules);
             }
         } else if (type === 'class') {
             sheet.classes[node.name] = node.name;

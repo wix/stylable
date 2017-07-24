@@ -421,7 +421,7 @@ describe('Stylesheet', function () {
             `);
 
             const expected = {
-                "my-Name": ['value', 'value2'],
+                "my-Name": 'value2',
                 "my-Other": 'value3'
             };
 
