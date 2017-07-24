@@ -1,13 +1,19 @@
 
 # Variants
 
-A variant is a mixin described as part of a Stylable stylesheet that can be later applied on a CSS ruleset.
+You can use variants in **Stylable** the same way you use [mixins](./mixin-syntax.md). They are defined as part of a **Stylable** stylesheet that can then be applied to a CSS rule set.
 
-A single component might offer multiple style variants for different themes or semantics.
+Variants can be used if you want to apply multiple styles to a single component for different themes or semantics. They preserve the integrity of the CSS output by not being including unless its syntax is directly used in the CSS. This increases performance, enables easier debugging and generally keeps the CSS output cleaner and free of unused syntax.
 
-## Define a variant
+You can define variants only for a [class selector](./class-selectors.md). 
 
-> *Note*: Variants can be defined only for a [class selector](./class-selectors.md).
+When you declare a variant, use `-sb-variant: true;` to instruct the **Stylable** pre-processor to check if the variant is being used anywhere in the project and if it isn't, to ignore the variant during build time.
+
+## Examples
+
+### Define a variant
+
+The `.SaleBtn` class selector, which extends the default value `Button` that is being imported from the `button.css` file, is defined as a variant with the `-sb-variant: true;`. 
 
 CSS API :
 ```css
@@ -26,14 +32,11 @@ CSS API :
 }
 ```
 
-`-sb-variant: true;` tells the Stylable pre-processor that if the variant SaleBtn isn't used anywhere in the project it can ignore it during the build stage, resulting in a smaller end-CSS without redundant rules.
+### Define inline variants
 
+When you create a component, it's useful to keep in one file all of its styles and any variants you offer to consumers of your component.
 
-## Define inline variants
-
-It's handy when authoring a component to keep all its styles, and any variants you offer to consumers of your component, in one file.
-
-For example, consider the following button, and its variant, BigButton
+For example, consider the following button and its variant `BigButton`. While the button component has a height of 2em, the variant has a different height so the original sstyle and the variant's style are both available for use from the same file. 
 
 ```css
 .root {
@@ -48,10 +51,10 @@ For example, consider the following button, and its variant, BigButton
 }
 ```
 
-> *Notice:* variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet.
+> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet.
 
 
-## Use variants
+### Use variants
 
 CSS API:
 ```css
@@ -77,9 +80,9 @@ CSS OUTPUT:
 }
 ```
 
-## Use variants with extends 
+### Use variants with extends 
 
-When using variant with `-sb-extends` the class also inherits the variant type.
+When you use a variant with `-sb-extends`, the class also inherits the variant type.
 
 CSS API:
 ```css
