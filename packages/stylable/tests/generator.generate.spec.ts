@@ -142,7 +142,7 @@ describe('static Generator.generate', function () {
                      -st-default: Container;
                 }
                 .containerB {
-                    -st-type: Container;
+                    -st-extends: Container;
                 }
             `, "TheGreatNameSpace");
 
@@ -170,7 +170,7 @@ describe('static Generator.generate', function () {
                      -st-default: Container;
                 }                
                 container {
-                    -st-type: Container;
+                    -st-extends: Container;
                 }
             `, "TheGreatNameSpace");
 
@@ -200,7 +200,7 @@ describe('static Generator.generate', function () {
                      -st-default: Container;
                 }                
                 container {
-                    -st-type: Container;
+                    -st-extends: Container;
                 }
                 container::inner {
                     
@@ -238,7 +238,7 @@ describe('static Generator.generate', function () {
                     -st-default: Container;
                 }
                 .containerB {
-                    -st-type: Container;
+                    -st-extends: Container;
                 }
                 .containerB::icon { }
             `, "TheGreatNameSpace");
@@ -272,7 +272,7 @@ describe('static Generator.generate', function () {
                     -st-default: Text;
                 }
                 .button { }
-                .text { -st-type: Text; }
+                .text { -st-extends: Text; }
             `, "Button");
 
             const App = Stylesheet.fromCSS(`
@@ -280,7 +280,7 @@ describe('static Generator.generate', function () {
                     -st-default: Button;
                 }
                 .app {
-                    -st-type: Button;
+                    -st-extends: Button;
                 }
                 .app::text::first-letter { }
             `, "App");
@@ -316,7 +316,7 @@ describe('static Generator.generate', function () {
                     -st-default: Text;
                 }
                 .button { }
-                .text { -st-type: Text; }
+                .text { -st-extends: Text; }
             `, "Button");
 
             const App = Stylesheet.fromCSS(`
@@ -324,7 +324,7 @@ describe('static Generator.generate', function () {
                     -st-default: Button;
                 }
                 .app {
-                    -st-type: Button;
+                    -st-extends: Button;
                 }
                 .app::text::first-letter, .gallery { }
             `, "App");
@@ -384,7 +384,7 @@ describe('static Generator.generate', function () {
                     -st-default: SheetA;
                 }
                 .my-class { 
-                    -st-type: SheetA;
+                    -st-extends: SheetA;
                 }
                 .my-class:my-state {}
             `, "StyleB");
@@ -420,7 +420,7 @@ describe('static Generator.generate', function () {
                 }
                 .my-class { 
                     -st-states: my-state;
-                    -st-type: SheetA;
+                    -st-extends: SheetA;
                 }
                 .my-class:my-state {}
             `, "StyleB");
@@ -456,7 +456,7 @@ describe('static Generator.generate', function () {
                     -st-default: SheetA;
                 }
                 .my-class { 
-                    -st-type: SheetA;
+                    -st-extends: SheetA;
                 }
                 .my-class::container:my-state {}
             `, "StyleB");

@@ -1,7 +1,7 @@
 export interface TypedClass {
     "-st-root"?: boolean;
     "-st-states"?: string[];
-    "-st-type"?: string;
+    "-st-extends"?: string;
 }
 
 export interface MixinValue<T = any[]> {
@@ -15,7 +15,7 @@ export const valueMapping = {
     default: '-st-default' as "-st-default",
     root: '-st-root' as "-st-root",
     states: '-st-states' as "-st-states",
-    type: '-st-type' as "-st-type",
+    extends: '-st-extends' as "-st-extends",
     mixin: '-st-mixin' as "-st-mixin"
 };
 
@@ -29,7 +29,7 @@ export const SBTypesParsers = {
     "-st-states"(value: string) {
         return value ? value.split(',').map((state) => state.trim()) : [];
     },
-    "-st-type"(value: string) {
+    "-st-extends"(value: string) {
         return value ? value.trim() : "";
     },
     "-st-mixin"(value: string) {
