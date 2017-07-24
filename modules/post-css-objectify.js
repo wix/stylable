@@ -10,7 +10,7 @@ function atRule(node, options) {
 
 
 function shouldCamel(options, name, selector) {
-    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher)=>selector.match(matcher)));
+    return !(options.noCamel.some((matcher) => name.match(matcher)) || options.noCamelSelector.some((matcher) => selector.match(matcher)));
 }
 
 function process(node, options) {
@@ -19,25 +19,28 @@ function process(node, options) {
     options = options || {};
     options.noCamel = options.noCamel || [];
     options.noCamelSelector = options.noCamelSelector || [];
+    options.mergeSame = options.mergeSame === undefined ? true : options.mergeSame;
     node.each(function (child) {
-        var rules = {};
-        node.each(function (rule) {
-            if (rule.type !== 'rule') {
-                return;
-            } else if (rules[rule.selector]) {
-                if (rules[rule.selector].append) {
-                    rules[rule.selector].append(rule.nodes);
-                    rule.remove();
-                }
-            } else {
-                rules[rule.selector] = rule;
-            }
-        });
+        if (options.mergeSame) {
+            var rules = {};
 
+            node.each(function (rule) {
+                if (rule.type !== 'rule') {
+                    return;
+                } else if (rules[rule.selector]) {
+                    if (rules[rule.selector].append) {
+                        rules[rule.selector].append(rule.nodes);
+                        rule.remove();
+                    }
+                } else {
+                    rules[rule.selector] = rule;
+                }
+            });
+        }
         if (child.type === 'atrule') {
             name = '@' + child.name;
             if (child.params && child.nodes) name += ' ' + child.params;
-            
+
             if (typeof result[name] === 'undefined') {
                 result[name] = atRule(child, options);
             } else if (Array.isArray(result[name])) {
@@ -47,7 +50,11 @@ function process(node, options) {
             }
 
         } else if (child.type === 'rule') {
-            result[child.selector] = process(child, options);
+            var selector = child.selector;
+            while (result[selector]) {
+                selector += ' ';
+            }
+            result[selector] = process(child, options);
 
         } else if (child.type === 'decl') {
             name = shouldCamel(options, child.prop, child.parent.selector || '') ? camelcase(child.prop) : child.prop;

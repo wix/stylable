@@ -133,7 +133,7 @@ function objectifyTests(objectify: (css: string) => any) {
 
 
 
-    it('multiple selectors with same name', function () {
+    xit('multiple selectors with same name (merged)', function () {
 
         const actual = objectify(`
             .btn {
@@ -150,6 +150,30 @@ function objectifyTests(objectify: (css: string) => any) {
         const expected = {
             ".btn": { "borderRadius": ["0", "1"] },
             ".class": {}
+        }
+
+        expect(actual).to.eql(expected);
+
+    });
+
+    it('multiple selectors with same name', function () {
+
+        const actual = objectify(`
+            .btn {
+                border-radius: 0;
+            }
+            .class {
+
+            }
+            .btn {
+                border-radius: 1;
+            }
+        `);
+        
+        const expected = {
+            ".btn": { "borderRadius": "0" },
+            ".class": {},
+            ".btn ": { "borderRadius": "1" }
         }
 
         expect(actual).to.eql(expected);

@@ -77,10 +77,12 @@ describe('static Generator.generate', function () {
         it('do not output :import', function () {
 
             const sheet = Stylesheet.fromCSS(`
-                :import("./relative/path/to/sheetA.stylable.css"){
+                :import{
+                    -st-from: "./relative/path/to/sheetA.stylable.css";
                     -st-default: ContainerA;
                 }
-                :import("./relative/path/to/sheetB.stylable.css"){
+                :import{
+                    -st-from: "./relative/path/to/sheetB.stylable.css";
                     -st-default: ContainerB;
                 }
                 .container {
