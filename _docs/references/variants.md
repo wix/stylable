@@ -30,59 +30,9 @@ CSS API :
 }
 ```
 
-## Define inline variants
+## Use a variant with `-st-extends`
 
-When you create a component, it's useful to keep in one file all of its styles and any variants you offer to consumers of your component.
-
-For example, consider the following button and its variant `BigButton`. While the button component has a height of 2em, the variant has a different height so the original style and the variant's style are both available for use from the same file. 
-
-```css
-.root {
-    color:red;
-    background-color:blue;
-    height:2em;
-}
-
-.BigButton {
-    -st-variant: true; /* variant of root */
-    height:5em;
-}
-```
-
-> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet `root` class.
-
-
-## Use variants
-
-When you apply a variant as a mixin, you are applying the variant's styles and behavior and cannot access its custom internal parts, like pseudo-elements or pseudo-classes. 
-
-CSS API:
-```css
-/* page.css */
-:import {
-    -st-from: "./theme.css";
-    -st-names: SaleBtn;
-}
-
-.sale-button {
-    -st-mixin: SaleBtn;
-}
-```
-
-CSS OUTPUT:
-```css
-/* namespaced to page */
-.root .sale-button {
-    color: red;
-}
-.root .sale-button:hover {
-    color: pink;
-}
-```
-
-## Use variants with extends 
-
-When you use a variant with `-st-extends`, the class also inherits the variant base type enabling access to pseudo-elements and pseudo-classes. In this example, the CSS can style the button's `icon` because in the `theme.css` file, the `SaleBtn` variant extends `Button`.
+You use a variant using the `-st-extends` directive. The class then inherits the variant base type enabling access to its root definitions as well as all pseudo-elements and pseudo-classes. In this example, the CSS can style the button's `icon` because in the `theme.css` file, the `SaleBtn` variant extends `Button`. The hover behavior is also inherited from the base class.
 
 CSS API:
 ```css
@@ -114,3 +64,53 @@ CSS OUTPUT:
     border: 2px solid green;
 }
 ```
+
+## Use a variant with `-st-mixin`
+
+When you apply a variant as a mixin, you are applying the variant's styles and behavior only, and cannot access its custom internal parts, like pseudo-elements or pseudo-classes. 
+
+CSS API:
+```css
+/* page.css */
+:import {
+    -st-from: "./theme.css";
+    -st-names: SaleBtn;
+}
+
+.sale-button {
+    -st-mixin: SaleBtn;
+}
+```
+
+CSS OUTPUT:
+```css
+/* namespaced to page */
+.root .sale-button {
+    color: red;
+}
+.root .sale-button:hover {
+    color: pink;
+}
+```
+
+## Define inline variants
+
+When you create a component, it's useful to keep in one file all of its styles and any variants you offer to consumers of your component.
+
+For example, consider the following button and its variant `BigButton`. While the button component has a height of 2em, the variant has a different height so the original style and the variant's style are both available for use from the same file. 
+
+```css
+.root {
+    color:red;
+    background-color:blue;
+    height:2em;
+}
+
+.BigButton {
+    -st-variant: true; /* variant of root */
+    height:5em;
+}
+```
+
+> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet `root` class.
+
