@@ -1,6 +1,8 @@
 # Global selectors
 
-Selectors inside `:global()` directive selector are not scoped to the stylesheet 
+Selectors inside the `:global()` directive selector are not scoped to the stylesheet. 
+
+In this example `.classB` and `.classC` are not coped to `App`.
 
 CSS input
 ```css
@@ -18,7 +20,7 @@ CSS output
     }
 ```
 
-> Note: you can also use global pseudo-classes and elements, to override an override. But why would you?! You describe them using this syntax:
+> **Note**: You can also use global pseudo-classes and elements to override an override. But why would you?! You can describe them using this syntax:
 >
 > ```css
 > .classA :global(.classB > .classC) .classD:global(:hover) {
