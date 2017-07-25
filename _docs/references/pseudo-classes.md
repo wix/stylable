@@ -12,13 +12,9 @@ To define custom pseudo-classes, you use the **Stylable** directive rule `-sb-st
 
 The `-sb-states` directive rule can be defined only for simple selectors like [tag selector](./tag-selectors.md), [class selector](./class-selectors.md) and [root](./root.md).
 
-### Name custom pseudo-classes and assign a style to them
+## Name custom pseudo-classes and assign a style to them
 
-Name `toggled` and `loading` as custom pseudo-classes and assign different colors to them. The [.root](./root.md) selector is added to the custom pseudo-class.
-
-To define custom states, you tell Stylable the list of possible custom states that the CSS declaration may be given, using the Stylable directive rule `-st-states`:
-
-> *Note*: `-st-states` directive rule may only be defined for simple selectors like [tag selector](./tag-selectors.md), [class selector](./class-selectors.md) and [root selector](./root.md).
+To define custom states for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then assigned different colors. 
 
 CSS API:
 ```css
@@ -28,6 +24,7 @@ CSS API:
 }
 .root:toggled { color:red; }
 .root:loading { color:green; }
+.root:loading:toggled { color:blue; }
 ```
 
 CSS OUTPUT:
@@ -35,14 +32,14 @@ CSS OUTPUT:
 /* namespaced to example1 */
 .root[data-example1-toggled] { color:red; }
 .root[data-example1-loading] { color:green; }
+.root[data-example1-loading][data-example1-toggled] { color:blue; }
 ```
 
-> Note: Custom pseudo-classes are implemented using `data-*` attributes that are scoped to the stylesheet. *<Need more information here>*
+> Note: You can also override the behavior of native pseudo-class. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
+## Map custom pseudo-classes
 
-### Map custom pseudo-classes
-
-You can target existing components that are not based on **Stylable** to be mapped to custom pseudo-classes created in **Stylable**.  *<What about mapping components that were created in Stylable?>*
+You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. In the CSS output, instead of the default behavior in **Stylable** of generating the `data-*` attributes to target states, it uses the custom implementation defined in the source. 
 
 CSS API:
 ```css
@@ -61,33 +58,25 @@ CSS OUTPUT:
 .root[data-spinner] { color:green; }
 ```
 
-## Override the behavior of native pseudo-classes
-
-You can also override any native pseudo-class. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes. This can ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change.
-
-We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
-
-*<No example?>
-
 ## Extend external stylesheet
 
-You can import from an external stylesheet and extend it to use custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and scoped to be used for the class selector `.media-button`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `media-button` component. Several native and custom pseudo-classes are styled for `media-button`. *<Shouldn't `loading` be defined in `-sb-states`?>* 
+You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.media-button`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `media-button` component. 
 
 CSS API:
 ```css
 /* example2.css */
 :import {
     -st-from: "./example1.css"; /* stylesheet a previous example */
-    -st-default: Comp1; /* import color1 and color2 variables */
+    -st-default: Comp1;
 }
-.media-button{
+.media-button {
     -st-extends: Comp1;
     -st-states: toggled, selected;
 }
-.media-button:hover { border:10px solid black; }
-.media-button:toggled { color:gold;}
-.media-button:loading { color:silver; }
-.media-button:selected { color:salmon; }
+.media-button:hover { border:10px solid black; } /* native CSS because no custom declaration*/
+.media-button:loading { color:silver; } /* from example1 */
+.media-button:selected { color:salmon; } /* from example2 */
+.media-button:toggled { color:gold;} /* included in example1 but overridden by example2 */
 ```
 
 CSS OUTPUT:
@@ -96,13 +85,13 @@ CSS OUTPUT:
 .root[data-example1-toggled]{ color:red; }
 .root[data-example1-loading]{ color:green; }
 /* namespaced to example2 */
-.root .media-button:hover { border:10px solid black; } /* native hover - not declared by anyone */
-.root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to example2 - last to declare */
+.root .media-button:hover { border:10px solid black; } /* native hover - not declared */
 .root .media-button[data-example1-loading] { color:silver; } /* loading scoped to example1 - only one to declare */
 .root .media-button[data-example2-selected] { color:salmon; } /* selected scoped to example2 - only one to declare */
+.root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to example2 - last to declare */
 ```
 
-## Enabling custom states
+## Enabling custom pseudo-classes
 
 Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. *<Should this also be explained above?>*
 
