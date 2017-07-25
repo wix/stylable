@@ -15,10 +15,10 @@ describe('static Generator mixins', function () {
 
         const sheet = Stylesheet.fromCSS(`
             :import("./relative/path/to/mixin.js") {
-                -sb-default: MyMixin;
+                -st-default: MyMixin;
             }
             .container { 
-                -sb-mixin: MyMixin(red);                
+                -st-mixin: MyMixin(red);                
             }
         `, "StyleA");
 
@@ -36,7 +36,7 @@ describe('static Generator mixins', function () {
         expect(stack[0]).to.eql({
             selector: '.container',
             rules: {
-                "-sb-mixin": "MyMixin(red)",
+                "-st-mixin": "MyMixin(red)",
                 color: "red"
             }
         });
@@ -56,10 +56,10 @@ describe('static Generator mixins', function () {
 
         const sheet = Stylesheet.fromCSS(`
             :import("./relative/path/to/mixin.js") {
-                -sb-default: MyMixin;
+                -st-default: MyMixin;
             }
             .container { 
-                -sb-mixin: MyMixin(red);
+                -st-mixin: MyMixin(red);
             }
         `, "StyleA");
 
@@ -78,7 +78,7 @@ describe('static Generator mixins', function () {
             {
                 selector: '.container',
                 rules: {
-                    '-sb-mixin': "MyMixin(red)"
+                    '-st-mixin': "MyMixin(red)"
                 }
             },
             {
@@ -104,10 +104,10 @@ describe('static Generator mixins', function () {
 
         const sheet = Stylesheet.fromCSS(`
             :import("./relative/path/to/mixin.js") {
-                -sb-default: MyMixin;
+                -st-default: MyMixin;
             }
             .container { 
-                -sb-mixin: MyMixin(red);
+                -st-mixin: MyMixin(red);
             }
         `, "StyleA");
 
@@ -154,10 +154,10 @@ describe('static Generator mixins', function () {
 
         const sheet = Stylesheet.fromCSS(`
             :import("./relative/path/to/mixin.js") {
-                -sb-default: MyMixin;
+                -st-default: MyMixin;
             }
             .container { 
-                -sb-mixin: MyMixin(red, 10px solid black);
+                -st-mixin: MyMixin(red, 10px solid black);
             }
         `, "StyleA");
 
@@ -175,7 +175,7 @@ describe('static Generator mixins', function () {
         expect(stack).to.eql([
             {
                 selector: ".container",
-                rules: { "-sb-mixin": "MyMixin(red, 10px solid black)" }
+                rules: { "-st-mixin": "MyMixin(red, 10px solid black)" }
             },
             {
                 selector: ".container > *",

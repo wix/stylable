@@ -1,17 +1,17 @@
 # Extend Stylable stylesheet
 
-Use the `-sb-extends` directive rule to extend a CSS class with another stylesheet, in order to be able to describe styling of [pseudo classes](./pseudo-classes.md) and [pseudo elements](./pseudo-elements.md) of the extended stylesheet.
+Use the `-st-extends` directive rule to extend a CSS class with another stylesheet, in order to be able to describe styling of [pseudo classes](./pseudo-classes.md) and [pseudo elements](./pseudo-elements.md) of the extended stylesheet.
 
-> *Note*: `-sb-extends` may only be applied to [class selector](./class-selectors.md) and [root selector](./root.md).
+> *Note*: `-st-extends` may only be applied to [class selector](./class-selectors.md) and [root selector](./root.md).
 
 CSS API:
 ```css
 :import{
-    -sb-from: "./toggle-button.css";
-    -sb-default: ToggleButton;
+    -st-from: "./toggle-button.css";
+    -st-default: ToggleButton;
 }
 .check-btn{
-  -sb-extends:ToggleButton;
+  -st-extends:ToggleButton;
   background:white;
 }
 .check-btn::label{ color:green; } /* style pseudo element label */

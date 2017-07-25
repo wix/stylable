@@ -1,17 +1,19 @@
 import { CSSObject } from "./types";
 import { STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";  
+import * as postcss from "postcss";
 
 const objectify = require("../modules/post-css-objectify");
 const stylis = require("stylis");
 const plugin = require("../modules/plugin");
 const postcssJS = require("postcss-js");
 const postcssNested = require("postcss-nested");
-const postcss = require("postcss");
+const safeParser = require("postcss-safe-parser");
 
 
 const stylableObjectifyConfig = {
     noCamel: [STYLABLE_VALUE_MATCHER],
-    noCamelSelector: [/^:vars$/]
+    noCamelSelector: [/^:vars$/],
+    mergeSame: false
 };
 
 stylis.set({ compress: false, lossless: true, global: false, preserve: true });
@@ -31,9 +33,5 @@ export function objectifyCSSStylis(css: string): CSSObject {
 
 export function objectifyCSS(css: string): CSSObject {
     // return stylis('', css);
-    return objectify(postcss.parse(css), stylableObjectifyConfig);
-}
-
-export function parse(css: string): CSSObject {
-    return processor.parse(css);
+    return objectify(safeParser(css), stylableObjectifyConfig);
 }

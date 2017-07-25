@@ -2,11 +2,11 @@
 
 **Stylable** enables you to import other stylesheets and modules in a way that is similar to [JS Imports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import). You can then use the stylesheet or module as it's been defined, or just one or more of its named values, in your own **Stylable** stylesheet.
 
-You use the **Stylable** syntax beginning with `-sb-` for the  `:import` config:
+You use the **Stylable** syntax beginning with `-st-` for the  `:import` config:
 
- * ```-sb-from:``` Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.
- * ```-sb-default:``` Imports the default export of the module named in ```-sb-from:```. Use with the name by which to identify the imported value in the scoped stylesheet.
- * ```-sb-named:``` List of the named exports to import into the local scoped stylesheet from the file named in ```-sb-from:```.
+ * ```-st-from:``` Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.
+ * ```-st-default:``` Imports the default export of the module named in ```-st-from:```. Use with the name by which to identify the imported value in the scoped stylesheet.
+ * ```-st-named:``` List of the named exports to import into the local scoped stylesheet from the file named in ```-st-from:```.
 
  > Note:
  > * `:import` is a Stylable directive and not a selector.
@@ -21,8 +21,8 @@ Import the ```toggle-button.css``` stylesheet from a local location. Assign the 
 
 ```css
  :import{
-    -sb-from:"./toggle-button.css";
-    -sb-default: ToggleButton;
+    -st-from:"./toggle-button.css";
+    -st-default: ToggleButton;
  }
  ```
 
@@ -37,8 +37,8 @@ The values ```Gallery``` and ```Menu``` are imported from the local JavaScript m
 
  ```css
  :import{
-    -sb-from:"./my-components";
-    -sb-named: Gallery, Menu;
+    -st-from:"./my-components";
+    -st-named: Gallery, Menu;
  }
  ```
 
@@ -53,8 +53,8 @@ The values ```Menu``` and ```Gallery``` are imported from the local JavaScript m
 
  ```css
  :import{
-    -sb-from:"./my-components";
-    -sb-named: Menu, Gallery as ProductGallery;
+    -st-from:"./my-components";
+    -st-named: Menu, Gallery as ProductGallery;
  }
  ```
 

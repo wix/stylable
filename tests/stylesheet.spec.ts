@@ -82,16 +82,16 @@ describe('Stylesheet', function () {
 
     describe('process', function () {
 
-        it('throw when -sb-root used in complex selector', function () {
+        it('throw when -st-root used in complex selector', function () {
 
             expect(function () {
                 Stylesheet.fromCSS(`
                     .container[attr] {
-                        -sb-root: true;
+                        -st-root: true;
                         color: red;
                     }
                 `);
-            }).throw('-sb-root on complex selector: .container[attr]');
+            }).throw('-st-root on complex selector: .container[attr]');
 
         });
 
@@ -99,53 +99,53 @@ describe('Stylesheet', function () {
             const sheet = Stylesheet.fromCSS(``);
             expect(sheet.classes).to.eql({root: 'root'});
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true }
+                root: { "-st-root": true }
             });
         });
 
-        it('with typed class -sb-root true', function () {
+        it('with typed class -st-root true', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 .container {
-                    -sb-root: true;
+                    -st-root: true;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-root": true
+                    "-st-root": true
                 }
             });
 
         });
 
-        it('with typed class -sb-root ANY_VALUE that is not "false"', function () {
+        it('with typed class -st-root ANY_VALUE that is not "false"', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
-                    -sb-root: ANY_VALUE;
+                    -st-root: ANY_VALUE;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-root": true
+                    "-st-root": true
                 }
             })
         });
 
-        it('with typed class -sb-root is false', function () {
+        it('with typed class -st-root is false', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
-                    -sb-root: false;
+                    -st-root: false;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-root": false
+                    "-st-root": false
                 }
             })
         });
@@ -154,9 +154,9 @@ describe('Stylesheet', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
-                    -sb-default: Name;
-                    -sb-named: Button as Btn, Icon;
-                    -sb-named-ExportName: MyName;
+                    -st-default: Name;
+                    -st-named: Button as Btn, Icon;
+                    -st-named-ExportName: MyName;
                 }
             `);
 
@@ -173,7 +173,7 @@ describe('Stylesheet', function () {
 
             var sheet = Stylesheet.fromCSS(`
                 :import {
-                    -sb-from: "./path/to/thing";
+                    -st-from: "./path/to/thing";
                 }
             `);
 
@@ -181,65 +181,65 @@ describe('Stylesheet', function () {
 
         });
 
-        it('with -sb-states', function () {
+        it('with -st-states', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
-                    -sb-states: stateA, stateB;
+                    -st-states: stateA, stateB;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-states": ["stateA", "stateB"]
+                    "-st-states": ["stateA", "stateB"]
                 }
             })
         });
 
-        it('with empty -sb-states ', function () {
+        it('with empty -st-states ', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
-                    -sb-states: ;
+                    -st-states: ;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-states": []
+                    "-st-states": []
                 }
             })
         })
 
 
-        it('with -sb-type', function () {
+        it('with -st-extends', function () {
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/thing"){
-                    -sb-default: Thing;
+                    -st-default: Thing;
                 }
                 .container {
-                    -sb-type: Thing;
+                    -st-extends: Thing;
                 }
             `);
 
             expect(sheet.typedClasses).to.eql({
-                root: { "-sb-root": true },
+                root: { "-st-root": true },
                 container: {
-                    "-sb-type": "Thing"
+                    "-st-extends": "Thing"
                 }
             })
         })
 
 
 
-        it('with -sb-mixin', function () {
+        it('with -st-mixin', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/mixin"){
-                    -sb-named: MyMixin1;
+                    -st-named: MyMixin1;
                 }
                 .container {
-                    -sb-mixin: MyMixin1;
+                    -st-mixin: MyMixin1;
                 }
             `);
 
@@ -250,14 +250,14 @@ describe('Stylesheet', function () {
             })
         })
 
-        it('with -sb-mixin with params', function () {
+        it('with -st-mixin with params', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/mixin"){
-                    -sb-named: MyMixin1;
+                    -st-named: MyMixin1;
                 }
                 .container {
-                    -sb-mixin: MyMixin1(100px, 50);
+                    -st-mixin: MyMixin1(100px, 50);
                 }
             `);
 
@@ -268,14 +268,14 @@ describe('Stylesheet', function () {
             })
         });
 
-        it('with -sb-mixin with multiple mixins', function () {
+        it('with -st-mixin with multiple mixins', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/mixin"){
-                    -sb-named: MyMixin1, MyMixin2;
+                    -st-named: MyMixin1, MyMixin2;
                 }
                 .container {
-                    -sb-mixin:  MyMixin1(100px, 50) MyMixin2  MyMixin3();
+                    -st-mixin:  MyMixin1(100px, 50) MyMixin2  MyMixin3();
                 }
             `);
 
@@ -288,15 +288,15 @@ describe('Stylesheet', function () {
             })
         })
 
-        it('with -sb-mixin no params multiple defs', function () {
+        it('with -st-mixin no params multiple defs', function () {
 
             const sheet = Stylesheet.fromCSS(`
                 :import("./path/to/mixin"){
-                    -sb-named: MyMixin1, MyMixin2;
+                    -st-named: MyMixin1, MyMixin2;
                 }
                 .container {
-                    -sb-mixin: MyMixin1;
-                    -sb-mixin: MyMixin2;
+                    -st-mixin: MyMixin1;
+                    -st-mixin: MyMixin2;
                 }
             `);
 
@@ -421,7 +421,7 @@ describe('Stylesheet', function () {
             `);
 
             const expected = {
-                "my-Name": ['value', 'value2'],
+                "my-Name": 'value2',
                 "my-Other": 'value3'
             };
 
@@ -507,12 +507,12 @@ describe('Stylesheet', function () {
         it('not break types on broken selector', function(){
 
             var sheet = Stylesheet.fromCSS(`
-                .root{-sb-states: a, b;}
+                .root{-st-states: a, b;}
                 .root:
             `);
 
             expect(sheet.typedClasses[sheet.root]).to.eql({
-                "-sb-states": ["a", "b"]
+                "-st-states": ["a", "b"]
             });
         });
     })

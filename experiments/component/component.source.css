@@ -1,6 +1,6 @@
 :import("party") {
-    -sb-defualt: Party;
-    -sb-named: Hot, gaga;
+    -st-defualt: Party;
+    -st-named: Hot, gaga;
 }
 
 :vars {
@@ -16,7 +16,7 @@
 }
 
 .Label {
-    -sb-type: Party;
-    -sb-apply: Hot;
+    -st-extends: Party;
+    -st-apply: Hot;
     background: firebrick;
 }

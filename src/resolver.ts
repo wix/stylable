@@ -30,7 +30,7 @@ export class Resolver {
     }
     resolve(sheet: Stylesheet, name: string) {
         const typedClass = sheet.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(sheet, typedClass[valueMapping.type] || "") : null;
+        const _import = typedClass ? this.getImportForSymbol(sheet, typedClass[valueMapping.extends] || "") : null;
         return _import ? this.resolveModule(_import.from) : sheet;
     }
     resolveImports(sheet: Stylesheet) {
