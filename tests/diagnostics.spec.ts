@@ -441,7 +441,38 @@ describe('diagnostics: warnings and errors',function(){
 
             });
         });
-
-                    
+                 
     });
+  
+  describe('selectors', function(){
+
+        it('should not allow conflicting extends', function(){
+            expectWarnings(`
+                :import {
+                    -st-from: "./sheetA";
+                    -st-named: SheetA;
+                }
+                :import {
+                    -st-from: "./sheetB";
+                    -st-named: SheetB;
+                }
+                .my-a { -st-extends: SheetA }
+                .my-b { -st-extends: SheetB }
+
+                .my-a.my-b {}
+                SheetA.my-b {}
+                SheetB.my-a {}
+            `,[
+                {message:'conflicting extends matching same target [.my-a.my-b]',file:"main.css"},
+                {message:'conflicting extends matching same target [SheetA.my-b]',file:"main.css"},
+                {message:'conflicting extends matching same target [SheetB.my-a]',file:"main.css"}
+            ]
+            ,[
+                {content:'.root{}', path:'sheetA.ts'},
+                {content:'.root{}', path:'sheetB.ts'}
+            ]);
+        });
+
+    });
+  
 });
