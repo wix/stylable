@@ -8,9 +8,9 @@ Native pseudo-classes like `:hover` and `:nth-child()` are valid and supported n
 
 ## Define custom pseudo-classes
 
-To define custom pseudo-classes, you use the **Stylable** directive rule `-sb-states` to provide a list of the possible custom pseudo-classes that you want to use in the CSS.
+To define custom pseudo-classes, you use the **Stylable** directive rule `-st-states` to provide a list of the possible custom pseudo-classes that you want to use in the CSS.
 
-The `-sb-states` directive rule can be defined only for simple selectors like [tag selector](./tag-selectors.md), [class selector](./class-selectors.md) and [root](./root.md).
+The `-st-states` directive rule can be defined only for simple selectors like [tag selector](./tag-selectors.md), [class selector](./class-selectors.md) and [root](./root.md).
 
 ## Name custom pseudo-classes and assign a style to them
 
@@ -35,28 +35,8 @@ CSS OUTPUT:
 .root[data-example1-loading][data-example1-toggled] { color:blue; }
 ```
 
-> Note: You can also override the behavior of native pseudo-class. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
+> Note: You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
-## Map custom pseudo-classes
-
-You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. In the CSS output, instead of the default behavior in **Stylable** of generating the `data-*` attributes to target states, it uses the custom implementation defined in the source. 
-
-CSS API:
-```css
-/* example-custom.css */
-.root{
-    -st-states: toggled(".on"), loading("[data-spinner]");
-}
-.root:toggled { color:red; }
-.root:loading { color:green; }
-```
-
-CSS OUTPUT:
-```css
-/* namespaced to example-custom */
-.root.on { color:red; }
-.root[data-spinner] { color:green; }
-```
 
 ## Extend external stylesheet
 
@@ -91,7 +71,28 @@ CSS OUTPUT:
 .root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to example2 - last to declare */
 ```
 
-## Enabling custom pseudo-classes
+## Map custom pseudo-classes
+
+You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. In the CSS output,instead of the default behavior in **Stylable** of generating the `data-*` attributes to target states, it uses the custom implementation defined in the source. 
+
+CSS API:
+```css
+/* example-custom.css */
+.root{
+    -st-states: toggled(".on"), loading("[data-spinner]");
+}
+.root:toggled { color:red; }
+.root:loading { color:green; }
+```
+
+CSS OUTPUT:
+```css
+/* namespaced to example-custom */
+.root.on { color:red; }
+.root[data-spinner] { color:green; }
+```
+
+## Enable custom pseudo-classes
 
 Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. *<Should this also be explained above?>*
 
