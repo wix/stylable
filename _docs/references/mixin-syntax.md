@@ -6,9 +6,7 @@ You can use **Stylable** to apply complex styles and behaviors to a CSS rule set
 Here are some use cases where you can use mixins with other **Stylable** features:
 * [Layouts](./create-layouts.md) - easily describe complex layouts.
 * [Variants](./variants.md) - apply a specific theme to a component.
-* Helpers - handle color manipulations, ease functions, use custom CSS shortcuts.
-
-You use the **Stylable** syntax `-sb-mixin` with or without parameters applied. You can also use multiple mixins in the same statement. 
+* Helpers - use custom CSS shortcuts, like timers, effects and macros.
 
 ## Example
 
@@ -17,11 +15,11 @@ The value `textTooltip` of the external file `my-mixins` is imported. The class 
 CSS API:
 ```css
 :import{
-    -sb-from: "./my-mixins";
-    -sb-names: textTooltip;
+    -st-from: "./my-mixins";
+    -st-names: textTooltip;
 }
 .submit-button{
-    -sb-mixin: textTooltip(300, data-tooltip);
+    -st-mixin: textTooltip(300, data-tooltip); /* apply mixin */
 }
 ```
 
@@ -32,15 +30,15 @@ You can use mixins with parameters, without parameters, and with multiple mixins
 ```css
 .a{
     /* no parameters */
-    -sb-mixin: noParams;
+    -st-mixin: noParams;
 }
 .b{
     /* multiple parameters */
-    -sb-mixin: multiParams(param1, param2);
+    -st-mixin: multiParams(param1, param2);
 }
 .c{
     /* apply multiple mixins */
-    -sb-mixin: noParams, multiParams(param1, param2);
+    -st-mixin: noParams, multiParams(param1, param2);
 }
 ```
 
@@ -48,16 +46,16 @@ Any parameter you add to the mixin is considered a string.
 
 ```css
 .a {
-    -sb-mixin: mix(300, xxx); /* ["300", "xxx"] */
+    -st-mixin: mix(300, xxx); /* ["300", "xxx"] */
 }
 .b {
-    -sb-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
+    -st-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
 }
 .c { /* use quotations to include comma */
-    -sb-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
+    -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
 .d { /* escape slashes */
-    -sb-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
+    -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
 }
 ```
 
@@ -65,7 +63,7 @@ Any parameter you add to the mixin is considered a string.
 
 Mixins can add CSS declarations to the CSS rule set to which they are applied:
 
-* Rules are added at the position in the CSS where the `-sb-mixin` is declared.
+* Rules are added at the position in the CSS where the `-st-mixin` is declared.
 * Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.
 * Multiple mixins are applied according to the order that they are specified.
 
@@ -73,7 +71,7 @@ CSS API:
 ```css
 .a{
     color:red;
-    -sb-mixin: golden;
+    -st-mixin: golden;
     background:white;
 }
 .a:hover{
