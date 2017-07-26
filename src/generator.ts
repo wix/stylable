@@ -229,7 +229,7 @@ export class Generator {
                 node.name = this.scope(name, current.namespace);
                 break;
             }
-            const next = this.resolver.resolve(current, 'root');
+            const next = this.resolver.resolve(current, current.root);
             if (next !== current) {
                 current = next;
             } else {
