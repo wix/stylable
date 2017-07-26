@@ -2,7 +2,7 @@ import { Import } from './import';
 import { Pojo, CSSObject } from './types';
 import { MixinValue, TypedClass } from "./stylable-value-parsers";
 import { objectifyCSS } from './parser';
-import { process } from "./process";
+import { process, processNamespace } from "./process";
 
 export class Stylesheet {
     namespace: string;
@@ -20,7 +20,7 @@ export class Stylesheet {
     constructor(cssDefinition: CSSObject, namespace: string = "", source: string = "") {
         this.source = source;
         this.cssDefinition = cssDefinition;
-        this.namespace = this.processNamespace(namespace, cssDefinition['@namespace']);
+        this.namespace = processNamespace(namespace, cssDefinition['@namespace']);
         process(this);
     }
     static fromCSS(css: string, namespace?: string, source?: string) {
@@ -28,16 +28,6 @@ export class Stylesheet {
     }
     static isStylesheet(maybeStylesheet: any) {
         return maybeStylesheet instanceof Stylesheet;
-    }
-    private processNamespace(strongNamespace = "", weakNamespace: string | string[] = "") {
-        if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
-        if (Array.isArray(weakNamespace)) {
-            return weakNamespace[weakNamespace.length - 1].replace(/'|"/g, '');
-        } else if (weakNamespace) {
-            return weakNamespace.replace(/'|"/g, '');
-        } else {
-            return 's' + Stylesheet.globalCounter++;
-        }
     }
     public get(name: string) {
         return this.classes[name] || null;
