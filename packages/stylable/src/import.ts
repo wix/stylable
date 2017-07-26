@@ -9,6 +9,9 @@ export interface CSSImportRaw {
 
 export class Import {
     constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) { }
+    static findImportForSymbol(imports: Import[], symbol: string){
+        return imports.filter((_import: Import) => _import.containsSymbol(symbol))[0] || null;
+    }
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
         //TODO: handle " and ' strings in SbFrom
 
