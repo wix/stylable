@@ -54,6 +54,17 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
 }
 
 function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
+    if(isSimpleSelector && selector.match(/^[A-Z]\w+$/)){
+        const importWithRef = sheet.imports.find(_import => _import.containsSymbol(selector));
+        if(importWithRef){
+            const ExtendsRef = importWithRef.defaultExport || importWithRef.named[selector];
+            Array.isArray(rules) ? rules.forEach((rules) => {
+                mergeTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends, ExtendsRef);
+            }) : mergeTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends, ExtendsRef);
+        } else {
+            // warn for component Tag selector with no reference ?
+        }
+    }
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.root);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.states);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends);
@@ -65,14 +76,13 @@ function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObjec
     }) : mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
 }
 
-
-function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
-    if (!hasOwn(rules, typedRule)) { return; }
+function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers, value?:any) {
+    if (!value && !hasOwn(rules, typedRule)) { return; }
     if (!isSimpleSelector) { throw new Error(typedRule + ' on complex selector: ' + selector); }
     const name = selector.replace('.', '');
     sheet.typedClasses[name] = {
         ...sheet.typedClasses[name],
-        [typedRule]: SBTypesParsers[typedRule](rules[typedRule])
+        [typedRule]: value || SBTypesParsers[typedRule](rules[typedRule])
     };
 }
 

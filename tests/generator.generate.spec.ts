@@ -182,7 +182,33 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('component/tag typed selector that extends root', function () {
+        it('component/tag selector with first Capital letter automatically extend reference with identical name', function () {
+            
+            const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+
+            const sheetB = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -st-default: Container;
+                }                
+                Container {}
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector that extends another stylesheet', function () {
 
             const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
 
@@ -210,7 +236,40 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('component/tag typed selector that extends root with inner class targeting', function () {
+        it('component/tag selector with first Capital letter is overridden with -st-extends', function () {
+            
+            const sheetA = Stylesheet.fromCSS(``, "SheetA");
+            const sheetB = Stylesheet.fromCSS(``, "SheetB");
+
+            const entrySheet = Stylesheet.fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -st-default: SheetA;
+                }  
+                :import("./relative/path/to/sheetB.stylable.css"){
+                    -st-default: SheetB;
+                }                 
+                SheetB {
+                    -st-extends: SheetA;
+                }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([entrySheet], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA,
+                    "./relative/path/to/sheetB.stylable.css": sheetB
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .SheetA__THE_DIVIDER__root {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector that extends root with inner class targeting', function () {
 
             const sheetA = Stylesheet.fromCSS(`
                 .inner { }
@@ -392,7 +451,6 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-
         it('custom states from imported type', function () {
             const sheetA = Stylesheet.fromCSS(`
                 .root { 
@@ -426,7 +484,6 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-
 
         it('custom states lookup order', function () {
             const sheetA = Stylesheet.fromCSS(`
@@ -462,8 +519,6 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-
-
 
         it('custom states form imported type on inner pseudo-class', function () {
             const sheetA = Stylesheet.fromCSS(`
