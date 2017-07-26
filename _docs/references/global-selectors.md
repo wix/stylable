@@ -1,8 +1,8 @@
 # Global selectors
 
-Selectors inside the `:global()` directive selector are not scoped to the stylesheet. 
+In **Stylable**, selectors are scoped to the stylesheet. But what if you want to target global or other selectors that are not scoped? You can use the `:global()` directive selector. 
 
-In this example `.classB` and `.classC` are not coped to `App`.
+In this example `.classB` and `.classC` are not scoped to `App` but they are still colored red in the CSS.
 
 CSS input
 ```css
@@ -20,7 +20,7 @@ CSS output
     }
 ```
 
-> **Note**: You can also use global pseudo-classes and elements to override an override. But why would you?! You can describe them using this syntax:
+> **Note**: While we don't recommend it, you can also use global pseudo-classes and elements to override an override. You can describe them using this syntax:
 >
 > ```css
 > .classA :global(.classB > .classC) .classD:global(:hover) {
