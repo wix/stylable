@@ -221,12 +221,22 @@ export class Generator {
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         //TODO: only transform what is found
-        if (sheet.classes[name]) {
-            node.type = 'class';
-            node.before = ' ';
-            node.name = this.scope(name, sheet.namespace);
+        let current = sheet;
+        while (current) {
+            if(current.classes[name]){
+                node.type = 'class';
+                node.before = ' ';
+                node.name = this.scope(name, current.namespace);
+                break;
+            }
+            const next = this.resolver.resolve(current, current.root);
+            if (next !== current) {
+                current = next;
+            } else {
+                break;
+            }
         }
-        return this.resolver.resolve(sheet, name);
+        return this.resolver.resolve(current, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
