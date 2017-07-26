@@ -11,15 +11,16 @@
 ## Stylable
 
  * **directive rule**: `-st-*` rules that hint Stylable
-    * **[-st-from](./imports.md)**: import location
-    * **[-st-default](./imports.md)**: import default export
-    * **[-st-named](./imports.md)**: import named exports
-    * **[-st-extends](./extend-stylesheet.md)**: simple selector base class
-    * **[-st-states](./pseudo-classes.md)**: define custom pseudo-classes
-    * **[-st-mixin](./mixin-syntax.md)**: apply mixins to CSS ruleset
-    * **[-st-variant](./variants.md)**: apply pre-made look and feel
+    * **[-st-from](../references/imports.md)**: import location
+    * **[-st-default](../references/imports.md)**: import default export
+    * **[-st-named](../references/imports.md)**: import named exports
+    * **[-st-extends](../references/extend-stylesheet.md)**: simple selector base class
+    * **[-st-states](../references/pseudo-classes.md)**: define custom pseudo-classes
+    * **[-st-mixin](../references/mixin-syntax.md)**: apply mixins to CSS ruleset
+    * **[-st-variant](../references/variants.md)**: apply pre-made look and feel
 * **selectors**
-    * **[Pseudo-elements](./pseudo-elements.md)**: `::X` target internal part 
-    * **[Pseudo-classes](./pseudo-classes.md)**: `:X` target state
-    * **[Custom selectors](./custom-selectors)**: `:--X` selector shortcut
-    * **[Global selectors](./global-selectors)**: `:global(X)` keep selector global - not scoped
+    * **[Pseudo-elements](../references/pseudo-elements.md)**: `::X` target internal part 
+    * **[Pseudo-classes](../references/pseudo-classes.md)**: `:X` target state
+    * **[Custom selectors](../references/custom-selectors.md)**: `:--X` selector shortcut
+    * **[Global selectors](../references/global-selectors.md)**: `:global(X)` keep selector global - not scoped
+* **[namespace](../references/namespace.md)**: `@namespace "readable name"` - hint for better development mode
