@@ -326,6 +326,125 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
+        it('resolve and transform pseudo-element from deeply extended type', function () {
+            
+            const GenericGallery = Stylesheet.fromCSS(`
+                .nav-btn { }
+            `, "GenericGallery");
+
+            const ImageGallery = Stylesheet.fromCSS(`
+                :import("./generic-gallery.stylable.css"){
+                    -st-default: GenericGallery;
+                }
+                .root { -st-extends: GenericGallery; }
+            `, "ImageGallery");
+
+            const App = Stylesheet.fromCSS(`
+                :import("./image-gallery.stylable.css"){
+                    -st-default: ImageGallery;
+                }
+                .main-gallery {
+                    -st-extends: ImageGallery;
+                }
+                .main-gallery::nav-btn { }
+            `, "App");
+
+            const css = Generator.generate([App], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./generic-gallery.stylable.css": GenericGallery,
+                    "./image-gallery.stylable.css": ImageGallery
+                })
+            }));
+
+            const res = [
+                '.GenericGallery__nav-btn {}',
+                '.ImageGallery__root.GenericGallery__root {}', /* ToDo: check if GenericGallery__root is needed here */
+                '.App__main-gallery.ImageGallery__root {}',
+                '.App__main-gallery.ImageGallery__root .GenericGallery__nav-btn {}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('resolve and transform pseudo-element from deeply override rather then extended type', function () {
+            
+            const GenericGallery = Stylesheet.fromCSS(`
+                .nav-btn { }
+            `, "GenericGallery");
+
+            const ImageGallery = Stylesheet.fromCSS(`
+                :import("./generic-gallery.stylable.css"){
+                    -st-default: GenericGallery;
+                }
+                .root { -st-extends: GenericGallery; }
+                .nav-btn { }
+            `, "ImageGallery");
+
+            const App = Stylesheet.fromCSS(`
+                :import("./image-gallery.stylable.css"){
+                    -st-default: ImageGallery;
+                }
+                .main-gallery {
+                    -st-extends: ImageGallery;
+                }
+                .main-gallery::nav-btn { }
+            `, "App");
+
+            const css = Generator.generate([App], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./generic-gallery.stylable.css": GenericGallery,
+                    "./image-gallery.stylable.css": ImageGallery
+                })
+            }));
+
+            const res = [
+                '.GenericGallery__nav-btn {}',
+                '.ImageGallery__root.GenericGallery__root {}',
+                '.ImageGallery__nav-btn {}', 
+                '.App__main-gallery.ImageGallery__root {}',
+                '.App__main-gallery.ImageGallery__root .ImageGallery__nav-btn {}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('resolve and transform pseudo-element on root - prefer inherited element to override', function () {
+            
+            const GenericGallery = Stylesheet.fromCSS(`
+                .nav-btn { }
+            `, "GenericGallery");
+
+            const ImageGallery = Stylesheet.fromCSS(`
+                :import("./generic-gallery.stylable.css"){
+                    -st-default: GenericGallery;
+                }
+                .root { -st-extends: GenericGallery; }
+                .nav-btn { }
+                .root::nav-btn { }
+            `, "ImageGallery");
+
+            const css = Generator.generate([ImageGallery], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./generic-gallery.stylable.css": GenericGallery
+                })
+            }));
+
+            const res = [
+                '.GenericGallery__nav-btn {}',
+                '.ImageGallery__root.GenericGallery__root {}',
+                '.ImageGallery__nav-btn {}',
+                '.ImageGallery__root.GenericGallery__root .GenericGallery__nav-btn {}' /* ToDo: check if GenericGallery__root is needed here (same just uglier) */
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
         it('resolve and transform pseudo-element from deeply imported type (selector with , separator)', function () {
 
             const Text = Stylesheet.fromCSS(`
