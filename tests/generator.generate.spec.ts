@@ -135,6 +135,25 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
+        it('not append imports with unknown "from" to the output', function () {
+            const sheetA = Stylesheet.fromCSS(`
+                :import{}
+                .containerA{ color:red; }
+            `, "TheNameSpace");
+
+            const css = Generator.generate([sheetA], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({})
+            }));
+
+            const res = [
+                '.TheNameSpace__THE_DIVIDER__containerA {\n    color: red\n}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
         it('scoped typed selector that extends root', function () {
 
             const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");

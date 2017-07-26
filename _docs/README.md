@@ -111,6 +111,8 @@ Structural state dependencies
 
 [Variables](./references/variables.md)
 
+[namespace](./references/namespace.md)
+
 ## Useful Information
 [Cheatsheet](./usefulInfo/cheatsheet.md)
 

@@ -5,7 +5,7 @@ In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/d
 
 ## Styling custom pseudo-elements
 
-use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or [extended class selector](./extend-stylesheet.md).
+Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or [extended class selector](./extend-stylesheet.md).
 
 Stylesheet can [import](./imports.md) a `video-player` component (stylesheet), extend it and style an internal `play-button`:
 
