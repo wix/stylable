@@ -278,6 +278,17 @@ describe('diagnostics: warnings and errors',function(){
                 ,[{content:customButton,path:'file.css'}])
    
             });
+          
+            it('should return warning for import with missing "from"',function(){
+                expectWarnings(`
+
+                    :import{
+                        -st-default:Comp;
+                    }
+                `,{message:'"-st-from" is missing in import block',file:"main.css"}
+                ,[{content:customButton,path:'file.css'}])
+   
+            });
             
         });
 
