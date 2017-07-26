@@ -13,6 +13,8 @@ export class Import {
 
         SbFrom = SbFrom || cssImportDef[valueMapping.from];
 
+        if(!SbFrom){ return null; }
+
         if (cssImportDef[valueMapping.named]) {
             cssImportDef[valueMapping.named].split(',').forEach((name) => {
                 const parts = name.trim().split(/\s+as\s+/);
