@@ -268,6 +268,81 @@ describe('Stylesheet', function () {
             })
         });
 
+        it('with -st-mixin with params with spaces between', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -st-named: MyMixin1;
+                }
+                .container {
+                    -st-mixin: MyMixin1( 300 , xxx );
+                }
+            `);
+            
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: [`300`, `xxx`] }
+                ]
+            })
+        });
+
+        it('with -st-mixin with missing params should remove the last', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -st-named: MyMixin1;
+                }
+                .container {
+                    -st-mixin: MyMixin1( 300 , , , );
+                }
+            `);
+            
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: [`300`, ``, ``] }
+                ]
+            })
+        });
+
+        it('with -st-mixin with params normalized', function () {
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -st-named: MyMixin1;
+                }
+                .container {
+                    -st-mixin: MyMixin1(300, aaa, "bbb", "cc,c", ""ddd"", "\"eee\"", 'fff');
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: [`300`, `aaa`, `bbb`, `cc,c`, `"ddd"`, `"eee"`, `'fff'`] }
+                ]
+            })
+        });
+
+        it.skip("not working mixin arguments", function() {
+            // postcss-safe-parser outputs wrong AST and it breaks in -st-mixin value parser
+            const sheet = Stylesheet.fromCSS(`
+                :import("./path/to/mixin"){
+                    -st-named: MyMixin1;
+                }
+                .classA {
+                    -st-mixin: MyMixin1("3\"00");
+                }
+                .classB {
+                    -st-mixin: MyMixin1(aaa, "x\" ,xx");
+                }
+                .classC {
+                    -st-mixin: MyMixin1(bbb, 'y'yy');
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".classA": [ { type: "MyMixin1", options: [`3"00`] } ],
+                ".classB": [ { type: "MyMixin1", options: [`aaa`, `x" ,xx`] } ],
+                ".classC": [ { type: "MyMixin1", options: [`bbb`, `'y'yy'`] } ]
+            })
+        });
+
         it('with -st-mixin with multiple mixins', function () {
 
             const sheet = Stylesheet.fromCSS(`
