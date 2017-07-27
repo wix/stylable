@@ -1,3 +1,4 @@
+import { fromCSS } from "../src";
 import { Generator, Mode } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
@@ -8,7 +9,7 @@ describe('Generator variables interpolation', function () {
     it('should not output :vars selector', function () {
 
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :vars {
                 param: red;
             }
@@ -25,7 +26,7 @@ describe('Generator variables interpolation', function () {
     it('should inline value() usage', function () {
 
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :vars {
                 param: red;
             }
@@ -49,7 +50,7 @@ describe('Generator variables interpolation', function () {
 
     it('should resolve value() usage in variable declaration', function () {
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :vars {
                 param2: red;
                 param: value(param2);
@@ -73,7 +74,7 @@ describe('Generator variables interpolation', function () {
 
     it('should throw on recursive resolve', function () {
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :vars {
                 param2: value(param1);
                 param: value(param2);
@@ -90,7 +91,7 @@ describe('Generator variables interpolation', function () {
     });
 
     it('should support default value', function () {
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :vars {
                 param: red;
                 param2: blue
@@ -121,7 +122,7 @@ describe('Generator variables interpolation', function () {
                 "param2": "blue",
             }
         });
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import('./path') {
                 -st-named: param1, param2;
             }
@@ -165,7 +166,7 @@ describe('Generator variables interpolation', function () {
             };
         }
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import("./relative/path/to/mixin.js") {
                 -st-default: MyMixin;
             }

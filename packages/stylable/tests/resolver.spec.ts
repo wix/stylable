@@ -1,3 +1,4 @@
+import { fromCSS } from "../src";
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -9,9 +10,9 @@ describe('Resolver', function () {
 
         it('get the import definition for the symbol', function () {
 
-            var sheetA = Stylesheet.fromCSS(``);
+            var sheetA = fromCSS(``);
 
-            var sheetB = Stylesheet.fromCSS(`
+            var sheetB = fromCSS(`
                 :import("./path/to/thing"){
                     -st-default: Name;
                 }

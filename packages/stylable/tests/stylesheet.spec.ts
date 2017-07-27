@@ -1,3 +1,4 @@
+import { fromCSS } from "../src";
 import { Import } from '../src/import';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -9,7 +10,7 @@ describe('Stylesheet', function () {
 
         it('create css in js definition', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .container {
                     color: red;
                 }
@@ -23,7 +24,7 @@ describe('Stylesheet', function () {
 
         it('create a stylesheet from css', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .container { }
             `)
 
@@ -36,7 +37,7 @@ describe('Stylesheet', function () {
 
         it('create a stylesheet from css with multiple selectors', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .container { }
                 .image { }
             `)
@@ -51,7 +52,7 @@ describe('Stylesheet', function () {
 
         it('create a stylesheet from css with nested selector', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .container .image { } 
             `)
 
@@ -65,7 +66,7 @@ describe('Stylesheet', function () {
 
         it('create a stylesheet from css with multiple selectors in the same declaration', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .container, .wrapper .image { } 
             `)
 
@@ -85,7 +86,7 @@ describe('Stylesheet', function () {
         it('throw when -st-root used in complex selector', function () {
 
             expect(function () {
-                Stylesheet.fromCSS(`
+                fromCSS(`
                     .container[attr] {
                         -st-root: true;
                         color: red;
@@ -96,7 +97,7 @@ describe('Stylesheet', function () {
         });
 
         it('with empty css', function () {
-            const sheet = Stylesheet.fromCSS(``);
+            const sheet = fromCSS(``);
             expect(sheet.classes).to.eql({root: 'root'});
             expect(sheet.typedClasses).to.eql({
                 root: { "-st-root": true }
@@ -105,7 +106,7 @@ describe('Stylesheet', function () {
 
         it('with typed class -st-root true', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-root: true;
                 }
@@ -121,7 +122,7 @@ describe('Stylesheet', function () {
         });
 
         it('with typed class -st-root ANY_VALUE that is not "false"', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-root: ANY_VALUE;
                 }
@@ -136,7 +137,7 @@ describe('Stylesheet', function () {
         });
 
         it('with typed class -st-root is false', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-root: false;
                 }
@@ -152,7 +153,7 @@ describe('Stylesheet', function () {
 
         it('create import definitions (format A)', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/thing"){
                     -st-default: Name;
                     -st-named: Button as Btn, Icon;
@@ -171,7 +172,7 @@ describe('Stylesheet', function () {
 
         it('create import definitions (format B)', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 :import {
                     -st-from: "./path/to/thing";
                 }
@@ -182,7 +183,7 @@ describe('Stylesheet', function () {
         });
 
         it('with -st-states', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-states: stateA, stateB;
                 }
@@ -197,7 +198,7 @@ describe('Stylesheet', function () {
         });
 
         it('with empty -st-states ', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-states: ;
                 }
@@ -213,7 +214,7 @@ describe('Stylesheet', function () {
 
 
         it('with -st-extends', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/thing"){
                     -st-default: Thing;
                 }
@@ -234,7 +235,7 @@ describe('Stylesheet', function () {
 
         it('with -st-mixin', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
@@ -252,7 +253,7 @@ describe('Stylesheet', function () {
 
         it('with -st-mixin with params', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
@@ -270,7 +271,7 @@ describe('Stylesheet', function () {
 
         it('with -st-mixin with multiple mixins', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1, MyMixin2;
                 }
@@ -290,7 +291,7 @@ describe('Stylesheet', function () {
 
         it('with -st-mixin no params multiple defs', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1, MyMixin2;
                 }
@@ -392,7 +393,7 @@ describe('Stylesheet', function () {
 
         it('name should not by modified', function () {
 
-            var styleCSS = Stylesheet.fromCSS(`
+            var styleCSS = fromCSS(`
                 :vars{
                     my-Name: value;
                 }
@@ -410,7 +411,7 @@ describe('Stylesheet', function () {
 
         it('should support multiple declarations', function () {
 
-            var styleCSS = Stylesheet.fromCSS(`
+            var styleCSS = fromCSS(`
                 :vars{
                     my-Name: value;
                 }
@@ -434,7 +435,7 @@ describe('Stylesheet', function () {
     describe('global', function () {
         it('should not by modified', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 :global(.myselector){
                     color: red;
                 }
@@ -448,7 +449,7 @@ describe('Stylesheet', function () {
 
         it('should not by modified and keep scoping after', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 :global(.myselector) .myclass{
                     color: red;
                 }
@@ -466,7 +467,7 @@ describe('Stylesheet', function () {
 
         it('should not by modified complex global selector', function () {
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 :global(.myselector .otherselector){
                     color: red;
                 }
@@ -492,7 +493,7 @@ describe('Stylesheet', function () {
         });
         it('should contain source string fromCSS', function(){
             var source = "source string";
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 :global(.myselector .otherselector){
                     color: red;
                 }
@@ -506,7 +507,7 @@ describe('Stylesheet', function () {
 
         it('not break types on broken selector', function(){
 
-            var sheet = Stylesheet.fromCSS(`
+            var sheet = fromCSS(`
                 .root{-st-states: a, b;}
                 .root:
             `);
