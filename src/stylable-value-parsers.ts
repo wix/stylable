@@ -32,6 +32,18 @@ export const SBTypesParsers = {
     "-st-extends"(value: string) {
         return value ? value.trim() : "";
     },
+    "-st-named"(value: string) {
+        var namedMap: { [key: string]: string } = {};
+        value && value.split(',').forEach((name) => {
+            const parts = name.trim().split(/\s+as\s+/);
+            if (parts.length === 1) {
+                namedMap[parts[0]] = parts[0];
+            } else if (parts.length === 2) {
+                namedMap[parts[1]] = parts[0];
+            }
+        });
+        return namedMap;
+    },
     "-st-mixin"(value: string) {
 
         const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);

@@ -26,7 +26,7 @@ export class Resolver {
         return value;
     }
     getImportForSymbol(sheet: Stylesheet, symbol: string) {
-        return sheet.imports.filter((_import: Import) => _import.containsSymbol(symbol))[0] || null;
+        return Import.findImportForSymbol(sheet.imports, symbol);
     }
     resolve(sheet: Stylesheet, name: string) {
         const typedClass = sheet.typedClasses[name];

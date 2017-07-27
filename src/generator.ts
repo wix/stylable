@@ -80,8 +80,8 @@ export class Generator {
         let rules: Pojo, aSelector: string, processedRules: NestedRules;
 
         if (typeof selector === 'string') {
-            rules = sheet.cssDefinition[selector];
             aSelector = selector;
+            rules = sheet.cssDefinition[aSelector];
             const mixins = sheet.mixinSelectors[aSelector];
             if (mixins) {
                 this.applyMixins(aSelector, rules, mixins, resolvedSymbols, stack);
@@ -97,18 +97,14 @@ export class Generator {
         if (selector === ':vars') { return null; }
 
         if (matchAtMedia(aSelector)) {
-            processedRules = {}
-            for(var k in rules){
-                const d = this.prepareSelector(sheet, k, resolvedSymbols, []);
-                d && Object.assign(processedRules, d);
+            processedRules = {};
+            for (var k in rules) {
+                Object.assign(processedRules, this.prepareSelector(sheet, k, resolvedSymbols, []));
             }
-            return {
-                [aSelector]: processedRules
-            };
+            return { [aSelector]: processedRules };
         } else {
             processedRules = this.processRules(rules, resolvedSymbols, sheet);
         }
-
 
         //don't emit empty selectors in production
         if (this.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
@@ -156,7 +152,7 @@ export class Generator {
         var value = valueTemplate(value, resolvedSymbols);
         if (key === 'animation' || key === 'animationName') {
             value = sheet.keyframes.reduce((value: string, keyframe: string) => {
-                return value.replace(new RegExp('\\b'+keyframe+'\\b', 'g'), this.scope(keyframe, sheet.namespace));
+                return value.replace(new RegExp('\\b' + keyframe + '\\b', 'g'), this.scope(keyframe, sheet.namespace));
             }, value);
         }
         return value;
@@ -167,7 +163,7 @@ export class Generator {
         let element: string;
 
         const keyframeMatch = matchAtKeyframes(selector);
-        if(keyframeMatch){
+        if (keyframeMatch) {
             return selector.replace(keyframeMatch[1], this.scope(keyframeMatch[1], sheet.namespace));
         }
 
@@ -225,12 +221,22 @@ export class Generator {
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         //TODO: only transform what is found
-        if (sheet.classes[name]) {
-            node.type = 'class';
-            node.before = ' ';
-            node.name = this.scope(name, sheet.namespace);
+        let current = sheet;
+        while (current) {
+            if(current.classes[name]){
+                node.type = 'class';
+                node.before = ' ';
+                node.name = this.scope(name, current.namespace);
+                break;
+            }
+            const next = this.resolver.resolve(current, current.root);
+            if (next !== current) {
+                current = next;
+            } else {
+                break;
+            }
         }
-        return this.resolver.resolve(sheet, name);
+        return this.resolver.resolve(current, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
