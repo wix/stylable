@@ -50,6 +50,18 @@ export const SBTypesParsers = {
     "-st-extends"(value: string) {
         return value ? value.trim() : "";
     },
+    "-st-named"(value: string) {
+        var namedMap: { [key: string]: string } = {};
+        value && value.split(',').forEach((name) => {
+            const parts = name.trim().split(/\s+as\s+/);
+            if (parts.length === 1) {
+                namedMap[parts[0]] = parts[0];
+            } else if (parts.length === 2) {
+                namedMap[parts[1]] = parts[0];
+            }
+        });
+        return namedMap;
+    },
     "-st-mixin"(value: string) {
 
         const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);
@@ -65,7 +77,61 @@ export const SBTypesParsers = {
                 options = [];
             } else if (match = mix.match(/(.*?)\((.*?\)?)\)/)) {
                 type = match[1].trim();
-                options = match[2] ? match[2].split(',').map(x => x.trim()) : [];
+                options = [];
+                if(match[2]) {
+                    const args:string = match[2];
+                    let isInParam = false;
+                    let isInString = false;
+                    let lastIndex = 0;
+                    let lastNoneSpaceIndex = 0;
+                    for(let i = 0; i < args.length; ++i){
+                        const currentChar = args[i];
+                        if(currentChar.match(/\s/)){
+                            if(!isInParam){
+                                lastIndex = i + 1; // ignore  spaces before param
+                            }
+                            continue;
+                        }
+                        
+                        switch(currentChar) {
+                            case `"`:
+                                if(isInParam) {
+
+                                } else {
+                                    isInParam = true;
+                                    lastIndex = i + 1;
+                                }
+                                isInString = true;
+                                lastNoneSpaceIndex = i + 1;
+                                break;
+                            case `,`:
+                                if(isInString){
+                                    const lastNoneSpaceChar = args[lastNoneSpaceIndex-1];
+                                    if(lastNoneSpaceChar === `"`){
+                                        lastNoneSpaceIndex = lastNoneSpaceIndex - 1;
+                                    } else {
+                                        lastNoneSpaceIndex = lastNoneSpaceIndex + 1;
+                                        continue;
+                                    }
+                                }
+                                options.push(args.slice(lastIndex, lastNoneSpaceIndex))
+                                isInParam = false;
+                                isInString = false;
+                                lastIndex = i + 1;
+                                lastNoneSpaceIndex = i + 1;
+                                break;
+                            default:
+                                isInParam = true;
+                                lastNoneSpaceIndex = i + 1;
+                        }
+                    }
+                    if(lastIndex < args.length){
+                        if(isInParam){
+                            lastNoneSpaceIndex = args[lastNoneSpaceIndex-1] === '"' ? lastNoneSpaceIndex - 1 : lastNoneSpaceIndex
+                        }
+                        options.push(args.slice(lastIndex, lastNoneSpaceIndex));
+                    }
+                }
             } else {
                 throw new Error('Invalid mixin call:' + mix);
             }
