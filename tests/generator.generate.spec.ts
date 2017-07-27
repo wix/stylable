@@ -392,6 +392,53 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
+        it('custom states with mapping', function () {
+            
+            const sheet = Stylesheet.fromCSS(`
+                .my-class { 
+                    -st-states: my-state(".x"), my-other-state(".y[data-z=\"val\"]");
+                }
+                .my-class:my-state {} 
+                .my-class:my-other-state {}
+            `, "Style");
+
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                '.Style__my-class {}',
+                '.Style__my-class.x {}',
+                '.Style__my-class.y[data-z="val"] {}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('custom states with mapping with space around', function () {
+            
+            const sheet = Stylesheet.fromCSS(`
+                .my-class { 
+                    -st-states: my-state(" .x "), my-other-state(" .y[data-z=\"val\"] ");
+                }
+                .my-class:my-state {} 
+                .my-class:my-other-state {}
+            `, "Style");
+
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+
+            const res = [
+                '.Style__my-class {}',
+                '.Style__my-class.x {}',
+                '.Style__my-class.y[data-z="val"] {}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
 
         it('custom states from imported type', function () {
             const sheetA = Stylesheet.fromCSS(`

@@ -1,6 +1,8 @@
+export type MappedStates = { [s:string]:string|null };
+
 export interface TypedClass {
     "-st-root"?: boolean;
-    "-st-states"?: string[];
+    "-st-states"?: string[] | MappedStates;
     "-st-extends"?: string;
 }
 
@@ -27,7 +29,23 @@ export const SBTypesParsers = {
         return value === 'false' ? false : true
     },
     "-st-states"(value: string) {
-        return value ? value.split(',').map((state) => state.trim()) : [];
+        if(!value){
+            return [];
+        }
+        if(value.indexOf('(') !== -1){
+            const mappedStates:MappedStates = {};
+            const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
+            for(let i = 0; i < parts.length; i += 4){
+                const stateName = parts[i+1];
+                const mapToSelector = parts[i+3];
+                if(stateName){// ToDo: should check the selector has no operators and child
+                    mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
+                }
+            }
+            return mappedStates;
+        } else {
+            return value.split(',').map((state) => state.trim());
+        }
     },
     "-st-extends"(value: string) {
         return value ? value.trim() : "";

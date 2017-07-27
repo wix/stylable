@@ -196,6 +196,36 @@ describe('Stylesheet', function () {
             })
         });
 
+        it('with mapped -st-states', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    -st-states: stateA(".x"), stateB, state-c("[x="y"]"), state-d;
+                }
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                root: { "-st-root": true },
+                container: {
+                    "-st-states": {"stateA":`.x`, "stateB":null, "state-c":`[x="y"]`, "state-d":null}
+                }
+            })
+        });
+
+        it('with trim mapped -st-states', function () {
+            const sheet = Stylesheet.fromCSS(`
+                .container {
+                    -st-states: stateA(" .x "), stateB, state-c(" [x="y"] "), state-d;
+                }
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                root: { "-st-root": true },
+                container: {
+                    "-st-states": {"stateA":`.x`, "stateB":null, "state-c":`[x="y"]`, "state-d":null}
+                }
+            })
+        });
+
         it('with empty -st-states ', function () {
             const sheet = Stylesheet.fromCSS(`
                 .container {
@@ -229,8 +259,6 @@ describe('Stylesheet', function () {
                 }
             })
         })
-
-
 
         it('with -st-mixin', function () {
 
