@@ -1,7 +1,6 @@
 import { Import } from './import';
 import { Pojo, CSSObject } from './types';
 import { MixinValue, TypedClass } from "./stylable-value-parsers";
-import { objectifyCSS } from './parser';
 import { process, processNamespace } from "./process";
 
 export class Stylesheet {
@@ -22,9 +21,6 @@ export class Stylesheet {
         this.cssDefinition = cssDefinition;
         this.namespace = processNamespace(namespace, cssDefinition['@namespace']);
         process(this);
-    }
-    static fromCSS(css: string, namespace?: string, source?: string) {
-        return new this(objectifyCSS(css), namespace, source);
     }
     static isStylesheet(maybeStylesheet: any) {
         return maybeStylesheet instanceof Stylesheet;
