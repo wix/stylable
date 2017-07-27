@@ -25,15 +25,13 @@ export class Resolver {
         }
         return value;
     }
-    getImportForSymbol(sheet: Stylesheet, symbol: string) {
-        return Import.findImportForSymbol(sheet.imports, symbol);
-    }
     resolve(sheet: Stylesheet, name: string) {
         const typedClass = sheet.typedClasses[name];
-        const _import = typedClass ? this.getImportForSymbol(sheet, typedClass[valueMapping.extends] || "") : null;
+        const _import = typedClass ? Import.findImportForSymbol(sheet.imports, typedClass[valueMapping.extends] || "") : null;
         return _import ? this.resolveModule(_import.from) : sheet;
     }
     resolveImports(sheet: Stylesheet) {
+        //TODO: add support __esModule support?
         const imports = sheet.imports.reduce((acc, importDef) => {
             const resolved = this.resolveModule(importDef.from);
             acc[importDef.defaultExport || importDef.from] = resolved.default || resolved;
@@ -46,7 +44,7 @@ export class Resolver {
         return imports;
     }
     resolveSymbols(sheet: Stylesheet) {
-        //TODO: add support __esModule support?
+        //TODO: add keyframes
         const symbols = this.resolveImports(sheet);
         for (const varName in sheet.vars) {
             if (symbols[varName]) {

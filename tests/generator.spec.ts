@@ -4,7 +4,6 @@ import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 import { Resolver } from "../src/resolver";
 
-
 describe('Generator', function () {
 
     describe('generator.addEntry', function () {

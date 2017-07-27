@@ -1,3 +1,4 @@
+import { fromCSS } from "../src";
 import { Generator } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
@@ -10,7 +11,7 @@ describe('static Generator.generate', function () {
 
         it('accepts single stylesheet as input', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     color: black;
                 }
@@ -24,7 +25,7 @@ describe('static Generator.generate', function () {
 
         it('includes empty selectors', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {}
                 .image {}
             `, "''");
@@ -37,13 +38,13 @@ describe('static Generator.generate', function () {
 
         it('css from multiple sheets', function () {
 
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .container {
                     color: black;
                 }
             `, "''");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 .container {
                     color: white;
                 }
@@ -60,7 +61,7 @@ describe('static Generator.generate', function () {
 
         it('scope class selectors', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     color: white;
                 }
@@ -76,7 +77,7 @@ describe('static Generator.generate', function () {
 
         it('do not output :import', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import{
                     -st-from: "./relative/path/to/sheetA.stylable.css";
                     -st-default: ContainerA;
@@ -106,13 +107,13 @@ describe('static Generator.generate', function () {
 
         it('append imports to the output', function () {
 
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .containerA {
                     -st-root: true;
                 }
             `, "TheNameSpace");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){}
                 .containerB {
                     -st-root: true;
@@ -136,7 +137,7 @@ describe('static Generator.generate', function () {
         });
 
         it('not append imports with unknown "from" to the output', function () {
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 :import{}
                 .containerA{ color:red; }
             `, "TheNameSpace");
@@ -156,9 +157,9 @@ describe('static Generator.generate', function () {
 
         it('scoped typed selector that extends root', function () {
 
-            const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+            const sheetA = fromCSS(``, "TheNameSpace");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -st-default: Container;
                 }
@@ -184,9 +185,9 @@ describe('static Generator.generate', function () {
 
         it('component/tag typed selector that extends root', function () {
 
-            const sheetA = Stylesheet.fromCSS(``, "TheNameSpace");
+            const sheetA = fromCSS(``, "TheNameSpace");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -st-default: Container;
                 }                
@@ -212,11 +213,11 @@ describe('static Generator.generate', function () {
 
         it('component/tag typed selector that extends root with inner class targeting', function () {
 
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .inner { }
             `, "TheNameSpace");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                      -st-default: Container;
                 }                
@@ -247,14 +248,14 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element from imported type', function () {
 
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .containerA {
                     
                 }
                 .icon { }
             `, "TheNameSpace");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -st-default: Container;
                 }
@@ -284,11 +285,11 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element from deeply imported type', function () {
 
-            const Text = Stylesheet.fromCSS(`
+            const Text = fromCSS(`
                 .first-letter { }
             `, "Text");
 
-            const Button = Stylesheet.fromCSS(`
+            const Button = fromCSS(`
                 :import("./Text.stylable.css"){
                     -st-default: Text;
                 }
@@ -296,7 +297,7 @@ describe('static Generator.generate', function () {
                 .text { -st-extends: Text; }
             `, "Button");
 
-            const App = Stylesheet.fromCSS(`
+            const App = fromCSS(`
                 :import("./Button.stylable.css"){
                     -st-default: Button;
                 }
@@ -328,18 +329,18 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element from deeply extended type', function () {
             
-            const GenericGallery = Stylesheet.fromCSS(`
+            const GenericGallery = fromCSS(`
                 .nav-btn { }
             `, "GenericGallery");
 
-            const ImageGallery = Stylesheet.fromCSS(`
+            const ImageGallery = fromCSS(`
                 :import("./generic-gallery.stylable.css"){
                     -st-default: GenericGallery;
                 }
                 .root { -st-extends: GenericGallery; }
             `, "ImageGallery");
 
-            const App = Stylesheet.fromCSS(`
+            const App = fromCSS(`
                 :import("./image-gallery.stylable.css"){
                     -st-default: ImageGallery;
                 }
@@ -370,11 +371,11 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element from deeply override rather then extended type', function () {
             
-            const GenericGallery = Stylesheet.fromCSS(`
+            const GenericGallery = fromCSS(`
                 .nav-btn { }
             `, "GenericGallery");
 
-            const ImageGallery = Stylesheet.fromCSS(`
+            const ImageGallery = fromCSS(`
                 :import("./generic-gallery.stylable.css"){
                     -st-default: GenericGallery;
                 }
@@ -382,7 +383,7 @@ describe('static Generator.generate', function () {
                 .nav-btn { }
             `, "ImageGallery");
 
-            const App = Stylesheet.fromCSS(`
+            const App = fromCSS(`
                 :import("./image-gallery.stylable.css"){
                     -st-default: ImageGallery;
                 }
@@ -414,11 +415,11 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element on root - prefer inherited element to override', function () {
             
-            const GenericGallery = Stylesheet.fromCSS(`
+            const GenericGallery = fromCSS(`
                 .nav-btn { }
             `, "GenericGallery");
 
-            const ImageGallery = Stylesheet.fromCSS(`
+            const ImageGallery = fromCSS(`
                 :import("./generic-gallery.stylable.css"){
                     -st-default: GenericGallery;
                 }
@@ -447,11 +448,11 @@ describe('static Generator.generate', function () {
 
         it('resolve and transform pseudo-element from deeply imported type (selector with , separator)', function () {
 
-            const Text = Stylesheet.fromCSS(`
+            const Text = fromCSS(`
                 .first-letter { }
             `, "Text");
 
-            const Button = Stylesheet.fromCSS(`
+            const Button = fromCSS(`
                 :import("./Text.stylable.css"){
                     -st-default: Text;
                 }
@@ -459,7 +460,7 @@ describe('static Generator.generate', function () {
                 .text { -st-extends: Text; }
             `, "Button");
 
-            const App = Stylesheet.fromCSS(`
+            const App = fromCSS(`
                 :import("./Button.stylable.css"){
                     -st-default: Button;
                 }
@@ -491,7 +492,7 @@ describe('static Generator.generate', function () {
 
         it('custom states inline', function () {
 
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .my-class { 
                     -st-states: my-state;
                 }
@@ -513,13 +514,13 @@ describe('static Generator.generate', function () {
 
 
         it('custom states from imported type', function () {
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .root { 
                     -st-states: my-state;
                 }
             `, "StyleA");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -st-default: SheetA;
                 }
@@ -548,13 +549,13 @@ describe('static Generator.generate', function () {
 
 
         it('custom states lookup order', function () {
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .root { 
                     -st-states: my-state;
                 }
             `, "StyleA");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -st-default: SheetA;
                 }
@@ -585,13 +586,13 @@ describe('static Generator.generate', function () {
 
 
         it('custom states form imported type on inner pseudo-class', function () {
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .container { 
                     -st-states: my-state;
                 }
             `, "StyleA");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -st-default: SheetA;
                 }
@@ -619,7 +620,7 @@ describe('static Generator.generate', function () {
         });
 
         it('supports multiple appearances of the same css rule', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     color: black;
                     color: red;
@@ -636,7 +637,7 @@ describe('static Generator.generate', function () {
     describe('classes rewrite', function () {
 
         it('should update the scoped classnames on the stylesheet', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     color: black;
                     color: red;
@@ -653,14 +654,14 @@ describe('static Generator.generate', function () {
 
         it('should update the scoped classnames on depended stylesheet', function () {
 
-            const sheetA = Stylesheet.fromCSS(`
+            const sheetA = fromCSS(`
                 .container {
                     color: black;
                     color: red;
                 }
             `, "sheetA");
 
-            const sheetB = Stylesheet.fromCSS(`
+            const sheetB = fromCSS(`
                 :import("./relative/path/to/sheetA.stylable.css"){
                     -st-default: SheetA;
                 }
@@ -683,7 +684,7 @@ describe('static Generator.generate', function () {
 
 
         it('should update root classname evan if there is no root defined', function () {
-            const sheet = Stylesheet.fromCSS(``, "Sheet");
+            const sheet = fromCSS(``, "Sheet");
 
             Generator.generate(sheet, new Generator({
                 namespaceDivider: "__"
@@ -696,7 +697,7 @@ describe('static Generator.generate', function () {
 
     describe('global', function () {
         it('should not scope global selectors and remove :global', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     color: black;
                 }
@@ -719,7 +720,7 @@ describe('static Generator.generate', function () {
         });
 
         it('should work with other chunks after', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :global(.container) .container {
                     color: red;
                 }
@@ -738,7 +739,7 @@ describe('static Generator.generate', function () {
         });
 
         it('should work with multiple selectors inline', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :global(.container), .container {
                     color: red;
                 }
