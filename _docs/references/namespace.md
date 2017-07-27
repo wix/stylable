@@ -1,6 +1,10 @@
 # Namespace
 
-When you develope your application, you might want to hint **stylable** with better readable name to help scope your stylesheet.
+When you use **Stylable** your classes are automatically namespaced to that stylesheet, and to the scope that it defines. Each stylesheet has a single [root](./root.md), and defines a scope and namespace.
+
+## Overriding namespace
+
+When you develop your application, you might want to hint **Stylable** with better readable name to help scope your stylesheet.
 
 Use `@namespace` to provide better display name:
 
