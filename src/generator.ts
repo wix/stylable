@@ -5,7 +5,7 @@ import { Stylesheet } from './stylesheet';
 import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport, matchAtKeyframes, matchAtMedia } from "./selector-utils";
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
-import { hasKeys } from "./utils";
+import { hasKeys, hasOwn } from "./utils";
 const cssflat = require('../modules/flat-css');
 
 export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>
@@ -243,9 +243,15 @@ export class Generator {
         let localName = element ? element : typedClassName;
         while (current) {
             const typedClass = current.typedClasses[localName];
-            if (hasState(typedClass, name)) {
-                node.type = 'attribute';
-                node.content = current.stateAttr(name);
+            const stateValue = getState(typedClass, name);
+            if (stateValue) {
+                if(typeof stateValue === 'string') { // mapped value
+                    node.type = 'invalid';// simply concat global mapped selector - ToDo: maybe change to 'selector'
+                    node.value = stateValue;
+                } else {
+                    node.type = 'attribute';
+                    node.content = current.stateAttr(name);
+                }
                 break;
             }
             const next = this.resolver.resolve(current, localName);
@@ -263,7 +269,13 @@ export class Generator {
     }
 }
 
-function hasState(typedClass: TypedClass, name: string) {
+function getState(typedClass: TypedClass, name: string):string | boolean {
     const states = typedClass && typedClass[valueMapping.states];
-    return states ? states.indexOf(name) !== -1 : false;
+    if(Array.isArray(states)){
+        return states.indexOf(name) !== -1;
+    } else if(states && hasOwn(states, name)){
+        return states[name] || true;
+    }
+    return false;
 }
+
