@@ -514,7 +514,7 @@ describe('static Generator.generate', function () {
 
         it('custom states with mapping', function () {
             
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .my-class { 
                     -st-states: my-state(".x"), my-other-state(".y[data-z=\"val\"]");
                 }
@@ -538,7 +538,7 @@ describe('static Generator.generate', function () {
 
         it('custom states with mapping with space around', function () {
             
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .my-class { 
                     -st-states: my-state(" .x "), my-other-state(" .y[data-z=\"val\"] ");
                 }

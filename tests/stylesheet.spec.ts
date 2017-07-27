@@ -198,7 +198,7 @@ describe('Stylesheet', function () {
         });
 
         it('with mapped -st-states', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-states: stateA(".x"), stateB, state-c("[x="y"]"), state-d;
                 }
@@ -213,7 +213,7 @@ describe('Stylesheet', function () {
         });
 
         it('with trim mapped -st-states', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 .container {
                     -st-states: stateA(" .x "), stateB, state-c(" [x="y"] "), state-d;
                 }
