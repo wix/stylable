@@ -270,7 +270,7 @@ describe('Stylesheet', function () {
         });
 
         it('with -st-mixin with params with spaces between', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
@@ -287,7 +287,7 @@ describe('Stylesheet', function () {
         });
 
         it('with -st-mixin with missing params should remove the last', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
@@ -304,7 +304,7 @@ describe('Stylesheet', function () {
         });
 
         it('with -st-mixin with params normalized', function () {
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
@@ -322,7 +322,7 @@ describe('Stylesheet', function () {
 
         it.skip("not working mixin arguments", function() {
             // postcss-safe-parser outputs wrong AST and it breaks in -st-mixin value parser
-            const sheet = Stylesheet.fromCSS(`
+            const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
