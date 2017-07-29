@@ -12,29 +12,6 @@ const parseNamed = SBTypesParsers[valueMapping.named];
 const stylableVendor = /^-st-/;
 
 
-export interface Import {
-    rule: postcss.Rule;
-    from?: string;
-    named?: Pojo<string>;
-    default?: string;
-}
-
-
-export interface StyleableMeta {
-    source: string
-    namespace: string;
-    imports: Import[];
-    vars: postcss.Rule[];
-    keyframes: postcss.AtRule[];
-    directives: { [key: string]: postcss.Declaration[] };
-    classes: string[];
-    diagnostics: Diagnostics;
-}
-
-export interface SRule extends postcss.Rule {
-    selectorAst: SelectorAstNode;
-}
-
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
     const source = root.source.input.file || '';
@@ -55,15 +32,14 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
     };
 
     root.walkAtRules((atRule) => {
-        if (atRule.name === 'namespace') {
-            const match = atRule.params.match(/["'](.*?)['"]/);
-            if (match) {
-                stylableMeta.namespace = match[1] || "";
-            } else {
-                diagnostics.error(atRule, 'invalid namespace');
-            }
-        } else if (atRule.name === 'keyframes') {
-            stylableMeta.keyframes.push(atRule);
+        switch (atRule.name) {
+            case 'namespace':
+                const match = atRule.params.match(/["'](.*?)['"]/);
+                match ? (stylableMeta.namespace = match[1]) : diagnostics.error(atRule, 'invalid namespace');
+                break;
+            case 'keyframes':
+                stylableMeta.keyframes.push(atRule);
+                break;
         }
     });
 
@@ -78,14 +54,13 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
             if (type === 'pseudo-class') {
                 if (name === 'import') {
                     stylableMeta.imports.push(handleImport(rule, diagnostics));
-                    if(rule.selector !== ':import'){
+                    if (rule.selector !== ':import') {
                         //TODO: add warn test;
                     }
                     return false;
-                }
-                if (name === 'vars') {
+                } else if (name === 'vars') {
                     stylableMeta.vars.push(rule);
-                    if(rule.selector !== ':vars'){
+                    if (rule.selector !== ':vars') {
                         //TODO: add warn test;
                     }
                     return false;
@@ -108,14 +83,12 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
 }
 
-
-
 function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 
     var importObj: Import = { rule, from: '', default: '', named: {} };
-    
+
     var notValidProps: postcss.Declaration[] = [];
-    
+
     rule.walkDecls((decl) => {
         switch (decl.prop) {
             case valueMapping.from:
@@ -143,4 +116,37 @@ function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 
     return importObj;
 
+}
+
+
+
+
+
+
+
+
+
+
+
+export interface Import {
+    rule: postcss.Rule;
+    from?: string;
+    named?: Pojo<string>;
+    default?: string;
+}
+
+
+export interface StyleableMeta {
+    source: string
+    namespace: string;
+    imports: Import[];
+    vars: postcss.Rule[];
+    keyframes: postcss.AtRule[];
+    directives: { [key: string]: postcss.Declaration[] };
+    classes: string[];
+    diagnostics: Diagnostics;
+}
+
+export interface SRule extends postcss.Rule {
+    selectorAst: SelectorAstNode;
 }
