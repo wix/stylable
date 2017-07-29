@@ -1,4 +1,10 @@
 {
+  "exclude": [
+    "_docs",
+    "node_modules",
+    "dist",
+    "modules"
+  ],
   "compilerOptions": {
     /* Basic Options */                       
     "target": "es5",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
