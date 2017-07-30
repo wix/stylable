@@ -56,6 +56,14 @@ install
 import
 ...same as source components...
 
+[Configure a Web Application](./guides/configurewebapp.md)
+
+[Configure a Component Library](./guides/configurelibrary.md)
+
+[Integrate with React](./guides/react-integration.md)
+
+## Advanced Guides
+
 [Create Layouts Using Mixins](./guides/create-layouts.md)
 base layouters,
 custom layouter - write your own
@@ -75,13 +83,9 @@ case: tooltip,
 timers,
 Structural state dependencies
 
-[Use Javascript API](./guides/usejsapi.md)
-
-[Configure a Web Application](./guides/configurewebapp.md)
-
-[Configure a Component Library](./guides/configurelibrary.md)
-
 [Integrate with React](./guides/react-integration.md)
+
+[Library Output](./guides/library-output.md)
 
 ## References
 
@@ -114,6 +118,7 @@ Structural state dependencies
 [namespace](./references/namespace.md)
 
 ## Useful Information
+
 [Cheatsheet](./usefulInfo/cheatsheet.md)
 
 [Overview](./usefulInfo/Overview.md)
