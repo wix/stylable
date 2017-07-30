@@ -92,6 +92,8 @@ CSS OUTPUT:
 .root[data-spinner] { color:green; }
 ```
 
+> Note: custom mapping should define selector that target one element (no CSS child elements) 
+
 ## Enable custom pseudo-classes
 
 Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. *<Should this also be explained above?>*

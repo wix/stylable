@@ -1,6 +1,10 @@
 # Namespace
 
-When you develope your application, you might want to hint **stylable** with better readable name to help scope your stylesheet.
+When you use **Stylable** your classes are automatically namespaced to that stylesheet. Each stylesheet has a single [root](./root.md).
+
+## Manual Namespace
+
+When you develop your application, you might want to hint **Stylable** with better readable name to help scope your stylesheet.
 
 Use `@namespace` to provide better display name:
 
@@ -15,4 +19,4 @@ CSS OUTPUT
 .my-gallery__root { color: red }
 ```
 
-> Note: namespace is not unique and scope name may still have suffix to make it unique
+> Note: `@namespace` is not unique and scope name may still have suffix to make it unique

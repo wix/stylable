@@ -93,3 +93,14 @@ function addMixins(sheet: Stylesheet, selector: string, rules: CSSRulesObject) {
         sheet.mixinSelectors[selector] = mixMixin(mixin[mixin.length - 1]);
     }
 }
+
+export function processNamespace(strongNamespace = "", weakNamespace: string | string[] = "") {
+    if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
+    if (Array.isArray(weakNamespace)) {
+        return weakNamespace[weakNamespace.length - 1].replace(/'|"/g, '');
+    } else if (weakNamespace) {
+        return weakNamespace.replace(/'|"/g, '');
+    } else {
+        return 's' + Stylesheet.globalCounter++;
+    }
+}
