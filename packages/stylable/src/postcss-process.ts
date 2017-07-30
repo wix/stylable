@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { parseSelector, traverseNode, SelectorAstNode } from './selector-utils';
+import { parseSelector, traverseNode, SelectorAstNode, createSimpleSelectorChecker } from './selector-utils';
 import { basename } from 'path';
 import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQ } from "./utils";
@@ -8,6 +8,7 @@ import { Pojo } from "./types";
 // const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
+const parseMixin = SBTypesParsers[valueMapping.mixin];
 
 const stylableVendor = /^-st-/;
 
@@ -48,8 +49,10 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
     root.walkRules((rule: SRule) => {
 
         rule.selectorAst = parseSelector(rule.selector);
-
+        let isSimpleSelector = true;
+        const checker = createSimpleSelectorChecker();
         traverseNode(rule.selectorAst, function (node) {
+            if (!checker(node)) { isSimpleSelector = false; }
             const { name, type } = node;
             if (type === 'pseudo-class') {
                 if (name === 'import') {
@@ -73,6 +76,22 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
         // Transform each rule here
         rule.walkDecls(stylableVendor, decl => {
+            if (decl.prop === valueMapping.states) {
+                if (!isSimpleSelector) {
+                    diagnostics.warning(decl, 'cannot define pseudo states inside complex selectors');
+                }
+            }
+            if (decl.prop === valueMapping.mixin) {
+                // var mixins = parseMixin(decl.value);
+                // var imported = mixins.some((mix) => {
+                //     stylableMeta.imports.
+                //     return mix.type;
+                // })
+                // if(!imported){
+                //     diagnostics.warning(decl, 'cannot define pseudo states inside complex selectors');
+                // }
+            }
+
             stylableMeta.directives[decl.prop] || (stylableMeta.directives[decl.prop] = []);
             stylableMeta.directives[decl.prop].push(decl);
         });
