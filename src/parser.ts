@@ -42,3 +42,6 @@ export function fromCSS(css: string, namespace?: string, source?: string) {
     return new Stylesheet(objectifyCSS(css), namespace, source);
 }
 
+export function safeParse(css: string, options: postcss.ProcessOptions = {from: 'style.css'}) {
+    return safeParser(css, options);
+}

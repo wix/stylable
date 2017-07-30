@@ -27,7 +27,8 @@ describe('Stylable postcss process', function () {
     it('throw if missing filename', function () {
         var { diagnostics, namespace } = processSource(``);
         expect(namespace).to.equal('');
-        expect(diagnostics.errors[0]).to.include({
+        expect(diagnostics.reports[0]).to.include({
+            type: 'error',
             message: 'missing source filename'
         })
     });
@@ -39,7 +40,8 @@ describe('Stylable postcss process', function () {
             { from: 'path/to/source' }
         );
 
-        expect(diagnostics.errors[0]).to.include({
+        expect(diagnostics.reports[0]).to.include({
+            type: 'error',
             message: 'invalid namespace'
         })
     });
@@ -105,8 +107,8 @@ describe('Stylable postcss process', function () {
             }
         `, { from: "path/to/style.css" });
 
-        expect(result.diagnostics.warnings[0].message).to.eql('unknown :import declarations: "color: red"');
-        expect(result.diagnostics.errors[0].message).to.eql('missing :import -st-from declaration');
+        expect(result.diagnostics.reports[0].message).to.eql('missing :import -st-from declaration');
+        expect(result.diagnostics.reports[1].message).to.eql('unknown :import declarations: "color: red"');
 
     });
 
