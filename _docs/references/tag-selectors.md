@@ -2,6 +2,8 @@
 
 Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match the names of elements in the DOM.
 
+A **Stylable** tag selector MUST have a capital first letter.
+
 Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped.  The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
 > **Note**: In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
@@ -13,29 +15,29 @@ Targeting a native element matches any element with the same tag name that is fo
 CSS API:
 
 ```css
-form {background:green;}
+Form {background:green;}
 
 ```
 
 CSS OUTPUT:
 
 ```css
-/* form is not namespaced */
-.root form {background:green;} 
+/* Form is not namespaced */
+.root Form {background:green;} 
 ```
 
 CSS API:
 
 ```css
-form {background:green;}
-.side-bar:hover form {background:red; }
+Form {background:green;}
+.side-bar:hover Form {background:red; }
 ```
 
 CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet - form is not namespaced */
-.root form {background:green;} 
-.root .side-bar:hover form {background:red; }
+/* namespaced to the stylesheet - Form is not namespaced */
+.root Form {background:green;} 
+.root .side-bar:hover Form {background:red; }
 ```
 
 React
@@ -46,7 +48,7 @@ React
     <div className="side-bar">
         <form></form> /* green background and red while hovering parent */
     </div>
-    <form></form> /* green background */
+    <Form></Form> /* green background */
 </div>
 ```
 
@@ -67,8 +69,8 @@ ToggleButton {background:green;}
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - .toggleButton_root is not namespaced */
-.root .toggleButton_root {background:green;}
-.root .side-bar:hover toggleButton_root {background:red;}
+.root .ToggleButton_root {background:green;}
+.root .side-bar:hover ToggleButton_root {background:red;}
 ```
 
 React
