@@ -119,15 +119,6 @@ function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 }
 
 
-
-
-
-
-
-
-
-
-
 export interface Import {
     rule: postcss.Rule;
     from?: string;
