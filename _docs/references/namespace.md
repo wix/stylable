@@ -4,9 +4,7 @@ When you use **Stylable** your classes are automatically namespaced to that styl
 
 ## Manual Namespace
 
-When you develop your application, you might want to hint **Stylable** with better readable name to help scope your stylesheet.
-
-Use `@namespace` to provide better display name:
+When you develop your application in **Stylable**, you can manually namespace classes so you can more easily identify them when they are displayed in the CSS output. You do this in your **Stylable** stylesheet by adding the syntax `@namespace` to provide better display names to your classes.
 
 CSS API
 ```css
@@ -19,4 +17,4 @@ CSS OUTPUT
 .my-gallery__root { color: red }
 ```
 
-> Note: `@namespace` is not unique and scope name may still have suffix to make it unique
+> Note: Because `@namespace` is not unique, the scoped name may still have a suffix added to it to make it unique.
