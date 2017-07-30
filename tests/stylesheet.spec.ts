@@ -261,6 +261,22 @@ describe('Stylesheet', function () {
             })
         })
 
+        it('with auto -st-extends on imported elements with capital first letter', function () {
+            const sheet = fromCSS(`
+                :import("./path/to/thing"){
+                    -st-default: Thing;
+                }
+                Thing {}
+            `);
+
+            expect(sheet.typedClasses).to.eql({
+                root: { "-st-root": true },
+                Thing: {
+                    "-st-extends": "Thing"
+                }
+            })
+        })
+
         it('with -st-mixin', function () {
 
             const sheet = fromCSS(`

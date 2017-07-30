@@ -188,21 +188,85 @@ describe('static Generator.generate', function () {
             const sheetA = fromCSS(``, "TheNameSpace");
 
             const sheetB = fromCSS(`
-                :import("./relative/path/to/sheetA.stylable.css"){
+                :import {
+                    -st-from: "./relative/path/to/sheetA.stylable.css";
                     -st-default: Container;
-                }                
-                Container {}
+                } 
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer;
+                }                 
+                Container { color:red; }
+                NamedContainer { color: green; }
             `, "TheGreatNameSpace");
 
             const css = Generator.generate([sheetB], new Generator({
                 namespaceDivider: "__THE_DIVIDER__",
                 resolver: new Resolver({
-                    "./relative/path/to/sheetA.stylable.css": sheetA
+                    "./relative/path/to/sheetA.stylable.css": sheetA,
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
                 })
             }));
 
             const res = [
-                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {}',
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: red\n}',
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: green\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector with first Capital letter automatically extend reference to named export', function () {
+            
+            const sheetA = fromCSS(``, "TheNameSpace");
+
+            const sheetB = fromCSS(`
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer as Container;
+                }                 
+                Container { color:red; }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: red\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector from named import with pseudo-elements', function () {
+            const sheetA = fromCSS(`
+                .x{}
+            `, "TheNameSpace");
+
+            const sheetB = fromCSS(`
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer;
+                }                 
+                NamedContainer::x { color: gold; }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
+                })
+            }));
+
+            const res = [
+                '.TheNameSpace__THE_DIVIDER__x {}',
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__x {\n    color: gold\n}'
             ];
 
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
@@ -913,7 +977,6 @@ describe('static Generator.generate', function () {
 
         })
     })
-
     
     describe('@media', function () {
         it('handle @media rules', function () {
