@@ -20,10 +20,10 @@ CSS output
     }
 ```
 
-> **Note**: While we don't recommend it, you can also use global pseudo-classes and elements to override an override. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
+> **Note**: While we don't recommend it, you can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
 >
 > ```css
-> .classA :global(:selected) {
+> .classA:global(:selected) {
 >     color: red;
 > }
 > ```
