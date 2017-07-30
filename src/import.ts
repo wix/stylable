@@ -1,5 +1,7 @@
 import { Pojo } from './types';
-import { valueMapping, STYLABLE_NAMED_MATCHER } from './stylable-value-parsers';
+import { SBTypesParsers, valueMapping, STYLABLE_NAMED_MATCHER } from './stylable-value-parsers';
+
+const parseNamed = SBTypesParsers[valueMapping.named];
 
 export interface CSSImportRaw {
     [key: string]: string;
@@ -7,23 +9,22 @@ export interface CSSImportRaw {
 
 export class Import {
     constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) { }
+    static findImportForSymbol(imports: Import[], symbol: string){
+        return imports.filter((_import: Import) => _import.containsSymbol(symbol))[0] || null;
+    }
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
         //TODO: handle " and ' strings in SbFrom
-        const namedMap: Pojo<string> = {};
 
         SbFrom = SbFrom || cssImportDef[valueMapping.from];
 
+        if(!SbFrom){ return null; }
+
+        let namedMap: Pojo<string> = {};
         if (cssImportDef[valueMapping.named]) {
-            cssImportDef[valueMapping.named].split(',').forEach((name) => {
-                const parts = name.trim().split(/\s+as\s+/);
-                if (parts.length === 1) {
-                    namedMap[parts[0]] = parts[0];
-                } else if (parts.length === 2) {
-                    namedMap[parts[1]] = parts[0];
-                }
-            });
+            namedMap = parseNamed(cssImportDef[valueMapping.named]);
         }
 
+        //TODO: rethink this.
         for (const key in cssImportDef) {
             const match = key.match(STYLABLE_NAMED_MATCHER);
             if (match) {

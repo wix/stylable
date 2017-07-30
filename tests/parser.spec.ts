@@ -58,11 +58,11 @@ function objectifyTests(objectify: (css: string) => any) {
 
         const actual = objectify(`
             .btn {
-                box-shadow: 0, 1, 2;
+                box-shadow: 0,1,2;
             }
         `)
         const expected = {
-            ".btn": { "boxShadow": "0, 1, 2" }
+            ".btn": { "boxShadow": "0,1,2" }
         }
 
         expect(actual).to.eql(expected);

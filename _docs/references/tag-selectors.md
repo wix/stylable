@@ -52,10 +52,9 @@ React
 
 ## Component element
 
-To target another component, the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector.
+When a stylesheet is [imported](./imports.md) with a **capital first letter** it can be used as a component tag selector
 
 CSS API:
-
 ```css
 :import{
     -st-from: "./toggle-button.css";

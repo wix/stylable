@@ -1,5 +1,5 @@
+import { fromCSS } from "../src";
 import { Generator } from '../src/generator';
-import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
 
 
@@ -13,7 +13,7 @@ describe('static Generator mixins', function () {
             }
         }
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import("./relative/path/to/mixin.js") {
                 -st-default: MyMixin;
             }
@@ -54,7 +54,7 @@ describe('static Generator mixins', function () {
             }
         }
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import("./relative/path/to/mixin.js") {
                 -st-default: MyMixin;
             }
@@ -102,7 +102,7 @@ describe('static Generator mixins', function () {
             }
         }
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import("./relative/path/to/mixin.js") {
                 -st-default: MyMixin;
             }
@@ -152,7 +152,7 @@ describe('static Generator mixins', function () {
             }
         }
 
-        const sheet = Stylesheet.fromCSS(`
+        const sheet = fromCSS(`
             :import("./relative/path/to/mixin.js") {
                 -st-default: MyMixin;
             }
