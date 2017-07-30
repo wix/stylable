@@ -28,7 +28,16 @@ export class Resolver {
     resolve(sheet: Stylesheet, name: string) {
         const typedClass = sheet.typedClasses[name];
         const _import = typedClass ? Import.findImportForSymbol(sheet.imports, typedClass[valueMapping.extends] || "") : null;
-        return _import ? this.resolveModule(_import.from) : sheet;
+        if(_import){
+            const m = this.resolveModule(_import.from);
+            const extendsName = typedClass[valueMapping.extends];
+            if(_import.defaultExport === extendsName){
+                return m.default || m;
+            } else {
+                return m[_import.named[extendsName!]]
+            }
+        }
+        return sheet;
     }
     resolveImports(sheet: Stylesheet) {
         //TODO: add support __esModule support?

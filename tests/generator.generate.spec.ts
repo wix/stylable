@@ -183,7 +183,97 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('component/tag typed selector that extends root', function () {
+        it('component/tag selector with first Capital letter automatically extend reference with identical name', function () {
+            
+            const sheetA = fromCSS(``, "TheNameSpace");
+
+            const sheetB = fromCSS(`
+                :import {
+                    -st-from: "./relative/path/to/sheetA.stylable.css";
+                    -st-default: Container;
+                } 
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer;
+                }                 
+                Container { color:red; }
+                NamedContainer { color: green; }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA,
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: red\n}',
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: green\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector with first Capital letter automatically extend reference to named export', function () {
+            
+            const sheetA = fromCSS(``, "TheNameSpace");
+
+            const sheetB = fromCSS(`
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer as Container;
+                }                 
+                Container { color:red; }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: red\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector from named import with pseudo-elements', function () {
+            const sheetA = fromCSS(`
+                .x{}
+            `, "TheNameSpace");
+
+            const sheetB = fromCSS(`
+                :import {
+                    -st-from: "./relative/path/to/sheetA-re-exported.js";
+                    -st-named: NamedContainer;
+                }                 
+                NamedContainer::x { color: gold; }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    './relative/path/to/sheetA-re-exported.js': { NamedContainer:sheetA }
+                })
+            }));
+
+            const res = [
+                '.TheNameSpace__THE_DIVIDER__x {}',
+                '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__x {\n    color: gold\n}'
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector that extends another stylesheet', function () {
 
             const sheetA = fromCSS(``, "TheNameSpace");
 
@@ -211,7 +301,40 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-        it('component/tag typed selector that extends root with inner class targeting', function () {
+        it('component/tag selector with first Capital letter is overridden with -st-extends', function () {
+            
+            const sheetA = fromCSS(``, "SheetA");
+            const sheetB = fromCSS(``, "SheetB");
+
+            const entrySheet = fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -st-default: SheetA;
+                }  
+                :import("./relative/path/to/sheetB.stylable.css"){
+                    -st-default: SheetB;
+                }                 
+                SheetB {
+                    -st-extends: SheetA;
+                }
+            `, "TheGreatNameSpace");
+
+            const css = Generator.generate([entrySheet], new Generator({
+                namespaceDivider: "__THE_DIVIDER__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA,
+                    "./relative/path/to/sheetB.stylable.css": sheetB
+                })
+            }));
+
+            const res = [
+                '.TheGreatNameSpace__THE_DIVIDER__root .SheetA__THE_DIVIDER__root {}',
+            ];
+
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        });
+
+        it('component/tag selector that extends root with inner class targeting', function () {
 
             const sheetA = fromCSS(`
                 .inner { }
@@ -594,7 +717,6 @@ describe('static Generator.generate', function () {
             expect(css.length).to.equal(res.length);
         });
 
-
         it('custom states lookup order', function () {
             const sheetA = fromCSS(`
                 .root { 
@@ -629,8 +751,6 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
-
-
 
         it('custom states form imported type on inner pseudo-class', function () {
             const sheetA = fromCSS(`
@@ -857,7 +977,6 @@ describe('static Generator.generate', function () {
 
         })
     })
-
     
     describe('@media', function () {
         it('handle @media rules', function () {
