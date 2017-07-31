@@ -2,7 +2,7 @@ import { Import } from './import';
 import { createSimpleSelectorChecker, parseSelector, PseudoSelectorAstNode, matchAtKeyframes, traverseNode } from './selector-utils';
 import { SBTypesParsers, valueMapping } from './stylable-value-parsers';
 import { Stylesheet } from './stylesheet';
-import { CSSRulesObject } from './types';
+import { CSSRulesObject, Pojo } from './types';
 import { hasOwn } from './utils';
 
 const mixMixin = SBTypesParsers[valueMapping.mixin];
@@ -16,7 +16,6 @@ export function process(sheet: Stylesheet) {
         sheet.typedClasses.root = { [valueMapping.root]: true };
     }
 }
-
 function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesObject) {
     addMixins(sheet, selector, rules);
     const keyframesMatch = matchAtKeyframes(selector);
@@ -30,13 +29,15 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
     const ast = parseSelector(selector);
     const checker = createSimpleSelectorChecker();
     let isSimpleSelector = true;
+    let importedElements: Pojo<boolean> = {};
     traverseNode(ast, (node) => {
         if (!checker(node)) { isSimpleSelector = false; }
         const { type, name } = node;
         if (type === "pseudo-class") {
             if (name === 'import') {
                 const { content } = <PseudoSelectorAstNode>node;
-                sheet.imports.push(Import.fromImportObject(content, rules));
+                const importRes = Import.fromImportObject(content, rules);
+                importRes && sheet.imports.push(importRes);
             } else if (name === 'vars') {
                 Object.assign(sheet.vars, rules);
             }
@@ -46,10 +47,26 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
             if (name === 'global') {
                 return true;
             }
+        } else if(type === 'element'){
+            if(name.match(/^[A-Z]\w+$/)){
+                importedElements[name] = true;
+            }
         }
         return undefined;
     });
+    addImportedElements(sheet, importedElements);
     addTypedClasses(sheet, selector, rules, isSimpleSelector);
+}
+
+function addImportedElements(sheet: Stylesheet, importedElements:Pojo<boolean>){
+    for(var element in importedElements){
+        const importWithRef = Import.findImportForSymbol(sheet.imports, element)
+        if(importWithRef){
+            mergeTypedClass(sheet, element, element, valueMapping.extends);
+        } else {
+            // warn for component Tag selector with no reference ?
+        }
+    }
 }
 
 function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
@@ -59,19 +76,21 @@ function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObj
 }
 
 function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
-    Array.isArray(rules) ? rules.forEach((rules) => {
-        mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
-    }) : mergeTypedClass(sheet, selector, rules, isSimpleSelector, typedRule);
+    const name = selector.replace('.', '');
+    const merge = (rules: Pojo) => {
+        if (!hasOwn(rules, typedRule)) { return; }
+        if (!isSimpleSelector) { throw new Error(typedRule + ' on complex selector: ' + selector); }
+        const value = SBTypesParsers[typedRule](rules[typedRule]);
+        mergeTypedClass(sheet, name, value, typedRule);
+    }
+    Array.isArray(rules) ? rules.forEach(merge) : merge(rules)
 }
 
 
-function mergeTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean, typedRule: keyof typeof SBTypesParsers) {
-    if (!hasOwn(rules, typedRule)) { return; }
-    if (!isSimpleSelector) { throw new Error(typedRule + ' on complex selector: ' + selector); }
-    const name = selector.replace('.', '');
+function mergeTypedClass(sheet: Stylesheet, name: string, value:any, typedRule: keyof typeof SBTypesParsers) {
     sheet.typedClasses[name] = {
         ...sheet.typedClasses[name],
-        [typedRule]: SBTypesParsers[typedRule](rules[typedRule])
+        [typedRule]: value
     };
 }
 
@@ -80,5 +99,16 @@ function addMixins(sheet: Stylesheet, selector: string, rules: CSSRulesObject) {
     if (mixin && !Array.isArray(mixin)) { mixin = [mixin]; }
     if (mixin) {
         sheet.mixinSelectors[selector] = mixMixin(mixin[mixin.length - 1]);
+    }
+}
+
+export function processNamespace(strongNamespace = "", weakNamespace: string | string[] = "") {
+    if (strongNamespace) { return strongNamespace.replace(/'|"/g, ''); }
+    if (Array.isArray(weakNamespace)) {
+        return weakNamespace[weakNamespace.length - 1].replace(/'|"/g, '');
+    } else if (weakNamespace) {
+        return weakNamespace.replace(/'|"/g, '');
+    } else {
+        return 's' + Stylesheet.globalCounter++;
     }
 }

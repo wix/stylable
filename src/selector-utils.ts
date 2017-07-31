@@ -6,6 +6,7 @@ export interface SelectorAstNode {
     nodes: SelectorAstNode[];
     content?: string;
     before?: string;
+    value?: string;
 }
 
 export interface PseudoSelectorAstNode extends SelectorAstNode {

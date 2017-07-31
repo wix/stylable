@@ -2,7 +2,7 @@
 
 Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors), **Stylable** `tag selectors` can match the names of elements in the DOM.
 
-Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped.  The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
+Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped. The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
 > **Note**: In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
 
@@ -52,10 +52,9 @@ React
 
 ## Component element
 
-To target another component, the external component or stylesheet is [imported](./imports.md) and its value's name can be used as a tag selector.
+When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
 CSS API:
-
 ```css
 :import{
     -st-from: "./toggle-button.css";

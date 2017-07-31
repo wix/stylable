@@ -1,3 +1,4 @@
+import { fromCSS } from "../src";
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
@@ -6,12 +7,10 @@ describe('Resolver', function () {
 
     describe('resolve', function () {
 
-
         it('get the import definition for the symbol', function () {
+            var sheetA = fromCSS(``);
 
-            var sheetA = Stylesheet.fromCSS(``);
-
-            var sheetB = Stylesheet.fromCSS(`
+            var sheetB = fromCSS(`
                 :import("./path/to/thing"){
                     -st-default: Name;
                 }
@@ -24,12 +23,51 @@ describe('Resolver', function () {
 
             expect(resolver.resolve(sheetB, "class")).to.equal(sheetA);
             expect(resolver.resolve(sheetB, "NotExist")).to.equal(sheetB);
-
         });
 
+        it('get the import named definition for the symbol', function () {
+            var sheetA = fromCSS(``);
+
+            var sheetB = fromCSS(`
+                :import {
+                    -st-from: "./path/to/thing";
+                    -st-named: x;
+                }
+                .class {
+                    -st-extends: x;
+                }
+            `);
+
+            const resolver = new Resolver({ "./path/to/thing": { x:sheetA } });
+
+            expect(resolver.resolve(sheetB, "class")).to.equal(sheetA);
+        });
+
+        it('get the import named definition for the symbol when default is override named import', function () {
+            var sheetNamed = fromCSS(``);
+            var sheetDefault = fromCSS(``);
+
+            var sheetMain = fromCSS(`
+                :import {
+                    -st-from: "./path/to/thing";
+                    -st-default: x;
+                    -st-named: x as y;
+                }
+                .classExtendDefault {
+                    -st-extends: x;
+                }
+                .classExtendNamed {
+                    -st-extends: y;
+                }
+            `);
+
+            const resolver = new Resolver({ "./path/to/thing": { x:sheetNamed, default:sheetDefault } });
+
+            expect(resolver.resolve(sheetMain, "classExtendDefault")).to.equal(sheetDefault);
+            expect(resolver.resolve(sheetMain, "classExtendNamed")).to.equal(sheetNamed);
+        });
 
     });
-
 
     describe('resolveSymbols', function () {
 

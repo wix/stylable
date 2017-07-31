@@ -5,7 +5,7 @@ import { Stylesheet } from './stylesheet';
 import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImport, matchAtKeyframes, matchAtMedia } from "./selector-utils";
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
-import { hasKeys } from "./utils";
+import { hasKeys, hasOwn } from "./utils";
 const cssflat = require('../modules/flat-css');
 
 export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>
@@ -80,8 +80,8 @@ export class Generator {
         let rules: Pojo, aSelector: string, processedRules: NestedRules;
 
         if (typeof selector === 'string') {
-            rules = sheet.cssDefinition[selector];
             aSelector = selector;
+            rules = sheet.cssDefinition[aSelector];
             const mixins = sheet.mixinSelectors[aSelector];
             if (mixins) {
                 this.applyMixins(aSelector, rules, mixins, resolvedSymbols, stack);
@@ -97,18 +97,14 @@ export class Generator {
         if (selector === ':vars') { return null; }
 
         if (matchAtMedia(aSelector)) {
-            processedRules = {}
-            for(var k in rules){
-                const d = this.prepareSelector(sheet, k, resolvedSymbols, []);
-                d && Object.assign(processedRules, d);
+            processedRules = {};
+            for (var k in rules) {
+                Object.assign(processedRules, this.prepareSelector(sheet, k, resolvedSymbols, []));
             }
-            return {
-                [aSelector]: processedRules
-            };
+            return { [aSelector]: processedRules };
         } else {
             processedRules = this.processRules(rules, resolvedSymbols, sheet);
         }
-
 
         //don't emit empty selectors in production
         if (this.mode === Mode.PROD && !hasKeys(processedRules)) { return null; }
@@ -156,7 +152,7 @@ export class Generator {
         var value = valueTemplate(value, resolvedSymbols);
         if (key === 'animation' || key === 'animationName') {
             value = sheet.keyframes.reduce((value: string, keyframe: string) => {
-                return value.replace(new RegExp('\\b'+keyframe+'\\b', 'g'), this.scope(keyframe, sheet.namespace));
+                return value.replace(new RegExp('\\b' + keyframe + '\\b', 'g'), this.scope(keyframe, sheet.namespace));
             }, value);
         }
         return value;
@@ -167,7 +163,7 @@ export class Generator {
         let element: string;
 
         const keyframeMatch = matchAtKeyframes(selector);
-        if(keyframeMatch){
+        if (keyframeMatch) {
             return selector.replace(keyframeMatch[1], this.scope(keyframeMatch[1], sheet.namespace));
         }
 
@@ -225,21 +221,37 @@ export class Generator {
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
         //TODO: only transform what is found
-        if (sheet.classes[name]) {
-            node.type = 'class';
-            node.before = ' ';
-            node.name = this.scope(name, sheet.namespace);
+        let current = sheet;
+        while (current) {
+            if(current.classes[name]){
+                node.type = 'class';
+                node.before = ' ';
+                node.name = this.scope(name, current.namespace);
+                break;
+            }
+            const next = this.resolver.resolve(current, current.root);
+            if (next !== current) {
+                current = next;
+            } else {
+                break;
+            }
         }
-        return this.resolver.resolve(sheet, name);
+        return this.resolver.resolve(current, name);
     }
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
         let localName = element ? element : typedClassName;
         while (current) {
             const typedClass = current.typedClasses[localName];
-            if (hasState(typedClass, name)) {
-                node.type = 'attribute';
-                node.content = current.stateAttr(name);
+            const stateValue = getState(typedClass, name);
+            if (stateValue) {
+                if(typeof stateValue === 'string') { // mapped value
+                    node.type = 'invalid';// simply concat global mapped selector - ToDo: maybe change to 'selector'
+                    node.value = stateValue;
+                } else {
+                    node.type = 'attribute';
+                    node.content = current.stateAttr(name);
+                }
                 break;
             }
             const next = this.resolver.resolve(current, localName);
@@ -257,7 +269,13 @@ export class Generator {
     }
 }
 
-function hasState(typedClass: TypedClass, name: string) {
+function getState(typedClass: TypedClass, name: string):string | boolean {
     const states = typedClass && typedClass[valueMapping.states];
-    return states ? states.indexOf(name) !== -1 : false;
+    if(Array.isArray(states)){
+        return states.indexOf(name) !== -1;
+    } else if(states && hasOwn(states, name)){
+        return states[name] || true;
+    }
+    return false;
 }
+
