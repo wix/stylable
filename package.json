@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -44,6 +44,7 @@
   "files": [
     "dist",
     "src",
+    "runtime.js",
     "tsconfig.json"
   ]
 }

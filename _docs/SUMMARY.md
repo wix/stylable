@@ -12,6 +12,12 @@
 
 * [Use 3rd Party Components](guides/use3rdparty.md)
 
+* [Configure a Web Application](guides/configurewebapp.md)
+
+* [Configure a Component Library](guides/configurelibrary.md)
+
+* [Integrate with React](guides/react-integration.md)
+
 ## References
 
 * [Imports](references/imports.md)
@@ -40,6 +46,8 @@
 
 * [Variables](references/variables.md)
 
+* [Namespace](./references/namespace.md)
+
 ## Advanced Guides
 
 * [Create Layouts Using Mixins](guides/create-layouts.md)
@@ -52,13 +60,9 @@
 
 * [Advanced Styling Patterns]()
 
-* [Use Javascript API](guides/usejsapi.md)
-
-* [Configure a Web Application](guides/configurewebapp.md)
-
-* [Configure a Component Library](guides/configurelibrary.md)
-
 * [Integrate with React](guides/react-integration.md)
+
+* [Library Output](guides/library-output.md)
 
 ## Components
 

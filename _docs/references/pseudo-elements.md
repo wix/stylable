@@ -85,7 +85,7 @@ CSS API
 CSS OUTPUT
 ```css
 /* namespaced to super-video-player.css */
-.root .VideoPlayer_root .VideoPlayer_play-button {
+.root.VideoPlayer_root .VideoPlayer_play-button {
     color: gold;
 }
 /* namespaced to page.css */
@@ -120,11 +120,11 @@ CSS API
 CSS OUTPUT
 ```css
 /* namespaced to amazing-video-player.css */
-.root .VideoPlayer_root .VideoPlayer_play-button {
+.root.VideoPlayer_root .AmazingVideoPlayer_play-button {
     color: gold;
 }
 /* namespaced to page.css */
-.root .main-player.SuperVideoPlayer_root.VideoPlayer_root .VideoPlayer_play-button {
+.root .main-player.AmazingVideoPlayer_root.VideoPlayer_root .AmazingVideoPlayer_play-button {
     color: silver;
 }
 ```
