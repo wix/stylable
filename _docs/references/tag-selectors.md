@@ -52,7 +52,7 @@ React
 
 ## Component element
 
-When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector. The value can be the default or a named value from the imported stylesheet.
+When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
 CSS API:
 ```css
