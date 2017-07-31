@@ -1,0 +1,8 @@
+/* test.st.css */
+:import {
+    -st-from: "./vars.st.css";
+    -st-named: mycolor;
+}
+.name {
+    color: value(mycolor);
+}

@@ -2,6 +2,8 @@
 
 ## Install, Configure and Build
 
+{% playground id="myPlayground", title="My Playground", dir="./playgroundProject", entry="main.tsx", active="main.tsx", readOnly=false %}{% endplayground %}
+
 Install it for a project
 
 npm install stylable
