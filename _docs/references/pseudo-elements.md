@@ -7,7 +7,7 @@ In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/d
 
 Use `::` to access an internal part of a component after either a [custom tag selector](./tag-selectors.md#custom-element) or after an [extended class selector](./extend-stylesheet.md).
 
-In this example the **Stylable** stylesheet [imports](./imports.md) a `video-player` component (stylesheet), extends it as the class selector `.main-video` and names and styles an internal `play-button` as a custom pseudo-element of the component. 
+In this example the **Stylable** stylesheet [imports](./imports.md) a `video-player` component (stylesheet), extends it as the class selector `.main-video` and styles an internal `play-button` as a custom pseudo-element of the component. 
 
 CSS API
 ```css
@@ -51,7 +51,7 @@ CSS API
 
 When a **Stylable** stylesheet's [root](./root.md) extends another stylesheet, pseudo-elements are automatically exposed on the extending stylesheet and available inline.
 
-In this example, the class `play-button` is available from the original component file `video-player.css`, and extended and styled in the`super-video-player.css` stylesheet as a custom pseudo-element on the `root` class. The `pages.css` stylesheet can then extend `super-video-player.css` and in the `.main-player` class, style `play-button` differently.
+In this example, the class `play-button` is available from the original component file `video-player.css`, and extended and styled in the`super-video-player.css` stylesheet as a custom pseudo-element on the `root` class. The `page.css` stylesheet can then extend `super-video-player.css` and on the `.main-player` class, style `play-button` differently.
 
 CSS API
 ```css
@@ -100,7 +100,7 @@ You can use CSS class selector to override extended pseudo-elements.
 
 > **Note:** You can also override native pseudo-elements using **Stylable's** custom pseudo-element but this is not recommended.
 
-Per the above example, `play-button` is a custom pseudo-element in the `pages.css` file and here in `amazing-video-player.css` it is a class selector, styled differently.   
+Per the above example, `play-button` is a custom pseudo-element in the `page.css` file and here in `amazing-video-player.css` it is a class selector, styled differently.   
 
 CSS API
 ```css
@@ -129,7 +129,7 @@ CSS OUTPUT
 }
 ```
 
-> **Note:** Overriding pseudo-elements only changes the way pseudo-elements are targeted by the CSS. It does not change the extended component's CSS output. This can have adverse effects on performance.
+> **Note:** Overriding pseudo-elements only changes the targeting in the overriding stylesheet not in the stylesheet being extended. This can have adverse effects on performance.
 
 
 
