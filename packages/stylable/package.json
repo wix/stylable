@@ -35,6 +35,7 @@
     "camelcase-css": "^1.0.1",
     "css-selector-tokenizer": "^0.7.0",
     "kebab-case": "^1.0.0",
+    "murmurhash": "0.0.2",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
     "postcss-nested": "^2.0.2",
