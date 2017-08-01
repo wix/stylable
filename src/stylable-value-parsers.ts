@@ -1,4 +1,4 @@
-export type MappedStates = { [s:string]:string|null };
+export type MappedStates = { [s: string]: string | null };
 
 export interface TypedClass {
     "-st-root"?: boolean;
@@ -21,6 +21,10 @@ export const valueMapping = {
     mixin: '-st-mixin' as "-st-mixin"
 };
 
+export type stKeys = keyof typeof valueMapping;
+
+export const stValues: string[] = Object.keys(valueMapping).map((key: stKeys) => valueMapping[key]);
+
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
@@ -29,16 +33,16 @@ export const SBTypesParsers = {
         return value === 'false' ? false : true
     },
     "-st-states"(value: string) {
-        if(!value){
+        if (!value) {
             return [];
         }
-        if(value.indexOf('(') !== -1){
-            const mappedStates:MappedStates = {};
+        if (value.indexOf('(') !== -1) {
+            const mappedStates: MappedStates = {};
             const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
-            for(let i = 0; i < parts.length; i += 4){
-                const stateName = parts[i+1];
-                const mapToSelector = parts[i+3];
-                if(stateName){// ToDo: should check the selector has no operators and child
+            for (let i = 0; i < parts.length; i += 4) {
+                const stateName = parts[i + 1];
+                const mapToSelector = parts[i + 3];
+                if (stateName) {// ToDo: should check the selector has no operators and child
                     mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
                 }
             }
@@ -78,24 +82,24 @@ export const SBTypesParsers = {
             } else if (match = mix.match(/(.*?)\((.*?\)?)\)/)) {
                 type = match[1].trim();
                 options = [];
-                if(match[2]) {
-                    const args:string = match[2];
+                if (match[2]) {
+                    const args: string = match[2];
                     let isInParam = false;
                     let isInString = false;
                     let lastIndex = 0;
                     let lastNoneSpaceIndex = 0;
-                    for(let i = 0; i < args.length; ++i){
+                    for (let i = 0; i < args.length; ++i) {
                         const currentChar = args[i];
-                        if(currentChar.match(/\s/)){
-                            if(!isInParam){
+                        if (currentChar.match(/\s/)) {
+                            if (!isInParam) {
                                 lastIndex = i + 1; // ignore  spaces before param
                             }
                             continue;
                         }
-                        
-                        switch(currentChar) {
+
+                        switch (currentChar) {
                             case `"`:
-                                if(isInParam) {
+                                if (isInParam) {
 
                                 } else {
                                     isInParam = true;
@@ -105,9 +109,9 @@ export const SBTypesParsers = {
                                 lastNoneSpaceIndex = i + 1;
                                 break;
                             case `,`:
-                                if(isInString){
-                                    const lastNoneSpaceChar = args[lastNoneSpaceIndex-1];
-                                    if(lastNoneSpaceChar === `"`){
+                                if (isInString) {
+                                    const lastNoneSpaceChar = args[lastNoneSpaceIndex - 1];
+                                    if (lastNoneSpaceChar === `"`) {
                                         lastNoneSpaceIndex = lastNoneSpaceIndex - 1;
                                     } else {
                                         lastNoneSpaceIndex = lastNoneSpaceIndex + 1;
@@ -125,9 +129,9 @@ export const SBTypesParsers = {
                                 lastNoneSpaceIndex = i + 1;
                         }
                     }
-                    if(lastIndex < args.length){
-                        if(isInParam){
-                            lastNoneSpaceIndex = args[lastNoneSpaceIndex-1] === '"' ? lastNoneSpaceIndex - 1 : lastNoneSpaceIndex
+                    if (lastIndex < args.length) {
+                        if (isInParam) {
+                            lastNoneSpaceIndex = args[lastNoneSpaceIndex - 1] === '"' ? lastNoneSpaceIndex - 1 : lastNoneSpaceIndex
                         }
                         options.push(args.slice(lastIndex, lastNoneSpaceIndex));
                     }

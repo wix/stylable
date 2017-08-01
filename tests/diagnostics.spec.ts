@@ -30,72 +30,92 @@ interface file {
     path: string;
 }
 
-function findTestLocations(src: string) {
+
+function findTestLocations(css: string) {
     var line = 1;
     var column = 1;
+    var inWord = false;
     var start;
     var end;
-    for (var i = 0; i < src.length; i++) {
-        var ch = src.charAt(i);
+    var word = null;
+    for (var i = 0; i < css.length; i++) {
+        var ch = css.charAt(i);
         if (ch === '\n') {
             line += 1;
-            column = 0;
-        }
-        if (ch === '|') {
+            column = 1;
+        } else if (ch === '|') {
             if (!start) {
                 start = { line, column };
             } else {
                 end = { line, column };
             }
+        } else if (ch === '@') {
+            inWord = !inWord;
+            if (inWord) { word = ''; }
+        } else if (inWord) {
+            word += ch;
         } else {
             column++;
         }
     }
-    if (!end) {
-        end = { line, column };
-    }
+    // if (!start) {
+    //     start = { line: 1, column: 1 };
+    // }
+    // if (!end) {
+    //     end = { line, column };
+    // }
 
-    return { start, end };
+    return { start, end, word, css: css.replace(/[|@]/gm, '') };
 }
-
 
 describe('findTestLocations', () => {
 
-    it('find single location', function () {
-
-        expect(findTestLocations('\n  |a|')).to.eql({
-            start: { line: 2, column: 3 },
-            end: { line: 2, column: 4 }
-        });
+    it('find single location 1', function () {
+        var l = findTestLocations('\n  |a|');
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 2, column: 4 });
 
     });
 
-    it('find single location', function () {
-
-        expect(findTestLocations('\n  |a\n  |')).to.eql({
-            start: { line: 2, column: 3 },
-            end: { line: 3, column: 3 }
-        });
-
+    it('find single location 2', function () {
+        var l = findTestLocations('\n  |a\n  |');
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
     });
 
-})
+    it('find single location with word', function () {
+        var l = findTestLocations('\n  |@a@\n  |');
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
+        expect(l.word, 'end').to.eql('a');
+    });
+
+    it('striped css', function () {
+        var css = '\n  |@a@\n  |';
+        var l = findTestLocations(css);
+        expect(l.css, 'start').to.eql(css.replace(/[|@]/gm, ''));
+    });
+
+});
 
 
-function expectWarnings(src: string, warnings: warning[], extraFiles?: file[]) {
-
-    var source = findTestLocations(src);
-    var root = safeParse(src.replace(/\|/gm, ''));
+function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
+    debugger;
+    var source = findTestLocations(css);
+    var root = safeParse(source.css);
     var res = process(root);
 
     res.diagnostics.reports.forEach((report, i) => {
         expect(report.message).to.equal(warnings[i].message);
         expect(report.node.source.start).to.eql(source.start);
+        if (source.word !== null) {
+            expect(report.options.word).to.eql(source.word);
+        }
     });
 
     expect(res.diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
 
-    console.log(src, warnings, extraFiles);
+    // console.log(src, warnings, extraFiles);
 }
 
 describe('diagnostics: warnings and errors', function () {
@@ -198,7 +218,7 @@ describe('diagnostics: warnings and errors', function () {
                     |:hover|{
 
                     }
-                `,[{ message: 'global states are not supported, use .root:hover instead', file: "main.css" }])
+                `, [{ message: 'global states are not supported, use .root:hover instead', file: "main.css" }])
             });
 
             it('should return warning for unknown state', function () {
@@ -242,11 +262,8 @@ describe('diagnostics: warnings and errors', function () {
         describe('root', function () {
             it('should return warning for ".root" after selector', function () {
                 expectWarnings(`
-                    |.gaga .root|{
-
-                    }
-                    
-                `, [{ message: '.root can only be used as the root of the component', file: "main.css" }])
+                    |.gaga .root|{}                    
+                `, [{ message: '.root class cannot be used after spacing', file: "main.css" }])
             });
 
 
@@ -264,7 +281,7 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown mixin', function () {
                 expectWarnings(`
                     .gaga{
-                        -st-mixin:|myMixin|;
+                        |-st-mixin: @myMixin@|;
                     }
                 `, [{ message: 'unknown mixin: "myMixin"', file: "main.css" }])
             });
@@ -274,9 +291,16 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown var', function () {
                 expectWarnings(`
                     .gaga{
-                        color:|value(myColor)|;
+                        |color:value(@myColor@)|;
                     }
                 `, [{ message: 'unknown var "myColor"', file: "main.css" }])
+            });
+            it('should return warning for unresolvable var', function () {
+                expectWarnings(`
+                    :vars{
+                        |myvar: @value(myvar)@|;
+                    }
+                `, [{ message: 'cannot resolve variable value for "myvar"', file: "main.css" }])
             });
 
             it('should return warning when defined in a complex selector', function () {
@@ -285,10 +309,10 @@ describe('diagnostics: warnings and errors', function () {
                         myColor:red;
                     }
                     
-                `, [{ message: 'cannot define "vars" inside a complex selector', file: "main.css" }])
+                `, [{ message: 'cannot define ":vars" inside a complex selector', file: "main.css" }])
             });
         });
-        describe('-st-variant', function () {
+        xdescribe('-st-variant', function () {
             it('should return warning when defining variant in complex selector', function () {
                 expectWarnings(`
                     .gaga:hover{
@@ -306,6 +330,59 @@ describe('diagnostics: warnings and errors', function () {
             });
         });
         describe(':import', function () {
+            it('should return warning when defined in a complex selector', function () {
+                expectWarnings(`
+                    |.gaga:import|{
+                        -st-from:"./file";
+                        -st-default:Theme;
+                    }
+                `, [{ message: 'cannot define ":import" inside a complex selector', file: "main.css" }])
+            })
+            it('should return warning for non import rules inside imports', function () {
+
+                expectWarnings(`
+                    :import{
+                        -st-from:"./file";
+                        -st-default:Comp;
+                        |@color@:red;|
+                    }
+                `, [{ message: '"color" css attribute cannot be used inside :import block', file: "main.css" }]
+                    , [{ content: customButton, path: 'file.css' }])
+
+            });
+
+            it('should return warning for import with missing "from"', function () {
+                expectWarnings(`
+
+                    |:import{
+                        -st-default:Comp;
+                    }
+                `, [{ message: '"-st-from" is missing in :import block', file: "main.css" }]
+                    , [{ content: customButton, path: 'file.css' }])
+
+            });
+
+        });
+
+        describe('-st-extends', function () {
+            it('should return warning when defined under complex selector', function () {
+                expectWarnings(`
+                    :import{
+                        -st-from:"./file";
+                        -st-default:Comp;
+                    }
+                    .root:hover{
+                        |-st-extends|:Comp;
+                    }
+                `, [{ message: 'cannot define "-st-extends" inside a complex selector', file: "main.css" }]
+                    , [{ content: customButton, path: 'file.css' }])
+
+            });
+        });
+    });
+
+    describe('complex examples', function () {
+        describe(':import', function () {
             it('should return warning for unknown file', function () {
                 expectWarnings(`
 
@@ -315,17 +392,8 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'could not find file "./file"', file: "main.css" }])
             });
-            it('should return warning when defined in a complex selector', function () {
-                expectWarnings(`
-                    |.gaga:import|{
-                        -st-from:"./file";
-                        -st-default:Theme;
-                    }
-                `, [{ message: 'cannot define ":import" inside complex selector', file: "main.css" }])
-            })
             it('should return warning for unknown import', function () {
                 expectWarnings(`
-
                     :import{
                         -st-from:"./file";
                         -st-default:Comp;
@@ -334,50 +402,7 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'cannot find export "variant" in "./file"', file: "main.css" }]
                     , [{ content: customButton, path: 'file.css' }]);
             });
-            it('should return warning for non import rules inside imports', function () {
-                expectWarnings(`
-
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        |color|:red
-                    }
-                `, [{ message: '"color" css attribute cannot be used inside import block', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
-            });
-
-            it('should return warning for import with missing "from"', function () {
-                expectWarnings(`
-
-                    :import{
-                        -st-default:Comp;
-                    }
-                `, [{ message: '"-st-from" is missing in import block', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
-            });
-
         });
-
-        describe('-st-extend', function () {
-            it('should return warning when defined under complex selector', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                    }
-                    .root:hover{
-                        |-st-extend|:Comp;
-                    }
-                `, [{ message: 'cannot define "-sb-extend" inside complex selector', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
-            });
-        });
-    });
-
-    describe('complex examples', function () {
         describe('cross variance', function () {
             it('variant cannot be used as var', function () {
                 expectWarnings(`

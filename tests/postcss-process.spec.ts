@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { process, StyleableMeta } from '../src/postcss-process';
+import { process, StyleableMeta, processNamespace } from '../src/postcss-process';
 import { cachedProcessFile } from '../src/cached-process-file';
 import * as postcss from 'postcss';
 
@@ -24,20 +24,20 @@ function processSource(source: string, options: postcss.ProcessOptions = {}) {
 
 describe('Stylable postcss process', function () {
 
-    it('throw if missing filename', function () {
+    it('report if missing filename', function () {
         var { diagnostics, namespace } = processSource(``);
-        expect(namespace).to.equal('');
+        expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
             message: 'missing source filename'
         })
     });
 
-    it('throw on invalid namespace', function () {
+    it('report on invalid namespace', function () {
 
         const { diagnostics } = processSource(
             `@namespace App;`,
-            { from: 'path/to/source' }
+            { from: '/path/to/source' }
         );
 
         expect(diagnostics.reports[0]).to.include({
@@ -47,23 +47,24 @@ describe('Stylable postcss process', function () {
     });
 
     it('collect namespace', function () {
-
+        const from = "/path/to/style.css";
         const result = processSource(`
             @namespace "name";
             @namespace 'anther-name';
-        `, { from: "path/to/style.css" });
+        `, { from });
 
-        expect(result.namespace).to.eql('anther-name');
+        expect(result.namespace).to.equal(processNamespace('anther-name', from));
 
     });
 
     it('use filename as default namespace prefix', function () {
+        const from = "/path/to/style.css";
 
         const result = processSource(`
             
-        `, { from: "path/to/style.css" });
+        `, { from });
 
-        expect(result.namespace).to.eql('style');
+        expect(result.namespace).to.eql(processNamespace('style', from));
 
     });
 
@@ -93,7 +94,7 @@ describe('Stylable postcss process', function () {
         expect(result.imports[2].rule.selector).to.eql(':import');
         expect(result.imports[2].from).to.eql("./some/global/path");
         expect(result.imports[2].named).to.eql({});
-        expect(result.imports[2].default).to.eql('name');
+        expect(result.imports[2].defaultExport).to.eql('name');
    
     });
 
@@ -107,8 +108,8 @@ describe('Stylable postcss process', function () {
             }
         `, { from: "path/to/style.css" });
 
-        expect(result.diagnostics.reports[0].message).to.eql('missing :import -st-from declaration');
-        expect(result.diagnostics.reports[1].message).to.eql('unknown :import declarations: "color: red"');
+        expect(result.diagnostics.reports[0].message).to.eql('"-st-from" is missing in :import block');
+        expect(result.diagnostics.reports[1].message).to.eql('"color" css attribute cannot be used inside :import block');
 
     });
 
@@ -127,6 +128,23 @@ describe('Stylable postcss process', function () {
         expect(result.vars.length).to.eql(2);
 
     });
+
+    it('resolve local :vars', function () {
+
+        const result = processSource(`
+            :vars {
+                name: value;
+                myname: value(name);
+            }
+        `, { from: "path/to/style.css" });
+
+        expect(result.mappedVars).to.eql({
+            name: 'value',
+            myname: 'value'
+        });
+
+    });
+
 
     it('collect classes', function () {
 
