@@ -7,17 +7,25 @@ export interface CSSImportRaw {
     [key: string]: string;
 }
 
+export function findImportForSymbol(imports: Import[], symbol: string) {
+    return imports.filter((_import: Import) => containsSymbol(_import, symbol))[0] || null;
+}
+
+export function containsSymbol(_import: Import, symbol: string): boolean {
+    return symbol ? (_import.defaultExport === symbol || !!_import.named[symbol]) : false;
+}
+
 export class Import {
-    constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) { }
-    static findImportForSymbol(imports: Import[], symbol: string){
-        return imports.filter((_import: Import) => _import.containsSymbol(symbol))[0] || null;
+    constructor(public from: string, public defaultExport: string = "", public named: Pojo<string> = {}) {}
+    static findImportForSymbol(imports: Import[], symbol: string) {
+        return imports.filter((_import: Import) => containsSymbol(_import, symbol))[0] || null;
     }
     static fromImportObject(SbFrom: string, cssImportDef: CSSImportRaw) {
         //TODO: handle " and ' strings in SbFrom
 
         SbFrom = SbFrom || cssImportDef[valueMapping.from];
 
-        if(!SbFrom){ return null; }
+        if (!SbFrom) { return null; }
 
         let namedMap: Pojo<string> = {};
         if (cssImportDef[valueMapping.named]) {
@@ -37,8 +45,5 @@ export class Import {
         }
 
         return new Import(SbFrom, cssImportDef[valueMapping.default], namedMap);
-    }
-    containsSymbol(symbol: string): boolean {
-        return symbol ? (this.defaultExport === symbol || !!this.named[symbol]) : false;
     }
 }
