@@ -146,6 +146,31 @@ describe('Resolver', function () {
             expect(resolved).to.contain({ param1: "red", param2: "blue", param3: "green" });
         });
 
+        it('should resolve named vars alias', function(){
+            const resolvedModule = new Stylesheet({
+                ":vars": {
+                    "param1": "red",
+                    "param2": "blue",
+                }
+            });
+
+            var sheet = new Stylesheet({
+                ":import": {
+                    "-st-from": "./path",
+                    "-st-named": "param1 as P1, param2 as P2",
+                },
+                ":vars": {
+                    "P3": "green",
+                },
+            }, "namespace");
+
+            const resolved = new Resolver({
+                "./path": resolvedModule,
+            }).resolveSymbols(sheet);
+
+            expect(resolved).to.contain({ P1: "red", P2: "blue", P3: "green" });
+        });
+
         it('should throw error on var name conflict', function () {
 
             const resolvedModule = new Stylesheet({
