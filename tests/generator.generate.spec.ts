@@ -923,6 +923,30 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
             expect(css.length).to.equal(res.length);
         });
+
+        it('should work with nested pseudo-selectors', () => {
+            const sheet = fromCSS(`
+                .container {
+                    -st-states: state;
+                }
+                .container:state {
+                    background: green;
+                }
+                .container:not(:state) {
+                    background: red;
+                }
+            `, 'Style');
+            const css = Generator.generate([sheet], new Generator({
+                namespaceDivider: "__"
+            }));
+            const res = [
+                '.Style__container {}',
+                '.Style__container[data-style-state] {\n    background: green\n}',
+                '.Style__container:not([data-style-state]) {\n    background: red\n}'
+            ]
+            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            expect(css.length).to.equal(res.length);
+        })
     })
 
     describe('@keyframes', function () {

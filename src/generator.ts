@@ -161,6 +161,7 @@ export class Generator {
         let current = sheet;
         let classname: string;
         let element: string;
+        let elementClassname: string;
 
         const keyframeMatch = matchAtKeyframes(selector);
         if (keyframeMatch) {
@@ -171,7 +172,7 @@ export class Generator {
             const { name, type } = node;
             if (type === 'selector') {
                 current = sheet;
-                classname = sheet.root;
+                classname = elementClassname || sheet.root;
             } else if (type === 'class') {
                 classname = name;
                 current = this.handleClass(current, node, name);
@@ -187,6 +188,7 @@ export class Generator {
                     node.type = 'selector';
                     return true;
                 }
+                elementClassname = classname;
             }
             /* do nothing */
             return undefined;
@@ -238,6 +240,7 @@ export class Generator {
         }
         return this.resolver.resolve(current, name);
     }
+
     handlePseudoClass(sheet: Stylesheet, node: SelectorAstNode, name: string, sheetOrigin: Stylesheet, typedClassName: string, element: string) {
         let current = element ? sheet : sheetOrigin;
         let localName = element ? element : typedClassName;
