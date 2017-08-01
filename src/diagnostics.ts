@@ -6,17 +6,18 @@ export interface Diagnostic {
     type: DiagnosticType;
     node: postcss.Node;
     message: string;
+    options: postcss.NodeErrorOptions;
 }
 
 export class Diagnostics {
     reports: Diagnostic[] = [];
-    add(type: DiagnosticType, node: postcss.Node, message: string){
-        this.reports.push({ type, node, message });
+    add(type: DiagnosticType, node: postcss.Node, message: string, options: postcss.NodeErrorOptions = {}){
+        this.reports.push({ type, node, message, options });
     }
-    error(node: postcss.Node, message: string) {
-        this.add('error', node, message);
+    error(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
+        this.add('error', node, message, options);
     }
-    warning(node: postcss.Node, message: string) {
-        this.add('warning', node, message);
+    warning(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
+        this.add('warning', node, message, options);
     }
 }
