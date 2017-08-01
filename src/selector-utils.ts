@@ -57,6 +57,21 @@ export function createChecker(types: Array<string | string[]>) {
     }
 }
 
+export function createRootAfterSpaceChecker() {
+    var hasSpacing = false;
+    var isValid = true;
+    return (node?: SelectorAstNode) => {
+        if (!node) { return isValid; }
+        if (node.type === 'spacing') {
+            hasSpacing = true;
+        }
+        if (node.type === 'class' && node.name === 'root' && hasSpacing) {
+            isValid = false;
+        }
+        return isValid;
+    }
+}
+
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
 
 export function isImport(ast: SelectorAstNode): boolean {
@@ -66,10 +81,10 @@ export function isImport(ast: SelectorAstNode): boolean {
 }
 
 
-export function matchAtKeyframes(selector: string){
+export function matchAtKeyframes(selector: string) {
     return selector.match(/^@keyframes\s*(.*)/);
 }
 
-export function matchAtMedia(selector: string){
+export function matchAtMedia(selector: string) {
     return selector.match(/^@media\s*(.*)/);
 }
