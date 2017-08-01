@@ -15,7 +15,7 @@ export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProper
 //     return namespace ? namespace + separator + name : name;
 // }
 
-export function stripQ(str: string){
+export function stripQuotation(str: string){
     return str.replace(/'|"/g, '');
 }
 
