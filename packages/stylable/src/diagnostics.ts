@@ -17,7 +17,7 @@ export class Diagnostics {
     error(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
         this.add('error', node, message, options);
     }
-    warning(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
+    warn(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
         this.add('warning', node, message, options);
     }
 }

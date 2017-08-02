@@ -273,6 +273,13 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
             });
+            it('should warn when defining states on element selector', function () {
+                expectWarnings(`
+                    MyElement{
+                        |-st-states|:shmover;
+                    }
+                `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
+            });
         });
 
         describe('-st-mixin', function () {
