@@ -2,6 +2,10 @@
 
 * [Stylable](README.md)
 
+## Playground Example
+
+* [Playground Example](playground-example.md)
+
 ## Basic Guides
 
 * [Install, Configure & Build](guides/installconfigure.md)

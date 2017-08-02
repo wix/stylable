@@ -48,15 +48,17 @@ export class Resolver {
             const isStylesheet = Stylesheet.isStylesheet(resolved);
             if(isStylesheet){
                 for (const name in importDef.named) {
-                    if(resolved.vars[name]){
-                        acc[name] = valueTemplate(resolved.vars[name], resolved.vars);
-                    } else if(resolved.classes[name]){
+                    const importLocalName = importDef.named[name];
+                    if(resolved.vars[importLocalName]){
+                        acc[name] = valueTemplate(resolved.vars[importLocalName], resolved.vars);
+                    } else if(resolved.classes[importLocalName]){
                         acc[name] = name;
                     }
                 }
             } else {
                 for (const name in importDef.named) {
-                    acc[name] = resolved[name];
+                    const importLocalName = importDef.named[name];
+                    acc[name] = resolved[importLocalName];
                 }
             }
             return acc;
