@@ -35,8 +35,8 @@ Syntax unique to Stylable
 
 | **CSS**  |[CSS Syntax Docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)  |
 |---|---|
-|**simple selector**   |type selector, class selector (+Stylable [root class](./root.md))   |
-|**CSS property**   | name of the rule (for example, "color")  |
+|**simple selector**   |Type selector, class selector (+Stylable [root class](./root.md))   |
+|**CSS property**   | Name of the rule (for example, "color")  |
 | **CSS declaration**  | CSS property paired with a value  |
 |**CSS declaration block**   |  List of CSS declarations  |
 |**CSS ruleset** | CSS declaration block paired with a selector
