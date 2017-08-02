@@ -6,6 +6,7 @@ import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImpo
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 import { hasKeys, hasOwn } from "./utils";
+import { Import } from "./import";
 const cssflat = require('../modules/flat-css');
 
 export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>
@@ -76,6 +77,16 @@ export class Generator {
             sheet.classes[sheet.root] = this.scope(sheet.root, sheet.namespace);
         }
     }
+    private collectCSSRulesets(sheet: Stylesheet, selectors: Array<string|ExtendedSelector>, onCollect:(selectorObj:any)=>void){
+        const resolvedSymbols = this.resolver.resolveSymbols(sheet);
+        while (selectors.length) {
+            const selector = selectors.pop()!;
+            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, selectors);
+            if (!selectorObject) { continue; }
+            onCollect(selectorObject);
+        }
+    }
+    
     prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
         let rules: Pojo, aSelector: string, processedRules: NestedRules;
 
@@ -84,7 +95,13 @@ export class Generator {
             rules = sheet.cssDefinition[aSelector];
             const mixins = sheet.mixinSelectors[aSelector];
             if (mixins) {
-                this.applyMixins(aSelector, rules, mixins, resolvedSymbols, stack);
+                this.applyMixins(sheet, aSelector, rules, mixins, resolvedSymbols, stack);
+                return null;
+            }
+            const classSelectorNameMatch = selector.match(/^\s*\.([\w-_]+)/); // ToDo: change catch 
+            const classSelectorName = classSelectorNameMatch && classSelectorNameMatch[1];
+            const typesClass = classSelectorName && sheet.typedClasses[classSelectorName];
+            if(typesClass && typesClass[valueMapping.variant]){ // ToDo: nicify
                 return null;
             }
         } else {
@@ -119,17 +136,65 @@ export class Generator {
         };
 
     }
-    applyMixins(aSelector: string, rules: NestedRules, mixins: any[], resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector>) {
+    applyMixins(sheet: Stylesheet, aSelector: string, rules: NestedRules, mixins: any[], resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector>) {
+        const isVariant = hasOwn(rules, valueMapping.variant) && rules[valueMapping.variant] === 'true';
+        if(isVariant){
+            return;
+        }
         mixins.forEach((mixin) => {
-            const mixinFunction = resolvedSymbols[mixin.type];
-            const cssMixin = cssflat({
-                [aSelector]: {
-                    ...rules,
-                    ...mixinFunction(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.mode === Mode.DEV)))
-                }
-            });
-            for (var key in cssMixin) {
-                stack.push({ selector: key, rules: cssMixin[key] });
+            let cssMixin;
+            const mixinSymbol = mixin.type;
+            const {origin, type, localName} = this.resolver.getSymbolDefinition(sheet, mixinSymbol, resolvedSymbols);
+            switch(type){
+                case 'class':
+                    const typedClass = origin.typedClasses[localName];
+                    if(typedClass[valueMapping.variant]){
+                        const variantSelector = '.' + localName;
+                        let mixedInVal:Array<[string, any]> = [[aSelector, rules]];
+                        Object.keys(origin.cssDefinition).forEach((targetSelector, index) => {
+                            const targetSelectorTrim = targetSelector.trim();
+                            const isVariantRoot = targetSelectorTrim === variantSelector;
+                            if(isVariantRoot || targetSelectorTrim.indexOf(variantSelector) === 0){
+                                const currentRules = origin.cssDefinition[targetSelector];
+                                this.scope,resolvedSymbols;
+                                if(index === 0 && isVariantRoot){
+                                    mixedInVal[0][1] = {
+                                        ...mixedInVal[0][1], 
+                                        ...currentRules, 
+                                        [valueMapping.variant]:isVariant
+                                    };
+                                } else {
+                                    const withoutVariantClass = targetSelector.replace(variantSelector, '');
+                                    const scopedCSSRulesets = this.collectCSSRulesets(origin, [{selector:targetSelector, rules:currentRules}], selectorObj => {
+                                        Object.keys(selectorObj).forEach(selector => {
+                                            const selectorWithoutVariant = selector.replace('.' + this.scope(localName, origin.namespace), '');
+                                            mixedInVal.push([aSelector + ':global(' + selectorWithoutVariant + ')', currentRules]);
+                                        });
+                                    });
+                                }
+                            }
+                        });
+                        mixedInVal.forEach(([selector, rules]) => {
+                            const flatValue = cssMixin = cssflat({ [selector]: rules });
+                            for (var key in flatValue) {
+                                stack.unshift({ selector:key, rules:flatValue[key] }); // ToDo: barak, why is this in reverse?
+                            }
+                        });
+                    }
+                break;
+                case 'JSExport':
+                    const mixinFunc = origin[localName];
+                    cssMixin = cssflat({
+                        [aSelector]: {
+                            ...rules,
+                            ...mixinFunc(mixin.options.map((option: string) => valueTemplate(option, resolvedSymbols, this.mode === Mode.DEV)))
+                        }
+                    });
+                    for (var key in cssMixin) {
+                        const mixRules = cssMixin[key];
+                        stack.push({ selector: key, rules: mixRules });
+                    }
+                break;
             }
         });
     }
@@ -278,4 +343,3 @@ function getState(typedClass: TypedClass, name: string):string | boolean {
     }
     return false;
 }
-

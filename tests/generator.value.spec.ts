@@ -3,6 +3,7 @@ import { Generator, Mode } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
+import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
 
 
 describe('Generator variables interpolation', function () {
@@ -148,78 +149,41 @@ describe('Generator variables interpolation', function () {
     });
 
     it('should resolve value() usage in mixin call', function () {
-        function mixin(options: string[]) {
-            return {
-                color: options[0],
-            };
-        }
-
-        function otherMixin(options: string[]) {
-            return {
-                backgroundColor: options[0],
-            };
-        }
-
-        function noParamsMixin() {
-            return {
-                borderColor: 'orange',
-            };
-        }
-
-        const sheet = fromCSS(`
-            :import("./relative/path/to/mixin.js") {
-                -st-default: MyMixin;
-            }
-            :import("./relative/path/to/mixin.js") {
-                -st-default: OtherMixin;
-            }
-            :import("./relative/path/to/mixin.js") {
-                -st-default: NoParamsMixin;
-            }
-            :vars {
-                param: red;
-            }
-            .container {
-                -st-mixin: MyMixin(value(param)) NoParamsMixin OtherMixin(blue);
-            }
-        `, "''");
-
-        const gen = new Generator({
-            namespaceDivider: "__",
-            mode: Mode.PROD
-        });
-
-        const stack: any = [];
-
-        gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin,
-            OtherMixin: otherMixin,
-            NoParamsMixin: noParamsMixin,
-            param: 'red',
-        }, stack);
-
-        expect(stack[0]).to.eql({
-            selector: '.container',
-            rules: {
-                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
-                color: "red",
-            }
-        }, '.container red');
-
-        expect(stack[1]).to.eql({
-            selector: '.container',
-            rules: {
-                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
-                borderColor: "orange",
-            }
-        }, '.container orange');
-
-        expect(stack[2]).to.eql({
-            selector: '.container',
-            rules: {
-                "-st-mixin": "MyMixin(value(param)) NoParamsMixin OtherMixin(blue)",
-                backgroundColor: "blue",
-            }
-        }, '.container blue');
+        const env = defineStylableEnv([
+            JS('./mixins.js', 'Mixins', {
+                mixin(options: string[]) {
+                    return {
+                        color: options[0],
+                    };
+                },
+                otherMixin(options: string[]) {
+                    return {
+                        backgroundColor: options[0],
+                    };
+                },
+                noParamsMixin() {
+                    return {
+                        borderColor: 'orange',
+                    };
+                }
+            }),
+            CSS('./main.css', 'Main', `
+                :import("./mixins.js") {
+                    -st-named: mixin, otherMixin, noParamsMixin;
+                }
+                :vars {
+                    param: red;
+                }
+                .container {
+                    -st-mixin: mixin(value(param)) noParamsMixin otherMixin(blue);
+                }
+            `)
+        ], {});
+       
+        env.validate.output([
+            '.Main__container {\n    background-color: blue\n}',
+            '.Main__container {\n    border-color: orange\n}',
+            '.Main__container {\n    color: red/*param*/\n}'
+        ]); // ToDo: fix order and combine into a single CSS ruleset
     });
 });
