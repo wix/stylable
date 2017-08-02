@@ -51,7 +51,7 @@ Syntax unique to Stylable - Click each to access code examples and descriptions 
   
 | Directives | Syntax  |  Description |
 |---|---|---|
-||**-st-**|Instructions for the **Stylable** pre-processor, removed during transpilation|
+||**`-st-`**|Instructions for the **Stylable** pre-processor, removed during transpilation|
 |[Extend stylesheet](../references/extend-stylesheet.md)|**`-st-extends`**   | Simple selector base class extending from another stylesheet  |
 |[State](../references/pseudo-classes.md)| **`-st-states`** | Define custom pseudo-classes  |
 |[Mixin](../references/mixin-syntax.md) | **`-st-mixin`**   | Apply mixins to CSS ruleset  |
