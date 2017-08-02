@@ -70,6 +70,12 @@ function addImportedElements(sheet: Stylesheet, importedElements:Pojo<boolean>){
 }
 
 function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
+    if(rules[valueMapping.variant] && selector.match(/^\.[\w]+$/)){ // ToDo: warn if variant not on class
+        if(!rules[valueMapping.extends]){
+            rules = {[valueMapping.extends]:'root', ...rules};
+        }
+        addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.variant);
+    }
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.root);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.states);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends);
