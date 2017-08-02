@@ -3,22 +3,7 @@ import { expect } from "chai";
 
 describe('cachedProcessFile', function () {
 
-    it('return apply function', function () {
-
-        expect(cachedProcessFile(() => null, {
-            readFileSync() {
-                return 'content'
-            },
-            statSync() {
-                return {
-                    mtime: new Date(0)
-                };
-            },
-        })).to.instanceOf(Function);
-
-    });
-
-    it('return process file content', function () {
+     it('return process file content', function () {
         const file = 'C:/file.txt';
         const fs: MinimalFS = {
             readFileSync(fullpath: string) {
@@ -39,7 +24,7 @@ describe('cachedProcessFile', function () {
             return content + '!';
         }, fs);
 
-        expect(p(file)).to.equal('content!');
+        expect(p.process(file)).to.equal('content!');
 
     });
 
@@ -67,7 +52,7 @@ describe('cachedProcessFile', function () {
             return processed;
         }, fs);
 
-        expect(p(file)).to.equal(p(file));
+        expect(p.process(file)).to.equal(p.process(file));
 
     });
 
@@ -91,9 +76,9 @@ describe('cachedProcessFile', function () {
         }
 
         const p = cachedProcessFile(() => { return null }, fs);
-        p(file);
-        p(file);
-        p(file);
+        p.process(file);
+        p.process(file);
+        p.process(file);
         expect(count).to.equal(1);
 
     });
@@ -122,8 +107,41 @@ describe('cachedProcessFile', function () {
             return null;
         }, fs);
 
-        p(file);
-        p(file);
+        p.process(file);
+        p.process(file);
+
+        expect(readCount).to.equal(2);
+        expect(processCount).to.equal(2);
+
+    });
+
+    
+
+    it('add stuff to ', function () {
+        const file = 'C:/file.txt';
+
+        let readCount = 0;
+        let processCount = 0;
+
+        const fs: MinimalFS = {
+            readFileSync() {
+                readCount++;
+                return '';
+            },
+            statSync() {
+                return {
+                    mtime: readCount === 0 ? new Date(0) : new Date(1)
+                }
+            }
+        }
+
+        const p = cachedProcessFile(() => {
+            processCount++;
+            return null;
+        }, fs);
+
+        p.process(file);
+        p.process(file);
 
         expect(readCount).to.equal(2);
         expect(processCount).to.equal(2);
