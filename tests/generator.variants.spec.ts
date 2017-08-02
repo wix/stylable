@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { defineStylableEnv, CSS } from "./stylable-test-kit";
 
 describe('static Generator variants', () => {
@@ -119,7 +118,7 @@ describe('static Generator variants', () => {
             env.validate.stylesheet('./main.css').variant('classA', true);
         });
 
-        it('should output multiple-selector variant', () => {
+        it('should output multiple-selector variant', () => {        
             const env = defineStylableEnv([
                 CSS('./comp-a.css', 'CompA', `
                     .MyCompVariant { 

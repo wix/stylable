@@ -6,7 +6,6 @@ import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImpo
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 import { hasKeys, hasOwn } from "./utils";
-import { Import } from "./import";
 const cssflat = require('../modules/flat-css');
 
 export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>

@@ -1,5 +1,5 @@
 import { fromCSS } from "../src";
-import { Generator, Mode } from '../src/generator';
+import { Generator } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";

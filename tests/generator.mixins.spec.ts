@@ -1,6 +1,3 @@
-import { fromCSS } from "../src";
-import { Generator } from '../src/generator';
-import { expect } from "chai";
 import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
 
 
@@ -83,13 +80,6 @@ describe('static Generator mixins', function () {
             '.Main__container {}'
         ]); // ToDo: fix the order is wrong
 
-        function mixin(options: string[]) {
-            return {
-                "&:hover": {
-                    color: options[0]
-                }
-            }
-        }
     });
 
     it('should handle nested mixins', function () {

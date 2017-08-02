@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { fromCSS, Stylesheet, Resolver } from "../src";
 import { Pojo } from "../src/types";
 import { Generator } from '../src/generator';
