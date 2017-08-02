@@ -2,6 +2,7 @@ import { fromCSS } from "../src";
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
+import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
 
 describe('Resolver', function () {
 
@@ -82,7 +83,7 @@ describe('Resolver', function () {
 
             const resolved = new Resolver({ "./path": resolvedModule }).resolveSymbols(sheet)
 
-            expect(resolved).to.eql({ name1: resolvedModule });
+            expect(resolved).to.eql({ name1: resolvedModule, root:'root' });
         });
 
         it('should handle nameless default by using the path', function () {
@@ -95,7 +96,7 @@ describe('Resolver', function () {
 
             const resolved = new Resolver({ "./path": resolvedModule }).resolveSymbols(sheet);
 
-            expect(resolved).to.eql({ './path': resolvedModule });
+            expect(resolved).to.eql({ './path': resolvedModule, root:'root' });
 
         });
 
@@ -119,9 +120,9 @@ describe('Resolver', function () {
             }).resolveSymbols(sheet);
 
             expect(resolved).to.contain({ name1: resolvedModule1, name2: resolvedModule2 });
-        });
+        }); 
 
-        it('should resolve stylesheets', function () {
+        it('should resolve stylesheet vars', function () {
 
             const resolvedModule = new Stylesheet({
                 ":vars": {
@@ -146,8 +147,29 @@ describe('Resolver', function () {
             expect(resolved).to.contain({ param1: "red", param2: "blue", param3: "green" });
         });
 
-        it('should throw error on var name conflict', function () {
+        it('should resolve stylesheet class definition', function () {
+            const resolvedModule = new Stylesheet({
+                ".classA": {
+                    "color": "red"
+                }
+            });
 
+            var sheet = new Stylesheet({
+                ":import('./path')": {
+                    "-st-named": "classA",
+                },
+                ".classB": {}
+            }, "namespace");
+
+            const resolved = new Resolver({
+                "./path": resolvedModule
+            }).resolveSymbols(sheet);
+            
+            expect(resolved.classA).to.eql("classA");
+            expect(resolved.classB).to.eql("classB");
+        });
+
+        it('should throw error on var name conflict', function () {
             const resolvedModule = new Stylesheet({
                 ":vars": {
                     "param1": "red",
@@ -193,6 +215,132 @@ describe('Resolver', function () {
         });
     });
 
+    describe('getSymbolDefinition', () => {
+
+        it('should return type "not-found" when symbol is missing', () => {
+            const env = defineStylableEnv([
+                CSS('./main.css', 'Main', ``)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'missing');
+
+            expect(symbolDef).to.eql({origin:mainStylesheet, type:'not-found', localName:''});
+        });
+
+        it('should return class from stylesheet', () => {
+            const env = defineStylableEnv([
+                CSS('./main.css', 'Main', `
+                    .classA {}
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'classA');
+
+            expect(symbolDef).to.eql({origin:mainStylesheet, type:'class', localName:'classA'});
+        });
+
+        it('should return var from stylesheet', () => {
+            const env = defineStylableEnv([
+                CSS('./main.css', 'Main', `
+                    :vars {
+                        param1: green; 
+                    }
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'param1');
+
+            expect(symbolDef).to.eql({origin:mainStylesheet, type:'var', localName:'param1'});
+        });
+
+        it('should return class from imported stylesheet', () => {
+            const env = defineStylableEnv([
+                CSS('./style-x.css', 'StyleX', `
+                    .classA {}
+                `),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./style-x.css";
+                        -st-named: classA as renamedClassA;
+                    }
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'renamedClassA');
+            
+            const styleX = env.resolver.resolveModule('./style-x.css');
+            expect(symbolDef).to.eql({origin:styleX, type:'class', localName:'classA'});
+        });
+
+        it('should return var from imported stylesheet', () => {
+            const env = defineStylableEnv([
+                CSS('./style-x.css', 'StyleX', `
+                    :vars {
+                        param1: green; 
+                    }
+                `),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./style-x.css";
+                        -st-named: param1 as renamedParam;
+                    }
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'renamedParam');
+            
+            const styleX = env.resolver.resolveModule('./style-x.css');
+            expect(symbolDef).to.eql({origin:styleX, type:'var', localName:'param1'});
+        });
+
+        it('should return default imported stylesheet', () => {
+            const env = defineStylableEnv([
+                CSS('./style-x.css', 'StyleX', ``),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./style-x.css";
+                        -st-default: StyleXDefault;
+                    }
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const symbolDef = env.resolver.getSymbolDefinition(mainStylesheet, 'StyleXDefault');
+            
+            const styleX = env.resolver.resolveModule('./style-x.css');
+            expect(symbolDef).to.eql({origin:styleX, type:'stylesheet', localName:'default'});
+        });
+
+        it('should return symbols imported from JS module', () => {
+            const env = defineStylableEnv([
+                JS('./module-x.js', 'ModuleX', {
+                    default:'def-value',
+                    other:'named-value'
+                }),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./module-x.js";
+                        -st-default: moduleXDefault;
+                        -st-named: other as moduleXNamed;
+                    }
+                `)
+            ], {});
+           
+            const mainStylesheet = env.resolver.resolveModule('./main.css');
+            const defaultDef = env.resolver.getSymbolDefinition(mainStylesheet, 'moduleXDefault');
+            const namedDef = env.resolver.getSymbolDefinition(mainStylesheet, 'moduleXNamed');
+            
+            const moduleX = env.resolver.resolveModule('./module-x.js');
+            expect(defaultDef, 'default').to.eql({origin:moduleX, type:'JSExport', localName:'default'});
+            expect(namedDef, 'named').to.eql({origin:moduleX, type:'JSExport', localName:'other'});
+        });
+
+    });
 
 });
 
