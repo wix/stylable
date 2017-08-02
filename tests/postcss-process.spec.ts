@@ -121,7 +121,6 @@ describe('Stylable postcss process', function () {
 
     });
 
-
     it('collect :import warnings', function () {
 
         const result = processSource(`
@@ -135,7 +134,6 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports[1].message).to.eql('"color" css attribute cannot be used inside :import block');
 
     });
-
 
     it('collect :vars', function () {
 
@@ -189,7 +187,6 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
     });
-
     
     it('collect typed classes', function () {
 
