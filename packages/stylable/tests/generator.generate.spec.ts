@@ -2,7 +2,27 @@ import { fromCSS } from "../src";
 import { Generator } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
-import { expect } from "chai";
+import * as chai from "chai";
+
+const expect = chai.expect;
+
+chai.use(matchCSSMatchers);
+
+function matchCSSMatchers(chai: any, util: any) {
+    const { flag } = util;
+    chai.Assertion.addMethod('matchCSS', function (this: any, css: string | string[]) {
+        let element = flag(this, 'object');
+        if(!Array.isArray(css)){
+            css = [css]
+        }
+        if(!Array.isArray(element)){
+            element = [element]
+        }     
+        //TODO: better reporting.
+        expect(element.length).to.equal(css.length);
+        css.forEach((chunk, index) => expect(element[index]).to.eql(chunk));
+    });
+}
 
 
 describe('static Generator.generate', function () {
@@ -19,7 +39,7 @@ describe('static Generator.generate', function () {
 
             const css = Generator.generate(sheet);
 
-            expect(css).to.eql(['.container {\n    color: black\n}']);
+            expect(css).to.matchCSS(['.container {\n    color: black\n}']);
 
         });
 
@@ -32,7 +52,7 @@ describe('static Generator.generate', function () {
 
             const css = Generator.generate(sheet);
 
-            expect(css).to.eql([".container {}", ".image {}"]);
+            expect(css).to.matchCSS([".container {}", ".image {}"]);
 
         });
 
@@ -52,7 +72,7 @@ describe('static Generator.generate', function () {
 
             const css = Generator.generate([sheetA, sheetB]);
 
-            expect(css).to.eql([
+            expect(css).to.matchCSS([
                 '.container {\n    color: black\n}',
                 '.container {\n    color: white\n}',
             ]);
@@ -69,7 +89,7 @@ describe('static Generator.generate', function () {
 
             const css = Generator.generate(sheet, new Generator({ namespaceDivider: "__THE_DIVIDER__" }));
 
-            expect(css).to.eql([
+            expect(css).to.matchCSS([
                 '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
             ]);
 
@@ -99,7 +119,7 @@ describe('static Generator.generate', function () {
                 })
             }));
 
-            expect(css).to.eql([
+            expect(css).to.matchCSS([
                 '.TheNameSpace__THE_DIVIDER__container {\n    color: white\n}'
             ]);
 
@@ -132,7 +152,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__containerB {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -151,7 +171,7 @@ describe('static Generator.generate', function () {
                 '.TheNameSpace__THE_DIVIDER__containerA {\n    color: red\n}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -179,7 +199,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__containerB.TheNameSpace__THE_DIVIDER__root {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -213,7 +233,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: green\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -240,7 +260,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {\n    color: red\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -269,7 +289,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__x {\n    color: gold\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -297,7 +317,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -330,7 +350,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .SheetA__THE_DIVIDER__root {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -365,7 +385,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__inner {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -402,7 +422,7 @@ describe('static Generator.generate', function () {
                 '.TheGreatNameSpace__THE_DIVIDER__containerB.TheNameSpace__THE_DIVIDER__root .TheNameSpace__THE_DIVIDER__icon {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -446,7 +466,7 @@ describe('static Generator.generate', function () {
                 '.App__app.Button__root .Button__text .Text__first-letter {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -488,7 +508,7 @@ describe('static Generator.generate', function () {
                 '.App__main-gallery.ImageGallery__root .GenericGallery__nav-btn {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -532,7 +552,7 @@ describe('static Generator.generate', function () {
                 '.App__main-gallery.ImageGallery__root .ImageGallery__nav-btn {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -565,7 +585,7 @@ describe('static Generator.generate', function () {
                 '.ImageGallery__root.GenericGallery__root .GenericGallery__nav-btn {}' /* ToDo: check if GenericGallery__root is needed here (same just uglier) */
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -609,7 +629,7 @@ describe('static Generator.generate', function () {
                 '.App__app.Button__root .Button__text .Text__first-letter, .App__gallery {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -631,7 +651,7 @@ describe('static Generator.generate', function () {
                 '.Style__my-class[data-style-my-state] {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -655,7 +675,7 @@ describe('static Generator.generate', function () {
                 '.Style__my-class.y[data-z="val"] {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -679,7 +699,7 @@ describe('static Generator.generate', function () {
                 '.Style__my-class.y[data-z="val"] {}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -713,7 +733,7 @@ describe('static Generator.generate', function () {
                 '.StyleB__my-class.StyleA__root[data-stylea-my-state] {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -748,7 +768,7 @@ describe('static Generator.generate', function () {
                 '.StyleB__my-class.StyleA__root[data-styleb-my-state] {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -782,7 +802,7 @@ describe('static Generator.generate', function () {
                 '.StyleB__my-class.StyleA__root .StyleA__container[data-stylea-my-state] {}',
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -882,7 +902,7 @@ describe('static Generator.generate', function () {
                 '.container {\n    color: red\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -901,7 +921,7 @@ describe('static Generator.generate', function () {
                 '.container .Style__container {\n    color: red\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
 
@@ -920,7 +940,7 @@ describe('static Generator.generate', function () {
                 '.container, .Style__container {\n    color: red\n}'
             ];
 
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
     })
@@ -940,7 +960,7 @@ describe('static Generator.generate', function () {
             
             const res = ["@keyframes s0__name {\n    from {}\n    to {}\n}"];
             
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
 
         });
@@ -972,7 +992,7 @@ describe('static Generator.generate', function () {
                 ".s0__selector {\n    animation: 2s s0__name infinite, 1s s0__name2 infinite;\n    animation-name: s0__name\n}"
             ];
             
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
 
         })
@@ -991,7 +1011,7 @@ describe('static Generator.generate', function () {
             }));
             const res = ['@media (max-width: 300px) {\n    .s0__container {}\n}']
             
-            css.forEach((chunk, index) => expect(chunk).to.eql(res[index]));
+            css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
 
         })

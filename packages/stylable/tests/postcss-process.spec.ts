@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { process, StyleableMeta, processNamespace } from '../src/postcss-process';
+import { process, StyleableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
 import { cachedProcessFile } from '../src/cached-process-file';
 import * as postcss from 'postcss';
 
@@ -83,19 +83,42 @@ describe('Stylable postcss process', function () {
                 -st-default: name;
             }
         `, { from: "path/to/style.css" });
+        
+        expect(result.imports.length).to.eql(3);
+        
+        expect(result.mappedSymbols.a).to.include({
+            _kind: 'import',
+            type: 'named'
+        });
+        
+        expect(result.mappedSymbols.c).to.include({
+            _kind: 'import',
+            type: 'named'
+        });
 
-        expect(result.imports[0].from).to.eql("./some/path");
-        expect(result.imports[0].rule.selector).to.eql(':import');
+        expect(result.mappedSymbols.name).to.include({
+            _kind: 'import',
+            type: 'default'
+        });
+        
+        expect((<ImportSymbol>result.mappedSymbols.a).import).to.deep.include({
+            from: './some/other/path',
+            defaultExport: '',
+            named: {a: 'a', c: 'b'}
+        });
+        
+        expect((<ImportSymbol>result.mappedSymbols.c).import).to.deep.include({
+            from: './some/other/path',
+            defaultExport: '',
+            named: {a: 'a', c: 'b'}
+        });
+        
+        expect((<ImportSymbol>result.mappedSymbols.name).import).to.deep.include({
+            from: './some/global/path',
+            defaultExport: 'name',
+            named: {}
+        });
 
-        expect(result.imports[1].rule.selector).to.eql(':import');
-        expect(result.imports[1].from).to.eql("./some/other/path");
-        expect(result.imports[1].named).to.eql({a: 'a', c: 'b'});
-   
-        expect(result.imports[2].rule.selector).to.eql(':import');
-        expect(result.imports[2].from).to.eql("./some/global/path");
-        expect(result.imports[2].named).to.eql({});
-        expect(result.imports[2].defaultExport).to.eql('name');
-   
     });
 
 
@@ -129,7 +152,7 @@ describe('Stylable postcss process', function () {
 
     });
 
-    it('resolve local :vars', function () {
+    it('resolve local :vars (by order of definition)', function () {
 
         const result = processSource(`
             :vars {
@@ -137,11 +160,63 @@ describe('Stylable postcss process', function () {
                 myname: value(name);
             }
         `, { from: "path/to/style.css" });
-
-        expect(result.mappedVars).to.eql({
-            name: 'value',
-            myname: 'value'
+        
+        expect(result.mappedSymbols).to.deep.equal({
+            name: {
+                _kind: 'var',
+                value: 'value'
+            },
+            myname: {
+                _kind: 'var',
+                value: 'value'
+            }
         });
+
+    });
+
+    it('resolve local :vars (dont warn if name is imported)', function () {
+
+        const result = processSource(`
+            :import {
+                -st-from: "./file.css";
+                -st-named: name;
+            }
+            :vars {
+                myname: value(name);
+            }
+        `, { from: "path/to/style.css" });
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+
+    });
+
+    
+    it('collect typed classes', function () {
+
+        const result = processSource(`
+            :import {
+                -st-from: './file.css';   
+                -st-default: Style;   
+            }
+            .myclass {
+                -st-extends: Style; 
+            }
+        `, { from: "path/to/style.css" });
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+        expect(result.typedClasses.myclass).to.eql({
+            extends: 'Style'
+        });
+
+    });
+
+        
+    it('collect typed elements', function () {
+
+        const result = processSource(`
+        `, { from: "path/to/style.css" });
+
+        expect(result.classes.length).to.eql(5);
 
     });
 

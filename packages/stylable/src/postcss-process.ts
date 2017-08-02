@@ -1,10 +1,10 @@
 import * as postcss from 'postcss';
-import { parseSelector, traverseNode, SelectorAstNode, createSimpleSelectorChecker, createRootAfterSpaceChecker } from './selector-utils';
+import { parseSelector, traverseNode, SelectorAstNode, createSimpleSelectorChecker, createRootAfterSpaceChecker, matchAtKeyframes } from './selector-utils';
 import { basename } from 'path';
 import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues } from "./stylable-value-parsers";
-import { findImportForSymbol, Import } from "./import";
+import { Import } from "./import";
 import { matchValue, valueReplacer } from "./value-template";
 import { Pojo } from "./types";
 const hash = require('murmurhash');
@@ -14,6 +14,7 @@ const parseMixin = SBTypesParsers[valueMapping.mixin];
 
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
+
     const source = root.source.input.file || '';
 
     if (!source) {
@@ -25,21 +26,20 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
         source,
         imports: [],
         vars: [],
-        mappedVars: {},
+        mappedSymbols: {},
         directives: {},
         keyframes: [],
         classes: [],
         diagnostics
     };
 
+
     handleAtRules(root, stylableMeta, diagnostics);
 
     root.walkRules((rule: SRule) => {
         rule.selectorAst = parseSelector(rule.selector);
         rule.isSimpleSelector = true;
-
         handleSelector(rule, stylableMeta, diagnostics);
-        handleMappedVars(stylableMeta, diagnostics);
         handleDeclarations(rule, stylableMeta, diagnostics);
     });
 
@@ -58,19 +58,24 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
         const { name, type } = node;
         if (type === 'pseudo-class') {
             if (name === 'import') {
-                stylableMeta.imports.push(handleImport(rule, diagnostics));
-                if (rule.selector !== ':import') {
+                if (rule.selector === ':import') {
+                    stylableMeta.imports.push(rule);
+                    addImportSymbols(rule, stylableMeta, diagnostics);
+                    return false;
+                } else {
                     diagnostics.warning(rule, 'cannot define ":import" inside a complex selector');
                 }
-                return false;
             } else if (name === 'vars') {
-                stylableMeta.vars.push(rule);
-                if (rule.selector !== ':vars') {
+                if (rule.selector === ':vars') {
+                    stylableMeta.vars.push(rule);
+                    addVarSymbols(rule, stylableMeta, diagnostics);
+                    return false;
+                } else {
                     diagnostics.warning(rule, 'cannot define ":vars" inside a complex selector');
                 }
-                return false;
             }
         } else if (type === 'class') {
+            
             stylableMeta.classes.push(name);
         }
         return void 0;
@@ -82,24 +87,62 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
 
 }
 
-function handleMappedVars(stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
-    stylableMeta.vars.forEach((rule) => {
-        rule.walkDecls((decl) => {
-            stylableMeta.mappedVars[decl.prop] = valueReplacer(decl.value, stylableMeta.mappedVars, (value, name, match) => {
-                if (value === undefined) {
-                    diagnostics.warning(decl, `cannot resolve variable value for "${name}"`, { word: match });
-                }
-                return value;
-            });
-        });
+function checkRedeclare(styleableMeta: StyleableMeta, symbolName: string, node: postcss.Node, diagnostics: Diagnostics) {
+    const symbol = styleableMeta.mappedSymbols[symbolName];
+    if (symbol) {
+        //TODO: can output match better error;
+        diagnostics.warning(node, `redeclare symbol "${symbolName}"`, { word: symbolName })
+    }
+}
+
+function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+    const _import = handleImport(rule, diagnostics);
+    //TODO: handle error;
+    if (_import.defaultExport) {
+        checkRedeclare(stylableMeta, _import.defaultExport, _import.rule, diagnostics);
+        stylableMeta.mappedSymbols[_import.defaultExport] = {
+            _kind: 'import',
+            type: 'default',
+            import: _import
+        };
+    }
+    Object.keys(_import.named).forEach((name) => {
+        checkRedeclare(stylableMeta, name, _import.rule, diagnostics);
+        stylableMeta.mappedSymbols[name] = {
+            _kind: 'import',
+            type: 'named',
+            import: _import
+        };
     });
 }
+
+function addVarSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+    rule.walkDecls((decl) => {
+        checkRedeclare(stylableMeta, decl.prop, decl, diagnostics);
+        stylableMeta.mappedSymbols[decl.prop] = {
+            _kind: 'var',
+            value: valueReplacer(decl.value, {}, (value, name, match) => {
+                value;
+                const symbol = stylableMeta.mappedSymbols[name];
+                if (!symbol) {
+                    diagnostics.warning(decl, `cannot resolve variable value for "${name}"`, { word: match });
+                    return match;
+                }
+                return symbol._kind === 'var' ? symbol.value : match;
+            })
+        }
+    });
+    rule.remove();
+}
+
 
 function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
 
     // Transform each rule here
     rule.walkDecls(decl => {
+
         if (stValues.indexOf(decl.prop) !== -1) {
+
             if (decl.prop === valueMapping.states) {
                 if (!rule.isSimpleSelector) {
                     diagnostics.warning(decl, 'cannot define pseudo states inside complex selectors');
@@ -108,24 +151,31 @@ function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostic
                 if (!rule.isSimpleSelector) {
                     diagnostics.warning(decl, 'cannot define "' + valueMapping.extends + '" inside a complex selector');
                 }
+                const extendsSymbol = stylableMeta.mappedSymbols[decl.value];
+                if (!extendsSymbol || extendsSymbol._kind !== 'import') {
+                    diagnostics.warning(decl, `cannot resolve extends type for "${decl.value}"`, { word: decl.value });
+                }
+
             } else if (decl.prop === valueMapping.mixin) {
-                var mixins = parseMixin(decl.value);
+                const mixins = parseMixin(decl.value);
 
                 mixins.forEach((mix) => {
-                    var _import = findImportForSymbol(stylableMeta.imports, mix.type);
-                    if (!_import) {
+                    const symbol = stylableMeta.mappedSymbols[mix.type];
+                    if (!symbol || symbol._kind !== 'import') {
                         diagnostics.warning(decl, `unknown mixin: "${mix.type}"`, { word: mix.type });
                     }
-                    return mix.type;
                 });
             }
 
             stylableMeta.directives[decl.prop] || (stylableMeta.directives[decl.prop] = []);
             stylableMeta.directives[decl.prop].push(decl);
+
         }
 
+
+
         decl.value.replace(matchValue, (match, varName) => {
-            if (!stylableMeta.mappedVars[varName] && match) {
+            if (match && !stylableMeta.mappedSymbols[varName]) {
                 diagnostics.warning(decl, `unknown var "${varName}"`, { word: varName });
             }
             return match;
@@ -137,6 +187,7 @@ function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostic
 
 function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
     let namespace = '';
+
     root.walkAtRules((atRule) => {
         switch (atRule.name) {
             case 'namespace':
@@ -155,9 +206,9 @@ function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnost
 
 function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 
-    var importObj: Imported = { rule, from: '', defaultExport: '', named: {} };
+    const importObj: Imported = { rule, from: '', defaultExport: '', named: {} };
 
-    var notValidProps: postcss.Declaration[] = [];
+    const notValidProps: postcss.Declaration[] = [];
 
     rule.walkDecls((decl) => {
         switch (decl.prop) {
@@ -186,6 +237,8 @@ function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
         diagnostics.error(rule, '"-st-from" is missing in :import block');
     }
 
+    rule.remove();
+
     return importObj;
 
 }
@@ -202,14 +255,27 @@ export interface Imported extends Import {
 export interface StyleableMeta {
     source: string
     namespace: string;
-    imports: Imported[];
+    imports: postcss.Rule[];
     vars: postcss.Rule[];
-    mappedVars: Pojo<string>;
     keyframes: postcss.AtRule[];
     directives: { [key: string]: postcss.Declaration[] };
     classes: string[];
+    mappedSymbols: Pojo<ImportSymbol | VarSymbol>;
+
     diagnostics: Diagnostics;
 }
+
+export interface ImportSymbol {
+    _kind: 'import'
+    type: 'named' | 'default'
+    import: Imported;
+}
+
+export interface VarSymbol {
+    _kind: 'var';
+    value: string;
+}
+
 
 export interface SRule extends postcss.Rule {
     selectorAst: SelectorAstNode;
