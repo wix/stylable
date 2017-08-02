@@ -49,7 +49,7 @@ Syntax unique to Stylable
 
 Syntax unique to Stylable - Click each to access code examples and descriptions in GitHub
   
-| Directive | Syntax  |  Description |
+| Directives | Syntax  |  Description |
 |---|---|---|
 ||**-st-**|Instructions for the **Stylable** pre-processor, removed during transpilation|
 |[Extend stylesheet](../references/extend-stylesheet.md)|**`-st-extends`**   | Simple selector base class extending from another stylesheet  |
