@@ -49,9 +49,9 @@ describe('static Generator mixins', function () {
         ], {});
         
         env.validate.output([
-            '.Main__container :hover {\n    color: red\n}',
-            '.Main__container {}'
-        ]); // ToDo: fix the order is wrong
+            '.Main__container {}',
+            '.Main__container :hover {\n    color: red\n}'
+        ]);
     });
 
     it('should add extended selectors (&) in the first level', function () {
@@ -76,9 +76,9 @@ describe('static Generator mixins', function () {
         ], {});
         
         env.validate.output([
-            '.Main__container:hover {\n    color: red\n}',
-            '.Main__container {}'
-        ]); // ToDo: fix the order is wrong
+            '.Main__container {}',
+            '.Main__container:hover {\n    color: red\n}'
+        ]);
 
     });
 
@@ -116,10 +116,10 @@ describe('static Generator mixins', function () {
         ], {});
         
         env.validate.output([
-            '.Main__container > *:hover {\n    color: green\n}',
+            '.Main__container {}',
             '.Main__container > * {\n    background: red;\n    border: 10px solid black;\n    color: red\n}',
-            '.Main__container {}'
-        ]); // ToDo: fix the order is wrong
+            '.Main__container > *:hover {\n    color: green\n}'
+        ]); 
     });
 
 });

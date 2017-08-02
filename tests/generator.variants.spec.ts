@@ -146,6 +146,40 @@ describe('static Generator variants', () => {
             ]);
         });
 
+
+        it('should output variant to simple class and append parts immediate after', () => {
+            const env = defineStylableEnv([
+                CSS('./comp-a.css', 'CompA', `
+                    .MyCompVariant { 
+                        -st-variant: true;
+                        color: red;                
+                    }
+                    .MyCompVariant:hover {
+                        color: green;
+                    }
+                `),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./comp-a.css";
+                        -st-named: MyCompVariant;
+                    }
+                    .classA { 
+                        -st-mixin: MyCompVariant;
+                    }
+                    .classB {
+                        color: blue;
+                    }
+                `)
+            ], {});
+           
+            env.validate.output([
+                '.Main__classA {\n    color: red\n}',
+                '.Main__classA:hover {\n    color: green\n}',
+                '.Main__classB {\n    color: blue\n}'
+            ]);
+        });
+
+
         it('should scope variant to origin', () => {
             const env = defineStylableEnv([
                 CSS('./comp-a.css', 'CompA', `
