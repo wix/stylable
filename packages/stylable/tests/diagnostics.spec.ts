@@ -4,22 +4,20 @@ import { process } from '../src/postcss-process';
 import { safeParse } from "../src/parser";
 
 const customButton = `
-                    .root{
-                        -st-states:shmover;
-                    }
-                    .my-part{
+    .root{
+        -st-states:shmover;
+    }
+    .my-part{
 
-                    }
-                    .my-variant{
-                        -st-variant:true;
-                        color:red;
-                    }
-                    
-                `;
-const mixins = `
+    }
+    .my-variant{
+        -st-variant:true;
+        color:red;
+    }
+    
+`;
+const mixins = ``;
 
-
-`
 interface warning {
     message: string;
     file: string;
@@ -100,7 +98,7 @@ describe('findTestLocations', () => {
 
 
 function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
-    debugger;
+    extraFiles;
     var source = findTestLocations(css);
     var root = safeParse(source.css);
     var res = process(root);
@@ -226,7 +224,7 @@ describe('diagnostics: warnings and errors', function () {
                     .root:|shmover|{
 
                     }
-                `, { message: 'unknown state "shmover"', file: "main.css" })
+                `, [{ message: 'unknown state "shmover"', file: "main.css" }])
             });
         });
         describe('pseudo selectors', function () {
@@ -235,7 +233,7 @@ describe('diagnostics: warnings and errors', function () {
                     |::before|{
 
                     }
-                `, { message: 'global pseudo elements are not allowed, you can use ".root::before" instead', file: "main.css" })
+                `, [{ message: 'global pseudo elements are not allowed, you can use ".root::before" instead', file: "main.css" }])
             });
 
             it('should return warning for unknown pseudo element', function () {
@@ -243,7 +241,7 @@ describe('diagnostics: warnings and errors', function () {
                     .root::|mybtn|{
 
                     }
-                `, { message: 'unknown pseudo element "mybtn"', file: "main.css" })
+                `, [{ message: 'unknown pseudo element "mybtn"', file: "main.css" }])
             });
 
             it('should return warning for unknown pseudo element', function () {
@@ -251,7 +249,7 @@ describe('diagnostics: warnings and errors', function () {
                     .root::|mybtn|{
 
                     }
-                `, { message: 'unknown pseudo element "mybtn"', file: "main.css" })
+                `, [{ message: 'unknown pseudo element "mybtn"', file: "main.css" }])
             });
         });
 
@@ -265,9 +263,8 @@ describe('diagnostics: warnings and errors', function () {
                     |.gaga .root|{}                    
                 `, [{ message: '.root class cannot be used after spacing', file: "main.css" }])
             });
-
-
         });
+
         describe('-st-states', function () {
             it('should return warning when defining states in complex selector', function () {
                 expectWarnings(`
@@ -277,6 +274,7 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
             });
         });
+
         describe('-st-mixin', function () {
             it('should return warning for unknown mixin', function () {
                 expectWarnings(`
@@ -287,6 +285,7 @@ describe('diagnostics: warnings and errors', function () {
             });
 
         });
+
         describe(':vars', function () {
             it('should return warning for unknown var', function () {
                 expectWarnings(`
@@ -312,6 +311,7 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'cannot define ":vars" inside a complex selector', file: "main.css" }])
             });
         });
+
         xdescribe('-st-variant', function () {
             it('should return warning when defining variant in complex selector', function () {
                 expectWarnings(`
@@ -329,6 +329,7 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: "main.css" }])
             });
         });
+
         describe(':import', function () {
             it('should return warning when defined in a complex selector', function () {
                 expectWarnings(`
@@ -378,11 +379,56 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
+            it('should warn on not imported extends', function () {
+                expectWarnings(`
+                    .root {
+                        |-st-extends: @Comp@|;
+                    }
+                `, [{ message: 'cannot resolve extends type for "Comp"', file: "main.css" }]
+                )
+
+            });
+
         });
+
     });
 
+
+    describe('redeclare symbols', function () {
+
+        describe('from import', function () {
+            
+            it('should warn when import redeclare same symbol (in same block)', function () {
+                expectWarnings(`
+                    |:import {
+                        -st-from: './file.css';
+                        -st-default: name;
+                        -st-named: @name@;
+                    }
+                `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
+            });
+
+            it('should warn when import redeclare same symbol (in different block)', function () {
+                expectWarnings(`
+                    :import {
+                        -st-from: './file.css';
+                        -st-default: name;
+                    }
+                    |:import {
+                        -st-from: './file.css';
+                        -st-default: @name@;
+                    }
+                `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
+            });
+
+        });
+
+    });
+
+    
     describe('complex examples', function () {
         describe(':import', function () {
+
             it('should return warning for unknown file', function () {
                 expectWarnings(`
 
@@ -392,6 +438,7 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'could not find file "./file"', file: "main.css" }])
             });
+
             it('should return warning for unknown import', function () {
                 expectWarnings(`
                     :import{
@@ -402,8 +449,10 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'cannot find export "variant" in "./file"', file: "main.css" }]
                     , [{ content: customButton, path: 'file.css' }]);
             });
+
         });
         describe('cross variance', function () {
+
             it('variant cannot be used as var', function () {
                 expectWarnings(`
                     :import{
@@ -418,6 +467,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
+
             it('mixin cannot be used as var', function () {
                 expectWarnings(`
                     :import{
@@ -431,6 +481,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
+
             it('mixin cannot be used as stylesheet', function () {
                 expectWarnings(`
                     :import{
@@ -444,6 +495,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
+
             it('stylesheet cannot be used as var', function () {
                 expectWarnings(`
                     :import{
@@ -456,6 +508,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
+
             it('stylesheet cannot be used as mixin', function () {
                 expectWarnings(`
                     :import{
@@ -470,6 +523,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
+
             it('component variant cannot be used for native node', function () {
                 expectWarnings(`
                     :import{
@@ -488,6 +542,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
+
             it('variants can only be used for a specific component', function () {
                 expectWarnings(`
                     :import{
@@ -512,6 +567,7 @@ describe('diagnostics: warnings and errors', function () {
                         { content: customButton, path: 'file.css' }, { content: customButton, path: 'file2.css' }])
 
             });
+
             it('variant cannot be used with params', function () {
                 expectWarnings(`
                     :import{
@@ -526,6 +582,7 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'invalid mixin arguments: "my-variant" is a variant and does not accept arguments', file: "main.css" }])
 
             });
+
             it('mixins cant be used with wrong number of params', function () {
                 expectWarnings(`
                     :import{
@@ -539,6 +596,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
+
             it('error running mixin', function () {
                 expectWarnings(`
                     :import{
@@ -552,6 +610,7 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
+                
         });
 
     });
