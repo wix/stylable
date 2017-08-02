@@ -16,15 +16,9 @@ const parseStates = SBTypesParsers[valueMapping.states];
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
-    const source = root.source.input.file || '';
-
-    if (!source) {
-        diagnostics.error(root, 'missing source filename');
-    }
-
     const stylableMeta: StyleableMeta = {
+        source: getSourcePath(root, diagnostics),
         namespace: '',
-        source,
         imports: [],
         vars: [],
         typedClasses: {},
@@ -34,7 +28,6 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
         classes: [],
         diagnostics
     };
-
 
     handleAtRules(root, stylableMeta, diagnostics);
 
@@ -47,6 +40,33 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
     return stylableMeta;
 
+}
+
+function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
+    const source = root.source.input.file || '';
+    if (!source) {
+        diagnostics.error(root, 'missing source filename');
+    }
+    return source;
+}
+
+function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+    let namespace = '';
+
+    root.walkAtRules((atRule) => {
+        switch (atRule.name) {
+            case 'namespace':
+                const match = atRule.params.match(/["'](.*?)['"]/);
+                match ? (namespace = match[1]) : diagnostics.error(atRule, 'invalid namespace');
+                break;
+            case 'keyframes':
+                stylableMeta.keyframes.push(atRule);
+                break;
+        }
+    });
+
+    namespace = namespace || filename2varname(basename(stylableMeta.source)) || 's';
+    stylableMeta.namespace = processNamespace(namespace, stylableMeta.source);
 }
 
 function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
@@ -77,7 +97,6 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
                 }
             }
         } else if (type === 'class') {
-
             stylableMeta.classes.push(name);
         }
         return void 0;
@@ -89,7 +108,7 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
 
 }
 
-function checkRedeclareSymbol(styleableMeta: StyleableMeta, symbolName: string, node: postcss.Node, diagnostics: Diagnostics) {
+function checkRedeclareSymbol(symbolName: string, node: postcss.Node, styleableMeta: StyleableMeta, diagnostics: Diagnostics) {
     const symbol = styleableMeta.mappedSymbols[symbolName];
     if (symbol) {
         //TODO: can output match better error;
@@ -101,7 +120,7 @@ function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagn
     const _import = handleImport(rule, diagnostics);
     //TODO: handle error;
     if (_import.defaultExport) {
-        checkRedeclareSymbol(stylableMeta, _import.defaultExport, _import.rule, diagnostics);
+        checkRedeclareSymbol(_import.defaultExport, _import.rule, stylableMeta, diagnostics);
         stylableMeta.mappedSymbols[_import.defaultExport] = {
             _kind: 'import',
             type: 'default',
@@ -109,7 +128,7 @@ function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagn
         };
     }
     Object.keys(_import.named).forEach((name) => {
-        checkRedeclareSymbol(stylableMeta, name, _import.rule, diagnostics);
+        checkRedeclareSymbol(name, _import.rule, stylableMeta, diagnostics);
         stylableMeta.mappedSymbols[name] = {
             _kind: 'import',
             type: 'named',
@@ -120,7 +139,7 @@ function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagn
 
 function addVarSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
     rule.walkDecls((decl) => {
-        checkRedeclareSymbol(stylableMeta, decl.prop, decl, diagnostics);
+        checkRedeclareSymbol(decl.prop, decl, stylableMeta, diagnostics);
         stylableMeta.mappedSymbols[decl.prop] = {
             _kind: 'var',
             value: valueReplacer(decl.value, {}, (value, name, match) => {
@@ -150,14 +169,14 @@ function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostic
         });
 
         if (stValues.indexOf(decl.prop) !== -1) {
-            handleStylableDirectives(rule, decl, stylableMeta, diagnostics);
+            handleDirectives(rule, decl, stylableMeta, diagnostics);
         }
 
     });
 
 }
 
-function handleStylableDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
 
     stylableMeta.directives[decl.prop] || (stylableMeta.directives[decl.prop] = []);
     const selectorName = rule.selector.replace('.', '');
@@ -217,24 +236,6 @@ function extendTypedClass(node: postcss.Node, name: string, key: keyof TypedClas
     typedClass[key] = value;
 }
 
-function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
-    let namespace = '';
-
-    root.walkAtRules((atRule) => {
-        switch (atRule.name) {
-            case 'namespace':
-                const match = atRule.params.match(/["'](.*?)['"]/);
-                match ? (namespace = match[1]) : diagnostics.error(atRule, 'invalid namespace');
-                break;
-            case 'keyframes':
-                stylableMeta.keyframes.push(atRule);
-                break;
-        }
-    });
-
-    namespace = namespace || filename2varname(basename(stylableMeta.source)) || 's';
-    stylableMeta.namespace = processNamespace(namespace, stylableMeta.source);
-}
 
 function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 

@@ -1,7 +1,13 @@
-import { expect } from "chai";
-import { process, StyleableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
-import { cachedProcessFile } from '../src/cached-process-file';
 import * as postcss from 'postcss';
+import { cachedProcessFile } from '../src/cached-process-file';
+import { process, StyleableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
+
+import { flatMatch } from "./matchers/falt-match";
+import * as chai from "chai";
+
+const expect = chai.expect;
+chai.use(flatMatch);
+
 
 
 export var loadFile: any = cachedProcessFile<StyleableMeta>((path, content) => {
@@ -83,14 +89,14 @@ describe('Stylable postcss process', function () {
                 -st-default: name;
             }
         `, { from: "path/to/style.css" });
-        
+
         expect(result.imports.length).to.eql(3);
-        
+
         expect(result.mappedSymbols.a).to.include({
             _kind: 'import',
             type: 'named'
         });
-        
+
         expect(result.mappedSymbols.c).to.include({
             _kind: 'import',
             type: 'named'
@@ -100,19 +106,19 @@ describe('Stylable postcss process', function () {
             _kind: 'import',
             type: 'default'
         });
-        
+
         expect((<ImportSymbol>result.mappedSymbols.a).import).to.deep.include({
             from: './some/other/path',
             defaultExport: '',
-            named: {a: 'a', c: 'b'}
+            named: { a: 'a', c: 'b' }
         });
-        
+
         expect((<ImportSymbol>result.mappedSymbols.c).import).to.deep.include({
             from: './some/other/path',
             defaultExport: '',
-            named: {a: 'a', c: 'b'}
+            named: { a: 'a', c: 'b' }
         });
-        
+
         expect((<ImportSymbol>result.mappedSymbols.name).import).to.deep.include({
             from: './some/global/path',
             defaultExport: 'name',
@@ -158,7 +164,7 @@ describe('Stylable postcss process', function () {
                 myname: value(name);
             }
         `, { from: "path/to/style.css" });
-        
+
         expect(result.mappedSymbols).to.deep.equal({
             name: {
                 _kind: 'var',
@@ -187,8 +193,8 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
     });
-    
-    it('collect typed classes', function () {
+
+    it('collect typed classes extends', function () {
 
         const result = processSource(`
             :import {
@@ -201,13 +207,60 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.typedClasses.myclass).to.eql({
-            extends: 'Style'
+        
+        expect(result.typedClasses).to.flatMatch({
+            myclass: {
+                extends: {
+                    _kind: 'import',
+                    type: 'default',
+                    import: {
+                        from: './file.css',
+                        defaultExport: 'Style'
+                    }
+                }
+            }
         });
 
     });
 
-        
+
+    it('collect typed classes with auto states', function () {
+
+        const result = processSource(`
+            .root {
+                -st-states: state1, state2; 
+            }
+        `, { from: "path/to/style.css" });
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+        expect(result.typedClasses).to.flatMatch({
+            root: {
+                states: ['state1', 'state2']
+            }
+        });
+
+    });
+
+    it('collect typed classes with mapping states', function () {
+
+        const result = processSource(`
+            .root {
+                -st-states: state1, state2("[data-mapped]"); 
+            }
+        `, { from: "path/to/style.css" });
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+        expect(result.typedClasses).to.flatMatch({
+            root: {
+                states: {
+                    state1: null,
+                    state2: "[data-mapped]"
+                }
+            }
+        });
+
+    });
+
     it('collect typed elements', function () {
 
         const result = processSource(`
