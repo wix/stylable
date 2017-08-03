@@ -210,7 +210,7 @@ describe('Stylable postcss process', function () {
         
         expect(result.typedClasses).to.flatMatch({
             myclass: {
-                extends: {
+                 "-st-extends": {
                     _kind: 'import',
                     type: 'default',
                     import: {
@@ -235,7 +235,7 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         expect(result.typedClasses).to.flatMatch({
             root: {
-                states: ['state1', 'state2']
+                "-st-states": ['state1', 'state2']
             }
         });
 
@@ -252,7 +252,7 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         expect(result.typedClasses).to.flatMatch({
             root: {
-                states: {
+                 "-st-states": {
                     state1: null,
                     state2: "[data-mapped]"
                 }

@@ -186,7 +186,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
             extendTypedClass(
                 decl,
                 selectorName,
-                'states',
+                valueMapping.states,
                 parseStates(decl.value),
                 stylableMeta,
                 diagnostics
@@ -201,7 +201,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
                 extendTypedClass(
                     decl,
                     selectorName,
-                    'extends',
+                    valueMapping.extends,
                     extendsRefSymbol,
                     stylableMeta,
                     diagnostics
@@ -231,7 +231,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
 function extendTypedClass(node: postcss.Node, name: string, key: keyof TypedClass, value: any, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
     const typedClass = stylableMeta.typedClasses[name] || (stylableMeta.typedClasses[name] = {});
     if (typedClass[key]) {
-        diagnostics.warn(node, 'override value!!!!!!!')
+        diagnostics.warn(node, `override ${key} value`);
     }
     typedClass[key] = value;
 }
@@ -299,8 +299,8 @@ export interface StyleableMeta {
 }
 
 export interface TypedClass {
-    states?: any;
-    extends?: any;
+    "-st-states"?: any;
+    "-st-extends"?: any;
 }
 
 export interface ImportSymbol {
