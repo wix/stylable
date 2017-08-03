@@ -398,6 +398,37 @@ describe('diagnostics: warnings and errors', function () {
 
         });
 
+        describe('override -st-* warnings', function(){
+
+            it('should warn on typed class extend override', function(){
+                  expectWarnings(`
+                    :import {
+                        -st-from : './file.css';
+                        -st-default: Comp;
+                    }
+                    .root {
+                        -st-extends: Comp;
+                    }
+                    .root {
+                        |-st-extends: Comp;|
+                    }
+                `, [{ message: 'override -st-extends value', file: "main.css" }])
+            });
+
+            it('should warn on typed class states override', function(){
+                  expectWarnings(`
+                    
+                    .root {
+                        -st-states: mystate;
+                    }
+                    .root {
+                        |-st-states: mystate2;|
+                    }
+                `, [{ message: 'override -st-states value', file: "main.css" }])
+            });
+
+        })
+
     });
 
 
@@ -424,6 +455,19 @@ describe('diagnostics: warnings and errors', function () {
                     |:import {
                         -st-from: './file.css';
                         -st-default: @name@;
+                    }
+                `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
+            });
+
+            
+            it('should warn when import redeclare same symbol (in different block types)', function () {
+                expectWarnings(`
+                    :import {
+                        -st-from: './file.css';
+                        -st-default: name;
+                    }
+                    :vars {
+                        |@name@: red;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
