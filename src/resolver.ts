@@ -46,7 +46,8 @@ export class Resolver {
             acc[importDef.defaultExport || importDef.from] = resolved.default || resolved;
             const isStylesheet = Stylesheet.isStylesheet(resolved);
             for (const name in importDef.named) {
-                acc[name] = isStylesheet ? valueTemplate(resolved.vars[name], resolved.vars) : resolved[name];
+                const importLocalName = importDef.named[name];
+                acc[name] = isStylesheet ? valueTemplate(resolved.vars[importLocalName], resolved.vars) : resolved[importLocalName];
             }
             return acc;
         }, {} as Pojo);

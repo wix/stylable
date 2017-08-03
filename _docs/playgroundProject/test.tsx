@@ -9,7 +9,7 @@ interface TestProps {
 
 class Test extends React.Component<TestProps, {}> {
     static defaultProps: TestProps = {
-        name: 'Anonymous'
+        name: 'Playground'
     };
 
     render() {
