@@ -72,7 +72,7 @@ Syntax unique to Stylable - Click each to access code examples and descriptions 
 |[Named value](../references/imports.md)   | **`-st-named`**  | Import the file's named export value or values  |
 <br>
 
-|Namespace|||
+|Namespace|Syntax|Description|
 |---|---|---|
 |Namespace|**`@namespace <readable name>:`**| Identify stylesheets to improve development|
 
