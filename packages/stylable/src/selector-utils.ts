@@ -14,7 +14,7 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
     content: string;
 }
 
-export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
+export type Visitor = (node: SelectorAstNode, index: number, nodes: SelectorAstNode[]) => boolean | void;
 
 export function parseSelector(selector: string): SelectorAstNode {
     return tokenizer.parse(selector);
@@ -24,14 +24,14 @@ export function stringifySelector(ast: SelectorAstNode): string {
     return tokenizer.stringify(ast)
 }
 
-export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0): boolean | void {
+export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0, nodes: SelectorAstNode[] = [node]): boolean | void {
     if (!node) { return }
-    let doNext = visitor(node, index);
+    let doNext = visitor(node, index, nodes);
     if (doNext === false) { return false; }
     if (doNext === true) { return true; }
     if (node.nodes) {
         for (var i = 0; i < node.nodes.length; i++) {
-            doNext = traverseNode(node.nodes[i], visitor, i);
+            doNext = traverseNode(node.nodes[i], visitor, i, node.nodes);
             if (doNext === true) { continue; }
             if (doNext === false) { return false; }
         }
