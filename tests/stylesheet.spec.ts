@@ -242,7 +242,6 @@ describe('Stylesheet', function () {
             })
         })
 
-
         it('with -st-extends', function () {
             const sheet = fromCSS(`
                 :import("./path/to/thing"){
@@ -426,6 +425,32 @@ describe('Stylesheet', function () {
                 ]
             })
         })
+
+        it('with -st-variant does not auto extends root', function(){
+            const sheet = fromCSS(`
+                .container {
+                    -st-variant: true;
+                }
+            `);
+
+            expect(sheet.typedClasses.container).to.not.contain({
+                "-st-extends": 'root'
+            })
+        });
+
+        it('with -st-variant extends override auto root', function(){
+            const sheet = fromCSS(`
+                .container {
+                    -st-extends: Comp;
+                    -st-variant: true;
+                }
+            `);
+
+            expect(sheet.typedClasses.container).to.eql({
+                "-st-extends": 'Comp',
+                "-st-variant": true
+            })
+        });
 
     });
 
