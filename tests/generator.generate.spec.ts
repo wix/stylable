@@ -799,7 +799,6 @@ describe('static Generator.generate', function () {
             expect(css[0]).to.equal('.container {\n    color: black;\n    color: red\n}');
 
         });
-
     })
 
     describe('classes rewrite', function () {
