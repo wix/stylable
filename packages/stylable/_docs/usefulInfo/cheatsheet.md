@@ -14,7 +14,7 @@
     * [**`-st-extends`**](../references/extend-stylesheet.md) simple selector base class
     * [**`-st-states`**](../references/pseudo-classes.md) define custom pseudo-classes
     * [**`-st-mixin`**](../references/mixin-syntax.md) apply mixins to CSS ruleset
-    * [**`-st-variant`**](../references/variants.md) apply pre-made look and feel
+    * [**`-st-variant`**](../references/variants.md) define pre-made look and feel
 * **selectors**
     * [**`::X`**](../references/pseudo-elements.md) target internal part (pseudo-element) 
     * [**`:X`**](../references/pseudo-classes.md) target state (pseudo-classe)
