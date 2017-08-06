@@ -47,8 +47,8 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
             if (name === 'global') {
                 return true;
             }
-        } else if(type === 'element'){
-            if(name.match(/^[A-Z]\w+$/)){
+        } else if (type === 'element') {
+            if (name.match(/^[A-Z]\w+$/)) {
                 importedElements[name] = true;
             }
         }
@@ -58,10 +58,10 @@ function processDefinition(sheet: Stylesheet, selector: string, rules: CSSRulesO
     addTypedClasses(sheet, selector, rules, isSimpleSelector);
 }
 
-function addImportedElements(sheet: Stylesheet, importedElements:Pojo<boolean>){
-    for(var element in importedElements){
+function addImportedElements(sheet: Stylesheet, importedElements: Pojo<boolean>) {
+    for (var element in importedElements) {
         const importWithRef = Import.findImportForSymbol(sheet.imports, element)
-        if(importWithRef){
+        if (importWithRef) {
             mergeTypedClass(sheet, element, element, valueMapping.extends);
         } else {
             // warn for component Tag selector with no reference ?
@@ -70,6 +70,12 @@ function addImportedElements(sheet: Stylesheet, importedElements:Pojo<boolean>){
 }
 
 function addTypedClasses(sheet: Stylesheet, selector: string, rules: CSSRulesObject, isSimpleSelector: boolean) {
+    if (rules[valueMapping.variant] && selector.match(/^\.[\w]+$/)) { // ToDo: warn if variant not on class
+        if (!rules[valueMapping.extends]) {
+            rules = { ...rules };
+        }
+        addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.variant);
+    }
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.root);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.states);
     addTypedClass(sheet, selector, rules, isSimpleSelector, valueMapping.extends);
@@ -87,7 +93,7 @@ function addTypedClass(sheet: Stylesheet, selector: string, rules: CSSRulesObjec
 }
 
 
-function mergeTypedClass(sheet: Stylesheet, name: string, value:any, typedRule: keyof typeof SBTypesParsers) {
+function mergeTypedClass(sheet: Stylesheet, name: string, value: any, typedRule: keyof typeof SBTypesParsers) {
     sheet.typedClasses[name] = {
         ...sheet.typedClasses[name],
         [typedRule]: value
@@ -111,4 +117,18 @@ export function processNamespace(strongNamespace = "", weakNamespace: string | s
     } else {
         return 's' + Stylesheet.globalCounter++;
     }
+}
+
+
+
+
+
+export function walkClassPrefix(cssObject: Pojo, className: string, visitor: (selector: string, index: number) => void) {
+    var i = 0;
+    for (var selector in cssObject) {
+        if (selector.match(new RegExp('^\s*' + className))) {
+            visitor(selector, i++);
+        }
+    }
+
 }
