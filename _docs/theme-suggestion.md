@@ -33,6 +33,11 @@ components used in this example:
 
 ### login-form t.css
 ```css
+
+:theme{
+  -st-implements:"./base-theme.t.css";
+  -st-use:cancelButton as cancel;
+}
 :import{
   -st-default:TextInput;
   -st-from:"./text-input.t.css";
@@ -50,13 +55,39 @@ components used in this example:
   -st-extends:Button;
 }
 .cancel{
+}
+
+
+```
+
+### Base-Theme.t.css
+the base theme file is relevant when creating components that work with many themes
+```css
+
+:import{
+  -st-default:Button;
+  -st-from:"./button.t.css";
+}
+
+.cancelButton{
+  -st-variant:true;
+  -st-extends:Button;
+}
+.premuimButton{
+  -st-variant:true;
   -st-extends:Button;
 }
 
+
 ```
-### Theme.t.css
-the theme file may include css for many components, only those acctualy required are added to the css (and written here)
+
+### Backoffice-Theme.t.css
+the theme file may include css for many components, only those acctualy required are added to the css
 ```css
+:import{
+  -st-default:BaseTheme;
+  -st-from:"./base-theme.t.css";
+}
 :import{
   -st-default:TextInput;
   -st-from:"./text-input.t.css";
@@ -69,6 +100,9 @@ the theme file may include css for many components, only those acctualy required
   -st-default:LoginForm;
   -st-from:"./login-form.t.css";
 }
+.root{
+  -st-extends:BaseTheme;
+}
 :vars{
   outline: blue;
   normal:green;
@@ -79,21 +113,13 @@ Button{
   outline:value(outline);
 }
 .cancelButton{
-  -st-variant:true;
-  -st-extends:Button;
   background:value(low);
 }
 .premuimButton{
-  -st-variant:true;
-  -st-extends:Button;
   background:value(high);
 }
-
 LoginForm{
   //login form  default style here
-}
-LoginForm::cancel{
-  -st-mixin:cancelButton;
 }
 
 .loginForVariant{
@@ -102,7 +128,7 @@ LoginForm::cancel{
 }
 
 .loginForVariant::cancel{
-  -st-mixin:cancelButton;
+  color:red;
 }
 
 ```
@@ -110,25 +136,23 @@ LoginForm::cancel{
 ## example usage
 
 
-### App with buttons:
+### App with buttons and LoginForm:
 
 app.t.css
 ```css
   :theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
-    -st-use:premiumButton;
+    -st-from:"stylable-components/backoffice-theme.t.css";
+    -st-use:premiumButton loginFormVariant;
   }
  
 ```
-
-
 
 ### App with extended buttons
 app.t.css
 ```css
   
   :theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+    -st-from:"stylable-components/backoffice-theme.t.css";
     -st-use:premiumButton;
   }
 
@@ -144,7 +168,7 @@ app.t.css
 ```css
   
   :theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+    -st-from:"stylable-components/backoffice-theme.t.css";
     -st-use:cancelButton premiumButton;
     low:yellow;
     outline:red;
@@ -163,7 +187,7 @@ app.t.css
 ```css
   
   .sidebar:theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+    -st-from:"stylable-components/backoffice-theme.t.css";
     -st-use:cancelButton premiumButton;
     low:yellow;
     outline:red;
@@ -182,12 +206,12 @@ app.t.css
 ```css
   
   .topbar:theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+    -st-from:"stylable-components/backoffice-theme.t.css";
     -st-use:cancelButton, premiumButton;
     outline1:red;
   }
   .sidebar:theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+    -st-from:"stylable-components/backoffice-theme.t.css";
     -st-use:cancelButton, premiumButton;
     outline1:green;
   }
@@ -207,8 +231,8 @@ app.t.css
 ```css
   
  :theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
-    -st-use:cancelButton, premiumButton;
+    -st-from:"stylable-components/backoffice-theme.t.css";
+    -st-use: premiumButton,cancelButton;
     outline1:green;
   }
  
@@ -219,14 +243,12 @@ app.t.css
 comp.t.css
 ```css
   
- :import{
-    -st-from:"stylable-components/zagzag-theme.t.css";
-    -st-named:cancelButton;
-    outline1:green;
+ :theme{
+    -st-implements:"stylable-components/backoffice-theme.t.css";
+    -st-use: premiumButton,cancelButton;
   }
  
- .myButton{
-  -st-extends:cancelButton;
+ .cancelButton{
  }
  
   
@@ -238,12 +260,16 @@ comp.t.css
 local-theme.t.css
 ```css
   
- :theme{
-    -st-from:"stylable-components/zagzag-theme.t.css";
+  :theme{
+    -st-from:"stylable-components/backoffice-theme.t.css";
+    -st-default:Theme;
     -st-use:cancelButton, premiumButton;
     outline1:green;
   }
  
+  cancelButton::content{
+    color:red;
+  }
  
   
 ```
@@ -261,12 +287,14 @@ app.t.css
 comp.t.css
 ```css
   
- :import{
-    -st-from:"local-theme.t.css";
+ :theme{
+    -st-implements:"gaga-theme.t.css";
     -st-use:cancelButton;
   }
  
-  
+  .as .cancelButton{
+    color:red;
+  }
 ```
 
 
