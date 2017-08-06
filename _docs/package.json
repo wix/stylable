@@ -17,6 +17,6 @@
   "license": "ISC",
   "dependencies": {
     "generic-playground": "^0.0.11",
-    "gitbook-plugin-playground": "^0.0.19"
+    "gitbook-plugin-playground": "^0.0.20"
   }
 }
