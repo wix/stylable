@@ -1,7 +1,7 @@
 
 # Variants
 
-You can use variants in **Stylable** the same way you use [mixins](./mixin-syntax.md). They are defined as part of a **Stylable** stylesheet that can then be applied to a CSS rule set.
+You can use variants in **Stylable** the same way you use [mixins](./mixin-syntax.md). They are defined as part of a **Stylable** stylesheet that can then later be applied to a CSS ruleset.
 
 Variants can be used if you want a single component to offer multiple style variants for different themes or semantics. The CSS output does not include variants unless it is directly used in the CSS. This increases performance, enables easier debugging and generally keeps the CSS output cleaner and free of unused code.
 
@@ -15,7 +15,7 @@ The `.SaleBtn` class, which extends `Button` that is imported from the `button.c
 
 CSS API :
 ```css
-/* theme.css */
+/* main.css */
 :import {
     -st-from: "./button.css";
     -st-default: Button;
@@ -32,13 +32,13 @@ CSS API :
 
 ## Use a variant with `-st-extends`
 
-You use a variant using the `-st-extends` directive. The class then inherits the variant base type enabling access to its root definitions as well as all pseudo-elements and pseudo-classes. In this example, the CSS can style the button's `icon` because in the `theme.css` file, the `SaleBtn` variant extends `Button`. The hover behavior is also inherited from the base class.
+You use a variant using the `-st-extends` directive. The class then inherits the variant base type enabling access to its root definitions as well as all pseudo-elements and pseudo-classes. In this example, the CSS can style the button's `icon` because in the `main.css` file, the `SaleBtn` variant extends `Button`. The hover behavior is also inherited from the base class.
 
 CSS API:
 ```css
 /* page.css */
 :import {
-    -st-from: "./theme.css";
+    -st-from: "./main.css";
     -st-names: SaleBtn;
 }
 
@@ -73,7 +73,7 @@ CSS API:
 ```css
 /* page.css */
 :import {
-    -st-from: "./theme.css";
+    -st-from: "./main.css";
     -st-names: SaleBtn;
 }
 
@@ -107,10 +107,11 @@ For example, consider the following button and its variant `BigButton`. While th
 }
 
 .BigButton {
+    -st-extends: root; /* extends stylesheet root */
     -st-variant: true; /* variant of root */
     height:5em;
 }
 ```
 
-> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are automatically variants of the owner stylesheet `root` class.
+> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are universal variants for any element.
 
