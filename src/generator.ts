@@ -80,13 +80,22 @@ export class Generator {
     private collectCSSRuleSets(sheet: Stylesheet, selectors: Array<string | ExtendedSelector>, resolvedSymbols: Pojo, onCollect: (selectorObj: any) => void) {
         while (selectors.length) {
             const selector = selectors.pop()!;
-            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, selectors);
+            const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, selectors, true);
             if (!selectorObject) { continue; }
             onCollect(selectorObject);
         }
     }
+    private isVariant(sheet: Stylesheet, aSelector: string) {
+        const classSelectorNameMatch = aSelector.match(/^\s*\.([\w-_]+)/); // ToDo: change catch 
+        const classSelectorName = classSelectorNameMatch && classSelectorNameMatch[1];
+        const typesClass = classSelectorName && sheet.typedClasses[classSelectorName];
 
-    prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = []) {
+        if (typesClass && typesClass[valueMapping.variant]) { // ToDo: nicify
+            return true;
+        }
+        return false;
+    }
+    prepareSelector(sheet: Stylesheet, selector: string | ExtendedSelector, resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector> = [], outputVariants: boolean = false) {
         let rules: Pojo, aSelector: string, processedRules: NestedRules;
 
         if (typeof selector === 'string') {
@@ -94,13 +103,10 @@ export class Generator {
             rules = sheet.cssDefinition[aSelector];
             const mixins = sheet.mixinSelectors[aSelector];
             if (mixins) {
+                if (this.isVariant(sheet, aSelector) && outputVariants === false) {
+                    return null;
+                }
                 this.applyMixins(sheet, aSelector, rules, mixins, resolvedSymbols, stack);
-                return null;
-            }
-            const classSelectorNameMatch = selector.match(/^\s*\.([\w-_]+)/); // ToDo: change catch 
-            const classSelectorName = classSelectorNameMatch && classSelectorNameMatch[1];
-            const typesClass = classSelectorName && sheet.typedClasses[classSelectorName];
-            if (typesClass && typesClass[valueMapping.variant]) { // ToDo: nicify
                 return null;
             }
         } else {
@@ -109,6 +115,10 @@ export class Generator {
         }
 
         /* don't emit */
+        if (this.isVariant(sheet, aSelector) && !outputVariants) {
+            return null;
+        }
+
         if (selector === '@namespace') { return null; }
         if (selector === ':vars') { return null; }
 
@@ -136,10 +146,6 @@ export class Generator {
 
     }
     applyMixins(sheet: Stylesheet, aSelector: string, rules: NestedRules, mixins: any[], resolvedSymbols: Pojo, stack: Array<string | ExtendedSelector>) {
-        const isVariant = hasOwn(rules, valueMapping.variant) && rules[valueMapping.variant] === 'true';
-        if (isVariant) {
-            return;
-        }
         mixins.forEach((mixin) => {
             let cssMixin: Pojo;
             const mixinSymbol = mixin.type;
@@ -150,27 +156,34 @@ export class Generator {
                     if (typedClass[valueMapping.variant]) {
                         const originResolvedSymbols = this.resolver.resolveSymbols(origin);
                         const variantSelector = '.' + localName;
-                        debugger;
-                        let mixedInVal: Array<[string, any]> = [[aSelector, rules]];
-                        walkClassPrefix(origin.cssDefinition, variantSelector, (targetSelector, index)=>{
+                        const mixedInVal: Array<[string, any]> = [[aSelector, rules]];
+                        walkClassPrefix(origin.cssDefinition, variantSelector, (targetSelector, index) => {
                             const targetSelectorTrim = targetSelector.trim();
                             const isVariantRoot = targetSelectorTrim === variantSelector;
-                            const currentRules = origin.cssDefinition[targetSelector];
-                            this.collectCSSRuleSets(origin, [{ selector: targetSelector, rules: currentRules }], originResolvedSymbols, selectorObj => {
+                            this.collectCSSRuleSets(origin, [targetSelector], originResolvedSymbols, selectorObj => {
                                 Object.keys(selectorObj).forEach(selector => {
+                                    const pRules = selectorObj[selector];
                                     const selectorWithoutVariant = selector.replace('.' + this.scope(localName, origin.namespace), '');
                                     if (index === 0 && isVariantRoot) {
-                                        mixedInVal[0][1] = {
-                                            ...mixedInVal[0][1],
-                                            ...currentRules,
-                                            [valueMapping.variant]: isVariant
-                                        };
+                                        mixedInVal[0][0] = aSelector + ':global(' + selectorWithoutVariant + ')';
+                                        var inRules: Pojo = {};
+                                        
+                                        for (var rule in mixedInVal[0][1]) {
+                                            if (rule === valueMapping.mixin || rule === valueMapping.extends) {
+                                                inRules[rule] = mixedInVal[0][1][rule];
+                                                Object.assign(inRules, pRules);
+                                            } else {
+                                                inRules[rule] = mixedInVal[0][1][rule];
+                                            }
+                                        }
+
+                                        mixedInVal[0][1] = {...inRules};
                                     } else {
-                                        mixedInVal.push([aSelector + ':global(' + selectorWithoutVariant + ')', currentRules]);
+                                        mixedInVal.push([aSelector + ':global(' + selectorWithoutVariant + ')', pRules]);
                                     }
                                 });
                             });
-                        
+
                         });
 
                         mixedInVal.reverse().forEach(([selector, rules]) => {
@@ -267,6 +280,14 @@ export class Generator {
             node.before = '.' + localName;
             node.name = this.scope(next.root, next.namespace);
             sheet = next;
+        } else if (sheet.typedClasses[name]) { /*local extends*/
+            var _extends = sheet.typedClasses[name][valueMapping.extends];
+            if (_extends) {
+                node.before = '.' + localName;
+                node.name = this.scope(_extends, sheet.namespace);
+            } else {
+                node.name = localName;
+            }
         } else {
             //not type
             node.name = localName;

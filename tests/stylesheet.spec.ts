@@ -426,16 +426,15 @@ describe('Stylesheet', function () {
             })
         })
 
-        it('with -st-variant auto extends root', function(){
+        it('with -st-variant does not auto extends root', function(){
             const sheet = fromCSS(`
                 .container {
                     -st-variant: true;
                 }
             `);
 
-            expect(sheet.typedClasses.container).to.eql({
-                "-st-extends": 'root',
-                "-st-variant": true
+            expect(sheet.typedClasses.container).to.not.contain({
+                "-st-extends": 'root'
             })
         });
 

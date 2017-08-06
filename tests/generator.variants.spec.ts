@@ -168,7 +168,6 @@ describe('static Generator variants', () => {
             ], {})
 
             env.validate.output([
-                '.Main__classA {\n    background: green;\n    color: red\n}',
                 '.Main__classB {\n    color: red;\n    background: green\n}'
             ]);
             env.validate.stylesheet('./comp-a.css').variant('MyCompVariant', true);
