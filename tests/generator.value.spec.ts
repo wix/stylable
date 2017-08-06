@@ -3,7 +3,7 @@ import { Generator } from '../src/generator';
 import { Resolver } from '../src/resolver';
 import { Stylesheet } from '../src/stylesheet';
 import { expect } from "chai";
-import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
+import { defineStylableEnv, CSS, JS } from "./utils/stylable-test-kit";
 
 
 describe('Generator variables interpolation', function () {

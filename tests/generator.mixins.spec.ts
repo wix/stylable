@@ -1,4 +1,4 @@
-import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
+import { defineStylableEnv, CSS, JS } from "./utils/stylable-test-kit";
 
 
 describe('static Generator mixins', function () {
