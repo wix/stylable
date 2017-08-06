@@ -1,6 +1,6 @@
 import * as postcss from 'postcss';
 import { cachedProcessFile } from '../src/cached-process-file';
-import { process, StyleableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
+import { process, StylableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
 
 import { flatMatch } from "./matchers/falt-match";
 import * as chai from "chai";
@@ -10,7 +10,7 @@ chai.use(flatMatch);
 
 
 
-export var loadFile: any = cachedProcessFile<StyleableMeta>((path, content) => {
+export var loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
     return processSource(content, { from: path })
 },
     {
@@ -85,7 +85,7 @@ describe('Stylable postcss process', function () {
                 -st-named: a,b as c;
             }
             :import {
-                -st-from: "./some/global/path";
+                -st-from: "../some/global/path";
                 -st-default: name;
             }
         `, { from: "path/to/style.css" });
@@ -108,19 +108,22 @@ describe('Stylable postcss process', function () {
         });
 
         expect((<ImportSymbol>result.mappedSymbols.a).import).to.deep.include({
-            from: './some/other/path',
+            from: '/path/to/some/other/path',
+            fromRelative: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' }
         });
 
         expect((<ImportSymbol>result.mappedSymbols.c).import).to.deep.include({
-            from: './some/other/path',
+            from: '/path/to/some/other/path',
+            fromRelative: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' }
         });
 
         expect((<ImportSymbol>result.mappedSymbols.name).import).to.deep.include({
-            from: './some/global/path',
+            from: '/path/some/global/path',
+            fromRelative: '../some/global/path',
             defaultExport: 'name',
             named: {}
         });
@@ -208,13 +211,14 @@ describe('Stylable postcss process', function () {
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         
-        expect(result.typedClasses).to.flatMatch({
+        expect(result.classes).to.flatMatch({
             myclass: {
                  "-st-extends": {
                     _kind: 'import',
                     type: 'default',
                     import: {
-                        from: './file.css',
+                        from: '/path/to/file.css',
+                        fromRelative: './file.css',
                         defaultExport: 'Style'
                     }
                 }
@@ -233,7 +237,7 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.typedClasses).to.flatMatch({
+        expect(result.classes).to.flatMatch({
             root: {
                 "-st-states": ['state1', 'state2']
             }
@@ -250,7 +254,7 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.typedClasses).to.flatMatch({
+        expect(result.classes).to.flatMatch({
             root: {
                  "-st-states": {
                     state1: null,
@@ -264,23 +268,46 @@ describe('Stylable postcss process', function () {
     it('collect typed elements', function () {
 
         const result = processSource(`
+            Element {
+
+            }
+            div {
+                
+            }
         `, { from: "path/to/style.css" });
 
-        expect(result.classes.length).to.eql(5);
+        expect(Object.keys(result.elements).length).to.eql(1);
 
     });
 
+    
+    it('always contain root class', function () {
+
+        const result = processSource(`
+
+        `, { from: "path/to/style.css" });
+
+        expect(result.classes).to.eql({
+             root: {
+                 type: 'class',
+                 name: 'root',
+                 "-st-root": true
+             }
+        });
+
+    });
 
     it('collect classes', function () {
 
         const result = processSource(`
+            .root{}
             .classA{}
-            .classB, .classC{}
+            .classB, .classC, .classA{}
             :not(.classD){}
             .classE:hover{}
         `, { from: "path/to/style.css" });
 
-        expect(result.classes.length).to.eql(5);
+        expect(Object.keys(result.classes).length).to.eql(6);
 
     });
 
@@ -288,6 +315,7 @@ describe('Stylable postcss process', function () {
 
         const result = processSource(`
             @media (max-width: 300px) {
+                .root{}
                 .classA{}
                 .classB, .classC{}
                 :not(.classD){}
@@ -295,7 +323,7 @@ describe('Stylable postcss process', function () {
             }
         `, { from: "path/to/style.css" });
 
-        expect(result.classes.length).to.eql(5);
+        expect(Object.keys(result.classes).length).to.eql(6);
 
     });
 
@@ -314,23 +342,6 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.keyframes.length).to.eql(2);
-
-    });
-
-
-    it('collect -st-nodes', function () {
-
-        const result = processSource(`
-            .classA{
-                -st-thing: value;
-            }
-            .classA .classB{
-                -st-other-thing: value;
-            }
-        `, { from: "path/to/style.css" });
-
-        expect(result.directives['-st-thing'].length).to.eql(1);
-        expect(result.directives['-st-other-thing'].length).to.eql(1);
 
     });
 
