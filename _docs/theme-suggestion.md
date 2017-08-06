@@ -255,8 +255,6 @@ app.t.css
     -st-from:"local-theme.t.css";
     -st-use:cancelButton, premiumButton;
   }
- 
- 
   
 ```
 
@@ -265,12 +263,8 @@ comp.t.css
   
  :import{
     -st-from:"local-theme.t.css";
-    -st-named:cancelButton;
+    -st-use:cancelButton;
   }
- 
- .myButton{
-  -st-extends:cancelButton;
- }
  
   
 ```
