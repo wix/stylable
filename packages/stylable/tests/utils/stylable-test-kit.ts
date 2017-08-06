@@ -1,7 +1,7 @@
-import { fromCSS, Stylesheet, Resolver } from "../src";
-import { Pojo } from "../src/types";
-import { Generator } from '../src/generator';
-import { valueMapping } from '../src/stylable-value-parsers';
+import { fromCSS, Stylesheet, Resolver } from "../../src";
+import { Pojo } from "../../src/types";
+import { Generator } from '../../src/generator';
+import { valueMapping } from '../../src/stylable-value-parsers';
 
 export interface EnvFile {
     path:string;
