@@ -6,6 +6,7 @@ import { SelectorAstNode, parseSelector, traverseNode, stringifySelector, isImpo
 import { valueTemplate } from "./value-template";
 import { valueMapping, TypedClass, STYLABLE_VALUE_MATCHER } from "./stylable-value-parsers";
 import { hasKeys, hasOwn } from "./utils";
+import { walkClassPrefix } from "./process";
 const cssflat = require('../modules/flat-css');
 
 export declare type NestedRules = Pojo<string | string[] | Pojo<string | string[]>>
@@ -76,7 +77,7 @@ export class Generator {
             sheet.classes[sheet.root] = this.scope(sheet.root, sheet.namespace);
         }
     }
-    private collectCSSRulesets(sheet: Stylesheet, selectors: Array<string | ExtendedSelector>, resolvedSymbols: Pojo, onCollect: (selectorObj: any) => void) {
+    private collectCSSRuleSets(sheet: Stylesheet, selectors: Array<string | ExtendedSelector>, resolvedSymbols: Pojo, onCollect: (selectorObj: any) => void) {
         while (selectors.length) {
             const selector = selectors.pop()!;
             const selectorObject = this.prepareSelector(sheet, selector, resolvedSymbols, selectors);
@@ -149,27 +150,27 @@ export class Generator {
                     if (typedClass[valueMapping.variant]) {
                         const originResolvedSymbols = this.resolver.resolveSymbols(origin);
                         const variantSelector = '.' + localName;
+                        debugger;
                         let mixedInVal: Array<[string, any]> = [[aSelector, rules]];
-                        Object.keys(origin.cssDefinition).forEach((targetSelector, index) => {
+                        walkClassPrefix(origin.cssDefinition, variantSelector, (targetSelector, index)=>{
                             const targetSelectorTrim = targetSelector.trim();
                             const isVariantRoot = targetSelectorTrim === variantSelector;
-                            if (isVariantRoot || targetSelectorTrim.indexOf(variantSelector) === 0) {
-                                const currentRules = origin.cssDefinition[targetSelector];
-                                if (index === 0 && isVariantRoot) {
-                                    mixedInVal[0][1] = {
-                                        ...mixedInVal[0][1],
-                                        ...currentRules,
-                                        [valueMapping.variant]: isVariant
-                                    };
-                                } else {
-                                    this.collectCSSRulesets(origin, [{ selector: targetSelector, rules: currentRules }], originResolvedSymbols, selectorObj => {
-                                        Object.keys(selectorObj).forEach(selector => {
-                                            const selectorWithoutVariant = selector.replace('.' + this.scope(localName, origin.namespace), '');
-                                            mixedInVal.push([aSelector + ':global(' + selectorWithoutVariant + ')', currentRules]);
-                                        });
-                                    });
-                                }
-                            }
+                            const currentRules = origin.cssDefinition[targetSelector];
+                            this.collectCSSRuleSets(origin, [{ selector: targetSelector, rules: currentRules }], originResolvedSymbols, selectorObj => {
+                                Object.keys(selectorObj).forEach(selector => {
+                                    const selectorWithoutVariant = selector.replace('.' + this.scope(localName, origin.namespace), '');
+                                    if (index === 0 && isVariantRoot) {
+                                        mixedInVal[0][1] = {
+                                            ...mixedInVal[0][1],
+                                            ...currentRules,
+                                            [valueMapping.variant]: isVariant
+                                        };
+                                    } else {
+                                        mixedInVal.push([aSelector + ':global(' + selectorWithoutVariant + ')', currentRules]);
+                                    }
+                                });
+                            });
+                        
                         });
 
                         mixedInVal.reverse().forEach(([selector, rules]) => {

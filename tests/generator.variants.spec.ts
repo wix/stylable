@@ -49,7 +49,7 @@ describe('static Generator variants', () => {
             env.validate.stylesheet('./main.css').variant('MyCompVariant', true);
         });
 
-        it('should not output any variant selector to CSS', () => {
+        it('should not output variant sub-selector to CSS', () => {
             const env = defineStylableEnv([
                 CSS('./main.css', 'Main', `
                     .MyCompVariant { 
@@ -63,6 +63,35 @@ describe('static Generator variants', () => {
 
             env.validate.output([]);
             env.validate.stylesheet('./main.css').variant('MyCompVariant', true);
+        });
+
+    });
+
+    describe('with -st-extends', () => {
+
+        it('should output variant to simple class and apply extend', () => {
+            const env = defineStylableEnv([
+                CSS('./comp-a.css', 'CompA', `
+                    .MyCompVariant { 
+                        -st-extends: root;
+                        -st-variant: true;
+                        color: red;                
+                    }
+                `),
+                CSS('./main.css', 'Main', `
+                    :import {
+                        -st-from: "./comp-a.css";
+                        -st-named: MyCompVariant;
+                    }
+                    .classA { 
+                        -st-mixin: MyCompVariant;
+                    }
+                `)
+            ], {});
+           
+            env.validate.output([
+                '.Main__classA.CompA__root {\n    color: red\n}'
+            ]);
         });
 
     });
@@ -82,6 +111,7 @@ describe('static Generator variants', () => {
                         -st-from: "./comp-a.css";
                         -st-named: MyCompVariant;
                     }
+
                     .classA { 
                         -st-mixin: MyCompVariant;
                     }
@@ -92,6 +122,26 @@ describe('static Generator variants', () => {
                 '.Main__classA {\n    color: red\n}'
             ]);
         });
+
+        it('should output inline variant to simple class', () => {
+            const env = defineStylableEnv([
+                CSS('./main.css', 'Main', `
+                    .MyCompVariant { 
+                        -st-variant: true;
+                        color: red;                
+                    }
+                    .classA { 
+                        -st-mixin: MyCompVariant;
+                    }
+                `)
+            ], {});
+           
+            env.validate.output([
+                '.Main__classA {\n    color: red\n}'
+            ]);
+        });
+
+        it('should not apply -st-extends', () => {});
 
         it('should apply variant to another variant', () => {
             const env = defineStylableEnv([
@@ -109,11 +159,18 @@ describe('static Generator variants', () => {
                     .classA {
                         -st-variant: true;
                         -st-mixin: MyCompVariant;
+                        background: green;
+                    }
+                    .classB {
+                        -st-mixin: classA;
                     }
                 `)
             ], {})
 
-            env.validate.output([]);
+            env.validate.output([
+                '.Main__classA {\n    background: green;\n    color: red\n}',
+                '.Main__classB {\n    color: red;\n    background: green\n}'
+            ]);
             env.validate.stylesheet('./comp-a.css').variant('MyCompVariant', true);
             env.validate.stylesheet('./main.css').variant('classA', true);
         });
@@ -146,7 +203,6 @@ describe('static Generator variants', () => {
             ]);
         });
 
-
         it('should output variant to simple class and append parts immediate after', () => {
             const env = defineStylableEnv([
                 CSS('./comp-a.css', 'CompA', `
@@ -178,7 +234,6 @@ describe('static Generator variants', () => {
                 '.Main__classB {\n    color: blue\n}'
             ]);
         });
-
 
         it('should scope variant to origin', () => {
             const env = defineStylableEnv([
