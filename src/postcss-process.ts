@@ -1,9 +1,9 @@
 import * as postcss from 'postcss';
 import { parseSelector, traverseNode, SelectorAstNode, createSimpleSelectorChecker, createRootAfterSpaceChecker } from './selector-utils';
-import { basename } from 'path';
+import * as path from 'path';
 import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQuotation } from "./utils";
-import { valueMapping, SBTypesParsers, stValues } from "./stylable-value-parsers";
+import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
 import { Import } from "./import";
 import { matchValue, valueReplacer } from "./value-template";
 import { Pojo } from "./types";
@@ -15,26 +15,31 @@ const parseStates = SBTypesParsers[valueMapping.states];
 
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
-
-    const stylableMeta: StyleableMeta = {
+    const reservedRootName = 'root';
+    const stylableMeta: StylableMeta = {
+        ast: root,
+        root: reservedRootName,
         source: getSourcePath(root, diagnostics),
         namespace: '',
         imports: [],
         vars: [],
-        typedClasses: {},
         mappedSymbols: {},
-        directives: {},
         keyframes: [],
-        classes: [],
+        classes: {
+            [reservedRootName]: { 
+                type: 'class',
+                name: 'root', 
+                [valueMapping.root]: true 
+            }
+        },
+        elements: {},
         diagnostics
     };
 
     handleAtRules(root, stylableMeta, diagnostics);
 
     root.walkRules((rule: SRule) => {
-        rule.selectorAst = parseSelector(rule.selector);
-        rule.isSimpleSelector = true;
-        handleSelector(rule, stylableMeta, diagnostics);
+        handleRule(rule, stylableMeta, diagnostics);
         handleDeclarations(rule, stylableMeta, diagnostics);
     });
 
@@ -46,11 +51,14 @@ function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     const source = root.source.input.file || '';
     if (!source) {
         diagnostics.error(root, 'missing source filename');
+    } else if (!path.isAbsolute(source)) {
+        //TODO: rethink this error
+        throw new Error('source filename is not absolute path');
     }
     return source;
 }
 
-function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function handleAtRules(root: postcss.Root, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
     let namespace = '';
 
     root.walkAtRules((atRule) => {
@@ -65,24 +73,28 @@ function handleAtRules(root: postcss.Root, stylableMeta: StyleableMeta, diagnost
         }
     });
 
-    namespace = namespace || filename2varname(basename(stylableMeta.source)) || 's';
+    namespace = namespace || filename2varname(path.basename(stylableMeta.source)) || 's';
     stylableMeta.namespace = processNamespace(namespace, stylableMeta.source);
 }
 
-function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+    rule.selectorAst = parseSelector(rule.selector);
 
     const checker = createSimpleSelectorChecker();
     const isValidRootUsage = createRootAfterSpaceChecker();
 
-    traverseNode(rule.selectorAst, function (node) {
+    traverseNode(rule.selectorAst, function (node, index, nodes) {
         isValidRootUsage(node);
-        if (!checker(node)) { rule.isSimpleSelector = false; }
+        if (!checker(node)) {
+            rule.isSimpleSelector = false;
+        }
         const { name, type } = node;
         if (type === 'pseudo-class') {
             if (name === 'import') {
                 if (rule.selector === ':import') {
-                    stylableMeta.imports.push(rule);
-                    addImportSymbols(rule, stylableMeta, diagnostics);
+                    const _import = handleImport(rule, stylableMeta, diagnostics);
+                    stylableMeta.imports.push(_import);
+                    addImportSymbols(_import, stylableMeta, diagnostics);
                     return false;
                 } else {
                     diagnostics.warn(rule, 'cannot define ":import" inside a complex selector');
@@ -97,10 +109,23 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
                 }
             }
         } else if (type === 'class') {
-            stylableMeta.classes.push(name);
+            if (!stylableMeta.classes[name]) {
+                stylableMeta.classes[name] = { type: 'class', name };
+            }
+        } else if (type === 'element') {
+            if (name.charAt(0).match(/[A-Z]/) && !stylableMeta.elements[name]) {
+                const prev = nodes[index - 1];
+                if (prev) { /*TODO: maybe warn on element with no direct child*/ }
+                stylableMeta.elements[name] = { type: 'element', name };
+            }
         }
         return void 0;
     });
+
+    if (rule.isSimpleSelector !== false) {
+        rule.isSimpleSelector = true;
+        rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
+    };
 
     if (!isValidRootUsage()) {
         diagnostics.warn(rule, '.root class cannot be used after spacing');
@@ -108,7 +133,7 @@ function handleSelector(rule: SRule, stylableMeta: StyleableMeta, diagnostics: D
 
 }
 
-function checkRedeclareSymbol(symbolName: string, node: postcss.Node, styleableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function checkRedeclareSymbol(symbolName: string, node: postcss.Node, styleableMeta: StylableMeta, diagnostics: Diagnostics) {
     const symbol = styleableMeta.mappedSymbols[symbolName];
     if (symbol) {
         //TODO: can output match better error;
@@ -116,14 +141,14 @@ function checkRedeclareSymbol(symbolName: string, node: postcss.Node, styleableM
     }
 }
 
-function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
-    const _import = handleImport(rule, diagnostics);
-    //TODO: handle error;
+function addImportSymbols(_import: Imported, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+
     if (_import.defaultExport) {
         checkRedeclareSymbol(_import.defaultExport, _import.rule, stylableMeta, diagnostics);
         stylableMeta.mappedSymbols[_import.defaultExport] = {
             _kind: 'import',
             type: 'default',
+            export: 'default',
             import: _import
         };
     }
@@ -132,15 +157,17 @@ function addImportSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagn
         stylableMeta.mappedSymbols[name] = {
             _kind: 'import',
             type: 'named',
+            export: _import.named[name],
             import: _import
         };
     });
 }
 
-function addVarSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function addVarSymbols(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+
     rule.walkDecls((decl) => {
         checkRedeclareSymbol(decl.prop, decl, stylableMeta, diagnostics);
-        stylableMeta.mappedSymbols[decl.prop] = {
+        const varSymbol: VarSymbol = {
             _kind: 'var',
             value: valueReplacer(decl.value, {}, (value, name, match) => {
                 value;
@@ -152,13 +179,13 @@ function addVarSymbols(rule: postcss.Rule, stylableMeta: StyleableMeta, diagnost
                 return symbol._kind === 'var' ? symbol.value : match;
             })
         }
+        stylableMeta.mappedSymbols[decl.prop] = varSymbol;
     });
     rule.remove();
 }
 
-function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
+function handleDeclarations(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
 
-    // Transform each rule here
     rule.walkDecls(decl => {
 
         decl.value.replace(matchValue, (match, varName) => {
@@ -176,16 +203,13 @@ function handleDeclarations(rule: SRule, stylableMeta: StyleableMeta, diagnostic
 
 }
 
-function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
-
-    stylableMeta.directives[decl.prop] || (stylableMeta.directives[decl.prop] = []);
-    const selectorName = rule.selector.replace('.', '');
+function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
 
     if (decl.prop === valueMapping.states) {
         if (rule.isSimpleSelector) {
             extendTypedClass(
                 decl,
-                selectorName,
+                rule.selector,
                 valueMapping.states,
                 parseStates(decl.value),
                 stylableMeta,
@@ -200,7 +224,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
             if (extendsRefSymbol && extendsRefSymbol._kind === 'import') {
                 extendTypedClass(
                     decl,
-                    selectorName,
+                    rule.selector,
                     valueMapping.extends,
                     extendsRefSymbol,
                     stylableMeta,
@@ -214,39 +238,51 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
         }
 
     } else if (decl.prop === valueMapping.mixin) {
-        const mixins = parseMixin(decl.value);
-
-        mixins.forEach((mix) => {
-            const mixinRefSymbol = stylableMeta.mappedSymbols[mix.type];
-            if (!mixinRefSymbol || mixinRefSymbol._kind !== 'import') {
-                diagnostics.warn(decl, `unknown mixin: "${mix.type}"`, { word: mix.type });
+        const mixins: RefedMixin[] = [];
+        parseMixin(decl.value).forEach((mixin) => {
+            const mixinRefSymbol = stylableMeta.mappedSymbols[mixin.type];
+            if (mixinRefSymbol && mixinRefSymbol._kind === 'import') {
+                mixins.push({
+                    mixin,
+                    ref: mixinRefSymbol
+                });
+            } else {
+                diagnostics.warn(decl, `unknown mixin: "${mixin.type}"`, { word: mixin.type });
             }
         });
+
+        if (rule.mixins) {
+            //TODO: add test
+            diagnostics.warn(decl, `override mixin on same rule`);
+        }
+
+        rule.mixins = mixins;
     }
 
-    stylableMeta.directives[decl.prop].push(decl);
 
 }
 
-function extendTypedClass(node: postcss.Node, name: string, key: keyof TypedClass, value: any, stylableMeta: StyleableMeta, diagnostics: Diagnostics) {
-    const typedClass = stylableMeta.typedClasses[name] || (stylableMeta.typedClasses[name] = {});
+function extendTypedClass(node: postcss.Node, selector: string, key: keyof TypedRule, value: any, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+    const name = selector.replace('.', '');
+    const typedClass = name === selector ? stylableMeta.elements[name] : stylableMeta.classes[name];
+
     if (typedClass[key]) {
         diagnostics.warn(node, `override ${key} value`);
     }
     typedClass[key] = value;
 }
 
+function handleImport(rule: postcss.Rule, styleableMeta: StylableMeta, diagnostics: Diagnostics) {
 
-function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
-
-    const importObj: Imported = { rule, from: '', defaultExport: '', named: {} };
+    const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {} };
 
     const notValidProps: postcss.Declaration[] = [];
 
     rule.walkDecls((decl) => {
         switch (decl.prop) {
             case valueMapping.from:
-                importObj.from = stripQuotation(decl.value);
+                importObj.fromRelative = stripQuotation(decl.value);
+                importObj.from = path.resolve(path.dirname(styleableMeta.source), importObj.fromRelative); //stripQuotation(decl.value);
                 break;
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
@@ -267,7 +303,7 @@ function handleImport(rule: postcss.Rule, diagnostics: Diagnostics) {
 
 
     if (!importObj.from) {
-        diagnostics.error(rule, '"-st-from" is missing in :import block');
+        diagnostics.error(rule, `"${valueMapping.from}" is missing in :import block`);
     }
 
     rule.remove();
@@ -282,23 +318,29 @@ export function processNamespace(namespace: string, source: string) {
 
 export interface Imported extends Import {
     rule: postcss.Rule;
+    fromRelative: string;
 }
 
 
-export interface StyleableMeta {
-    source: string
+export interface StylableMeta {
+    ast: postcss.Root;
+    root: 'root';
+    source: string;
     namespace: string;
-    imports: postcss.Rule[];
+    imports: Imported[];
     vars: postcss.Rule[];
     keyframes: postcss.AtRule[];
-    directives: { [key: string]: postcss.Declaration[] };
-    classes: string[];
+    classes: Pojo<TypedRule>;
+    elements: Pojo<TypedRule>;
     mappedSymbols: Pojo<ImportSymbol | VarSymbol>;
-    typedClasses: Pojo<TypedClass>;
     diagnostics: Diagnostics;
 }
 
-export interface TypedClass {
+//TODO: fix type
+export interface TypedRule {
+    type: 'element' | 'class';
+    name: string;
+    "-st-root"?: boolean;
     "-st-states"?: any;
     "-st-extends"?: any;
 }
@@ -306,6 +348,7 @@ export interface TypedClass {
 export interface ImportSymbol {
     _kind: 'import'
     type: 'named' | 'default'
+    export: string;
     import: Imported;
 }
 
@@ -314,8 +357,16 @@ export interface VarSymbol {
     value: string;
 }
 
+export interface RefedMixin {
+    mixin: MixinValue<any>,
+    ref: ImportSymbol
+}
 
+
+//TODO: maybe put under stylable namespace object
 export interface SRule extends postcss.Rule {
     selectorAst: SelectorAstNode;
     isSimpleSelector: boolean;
+    selectorType: 'class' | 'element' | 'complex';
+    mixins?: RefedMixin[];
 }
