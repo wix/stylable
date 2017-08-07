@@ -1,302 +1,377 @@
 This file lays out an example of how to theme an application using stylable
 
-components used in this example:
-( imported from a third party library )
-* button
-* textinput
-* login form with ok and cancel buttons
+## Example Assets
 
-## example assets
+### External component library: `a-comps` 
 
-### button t.css
+#### button.st.css
 ```css
-.content{
-  
+.root {
+  display: inline-block; /* button root inner style */
 }
-.background{
-
-}
+.content {} /* button pseudo-element */
 ```
-
-
-
-### textinput t.css
+#### login-form.st.css
 ```css
-.input{
-  
-}
-.background{
-
-}
-```
-
-
-### login-form t.css
-```css
-
 :theme{
-  -st-implements:"./base-theme.t.css";
-  -st-use:cancelButton as cancel;
+  -st-implements: "./base-theme.st.css"; /* indicate that base-theme should be available (rendered to CSS) */
+  -st-use: cancelButton as cancel; /* require cancelButton class to be available and use as cancel */
 }
-:import{
-  -st-default:TextInput;
-  -st-from:"./text-input.t.css";
+:import {
+  -st-default: Button;
+  -st-from: "./button.st.css";
 }
-:import{
-  -st-default:Button;
-  -st-from:"./button.t.css";
+.ok {
+  -st-extends: Button; /* ok pseudo-element extending a button */
 }
-.title{
-}
-.input{
-  -st-extends:TextInput;
-}
-.ok{
-  -st-extends:Button;
-}
-.cancel{
-}
-
-
+.cancel {} /* not needed - defined by the use of cancelButton */
 ```
-
-### Base-Theme.t.css
-the base theme file is relevant when creating components that work with many themes
-```css
-
-:import{
-  -st-default:Button;
-  -st-from:"./button.t.css";
-}
-
-.cancelButton{
-  -st-variant:true;
-  -st-extends:Button;
-}
-.premuimButton{
-  -st-variant:true;
-  -st-extends:Button;
-}
-
-
-```
-
-### Backoffice-Theme.t.css
-the theme file may include css for many components, only those acctualy required are added to the css
+#### base-theme.st.css
+Base theme file is relevant when creating components that work with many themes
 ```css
 :import{
-  -st-default:BaseTheme;
-  -st-from:"./base-theme.t.css";
+  -st-from: "./button.st.css";
+  -st-default: Button;
 }
-:import{
-  -st-default:TextInput;
-  -st-from:"./text-input.t.css";
+.cancelButton {
+  -st-variant: true;
+  -st-extends: Button;
+  background: red;
 }
-:import{
-  -st-default:Button;
-  -st-from:"./button.t.css";
+.premiumButton {
+  -st-variant: true;
+  -st-extends: Button;
+  background: purple;
 }
-:import{
-  -st-default:LoginForm;
-  -st-from:"./login-form.t.css";
+```
+### backoffice-theme.st.css
+```css
+:import {
+  -st-default: BaseTheme;
+  -st-from: "./base-theme.st.css";
+}
+:import {
+  -st-default: Button;
+  -st-from: "./button.st.css";
+}
+:import {
+  -st-default: LoginForm;
+  -st-from: "./login-form.st.css";
 }
 .root{
-  -st-extends:BaseTheme;
+  -st-extends:BaseTheme; /*  */
 }
 :vars{
-  outline: blue;
-  normal:green;
-  low:gray;
-  high:purple;
+  color1: gold;
+  color2: silver;
+  color3: salmon;
 }
 Button{
-  outline:value(outline);
+  outline:value(color1);
 }
 .cancelButton{
-  background:value(low);
+  background:value(color2);
 }
 .premuimButton{
-  background:value(high);
+  background:value(color3);
 }
-LoginForm{
-  //login form  default style here
+LoginForm {
+  /* login form  default style here */
 }
-
-.loginForVariant{
-  -st-extends:LoginForm;
-  -st-variant:true;
+.loginFormDark {
+  -st-variant: true;
+  -st-extends: LoginForm;
 }
-
-.loginForVariant::cancel{
-  color:red;
+.loginFormDark::cancel {
+  color: darkred;
 }
-
 ```
+
+> **Note**: Theme file may include CSS for many components, only those actually required are added to the output CSS.
 
 ## example usage
 
-
 ### App with buttons and LoginForm:
 
-app.t.css
+app.st.css
 ```css
-  :theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:premiumButton loginFormVariant;
-  }
- 
+:theme{
+  -st-from: "a-comps/backoffice-theme.st.css";
+  -st-use: premiumButton, loginFormDark;
+}
+```
+output.css
+```css
+/* a-comps/button.st.css */
+.Button__root {
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css root */
+.App__root .BaseTheme__cancelButton.Button__root {
+  color: red;
+}
+.App__root .BaseTheme__premiumButton.Button__root {
+  color: purple;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css root */
+.App__root Button__root {
+  outline: gold; /* color1 */
+}
+.App__root .BaseTheme__cancelButton.Button__root {
+  background: silver; /* color2 */
+}
+.App__root .BaseTheme__premuimButton.Button__root {
+  background: salmon; /* color3 */
+}
+.App__root .BackOfficeTheme__loginFormDark.LoginForm__root .BaseTheme__cancelButton {
+  color: darkred;
+}
 ```
 
 ### App with extended buttons
-app.t.css
-```css
-  
-  :theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:premiumButton;
-  }
 
-  .premiumButton::content{
-    color:red;
-  }
+app.st.css
+```css
+:theme{
+  -st-from: "a-comps/backoffice-theme.st.css";
+  -st-use: premiumButton;
+}
+.premiumButton::content{
+  color:yellow;
+}
+```
+output.css
+```css
+/* a-comps/button.st.css */
+.Button__root { 
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css root */
+.App__root .BaseTheme__premiumButton.Button__root { 
+  color: purple;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css root */
+.App__root Button__root {
+  outline: gold; /* color1 */
+}
+.App__root .BackOfficeTheme__premuimButton.Button__root {
+  background: salmon; /* color3 */
+}
+
+/* ./app.st.css */
+.App__root .BackOfficeTheme__premiumButton.Button__root .Button__content {
+  color: yellow;
+}
 ```
 
+### App with vars override and extended buttons
 
-
-### App with color override and extended buttons
-app.t.css
+app.st.css
 ```css
-  
-  :theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:cancelButton premiumButton;
-    low:yellow;
-    outline:red;
-  }
-  
-  
-  .premiumButton::content{
-    color:red;
-  }
+:theme{
+  -st-from: "a-comps/backoffice-theme.st.css";
+  -st-use: cancelButton, premiumButton;
+  color1: aqua;
+  color2: chocolate;
+}  
+.premiumButton::content{
+  color: pink;
+}
+```
+output.css
+```css
+/* a-comps/button.st.css */
+.Button__root { /* button is used in app */
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css root */
+.App__root .BaseTheme__cancelButton.Button__root {
+  color: red;
+}
+.App__root .BaseTheme__premiumButton.Button__root {
+  color: purple;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css root */
+.App__root Button__root {
+  outline: aqua; /* color1 override */
+}
+.App__root .BackOfficeTheme__cancelButton.Button__root {
+  background: chocolate; /* color2 override */
+}
+.App__root .BackOfficeTheme__premuimButton.Button__root {
+  background: salmon; /* color3 */
+}
+
+/* ./app.st.css */
+.App__root .BackOfficeTheme__premiumButton.Button__root .Button__content {
+  color: pink;
+}
 ```
 
+### App with component using a variant (using button)
 
+app.st.css
+```css
+ :theme {
+    -st-from: "a-comps/backoffice-theme.st.css";
+    -st-use: cancelButton;
+    color1: khaki;
+  }
+  .premiumButton{
+    color: hotpink;
+  }
+```
+comp.st.css
+```css
+:theme {
+  -st-implements: "a-comps/backoffice-theme.st.css";
+  -st-use: cancelButton;
+}
+.cancelButton { 
+  color: maroon;
+}  
+```
+output.css
+```css
+/* a-comps/button.st.css */
+.Button__root {
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css root */
+.App__root .BaseTheme__cancelButton.Button__root { /* used by app */
+  color: red;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css root  */
+.App__root Button__root {
+  outline: khaki; /* color1 override */
+}
+.App__root .BackOfficeTheme__cancelButton.Button__root {
+  background: silver; /* color2 */
+}
+
+/* ^ theme and theme dependencies (Button__root) are hoisted to top */
+
+/* ./comp.st.css */
+.Comp__root .BaseTheme__cancelButton.Button__root { /* cancelButton used in comp */
+  color: maroon; 
+}
+
+/* ./app.st.css */
+.App__root .BackOfficeTheme__premiumButton.Button__root {
+  color: hotpink;
+}
+```
 
 ### App applying theme on a part
-app.t.css
+
+app.st.css
 ```css
-  
-  .sidebar:theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:cancelButton premiumButton;
-    low:yellow;
-    outline:red;
-  }
-  
-  
-  .premiumButton::content{
-    color:red;
-  }
+.sidebar:theme {
+  -st-from: "a-comps/backoffice-theme.t.css";
+  -st-use: cancelButtonm, premiumButton;
+  color1: orange;
+  color2: tomato;
+}
+.premiumButton::content{
+  color:olive;
+}
+```
+output.css
+```css
+/* a-comps/button.st.css */
+.Button__root {
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css sidebar */
+.App__sidebar .BaseTheme__cancelButton.Button__root {
+  color: red;
+}
+.App__sidebar .BaseTheme__premiumButton.Button__root {
+  color: purple;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css sidebar  */
+.App__sidebar Button__root {
+  outline: orange; /* color1 override */
+}
+.App__sidebar .BackOfficeTheme__cancelButton.Button__root { 
+  background: tomato; /* color2 override */
+}
+.App__sidebar .BackOfficeTheme__premuimButton.Button__root {
+  background: salmon; /* color3 */
+}
+
+/* ./app.st.css */
+.App__root .BackOfficeTheme__premiumButton.Button__root .Button__content {
+  color: olive;
+}
 ```
 
+### App with project theme using imported theme (using Button)
 
-
-### App applying theme on 2 parts
-app.t.css
+main-theme.st.css
 ```css
-  
-  .topbar:theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:cancelButton, premiumButton;
-    outline1:red;
-  }
-  .sidebar:theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use:cancelButton, premiumButton;
-    outline1:green;
-  }
-  
-  .topbar .premiumButton::content {
-    //my custom stuff
-  }
-  
+:import {
+  -st-from: "a-comps/backoffice-theme.t.css";
+  -st-default: Theme;
+  color1: darkviolet;
+}
+.root {
+  -st-extends: Theme;
+}
+.cancelButton::content{
+  color: darkcyan;
+}
 ```
-
-
-
-
-
-### App with component using a variant
-app.t.css
+app.st.css
 ```css
-  
- :theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-use: premiumButton,cancelButton;
-    outline1:green;
-  }
- 
- 
-  
+:theme {
+  -st-from: "./main-theme.st.css";
+  -st-use: cancelButton;
+}
 ```
-
-comp.t.css
+comp.st.css
 ```css
-  
- :theme{
-    -st-implements:"stylable-components/backoffice-theme.t.css";
-    -st-use: premiumButton,cancelButton;
-  }
- 
- .cancelButton{
- }
- 
-  
+:theme {
+  -st-implements: "./main-theme.st.css";
+  -st-use: cancelButton;
+}
+.controls .cancelButton {
+  color: darksalmon;
+}
 ```
-
-
-
-### App with internal theme using imported theme
-local-theme.t.css
+output.css
 ```css
-  
-  :theme{
-    -st-from:"stylable-components/backoffice-theme.t.css";
-    -st-default:Theme;
-    -st-use:cancelButton, premiumButton;
-    outline1:green;
-  }
- 
-  cancelButton::content{
-    color:red;
-  }
- 
-  
+/* a-comps/button.st.css */
+.Button__root {
+  display: inline-block;
+}
+
+/* a-comps/base-theme.st.css > theme on ./app.st.css root */
+.App__root .BaseTheme__cancelButton.Button__root {
+  color: red;
+}
+
+/* a-comps/backoffice-theme.st.css > theme on ./app.st.css root  */
+.App__root Button__root {
+  outline: darkviolet; /* color1 override */
+}
+.App__root .BackOfficeTheme__cancelButton.Button__root .Button__content {
+  background: darkcyan; /* color2 override */
+}
+
+/* ^ theme and theme dependencies (Button__root) are hoisted to top */
+
+.Comp__root .Comp__controls .BaseTheme__cancelButton.Button__root {
+  color: darksalmon; 
+}
 ```
-
-app.t.css
-```css
-  
- :theme{
-    -st-from:"local-theme.t.css";
-    -st-use:cancelButton, premiumButton;
-  }
-  
-```
-
-comp.t.css
-```css
-  
- :theme{
-    -st-implements:"gaga-theme.t.css";
-    -st-use:cancelButton;
-  }
- 
-  .as .cancelButton{
-    color:red;
-  }
-```
-
-
-
-
