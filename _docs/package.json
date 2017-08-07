@@ -7,7 +7,7 @@
     "copyPlayground": "cp node_modules/generic-playground/build/Playground.bundle.js . && cp -r node_modules/generic-playground/build/vs .",
     "postinstall": "npm run copyPlayground && gitbook install",
     "build": "gitbook build",
-    "start": "gitbook serve",
+    "start": "gitbook build && gitbook serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
@@ -16,7 +16,7 @@
   "author": "talh@wix.com",
   "license": "ISC",
   "dependencies": {
-    "generic-playground": "^0.0.11",
-    "gitbook-plugin-playground": "^0.0.20"
+    "generic-playground": "^0.0.15",
+    "gitbook-plugin-playground": "^0.0.21"
   }
 }
