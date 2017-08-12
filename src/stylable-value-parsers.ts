@@ -4,6 +4,7 @@ export interface TypedClass {
     "-st-root"?: boolean;
     "-st-states"?: string[] | MappedStates;
     "-st-extends"?: string;
+    "-st-variant"?: boolean;
 }
 
 export interface MixinValue<T = any[]> {
@@ -18,7 +19,8 @@ export const valueMapping = {
     root: '-st-root' as "-st-root",
     states: '-st-states' as "-st-states",
     extends: '-st-extends' as "-st-extends",
-    mixin: '-st-mixin' as "-st-mixin"
+    mixin: '-st-mixin' as "-st-mixin",
+    variant: '-st-variant' as "-st-variant"
 };
 
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
@@ -26,7 +28,10 @@ export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
 export const SBTypesParsers = {
     "-st-root"(value: string) {
-        return value === 'false' ? false : true
+        return value === 'false' ? false : true;
+    },
+    "-st-variant"(value: string) {
+        return value === 'false' ? false : true;
     },
     "-st-states"(value: string) {
         if(!value){
