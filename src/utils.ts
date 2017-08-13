@@ -20,7 +20,7 @@ export function stripQuotation(str: string){
 }
 
 export function filename2varname(filename: string) {
-    return string2varname(filename.replace(/(?=.*)\.\w+$/, ''));
+    return string2varname(filename.replace(/(?=.*)\.\w+$/, '').replace(/\.st$/, ''));
 }
 
 export function string2varname(str: string) {

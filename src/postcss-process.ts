@@ -16,6 +16,12 @@ const parseStates = SBTypesParsers[valueMapping.states];
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
     const reservedRootName = 'root';
+    const rootSymbol: ClassSymbol = {
+        _kind: 'class',
+        name: reservedRootName,
+        [valueMapping.root]: true
+    };
+
     const stylableMeta: StylableMeta = {
         ast: root,
         root: reservedRootName,
@@ -23,16 +29,14 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
         namespace: '',
         imports: [],
         vars: [],
-        mappedSymbols: {},
         keyframes: [],
-        classes: {
-            [reservedRootName]: { 
-                type: 'class',
-                name: 'root', 
-                [valueMapping.root]: true 
-            }
-        },
         elements: {},
+        classes: {
+            [reservedRootName]: rootSymbol
+        },
+        mappedSymbols: {
+            [reservedRootName]: rootSymbol
+        },
         diagnostics
     };
 
@@ -109,15 +113,12 @@ function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagno
                 }
             }
         } else if (type === 'class') {
-            if (!stylableMeta.classes[name]) {
-                stylableMeta.classes[name] = { type: 'class', name };
-            }
+            addClassSymbolOnce(name, rule, stylableMeta, diagnostics);
         } else if (type === 'element') {
-            if (name.charAt(0).match(/[A-Z]/) && !stylableMeta.elements[name]) {
-                const prev = nodes[index - 1];
-                if (prev) { /*TODO: maybe warn on element with no direct child*/ }
-                stylableMeta.elements[name] = { type: 'element', name };
-            }
+            addElementSymbolOnce(name, rule, stylableMeta, diagnostics);
+            const prev = nodes[index - 1];
+            if (prev) { /*TODO: maybe warn on element with no direct child*/ }
+
         }
         return void 0;
     });
@@ -125,6 +126,8 @@ function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagno
     if (rule.isSimpleSelector !== false) {
         rule.isSimpleSelector = true;
         rule.selectorType = rule.selector.match(/^\./) ? 'class' : 'element';
+    } else {
+        rule.selectorType = 'complex';
     };
 
     if (!isValidRootUsage()) {
@@ -133,11 +136,26 @@ function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagno
 
 }
 
-function checkRedeclareSymbol(symbolName: string, node: postcss.Node, styleableMeta: StylableMeta, diagnostics: Diagnostics) {
-    const symbol = styleableMeta.mappedSymbols[symbolName];
+function checkRedeclareSymbol(symbolName: string, node: postcss.Node, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+    const symbol = stylableMeta.mappedSymbols[symbolName];
     if (symbol) {
         //TODO: can output match better error;
         diagnostics.warn(node, `redeclare symbol "${symbolName}"`, { word: symbolName })
+    }
+}
+
+function addElementSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+    if (name.charAt(0).match(/[A-Z]/) && !stylableMeta.elements[name]) {
+        checkRedeclareSymbol(name, rule, stylableMeta, diagnostics);
+        stylableMeta.elements[name] = { _kind: "element", name };
+    }
+}
+
+
+function addClassSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+    if (!stylableMeta.classes[name]) {
+        checkRedeclareSymbol(name, rule, stylableMeta, diagnostics);
+        stylableMeta.classes[name] = stylableMeta.mappedSymbols[name] = { _kind: "class", name };
     }
 }
 
@@ -148,7 +166,7 @@ function addImportSymbols(_import: Imported, stylableMeta: StylableMeta, diagnos
         stylableMeta.mappedSymbols[_import.defaultExport] = {
             _kind: 'import',
             type: 'default',
-            export: 'default',
+            name: 'default',
             import: _import
         };
     }
@@ -157,7 +175,7 @@ function addImportSymbols(_import: Imported, stylableMeta: StylableMeta, diagnos
         stylableMeta.mappedSymbols[name] = {
             _kind: 'import',
             type: 'named',
-            export: _import.named[name],
+            name: _import.named[name],
             import: _import
         };
     });
@@ -167,17 +185,23 @@ function addVarSymbols(rule: postcss.Rule, stylableMeta: StylableMeta, diagnosti
 
     rule.walkDecls((decl) => {
         checkRedeclareSymbol(decl.prop, decl, stylableMeta, diagnostics);
+        let importSymbol = null;
+        const value = valueReplacer(decl.value, {}, (value, name, match) => {
+            value;
+            const symbol = stylableMeta.mappedSymbols[name];
+            if (!symbol) {
+                diagnostics.warn(decl, `cannot resolve variable value for "${name}"`, { word: match });
+                return match;
+            } else if (symbol._kind === 'import') {
+                importSymbol = symbol;
+            }
+            return symbol._kind === 'var' ? symbol.value : match;
+        });
         const varSymbol: VarSymbol = {
             _kind: 'var',
-            value: valueReplacer(decl.value, {}, (value, name, match) => {
-                value;
-                const symbol = stylableMeta.mappedSymbols[name];
-                if (!symbol) {
-                    diagnostics.warn(decl, `cannot resolve variable value for "${name}"`, { word: match });
-                    return match;
-                }
-                return symbol._kind === 'var' ? symbol.value : match;
-            })
+            name: decl.prop,
+            value: value,
+            import: importSymbol
         }
         stylableMeta.mappedSymbols[decl.prop] = varSymbol;
     });
@@ -207,7 +231,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
 
     if (decl.prop === valueMapping.states) {
         if (rule.isSimpleSelector) {
-            extendTypedClass(
+            extendTypedRule(
                 decl,
                 rule.selector,
                 valueMapping.states,
@@ -221,8 +245,8 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
     } else if (decl.prop === valueMapping.extends) {
         if (rule.isSimpleSelector) {
             const extendsRefSymbol = stylableMeta.mappedSymbols[decl.value];
-            if (extendsRefSymbol && extendsRefSymbol._kind === 'import') {
-                extendTypedClass(
+            if (extendsRefSymbol && extendsRefSymbol._kind === 'import' || decl.value === stylableMeta.root) {
+                extendTypedRule(
                     decl,
                     rule.selector,
                     valueMapping.extends,
@@ -262,17 +286,16 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
 
 }
 
-function extendTypedClass(node: postcss.Node, selector: string, key: keyof TypedRule, value: any, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+function extendTypedRule(node: postcss.Node, selector: string, key: keyof StylableDirectives, value: any, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
     const name = selector.replace('.', '');
-    const typedClass = name === selector ? stylableMeta.elements[name] : stylableMeta.classes[name];
-
-    if (typedClass[key]) {
-        diagnostics.warn(node, `override ${key} value`);
+    const typedRule = <ClassSymbol | ElementSymbol>stylableMeta.mappedSymbols[name];
+    if (typedRule[key]) {
+        diagnostics.warn(node, `override "${key}" on typed rule "${name}"`, { word: name });
     }
-    typedClass[key] = value;
+    typedRule[key] = value;
 }
 
-function handleImport(rule: postcss.Rule, styleableMeta: StylableMeta, diagnostics: Diagnostics) {
+function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
 
     const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {} };
 
@@ -282,7 +305,7 @@ function handleImport(rule: postcss.Rule, styleableMeta: StylableMeta, diagnosti
         switch (decl.prop) {
             case valueMapping.from:
                 importObj.fromRelative = stripQuotation(decl.value);
-                importObj.from = path.resolve(path.dirname(styleableMeta.source), importObj.fromRelative); //stripQuotation(decl.value);
+                importObj.from = path.resolve(path.dirname(stylableMeta.source), importObj.fromRelative); //stripQuotation(decl.value);
                 break;
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
@@ -313,7 +336,7 @@ function handleImport(rule: postcss.Rule, styleableMeta: StylableMeta, diagnosti
 }
 
 export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source).toString(36);
+    return namespace + hash.v3(source)//.toString(36);
 }
 
 export interface Imported extends Import {
@@ -321,6 +344,49 @@ export interface Imported extends Import {
     fromRelative: string;
 }
 
+
+export interface StylableDirectives {
+    "-st-root"?: boolean;
+    "-st-states"?: any;
+    "-st-extends"?: ImportSymbol | ClassSymbol;
+}
+
+
+
+//TODO: fix type
+export interface TypedRule extends StylableDirectives {
+    type: 'element' | 'class';
+    name: string;
+}
+
+
+export interface ClassSymbol extends StylableDirectives {
+    _kind: 'class';
+    name: string;
+}
+
+export interface ElementSymbol extends StylableDirectives {
+    _kind: 'element';
+    name: string;
+}
+
+export interface ImportSymbol {
+    _kind: 'import';
+    type: 'named' | 'default';
+    name: string;
+    import: Imported;
+}
+
+
+export interface VarSymbol {
+    _kind: 'var';
+    name: string;
+    value: string;
+    import: ImportSymbol | null;
+}
+
+
+export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;
 
 export interface StylableMeta {
     ast: postcss.Root;
@@ -330,31 +396,10 @@ export interface StylableMeta {
     imports: Imported[];
     vars: postcss.Rule[];
     keyframes: postcss.AtRule[];
-    classes: Pojo<TypedRule>;
-    elements: Pojo<TypedRule>;
-    mappedSymbols: Pojo<ImportSymbol | VarSymbol>;
+    classes: Pojo<ClassSymbol>;
+    elements: Pojo<ElementSymbol>;
+    mappedSymbols: Pojo<StylableSymbol>;
     diagnostics: Diagnostics;
-}
-
-//TODO: fix type
-export interface TypedRule {
-    type: 'element' | 'class';
-    name: string;
-    "-st-root"?: boolean;
-    "-st-states"?: any;
-    "-st-extends"?: any;
-}
-
-export interface ImportSymbol {
-    _kind: 'import'
-    type: 'named' | 'default'
-    export: string;
-    import: Imported;
-}
-
-export interface VarSymbol {
-    _kind: 'var';
-    value: string;
 }
 
 export interface RefedMixin {
@@ -370,3 +415,4 @@ export interface SRule extends postcss.Rule {
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
 }
+

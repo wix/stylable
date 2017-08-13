@@ -7,8 +7,13 @@ describe('value-template', function () {
         expect(valueReplacer('value(A)', {A: 'the value'}, (value)=>value)).to.equal('the value');
     });
 
+    it('should replace "value()" function with actual value with transform value', function(){
+        expect(valueReplacer('value(A)', {A: 'the value'}, (value)=>value + '!!!')).to.equal('the value!!!');
+    });
+
     it('should replace multiple "value()" functions with actual values', function(){
         expect(valueReplacer('value(A) value(B)', {A: 'the value', B: 'other value'}, (value)=>value)).to.equal('the value other value');
     });
+    
 });
 

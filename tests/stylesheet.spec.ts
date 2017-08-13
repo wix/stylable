@@ -192,7 +192,10 @@ describe('Stylesheet', function () {
             expect(sheet.typedClasses).to.eql({
                 root: { "-st-root": true },
                 container: {
-                    "-st-states": ["stateA", "stateB"]
+                    "-st-states": {
+                        "stateA": null, 
+                        "stateB": null
+                    }
                 }
             })
         });
@@ -237,7 +240,7 @@ describe('Stylesheet', function () {
             expect(sheet.typedClasses).to.eql({
                 root: { "-st-root": true },
                 container: {
-                    "-st-states": []
+                    "-st-states": {}
                 }
             })
         })
@@ -657,7 +660,9 @@ describe('Stylesheet', function () {
             `);
 
             expect(sheet.typedClasses[sheet.root]).to.eql({
-                "-st-states": ["a", "b"]
+                "-st-states": {
+                    "a": null, "b": null
+                }
             });
         });
     })

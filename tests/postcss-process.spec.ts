@@ -167,14 +167,16 @@ describe('Stylable postcss process', function () {
                 myname: value(name);
             }
         `, { from: "path/to/style.css" });
-
-        expect(result.mappedSymbols).to.deep.equal({
+            
+        expect(result.mappedSymbols).to.deep.include({
             name: {
                 _kind: 'var',
+                name: 'name',
                 value: 'value'
             },
             myname: {
                 _kind: 'var',
+                name: 'myname',
                 value: 'value'
             }
         });
@@ -210,10 +212,11 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        
+
         expect(result.classes).to.flatMatch({
             myclass: {
-                 "-st-extends": {
+
+                "-st-extends": {
                     _kind: 'import',
                     type: 'default',
                     import: {
@@ -239,7 +242,10 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         expect(result.classes).to.flatMatch({
             root: {
-                "-st-states": ['state1', 'state2']
+                "-st-states": {
+                    'state1': null, 
+                    'state2': null
+                }
             }
         });
 
@@ -256,7 +262,7 @@ describe('Stylable postcss process', function () {
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         expect(result.classes).to.flatMatch({
             root: {
-                 "-st-states": {
+                "-st-states": {
                     state1: null,
                     state2: "[data-mapped]"
                 }
@@ -280,7 +286,7 @@ describe('Stylable postcss process', function () {
 
     });
 
-    
+
     it('always contain root class', function () {
 
         const result = processSource(`
@@ -288,11 +294,11 @@ describe('Stylable postcss process', function () {
         `, { from: "path/to/style.css" });
 
         expect(result.classes).to.eql({
-             root: {
-                 type: 'class',
-                 name: 'root',
-                 "-st-root": true
-             }
+            root: {
+                _kind: 'class',
+                name: 'root',
+                "-st-root": true
+            }
         });
 
     });

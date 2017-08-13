@@ -3,7 +3,8 @@
     "_docs",
     "node_modules",
     "dist",
-    "modules"
+    "modules",
+    "**/*~~.ts"
   ],
   "compilerOptions": {
     /* Basic Options */                       
