@@ -39,22 +39,22 @@ export const SBTypesParsers = {
     },
     "-st-states"(value: string) {
         if (!value) {
-            return [];
+            return {};
         }
-        if (value.indexOf('(') !== -1) {
-            const mappedStates: MappedStates = {};
-            const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
-            for (let i = 0; i < parts.length; i += 4) {
-                const stateName = parts[i + 1];
-                const mapToSelector = parts[i + 3];
-                if (stateName) {// ToDo: should check the selector has no operators and child
-                    mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
-                }
+        // if (value.indexOf('(') !== -1) {
+        const mappedStates: MappedStates = {};
+        const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
+        for (let i = 0; i < parts.length; i += 4) {
+            const stateName = parts[i + 1];
+            const mapToSelector = parts[i + 3];
+            if (stateName) {// ToDo: should check the selector has no operators and child
+                mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
             }
-            return mappedStates;
-        } else {
-            return value.split(',').map((state) => state.trim());
         }
+        return mappedStates;
+        // } else {
+            // return value.split(',').map((state) => state.trim());
+        // }
     },
     "-st-extends"(value: string) {
         return value ? value.trim() : "";

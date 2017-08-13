@@ -1,9 +1,9 @@
-import * as postcss from 'postcss';
-import { generate, Options } from "./postcss-generate";
+// import * as postcss from 'postcss';
+// import { StylableTransformer, Options } from "./postcss-generate";
 
 
-export default postcss.plugin('stylable', (options: Options) => {
-    return (root) => {
-        generate(root, options);
-    };
-});
+// export default postcss.plugin('stylable', (options: Options) => {
+//     return (root) => {
+//         // generate(root, options);
+//     };
+// });

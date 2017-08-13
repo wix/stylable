@@ -37,6 +37,6 @@ export function generateFromConfig(config: Config) {
 
     const t = new StylableTransformer({ fileProcessor, diagnostics: new Diagnostics() });
 
-    return t.transform(fileProcessor.process(config.entry))
+    return t.transform(fileProcessor.process(config.entry)).ast;
 
 }
