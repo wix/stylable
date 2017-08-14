@@ -79,7 +79,7 @@ export const SBTypesParsers = {
         const ast = valueParser(value);
         var mixins: { type: string, options: string[] }[] = [];
         ast.nodes.forEach((node: any) => {
-            debugger;
+            
             if (node.type === 'function') {
                 var grouped: any[] = [];
                 var current: any[] = [];
@@ -112,7 +112,8 @@ export const SBTypesParsers = {
                 mixins.push({
                     type: node.value,
                     options
-                })
+                });
+                
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
