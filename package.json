@@ -29,7 +29,9 @@
     "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0"
+    "webpack-dev-server": "^2.5.0",
+    "c3-platform":"^1.0.0"
+
   },
   "dependencies": {
     "camelcase-css": "^1.0.1",
