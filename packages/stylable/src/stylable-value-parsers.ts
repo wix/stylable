@@ -44,7 +44,6 @@ export const SBTypesParsers = {
         if (!value) {
             return {};
         }
-        // if (value.indexOf('(') !== -1) {
         const mappedStates: MappedStates = {};
         const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
         for (let i = 0; i < parts.length; i += 4) {
@@ -55,9 +54,6 @@ export const SBTypesParsers = {
             }
         }
         return mappedStates;
-        // } else {
-        // return value.split(',').map((state) => state.trim());
-        // }
     },
     "-st-extends"(value: string) {
         return value ? value.trim() : "";
