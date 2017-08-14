@@ -6,6 +6,7 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 
 CSS API:
 ```css
+@namespace "S1"
 .thumbnail{ background:green; }
 .thumbnail:hover{ background:blue; }
 .gallery:hover .thumbnail{ background:red; }
@@ -13,10 +14,9 @@ CSS API:
 
 CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
-.root .thumbnail{ background:green;}
-.root .thumbnail:hover{ background:blue; }
-.root .gallery:hover .thumbnail{ background:red; }
+.S1__root .S1__thumbnail{ background:green;}
+.S1__root .S1__thumbnail:hover{ background:blue; }
+.S1__root .S1__gallery:hover .S1__thumbnail{ background:red; }
 ```
 
 React
@@ -32,3 +32,11 @@ Notes:
 > In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).
 
 > CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
+
+## Import classes
+
+When importing a stylesheet, any class defined within it can be imported using `-st-named`.
+
+## Usage
+* [Compose CSS class](./compose-css-class.md)
+* [Style pseudo-elements](./pseudo-elements.md)
