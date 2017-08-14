@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import * as postcss from "postcss";
-import { generateFromConfig } from "../utils/generate-test-util";
+import { generateFromMock } from "../utils/generate-test-util";
 
 describe('Stylable mixins', function () {
 
     it('apply simple js mixin', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -40,7 +40,7 @@ describe('Stylable mixins', function () {
 
     it('apply simple js mixin and remove all -st-mixins', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -74,7 +74,7 @@ describe('Stylable mixins', function () {
 
     it('apply complex js mixin', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -137,7 +137,7 @@ describe('Stylable mixins', function () {
 
     it('apply js mixin on multiple selectors', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -184,7 +184,7 @@ describe('Stylable mixins', function () {
 
     it('apply js mixin with multiple selectors', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -226,7 +226,7 @@ describe('Stylable mixins', function () {
     
     it('apply js mixin with multiple var values', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -271,7 +271,7 @@ describe('Stylable mixins', function () {
         
     it('apply js multiple mixins', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {

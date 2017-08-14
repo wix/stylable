@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import * as postcss from "postcss";
-import { generateFromConfig } from "../utils/generate-test-util";
+import { generateFromMock } from "../utils/generate-test-util";
 
 describe('Generator variables interpolation', function () {
 
 
     it('should inline value() usage with and without quotes', function () {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -36,7 +36,7 @@ describe('Generator variables interpolation', function () {
 
     it('should resolve value inside @media', function () {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -59,7 +59,7 @@ describe('Generator variables interpolation', function () {
     it('should resolve value() usage in variable declaration', function () {
 
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -86,7 +86,7 @@ describe('Generator variables interpolation', function () {
 
     it('should resolve to recursive entry', function () {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -112,7 +112,7 @@ describe('Generator variables interpolation', function () {
 
     it('should support imported vars', function () {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
@@ -153,7 +153,7 @@ describe('Generator variables interpolation', function () {
 
     it('should support imported vars (deep)', function () {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/entry.st.css`,
             files: {
                 '/entry.st.css': {
