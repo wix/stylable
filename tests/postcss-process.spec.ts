@@ -167,17 +167,19 @@ describe('Stylable postcss process', function () {
                 myname: value(name);
             }
         `, { from: "path/to/style.css" });
-            
+            debugger;
         expect(result.mappedSymbols).to.deep.include({
             name: {
                 _kind: 'var',
                 name: 'name',
-                value: 'value'
+                value: 'value',
+                import: null
             },
             myname: {
                 _kind: 'var',
                 name: 'myname',
-                value: 'value'
+                value: 'value',
+                import: null
             }
         });
 

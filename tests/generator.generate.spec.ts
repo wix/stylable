@@ -760,6 +760,7 @@ describe('static Generator.generate', function () {
         it('custom states form imported type on inner pseudo-class', function () {
             const sheetA = fromCSS(`
                 .container { 
+
                     -st-states: my-state;
                 }
             `, "StyleA");
@@ -790,6 +791,45 @@ describe('static Generator.generate', function () {
             css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
             expect(css.length).to.equal(res.length);
         });
+
+        
+        it('TODO: custom states form imported type on inner pseudo-class deep', function () {
+            const sheet0 = fromCSS(`
+                .root { 
+                    -st-states: my-state;
+                }
+            `, "Style0");
+
+            const sheetA = fromCSS(`
+                :import("./relative/path/to/sheet0.stylable.css"){
+                    -st-default: Sheet0;
+                }
+                .container { 
+                     -st-extends: Sheet0;
+                }
+            `, "StyleA");
+
+            const sheetB = fromCSS(`
+                :import("./relative/path/to/sheetA.stylable.css"){
+                    -st-default: SheetA;
+                }
+                .my-class { 
+                    -st-extends: SheetA;
+                }
+                .my-class::container:my-state {}
+            `, "StyleB");
+
+            const css = Generator.generate([sheetB], new Generator({
+                namespaceDivider: "__",
+                resolver: new Resolver({
+                    "./relative/path/to/sheetA.stylable.css": sheetA,
+                    "./relative/path/to/sheet0.stylable.css": sheet0
+                })
+            }));
+
+            expect(css[3]).to.equal('');
+        });
+
 
         it('supports multiple appearances of the same css rule', function () {
             const sheet = fromCSS(`

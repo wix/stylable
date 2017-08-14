@@ -154,8 +154,12 @@ function addElementSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: St
 
 function addClassSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
     if (!stylableMeta.classes[name]) {
-        checkRedeclareSymbol(name, rule, stylableMeta, diagnostics);
-        stylableMeta.classes[name] = stylableMeta.mappedSymbols[name] = { _kind: "class", name };
+        let alias = <ImportSymbol | undefined>stylableMeta.mappedSymbols[name];
+        if (alias && alias._kind !== 'import') {
+            checkRedeclareSymbol(name, rule, stylableMeta, diagnostics);
+            alias = undefined;
+        }
+        stylableMeta.classes[name] = stylableMeta.mappedSymbols[name] = { _kind: "class", name, alias: alias };
     }
 }
 
@@ -186,6 +190,7 @@ function addVarSymbols(rule: postcss.Rule, stylableMeta: StylableMeta, diagnosti
     rule.walkDecls((decl) => {
         checkRedeclareSymbol(decl.prop, decl, stylableMeta, diagnostics);
         let importSymbol = null;
+        
         const value = valueReplacer(decl.value, {}, (value, name, match) => {
             value;
             const symbol = stylableMeta.mappedSymbols[name];
@@ -266,9 +271,9 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
         parseMixin(decl.value).forEach((mixin) => {
             const mixinRefSymbol = stylableMeta.mappedSymbols[mixin.type];
             if (mixinRefSymbol && mixinRefSymbol._kind === 'import') {
-                mixins.push({
+                mixins.unshift({
                     mixin,
-                    ref: mixinRefSymbol
+                    ref: mixinRefSymbol,
                 });
             } else {
                 diagnostics.warn(decl, `unknown mixin: "${mixin.type}"`, { word: mixin.type });
@@ -281,6 +286,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
         }
 
         rule.mixins = mixins;
+        rule.mixinEntry = decl;
     }
 
 
@@ -305,7 +311,7 @@ function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostic
         switch (decl.prop) {
             case valueMapping.from:
                 importObj.fromRelative = stripQuotation(decl.value);
-                importObj.from = path.resolve(path.dirname(stylableMeta.source), importObj.fromRelative); //stripQuotation(decl.value);
+                importObj.from = path.resolve(path.dirname(stylableMeta.source), importObj.fromRelative);
                 break;
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
@@ -363,6 +369,7 @@ export interface TypedRule extends StylableDirectives {
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
     name: string;
+    alias?: ImportSymbol;
 }
 
 export interface ElementSymbol extends StylableDirectives {
@@ -414,5 +421,6 @@ export interface SRule extends postcss.Rule {
     isSimpleSelector: boolean;
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
+    mixinEntry: postcss.Declaration;
 }
 

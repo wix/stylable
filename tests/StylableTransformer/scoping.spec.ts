@@ -342,6 +342,42 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+
+        it('scope class alias', () => {
+
+            var result = generateFromConfig({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                                -st-named: inner-class;
+                            }
+
+                            .Imported{}
+                            .inner-class{}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .inner-class {
+
+                            }
+                        `,
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector, 'root alias').to.equal('.entry--root .imported--root');
+            expect((<postcss.Rule>result.nodes![1]).selector, 'class alias').to.equal('.entry--root .imported--inner-class');
+
+        });
+
+
         it('TODO: scope selector that extends local class', () => {
 
             var result = generateFromConfig({
@@ -562,39 +598,56 @@ describe('Stylable postcss transform (Scoping)', function () {
         });        
 
         
-        // it('custom states form imported type on inner pseudo-class', function () {
-        //     const sheetA = fromCSS(`
-        //         .container { 
-        //             -st-states: my-state;
-        //         }
-        //     `, "StyleA");
+        
+        it('custom states form imported type on inner pseudo-class deep', function () {
 
-        //     const sheetB = fromCSS(`
-        //         :import("./relative/path/to/sheetA.stylable.css"){
-        //             -st-default: SheetA;
-        //         }
-        //         .my-class { 
-        //             -st-extends: SheetA;
-        //         }
-        //         .my-class::container:my-state {}
-        //     `, "StyleB");
+            var result = generateFromConfig({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .my-class { 
+                                -st-extends: Inner;
+                            }
+                            .my-class::container:my-state {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            :import {
+                                -st-from: "./deep.st.css";
+                                -st-default: Sheet0;
+                            }
+                            .root {
 
-        //     const css = Generator.generate([sheetB], new Generator({
-        //         namespaceDivider: "__",
-        //         resolver: new Resolver({
-        //             "./relative/path/to/sheetA.stylable.css": sheetA
-        //         })
-        //     }));
+                            }
+                            .container { 
+                                -st-extends: Sheet0;
+                            }
+                        `
+                    },
+                    '/deep.st.css': {
+                        namespace: 'deep',
+                        content: `
+                            .root { 
+                                -st-states: my-state;
+                            }
+                        `
+                    }
+                }
+            });
 
-        //     const res = [
-        //         '.StyleA__container {}',
-        //         '.StyleB__my-class.StyleA__root {}',
-        //         '.StyleB__my-class.StyleA__root .StyleA__container[data-stylea-my-state] {}',
-        //     ];
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-deep-my-state]');
+   
 
-        //     css.forEach((chunk, index) => expect(chunk).to.matchCSS(res[index]));
-        //     expect(css.length).to.equal(res.length);
-        // });
+        });
+
 
     })
 

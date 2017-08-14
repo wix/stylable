@@ -25,8 +25,12 @@ stylis.use(plugin(stylableObjectifyConfig));
 const postcssConfig = { parser: postcssJS };
 const processor = postcss([postcssNested]);
 
+export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
+    return processor.process(cssObject, {from: sourceFile, ...postcssConfig});
+}
+
 export function stringifyCSSObject(cssObject: CSSObject): string {
-    return processor.process(cssObject, postcssConfig).css;
+    return cssObjectToAst(cssObject).css;
 }
 
 export function objectifyCSSStylis(css: string): CSSObject {
