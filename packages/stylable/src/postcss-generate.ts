@@ -272,8 +272,6 @@ export class StylableTransformer {
 
         const scopedRoot = metaExports[meta.root] || (metaExports[meta.root] = this.scope(meta.root, meta.namespace));
         rule.selectorAst.nodes.forEach((selector) => {
-            //TODO: maybe there is no way for this error to exist
-            if (selector.type !== 'selector') { throw new Error('!') }
             const first = selector.nodes[0];
 
             if (first && first.before && first.before === '.' + scopedRoot) {
@@ -302,7 +300,7 @@ export class StylableTransformer {
                 node.name = this.scope(next.symbol.name, next.meta.namespace);
                 return next;
             } else {
-                //TODO: warn
+                //TODO: warn or handle
             }
         }
 

@@ -56,7 +56,6 @@ export class Generator {
             this.addSheet(sheet, resolvedSymbols);
         }
     }
-    //TODO: replace Pojo with "ModuleMap"
     addImports(resolvedSymbols: Pojo) {
         for (const symbol in resolvedSymbols) {
             const exportValue = resolvedSymbols[symbol];
@@ -305,7 +304,6 @@ export class Generator {
         return next;
     }
     handlePseudoElement(sheet: Stylesheet, node: SelectorAstNode, name: string) {
-        //TODO: only transform what is found
         let current = sheet;
         while (current) {
             if (current.classes[name]) {
