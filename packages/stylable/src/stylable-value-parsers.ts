@@ -81,22 +81,10 @@ export const SBTypesParsers = {
         ast.nodes.forEach((node: any) => {
 
             if (node.type === 'function') {
-
-                const options = groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
-                    if (node.type === 'div') {
-                        return null;
-                    } else if (node.type === 'string') {
-                        return node.value;
-                    } else {
-                        return undefined;
-                    }
-                })).filter((x: string) => typeof x === 'string');
-
                 mixins.push({
                     type: node.value,
-                    options
+                    options: createOptions(node)
                 });
-
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
@@ -131,4 +119,16 @@ function groupValues(node: any) {
         grouped.push(current);
     }
     return grouped;
+}
+
+function createOptions(node: any) {
+    return groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
+        if (node.type === 'div') {
+            return null;
+        } else if (node.type === 'string') {
+            return node.value;
+        } else {
+            return undefined;
+        }
+    })).filter((x: string) => typeof x === 'string');
 }
