@@ -1,12 +1,12 @@
 import { expect } from "chai";
 
-import { generateFromConfig } from "../utils/generate-test-util";
+import { generateFromMock } from "../utils/generate-test-util";
 
 describe('Stylable postcss transform (General)', function () {
 
     it('should output empty on empty input', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -21,7 +21,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :import', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -44,7 +44,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :vars', () => {
 
-        var result = generateFromConfig({
+        var result = generateFromMock({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {

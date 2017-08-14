@@ -9,7 +9,7 @@ export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File> }
 
 
-export function generateFromConfig(config: Config) {
+export function generateFromMock(config: Config) {
     const files = config.files;
 
     for (var file in files) {
