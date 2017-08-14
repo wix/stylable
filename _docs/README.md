@@ -45,6 +45,8 @@ w/ specific webpack instructions plus build
 define a stylesheet - CSS
 React integration (auto-root, string classnames, states),
 
+[Import stylesheets and theme](./guides/import-stylesheets-theme.md);
+
 [Use and Style Components](./guides/usestylecomponents.md)
 import
 tag selector v.s. class selector
