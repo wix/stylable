@@ -57,7 +57,7 @@ function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
         diagnostics.error(root, 'missing source filename');
     } else if (!path.isAbsolute(source)) {
         //TODO: rethink this error
-        throw new Error('source filename is not absolute path');
+        throw new Error('source filename is not absolute path: "' + source + '"');
     }
     return source;
 }
@@ -190,7 +190,7 @@ function addVarSymbols(rule: postcss.Rule, stylableMeta: StylableMeta, diagnosti
     rule.walkDecls((decl) => {
         checkRedeclareSymbol(decl.prop, decl, stylableMeta, diagnostics);
         let importSymbol = null;
-        
+
         const value = valueReplacer(decl.value, {}, (value, name, match) => {
             value;
             const symbol = stylableMeta.mappedSymbols[name];
@@ -355,14 +355,6 @@ export interface StylableDirectives {
     "-st-root"?: boolean;
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
-}
-
-
-
-//TODO: fix type
-export interface TypedRule extends StylableDirectives {
-    type: 'element' | 'class';
-    name: string;
 }
 
 
