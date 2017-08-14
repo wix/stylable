@@ -250,7 +250,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
     } else if (decl.prop === valueMapping.extends) {
         if (rule.isSimpleSelector) {
             const extendsRefSymbol = stylableMeta.mappedSymbols[decl.value];
-            if (extendsRefSymbol && extendsRefSymbol._kind === 'import' || decl.value === stylableMeta.root) {
+            if (extendsRefSymbol && (extendsRefSymbol._kind === 'import' || extendsRefSymbol._kind === 'class') || decl.value === stylableMeta.root) {
                 extendTypedRule(
                     decl,
                     rule.selector,
@@ -260,7 +260,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
                     diagnostics
                 );
             } else {
-                diagnostics.warn(decl, `cannot resolve extends type for "${decl.value}"`, { word: decl.value });
+                diagnostics.warn(decl, `cannot resolve "${valueMapping.extends}" type for "${decl.value}"`, { word: decl.value });
             }
         } else {
             diagnostics.warn(decl, 'cannot define "' + valueMapping.extends + '" inside a complex selector');

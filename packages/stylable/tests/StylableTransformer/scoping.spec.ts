@@ -378,7 +378,7 @@ describe('Stylable postcss transform (Scoping)', function () {
         });
 
 
-        it('TODO: scope selector that extends local class', () => {
+        it('scope selector that extends local class', () => {
 
             var result = generateFromConfig({
                 entry: `/style.st.css`,
@@ -401,7 +401,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
-        it('TODO: what to do?', () => {
+        it('extends class form imported sheet', () => {
 
             var result = generateFromConfig({
                 entry: `/style.st.css`,
@@ -429,7 +429,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns--a .ns1--b');
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns--a.ns1--b');
 
         });
 
@@ -622,13 +622,13 @@ describe('Stylable postcss transform (Scoping)', function () {
                         content: `
                             :import {
                                 -st-from: "./deep.st.css";
-                                -st-default: Sheet0;
+                                -st-default: Deep;
                             }
                             .root {
 
                             }
                             .container { 
-                                -st-extends: Sheet0;
+                                -st-extends: Deep;
                             }
                         `
                     },
