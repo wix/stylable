@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableTransformer, Options } from "./postcss-generate";
+import { StylableTransformer, Options } from "./stylable-transformer";
 import { Diagnostics } from "./diagnostics";
 import { cachedProcessFile } from "./cached-process-file";
 import { StylableMeta, process } from "./postcss-process";
