@@ -793,7 +793,7 @@ describe('static Generator.generate', function () {
         });
 
         
-        it('TODO: custom states form imported type on inner pseudo-class deep', function () {
+        it('TODO: custom states form imported type on inner pseudo-class on pseudo-element', function () {
             const sheet0 = fromCSS(`
                 .root { 
                     -st-states: my-state;

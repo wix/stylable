@@ -54,6 +54,6 @@ export function generateFromConfig(config: Config) {
         diagnostics: new Diagnostics()
     });
 
-    return t.transform(fileProcessor.process(config.entry)).ast;
+    return t.transform(fileProcessor.process(config.entry)).meta.ast;
 
 }

@@ -50,7 +50,7 @@ export class StylableTransformer {
             });
         });
 
-        //applyMixins() 
+        //applyMixins()
         //applyVariants()
         //applyVars() DONE!
         //scopeSelectors() DONE!
@@ -58,7 +58,10 @@ export class StylableTransformer {
         //handleAtMediaValue() DONE!
         //createExports()
 
-        return meta
+        return {
+            meta,
+            exports: metaExports
+        }
 
     }
     appendMixins(rule: SRule) {
@@ -88,8 +91,8 @@ export class StylableTransformer {
                                 ruleSelectorAst.nodes.forEach((ruleSelector) => {
                                     const m: any[] = cloneDeep(mixinSelector.nodes);
                                     const first = m[0];
-
-                                    if (first && first.type === 'invalid') {
+                                    
+                                    if (first && first.type === 'invalid' && first.value === '&') {
                                         m.splice(0, 1);
                                     } else if (first && first.type !== 'spacing') {
                                         m.unshift({
@@ -174,7 +177,7 @@ export class StylableTransformer {
             }
             if (symbol && symbol._kind === 'var') {
                 return stripQuotation(symbol.value);
-            } else if (typeof symbol === 'string') {
+            } else if (typeof symbol === 'string' /* only from js */) {
                 return symbol;
             } else {
                 return match;
@@ -304,12 +307,13 @@ export class StylableTransformer {
         }
 
         const next = this.resolver.resolve(extend);
+        //TODO: handle compose here!
         const scopedName = metaExports[name] || (metaExports[name] = this.scope(name, meta.namespace));
 
         if (next && next._kind === 'css') {
             if (next.symbol._kind === 'class') {
                 node.before = '.' + scopedName;
-                node.before += next.symbol[valueMapping.root] ? '' : ' ';
+                // node.before += next.symbol[valueMapping.root] ? '' : ' ';
                 node.name = this.scope(next.symbol.name, next.meta.namespace);
             } else {
                 //TODO: warn
@@ -319,7 +323,7 @@ export class StylableTransformer {
 
         if (extend && extend._kind === 'class') {
             node.before = '.' + scopedName;
-            node.before += extend[valueMapping.root] ? '' : ' ';
+            // node.before += extend[valueMapping.root] ? '' : ' ';
             node.name = this.scope(extend.name, meta.namespace);
         } else {
             node.name = scopedName;
