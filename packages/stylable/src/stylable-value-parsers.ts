@@ -79,27 +79,10 @@ export const SBTypesParsers = {
         const ast = valueParser(value);
         var mixins: { type: string, options: string[] }[] = [];
         ast.nodes.forEach((node: any) => {
-            
+
             if (node.type === 'function') {
-                var grouped: any[] = [];
-                var current: any[] = [];
 
-                node.nodes.forEach((node: any) => {
-                    if (node.type === 'div') {
-                        grouped.push(current);
-                        current = [];
-                    } else {
-                        current.push(node);
-                    }
-                });
-
-                const last = grouped[grouped.length - 1];
-
-                if ((last && last !== current && current.length) || !last && current.length) {
-                    grouped.push(current);
-                }
-
-                const options = grouped.map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
+                const options = groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
                     if (node.type === 'div') {
                         return null;
                     } else if (node.type === 'string') {
@@ -113,7 +96,7 @@ export const SBTypesParsers = {
                     type: node.value,
                     options
                 });
-                
+
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
@@ -127,4 +110,25 @@ export const SBTypesParsers = {
         return mixins;
 
     }
+}
+
+function groupValues(node: any) {
+    var grouped: any[] = [];
+    var current: any[] = [];
+
+    node.nodes.forEach((node: any) => {
+        if (node.type === 'div') {
+            grouped.push(current);
+            current = [];
+        } else {
+            current.push(node);
+        }
+    });
+
+    const last = grouped[grouped.length - 1];
+
+    if ((last && last !== current && current.length) || !last && current.length) {
+        grouped.push(current);
+    }
+    return grouped;
 }
