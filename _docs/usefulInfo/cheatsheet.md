@@ -1,36 +1,6 @@
-# Cheatsheet
+# Stylable Cheatsheet
 
- ## CSS - [CSS Syntax Docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
-
- * **simple selector**: type selector, class selector (+Stylable [root class](./root.md))
- * **CSS property**: name of the rule (for example, "color")
- * **CSS declaration**: CSS property paired with a value
- * **CSS declaration block**: List of CSS declarations
- * **CSS ruleset**: CSS declaration block paired with a selector
-
-## Stylable - [Stylable Docs](www.stylable.io) 
-Syntax unique to Stylable
-
- * **Directives** `-st-*` Instructions for the **Stylable** pre-processor, removed during transpilation
-    * [**`-st-extends`**](../references/extend-stylesheet.md) simple selector base class extending from another stylesheet
-    * [**`-st-states`**](../references/pseudo-classes.md) define custom pseudo-classes
-    * [**`-st-mixin`**](../references/mixin-syntax.md) apply mixins to CSS ruleset
-    * [**`-st-variant`**](../references/variants.md) define pre-made look and feel that are ignored if not in use
-* **Selectors**
-    * [**`::<class name>`**](../references/pseudo-elements.md) target internal part of a component (pseudo-element) 
-    * [**`:<class name>`**](../references/pseudo-classes.md) target states - pseudo-classes
-    -* [**`:--<class name>`**](../references/custom-selectors.md) selector shortcut (custom selector)-
-    * [**`:global(<class name>)`**](../references/global-selectors.md) keep selector global and not scoped to the stylesheet
-* **Imports** [**`:import {}`**](../references/imports.md) Import external assets like mixins, stylesheets and variants
-    * [**`-st-from`**](../references/imports.md) location of file to import
-    * [**`-st-default`**](../references/imports.md) import default export
-    * [**`-st-named`**](../references/imports.md) import named exports
-* [**`@namespace <readable name>;`**](../references/namespace.md) identify stylesheets to improve development
-
-
-*Option w/ tables*
-
-## CSS
+ ## CSS
 
 | **CSS**  |[CSS Syntax Docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)  |
 |---|---|
@@ -61,7 +31,7 @@ Syntax unique to Stylable - Click each to access code examples and descriptions 
 |---|---|---|
 |[Pseudo-element](../references/pseudo-elements.md) | **`::<class name>`**  | Target internal part of a component |
 |[Pseudo-class](../references/pseudo-classes.md) | **`:<class name>`**  | Target states including native and custom pseudo-classes |
-| [Global](../references/global-selectors.md) | **`:global(<class name>)`**| Keep selector global and not scoped to the stylesheet  |
+|[Global](../references/global-selectors.md) | **`:global(<class name>)`**| Keep selector global and not scoped to the stylesheet  |
  <br> 
 
 | Imports  | Syntax  | Description  |
