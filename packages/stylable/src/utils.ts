@@ -16,7 +16,7 @@ export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProper
 // }
 
 export function stripQuotation(str: string){
-    return str.replace(/'|"/g, '');
+    return str.replace(/^['"]|['"]$/g, '');
 }
 
 export function filename2varname(filename: string) {

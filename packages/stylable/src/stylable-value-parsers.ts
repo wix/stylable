@@ -1,3 +1,6 @@
+
+const valueParser = require("postcss-value-parser");
+
 export type MappedStates = { [s: string]: string | null };
 
 export interface TypedClass {
@@ -53,7 +56,7 @@ export const SBTypesParsers = {
         }
         return mappedStates;
         // } else {
-            // return value.split(',').map((state) => state.trim());
+        // return value.split(',').map((state) => state.trim());
         // }
     },
     "-st-extends"(value: string) {
@@ -73,79 +76,54 @@ export const SBTypesParsers = {
     },
     "-st-mixin"(value: string) {
 
-        const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);
-        if (!parts || parts.join('').length !== value.replace(/\s*/, '').length) {
-            throw new Error(valueMapping.mixin + ': not a valid mixin value: ' + value);
-        }
+        const ast = valueParser(value);
+        var mixins: { type: string, options: string[] }[] = [];
+        ast.nodes.forEach((node: any) => {
+            debugger;
+            if (node.type === 'function') {
+                var grouped: any[] = [];
+                var current: any[] = [];
 
-        return parts.map((mix) => {
-            let type: string, options: string[], match;
-
-            if (mix.indexOf('(') === -1) {
-                type = mix.trim();
-                options = [];
-            } else if (match = mix.match(/(.*?)\((.*?\)?)\)/)) {
-                type = match[1].trim();
-                options = [];
-                if (match[2]) {
-                    const args: string = match[2];
-                    let isInParam = false;
-                    let isInString = false;
-                    let lastIndex = 0;
-                    let lastNoneSpaceIndex = 0;
-                    for (let i = 0; i < args.length; ++i) {
-                        const currentChar = args[i];
-                        if (currentChar.match(/\s/)) {
-                            if (!isInParam) {
-                                lastIndex = i + 1; // ignore  spaces before param
-                            }
-                            continue;
-                        }
-
-                        switch (currentChar) {
-                            case `"`:
-                                if (isInParam) {
-
-                                } else {
-                                    isInParam = true;
-                                    lastIndex = i + 1;
-                                }
-                                isInString = true;
-                                lastNoneSpaceIndex = i + 1;
-                                break;
-                            case `,`:
-                                if (isInString) {
-                                    const lastNoneSpaceChar = args[lastNoneSpaceIndex - 1];
-                                    if (lastNoneSpaceChar === `"`) {
-                                        lastNoneSpaceIndex = lastNoneSpaceIndex - 1;
-                                    } else {
-                                        lastNoneSpaceIndex = lastNoneSpaceIndex + 1;
-                                        continue;
-                                    }
-                                }
-                                options.push(args.slice(lastIndex, lastNoneSpaceIndex))
-                                isInParam = false;
-                                isInString = false;
-                                lastIndex = i + 1;
-                                lastNoneSpaceIndex = i + 1;
-                                break;
-                            default:
-                                isInParam = true;
-                                lastNoneSpaceIndex = i + 1;
-                        }
+                node.nodes.forEach((node: any) => {
+                    if (node.type === 'div') {
+                        grouped.push(current);
+                        current = [];
+                    } else {
+                        current.push(node);
                     }
-                    if (lastIndex < args.length) {
-                        if (isInParam) {
-                            lastNoneSpaceIndex = args[lastNoneSpaceIndex - 1] === '"' ? lastNoneSpaceIndex - 1 : lastNoneSpaceIndex
-                        }
-                        options.push(args.slice(lastIndex, lastNoneSpaceIndex));
-                    }
+                });
+
+                const last = grouped[grouped.length - 1];
+
+                if ((last && last !== current && current.length) || !last && current.length) {
+                    grouped.push(current);
                 }
-            } else {
-                throw new Error('Invalid mixin call:' + mix);
+
+                const options = grouped.map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
+                    if (node.type === 'div') {
+                        return null;
+                    } else if (node.type === 'string') {
+                        return node.value;
+                    } else {
+                        return undefined;
+                    }
+                })).filter((x: string) => typeof x === 'string');
+
+                mixins.push({
+                    type: node.value,
+                    options
+                })
+            } else if (node.type === 'word') {
+                mixins.push({
+                    type: node.value,
+                    options: []
+                })
+            } else if (node.type === 'string') {
+                //TODO: warn
             }
-            return { type, options }
         });
+
+        return mixins;
 
     }
 }

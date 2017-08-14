@@ -35,7 +35,24 @@ export function generateFromConfig(config: Config) {
         }
     )
 
-    const t = new StylableTransformer({ fileProcessor, diagnostics: new Diagnostics() });
+    function requireModule(path: string) {
+        if(!path.match(/\.js$/)) {
+            path += '.js';
+        }
+        const fn = new Function("module", "exports", files[path].content);
+        const _module = {
+            id: path,
+            exports: {}
+        }
+        fn(_module, _module.exports);
+        return _module.exports;
+    }
+
+    const t = new StylableTransformer({
+        fileProcessor,
+        requireModule,
+        diagnostics: new Diagnostics()
+    });
 
     return t.transform(fileProcessor.process(config.entry)).ast;
 

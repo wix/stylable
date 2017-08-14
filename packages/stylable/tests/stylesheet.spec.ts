@@ -332,36 +332,54 @@ describe('Stylesheet', function () {
             })
         });
 
-        it('with -st-mixin with missing params should remove the last', function () {
+        it('with -st-mixin with missing params should remove empty args', function () {
             const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
                 .container {
-                    -st-mixin: MyMixin1( 300 , , , );
+                    -st-mixin: MyMixin1( 300 , '', 400);
+                }
+            `);
+
+            expect(sheet.mixinSelectors).to.eql({
+                ".container": [
+                    { type: "MyMixin1", options: [`300`, ``, '400'] }
+                ]
+            })
+        });
+
+        it.skip('TODO: with -st-mixin with missing params should give an empty string value to missing arg', function () {
+            const sheet = fromCSS(`
+                :import("./path/to/mixin"){
+                    -st-named: MyMixin1;
+                }
+                .container {
+                    -st-mixin: MyMixin1( 300 , , 400);
                 }
             `);
             
             expect(sheet.mixinSelectors).to.eql({
                 ".container": [
-                    { type: "MyMixin1", options: [`300`, ``, ``] }
+                    { type: "MyMixin1", options: [`300`, ``, '400'] }
                 ]
             })
         });
 
         it('with -st-mixin with params normalized', function () {
+
             const sheet = fromCSS(`
                 :import("./path/to/mixin"){
                     -st-named: MyMixin1;
                 }
                 .container {
-                    -st-mixin: MyMixin1(300, aaa, "bbb", "cc,c", ""ddd"", "\"eee\"", 'fff');
+                    -st-mixin: MyMixin1(300, aaa, "bbb", "cc,c", "'ddd'", '"eee"', 'fff');
                 }
             `);
 
             expect(sheet.mixinSelectors).to.eql({
                 ".container": [
-                    { type: "MyMixin1", options: [`300`, `aaa`, `bbb`, `cc,c`, `"ddd"`, `"eee"`, `'fff'`] }
+                    { type: "MyMixin1", options: [`300`, `aaa`, `bbb`, `cc,c`, `'ddd'`, `"eee"`, `fff`] }
                 ]
             })
         });

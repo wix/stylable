@@ -5,7 +5,7 @@ import { generateFromConfig } from "../utils/generate-test-util";
 describe('Generator variables interpolation', function () {
 
 
-    it('should inline value() usage', function () {
+    it('should inline value() usage with and without quotes', function () {
 
         var result = generateFromConfig({
             entry: `/entry.st.css`,
@@ -14,10 +14,12 @@ describe('Generator variables interpolation', function () {
                     namespace: 'entry',
                     content: `
                         :vars {
-                            param: red;
+                            param: "red";
+                            param1: green;
                         }
                         .container { 
                             color: value(param);
+                            background: value(param1);
                         }
                         `
                 }
@@ -27,9 +29,32 @@ describe('Generator variables interpolation', function () {
         const rule = <postcss.Rule>result.nodes![0];
 
         expect((<postcss.Declaration>rule.nodes![0]).value).to.equal('red');
+        expect((<postcss.Declaration>rule.nodes![1]).value).to.equal('green');
 
     });
 
+
+    it('should resolve value inside @media', function () {
+
+        var result = generateFromConfig({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :vars {
+                            xxl: "(max-width: 301px)";
+                        }
+                        @media value(xxl) {}
+                        `
+                }
+            }
+        });
+
+
+        expect((<postcss.AtRule>result.nodes![0]).params).to.equal('(max-width: 301px)');
+
+    });
 
     it('should resolve value() usage in variable declaration', function () {
 
