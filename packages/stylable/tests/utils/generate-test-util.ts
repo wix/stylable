@@ -53,7 +53,8 @@ export function generateFromMock(config: Config) {
         requireModule,
         diagnostics: new Diagnostics()
     });
+    const result = t.transform(fileProcessor.process(config.entry));
 
-    return t.transform(fileProcessor.process(config.entry)).meta.ast;
+    return result.meta.ast;
 
 }
