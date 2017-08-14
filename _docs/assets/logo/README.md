@@ -1,1 +1,1 @@
-# Stylable Logo Usage
+# Stylable Logo Usag
