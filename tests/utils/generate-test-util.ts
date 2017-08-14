@@ -2,7 +2,7 @@ import { Pojo } from "../../src/types";
 import { cachedProcessFile } from "../../src/cached-process-file";
 import { StylableMeta, process } from "../../src/postcss-process";
 import * as postcss from "postcss";
-import { StylableTransformer } from "../../src/postcss-generate";
+import { StylableTransformer } from "../../src/stylable-transformer";
 import { Diagnostics } from "../../src/diagnostics";
 
 export interface File { content: string; mtime?: Date; namespace?: string }
