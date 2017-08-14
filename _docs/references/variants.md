@@ -9,6 +9,8 @@ You can define variants only for a [class selector](./class-selectors.md).
 
 When you declare a variant, use `-st-variant: true;` to instruct the **Stylable** pre-processor to check if the variant is being used anywhere in the project and if it isn't, to ignore the variant during build time.
 
+// ToDo THEME: remove most - just write that variant means that variant class is not outputed to CSS by default, move most of the examples here to -st-mixin - just print any class on other selectors (with overrides?)
+
 ## Define a variant
 
 The `.SaleBtn` class, which extends `Button` that is imported from the `button.css` file, is defined as a variant with the `-st-variant: true;`. 
