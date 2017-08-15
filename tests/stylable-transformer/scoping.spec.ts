@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import * as postcss from "postcss";
-import { generateFromMock } from "../utils/generate-test-util";
+import { generateStylableRoot } from "../utils/generate-test-util";
 
 describe('Stylable postcss transform (Scoping)', function () {
 
@@ -8,7 +8,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('component/tag selector with first Capital letter automatically extend reference with identical name', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -40,7 +40,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('component/tag selector that extends root with inner class targeting', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -81,7 +81,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('class selector that extends root with inner class targeting (deep)', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -127,7 +127,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('resolve and transform pseudo-element from deeply extended type', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -171,7 +171,7 @@ describe('Stylable postcss transform (Scoping)', function () {
         
         it('resolve and transform pseudo-element from deeply override rather then extended type', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -216,7 +216,7 @@ describe('Stylable postcss transform (Scoping)', function () {
      
         it('resolve and transform pseudo-element on root - prefer inherited element to override', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -252,7 +252,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope local classes', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -274,7 +274,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope local root class', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -296,7 +296,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope selector that extends local root', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -316,7 +316,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope selector that extends anther style', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -345,7 +345,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope class alias', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -380,7 +380,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('scope selector that extends local class', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -403,7 +403,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('extends class form imported sheet', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -439,7 +439,7 @@ describe('Stylable postcss transform (Scoping)', function () {
         
         it('custom states inline', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -460,7 +460,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('custom states with mapping', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -483,7 +483,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('custom states from imported type', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -517,7 +517,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('custom states from deep imported type', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -565,7 +565,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('custom states form imported type on inner pseudo-class', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -601,7 +601,7 @@ describe('Stylable postcss transform (Scoping)', function () {
         
         it('custom states form imported type on inner pseudo-class deep', function () {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -655,7 +655,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         it('handle scoping inside media queries', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -685,7 +685,7 @@ describe('Stylable postcss transform (Scoping)', function () {
     describe('@keyframes scoping', function () {
         it('scope animation and animation name', () => {
 
-            var result = generateFromMock({
+            var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {

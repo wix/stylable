@@ -1,12 +1,12 @@
 import { expect } from "chai";
 
-import { generateFromMock } from "../utils/generate-test-util";
+import { generateStylableRoot } from "../utils/generate-test-util";
 
 describe('Stylable postcss transform (General)', function () {
 
     it('should output empty on empty input', () => {
 
-        var result = generateFromMock({
+        var result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -21,7 +21,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :import', () => {
 
-        var result = generateFromMock({
+        var result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -44,7 +44,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :vars', () => {
 
-        var result = generateFromMock({
+        var result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
