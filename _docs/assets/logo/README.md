@@ -8,7 +8,7 @@ The Stylabel's logo is always surrounded by a minimum clear space area. The mini
 
 
 
-![Google logo](https://photos-4.dropbox.com/t/2/AABpblpSpZFwmdtbBK5IJn27Hr3_Yguuc-ayHCQI86-v_w/12/44364663/png/32x32/1/_/1/2/Clear%20Space%20-%20horizontal-mark.png)
+![Google logo](https://drive.google.com/open?id=0B_1SKwytH7ipY3RiWWNOU01QLWc)
 
 ![Google logo](https://www.dropbox.com/s/efguwda9j095pon/96-logo-horizontal.png?dl=0 "The Google logo")
 
