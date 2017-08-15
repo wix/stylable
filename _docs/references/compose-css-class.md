@@ -1,6 +1,6 @@
 # Compose CSS Class
 
-Use `-st-compose` to apply CSS class to another CSS class or tag selector.
+Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector.
 
 ### CSS API:
 ```css
