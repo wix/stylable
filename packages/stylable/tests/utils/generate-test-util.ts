@@ -8,7 +8,6 @@ import { Diagnostics } from "../../src/diagnostics";
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File> }
 
-
 export function generateFromMock(config: Config) {
     const files = config.files;
 
@@ -36,7 +35,7 @@ export function generateFromMock(config: Config) {
     )
 
     function requireModule(path: string) {
-        if(!path.match(/\.js$/)) {
+        if (!path.match(/\.js$/)) {
             path += '.js';
         }
         const fn = new Function("module", "exports", files[path].content);
@@ -53,8 +52,18 @@ export function generateFromMock(config: Config) {
         requireModule,
         diagnostics: new Diagnostics()
     });
+
     const result = t.transform(fileProcessor.process(config.entry));
 
-    return result.meta.ast;
-
+    return result
 }
+
+export function generateStylableRoot(config: Config) {
+    return generateFromMock(config).meta.ast;    
+}
+
+
+export function generateStylableExports(config: Config) {
+    return generateFromMock(config).exports;    
+}
+

@@ -1,9 +1,11 @@
 import * as postcss from 'postcss';
-import { StylableTransformer, Options } from "./stylable-transformer";
+import { StylableTransformer } from "./stylable-transformer";
 import { Diagnostics } from "./diagnostics";
 import { cachedProcessFile } from "./cached-process-file";
 import { StylableMeta, process } from "./postcss-process";
 import { readFileSync, statSync } from "fs";
+
+export interface PluginOptions {}
 
 const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
     return process(postcss.parse(content, { from }));
@@ -14,7 +16,7 @@ const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
     }
 )
 
-function generate(root: postcss.Root, _options: Options) {
+function generate(root: postcss.Root, _options: PluginOptions) {
 
     const meta = process(root);
 
@@ -28,10 +30,10 @@ function generate(root: postcss.Root, _options: Options) {
 
     const { exports } = transformer.transform(meta);
 
-    console.log(exports)
+    console.log(exports);
 
 }
 
-export default postcss.plugin('stylable', (options: Options) => {
+export const postcssStylable = postcss.plugin('stylable', (options: PluginOptions) => {
     return (root) => generate(root, options);
 });

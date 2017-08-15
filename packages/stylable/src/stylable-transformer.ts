@@ -32,7 +32,9 @@ export class StylableTransformer {
     transform(meta: StylableMeta) {
 
         const root = meta.ast;
-        const metaExports: Pojo<string> = {};
+        const metaExports: Pojo<string> = {
+            [meta.root]: this.scope(meta.root, meta.namespace)
+        };
         this.scopeKeyframes(meta);
 
         root.walkAtRules(/media$/, (atRule) => {
