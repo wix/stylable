@@ -110,7 +110,6 @@ function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagno
                 }
             } else if (name === 'vars') {
                 if (rule.selector === ':vars') {
-                    stylableMeta.vars.push(rule);
                     addVarSymbols(rule, stylableMeta, diagnostics);
                     return false;
                 } else {
@@ -212,6 +211,7 @@ function addVarSymbols(rule: postcss.Rule, stylableMeta: StylableMeta, diagnosti
             value: value,
             import: importSymbol
         }
+        stylableMeta.vars.push(varSymbol);
         stylableMeta.mappedSymbols[decl.prop] = varSymbol;
     });
     rule.remove();
@@ -393,7 +393,7 @@ export interface StylableMeta {
     source: string;
     namespace: string;
     imports: Imported[];
-    vars: postcss.Rule[];
+    vars: VarSymbol[];
     keyframes: postcss.AtRule[];
     classes: Pojo<ClassSymbol>;
     elements: Pojo<ElementSymbol>;

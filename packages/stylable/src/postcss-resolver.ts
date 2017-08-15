@@ -2,6 +2,7 @@
 // import * as path from 'path';
 import { StylableMeta, ImportSymbol, StylableSymbol } from './postcss-process';
 import { FileProcessor } from "./cached-process-file";
+import { stripQuotation } from "./utils";
 
 export interface CSSResolve {
     _kind: 'css'
@@ -19,7 +20,37 @@ export class StylableResolver {
     constructor(private fileProcessor: FileProcessor<StylableMeta>, private requireModule: (modulePath: string) => any) {
 
     }
-    resolve(maybeImport: StylableSymbol | undefined) : CSSResolve | JSResolve | null {
+    resolveVarValue(meta: StylableMeta, name: string) {
+        let value;
+        let symbol = meta.mappedSymbols[name];
+
+        while (symbol) {
+            let next;
+            if (symbol._kind === 'var' && symbol.import) {
+                next = this.resolve(symbol.import);
+            } else if (symbol._kind === 'import') {
+                next = this.resolve(symbol);
+            } else {
+                break;
+            }
+
+            if (next) {
+                symbol = next.symbol;
+            } else {
+                break;
+            }
+        }
+        if (symbol && symbol._kind === 'var') {
+            value = stripQuotation(symbol.value);
+        } else if (typeof symbol === 'string' /* only from js */) {
+            value = symbol;
+        } else {
+            value = null;
+        }
+
+        return value;
+    }
+    resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             return null;
         }
