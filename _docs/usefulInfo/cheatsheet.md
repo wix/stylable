@@ -2,7 +2,7 @@
 
  ## CSS - [docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
 
- * **simple selector**: type selector, class selector (+Stylable [root class](./root.md))
+ * **simple selector**: type selector, class selector (+Stylable [root class](../references/root.md))
  * **CSS property**: name of the rule (e.g. color)
  * **CSS declaration**: CSS property with value
  * **CSS declaration Block**: CSS declaration list
