@@ -2,7 +2,7 @@
 
 In addition to CSS's native [pseudo-classes](https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-classes), **Stylable** enables you to define custom pseudo-classes so that you can apply styles to your components based on state.
 
-Let's say you want a component to have different styling applied to it when its content is loading. You can define "loading" as a custom pseudo-class and toggle it in your component.
+Let's say you want a component to have different styling applied to it when its content is loading. You can define `loading` as a custom pseudo-class and toggle it in your component.
 
 Native pseudo-classes like `:hover` and `:nth-child()` are valid and supported natively.
 
@@ -18,7 +18,7 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 
 CSS API:
 ```css
-/* example1.css */
+@namespace "Example1"
 .root{
     -st-states: toggled, loading;
 }
@@ -29,13 +29,13 @@ CSS API:
 
 CSS OUTPUT:
 ```css
-/* namespaced to example1 */
-.root[data-example1-toggled] { color:red; }
-.root[data-example1-loading] { color:green; }
-.root[data-example1-loading][data-example1-toggled] { color:blue; }
+.Example1__root[data-example1-toggled] { color:red; }
+.Example1__root[data-example1-loading] { color:green; }
+.Example1__root[data-example1-loading][data-example1-toggled] { color:blue; }
 ```
 
-> Note: You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
+> **Note**:  
+> You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
 
 ## Extend external stylesheet
@@ -44,9 +44,9 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 CSS API:
 ```css
-/* example2.css */
+@namespace "Example2"
 :import {
-    -st-from: "./example1.css"; /* stylesheet a previous example */
+    -st-from: "./example1.css"; /* Example1 */
     -st-default: Comp1;
 }
 .media-button {
@@ -54,21 +54,20 @@ CSS API:
     -st-states: toggled, selected;
 }
 .media-button:hover { border:10px solid black; } /* native CSS because no custom declaration*/
-.media-button:loading { color:silver; } /* from example1 */
-.media-button:selected { color:salmon; } /* from example2 */
-.media-button:toggled { color:gold;} /* included in example1 but overridden by example2 */
+.media-button:loading { color:silver; } /* from Example1 */
+.media-button:selected { color:salmon; } /* from Example2 */
+.media-button:toggled { color:gold;} /* included in Example1 but overridden by Example2 */
 ```
 
 CSS OUTPUT:
 ```css
-/* namespaced to example1 */
-.root[data-example1-toggled]{ color:red; }
-.root[data-example1-loading]{ color:green; }
-/* namespaced to example2 */
-.root .media-button:hover { border:10px solid black; } /* native hover - not declared */
-.root .media-button[data-example1-loading] { color:silver; } /* loading scoped to example1 - only one to declare */
-.root .media-button[data-example2-selected] { color:salmon; } /* selected scoped to example2 - only one to declare */
-.root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to example2 - last to declare */
+
+.Example1__root[data-example1-toggled]{ color:red; }
+.Example1__root[data-example1-loading]{ color:green; }
+.Example2__root .media-button:hover { border:10px solid black; } /* native hover - not declared */
+.Example2__root .media-button[data-example1-loading] { color:silver; } /* loading scoped to Example1 - only one to declare */
+.Example2__root .media-button[data-example2-selected] { color:salmon; } /* selected scoped to Example2 - only one to declare */
+.Example2__root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to Example2 - last to declare */
 ```
 
 ## Map custom pseudo-classes
@@ -78,6 +77,7 @@ You can use this feature to define states even if the existing components you ar
 CSS API:
 ```css
 /* example-custom.css */
+@namespace "ExampleCustom"
 .root{
     -st-states: toggled(".on"), loading("[data-spinner]");
 }
@@ -87,16 +87,15 @@ CSS API:
 
 CSS OUTPUT:
 ```css
-/* namespaced to example-custom */
-.root.on { color:red; }
-.root[data-spinner] { color:green; }
+.ExampleCustom__root.on { color:red; }
+.ExampleCustom__root[data-spinner] { color:green; }
 ```
 
 > Note: custom mapping should define selector that target one element (no CSS child elements) 
 
 ## Enable custom pseudo-classes
 
-Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. *<Should this also be explained above?>*
+Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off.
 
 **Stylable** offers [React CSS state integration](./react-integration.md) to help components manage custom pseudo-classes easily.
 

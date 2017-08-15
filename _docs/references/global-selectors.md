@@ -6,18 +6,18 @@ In this example `.classB` and `.classC` are not scoped to `App` but are part of 
 
 CSS input
 ```css
-    @namespace "App";
-    .classA :global(.classB > .classC) .classD:hover {
-        color: red;
-    }
+@namespace "App";
+.classA :global(.classB > .classC) .classD:hover {
+    color: red;
+}
 
 ```
 
 CSS output
 ```css
-    .App_root .App_classA .classB > .classC .App_classD:hover {
-        color: red;
-    }
+.App__root .App__classA .classB > .classC .App__classD:hover {
+    color: red;
+}
 ```
 
 > **Note**: While we don't recommend it, you can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.

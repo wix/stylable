@@ -4,8 +4,9 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 > *Note*: `-st-extends` may only be applied to [class selector](./class-selectors.md) and [root selector](./root.md).
 
-CSS API:
+### CSS API:
 ```css
+@namespace "ToggleButton"
 :import{
     -st-from: "./toggle-button.css";
     -st-default: ToggleButton;
@@ -18,15 +19,15 @@ CSS API:
 .check-btn:toggled::label{ color:red; } /* style pseudo element label when check-box is toggled */
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet */
-.root .check-btn.toggle-button_root{ background:white;}
-.root .check-btn.toggle-button_root .toggle-button_label{ color:green; }
-.root .check-btn.toggle-button_root[data-toggle-button-toggled] .toggle-button_label{ color:red; }
+.ToggleButton__root .check-btn.toggle-button__root{ background:white;}
+.ToggleButton__root .check-btn.toggle-button__root .toggle-button__label{ color:green; }
+.ToggleButton__root .check-btn.toggle-button__root[data-toggle-button-toggled] .toggle-button__label{ color:red; }
 ```
 
-React
+### React
 ```jsx
 /* ToggleButton component implements toggle-button.css */
 import ToggleButton from './toggle-button';

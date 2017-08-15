@@ -1,117 +1,73 @@
-
 # Variants
 
-You can use variants in **Stylable** the same way you use [mixins](./mixin-syntax.md). They are defined as part of a **Stylable** stylesheet that can then later be applied to a CSS ruleset.
+Variants are classes that are selectively written to the CSS target, in order to offer multiple variations of a single component.
 
-Variants can be used if you want a single component to offer multiple style variants for different themes or semantics. The CSS output does not include variants unless it is directly used in the CSS. This increases performance, enables easier debugging and generally keeps the CSS output cleaner and free of unused code.
+Variants can be used if you want to expose multiple CSS declarations for different themes or semantics, but don't want to include every variation in your target code. 
+
+**The CSS output does not include a variant unless it is directly used in the CSS**. This increases performance, enables easier debugging and generally keeps the CSS output cleaner and free of unused code.
 
 You can define variants only for a [class selector](./class-selectors.md). 
 
-When you declare a variant, use `-st-variant: true;` to instruct the **Stylable** pre-processor to check if the variant is being used anywhere in the project and if it isn't, to ignore the variant during build time.
+When you declare a variant, use `-st-variant: true;` to instruct the **Stylable** pre-processor to check if the variant is being used anywhere in the project and if it isn't, to ignore the variant during build time. 
+
+Then to use the variant, you can use any of the extension methods available for **Stylable** classes. 
+
+> **Note**:  
+> Variants without an `-st-extends` (and thus, do not extend any component) directive are universal variants for use by any element.
 
 ## Define a variant
 
-The `.SaleBtn` class, which extends `Button` that is imported from the `button.css` file, is defined as a variant with the `-st-variant: true;`. 
+The `.cancelButton` class is defined as a variant using `-st-variant: true`. Then used in the `Form` stylsheet.
 
-CSS API :
-```css
-/* main.css */
-:import {
-    -st-from: "./button.css";
-    -st-default: Button;
-}
-.SaleBtn {
-    -st-extends: Button;
-    -st-variant: true; /* variant of Button */
-    color: red;
-}
-.SaleBtn:hover {
-    color: pink;
-}
-```
-
-## Use a variant with `-st-extends`
-
-You use a variant using the `-st-extends` directive. The class then inherits the variant base type enabling access to its root definitions as well as all pseudo-elements and pseudo-classes. In this example, the CSS can style the button's `icon` because in the `main.css` file, the `SaleBtn` variant extends `Button`. The hover behavior is also inherited from the base class.
-
-CSS API:
-```css
-/* page.css */
-:import {
-    -st-from: "./main.css";
-    -st-names: SaleBtn;
-}
-
-.sale-button {
-    -st-extends: SaleBtn;
-}
-
-.sale-button::icon {
-    border: 2px solid green;
-}
-```
-
-CSS OUTPUT:
-```css
-/* namespaced to page */
-.root .sale-button.Button_root {
-    color: red;
-}
-.root .sale-button.Button_root:hover {
-    color: pink;
-}
-.root .sale-button.Button_root .Button_icon {
-    border: 2px solid green;
-}
-```
-
-## Use a variant with `-st-mixin`
-
-When you apply a variant as a mixin, you are applying the variant's styles and behavior only, and cannot access its custom internal parts, like pseudo-elements or pseudo-classes. 
-
-CSS API:
-```css
-/* page.css */
-:import {
-    -st-from: "./main.css";
-    -st-names: SaleBtn;
-}
-
-.sale-button {
-    -st-mixin: SaleBtn;
-}
-```
-
-CSS OUTPUT:
-```css
-/* namespaced to page */
-.root .sale-button {
-    color: red;
-}
-.root .sale-button:hover {
-    color: pink;
-}
-```
-
-## Define inline variants
-
-When you create a component, it's useful to keep in one file all of its styles and any variants you offer to consumers of your component.
-
-For example, consider the following button and its variant `BigButton`. While the button component has a height of 2em, the variant has a different height so the original style and the variant's style are both available for use from the same file. 
+### CSS API:
 
 ```css
+/* button.st.css */
+@namespace "Button"
 .root {
-    color:red;
-    background-color:blue;
-    height:2em;
+    color: blue;
 }
-
-.BigButton {
-    -st-extends: root; /* extends stylesheet root */
-    -st-variant: true; /* variant of root */
-    height:5em;
+.bigBorder {
+    -st-variant: true; /* universal variant */
+    border: 10px solid black;
+}
+.cancelButton {
+    -st-extends: root;
+    -st-variant: true; /* variant of this component */
+    color: red;
+}
+.cancelButton:hover {
+    color: pink;
 }
 ```
 
-> Note: Variants without an [extends directive rule](./extend-stylesheet.md) are universal variants for any element.
+```css
+/* form.st.css */
+@namespace "Form"
+:import {
+    -st-from: './button.st.css';
+    -st-default: Button;
+    -st-named: cancelButton;
+}
+/* 
+@export "Form__cancel Button__cancelButton" 
+*/
+.cancel {
+    -st-extends: cancelButton;
+    color: gold;
+}
+```
 
+### CSS Output:
+
+```css
+.Button__root.Button__cancelButton { color: red } /* from variant */
+.Button__root.Button__cancelButton:hover { color: pink } /* from variant */
+.Form__root .Form__cancel.Button__cancelButton { color: gold }
+
+/* Note that bigBorder is not in the output since it is not in use */
+```
+
+## Usages
+
+[Mixins](./mixin-syntax.md)

@@ -6,39 +6,39 @@ Tag selectors are **not** scoped themselves. Other selectors used with a tag sel
 
 > **Note**: In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
 
-## Native element
+## Native Element
 
 Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.
 
-CSS API:
+### CSS API:
 
 ```css
 form {background:green;}
 
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 
 ```css
 /* form is not namespaced */
 .root form {background:green;} 
 ```
 
-CSS API:
+### CSS API:
 
 ```css
 form {background:green;}
 .side-bar:hover form {background:red; }
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet - form is not namespaced */
 .root form {background:green;} 
 .root .side-bar:hover form {background:red; }
 ```
 
-React
+### React
 
 ```jsx
 /* inside a stylable render */
@@ -50,12 +50,13 @@ React
 </div>
 ```
 
-## Component element
+## Component Element
 
 When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
-CSS API:
+### CSS API:
 ```css
+@namespace "ToggleButton"
 :import{
     -st-from: "./toggle-button.css";
     -st-default: ToggleButton;
@@ -64,14 +65,14 @@ ToggleButton {background:green;}
 .side-bar:hover ToggleButton {background:red;}
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet - .toggleButton_root is not namespaced */
-.root .toggleButton_root {background:green;}
-.root .side-bar:hover toggleButton_root {background:red;}
+/* namespaced to the stylesheet - .toggleButton__root is not namespaced */
+.ToggleButton__root .toggleButton_root {background:green;}
+.ToggleButton__root .side-bar:hover toggleButton__root {background:red;}
 ```
 
-React
+### React Implementation:
 ```jsx
 /* Button component implements toggle-button.css */
 import ToggleButton from './toggle-button';
@@ -83,5 +84,3 @@ import ToggleButton from './toggle-button';
     <ToggleButton></ToggleButton> /* green background */
 </div>
 ```
-
-
