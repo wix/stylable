@@ -1,8 +1,7 @@
 import * as postcss from 'postcss';
-// import * as path from 'path';
 import { StylableMeta, SRule, ClassSymbol, StylableSymbol } from './postcss-process';
 import { FileProcessor } from "./cached-process-file";
-import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
+import { traverseNode, stringifySelector, SelectorAstNode } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
 import { valueMapping } from "./stylable-value-parsers";
 import { Pojo } from "./types";
@@ -10,9 +9,9 @@ import { valueReplacer } from "./value-template";
 import { stripQuotation } from "./utils";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
+import { createClassSubsetRoot, mergeRules } from "./postcss-utils";
 
 
-const cloneDeep = require('lodash.clonedeep');
 const valueParser = require("postcss-value-parser");
 
 
@@ -21,7 +20,6 @@ export interface Options {
     requireModule: (modulePath: string) => any
     diagnostics: Diagnostics
 }
-
 
 export class StylableTransformer {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -37,13 +35,15 @@ export class StylableTransformer {
         const metaExports: Pojo<string> = {};
         this.scopeKeyframes(meta);
 
-
         root.walkAtRules(/media$/, (atRule) => {
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
 
         root.walkRules((rule: SRule) => {
-            this.appendMixins(rule);
+            this.appendMixins(root, rule);
+        });
+
+        root.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
             rule.walkDecls((decl) => {
                 decl.value = this.replaceValueFunction(decl.value, meta);
@@ -64,13 +64,9 @@ export class StylableTransformer {
         }
 
     }
-    appendMixins(rule: SRule) {
+    appendMixins(root: postcss.Root, rule: SRule) {
         if (!rule.mixins || rule.mixins.length === 0) {
             return;
-        }
-
-        function isValidDeclaration(decl: postcss.Declaration) {
-            return typeof decl.value === 'string';
         }
 
         rule.mixins.forEach((mix) => {
@@ -80,75 +76,13 @@ export class StylableTransformer {
                     if (typeof resolvedMixin.symbol === 'function') {
                         const res = resolvedMixin.symbol(mix.mixin.options);
                         const mixinRoot = cssObjectToAst(res).root;
-                        mixinRoot.walkRules((mixinRule: SRule) => {
-
-                            const ruleSelectorAst = parseSelector(rule.selector);
-                            const mixinSelectorAst = parseSelector(mixinRule.selector);
-
-                            var nodes: any[] = [];
-                            mixinSelectorAst.nodes.forEach((mixinSelector) => {
-                                
-                                ruleSelectorAst.nodes.forEach((ruleSelector) => {
-                                    const m: any[] = cloneDeep(mixinSelector.nodes);
-                                    const first = m[0];
-                                    
-                                    if (first && first.type === 'invalid' && first.value === '&') {
-                                        m.splice(0, 1);
-                                    } else if (first && first.type !== 'spacing') {
-                                        m.unshift({
-                                            type: 'spacing',
-                                            value: ' '
-                                        })
-                                    }
-
-                                    nodes.push({
-                                        type: 'selector',
-                                        before: ruleSelector.before || mixinSelector.before,
-                                        nodes: cloneDeep(ruleSelector.nodes, true).concat(m)
-                                    })
-                                });
-
-                            });
-
-                            ruleSelectorAst.nodes = nodes;
-
-                            mixinRule.selector = stringifySelector(ruleSelectorAst);
-                            mixinRule.selectorAst = ruleSelectorAst;
-                        });
-
-                        if (mixinRoot.nodes) {
-                            let nextRule = rule;
-                            mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration) => {
-                                if (node.type === 'decl') {
-                                    if (isValidDeclaration(node)) {
-                                        rule.insertBefore(rule.mixinEntry, node);
-                                    } else {
-                                        //TODO: warn invalid mixin value
-                                    }
-                                } else if (node.type === 'rule') {
-                                    if (rule.parent.last === nextRule) {
-                                        rule.parent.append(node);
-                                    } else {
-                                        rule.parent.insertAfter(nextRule, node);
-                                    }
-                                    const toRemove: postcss.Declaration[] = [];
-                                    rule.walkDecls((decl) => {
-                                        if (!isValidDeclaration(decl)) {
-                                            toRemove.push(decl);
-                                            //TODO: warn invalid mixin value
-                                        }
-                                    })
-                                    toRemove.forEach((decl) => decl.remove());
-                                    nextRule = node;
-                                }
-                                //TODO: warn on @media or not?
-                            });
-                            rule.walkDecls(new RegExp(valueMapping.mixin), (node) => node.remove());
-                        }
+                        mergeRules(mixinRoot, rule);
                     }
                 } else {
-                    //TODO: implement class mixin
+                    //TODO: implement imported class mixin
                 }
+            } else if (mix.ref._kind === 'class') {
+                mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);
             } else {
                 //TODO: report unresolvable
             }

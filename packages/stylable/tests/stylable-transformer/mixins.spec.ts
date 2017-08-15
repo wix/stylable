@@ -223,7 +223,7 @@ describe('Stylable mixins', function () {
     });
 
 
-    
+
     it('apply js mixin with multiple var values', () => {
 
         var result = generateFromMock({
@@ -268,7 +268,7 @@ describe('Stylable mixins', function () {
     });
 
 
-        
+
     it('apply js multiple mixins', () => {
 
         var result = generateFromMock({
@@ -319,6 +319,75 @@ describe('Stylable mixins', function () {
 
 
     });
+
+    describe('class mixins', function () {
+
+        it('apply simple class mixins declarations', () => {
+
+            var result = generateFromMock({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .my-mixin {
+                            color: red;
+                        }
+                        .container {
+                            -st-mixin: my-mixin;                           
+                        }
+                    `
+                    }
+                }
+            });
+
+
+            const rule = <postcss.Rule>result.nodes![1];
+            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container');
+            expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
+
+        });
+
+
+
+        it('append complex selector that starts with the mixin name', () => {
+
+            var result = generateFromMock({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .my-mixin {
+                            color: red;
+                        }
+                        .my-mixin:hover {
+                            color: blue;
+                        }
+                        .my-mixin .my-other-class {
+                            color: green;
+                        }
+                        .container {
+                            -st-mixin: my-mixin;                           
+                        }
+                    `
+                    }
+                }
+            });
+
+            const rule = <postcss.Rule>result.nodes![4];
+            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container:hover');
+            expect(rule.nodes![0].toString(), 'selector decl').to.equal('color: blue');
+
+            const rule2 = <postcss.Rule>result.nodes![5];
+            expect(rule2.selector, 'selector 2').to.equal('.entry--root .entry--container .entry--my-other-class');
+            expect(rule2.nodes![0].toString(), 'selector 2 decl').to.equal('color: green');
+
+        });
+
+
+
+    })
 
 });
 

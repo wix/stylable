@@ -13,8 +13,22 @@ const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 
-
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
+
+    const stylableMeta = createEmptyMeta(root, diagnostics);
+
+    handleAtRules(root, stylableMeta, diagnostics);
+
+    root.walkRules((rule: SRule) => {
+        handleRule(rule, stylableMeta, diagnostics);
+        handleDeclarations(rule, stylableMeta, diagnostics);
+    });
+
+    return stylableMeta;
+
+}
+
+function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
     const reservedRootName = 'root';
     const rootSymbol: ClassSymbol = {
         _kind: 'class',
@@ -22,7 +36,7 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
         [valueMapping.root]: true
     };
 
-    const stylableMeta: StylableMeta = {
+    return {
         ast: root,
         root: reservedRootName,
         source: getSourcePath(root, diagnostics),
@@ -39,15 +53,6 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
         },
         diagnostics
     };
-
-    handleAtRules(root, stylableMeta, diagnostics);
-
-    root.walkRules((rule: SRule) => {
-        handleRule(rule, stylableMeta, diagnostics);
-        handleDeclarations(rule, stylableMeta, diagnostics);
-    });
-
-    return stylableMeta;
 
 }
 
@@ -150,7 +155,6 @@ function addElementSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: St
         stylableMeta.elements[name] = { _kind: "element", name };
     }
 }
-
 
 function addClassSymbolOnce(name: string, rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
     if (!stylableMeta.classes[name]) {
@@ -270,7 +274,7 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
         const mixins: RefedMixin[] = [];
         parseMixin(decl.value).forEach((mixin) => {
             const mixinRefSymbol = stylableMeta.mappedSymbols[mixin.type];
-            if (mixinRefSymbol && mixinRefSymbol._kind === 'import') {
+            if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
                 mixins.unshift({
                     mixin,
                     ref: mixinRefSymbol,
@@ -350,13 +354,11 @@ export interface Imported extends Import {
     fromRelative: string;
 }
 
-
 export interface StylableDirectives {
     "-st-root"?: boolean;
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
 }
-
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
@@ -376,14 +378,12 @@ export interface ImportSymbol {
     import: Imported;
 }
 
-
 export interface VarSymbol {
     _kind: 'var';
     name: string;
     value: string;
     import: ImportSymbol | null;
 }
-
 
 export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;
 
@@ -403,9 +403,8 @@ export interface StylableMeta {
 
 export interface RefedMixin {
     mixin: MixinValue<any>,
-    ref: ImportSymbol
+    ref: ImportSymbol | ClassSymbol
 }
-
 
 //TODO: maybe put under stylable namespace object
 export interface SRule extends postcss.Rule {
@@ -415,4 +414,3 @@ export interface SRule extends postcss.Rule {
     mixins?: RefedMixin[];
     mixinEntry: postcss.Declaration;
 }
-
