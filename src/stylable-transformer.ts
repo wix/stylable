@@ -6,7 +6,6 @@ import { Diagnostics } from "./diagnostics";
 import { valueMapping } from "./stylable-value-parsers";
 import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
-import { stripQuotation } from "./utils";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
 import { createClassSubsetRoot, mergeRules } from "./postcss-utils";
@@ -21,6 +20,8 @@ export interface Options {
     diagnostics: Diagnostics
 }
 
+//TODO: v2 optimize call of this.scope
+
 export class StylableTransformer {
     fileProcessor: FileProcessor<StylableMeta>;
     diagnostics: Diagnostics;
@@ -31,40 +32,64 @@ export class StylableTransformer {
     }
     transform(meta: StylableMeta) {
 
-        const root = meta.ast;
+        const ast = meta.ast;
+
         const metaExports: Pojo<string> = {
             [meta.root]: this.scope(meta.root, meta.namespace)
         };
-        this.scopeKeyframes(meta);
 
-        root.walkAtRules(/media$/, (atRule) => {
+        const keyframeMapping = this.scopeKeyframes(meta);
+
+        ast.walkAtRules(/media$/, (atRule) => {
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
 
-        root.walkRules((rule: SRule) => {
-            this.appendMixins(root, rule);
+        ast.walkRules((rule: SRule) => {
+            this.appendMixins(ast, rule);
         });
 
-        root.walkRules((rule: SRule) => {
+        ast.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
             rule.walkDecls((decl) => {
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
         });
+        
+        this.exportLocalVars(meta, metaExports);
+        this.exportKeyframes(keyframeMapping, metaExports);
 
-        //applyMixins()
+        //applyMixins() DONE!
         //applyVariants()
         //applyVars() DONE!
         //scopeSelectors() DONE!
         //scopeKeyframes() DONE!
         //handleAtMediaValue() DONE!
-        //createExports()
+        //createExports() DONE!
 
         return {
             meta,
             exports: metaExports
         }
 
+    }
+    exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>){
+        meta.vars.forEach((varSymbol) => {
+            if (metaExports[varSymbol.name]) {
+                //TODO: warn on discard
+            } else {
+                let value = this.resolver.resolveVarValue(meta, varSymbol.name);
+                metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
+            }
+        });
+    }
+    exportKeyframes(keyframeMapping: Pojo<string>, metaExports: Pojo<string>){
+        Object.keys(keyframeMapping).forEach((name) => {
+            if (metaExports[name]) {
+                //TODO: warn on discard
+            } else {
+                metaExports[name] = keyframeMapping[name];
+            }
+        });
     }
     appendMixins(root: postcss.Root, rule: SRule) {
         if (!rule.mixins || rule.mixins.length === 0) {
@@ -92,32 +117,8 @@ export class StylableTransformer {
     }
     replaceValueFunction(value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
-
-            let symbol = meta.mappedSymbols[name];
-
-            while (symbol) {
-                let next;
-                if (symbol._kind === 'var' && symbol.import) {
-                    next = this.resolver.resolve(symbol.import);
-                } else if (symbol._kind === 'import') {
-                    next = this.resolver.resolve(symbol);
-                } else {
-                    break;
-                }
-
-                if (next) {
-                    symbol = next.symbol;
-                } else {
-                    break;
-                }
-            }
-            if (symbol && symbol._kind === 'var') {
-                return stripQuotation(symbol.value);
-            } else if (typeof symbol === 'string' /* only from js */) {
-                return symbol;
-            } else {
-                return match;
-            }
+            let value = this.resolver.resolveVarValue(meta, name);
+            return typeof value === 'string' ? value : match;
         });
     }
     scopeKeyframes(meta: StylableMeta) {

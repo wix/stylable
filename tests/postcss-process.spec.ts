@@ -152,10 +152,11 @@ describe('Stylable postcss process', function () {
             }
             :vars {
                 name: value;
+                name1: value1;
             }
         `, { from: "path/to/style.css" });
 
-        expect(result.vars.length).to.eql(2);
+        expect(result.vars.length).to.eql(3);
 
     });
 
