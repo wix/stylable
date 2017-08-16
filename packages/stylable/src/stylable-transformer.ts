@@ -178,9 +178,9 @@ export class StylableTransformer {
         if (!rule.mixins || rule.mixins.length === 0) {
             return;
         }
-
+        
         rule.mixins.forEach((mix) => {
-            const resolvedMixin = this.resolver.resolve(mix.ref);
+            const resolvedMixin = this.resolver.deepResolve(mix.ref);
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
                     if (typeof resolvedMixin.symbol === 'function') {
@@ -189,7 +189,12 @@ export class StylableTransformer {
                         mergeRules(mixinRoot, rule);
                     }
                 } else {
-                    //TODO: implement imported class mixin
+                    const resolvedClass = this.resolver.deepResolve(mix.ref);
+                    if (resolvedClass && resolvedClass._kind === 'css') {
+                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
+                    } else {
+                        //TODO: add warn
+                    }
                 }
             } else if (mix.ref._kind === 'class') {
                 mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);

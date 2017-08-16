@@ -348,8 +348,6 @@ describe('Stylable mixins', function () {
 
         });
 
-
-
         it('append complex selector that starts with the mixin name', () => {
 
             var result = generateStylableRoot({
@@ -385,8 +383,40 @@ describe('Stylable mixins', function () {
 
         });
 
+        it('apply simple class mixins declarations from import', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./imported.st.css";
+                            -st-named: my-mixin;
+                        }
+                        .container {
+                            -st-mixin: my-mixin;                           
+                        }
+                    `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .my-mixin {
+                            color: red;
+                        }
+                    `
+                    }
+                }
+            });
 
 
+            const rule = <postcss.Rule>result.nodes![0];
+            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container');
+            expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
+
+        });
     })
 
 });
