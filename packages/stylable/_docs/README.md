@@ -28,7 +28,7 @@ simple example 2 components, 2 CSS files - show pseudo element and state
 
 ## Components
 
-[wix-react-components](https://github.com/wix/wix-react-components) - react stylable components with mobx
+[Stylable-components](https://github.com/wix/stylable-components) - react stylable components with mobx
 
 ### Definitly Stylable
 
