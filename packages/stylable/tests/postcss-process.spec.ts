@@ -392,5 +392,22 @@ describe('Stylable postcss process', function () {
 
     });
 
+
+    
+    it('should annotate import with -st-theme', () => {
+        
+         const result = processSource(`
+            :import {
+                -st-theme: true;
+                -st-from: "./theme.st.css";
+            }
+        `)
+
+        const importSymbol = result.imports[0];
+
+        expect(importSymbol.theme).to.eql(true);
+
+    });
+
 });
 
