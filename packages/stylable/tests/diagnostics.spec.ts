@@ -398,10 +398,10 @@ xdescribe('diagnostics: warnings and errors', function () {
 
         });
 
-        describe('override -st-* warnings', function(){
+        describe('override -st-* warnings', function () {
 
-            it('should warn on typed class extend override', function(){
-                  expectWarnings(`
+            it('should warn on typed class extend override', function () {
+                expectWarnings(`
                     :import {
                         -st-from : './file.css';
                         -st-default: Comp;
@@ -415,8 +415,8 @@ xdescribe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'override "-st-extends" on typed rule "root"', file: "main.css" }])
             });
 
-            it('should warn on typed class states override', function(){
-                  expectWarnings(`
+            it('should warn on typed class states override', function () {
+                expectWarnings(`
                     
                     .root {
                         -st-states: mystate;
@@ -434,8 +434,18 @@ xdescribe('diagnostics: warnings and errors', function () {
 
     describe('redeclare symbols', function () {
 
+        it('should warn override mixin on same rule', function () {
+            expectWarnings(`
+                   .a {}
+                   .b {
+                       -st-mixin: a;
+                       -st-mixin: a;
+                   }
+                `, [{ message: 'override mixin on same rule', file: "main.css" }])
+        })
+
         describe('from import', function () {
-            
+
             it('should warn when import redeclare same symbol (in same block)', function () {
                 expectWarnings(`
                     |:import {
@@ -459,7 +469,7 @@ xdescribe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
 
-            
+
             it('should warn when import redeclare same symbol (in different block types)', function () {
                 expectWarnings(`
                     :import {
@@ -476,7 +486,7 @@ xdescribe('diagnostics: warnings and errors', function () {
 
     });
 
-    
+
     describe('complex examples', function () {
         describe(':import', function () {
 
@@ -661,7 +671,7 @@ xdescribe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
-                
+
         });
 
     });

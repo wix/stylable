@@ -20,8 +20,6 @@ export interface Options {
     diagnostics: Diagnostics
 }
 
-//TODO: v2 optimize call of this.scope
-
 export class StylableTransformer {
     fileProcessor: FileProcessor<StylableMeta>;
     diagnostics: Diagnostics;
@@ -98,7 +96,7 @@ export class StylableTransformer {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
             const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
             let exportedClasses = scopedName;
-
+            
             if (extend && extend !== classSymbol) {
                 let finalSymbol;
                 let finalName;
