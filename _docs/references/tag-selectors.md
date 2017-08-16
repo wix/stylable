@@ -14,14 +14,13 @@ Targeting a native element matches any element with the same tag name that is fo
 
 ```css
 form {background:green;}
-
 ```
 
 ### CSS OUTPUT:
 
 ```css
-/* form is not namespaced */
-.root form {background:green;} 
+@namepsace "Page"
+.Page__root form {background:green;} /* form is not namespaced */
 ```
 
 ### CSS API:
@@ -33,9 +32,9 @@ form {background:green;}
 
 ### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet - form is not namespaced */
-.root form {background:green;} 
-.root .side-bar:hover form {background:red; }
+/* form is not namespaced */
+.Page__root form {background:green;} 
+.Page__root.side-bar:hover form {background:red; }
 ```
 
 ### React
@@ -56,7 +55,7 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 
 ### CSS API:
 ```css
-@namespace "ToggleButton"
+@namespace "Page"
 :import{
     -st-from: "./toggle-button.css";
     -st-default: ToggleButton;
@@ -67,9 +66,9 @@ ToggleButton {background:green;}
 
 ### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet - .toggleButton__root is not namespaced */
-.ToggleButton__root .toggleButton_root {background:green;}
-.ToggleButton__root .side-bar:hover toggleButton__root {background:red;}
+/* namespaced to the stylesheet - .toggleButton is not namespaced */
+.Page__root ToggleButton {background:green;}
+.Page__root .Page__root.side-bar:hover ToggleButton {background:red;}
 ```
 
 ### React Implementation:

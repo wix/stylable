@@ -7,13 +7,17 @@ In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/d
 
 Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [extending stylesheet](./extend-stylesheet).
 
-When the `VideoPlayer` component defines an internal CSS class `play-button`, that class may be targeted as a pseudo-element from a parent component.
+When you define a CSS class `play-button` inside the component `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends `VideoPlayer`.
 
 CSS API
 ```css
+/* video-player.st.css */
 @namespace "VideoPlayer"
 .root {}
-.play-button { background:black; color:white; }
+.play-button { 
+    background:black; 
+    color:white;
+}
 ```
 
 ## Styling custom pseudo-elements
@@ -24,15 +28,15 @@ You can [import](./imports.md) a `VideoPlayer` component into your stylesheet, a
 
 CSS API
 ```css
-@namespace "MainVideo"
+@namespace "Page"
 :import {
     -st-from: './video-player.css';
     -st-default: VideoPlayer;
 }
-.main-video {
+.Page__root.main-video {
     -st-extends: VideoPlayer; /* define main-video as VideoPlayer */
 }
-.main-video::play-button { /* override main-video play button */
+.Page__root.main-video::play-button { /* override main-video play button */
     background: green;
     color: purple;
 }
@@ -41,7 +45,7 @@ CSS API
 CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet */
-.MainVideo__root .main-video.videoPlayer__root .videoPlayer__play-button {
+.Page__root .Page__root.main-video.VideoPlayer__root .VideoPlayer__play-button {
     background:green;
     color:purple;
 }
@@ -88,12 +92,12 @@ CSS API
 
 CSS OUTPUT
 ```css
-.SuperVideoPlayer__root .VideoPlayer__root .VideoPlayer__play-button { color: gold }
-.Page__root .main-player.SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: silver }
+.SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: gold }
+.Page__root .Page__root.main-player.SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: silver }
 ```
 
 > **Note**:
-> This mechanism you can override native pseudo-elements. For example, if one of your classes is called `.first-line`, accessing it as `.class::first-line` would override the native behavior. We don't recommend this, as this can get really messy to maintain.
+> With this mechanism you can override native pseudo-elements. For example, if one of your classes is called `.first-line`, accessing it as `.class::first-line` would override the native behavior. This can lead to code that's confusing and hard to maintain.
 
 ## Override custom pseudo-elements
 
@@ -116,7 +120,7 @@ CSS API
 
 CSS OUTPUT
 ```css
-.SuperVideoPlayer__root .VideoPlayer__root .VideoPlayer__play-button { color: gold }
+.SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: gold }
 .Page__root .SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: silver }
 
 ```
