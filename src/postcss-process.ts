@@ -12,6 +12,7 @@ const hash = require('murmurhash');
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
+const parseCompose = SBTypesParsers[valueMapping.compose];
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
@@ -291,6 +292,29 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
 
         rule.mixins = mixins;
         rule.mixinEntry = decl;
+    } else if (decl.prop === valueMapping.compose) {
+        const composes = parseCompose(decl.value);
+        if (rule.isSimpleSelector) {
+            const composeSymbols = composes.map((name) => {
+                const extendsRefSymbol = stylableMeta.mappedSymbols[name];
+                if (extendsRefSymbol && (extendsRefSymbol._kind === 'import' || extendsRefSymbol._kind === 'class')) {
+                    return extendsRefSymbol;
+                } else {
+                    diagnostics.warn(decl, `cannot resolve "${valueMapping.compose}" type for "${name}"`, { word: name });
+                    return null;
+                }
+            }).filter((x) => !!x);
+            extendTypedRule(
+                decl,
+                rule.selector,
+                valueMapping.compose,
+                composeSymbols,
+                stylableMeta,
+                diagnostics
+            );
+        } else {
+            diagnostics.warn(decl, 'cannot define "' + valueMapping.compose + '" inside a complex selector');
+        }
     }
 
 
@@ -356,6 +380,7 @@ export interface Imported extends Import {
 
 export interface StylableDirectives {
     "-st-root"?: boolean;
+    "-st-compose"?: Array<ImportSymbol | ClassSymbol>;
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
 }
