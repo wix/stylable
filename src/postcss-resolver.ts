@@ -84,6 +84,13 @@ export class StylableResolver {
             return <JSResolve>{ _kind: "js", symbol, meta: null };
         }
     }
+    deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+        let resolved = this.resolve(maybeImport);
+        while(resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import'){
+            resolved = this.resolve(resolved.symbol);
+        }
+        return resolved;
+    }
 }
 
 
