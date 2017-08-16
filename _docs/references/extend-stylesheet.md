@@ -6,7 +6,7 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 ### CSS API:
 ```css
-@namespace "ToggleButton"
+@namespace "CheckButton"
 :import{
     -st-from: "./toggle-button.css";
     -st-default: ToggleButton;
@@ -22,17 +22,17 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 ### CSS OUTPUT:
 ```css
 /* namespaced to the stylesheet */
-.ToggleButton__root .check-btn.toggle-button__root{ background:white;}
-.ToggleButton__root .check-btn.toggle-button__root .toggle-button__label{ color:green; }
-.ToggleButton__root .check-btn.toggle-button__root[data-toggle-button-toggled] .toggle-button__label{ color:red; }
+.CheckButton__root .check-btn.ToggleButton__root{ background:white;}
+.CheckButton__root .check-btn.ToggleButton__root .ToggleButton__label{ color:green; }
+.CheckButton__root .check-btn.ToggleButton__root[data-toggle-button-toggled] .ToggleButton__label{ color:red; }
 ```
 
 ### React
 ```jsx
-/* ToggleButton component implements toggle-button.css */
-import ToggleButton from './toggle-button';
+/* CheckButton component implements toggle-button.css */
+import CheckButton from './check-button';
 /* inside a stylable render */
 <div>
-    <ToggleButton className="check-btn" />
+    <CheckButton className="check-btn" />
 </div>
 ```
