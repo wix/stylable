@@ -13,6 +13,7 @@ const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseCompose = SBTypesParsers[valueMapping.compose];
+const parseTheme = SBTypesParsers[valueMapping.theme];
 
 export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 
@@ -328,7 +329,7 @@ function extendTypedRule(node: postcss.Node, selector: string, key: keyof Stylab
 
 function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
 
-    const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {} };
+    const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {}, theme: false };
 
     const notValidProps: postcss.Declaration[] = [];
 
@@ -343,6 +344,9 @@ function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostic
                 break;
             case valueMapping.named:
                 importObj.named = parseNamed(decl.value);
+                break;
+            case valueMapping.theme:
+                importObj.theme = parseTheme(decl.value);
                 break;
             default:
                 notValidProps.push(decl);
@@ -371,6 +375,7 @@ export function processNamespace(namespace: string, source: string) {
 }
 
 export interface Imported extends Import {
+    theme: boolean;
     rule: postcss.Rule;
     fromRelative: string;
 }
@@ -380,6 +385,7 @@ export interface StylableDirectives {
     "-st-compose"?: Array<ImportSymbol | ClassSymbol>;
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
+    "-st-theme"?: boolean;
 }
 
 export interface ClassSymbol extends StylableDirectives {

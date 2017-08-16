@@ -32,9 +32,7 @@ export class StylableTransformer {
 
         const ast = meta.ast;
 
-        const metaExports: Pojo<string> = {
-            [meta.root]: this.scope(meta.root, meta.namespace)
-        };
+        const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
@@ -53,6 +51,7 @@ export class StylableTransformer {
             });
         });
 
+        this.exportRootClass(meta, metaExports);
         this.exportLocalVars(meta, metaExports);
         this.exportKeyframes(keyframeMapping, metaExports);
 
@@ -89,6 +88,30 @@ export class StylableTransformer {
             }
         });
     }
+    exportRootClass(meta: StylableMeta, metaExports: Pojo<string>) {
+        //TODO: move the theme root composition to the process;
+        const classExports: Pojo<string> = {};
+        this.handleClass(meta, { type: 'class', name: meta.mappedSymbols[meta.root].name, nodes: [] }, meta.mappedSymbols[meta.root].name, classExports);
+        let scopedName = classExports[meta.mappedSymbols[meta.root].name];
+        meta.imports.forEach(_import => {
+            if (_import.theme) {
+                const resolved = this.resolver.deepResolve({
+                    _kind: "import",
+                    type: "default",
+                    name: "default",
+                    import: _import
+                });
+                if (resolved && resolved._kind === 'css') {
+                    const classExports: Pojo<string> = {};
+                    this.exportRootClass(resolved.meta, classExports);
+                    scopedName += ' ' + classExports[resolved.symbol.name];
+                } else {
+                    //TODO: warn
+                }
+            }
+        });
+        metaExports[meta.root] = scopedName;
+    }
     exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
 
@@ -96,7 +119,7 @@ export class StylableTransformer {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
             const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
             let exportedClasses = scopedName;
-            
+
             if (extend && extend !== classSymbol) {
                 let finalSymbol;
                 let finalName;
@@ -178,7 +201,7 @@ export class StylableTransformer {
         if (!rule.mixins || rule.mixins.length === 0) {
             return;
         }
-        
+
         rule.mixins.forEach((mix) => {
             const resolvedMixin = this.resolver.deepResolve(mix.ref);
             if (resolvedMixin) {
@@ -295,7 +318,7 @@ export class StylableTransformer {
             return undefined;
         });
 
-        const scopedRoot = metaExports[meta.root] || (metaExports[meta.root] = this.scope(meta.root, meta.namespace));
+        const scopedRoot = this.scope(meta.root, meta.namespace);
         rule.selectorAst.nodes.forEach((selector) => {
             const first = selector.nodes[0];
             if (first && first.type === 'selector' && first.name === 'global') {

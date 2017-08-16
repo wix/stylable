@@ -3,6 +3,7 @@ const valueParser = require("postcss-value-parser");
 
 export type MappedStates = { [s: string]: string | null };
 
+//TODO: remove
 export interface TypedClass {
     "-st-root"?: boolean;
     "-st-states"?: string[] | MappedStates;
@@ -24,7 +25,8 @@ export const valueMapping = {
     extends: '-st-extends' as "-st-extends",
     mixin: '-st-mixin' as "-st-mixin",
     variant: '-st-variant' as "-st-variant",
-    compose: '-st-compose' as "-st-compose"
+    compose: '-st-compose' as "-st-compose",
+    theme: '-st-theme' as "-st-theme"
 };
 
 export type stKeys = keyof typeof valueMapping;
@@ -39,6 +41,9 @@ export const SBTypesParsers = {
         return value === 'false' ? false : true;
     },
     "-st-variant"(value: string) {
+        return value === 'false' ? false : true;
+    },
+    "-st-theme"(value: string) {
         return value === 'false' ? false : true;
     },
     "-st-states"(value: string) {
