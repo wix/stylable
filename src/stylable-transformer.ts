@@ -54,7 +54,7 @@ export class StylableTransformer {
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
         });
-        
+
         this.exportLocalVars(meta, metaExports);
         this.exportKeyframes(keyframeMapping, metaExports);
 
@@ -72,7 +72,7 @@ export class StylableTransformer {
         }
 
     }
-    exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>){
+    exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
             if (metaExports[varSymbol.name]) {
                 //TODO: warn on discard
@@ -82,7 +82,7 @@ export class StylableTransformer {
             }
         });
     }
-    exportKeyframes(keyframeMapping: Pojo<string>, metaExports: Pojo<string>){
+    exportKeyframes(keyframeMapping: Pojo<string>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach((name) => {
             if (metaExports[name]) {
                 //TODO: warn on discard
@@ -90,6 +90,91 @@ export class StylableTransformer {
                 metaExports[name] = keyframeMapping[name];
             }
         });
+    }
+    exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
+        const scopedName = this.scope(name, meta.namespace);
+
+        if (!metaExports[name]) {
+            const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
+            const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
+            let exportedClasses = scopedName;
+
+            if (extend && extend !== classSymbol) {
+                let finalSymbol;
+                let finalName;
+                let finalMeta;
+                if (extend._kind === 'class') {
+                    finalSymbol = extend;
+                    finalName = extend.name;
+                    finalMeta = meta;
+                } else if (extend._kind === 'import') {
+                    const resolved = this.resolver.deepResolve(extend);
+                    if (resolved && resolved._kind === 'css' && resolved.symbol) {
+                        if (resolved.symbol._kind === 'class') {
+                            finalSymbol = resolved.symbol;
+                            finalName = resolved.symbol.name;
+                            finalMeta = resolved.meta;
+                        } else {
+                            //TODO: warn
+                        }
+                    } else {
+                        //TODO: warn
+                    }
+                } else {
+                    //TODO: warn
+                }
+
+                if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
+                    const classExports: Pojo<string> = {};
+                    this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
+                    if (classExports[finalName]) {
+                        exportedClasses += ' ' + classExports[finalName];
+                    } else {
+                        //TODO: warn
+                    }
+                }
+            }
+
+            if (compose) {
+                compose.forEach((symbol) => {
+                    let finalName;
+                    let finalMeta;
+                    if (symbol._kind === 'class') {
+                        finalName = symbol.name;
+                        finalMeta = meta;
+                    } else if (symbol._kind === 'import') {
+                        const resolved = this.resolver.deepResolve(symbol);
+                        if (resolved && resolved._kind === 'css' && resolved.symbol) {
+                            if (resolved.symbol._kind === 'class') {
+                                finalName = resolved.symbol.name;
+                                finalMeta = resolved.meta;
+                            } else {
+                                //TODO: warn
+                            }
+                        } else {
+                            //TODO: warn
+                        }
+                    } else {
+                        //TODO: warn
+                    }
+
+                    if (finalName && finalMeta) {
+                        const classExports: Pojo<string> = {};
+                        this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
+                        if (classExports[finalName]) {
+                            exportedClasses += ' ' + classExports[finalName];
+                        } else {
+                            //TODO: warn
+                        }
+                    }
+
+                })
+            }
+            metaExports[name] = exportedClasses;
+        }
+
+        return scopedName;
+
     }
     appendMixins(root: postcss.Root, rule: SRule) {
         if (!rule.mixins || rule.mixins.length === 0) {
@@ -210,7 +295,9 @@ export class StylableTransformer {
         const scopedRoot = metaExports[meta.root] || (metaExports[meta.root] = this.scope(meta.root, meta.namespace));
         rule.selectorAst.nodes.forEach((selector) => {
             const first = selector.nodes[0];
-
+            if (first && first.type === 'selector' && first.name === 'global') {
+                return;
+            }
             if (first && first.before && first.before === '.' + scopedRoot) {
                 return;
             }
@@ -232,23 +319,23 @@ export class StylableTransformer {
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
 
         if (!extend && symbol && symbol.alias) {
-            const next = this.resolver.resolve(symbol.alias);
-            if (next && next._kind === 'css') {
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
+            const next = this.resolver.deepResolve(symbol.alias);
+            if (next && next._kind === 'css' && next.symbol._kind === 'class') {
+
+                node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
                 return next;
             } else {
                 //TODO: warn or handle
             }
         }
 
+        const scopedName = this.exportClass(meta, name, symbol, metaExports);
+
         const next = this.resolver.resolve(extend);
-        //TODO: handle compose here!
-        const scopedName = metaExports[name] || (metaExports[name] = this.scope(name, meta.namespace));
 
         if (next && next._kind === 'css') {
             if (next.symbol._kind === 'class') {
                 node.before = '.' + scopedName;
-                // node.before += next.symbol[valueMapping.root] ? '' : ' ';
                 node.name = this.scope(next.symbol.name, next.meta.namespace);
             } else {
                 //TODO: warn
@@ -258,8 +345,15 @@ export class StylableTransformer {
 
         if (extend && extend._kind === 'class') {
             node.before = '.' + scopedName;
-            // node.before += extend[valueMapping.root] ? '' : ' ';
-            node.name = this.scope(extend.name, meta.namespace);
+            if (extend === symbol && extend.alias) {
+                const next = this.resolver.deepResolve(extend.alias);
+                if (next && next._kind === 'css') {
+                    node.name = this.scope(next.symbol.name, next.meta.namespace);
+                    return next;
+                }
+            } else {
+                node.name = this.scope(extend.name, meta.namespace);
+            }
         } else {
             node.name = scopedName;
         }

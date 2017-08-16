@@ -34,6 +34,34 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Element;
+                            }
+                            Element::part {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            .part {}
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .inner--root .inner--part');
+
+        });
+
     })
 
     describe('scoped pseudo-elements', function () {
@@ -377,6 +405,38 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('scope class alias that also extends', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                                -st-named: inner-class;
+                            }
+                            .inner-class{
+                                -st-extends: inner-class
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .inner-class {
+
+                            }
+                        `,
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector, 'class alias').to.equal('.entry--root .entry--inner-class.imported--inner-class');
+
+        });
 
         it('scope selector that extends local class', () => {
 
