@@ -47,7 +47,7 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
 
     if (mixinRoot.nodes) {
         let nextRule = rule;
-        mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration) => {
+        mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
             if (node.type === 'decl') {
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(rule.mixinEntry, node);
@@ -69,8 +69,9 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                 })
                 toRemove.forEach((decl) => decl.remove());
                 nextRule = node;
+            } else if (node.type === 'atrule') {
+                throw new Error('mixins @ rules are not supported yet!');
             }
-            //TODO: warn on @media or not?
         });
         rule.walkDecls(new RegExp(valueMapping.mixin), (node) => node.remove());
     }
@@ -81,7 +82,7 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
     let addRootDecls = true;
     root.nodes!.forEach((node: SRule) => {
         if (node.type === "rule") {
-            if (node.selector.startsWith(selectorPrefix)) {
+            if (node.selector.startsWith(selectorPrefix) && node.selector.indexOf(',') === -1) {
                 if (addRootDecls && node.selectorType === 'class') {
                     addRootDecls = false;
                     node.walkDecls((decl) => {
@@ -92,8 +93,7 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
                     const clone: SRule = node.clone({
                         selector: node.selector.replace(selectorPrefix, '&')
                     });
-                    //TODO: maybe delete
-                    // delete clone.selectorAst;
+                    //TODO: maybe delete clone.selectorAst
                     mixinRoot.append(clone);
                 }
             }

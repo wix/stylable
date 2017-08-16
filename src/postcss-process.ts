@@ -62,7 +62,6 @@ function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     if (!source) {
         diagnostics.error(root, 'missing source filename');
     } else if (!path.isAbsolute(source)) {
-        //TODO: rethink this error
         throw new Error('source filename is not absolute path: "' + source + '"');
     }
     return source;
@@ -122,8 +121,7 @@ function handleRule(rule: SRule, stylableMeta: StylableMeta, diagnostics: Diagno
         } else if (type === 'element') {
             addElementSymbolOnce(name, rule, stylableMeta, diagnostics);
             const prev = nodes[index - 1];
-            if (prev) { /*TODO: maybe warn on element with no direct child*/ }
-
+            if (prev) { /*TODO: maybe warn on element that is not a direct child div vs > div*/ }
         }
         return void 0;
     });
@@ -286,7 +284,6 @@ function handleDirectives(rule: SRule, decl: postcss.Declaration, stylableMeta: 
         });
 
         if (rule.mixins) {
-            //TODO: add test
             diagnostics.warn(decl, `override mixin on same rule`);
         }
 
@@ -431,7 +428,7 @@ export interface RefedMixin {
     ref: ImportSymbol | ClassSymbol
 }
 
-//TODO: maybe put under stylable namespace object
+//TODO: maybe put under stylable namespace object in v2
 export interface SRule extends postcss.Rule {
     selectorAst: SelectorAstNode;
     isSimpleSelector: boolean;

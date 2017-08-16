@@ -50,6 +50,39 @@ export class StylableResolver {
 
         return value;
     }
+    resolveClass(meta: StylableMeta, symbol: StylableSymbol): CSSResolve | null {
+
+        let finalSymbol;
+        let finalMeta;
+        if (symbol._kind === 'class') {
+            finalSymbol = symbol;
+            finalMeta = meta;
+        } else if (symbol._kind === 'import') {
+            const resolved = this.deepResolve(symbol);
+            if (resolved && resolved._kind === 'css' && resolved.symbol) {
+                if (resolved.symbol._kind === 'class') {
+                    finalSymbol = resolved.symbol;
+                    finalMeta = resolved.meta;
+                } else {
+                    //TODO: warn
+                }
+            } else {
+                //TODO: warn
+            }
+        } else {
+            //TODO: warn
+        }
+
+        if (finalMeta && finalSymbol) {
+            return {
+                _kind: 'css',
+                symbol: finalSymbol,
+                meta: finalMeta
+            }
+        } else {
+            return null;
+        }
+    }
     resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             return null;
@@ -86,7 +119,7 @@ export class StylableResolver {
     }
     deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         let resolved = this.resolve(maybeImport);
-        while(resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import'){
+        while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
             resolved = this.resolve(resolved.symbol);
         }
         return resolved;
