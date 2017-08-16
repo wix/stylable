@@ -47,4 +47,4 @@ The Stylabel's logo is always surrounded by a minimum clear space area. The mini
 
 ### Assets
 
-**Logo:** https://github.com/wixplosives/stylable/tree/oleksiik/logo-insert/_docs/assets/logo
+[Logotype](./logo)
