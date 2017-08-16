@@ -23,7 +23,8 @@ export const valueMapping = {
     states: '-st-states' as "-st-states",
     extends: '-st-extends' as "-st-extends",
     mixin: '-st-mixin' as "-st-mixin",
-    variant: '-st-variant' as "-st-variant"
+    variant: '-st-variant' as "-st-variant",
+    compose: '-st-compose' as "-st-compose"
 };
 
 export type stKeys = keyof typeof valueMapping;
@@ -93,6 +94,20 @@ export const SBTypesParsers = {
 
         return mixins;
 
+    },
+    "-st-compose"(value: string){
+        const ast = valueParser(value);
+        const composes: string[] = [];
+        ast.walk((node: any)=>{
+            if (node.type === 'function') {
+                
+            } else if (node.type === 'word') {
+                composes.push(node.value);
+            } else if (node.type === 'string') {
+                //TODO: warn
+            }
+        })
+        return composes;
     }
 }
 
