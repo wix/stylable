@@ -13,19 +13,21 @@ Targeting a native element matches any element with the same tag name that is fo
 ### CSS API:
 
 ```css
+@namepsace "Page"
 form {background:green;}
 ```
 
 ### CSS OUTPUT:
 
 ```css
-@namepsace "Page"
-.Page__root form {background:green;} /* form is not namespaced */
+/* form is not namespaced */
+.Page__root form {background:green;} 
 ```
 
 ### CSS API:
 
 ```css
+@namepsace "Page"
 form {background:green;}
 .side-bar:hover form {background:red; }
 ```
