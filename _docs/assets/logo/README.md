@@ -27,7 +27,7 @@ The Stylabel's logo is always surrounded by a minimum clear space area. The mini
 ![Clear Space - horizontal-mark](https://cdn.zeplin.io/590ed391cb8bde641789e1cb/screens/BB1B2E41-C7E5-4F43-B42C-20BA80B0B1AD.png)
 
 # Test
-![Clear Space - horizontal-mark](.assets/logo/96-logo-OnlySymbol.png)
+![Clear Space - horizontal-mark](../../../assets/logo/96-logo-OnlySymbol.png)
 
 ##### Horizontal Logo Usage
 
