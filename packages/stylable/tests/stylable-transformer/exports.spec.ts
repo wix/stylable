@@ -47,6 +47,103 @@ describe('Exports', function () {
     });
 
         
+    it('not contain imported class', function () {
+
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./imported.st.css";
+                            -st-named: my-class;
+                        }
+                    `
+                },
+                "/imported.st.css": {
+                    namespace: 'imported',
+                    content: `
+                        .my-class {}
+                       
+                    `
+                }
+            }
+        });
+
+        expect(cssExports).to.eql({
+            root: 'entry--root'
+        });
+
+    });
+
+            
+    it('contain used imported class', function () {
+
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./imported.st.css";
+                            -st-named: my-class;
+                        }
+                        .my-class{}
+                    `
+                },
+                "/imported.st.css": {
+                    namespace: 'imported',
+                    content: `
+                        .my-class {}
+                       
+                    `
+                }
+            }
+        });
+
+        expect(cssExports).to.eql({
+            root: 'entry--root',
+            "my-class": 'imported--my-class'
+        });
+
+    });
+        
+    it('not contain imported class when only extended and compose it into the existing class', function () {
+
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./imported.st.css";
+                            -st-named: my-class;
+                        }
+                        .local-class {
+                            -st-extends: my-class;
+                        }
+                    `
+                },
+                "/imported.st.css": {
+                    namespace: 'imported',
+                    content: `
+                        .my-class {}
+                       
+                    `
+                }
+            }
+        });
+
+        expect(cssExports).to.eql({
+            root: 'entry--root',
+            "local-class": 'entry--local-class imported--my-class'
+        });
+
+    });
+ 
     it('contain local vars', function () {
 
         const cssExports = generateStylableExports({
@@ -57,9 +154,9 @@ describe('Exports', function () {
                     content: `
                         :vars {
                             color1: red;
-                        }
-                       
-                    `
+                        }                       
+
+                        `
                 }
             }
         });
