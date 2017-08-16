@@ -64,10 +64,10 @@ CSS OUTPUT:
 
 .Example1__root[data-example1-toggled]{ color:red; }
 .Example1__root[data-example1-loading]{ color:green; }
-.Example2__root .media-button:hover { border:10px solid black; } /* native hover - not declared */
-.Example2__root .media-button[data-example1-loading] { color:silver; } /* loading scoped to Example1 - only one to declare */
-.Example2__root .media-button[data-example2-selected] { color:salmon; } /* selected scoped to Example2 - only one to declare */
-.Example2__root .media-button[data-example2-toggled] { color:gold;} /* toggled scoped to Example2 - last to declare */
+.Example2__root .Example2__root.media-button:hover { border:10px solid black; } /* native hover - not declared */
+.Example2__root .Example2__root.media-button[data-example1-loading] { color:silver; } /* loading scoped to Example1 - only one to declare */
+.Example2__root .Example2__root.media-button[data-example2-selected] { color:salmon; } /* selected scoped to Example2 - only one to declare */
+.Example2__root .Example2__root.media-button[data-example2-toggled] { color:gold;} /* toggled scoped to Example2 - last to declare */
 ```
 
 ## Map custom pseudo-classes
