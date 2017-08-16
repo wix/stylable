@@ -6,14 +6,15 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 ### CSS API:
 ```css
-@namespace "CheckButton"
+/* page.st.css */
+@namespace "Page"
 :import{
     -st-from: "./toggle-button.css";
     -st-default: ToggleButton;
 }
 .check-btn{
-  -st-extends:ToggleButton;
-  background:white;
+    -st-extends:ToggleButton;
+    background:white;
 }
 .check-btn::label{ color:green; } /* style pseudo element label */
 .check-btn:toggled::label{ color:red; } /* style pseudo element label when check-box is toggled */
@@ -21,18 +22,17 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 ### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
-.CheckButton__root .check-btn.ToggleButton__root{ background:white;}
-.CheckButton__root .check-btn.ToggleButton__root .ToggleButton__label{ color:green; }
-.CheckButton__root .check-btn.ToggleButton__root[data-toggle-button-toggled] .ToggleButton__label{ color:red; }
+.Page__root .Page__root.check-btn.ToggleButton__root{ background:white;}
+.Page__root .Page__root.check-btn.ToggleButton__root .ToggleButton__label{ color:green; }
+.Page__root .Page__root.check-btn.ToggleButton__root[data-toggle-button-toggled] .ToggleButton__label{ color:red; }
 ```
 
 ### React
 ```jsx
 /* CheckButton component implements toggle-button.css */
-import CheckButton from './check-button';
+import ToggleButton from './toggle-button';
 /* inside a stylable render */
 <div>
-    <CheckButton className="check-btn" />
+    <ToggleButton className="check-btn" />
 </div>
 ```
