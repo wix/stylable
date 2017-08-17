@@ -12,6 +12,7 @@
 
  * **directive rule** `-st-*` rules that hint Stylable
     * [**`-st-extends`**](../references/extend-stylesheet.md) simple selector base class
+    * [**`-st-compose`**](../references/compose-css-class.md) append class selector
     * [**`-st-states`**](../references/pseudo-classes.md) define custom pseudo-classes
     * [**`-st-mixin`**](../references/mixin-syntax.md) apply mixins to CSS ruleset
     * [**`-st-variant`**](../references/variants.md) define pre-made look and feel
