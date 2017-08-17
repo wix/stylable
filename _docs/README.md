@@ -107,6 +107,8 @@ Structural state dependencies
 
 [Global selectors](./references/global-selectors)
 
+[Compose CSS Class](./references/compose-css-class.md)
+
 [Formatters](./references/formatters)
 
 [Mixins](./references/mixin-syntax.md)
