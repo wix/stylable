@@ -1,28 +1,32 @@
-# Cheatsheet:
+# Stylable Cheatsheet
 
- ## CSS - [docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
+ ## CSS Terminology - [docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
 
- * **simple selector**: type selector, class selector (+Stylable [root class](../references/root.md))
- * **CSS property**: name of the rule (e.g. color)
- * **CSS declaration**: CSS property with value
- * **CSS declaration Block**: CSS declaration list
- * **CSS ruleset**: selector with CSS declaration
+ * **Simple selector**: Type selector, class selector (+Stylable [root class](../references/root.md))
+ * **CSS property**: Name of the rule (e.g. color)
+ * **CSS declaration**: CSS property paired with a value
+ * **CSS declaration Block**: List of CSS declarations
+ * **CSS ruleset**: CSS declaration block paired with a selector
 
 ## Stylable
 
- * **directive rule** `-st-*` rules that hint Stylable
-    * [**`-st-extends`**](../references/extend-stylesheet.md) simple selector base class
-    * [**`-st-compose`**](../references/compose-css-class.md) append class selector
-    * [**`-st-states`**](../references/pseudo-classes.md) define custom pseudo-classes
-    * [**`-st-mixin`**](../references/mixin-syntax.md) apply mixins to CSS ruleset
-    * [**`-st-variant`**](../references/variants.md) define pre-made look and feel
-* **selectors**
-    * [**`::X`**](../references/pseudo-elements.md) target internal part (pseudo-element) 
-    * [**`:X`**](../references/pseudo-classes.md) target state (pseudo-classe)
+[Stylable Docs Site](www.stylable.io)
+
+Syntax unique to Stylable - Click each to access code examples and descriptions in GitHub
+
+ * **Directive rules** `-st-*` Instructions for the **Stylable** pre-processor, removed during transpilation
+    * [**`-st-extends`**](../references/extend-stylesheet.md) Simple selector base class
+    * [**`-st-compose`**](../references/compose-css-class.md) Append class selector
+    * [**`-st-states`**](../references/pseudo-classes.md) Define custom pseudo-classes
+    * [**`-st-mixin`**](../references/mixin-syntax.md) Apply mixins to CSS ruleset
+    * [**`-st-variant`**](../references/variants.md) Define pre-made look and feel that are ignored if not in use
+* **Selectors**
+    * [**`::X`**](../references/pseudo-elements.md) Target internal part (pseudo-element) 
+    * [**`:X`**](../references/pseudo-classes.md) Target states including native and custom (pseudo-classes)
     * [**`:--X`**](../references/custom-selectors.md) selector shortcut (custom selector)
     * [**`:global(X)`**](../references/global-selectors.md) keep selector global
-* [**`:import {}`**](../references/imports.md) import mixins, stylesheets
-    * [**`-st-from`**](../references/imports.md) import location
-    * [**`-st-default`**](../references/imports.md) import default export
-    * [**`-st-named`**](../references/imports.md) import named exports
-* [**`@namespace "readable name";`**](../references/namespace.md) hint for better development mode
+* [**`:import {}`**](../references/imports.md) Import external assets like mixins, stylesheets, variants and vars
+    * [**`-st-from`**](../references/imports.md) Location of file to import
+    * [**`-st-default`**](../references/imports.md) Import the file's default export value
+    * [**`-st-named`**](../references/imports.md) Import the file's named export value or values
+* [**`@namespace "readable name";`**](../references/namespace.md) Development display name for debugging
