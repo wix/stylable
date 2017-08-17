@@ -8,15 +8,16 @@ You can apply default styling and behavior to the component on the root class it
 
 The `root` class is added automatically to root in [react integration](react-integration.md). No need to write `className="root"`.
 
-CSS API:
+## CSS API:
 ```css
-.root{ background:red; } /* set component background to red */
+@namespace "Comp";
+.root { background: red; } /* set component background to red */
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
-/* Namespaced to the stylesheet */
-.root{ background:red;}
+.Comp__root { background: red; }
 ```
 
-> **Note**: Root can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
+> **Note**:  
+> Root can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).

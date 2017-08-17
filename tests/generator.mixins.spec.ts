@@ -1,136 +1,88 @@
-import { fromCSS } from "../src";
-import { Generator } from '../src/generator';
-import { expect } from "chai";
+import { defineStylableEnv, CSS, JS } from "./stylable-test-kit";
 
 
 describe('static Generator mixins', function () {
 
     it('should add rules to the root selector', function () {
+        const env = defineStylableEnv([
+            JS('./relative/path/to/mixin.js', 'MixinJS', {
+                default: function mixin(options: string[]) {
+                    return {
+                        color: options[0]
+                    }
+                }
+            }),
+            CSS('./main.css', 'Main', `
+                :import("./relative/path/to/mixin.js") {
+                    -st-default: MyMixin;
+                }
+                .container { 
+                    -st-mixin: MyMixin(red);                
+                }
+            `)
+        ], {});
 
-        function mixin(options: string[]) {
-            return {
-                color: options[0]
-            }
-        }
-
-        const sheet = fromCSS(`
-            :import("./relative/path/to/mixin.js") {
-                -st-default: MyMixin;
-            }
-            .container { 
-                -st-mixin: MyMixin(red);                
-            }
-        `, "StyleA");
-
-
-        const gen = new Generator({
-            namespaceDivider: "__"
-        });
-
-        const stack: any = [];
-
-        gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin
-        }, stack);
-
-        expect(stack[0]).to.eql({
-            selector: '.container',
-            rules: {
-                "-st-mixin": "MyMixin(red)",
-                color: "red"
-            }
-        });
-
-
+        env.validate.output([
+            '.Main__container {\n    color: red\n}'
+        ]);
     });
 
     it('should add child selectors', function () {
-
-        function mixin(options: string[]) {
-            return {
-                ":hover": {
-                    color: options[0]
+        const env = defineStylableEnv([
+            JS('./relative/path/to/mixin.js', 'MixinJS', {
+                default: function mixin(options: string[]) {
+                    return {
+                        ':hover': {
+                            color: options[0]
+                        }
+                    }
                 }
-            }
-        }
-
-        const sheet = fromCSS(`
-            :import("./relative/path/to/mixin.js") {
-                -st-default: MyMixin;
-            }
-            .container { 
-                -st-mixin: MyMixin(red);
-            }
-        `, "StyleA");
-
-
-        const gen = new Generator({
-            namespaceDivider: "__"
-        });
-
-        const stack: any = [];
-
-        gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin
-        }, stack);
-
-        expect(stack).to.eql([
-            {
-                selector: '.container',
-                rules: {
-                    '-st-mixin': "MyMixin(red)"
+            }),
+            CSS('./main.css', 'Main', `
+                :import("./relative/path/to/mixin.js") {
+                    -st-default: MyMixin;
                 }
-            },
-            {
-                selector: '.container :hover',
-                rules: {
-                    color: "red"
+                .container { 
+                    -st-mixin: MyMixin(red);                
                 }
-            }
+            `)
+        ], {});
+        
+        env.validate.output([
+            '.Main__container {}',
+            '.Main__container :hover {\n    color: red\n}'
+        ]);
+    });
+
+    it('should add extended selectors (&) in the first level', function () {
+        const env = defineStylableEnv([
+            JS('./relative/path/to/mixin.js', 'MixinJS', {
+                default: function mixin(options: string[]) {
+                    return {
+                        '&:hover': {
+                            color: options[0]
+                        }
+                    }
+                }
+            }),
+            CSS('./main.css', 'Main', `
+                :import("./relative/path/to/mixin.js") {
+                    -st-default: MyMixin;
+                }
+                .container { 
+                    -st-mixin: MyMixin(red);                
+                }
+            `)
+        ], {});
+        
+        env.validate.output([
+            '.Main__container {}',
+            '.Main__container:hover {\n    color: red\n}'
         ]);
 
     });
 
-
-    it('should add extended selectors (&) in the first level', function () {
-
-        function mixin(options: string[]) {
-            return {
-                "&:hover": {
-                    color: options[0]
-                }
-            }
-        }
-
-        const sheet = fromCSS(`
-            :import("./relative/path/to/mixin.js") {
-                -st-default: MyMixin;
-            }
-            .container { 
-                -st-mixin: MyMixin(red);
-            }
-        `, "StyleA");
-
-
-        const gen = new Generator({
-            namespaceDivider: "__"
-        });
-
-        const stack: any = [];
-
-        gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin
-        }, stack);
-
-        expect(stack[1]).to.eql({
-            selector: ".container:hover",
-            rules: { color: "red" }
-        });
-
-    });
-
     it('should handle nested mixins', function () {
-
         function colorMixin(options: string[]) {
             return {
                 color: options[0],
@@ -139,8 +91,6 @@ describe('static Generator mixins', function () {
                 }
             }
         }
-
-
         function mixin(options: string[]) {
             return {
                 "& > *": {
@@ -151,42 +101,25 @@ describe('static Generator mixins', function () {
 
             }
         }
-
-        const sheet = fromCSS(`
-            :import("./relative/path/to/mixin.js") {
-                -st-default: MyMixin;
-            }
-            .container { 
-                -st-mixin: MyMixin(red, 10px solid black);
-            }
-        `, "StyleA");
-
-
-        const gen = new Generator({
-            namespaceDivider: "__"
-        });
-
-        const stack: any = [];
-
-        gen.prepareSelector(sheet, '.container', {
-            MyMixin: mixin
-        }, stack);
-
-        expect(stack).to.eql([
-            {
-                selector: ".container",
-                rules: { "-st-mixin": "MyMixin(red, 10px solid black)" }
-            },
-            {
-                selector: ".container > *",
-                rules: { background: "red", border: "10px solid black", color: "red" }
-            },
-            {
-                selector: ".container > *:hover",
-                rules: { color: "green" }
-            }
-        ]);
-
+        const env = defineStylableEnv([
+            JS('./relative/path/to/mixin.js', 'MixinJS', {
+                default: mixin
+            }),
+            CSS('./main.css', 'Main', `
+                :import("./relative/path/to/mixin.js") {
+                    -st-default: MyMixin;
+                }
+                .container { 
+                    -st-mixin: MyMixin(red, 10px solid black);
+                }
+            `)
+        ], {});
+        
+        env.validate.output([
+            '.Main__container {}',
+            '.Main__container > * {\n    background: red;\n    border: 10px solid black;\n    color: red\n}',
+            '.Main__container > *:hover {\n    color: green\n}'
+        ]); 
     });
 
 });
