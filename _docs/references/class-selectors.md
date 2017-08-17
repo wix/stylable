@@ -6,20 +6,20 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 
 ### CSS API:
 ```css
-@namespace "Gallery"
-.thumbnail{ background:green; }
-.thumbnail:hover{ background:blue; }
-.gallery:hover .thumbnail{ background:red; }
+@namespace "Page"
+.thumbnail { background:green; }
+.thumbnail:hover { background:blue; }
+.gallery:hover .thumbnail { background:red; }
 ```
 
 ### CSS OUTPUT:
 ```css
-.Gallery__root .Gallery__thumbnail{ background:green;}
-.Gallery__root .Gallery__thumbnail:hover{ background:blue; }
-.Gallery__root .Gallery__gallery:hover .Gallery__thumbnail{ background:red; }
+.Page__root .Page__thumbnail { background:green;}
+.Page__root .Page__thumbnail:hover { background:blue; }
+.Page__root .Page__gallery:hover .Page__thumbnail { background:red; }
 ```
 
-### React
+### React:
 ```jsx
 /* inside a stylable render */
 <div className="gallery">
@@ -36,12 +36,12 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 
 Any class defined in a Stylable stylesheet is exported as a named export and can be imported by other stylesheets using the directive `-st-named`.
 
-### Usage
+### Example
 
 ```css
 /* button.st.css */
 @namespace "Button"
-.root{ background:green; }
+.root { background:green; }
 .icon { border: 2px solid black; } 
 .label { font-size: 20px; } 
 ```

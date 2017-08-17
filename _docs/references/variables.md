@@ -9,7 +9,7 @@ Use variables to define common values to be used across the stylesheet and are e
 
 Use `:vars` to define variables, and apply them with the `value()`:
 
-CSS API:
+### CSS API:
 ```css
 @namespace "Example1";
 :vars {
@@ -22,7 +22,7 @@ CSS API:
 }
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
 .Example1__root {
     color: red; /* color1 */
@@ -34,8 +34,7 @@ CSS OUTPUT:
 
 Any var defined in stylesheet is exported as a named export and can be imported by other stylesheets:
 
-CSS API:
-
+### CSS API:
 ```css
 @namespace "Example2";
 :import {
@@ -46,17 +45,17 @@ CSS API:
     border: 10px solid value(color1);
 }
 .root:hover {
-    border:10px solid value(color2);
+    border: 10px solid value(color2);
 }
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
 .Example2__root {
     border: 10px solid red; /* color1 */
 }
 .Example2__root:hover {
-    border:10px solid green; /* color2 */
+    border: 10px solid green; /* color2 */
 }
 ```
 
@@ -67,14 +66,14 @@ CSS OUTPUT:
 
 You can set the value of a variable using another variable.
 
-CSS API:
+### CSS API:
 ```css
 @namespace "Example3";
 :import {
     -st-from: "./example1.css"; /* Example1 stylesheet */
     -st-named: color1, color2;
 }
-:vars{
+:vars {
     border1: 10px solid value(color1); /* use color1 in a complex value */
 }
 .root {
@@ -82,7 +81,7 @@ CSS API:
 }
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
 .Example3__root {
     border: 10px solid red; /* 10px solid {color1} */

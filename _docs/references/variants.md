@@ -20,7 +20,6 @@ Then to use the variant, you can use any of the extension methods available for 
 The `.cancelButton` class is defined as a variant using `-st-variant: true`. Then used in the `Form` stylsheet.
 
 ### CSS API:
-
 ```css
 /* button.st.css */
 @namespace "Button"
@@ -58,12 +57,12 @@ The `.cancelButton` class is defined as a variant using `-st-variant: true`. The
 }
 ```
 
-### CSS Output:
-
+### CSS OUTPUT:
 ```css
-.Button__root.Button__cancelButton { color: red } /* from variant */
-.Button__root.Button__cancelButton:hover { color: pink } /* from variant */
-.Form__root .Form__cancel.Button__cancelButton { color: gold }
+.Button__root { color: blue; } /* base button */
+.Button__root.Button__cancelButton { color: red; } /* from variant */
+.Button__root.Button__cancelButton:hover { color: pink; } /* from variant */
+.Form__root .Form__cancel.Button__cancelButton { color: gold; }
 
 /* Note that bigBorder is not in the output since it is not in use */
 ```

@@ -11,38 +11,25 @@ Tag selectors are **not** scoped themselves. Other selectors used with a tag sel
 Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.
 
 ### CSS API:
-
 ```css
-@namepsace "Page"
-form {background:green;}
-```
-
-### CSS OUTPUT:
-
-```css
-/* form is not namespaced */
-.Page__root form {background:green;} 
-```
-
-### CSS API:
-
-```css
-@namepsace "Page"
-form {background:green;}
-.side-bar:hover form {background:red; }
+@namespace "Page"
+form { background: green; }
+.side-bar:hover form { background: red; }
 ```
 
 ### CSS OUTPUT:
 ```css
-/* form is not namespaced */
-.Page__root form {background:green;} 
-.Page__root.side-bar:hover form {background:red; }
+/* form is not namespaced - affects any nested form */
+.Page__root form { background: green; } 
+.Page__root.side-bar:hover form { background: red; }
 ```
 
-### React
+> **Note**:  
+> `form` is not namespaced.
 
+### React:
 ```jsx
-/* inside a stylable render */
+/* inside a stylable component render */
 <div className="gallery">
     <div className="side-bar">
         <form></form> /* green background and red while hovering parent */
@@ -59,18 +46,18 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 ```css
 @namespace "Page"
 :import{
-    -st-from: "./toggle-button.css";
+    -st-from: "./toggle-button.st.css";
     -st-default: ToggleButton;
 }
-ToggleButton {background:green;}
-.side-bar:hover ToggleButton {background:red;}
+ToggleButton { background: green; }
+.side-bar:hover ToggleButton { background: red; }
 ```
 
 ### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet - .toggleButton is not namespaced */
-.Page__root ToggleButton {background:green;}
-.Page__root .Page__root.side-bar:hover ToggleButton {background:red;}
+/* ToggleButton is not namespaced - affects any nested toggle button */
+.Page__root .ToggleButton__root { background: green; }
+.Page__root .Page__root.side-bar:hover .ToggleButton__root { background: red; }
 ```
 
 ### React Implementation:
