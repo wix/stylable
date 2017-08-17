@@ -1,3 +1,5 @@
+![](../branding/logo/PNG/96-logo-horizontal.png)
+
 # Stylable - CSS for Components
 
 > "New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now."
