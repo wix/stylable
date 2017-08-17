@@ -1,4 +1,6 @@
-![](../branding/logo/PNG/96-logo-horizontal.png)
+
+![](../branding/logo/PNG/96-logo-OnlySymbol.png)
+
 
 # Stylable - CSS for Components
 
