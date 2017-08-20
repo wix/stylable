@@ -1,18 +1,22 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol } from './postcss-process';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl } from './postcss-process';
 import { FileProcessor } from "./cached-process-file";
-import { traverseNode, stringifySelector, SelectorAstNode } from "./selector-utils";
+import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
 import { valueMapping } from "./stylable-value-parsers";
 import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules } from "./postcss-utils";
+import { createClassSubsetRoot, mergeRules } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
 
+export interface StylableResults {
+    meta: StylableMeta;
+    exports: Pojo<string>;
+}
 
 export interface Options {
     fileProcessor: FileProcessor<StylableMeta>
@@ -28,7 +32,7 @@ export class StylableTransformer {
         this.diagnostics = options.diagnostics;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
-    transform(meta: StylableMeta) {
+    transform(meta: StylableMeta): StylableResults {
 
         const ast = meta.ast;
 
@@ -36,7 +40,8 @@ export class StylableTransformer {
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
-        ast.walkAtRules(/media$/, (atRule) => {
+        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
+            atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
 
@@ -46,7 +51,8 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
-            rule.walkDecls((decl) => {
+            rule.walkDecls((decl: SDecl) => {
+                decl.sourceValue = decl.value;
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
         });
@@ -291,7 +297,8 @@ export class StylableTransformer {
         let current = meta;
         let symbol: StylableSymbol;
 
-        traverseNode(rule.selectorAst, (node) => {
+        let selectorAst = parseSelector(rule.selector) //.selectorAst;
+        traverseNode(selectorAst, (node) => {
             const { name, type } = node;
             if (type === 'selector' || type === 'spacing' || type === 'operator') {
                 current = meta;
@@ -319,7 +326,7 @@ export class StylableTransformer {
         });
 
         const scopedRoot = this.scope(meta.root, meta.namespace);
-        rule.selectorAst.nodes.forEach((selector) => {
+        selectorAst.nodes.forEach((selector) => {
             const first = selector.nodes[0];
             if (first && first.type === 'selector' && first.name === 'global') {
                 return;
@@ -337,7 +344,7 @@ export class StylableTransformer {
             }
         });
 
-        return stringifySelector(rule.selectorAst);
+        return stringifySelector(selectorAst);
 
     }
     handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {

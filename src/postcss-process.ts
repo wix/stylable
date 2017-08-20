@@ -328,10 +328,10 @@ function extendTypedRule(node: postcss.Node, selector: string, key: keyof Stylab
 }
 
 function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
+  
 
-    const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {}, theme: false };
+    const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {}, theme: false, overrides: [] };
 
-    const notValidProps: postcss.Declaration[] = [];
 
     rule.walkDecls((decl) => {
         switch (decl.prop) {
@@ -349,16 +349,10 @@ function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostic
                 importObj.theme = parseTheme(decl.value);
                 break;
             default:
-                notValidProps.push(decl);
+                importObj.overrides.push(decl);
                 break;
         }
     });
-
-
-    notValidProps.forEach((decl) => {
-        diagnostics.warn(decl, `"${decl.prop}" css attribute cannot be used inside :import block`, { word: decl.prop });
-    });
-
 
     if (!importObj.from) {
         diagnostics.error(rule, `"${valueMapping.from}" is missing in :import block`);
@@ -375,6 +369,7 @@ export function processNamespace(namespace: string, source: string) {
 }
 
 export interface Imported extends Import {
+    overrides: postcss.Declaration[];
     theme: boolean;
     rule: postcss.Rule;
     fromRelative: string;
@@ -441,4 +436,16 @@ export interface SRule extends postcss.Rule {
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
     mixinEntry: postcss.Declaration;
+}
+
+
+//TODO: maybe put under stylable namespace object in v2
+export interface SAtRule extends postcss.AtRule {
+    sourceParams: string;
+}
+
+
+//TODO: maybe put under stylable namespace object in v2
+export interface SDecl extends postcss.Declaration {
+    sourceValue: string;
 }
