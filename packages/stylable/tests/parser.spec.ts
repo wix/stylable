@@ -1,4 +1,4 @@
-import { objectifyCSSStylis, objectifyCSS } from '../src/parser';
+import { objectifyCSS } from '../src/parser';
 import { expect } from "chai";
 
 
@@ -578,8 +578,4 @@ function objectifyTests(objectify: (css: string) => any) {
 
 describe('Parser (objectify postcss js)', function () {
     objectifyTests(objectifyCSS);
-});
-
-describe('Parser (objectify stylis)', function () {
-    objectifyTests(objectifyCSSStylis);
 });
