@@ -1,39 +1,39 @@
 # Stylable Imports
 
-This guide is meant to explain the use of [imports](../references/imports.md) in **Stylable**.
+This guide shows you an example of how to use [imports](../references/imports.md) in **Stylable**.
 
-## Example Project
+## 1 Basic Component
 
-Let's start with a simple example. 
+Let's start with a simple example of a project containing a number of components. 
 
-We have a project containing a number of components. 
+Our project needs a new login form which would need a few inputs and buttons. For this example, let's work with a `button` component.
 
-Our project needs a new login form.
-
-To create a login form we need a few inputs and buttons (in this example we will focus on the `Button` component).
-
-So this is the CSS of our button. We give this component the [namespace](../references/namespace.md) Button, and style its [root](../references/root.md). We also declare the [classes](../references/class-selectors.md) `icon` and `label` inside of our button, which will be exposed as [pseudo-elements](../references/pseudo-elements.md):
+In this Stylable CSS file for a button, let's:
+* Give this component the [namespace](../references/namespace.md) LoginFormButton. 
+* Style its [root](../references/root.md). 
+* Declare the [classes](../references/class-selectors.md) `icon` and `label` inside of our button.
+* Expose these classes as [pseudo-elements](../references/pseudo-elements.md).
 
 
 ```css
 /* button.st.css */
-@namespace "Button";
+@namespace "LoginFormButton";
 .root {
-    display: inline-block; /* button root inner style */
+    display: inline-block; /* provide the button root with an internal style */
 }
 .icon {} /* button pseudo-element */
 .label {} /* button pseudo-element */
 ```
 
-## Default Import
+## 2 Import Component into Project CSS
 
-Then we add a project directory called `project.st.css`. The directory containts all the variants of our components, and allows us to manage the numerous variations we need. For our example, we will focus on the `cancelButton` [variant](../references/variants.md) of the `Button` component.
+Let's now add a project directory called `project.st.css`. This directory contains all the [variants](../references/variants.md) for our components. We can manage the numerous style variations we need. For our example, let's focus on the `cancelButton` [variant](../references/variants.md) of the `Button` component.
 
-The project file itself imports all the components from the library using the directive `-st-default`. When exporting this way, classes that extend the components (in the example, `cancelButton` extending `Button`) have its entire API available.
+The project file itself imports all the components from the library using the directive `-st-default`. When importing this way, the classes that extend the components (in the example, `cancelButton` extending `Button`) have their entire API available.
 
 ```css
 /* project.st.css */
-@namespace "Project";
+@namespace "LoginFormProject";
 :import {
     -st-from: "./button.st.css";
     -st-default: Button;
@@ -45,18 +45,18 @@ The project file itself imports all the components from the library using the di
 }
 ```
 
-## Named Imports
+## 3 Import Named Values into Project Imports
 
 We can now build our login form.
 
-We use the button as well as its variant (the type `Button` for the `OK` button, and the variant `cancelButton` for the `cancel` button). We do this by importing them into our `Form` component, and then extending them by name.
+We use the button as well as its variant. The type `Button` is used for the `OK` button, and the variant `cancelButton` for the `cancel` button. We do this by importing them into our `Form` component, and then extending them by name.
 
 > **Note**:  
 > When using `-st-named`, [classes](../references/class-selector.md), [variants](../references/variants.md) and [mixins](.,/refernces/mixin-syntax.md) are imported using their actual name at the source. 
 
 ```css
 /* login-form.st.css */
-@namespace "Login";
+@namespace "LoginForm";
 :import {
     -st-from: "./button.st.css";
     -st-default: Button;
@@ -65,19 +65,19 @@ We use the button as well as its variant (the type `Button` for the `OK` button,
     -st-from: "./project.st.css"
     -st-named: cancelButton;
 }
-.ok {
-    -st-extends: Button; /* ok pseudo-element extending a button */
+.OK {
+    -st-extends: Button; /* OK pseudo-element extending a button */
 }
 .cancel { 
     -st-extends: cancelButton; /* cancel pseudo-element extending a button */
 }
 ```
 
-## Theme Imports
+## 4 Import Themes
 
 The theme is an import that's automatically composed to the root, and is used to change the styling of multiple components across multiple applications.
 
-The theme imports project directories using `-st-theme: true` and all of the components that each theme will be affecting using `-st-named`. 
+The theme imports project directories using `-st-theme: true` and all of the components that each theme affects use `-st-named`. 
 
 ```css
 /* backoffice-theme.st.css */
