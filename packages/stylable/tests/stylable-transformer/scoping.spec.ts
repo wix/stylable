@@ -116,7 +116,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'ns',
                         content: `
                             :import {
-                                -st-from: "inner.st.css";
+                                -st-from: "./inner.st.css";
                                 -st-default: Container;
                             }   
                             .app {
@@ -162,7 +162,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'ns',
                         content: `
                             :import {
-                                -st-from: "inner.st.css";
+                                -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }   
                             .app {
@@ -206,7 +206,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'ns',
                         content: `
                             :import {
-                                -st-from: "inner.st.css";
+                                -st-from: "./inner.st.css";
                                 -st-default: Container;
                             }   
                             .app {
@@ -251,7 +251,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'entry',
                         content: `
                             :import {
-                                -st-from: "inner.st.css";
+                                -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }   
                             .root { 

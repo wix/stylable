@@ -381,7 +381,7 @@ describe('output theme', () => {
         ].join('\n'));
     });
 
-    it('should output theme override from multiple levels from sheet marked for output', () => {
+    it.skip('should output theme override from multiple levels from sheet marked for output', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
