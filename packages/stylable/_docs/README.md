@@ -1,3 +1,7 @@
+
+![](../branding/logo/PNG/96-logo-OnlySymbol.png)
+
+
 # Stylable - CSS for Components
 
 > "New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now."
@@ -106,6 +110,8 @@ Structural state dependencies
 [Custom selectors](./references/custom-selectors)
 
 [Global selectors](./references/global-selectors)
+
+[Compose CSS Class](./references/compose-css-class.md)
 
 [Formatters](./references/formatters)
 

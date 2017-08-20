@@ -4,31 +4,32 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 > *Note*: `-st-extends` may only be applied to [class selector](./class-selectors.md) and [root selector](./root.md).
 
-CSS API:
+### CSS API:
 ```css
-:import{
-    -st-from: "./toggle-button.css";
+/* page.st.css */
+@namespace "Page"
+:import {
+    -st-from: "./toggle-button.st.css";
     -st-default: ToggleButton;
 }
-.check-btn{
-  -st-extends:ToggleButton;
-  background:white;
+.check-btn {
+    -st-extends: ToggleButton;
+    background: white;
 }
-.check-btn::label{ color:green; } /* style pseudo element label */
-.check-btn:toggled::label{ color:red; } /* style pseudo element label when check-box is toggled */
+.check-btn::label { color:green; } /* style pseudo element label */
+.check-btn:toggled::label { color:red; } /* style pseudo element label when check-box is toggled */
 ```
 
-CSS OUTPUT:
+### CSS OUTPUT:
 ```css
-/* namespaced to the stylesheet */
-.root .check-btn.toggle-button_root{ background:white;}
-.root .check-btn.toggle-button_root .toggle-button_label{ color:green; }
-.root .check-btn.toggle-button_root[data-toggle-button-toggled] .toggle-button_label{ color:red; }
+.Page__root .Page__check-btn.ToggleButton__root { background: white; }
+.Page__root .Page__check-btn.ToggleButton__root .ToggleButton__label { color: green; }
+.Page__root .Page__check-btn.ToggleButton__root[data-ToggleButton-toggled] .ToggleButton__label { color: red; }
 ```
 
-React
+### React
 ```jsx
-/* ToggleButton component implements toggle-button.css */
+/* Page component uses toggle-button component */
 import ToggleButton from './toggle-button';
 /* inside a stylable render */
 <div>
