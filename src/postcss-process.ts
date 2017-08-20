@@ -327,7 +327,7 @@ function extendTypedRule(node: postcss.Node, selector: string, key: keyof Stylab
 }
 
 function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
-  
+
 
     const importObj: Imported = { rule, fromRelative: '', from: '', defaultExport: '', named: {}, theme: false, overrides: [] };
 
@@ -335,8 +335,14 @@ function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostic
     rule.walkDecls((decl) => {
         switch (decl.prop) {
             case valueMapping.from:
-                importObj.fromRelative = stripQuotation(decl.value);
-                importObj.from = path.resolve(path.dirname(stylableMeta.source), importObj.fromRelative);
+                const importPath = stripQuotation(decl.value);
+                if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+                    importObj.fromRelative = importPath;
+                    importObj.from = importPath;
+                } else {
+                    importObj.fromRelative = importPath
+                    importObj.from = path.resolve(path.dirname(stylableMeta.source), importPath);
+                }
                 break;
             case valueMapping.default:
                 importObj.defaultExport = decl.value;
