@@ -4,7 +4,6 @@ import * as path from 'path';
 import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
-import { Import } from "./import";
 import { matchValue, valueReplacer } from "./value-template";
 import { Pojo } from "./types";
 const hash = require('murmurhash');
@@ -368,7 +367,10 @@ export function processNamespace(namespace: string, source: string) {
     return namespace + hash.v3(source)//.toString(36);
 }
 
-export interface Imported extends Import {
+export interface Imported {
+    from: string;
+    defaultExport: string;
+    named: Pojo<string>;
     overrides: postcss.Declaration[];
     theme: boolean;
     rule: postcss.Rule;
