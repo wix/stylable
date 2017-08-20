@@ -22,14 +22,17 @@ export interface Options {
     fileProcessor: FileProcessor<StylableMeta>
     requireModule: (modulePath: string) => any
     diagnostics: Diagnostics
+    delimiter?: string;
 }
 
 export class StylableTransformer {
     fileProcessor: FileProcessor<StylableMeta>;
     diagnostics: Diagnostics;
     resolver: StylableResolver;
+    delimiter: string;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
+        this.delimiter = options.delimiter || '--';
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
@@ -483,8 +486,8 @@ export class StylableTransformer {
             return states;
         }, {}) : {};
     }
-    scope(name: string, namespace: string, separator: string = '--') {
-        return namespace ? namespace + separator + name : name;
+    scope(name: string, namespace: string, delimiter: string = this.delimiter) {
+        return namespace ? namespace + delimiter + name : name;
     }
 }
 

@@ -132,3 +132,13 @@ export function removeUnusedRules(meta: StylableMeta, _import: Imported, usedFil
         });
     }
 }
+
+
+
+export function createImportString(importDef: Imported, path: string) {
+    var imports = importDef.defaultExport ? [`var ${importDef.defaultExport} = require("${(path)}");`] : [];
+    for (var k in importDef.named) {
+        imports.push(`var ${importDef.defaultExport} = require("${(path)}")[${JSON.stringify(importDef.named[k])}];`);
+    }
+    return imports.join('\n');
+}
