@@ -14,7 +14,7 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
     content: string;
 }
 
-export type Visitor = (node: SelectorAstNode, index: number) => boolean | void;
+export type Visitor = (node: SelectorAstNode, index: number, nodes: SelectorAstNode[]) => boolean | void;
 
 export function parseSelector(selector: string): SelectorAstNode {
     return tokenizer.parse(selector);
@@ -24,14 +24,14 @@ export function stringifySelector(ast: SelectorAstNode): string {
     return tokenizer.stringify(ast)
 }
 
-export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0): boolean | void {
+export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0, nodes: SelectorAstNode[] = [node]): boolean | void {
     if (!node) { return }
-    let doNext = visitor(node, index);
+    let doNext = visitor(node, index, nodes);
     if (doNext === false) { return false; }
     if (doNext === true) { return true; }
     if (node.nodes) {
         for (var i = 0; i < node.nodes.length; i++) {
-            doNext = traverseNode(node.nodes[i], visitor, i);
+            doNext = traverseNode(node.nodes[i], visitor, i, node.nodes);
             if (doNext === true) { continue; }
             if (doNext === false) { return false; }
         }
@@ -57,6 +57,21 @@ export function createChecker(types: Array<string | string[]>) {
     }
 }
 
+export function createRootAfterSpaceChecker() {
+    var hasSpacing = false;
+    var isValid = true;
+    return (node?: SelectorAstNode) => {
+        if (!node) { return isValid; }
+        if (node.type === 'spacing') {
+            hasSpacing = true;
+        }
+        if (node.type === 'class' && node.name === 'root' && hasSpacing) {
+            isValid = false;
+        }
+        return isValid;
+    }
+}
+
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
 
 export function isImport(ast: SelectorAstNode): boolean {
@@ -66,10 +81,10 @@ export function isImport(ast: SelectorAstNode): boolean {
 }
 
 
-export function matchAtKeyframes(selector: string){
+export function matchAtKeyframes(selector: string) {
     return selector.match(/^@keyframes\s*(.*)/);
 }
 
-export function matchAtMedia(selector: string){
+export function matchAtMedia(selector: string) {
     return selector.match(/^@media\s*(.*)/);
 }

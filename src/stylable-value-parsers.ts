@@ -1,9 +1,14 @@
-export type MappedStates = { [s:string]:string|null };
 
+const valueParser = require("postcss-value-parser");
+
+export type MappedStates = { [s: string]: string | null };
+
+//TODO: remove
 export interface TypedClass {
     "-st-root"?: boolean;
     "-st-states"?: string[] | MappedStates;
     "-st-extends"?: string;
+    "-st-variant"?: boolean;
 }
 
 export interface MixinValue<T = any[]> {
@@ -18,34 +23,43 @@ export const valueMapping = {
     root: '-st-root' as "-st-root",
     states: '-st-states' as "-st-states",
     extends: '-st-extends' as "-st-extends",
-    mixin: '-st-mixin' as "-st-mixin"
+    mixin: '-st-mixin' as "-st-mixin",
+    variant: '-st-variant' as "-st-variant",
+    compose: '-st-compose' as "-st-compose",
+    theme: '-st-theme' as "-st-theme"
 };
+
+export type stKeys = keyof typeof valueMapping;
+
+export const stValues: string[] = Object.keys(valueMapping).map((key: stKeys) => valueMapping[key]);
 
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
 export const SBTypesParsers = {
     "-st-root"(value: string) {
-        return value === 'false' ? false : true
+        return value === 'false' ? false : true;
+    },
+    "-st-variant"(value: string) {
+        return value === 'false' ? false : true;
+    },
+    "-st-theme"(value: string) {
+        return value === 'false' ? false : true;
     },
     "-st-states"(value: string) {
-        if(!value){
-            return [];
+        if (!value) {
+            return {};
         }
-        if(value.indexOf('(') !== -1){
-            const mappedStates:MappedStates = {};
-            const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
-            for(let i = 0; i < parts.length; i += 4){
-                const stateName = parts[i+1];
-                const mapToSelector = parts[i+3];
-                if(stateName){// ToDo: should check the selector has no operators and child
-                    mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
-                }
+        const mappedStates: MappedStates = {};
+        const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
+        for (let i = 0; i < parts.length; i += 4) {
+            const stateName = parts[i + 1];
+            const mapToSelector = parts[i + 3];
+            if (stateName) {// ToDo: should check the selector has no operators and child
+                mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
             }
-            return mappedStates;
-        } else {
-            return value.split(',').map((state) => state.trim());
         }
+        return mappedStates;
     },
     "-st-extends"(value: string) {
         return value ? value.trim() : "";
@@ -64,79 +78,73 @@ export const SBTypesParsers = {
     },
     "-st-mixin"(value: string) {
 
-        const parts = value.match(/\s*[A-Za-z$_][$_\w]*\(.*?\)\)?|\s*([A-Za-z$_][$_\w]*\s*)/g);
-        if (!parts || parts.join('').length !== value.replace(/\s*/, '').length) {
-            throw new Error(valueMapping.mixin + ': not a valid mixin value: ' + value);
-        }
+        const ast = valueParser(value);
+        var mixins: { type: string, options: string[] }[] = [];
+        ast.nodes.forEach((node: any) => {
 
-        return parts.map((mix) => {
-            let type: string, options: string[], match;
-
-            if (mix.indexOf('(') === -1) {
-                type = mix.trim();
-                options = [];
-            } else if (match = mix.match(/(.*?)\((.*?\)?)\)/)) {
-                type = match[1].trim();
-                options = [];
-                if(match[2]) {
-                    const args:string = match[2];
-                    let isInParam = false;
-                    let isInString = false;
-                    let lastIndex = 0;
-                    let lastNoneSpaceIndex = 0;
-                    for(let i = 0; i < args.length; ++i){
-                        const currentChar = args[i];
-                        if(currentChar.match(/\s/)){
-                            if(!isInParam){
-                                lastIndex = i + 1; // ignore  spaces before param
-                            }
-                            continue;
-                        }
-                        
-                        switch(currentChar) {
-                            case `"`:
-                                if(isInParam) {
-
-                                } else {
-                                    isInParam = true;
-                                    lastIndex = i + 1;
-                                }
-                                isInString = true;
-                                lastNoneSpaceIndex = i + 1;
-                                break;
-                            case `,`:
-                                if(isInString){
-                                    const lastNoneSpaceChar = args[lastNoneSpaceIndex-1];
-                                    if(lastNoneSpaceChar === `"`){
-                                        lastNoneSpaceIndex = lastNoneSpaceIndex - 1;
-                                    } else {
-                                        lastNoneSpaceIndex = lastNoneSpaceIndex + 1;
-                                        continue;
-                                    }
-                                }
-                                options.push(args.slice(lastIndex, lastNoneSpaceIndex))
-                                isInParam = false;
-                                isInString = false;
-                                lastIndex = i + 1;
-                                lastNoneSpaceIndex = i + 1;
-                                break;
-                            default:
-                                isInParam = true;
-                                lastNoneSpaceIndex = i + 1;
-                        }
-                    }
-                    if(lastIndex < args.length){
-                        if(isInParam){
-                            lastNoneSpaceIndex = args[lastNoneSpaceIndex-1] === '"' ? lastNoneSpaceIndex - 1 : lastNoneSpaceIndex
-                        }
-                        options.push(args.slice(lastIndex, lastNoneSpaceIndex));
-                    }
-                }
-            } else {
-                throw new Error('Invalid mixin call:' + mix);
+            if (node.type === 'function') {
+                mixins.push({
+                    type: node.value,
+                    options: createOptions(node)
+                });
+            } else if (node.type === 'word') {
+                mixins.push({
+                    type: node.value,
+                    options: []
+                })
+            } else if (node.type === 'string') {
+                //TODO: warn
             }
-            return { type, options }
         });
 
+        return mixins;
+
+    },
+    "-st-compose"(value: string){
+        const ast = valueParser(value);
+        const composes: string[] = [];
+        ast.walk((node: any)=>{
+            if (node.type === 'function') {
+                
+            } else if (node.type === 'word') {
+                composes.push(node.value);
+            } else if (node.type === 'string') {
+                //TODO: warn
+            }
+        })
+        return composes;
     }
+}
+
+function groupValues(node: any) {
+    var grouped: any[] = [];
+    var current: any[] = [];
+
+    node.nodes.forEach((node: any) => {
+        if (node.type === 'div') {
+            grouped.push(current);
+            current = [];
+        } else {
+            current.push(node);
+        }
+    });
+
+    const last = grouped[grouped.length - 1];
+
+    if ((last && last !== current && current.length) || !last && current.length) {
+        grouped.push(current);
+    }
+    return grouped;
+}
+
+function createOptions(node: any) {
+    return groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (node: any) => {
+        if (node.type === 'div') {
+            return null;
+        } else if (node.type === 'string') {
+            return node.value;
+        } else {
+            return undefined;
+        }
+    })).filter((x: string) => typeof x === 'string');
 }
