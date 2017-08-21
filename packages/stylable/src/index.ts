@@ -1,6 +1,6 @@
 export { safeParse } from "./parser";
 export { cachedProcessFile, FileProcessor } from "./cached-process-file";
-export { StylableMeta, process, SDecl } from "./postcss-process";
+export { StylableMeta, process, SDecl, SRule } from "./postcss-process";
 export { StylableTransformer, StylableResults } from "./stylable-transformer";
 export { CSSResolve, JSResolve, StylableResolver } from "./postcss-resolver";
 export { Diagnostics } from "./diagnostics";
