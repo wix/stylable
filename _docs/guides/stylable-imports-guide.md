@@ -93,12 +93,12 @@ The theme imports project directories using `-st-theme: true` and all of the com
    -st-default: Button;
 }
 Button {
-   outline: value(color1);
+   outline: gold;
 }
 /* We have the option of matching cancelButton directly by name, scoped to Project__cancelButton */
 .cancelButton { /* Project__cancelButton */
-   background: value(color2);
+   background: silver;
 }
 ```
 
-Our [next guide](./stylable-theming-guide.md) will deal with theming specifically
+Read more about [theming Stylable components](./stylable-theming-guide.md).
