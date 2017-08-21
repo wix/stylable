@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -19,7 +19,10 @@
     "@types/chai": "^4.0.1",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.2",
+    "c3-platform": "^1.0.0",
     "chai": "^4.0.2",
+    "deindent": "^0.1.0",
+    "flat": "^4.0.0",
     "glob": "^7.1.2",
     "mocha": "^3.4.2",
     "mocha-loader": "^1.1.1",
@@ -29,18 +32,19 @@
     "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0",
-    "c3-platform":"^1.0.0"
-
+    "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
     "camelcase-css": "^1.0.1",
     "css-selector-tokenizer": "^0.7.0",
     "kebab-case": "^1.0.0",
+    "lodash.clonedeep": "^4.5.0",
+    "murmurhash": "0.0.2",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
     "postcss-nested": "^2.0.2",
     "postcss-safe-parser": "^3.0.1",
+    "postcss-value-parser": "^3.3.0",
     "stylis": "^3.2.3"
   },
   "files": [

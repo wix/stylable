@@ -1,4 +1,4 @@
-import { defineStylableEnv, CSS } from "./stylable-test-kit";
+import { defineStylableEnv, CSS } from "./utils/stylable-test-kit";
 
 describe('static Generator variants', () => {
 
