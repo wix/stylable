@@ -196,7 +196,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--app.ns1--root .ns2--deep');
 
         });
-        
+
         it('resolve and transform pseudo-element from deeply override rather then extended type', () => {
 
             var result = generateStylableRoot({
@@ -241,7 +241,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--deep');
 
         });
-     
+
         it('resolve and transform pseudo-element on root - prefer inherited element to override', () => {
 
             var result = generateStylableRoot({
@@ -339,6 +339,26 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--a.entry--root');
+
+        });
+
+
+        it.skip('TODO: fix it. scope selector that extends local root', () => {
+
+            generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .a, .b {
+                                -st-extends: root;
+                            }
+                        `
+                    }
+                }
+            });
+
 
         });
 
@@ -495,8 +515,8 @@ describe('Stylable postcss transform (Scoping)', function () {
 
     })
 
-    describe('scoped states', function(){
-        
+    describe('scoped states', function () {
+
         it('custom states inline', () => {
 
             var result = generateStylableRoot({
@@ -516,7 +536,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class[data-entry-my-state]');
 
-        }); 
+        });
 
         it('custom states with mapping', () => {
 
@@ -539,7 +559,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.x');
             expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--my-class.y[data-z="value"]');
 
-        }); 
+        });
 
         it('custom states from imported type', () => {
 
@@ -571,9 +591,9 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-inner-my-state]');
-            
 
-        });        
+
+        });
 
         it('custom states from deep imported type', () => {
 
@@ -617,9 +637,9 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-deep-my-state]');
-            
 
-        });        
+
+        });
 
 
 
@@ -653,12 +673,12 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-inner-my-state]');
-            
 
-        });        
 
-        
-        
+        });
+
+
+
         it('custom states form imported type on inner pseudo-class deep', function () {
 
             var result = generateStylableRoot({
@@ -704,14 +724,14 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-deep-my-state]');
-   
+
 
         });
 
 
     })
 
-    describe('@media scoping', function(){
+    describe('@media scoping', function () {
 
         it('handle scoping inside media queries', () => {
 
@@ -733,15 +753,15 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             const mediaNode = <postcss.AtRule>result.nodes![0];
-            
+
             expect((<postcss.Rule>mediaNode.nodes![0]).selector).to.equal('.entry--root .entry--my-class');
             expect((<postcss.Rule>mediaNode.nodes![1]).selector).to.equal('.entry--root .entry--my-class[data-entry-my-state]');
 
-        }); 
+        });
 
     })
 
-    
+
     describe('@keyframes scoping', function () {
         it('scope animation and animation name', () => {
 
@@ -775,8 +795,8 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.AtRule>result.nodes![1]).params).to.equal('entry--name2');
             expect((<postcss.Rule>result.nodes![2]).nodes![0].toString()).to.equal('animation: 2s entry--name infinite, 1s entry--name2 infinite');
             expect((<postcss.Rule>result.nodes![2]).nodes![1].toString()).to.equal('animation-name: entry--name');
-           
-        }); 
+
+        });
 
     })
 
