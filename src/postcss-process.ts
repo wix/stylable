@@ -69,19 +69,20 @@ function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
 
 function handleAtRules(root: postcss.Root, stylableMeta: StylableMeta, diagnostics: Diagnostics) {
     let namespace = '';
-
+    const toRemove: postcss.Node[] = [];
     root.walkAtRules((atRule) => {
         switch (atRule.name) {
             case 'namespace':
                 const match = atRule.params.match(/["'](.*?)['"]/);
                 match ? (namespace = match[1]) : diagnostics.error(atRule, 'invalid namespace');
+                toRemove.push(atRule)
                 break;
             case 'keyframes':
                 stylableMeta.keyframes.push(atRule);
                 break;
         }
     });
-
+    toRemove.forEach(node => node.remove());
     namespace = namespace || filename2varname(path.basename(stylableMeta.source)) || 's';
     stylableMeta.namespace = processNamespace(namespace, stylableMeta.source);
 }
