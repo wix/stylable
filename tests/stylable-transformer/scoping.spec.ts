@@ -273,6 +273,41 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('using nestend pseudo selectors for pseudo elements', () => {
+
+            var result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }
+                            Container::item:not(:selected) {
+                                background: yellow;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .item {
+                                -st-states: selected;
+                                background: red;
+                            }
+                            .item:not(:selected) {
+                                background: green;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root .ns1--item:not([data-ns-selected])');
+        });
+
     })
 
     describe('scoped classes', function () {

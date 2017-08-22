@@ -124,6 +124,37 @@ describe('emit-css: general', () => {
             ].join('\n'))
         })
 
+        it('should work with nested pseudo selectors under pseudo element', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .list {
+                            }
+                            .list-item {
+                                -st-states: list-item-selected;
+                                background: green;
+                            }
+                            .list::list-item:not(:list-item-selected) {
+                                background: red;
+                            }
+                        `
+                    }
+                }
+            });
+            expect(output).to.eql([
+                '.entry--root .entry--list {\n}',
+                '.entry--root .entry--list-item {\n    -st-states: list-item-selected;\n    background: green;\n}',
+                '.entry--root .entry--list .entry--list-item:not([data-entry-list-item-selected]) {\n    background: red;\n}'
+            ].join('\n'))
+        })
+
+
 
     });
 
