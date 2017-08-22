@@ -58,5 +58,6 @@ There's a subtle but important difference between the two methods:
 
 ## Further Reading
 
-[Theming a Component Library]()
-[Creating a Stylable Theme]()
+* [Theming a Component Library]()  
+* [Creating a Stylable Theme]()  
+* [Debugging in Stylable]()  
