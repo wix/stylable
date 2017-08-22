@@ -24,7 +24,7 @@ When you define a CSS class inside a component, in this case a `play-button` in 
 
 Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or after an [extended class selector](./extend-stylesheet.md).
 
-In this example, you can [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
+In this example, you [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
 
 ### CSS API:
 ```css
@@ -106,7 +106,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 You can use CSS classes to override extended pseudo-elements. 
 
 > **Note**:  
-> You can also override native pseudo-elements using **Stylable's** custom pseudo-elements bit this is not recommended as it can lead to code that's confusing and hard to maintain.
+> You can also override native pseudo-elements using **Stylable's** custom pseudo-elements but this is not recommended as it can lead to code that's confusing and hard to maintain.
 
 In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
