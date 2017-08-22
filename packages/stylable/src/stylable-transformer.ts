@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl } from './postcss-process';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
