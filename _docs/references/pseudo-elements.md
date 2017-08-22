@@ -1,13 +1,13 @@
 
 # Pseudo-elements
 
-In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-elements), Stylable stylesheet automatically exposes CSS classes as custom pseudo-elements.
+In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-elements), **Stylable** stylesheets automatically expose CSS classes as custom pseudo-elements. This enables you to access internal parts of a component to apply styling.
 
-## Define a Custom Pseudo-Element
+## Define a custom pseudo-element
 
 Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [extending stylesheet](./extend-stylesheet).
 
-When you define a CSS class `play-button` inside the component `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends `VideoPlayer`.
+When you define a CSS class inside a component, in this case a `play-button` in a `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `VideoPlayer`.
 
 ### CSS API:
 ```css
@@ -20,11 +20,11 @@ When you define a CSS class `play-button` inside the component `VideoPlayer`, th
 }
 ```
 
-## Styling custom pseudo-elements
+## Style custom pseudo-elements
 
-Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or [extended class selector](./extend-stylesheet.md).
+Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or after an [extended class selector](./extend-stylesheet.md).
 
-You can [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal called `play-button`:
+In this example, you can [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
 
 ### CSS API:
 ```css
@@ -51,12 +51,16 @@ You can [import](./imports.md) a `VideoPlayer` component into your stylesheet, a
 ```
 
 > **Note**:  
-> Custom pseudo elements are not limited to the end of a selector like native pseudo elements, and unlike native pseudo-selectors they can be chained (e.g. `.my-gallery::nav-btn::label`)
+> Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
 
 
 ## Extend stylesheet pseudo-elements
 
-When stylesheet [root](./root.md) extends another stylesheet, pseudo-elements are automatically exposed on the extending stylesheet and available inline:
+When a Stylable stylesheet [root](./root.md) extends another stylesheet, pseudo-elements are automatically exposed on the extending stylesheet and available inline.
+
+In this example, the class `play-button` is available from the original component file `video-player.css`, and extended and styled in the `super-video-player.css` stylesheet as a custom pseudo-element on the `root` class. 
+
+The `page.css` stylesheet can then extend `super-video-player.css` and on the `.main-player` class, style `play-button` differently.
 
 ### CSS API:
 ```css
@@ -95,12 +99,16 @@ When stylesheet [root](./root.md) extends another stylesheet, pseudo-elements ar
 .Page__root .Page__main-player.SuperVideoPlayer__root .VideoPlayer__play-button { color: silver; }
 ```
 
-> **Note**:  
-> With this mechanism you can override native pseudo-elements. For example, if one of your classes is called `.first-line`, accessing it as `.class::first-line` would override the native behavior. This can lead to code that's confusing and hard to maintain.
+
 
 ## Override custom pseudo-elements
 
-You may use CSS classes normally to override extended pseudo-elements. In the example below, our root extends `VideoPlayer` and so any class placed on the root will override the pseudo-element.
+You can use CSS classes to override extended pseudo-elements. 
+
+> **Note**:  
+> You can also override native pseudo-elements using **Stylable's** custom pseudo-elements bit this is not recommended as it can lead to code that's confusing and hard to maintain.
+
+In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
 ### CSS API:
 ```css
@@ -123,5 +131,5 @@ CSS OUTPUT
 ```
 
 > **Note**:  
-> Overriding pseudo-elements only changes the manner which the CSS uses to match those pseudo-elements. It does not change the extended component view output.
+> Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended. This can have adverse effects on performance.
 
