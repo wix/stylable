@@ -125,7 +125,7 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 }
 ```
 
-CSS OUTPUT
+### CSS OUTPUT
 ```css
 .SuperVideoPlayer__root.VideoPlayer__root .SuperVideoPlayer__play-button { color: gold; }
 ```
