@@ -107,6 +107,37 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns1--root .ns1--inner .ns2--deep');
         });
 
+        it('component/tag selector with custom states', () => {
+
+            var result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }                
+                            Container:state {}
+                            
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .root {
+                                -st-states: state;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root[data-ns1-state]');
+            
+        });
+
         it('class selector that extends root with inner class targeting (deep)', () => {
 
             var result = generateStylableRoot({
@@ -270,6 +301,49 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root.inner--root .inner--inner, .entry--root .entry--inner');
+
+        });
+
+
+        it('resolve extend on extended alias', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }   
+          
+                            Inner::deep::up { }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'Inner',
+                        content: `
+                            :import {
+                                -st-from: "./deep.st.css";
+                                -st-default: deep;
+                            }   
+                            .deep { 
+                                -st-extends: deep;
+                            }
+                        `
+                    },
+                    '/deep.st.css': {
+                        namespace: 'Deep',
+                        content: `
+                            .root {}
+                            .up{}
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .Inner--root .Inner--deep .Deep--up');
 
         });
 
