@@ -1,6 +1,6 @@
 import { Pojo } from "../../src/types";
 import { cachedProcessFile } from "../../src/cached-process-file";
-import { StylableMeta, process, SDecl } from "../../src/postcss-process";
+import { StylableMeta, process, SDecl } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
 import { StylableTransformer, StylableResults } from "../../src/stylable-transformer";
 import { Diagnostics } from "../../src/diagnostics";

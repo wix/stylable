@@ -1,6 +1,6 @@
 // import * as postcss from 'postcss';
 // import * as path from 'path';
-import { StylableMeta, ImportSymbol, StylableSymbol } from './postcss-process';
+import { StylableMeta, ImportSymbol, StylableSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { stripQuotation } from "./utils";
 

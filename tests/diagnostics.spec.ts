@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { process } from '../src/postcss-process';
+import { process } from '../src/stylable-processor';
 
 import { safeParse } from "../src/parser";
 

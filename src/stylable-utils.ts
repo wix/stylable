@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { SRule, StylableMeta, Imported } from "./postcss-process";
+import { SRule, StylableMeta, Imported } from "./stylable-processor";
 import { parseSelector, stringifySelector, traverseNode } from "./selector-utils";
 import { valueMapping } from "./stylable-value-parsers";
 const cloneDeep = require('lodash.clonedeep');
