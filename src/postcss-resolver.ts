@@ -17,9 +17,7 @@ export interface JSResolve {
 }
 
 export class StylableResolver {
-    constructor(private fileProcessor: FileProcessor<StylableMeta>, private requireModule: (modulePath: string) => any) {
-
-    }
+    constructor(private fileProcessor: FileProcessor<StylableMeta>, private requireModule: (modulePath: string) => any) {}
     resolveVarValue(meta: StylableMeta, name: string) {
         let value;
         let symbol = meta.mappedSymbols[name];

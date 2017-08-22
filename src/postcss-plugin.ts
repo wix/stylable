@@ -21,7 +21,7 @@ export function createGenerator(fileProcessor: FileProcessor<StylableMeta>, fs: 
     }, fs)
 
 
-    return function (source: string, path: string) {
+    return function generate(source: string, path: string) {
 
         const root = safeParse(source, { from: path });
 
