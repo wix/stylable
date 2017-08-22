@@ -39,6 +39,7 @@ function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): Stylable
 
     return {
         ast: root,
+        rawAst: root.clone(),
         root: reservedRootName,
         source: getSourcePath(root, diagnostics),
         namespace: '',
@@ -365,7 +366,7 @@ function handleImport(rule: postcss.Rule, stylableMeta: StylableMeta, diagnostic
     }
 
     rule.remove();
-
+    
     return importObj;
 
 }
@@ -421,6 +422,7 @@ export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSym
 
 export interface StylableMeta {
     ast: postcss.Root;
+    rawAst: postcss.Root;
     root: 'root';
     source: string;
     namespace: string;
