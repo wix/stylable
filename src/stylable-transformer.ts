@@ -311,7 +311,9 @@ export class StylableTransformer {
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'element') {
-                current = this.handleElement(current, node, name);
+                const next = this.handleElement(current, node, name);
+                symbol = next.symbol;
+                current = next.meta;
             } else if (type === 'pseudo-element') {
                 const next = this.handlePseudoElement(current, node, name);
                 symbol = next.symbol;
@@ -359,12 +361,16 @@ export class StylableTransformer {
             if (next && next._kind === 'css' && next.symbol._kind === 'class') {
 
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
+                // const extended = this.resolver.resolve(next.symbol[valueMapping.extends]);
+                // if (extended && extended._kind === 'css') {
+                //     return extended;
+                // }
                 return next;
             } else {
                 //TODO: warn or handle
             }
         }
-
+        
         const scopedName = this.exportClass(meta, name, symbol, metaExports);
 
         const next = this.resolver.resolve(extend);
@@ -396,16 +402,16 @@ export class StylableTransformer {
         return { _kind: 'css', meta, symbol };
     }
     handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
-        const tRule = meta.elements[name];
+        const tRule = <StylableSymbol>meta.elements[name];
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
         const next = this.resolver.resolve(extend);
-        if (next && next.meta) {
+        if (next && next._kind === 'css') {
             node.type = 'class';
             node.name = this.scope(next.symbol.name, next.meta.namespace);
-            return next.meta;
+            return next;
         }
 
-        return meta;
+        return {meta, symbol: tRule};
     }
     handlePseudoElement(meta: StylableMeta, node: SelectorAstNode, name: string): CSSResolve {
         let next: JSResolve | CSSResolve | null;
@@ -425,12 +431,16 @@ export class StylableTransformer {
 
         if (symbol) {
             if (symbol._kind === 'class') {
-
+    
                 node.type = 'class';
                 node.before = symbol[valueMapping.root] ? '' : ' ';
                 node.name = this.scope(symbol.name, current.namespace);
 
-                next = this.resolver.resolve(symbol[valueMapping.extends]);
+                let extend = symbol[valueMapping.extends];
+                if(extend && extend._kind === 'class' && extend.alias){
+                    extend = extend.alias;
+                }
+                next = this.resolver.resolve(extend);
 
                 if (next && next._kind === 'css') {
                     return next;
