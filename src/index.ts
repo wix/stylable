@@ -3,7 +3,7 @@ export { cachedProcessFile, FileProcessor } from "./cached-process-file";
 export { createEmptyMeta, StylableMeta, process, SDecl, SRule } from "./stylable-processor";
 export { StylableTransformer, StylableResults } from "./stylable-transformer";
 export { CSSResolve, JSResolve, StylableResolver } from "./postcss-resolver";
-export { Diagnostics } from "./diagnostics";
+export { Diagnostics, Diagnostic } from "./diagnostics";
 export { createGenerator } from "./generator";
 export { createMinimalFS, File, MinimalFSSetup } from "./memory-minimal-fs";
 export { valueMapping } from "./stylable-value-parsers";
