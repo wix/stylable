@@ -9,15 +9,15 @@ Let's start with a simple example of a project containing a number of components
 Our project needs a new login form which would need a few inputs and buttons. For this example, let's work with a `button` component.
 
 In this Stylable CSS file for a button, let's:
-* Give this component the [namespace](../references/namespace.md) LoginFormButton. 
+* Give this component the [namespace](../references/namespace.md) `Button` so we can easily identify the component for debugging. 
 * Style its [root](../references/root.md). 
 * Declare the [classes](../references/class-selectors.md) `icon` and `label` inside of our button.
-* Expose these classes as [pseudo-elements](../references/pseudo-elements.md).
+* Expose the `icon` and `label` classes as [pseudo-elements](../references/pseudo-elements.md).
 
 
 ```css
 /* button.st.css */
-@namespace "LoginFormButton";
+@namespace "Button";
 .root {
     display: inline-block; /* provide the button root with an internal style */
 }
@@ -27,13 +27,13 @@ In this Stylable CSS file for a button, let's:
 
 ## 2 Import Component into Project CSS
 
-Let's now add a project directory called `project.st.css`. This directory contains all the [variants](../references/variants.md) for our components. We can manage the numerous style variations we need. For our example, let's focus on the `cancelButton` [variant](../references/variants.md) of the `Button` component.
+Let's add a project directory called `project.st.css`. This directory contains all the [variants](../references/variants.md) for our components. We can manage the numerous style variations we need. For our example, let's focus on the `cancelButton` [variant](../references/variants.md) of the `Button` component.
 
 The project file itself imports all the components from the library using the directive `-st-default`. When importing this way, the classes that extend the components (in the example, `cancelButton` extending `Button`) have their entire API available.
 
 ```css
 /* project.st.css */
-@namespace "LoginFormProject";
+@namespace "Project";
 :import {
     -st-from: "./button.st.css";
     -st-default: Button;
@@ -56,7 +56,7 @@ We use the button as well as its variant. The type `Button` is used for the `OK`
 
 ```css
 /* login-form.st.css */
-@namespace "LoginForm";
+@namespace "Form";
 :import {
     -st-from: "./button.st.css";
     -st-default: Button;
