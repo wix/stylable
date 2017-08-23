@@ -2,12 +2,63 @@
 
 When creating a [component library]() it is important to create it in a way that enables easy and featureful styling. 
 
+## The `project.st.css` File
+
+We recommend creating a `project.st.css` file at the `src` directory of your component library. This file should expose an API for the entire project, so that importing it into the theme would provide access to all library features:
+
+* exposing all vars in use in the project
+* importing and exposing all components in the project
+* declaring and exposing all the variants of these components
+
+```css
+/* project.st.css */
+@namespace "Project";
+:vars { /* see the Declaring Vars section */
+    red1: #F012BE;
+    red2: #FF4136;
+    grey1: #DDDDDD;
+    blue1: #7FDBFF;
+    blue2: #0074D9;
+}
+:import {
+    -st-from: './button/button.st.css';
+    -st-default: Button;
+}
+:import {
+    -st-from: './slider/slider.st.css';
+    -st-default: Slider;
+}
+:import {
+    -st-from: './number-input/number-input.st.css';
+    -st-default: NumberInput;
+}
+.cancelButton {
+    -st-extends: Button;
+    -st-variant: true;
+    color: value(red2);
+}
+.submitButton {
+    -st-extends: Button;
+    -st-variant: true;
+    color: value(grey1);
+    background: value(blue1);
+}
+.horizontalSlider {
+    -st-extends: Slider;
+    -st-variant: true;
+}
+.verticalSlider {
+    -st-extends: Slider;
+    -st-variant: true;
+}
+```
+
 ## Themable Components
 
 The components in the library should be as easy to style and theme as possible. We recommend following these guidelines when planning 
 
 * Components should be styled as minimally as possible, other than to describe layout or [custom states](../references/pseudo-classes.md). A component should expose a good [**Style API**](./component-basics.md) and its custom states, and contain the minimal styling required for the component to function. (When styling is required as part of the component functionality, it should be explained in a comment, as well as documentation).
-* Where possible, values should be declared as vars and then set at the theme level. Colors, for example, should almost never be hard-coded in a component.
+* Reusable vars should be declared outside of component. The component can use vars for common values that are less likely to be override-able. Colors, for example, should almost never be hard-coded in a component. 
 * Variants should be declared in the main `project.st.css` file, and should not be part of the component code unless required.
 
 ## Themable Project Structure
@@ -43,63 +94,34 @@ One of the markings of a theme is a standardization of styles across the applica
 For example, the `cancelButton` variant of the `Button` component, will want to use the tone of Red used elsewhere in the application theme.
 
 ```css
+:vars {
+    wonderRed: #F012BE;
+}
 .cancelButton {
     -st-extends: Button;
     -st-variant: true;
     color: value(wonderRed);
 }
-:vars {
-    wonderRed: #F012BE;
-}
 ```
 
-## The `project.st.css` File
+## Applying the Theme to our Project
 
-We recommend creating a `project.st.css` file at the root of your component library. This file should expose an API for the entire project, so that importing it into the theme would provide access to all library features:
+Lastly, in our theme, we will import our `project.st.css` and apply theming to it.
 
-* importing and exposing all components in the project
-* declaring and exposing all the variants of these components
-* exposing all vars in use in the project
+The structure of this file will be very similar to the `project.st.css`, and set all values specific to it. 
 
 ```css
-/* project.st.css */
-@namespace "Project";
-:import {
-    -st-from: './button/button.st.css';
-    -st-default: Button;
+@namespace "BackofficeTheme"
+:vars {
+    pink1: #ffb3ff;
+    pink2: #ff00ff;
 }
 :import {
-    -st-from: './slider/slider.st.css';
-    -st-default: Slider;
-}
-:import {
-    -st-from: './number-input/number-input.st.css';
-    -st-default: NumberInput;
+    -st-from: '../components/project.st.css';
+    -st-default: Project;
+    -st-named: cancelButton, submitButton, horizontalSlider, verticalSlider;
 }
 .cancelButton {
-    -st-extends: Button;
-    -st-variant: true;
-    color: value(red2);
-}
-.submitButton {
-    -st-extends: Button;
-    -st-variant: true;
-    color: value(grey1);
-    background: value(blue1)
-}
-.horizontalSlider{
-    -st-extends: Slider;
-    -st-variant: true;
-}
-.verticalSlider{
-    -st-extends: Slider;
-    -st-variant: true;
-}
-:vars {
-    red1: #F012BE;
-    red2: #FF4136;
-    grey1: #DDDDDD;
-    blue1: #7FDBFF;
-    blue2: #0074D9;
+    background: value(pink1);
 }
 ```
