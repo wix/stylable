@@ -634,6 +634,42 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--my-class.y[data-z="value"]');
 
         });
+        
+        it('custom states lookup order', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .my-class { 
+                                -st-states: my-state;
+                                -st-extends: Inner;
+                            }
+                            .my-class:my-state {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            .root { 
+                                -st-states: my-state;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-entry-my-state]');
+
+
+        });
+            
 
         it('custom states from imported type', () => {
 
@@ -715,8 +751,6 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
-
-
         it('custom states form imported type on inner pseudo-class', () => {
 
             var result = generateStylableRoot({
@@ -750,8 +784,6 @@ describe('Stylable postcss transform (Scoping)', function () {
 
 
         });
-
-
 
         it('custom states form imported type on inner pseudo-class deep', function () {
 

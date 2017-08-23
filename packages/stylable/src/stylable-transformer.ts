@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -299,6 +299,7 @@ export class StylableTransformer {
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
         let symbol: StylableSymbol;
+        let originSymbol: ClassSymbol | ElementSymbol;
 
         let selectorAst = parseSelector(rule.selector) //.selectorAst;
         traverseNode(selectorAst, (node) => {
@@ -306,12 +307,15 @@ export class StylableTransformer {
             if (type === 'selector' || type === 'spacing' || type === 'operator') {
                 current = meta;
                 symbol = meta.classes[meta.root];
+                originSymbol = symbol;
             } else if (type === 'class') {
                 const next = this.handleClass(current, node, name, metaExports);
+                originSymbol = current.classes[name];
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'element') {
                 const next = this.handleElement(current, node, name);
+                originSymbol = current.elements[name];
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'pseudo-element') {
@@ -319,7 +323,7 @@ export class StylableTransformer {
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'pseudo-class') {
-                current = this.handlePseudoClass(current, node, name, symbol);
+                current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol);
             } else if (type === 'nested-pseudo-class') {
                 if (name === 'global') {
                     node.type = 'selector';
@@ -370,7 +374,7 @@ export class StylableTransformer {
                 //TODO: warn or handle
             }
         }
-        
+
         const scopedName = this.exportClass(meta, name, symbol, metaExports);
 
         const next = this.resolver.resolve(extend);
@@ -411,7 +415,7 @@ export class StylableTransformer {
             return next;
         }
 
-        return {meta, symbol: tRule};
+        return { meta, symbol: tRule };
     }
     handlePseudoElement(meta: StylableMeta, node: SelectorAstNode, name: string): CSSResolve {
         let next: JSResolve | CSSResolve | null;
@@ -431,13 +435,13 @@ export class StylableTransformer {
 
         if (symbol) {
             if (symbol._kind === 'class') {
-    
+
                 node.type = 'class';
                 node.before = symbol[valueMapping.root] ? '' : ' ';
                 node.name = this.scope(symbol.name, current.namespace);
 
                 let extend = symbol[valueMapping.extends];
-                if(extend && extend._kind === 'class' && extend.alias){
+                if (extend && extend._kind === 'class' && extend.alias) {
                     extend = extend.alias;
                 }
                 next = this.resolver.resolve(extend);
@@ -450,9 +454,24 @@ export class StylableTransformer {
 
         return { _kind: 'css', meta: current, symbol };
     }
-    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol) {
+    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol, origin: StylableMeta, originSymbol: ClassSymbol | ElementSymbol) {
         let current = meta;
         let currentSymbol = symbol;
+
+        if (symbol !== originSymbol) {
+            const states = originSymbol[valueMapping.states];
+            if (states && states.hasOwnProperty(name)) {
+                if (states[name] === null) {
+                    node.type = 'attribute';
+                    node.content = this.autoStateAttrName(name, origin.namespace);
+                } else {
+                    node.type = 'invalid';// simply concat global mapped selector - ToDo: maybe change to 'selector'
+                    node.value = states[name];
+                }
+                return current;
+            }
+            
+        }
 
         while (current && currentSymbol) {
             if (currentSymbol && currentSymbol._kind === 'class') {

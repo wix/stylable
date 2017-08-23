@@ -6,48 +6,22 @@ import { StylableTransformer, StylableResults } from "../../src/stylable-transfo
 import { Diagnostics } from "../../src/diagnostics";
 import { removeUnusedRules } from "../../src/stylable-utils";
 import { valueReplacer } from "../../src/value-template";
-const deindent = require('deindent');
+import { createMinimalFS } from "../../src/memory-minimal-fs";
+// const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
 
 export function generateFromMock(config: Config) {
     const files = config.files;
 
-    for (var file in files) {
-        if (files[file].mtime === undefined) {
-            files[file].mtime = new Date();
-        }
-    }
-
+    const {fs, requireModule} = createMinimalFS(config);
+    
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
         const meta = process(postcss.parse(content, { from }));
         meta.namespace = files[from].namespace || meta.namespace;
         return meta;
-    },
-        {
-            readFileSync(path) {
-                return deindent(files[path].content).trim()
-            },
-            statSync(path) {
-                return {
-                    mtime: files[path].mtime!
-                };
-            }
-        }
-    )
+    }, fs);
 
-    function requireModule(path: string) {
-        if (!path.match(/\.js$/)) {
-            path += '.js';
-        }
-        const fn = new Function("module", "exports", files[path].content);
-        const _module = {
-            id: path,
-            exports: {}
-        }
-        fn(_module, _module.exports);
-        return _module.exports;
-    }
 
     const t = new StylableTransformer({
         fileProcessor,
@@ -79,8 +53,6 @@ export function generateStylableOutput(config: Config) {
         return generateFromMock({ ...config, entry });
     });
 }
-
-
 
 
 export function generateStylableBundle(usedFiles: string[], generate: (entry: string) => StylableResults) {
