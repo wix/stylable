@@ -299,7 +299,7 @@ export class StylableTransformer {
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
         let symbol: StylableSymbol;
-        let nestedSymbol: StylableSymbol;
+        let nestedSymbol: StylableSymbol | null;
         let originSymbol: ClassSymbol | ElementSymbol;
         let selectorAst = parseSelector(rule.selector) //.selectorAst;
         traverseNode(selectorAst, (node) => {

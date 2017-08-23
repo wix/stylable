@@ -356,7 +356,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--list .entry--list-item:not([data-entry-list-item-selected])');
         })
 
-        it('using nestend pseudo selectors for pseudo elements', () => {
+        it('using nested pseudo selectors for pseudo elements', () => {
 
             var result = generateStylableRoot({
                 entry: `/style.st.css`,
