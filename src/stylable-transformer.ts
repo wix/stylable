@@ -305,11 +305,11 @@ export class StylableTransformer {
         traverseNode(selectorAst, (node) => {
             const { name, type } = node;
             if (type === 'selector' || type === 'spacing' || type === 'operator') {
-                current = meta;
                 if (nestedSymbol) {
                     symbol = nestedSymbol;
                     nestedSymbol = null;
                 } else {
+                    current = meta;
                     symbol = meta.classes[meta.root];
                 }
             } else if (type === 'class') {

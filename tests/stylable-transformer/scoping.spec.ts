@@ -273,6 +273,58 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('should work with nested pseudo selectors', () => {
+            var result = generateStylableRoot({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .container {
+                                 -st-states: state;
+                            }
+                            .container:state {
+                                background: green;
+                            }
+                            .container:not(:state) {
+                                background: red;
+                            }
+                        `
+                    }
+                }
+            });
+            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--container:not([data-entry-state])');
+        })
+
+        it('should work with nested pseudo selectors under pseudo element', () => {
+            var result = generateStylableRoot({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .list {
+                            }
+                            .list-item {
+                                -st-states: list-item-selected;
+                                background: green;
+                            }
+                            .list::list-item:not(:list-item-selected) {
+                                background: red;
+                            }
+                        `
+                    }
+                }
+            });
+            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--list .entry--list-item:not([data-entry-list-item-selected])');
+        })
+
         it('using nestend pseudo selectors for pseudo elements', () => {
 
             var result = generateStylableRoot({
@@ -287,6 +339,9 @@ describe('Stylable postcss transform (Scoping)', function () {
                             }
                             Container::item:not(:selected) {
                                 background: yellow;
+                            }
+                            Container::item:selected {
+                                background: purple;
                             }
                         `
                     },
@@ -305,7 +360,8 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root .ns1--item:not([data-ns-selected])');
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root .ns1--item:not([data-ns1-selected])');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns1--root .ns1--item[data-ns1-selected]');
         });
 
     })
