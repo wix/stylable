@@ -299,15 +299,20 @@ export class StylableTransformer {
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
         let symbol: StylableSymbol;
+        let nestedSymbol: StylableSymbol | null;
         let originSymbol: ClassSymbol | ElementSymbol;
-
         let selectorAst = parseSelector(rule.selector) //.selectorAst;
         traverseNode(selectorAst, (node) => {
             const { name, type } = node;
             if (type === 'selector' || type === 'spacing' || type === 'operator') {
-                current = meta;
-                symbol = meta.classes[meta.root];
-                originSymbol = symbol;
+                if (nestedSymbol) {
+                    symbol = nestedSymbol;
+                    nestedSymbol = null;
+                } else {
+                    current = meta;
+                    symbol = meta.classes[meta.root];
+                    originSymbol = symbol;
+                }
             } else if (type === 'class') {
                 const next = this.handleClass(current, node, name, metaExports);
                 originSymbol = current.classes[name];
@@ -329,6 +334,7 @@ export class StylableTransformer {
                     node.type = 'selector';
                     return true;
                 }
+                nestedSymbol = symbol;
             }
             /* do nothing */
             return undefined;
