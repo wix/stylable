@@ -3,7 +3,7 @@ import { Diagnostics } from "./diagnostics";
 import { safeParse } from "./parser";
 import { cachedProcessFile, MinimalFS, FileProcessor } from "./cached-process-file";
 import { create, RuntimeStylesheet } from "./runtime";
-import { StylableMeta, process } from "./postcss-process";
+import { StylableMeta, process } from "./stylable-processor";
 
 
 export function createGenerator(

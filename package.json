@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "4.0.2",
+  "version": "4.0.7",
   "description": "",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -21,7 +21,6 @@
     "@types/node": "^8.0.2",
     "c3-platform": "^1.0.0",
     "chai": "^4.0.2",
-    "deindent": "^0.1.0",
     "flat": "^4.0.0",
     "glob": "^7.1.2",
     "mocha": "^3.4.2",
@@ -37,6 +36,7 @@
   "dependencies": {
     "camelcase-css": "^1.0.1",
     "css-selector-tokenizer": "^0.7.0",
+    "deindent": "^0.1.0",
     "kebab-case": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",
     "murmurhash": "0.0.2",

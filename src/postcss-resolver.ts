@@ -1,6 +1,6 @@
 // import * as postcss from 'postcss';
 // import * as path from 'path';
-import { StylableMeta, ImportSymbol, StylableSymbol } from './postcss-process';
+import { StylableMeta, ImportSymbol, StylableSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { stripQuotation } from "./utils";
 
@@ -17,9 +17,7 @@ export interface JSResolve {
 }
 
 export class StylableResolver {
-    constructor(private fileProcessor: FileProcessor<StylableMeta>, private requireModule: (modulePath: string) => any) {
-
-    }
+    constructor(protected fileProcessor: FileProcessor<StylableMeta>, protected requireModule: (modulePath: string) => any) {}
     resolveVarValue(meta: StylableMeta, name: string) {
         let value;
         let symbol = meta.mappedSymbols[name];
