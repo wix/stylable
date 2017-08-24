@@ -57,6 +57,14 @@ export function generateStylableOutput(config: Config) {
     });
 }
 
+type Overrides = Pojo<string>;
+interface ThemeEntry {
+    index: number;
+    themeMeta: StylableMeta;
+    overrides: Array<{ srcMeta: StylableMeta, declarations: Overrides }>;
+}
+type ThemeEntries = Pojo<ThemeEntry>;
+
 export function generateStylableBundle(usedFiles: string[], generate: (entry: string) => StylableResults) {
 
     // interface ExtraModule {
@@ -65,35 +73,15 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
     // }
 
     // const extraEntries: ExtraModule[] = [];
-    interface ThemeEntry {
-        index: number;
-        themeMeta: StylableMeta;
-        overrides: Array<{ srcMeta: StylableMeta, declarations: postcss.Declaration[] }>;
-    }
-    const themeEntries: { [s: string]: ThemeEntry } = {};
+    const themeEntries:ThemeEntries  = {};
 
     const outputCSS: postcss.Root[] = usedFiles.map((entry, index) => {
 
+        
         // const moduleImports: ExtraModule = { id: entry, imports: [] };
         const { meta } = generate(entry);
-        meta.imports.forEach((_import) => {
-            if (_import.theme || themeEntries[_import.from]) {
 
-                if (usedFiles.indexOf(_import.from) !== -1) {
-                    throw new Error('theme should not be imported from JS')
-                } else if (themeEntries[_import.from]) {
-                    themeEntries[_import.from].index = index;
-                    if (_import.overrides.length) {
-                        themeEntries[_import.from].overrides.unshift({ srcMeta: meta, declarations: _import.overrides });
-                    }
-                } else {
-                    const { meta: depMeta } = generate(_import.from);
-                    themeEntries[_import.from] = { index, themeMeta: depMeta, overrides: _import.overrides.length ? [{ srcMeta: meta, declarations: _import.overrides }] : [] };
-                }
-                // moduleImports.imports.push(_import.from);
-            }
-            removeUnusedRules(meta, _import, usedFiles);
-        });
+        collectThemesAndRemoveUnused(meta, themeEntries, usedFiles, index, generate, {});
         // extraEntries.push(moduleImports);
         return meta.ast;
 
@@ -105,16 +93,13 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
 
         themeMeta.imports.forEach((_import) => {
             removeUnusedRules(themeMeta, _import, usedFiles);
-        });
+        }); // ToDo: is this needed?
 
         const themeEntry = [themeMeta.ast];
 
         overrides.forEach(({ srcMeta, declarations }) => {
             const clone = themeMeta.ast.clone();
-            var data: Pojo<string> = {}
-            declarations.forEach((declOverride) => {
-                data[declOverride.prop] = declOverride.value;
-            });
+            var data: Pojo<string> = declarations;
             const toRemove: postcss.Declaration[] = [];
 
             clone.walkRules((rule) => {
@@ -159,6 +144,45 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
 
 }
 
+function collectThemesAndRemoveUnused(meta:StylableMeta, themeEntries:ThemeEntries, usedFiles:string[], entryIndex:number, generate: (entry: string) => StylableResults, overrides:Overrides, rootMeta = meta){
+    meta.imports.forEach((_import) => {
 
+        if (_import.theme || themeEntries[_import.from]) {
 
-//
+            let importOverrides = _import.overrides.reduce<Overrides>((acc, dec) => {
+                acc[dec.prop] = dec.value;
+                return acc;
+            }, {});
+            for(let overrideProp in overrides){
+                const symbol = meta.mappedSymbols[overrideProp];
+                if(symbol._kind === 'import' && symbol.import.from === _import.from && !importOverrides[overrideProp]){
+                    importOverrides[overrideProp] = overrides[overrideProp];
+                }
+            }
+
+            if (usedFiles.indexOf(_import.from) !== -1) {
+                throw new Error('theme should not be imported from JS')
+            } else if (themeEntries[_import.from]) {
+                themeEntries[_import.from].index = entryIndex;
+                if (_import.overrides.length) {
+                    themeEntries[_import.from].overrides.unshift({ srcMeta: rootMeta, declarations: importOverrides });
+                }
+            } else {
+                const { meta: depMeta } = generate(_import.from);              
+                
+                const themeEntryOverrides = Object.keys(importOverrides).length ? [{ srcMeta: rootMeta, declarations: importOverrides }] : [];
+
+                themeEntries[_import.from] = { index:entryIndex, themeMeta: depMeta, overrides: themeEntryOverrides};
+
+                collectThemesAndRemoveUnused(depMeta, themeEntries, usedFiles, entryIndex, generate, importOverrides, rootMeta);
+            }
+        }
+
+        removeUnusedRules(meta, _import, usedFiles);
+    });
+}
+
+//createAllModulesRelations
+//expendRelationsToDeepImports
+//forEachRelationsExtractOverrides
+//forEachRelationsPrintWithOverrides
