@@ -7,15 +7,19 @@ import { Diagnostics } from "../../src/diagnostics";
 import { removeUnusedRules } from "../../src/stylable-utils";
 import { valueReplacer } from "../../src/value-template";
 import { createMinimalFS } from "../../src/memory-minimal-fs";
+import { isAbsolute } from "path";
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
 
 export function generateFromMock(config: Config) {
     const files = config.files;
+    if (!isAbsolute(config.entry)) {
+        throw new Error('entry must be absolute path: ' + config.entry)
+    }
+    const entry = config.entry;
+    const { fs, requireModule } = createMinimalFS(config);
 
-    const {fs, requireModule} = createMinimalFS(config);
-    
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
         const meta = process(postcss.parse(content, { from }));
         meta.namespace = files[from].namespace || meta.namespace;
@@ -26,10 +30,11 @@ export function generateFromMock(config: Config) {
     const t = new StylableTransformer({
         fileProcessor,
         requireModule,
-        diagnostics: new Diagnostics()
+        diagnostics: new Diagnostics(),
+        keepValues: false
     });
 
-    const result = t.transform(fileProcessor.process(config.entry));
+    const result = t.transform(fileProcessor.process(entry));
 
     return result
 }
@@ -38,11 +43,9 @@ export function generateStylableRoot(config: Config) {
     return generateFromMock(config).meta.ast;
 }
 
-
 export function generateStylableExports(config: Config) {
     return generateFromMock(config).exports;
 }
-
 
 export function generateStylableOutput(config: Config) {
     if (!config.usedFiles) {
@@ -53,7 +56,6 @@ export function generateStylableOutput(config: Config) {
         return generateFromMock({ ...config, entry });
     });
 }
-
 
 export function generateStylableBundle(usedFiles: string[], generate: (entry: string) => StylableResults) {
 
@@ -70,7 +72,7 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
     }
     const themeEntries: { [s: string]: ThemeEntry } = {};
 
-    const outputCSS = usedFiles.map((entry, index) => {
+    const outputCSS: postcss.Root[] = usedFiles.map((entry, index) => {
 
         // const moduleImports: ExtraModule = { id: entry, imports: [] };
         const { meta } = generate(entry);
@@ -81,7 +83,7 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
                     throw new Error('theme should not be imported from JS')
                 } else if (themeEntries[_import.from]) {
                     themeEntries[_import.from].index = index;
-                    if(_import.overrides.length) {
+                    if (_import.overrides.length) {
                         themeEntries[_import.from].overrides.unshift({ srcMeta: meta, declarations: _import.overrides });
                     }
                 } else {
@@ -93,7 +95,7 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
             removeUnusedRules(meta, _import, usedFiles);
         });
         // extraEntries.push(moduleImports);
-        return meta.ast.toString();
+        return meta.ast;
 
     });
 
@@ -105,8 +107,8 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
             removeUnusedRules(themeMeta, _import, usedFiles);
         });
 
-        const themeEntry = [themeMeta.ast.toString()];
-        
+        const themeEntry = [themeMeta.ast];
+
         overrides.forEach(({ srcMeta, declarations }) => {
             const clone = themeMeta.ast.clone();
             var data: Pojo<string> = {}
@@ -132,15 +134,15 @@ export function generateStylableBundle(usedFiles: string[], generate: (entry: st
 
             });
 
-            toRemove.forEach((decl)=>{
+            toRemove.forEach((decl) => {
                 const parent = decl.parent;
                 decl.remove();
-                if(parent && parent.nodes && parent.nodes.length === 0){
+                if (parent && parent.nodes && parent.nodes.length === 0) {
                     parent.remove();
                 }
             })
 
-            themeEntry.unshift(clone.toString());
+            themeEntry.unshift(clone);
         });
 
         outputCSS.splice(index + 1, 0, ...themeEntry);
