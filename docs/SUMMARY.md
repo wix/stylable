@@ -30,7 +30,7 @@
 
 * [Pseudo-Elements](./references/pseudo-elements.md)
 
-* [Global selectors](./references/global-selectors)
+* [Global selectors](./references/global-selectors.md)
 
 * [Compose CSS Class](./references/compose-css-class.md)
 

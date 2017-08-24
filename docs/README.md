@@ -55,7 +55,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Pseudo-Elements](./references/pseudo-elements.md)
 
-* [Global selectors](./references/global-selectors)
+* [Global selectors](./references/global-selectors.md)
 
 * [Compose CSS Class](./references/compose-css-class.md)
 
