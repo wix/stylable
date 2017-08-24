@@ -437,4 +437,76 @@ describe('output theme', () => {
         // </div>
     });
 
+    
+    it.skip('xxx should output theme override from multiple levels from sheet marked for output', () => {
+        const cssOutput = generateStylableOutput({
+            entry: '/entry.st.css',
+            usedFiles: [
+                '/entry.st.css',
+                '/comp.st.css'
+            ],
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./theme.st.css";
+                            color1: gold;
+                        }
+                        .c { color:green; } 
+                    `
+                },
+                "/theme.st.css": {
+                    namespace: 'theme',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./base-theme.st.css";
+                            -st-named: color1;
+                        }
+                        .b { color:value(color1); }
+                    `
+                },
+                "/comp.st.css": {
+                    namespace: 'comp',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./base-theme.st.css";
+                            -st-named: color1;
+                        }
+                        .b { color:value(color1); }
+                    `
+                },
+                "/base-theme.st.css": {
+                    namespace: 'base-theme',
+                    content: `
+                        :vars {
+                            color1:red;
+                        }
+                        .a { color:value(color1); }
+                    `
+                }
+            }
+        });
+
+        expect(cssOutput).to.eql([
+            '.base-theme--root .base-theme--a { color:red; }',
+            '.entry--root .base-theme--a { color:gold; }',
+
+            '.comp--root .comp--b { color:red; }',
+            // '.entry--root .comp--b { color:gold; }',
+
+            '.theme--root .theme--b { color:red; }',
+            '.entry--root .theme--b { color:gold; }',
+
+            '.entry--root .entry--c { color:green; }'
+        ].join('\n'));
+
+        // <div class="entry--root theme--root">
+        //     <div class="theme-a"></div>
+        // </div>
+    });
+
 })
