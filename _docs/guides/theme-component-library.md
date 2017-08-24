@@ -1,14 +1,14 @@
-# Theming A Component Library
+# Theme a Component Library
 
-When creating a [component library]() it is important to create it in a way that enables easy and featureful styling. 
+When creating a [component library](), you should create it to enable easy and featureful styling. 
 
 ## The `project.st.css` File
 
-We recommend creating a `project.st.css` file at the `src` directory of your component library. This file should expose an API for the entire project, so that importing it into the theme would provide access to all library features:
+We recommend creating a `project.st.css` file in the `src` directory of your component library. This file should expose an API for the entire project. Importing this CSS into the theme would provide access to all the library's features, enabling you to: 
 
-* exposing all vars in use in the project
-* importing and exposing all components in the project
-* declaring and exposing all the variants of these components
+* Expose all vars in use in the project.
+* Import and expose all components in the project.
+* Declare and expose all the [variants](../references/variants.md) of these components.
 
 ```css
 /* project.st.css */
