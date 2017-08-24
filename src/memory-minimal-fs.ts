@@ -16,9 +16,15 @@ export function createMinimalFS(config: MinimalFSSetup) {
 
     const fs: MinimalFS = {
         readFileSync(path: string) {
+            if (!files[path]) {
+                throw new Error('Cannot find file: ' + path)
+            }
             return deindent(files[path].content).trim()
         },
         statSync(path: string) {
+            if (!files[path]) {
+                throw new Error('Cannot find file: ' + path)
+            }
             return {
                 mtime: files[path].mtime!
             };
@@ -26,15 +32,19 @@ export function createMinimalFS(config: MinimalFSSetup) {
     };
 
     const requireModule = function require(path: string): any {
-        if (!path.match(/\.js$/)) {
-            path += '.js';
-        }
-        const fn = new Function("module", "exports", "require", files[path].content);
         const _module = {
             id: path,
             exports: {}
         }
-        fn(_module, _module.exports, requireModule);
+        try {
+            if (!path.match(/\.js$/)) {
+                path += '.js';
+            }
+            const fn = new Function("module", "exports", "require", files[path].content);
+            fn(_module, _module.exports, requireModule);
+        } catch (e) {
+            throw new Error('Cannot require file: ' + path);
+        }
         return _module.exports;
     }
 
