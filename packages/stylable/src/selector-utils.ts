@@ -62,10 +62,11 @@ export function createRootAfterSpaceChecker() {
     var isValid = true;
     return (node?: SelectorAstNode) => {
         if (!node) { return isValid; }
-        if (node.type === 'spacing') {
+        if (node.type === 'selector') {
+            hasSpacing = false;
+        } else if (node.type === 'spacing') {
             hasSpacing = true;
-        }
-        if (node.type === 'class' && node.name === 'root' && hasSpacing) {
+        } else if (node.type === 'class' && node.name === 'root' && hasSpacing) {
             isValid = false;
         }
         return isValid;
