@@ -23,6 +23,7 @@ export interface Options {
     requireModule: (modulePath: string) => any
     diagnostics: Diagnostics
     delimiter?: string;
+    keepValues?: boolean;
 }
 
 export class StylableTransformer {
@@ -30,20 +31,22 @@ export class StylableTransformer {
     diagnostics: Diagnostics;
     resolver: StylableResolver;
     delimiter: string;
+    keepValues: boolean;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
+        this.keepValues = options.keepValues || false;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
-
+        
         const ast = meta.ast;
 
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
-        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
+        !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
@@ -54,7 +57,7 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
-            rule.walkDecls((decl: SDecl) => {
+            !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
