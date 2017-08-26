@@ -1,8 +1,9 @@
 import { Pojo } from "../../src/types";
 import { cachedProcessFile } from "../../src/cached-process-file";
-import { StylableMeta, process, SDecl } from "../../src/stylable-processor";
+import { StylableMeta, process, SDecl, Imported } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
 import { StylableTransformer, StylableResults } from "../../src/stylable-transformer";
+import { StylableResolver } from "../../src/postcss-resolver";
 import { Diagnostics } from "../../src/diagnostics";
 import { removeUnusedRules } from "../../src/stylable-utils";
 import { valueReplacer } from "../../src/value-template";
@@ -12,20 +13,25 @@ import { isAbsolute } from "path";
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
 
-export function generateFromMock(config: Config) {
-    const files = config.files;
+export function generateInfra(config:Config){
+    const { fs, requireModule } = createMinimalFS(config);
+    
+    const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
+        const meta = process(postcss.parse(content, { from }));
+        meta.namespace = config.files[from].namespace || meta.namespace;
+        return meta;
+    }, fs);
+
+    return { fs, requireModule, fileProcessor };
+}
+
+export function generateFromMock(config: Config, resolver?:StylableResolver) {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
     const entry = config.entry;
-    const { fs, requireModule } = createMinimalFS(config);
-
-    const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
-        const meta = process(postcss.parse(content, { from }));
-        meta.namespace = files[from].namespace || meta.namespace;
-        return meta;
-    }, fs);
-
+    
+    const { requireModule, fileProcessor } = generateInfra(config);
 
     const t = new StylableTransformer({
         fileProcessor,
@@ -33,6 +39,7 @@ export function generateFromMock(config: Config) {
         diagnostics: new Diagnostics(),
         keepValues: false
     });
+    resolver && t.setResolver(resolver); /*ToDo: pass through options... */
 
     const result = t.transform(fileProcessor.process(entry));
 
@@ -52,134 +59,190 @@ export function generateStylableOutput(config: Config) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
 
-    return generateStylableBundle(config.usedFiles, (entry) => {
-        return generateFromMock({ ...config, entry });
+    const { requireModule, fileProcessor } = generateInfra(config);
+    const resolver = new StylableResolver(fileProcessor, requireModule);
+
+    return generateStylableBundle(config.usedFiles, resolver, (entry) => {
+        return generateFromMock({ ...config, entry }, resolver);
     });
 }
 
-type Overrides = Pojo<string>;
-interface ThemeEntry {
+type OverrideVars = Pojo<string>;
+type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
+interface ThemeOverrideData {
     index: number;
     themeMeta: StylableMeta;
-    overrides: Array<{ srcMeta: StylableMeta, declarations: Overrides }>;
+    overrideDefs: OverrideDef[];
 }
-type ThemeEntries = Pojo<ThemeEntry>;
+type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
+export type Generate = (entry: string) => StylableResults;
 
-export function generateStylableBundle(usedFiles: string[], generate: (entry: string) => StylableResults) {
+export function generateStylableBundle(usedFiles: string[], resolver:StylableResolver, generate: Generate) {
 
-    // interface ExtraModule {
-    //     id: string
-    //     imports: string[]
-    // }
+    const themeAcc:ThemeEntries  = {};
+    const outputCSS: StylableMeta[] = [];
 
-    // const extraEntries: ExtraModule[] = [];
-    const themeEntries:ThemeEntries  = {};
+    // aggregate used files: insert used files to output, collect theme files, remove unused imports CSS
+    usedFiles.map((path, entryIndex) => {
+        const { meta:entryMeta } = generate(path);
 
-    const outputCSS: postcss.Root[] = usedFiles.map((entry, index) => {
+        function aggragateDependencies(srcMeta:StylableMeta, overrideVars:OverrideVars){
+            walkImports(srcMeta, metaImport => {
+                removeUnusedRules(srcMeta, metaImport, usedFiles);
 
-        
-        // const moduleImports: ExtraModule = { id: entry, imports: [] };
-        const { meta } = generate(entry);
+                const isImportTheme = !!metaImport.theme;
+                let themeOverrideData = themeAcc[metaImport.from]; // some entry already imported as theme
 
-        collectThemesAndRemoveUnused(meta, themeEntries, usedFiles, index, generate, {});
-        // extraEntries.push(moduleImports);
-        return meta.ast;
+                if(isImportTheme){ // collect and search sub-themes
+                    // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
+                    //     throw new Error('theme should not be imported from JS')
+                    // }
+                    const { meta: themeMeta } = generate(metaImport.from);
+                    themeOverrideData = themeAcc[metaImport.from] = themeOverrideData || { index:entryIndex, themeMeta: themeMeta, overrideDefs: []};
+                    let themeOverrideVars = generateThemeOverrideVars(srcMeta, metaImport, overrideVars);
 
-    });
-
-    Object.keys(themeEntries).reverse().forEach(themePath => {
-        const { index, themeMeta, overrides } = themeEntries[themePath];
-
-
-        themeMeta.imports.forEach((_import) => {
-            removeUnusedRules(themeMeta, _import, usedFiles);
-        }); // ToDo: is this needed?
-
-        const themeEntry = [themeMeta.ast];
-
-        overrides.forEach(({ srcMeta, declarations }) => {
-            const clone = themeMeta.ast.clone();
-            var data: Pojo<string> = declarations;
-            const toRemove: postcss.Declaration[] = [];
-
-            clone.walkRules((rule) => {
-                rule.selector = rule.selector.replace(new RegExp(themeMeta.namespace + '--' + themeMeta.root), srcMeta.namespace + '--' + srcMeta.root);
-                rule.walkDecls((decl: SDecl) => {
-
-                    const output = valueReplacer(decl.sourceValue, data, (value) => {
-                        return value;
-                    });
-
-                    if (decl.value === output) {
-                        toRemove.push(decl);
-                    } else {
-                        decl.value = output;
+                    if(themeOverrideVars){
+                        themeOverrideData.overrideDefs.unshift({ overrideRoot:entryMeta, overrideVars: themeOverrideVars });
                     }
-                });
 
-            });
-
-            toRemove.forEach((decl) => {
-                const parent = decl.parent;
-                decl.remove();
-                if (parent && parent.nodes && parent.nodes.length === 0) {
-                    parent.remove();
+                    aggragateDependencies(themeMeta, themeOverrideVars || {});
+                    
                 }
-            })
+                if(themeOverrideData){ // push theme above import
+                    themeOverrideData.index = entryIndex;
+                }
+            });
+        }
 
-            themeEntry.unshift(clone);
-        });
-
-        outputCSS.splice(index + 1, 0, ...themeEntry);
+        aggragateDependencies(entryMeta, {});
+        
+        outputCSS.push(entryMeta);
     });
 
-    // extraEntries.forEach((mod) => {
-    //     if (mod.imports.length) {
-    //         outputCSS.push(generateStylableBundle(mod.imports, generate));
-    //     }
-    // })
+    // insert theme to output
+    const themePaths = Object.keys(themeAcc);
+    themePaths.reverse().forEach(themePath => {
+        const { index, themeMeta } = themeAcc[themePath];
+        outputCSS.splice(index + 1, 0, themeMeta);
+    });
 
+    // apply theme
+    applyTheme(outputCSS, themeAcc, resolver);
 
-    return outputCSS.reverse().join('\n');
-
+    // emit output CSS
+    return outputCSS.reverse()
+                    .map(meta => meta.ast.toString())
+                    .filter(entryCSS => !!entryCSS)
+                    .join('\n');
 }
 
-function collectThemesAndRemoveUnused(meta:StylableMeta, themeEntries:ThemeEntries, usedFiles:string[], entryIndex:number, generate: (entry: string) => StylableResults, overrides:Overrides, rootMeta = meta){
-    meta.imports.forEach((_import) => {
+function getSheetNSRootSelector(meta:StylableMeta):string {
+    return meta.namespace + '--' + meta.root;
+}
 
-        if (_import.theme || themeEntries[_import.from]) {
+function walkImports(meta:StylableMeta, visit:(_import:Imported) => void):void{
+    meta.imports.forEach(visit);
+}
 
-            let importOverrides = _import.overrides.reduce<Overrides>((acc, dec) => {
-                acc[dec.prop] = dec.value;
-                return acc;
-            }, {});
-            for(let overrideProp in overrides){
-                const symbol = meta.mappedSymbols[overrideProp];
-                if(symbol._kind === 'import' && symbol.import.from === _import.from && !importOverrides[overrideProp]){
-                    importOverrides[overrideProp] = overrides[overrideProp];
+function generateThemeOverrideVars(
+    srcMeta:StylableMeta, 
+    {overrides:srcImportOverrides, from:themePath}:Imported, 
+    overrides:OverrideVars):OverrideVars|null {
+    // get override vars from import
+    let importOverrides = srcImportOverrides.reduce<OverrideVars>((acc, dec) => {
+        acc[dec.prop] = dec.value;
+        return acc;
+    }, {});
+    // add context override ? there is a bug in here...
+    for(let overrideProp in overrides){
+        const symbol = srcMeta.mappedSymbols[overrideProp];
+        if(symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
+            importOverrides[overrideProp] = overrides[overrideProp];
+        }
+    }
+    return Object.keys(importOverrides).length ? importOverrides : null;
+}
+
+function applyTheme(outputCSS:StylableMeta[], themeAcc:ThemeEntries, resolver:StylableResolver) {
+    // index each output entry position
+    const pathToIndex = outputCSS.reduce<Pojo<number>>((acc, meta, index) => {
+        acc[meta.source] = index;
+        return acc;
+    }, {})
+
+    // 
+    for(let i = outputCSS.length - 1; i >= 0; --i) {
+        const outputMeta = outputCSS[i];
+        const outputAST = outputMeta.ast;
+        const outputRootSelector = getSheetNSRootSelector(outputMeta);
+
+        // get overrides from each overridden stylesheet 
+        const overrideInstructions = Object.keys(outputMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
+            const symbol = outputMeta.mappedSymbols[symbolId];
+            const isLocalVar = (symbol._kind === 'var');
+            const resolve = resolver.deepResolve(symbol);
+            
+            const originMeta = isLocalVar ? outputMeta : resolve && resolve.meta;
+            if(originMeta) {
+                const overridePath = originMeta.source;
+                const themeEntry = themeAcc[overridePath];
+                if(themeEntry){
+                    themeEntry.overrideDefs.forEach(overrideDef => {
+                        if(overrideDef.overrideVars[symbolId]){
+                            const overridePath = overrideDef.overrideRoot.source;
+                            const overrideIndex = pathToIndex[overridePath];
+                            if(!acc.overrideVarsPerDef[overridePath]){
+                                acc.overrideVarsPerDef[overridePath] = { [symbolId]: overrideDef.overrideVars[symbolId] };
+                            } else {
+                                acc.overrideVarsPerDef[overridePath][symbolId] = overrideDef.overrideVars[symbolId];
+                            }
+                            acc.overrideDefs[overrideIndex] = overrideDef;
+                        }
+                    });
                 }
             }
+            return acc;
+        }, { overrideDefs:[], overrideVarsPerDef:{} });
 
-            if (usedFiles.indexOf(_import.from) !== -1) {
-                throw new Error('theme should not be imported from JS')
-            } else if (themeEntries[_import.from]) {
-                themeEntries[_import.from].index = entryIndex;
-                if (_import.overrides.length) {
-                    themeEntries[_import.from].overrides.unshift({ srcMeta: rootMeta, declarations: importOverrides });
-                }
-            } else {
-                const { meta: depMeta } = generate(_import.from);              
-                
-                const themeEntryOverrides = Object.keys(importOverrides).length ? [{ srcMeta: rootMeta, declarations: importOverrides }] : [];
-
-                themeEntries[_import.from] = { index:entryIndex, themeMeta: depMeta, overrides: themeEntryOverrides};
-
-                collectThemesAndRemoveUnused(depMeta, themeEntries, usedFiles, entryIndex, generate, importOverrides, rootMeta);
+        // sort override instructions according to insertion order
+        const sortedOverrides:{ rootSelector:string, overrideVars:OverrideVars }[] = [];
+        for(let i = 0; i < overrideInstructions.overrideDefs.length; ++i) {
+            const overrideDef = overrideInstructions.overrideDefs[i];
+            if(overrideDef){
+                const rootSelector = getSheetNSRootSelector(overrideDef.overrideRoot);
+                const overrideVars = overrideInstructions.overrideVarsPerDef[overrideDef.overrideRoot.source];
+                sortedOverrides.push({ rootSelector , overrideVars });
             }
         }
 
-        removeUnusedRules(meta, _import, usedFiles);
-    });
+        // generate override rulesets
+        const overrideRulesets:{ruleOverride:postcss.Rule, srcRule:postcss.Rule}[] = [];
+        outputAST.walkRules(srcRule => {
+            sortedOverrides.forEach(({rootSelector, overrideVars}) => {
+                let overrideSelector = srcRule.selector;
+                if(rootSelector !== outputRootSelector) {
+                    overrideSelector = overrideSelector.replace(new RegExp(outputRootSelector), rootSelector); // scope override
+                    overrideSelector = (overrideSelector === srcRule.selector) ? '.' + rootSelector + ' ' + overrideSelector : overrideSelector; // scope globals
+                }
+                let ruleOverride = postcss.rule({selector:overrideSelector});
+                srcRule.walkDecls((decl: SDecl) => {
+                    const overriddenValue = valueReplacer(decl.sourceValue, overrideVars, (value) => {
+                        return value;
+                    });
+                    if (decl.value !== overriddenValue) {
+                        ruleOverride.append(postcss.decl({prop:decl.prop, value:overriddenValue}));
+                    }
+                });
+                if(ruleOverride.nodes && ruleOverride.nodes.length){
+                    overrideRulesets.push({ruleOverride, srcRule});
+                }
+            });
+        });
+        
+        overrideRulesets.reverse().forEach(({ruleOverride, srcRule}) => {
+            outputAST.insertAfter(srcRule, ruleOverride);
+        });
+    }
 }
 
 //createAllModulesRelations

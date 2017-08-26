@@ -38,6 +38,9 @@ export class StylableTransformer {
         this.keepValues = options.keepValues || false;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
+    setResolver(resolver:StylableResolver){
+        this.resolver = resolver;
+    }
     transform(meta: StylableMeta): StylableResults {
         
         const ast = meta.ast;

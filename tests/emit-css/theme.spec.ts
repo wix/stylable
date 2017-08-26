@@ -3,9 +3,9 @@ import { generateStylableOutput } from "../utils/generate-test-util";
 
 const expect = chai.expect;
 
-describe('output theme', () => {
+describe('emit-css: theme', () => {
 
-    it('should output theme from sheet marked for output', () => {
+    it('should output theme from used file', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -33,12 +33,12 @@ describe('output theme', () => {
 
         expect(cssOutput).to.eql([
             '.theme--root .theme--a { color:red; }',
+
             '.entry--root .entry--b { color:green; }'
         ].join('\n'));
     });
 
-
-    it('should output theme from sheet marked for output', () => {
+    it('should output once for multiple theme declarations', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -53,7 +53,7 @@ describe('output theme', () => {
                             -st-theme: true;
                             -st-from: "./theme.st.css";
                         }
-                        .b { color:green; } 
+                        .a1 { color:red; } 
                     `
                 },
                 "/entry2.st.css": {
@@ -63,27 +63,28 @@ describe('output theme', () => {
                             -st-theme: true;
                             -st-from: "./theme.st.css";
                         }
-                        .b { color:green; } 
+                        .a2 { color:green; } 
                     `
                 },
                 "/theme.st.css": {
                     namespace: 'theme',
                     content: `
-                        .a { color:red; }
+                        .x { color:blue; }
                     `
                 }
             }
         });
 
         expect(cssOutput).to.eql([
-            '.theme--root .theme--a { color:red; }',
-            '.entry2--root .entry2--b { color:green; }',
-            '.entry--root .entry--b { color:green; }'
+            '.theme--root .theme--x { color:blue; }',
+
+            '.entry2--root .entry2--a2 { color:green; }',
+
+            '.entry--root .entry--a1 { color:red; }'
         ].join('\n'));
     });
 
-
-    it('should output theme from sheet marked for output', () => {
+    it('should output theme above used file nomally importing it', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -99,15 +100,12 @@ describe('output theme', () => {
                             -st-theme: true;
                             -st-from: "./theme.st.css";
                         }
-                        .b { color:green; } 
+                        .a { color:red; } 
                     `
                 },
                 "/comp.st.css": {
                     namespace: 'comp',
                     content: `
-                        :import {                            
-                            -st-from: "./comp.st.css";
-                        }
                         .b { color:green; } 
                     `
                 },
@@ -117,140 +115,30 @@ describe('output theme', () => {
                         :import {
                             -st-from: "./theme.st.css";
                         }
-                        .b { color:green; } 
+                        .c { color:blue; } 
                     `
                 },
                 "/theme.st.css": {
                     namespace: 'theme',
                     content: `
-                        .a { color:red; }
+                        .d { color:black; }
                     `
                 }
             }
         });
 
         expect(cssOutput).to.eql([
-            '.theme--root .theme--a { color:red; }',
-            '.comp2--root .comp2--b { color:green; }',
+            '.theme--root .theme--d { color:black; }',
+
+            '.comp2--root .comp2--c { color:blue; }',
+
             '.comp--root .comp--b { color:green; }',
-            '.entry--root .entry--b { color:green; }'
+
+            '.entry--root .entry--a { color:red; }'
         ].join('\n'));
     });
 
-    // // used = [
-    // //     {id: '/a.css', used: true},
-    // //     {id: '/b.css', used: true},
-    // //     {id: '/theme.css', used: true, theme: true}
-    // // ]
-
-    // list = [
-    //     {id: '/a.js', imports: ['/a.css' ,'/b.js'], type: 'js'},
-    //     {id: '/a.css', imports: ['/theme.css'], type: 'css'},
-    //     {id: '/b.js', imports: ['/b.css'], type: 'js'},
-    //     {id: '/b.css', imports: ['/theme.css'], type: 'css'},
-    //     {id: '/theme.css', imports: ['/b.css'], type: 'css'}
-    // ]
-
-
-    //bundle.css (bottom is strong)
-    // '/button.st.css'
-    // '/form.st.css'
-
-    // it('should output theme from sheet marked for output and it\'s dependencies', () => {
-    //     const cssOutput = generateStylableOutput({
-    //         entry: '/entry.st.css',
-    //         usedFiles: [
-    //             '/form.st.css',
-    //             '/button.st.css'
-    //         ],
-    //         files: {
-    //             "/backoffice-theme.st.css": {
-    //                 namespace: 'backoffice',
-    //                 content: `
-    //                     :import {
-    //                         -st-from: "./button.st.css";
-    //                         -st-default: Button;
-    //                     }
-    //                     :vars {
-    //                         color1: gold;
-    //                         color2: silver;
-    //                     }
-    //                     :import {
-    //                         -st-theme: true;
-    //                         -st-from: "./project.st.css";
-    //                         -st-default: Project;
-    //                         -st-named: cancelButton;
-    //                     }
-    //                     Button {
-    //                           outline:value(color1);
-    //                     }
-    //                     .cancelButton { 
-    //                            background:value(color2);
-    //                     }
-    //                 `
-    //             },
-    //             "/project.st.css": {
-    //                 namespace: 'project',
-    //                 content: `
-    //                     :import {
-    //                         -st-from: "./button.st.css";
-    //                         -st-default: Button;
-    //                     }
-    //                     .cancelButton {
-    //                         -st-variant: true;
-    //                         -st-extends: Button;
-    //                         color: red;
-    //                     }
-
-    //                 `
-    //             },
-    //             "/button.st.css": {
-    //                 namespace: 'button',
-    //                 content: `
-    //                     .root {
-    //                         display: inline-block;
-    //                     }
-    //                     .content {} 
-    //                 `
-    //             },
-    //             "/form.st.css": {
-    //                 namespace: 'button',
-    //                 content: `
-    //                     :import {
-    //                          -st-from: "./button.st.css";
-    //                         -st-default: Button;
-    //                     }
-    //                     :import {
-    //                         -st-from: "./project.st.css";
-    //                         -st-named: cancelButton;
-    //                     }
-    //                     .ok {
-    //                           -st-extends: Button;
-    //                     }
-    //                     .cancel { 
-    //                          -st-extends: cancelButton;
-    //                     }
-    //                 `
-    //             },
-    //             "app.js": {
-    //                 content: `
-    //                     import Form form "./form.ts";
-
-    //                 `
-    //             }
-    //         }
-    //     });
-
-    //     expect(cssOutput).to.eql([
-    //         '.theme--root .theme--a { color:red; }',
-    //         '.entry--root .entry--b { color:green; }'
-    //     ].join('\n'));
-    // });
-
-
-
-
-    it('should output theme override from sheet marked for output', () => {
+    it('should override theme CSS', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -260,39 +148,38 @@ describe('output theme', () => {
                 "/entry.st.css": {
                     namespace: 'entry',
                     content: `
-                        
                         :import {
                             -st-theme: true;
                             -st-from: "./theme.st.css";
                             color1: gold;
                         }
-                        .b { color:green; } 
+                        .a { color:red; } 
                     `
                 },
                 "/theme.st.css": {
                     namespace: 'theme',
                     content: `
                         :vars {
-                            color1:red;
+                            color1:green;
                         }
-                        .a { color:value(color1); }
+                        .x { color:value(color1); }
+                        .y { background:value(color1); }
                     `
                 }
             }
         });
 
         expect(cssOutput).to.eql([
-            '.theme--root .theme--a { color:red; }',
-            '.entry--root .theme--a { color:gold; }',
-            '.entry--root .entry--b { color:green; }'
-        ].join('\n'));
+            '.theme--root .theme--x { color:green; }',
+            '.entry--root .theme--x { color:gold; }',
+            '.theme--root .theme--y { background:green; }',
+            '.entry--root .theme--y { background:gold; }',
 
-        // <div class="entry--root theme--root">
-        //     <div class="theme-a"></div>
-        // </div>
+            '.entry--root .entry--a { color:red; }'
+        ].join('\n'));
     });
 
-    it('should output only effected theme override', () => {
+    it('should output only overridden CSS', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -325,13 +212,14 @@ describe('output theme', () => {
 
         expect(cssOutput).to.eql([
             `.theme--root .theme--a { color:red; background:yellow; }`,
-            `.theme--root .theme--c { color:purple; }`,
             `.entry--root .theme--a { color:gold; }`,
+            `.theme--root .theme--c { color:purple; }`,
+
             `.entry--root .entry--b { color:green; }`
         ].join('\n'));
     });
 
-    it('should output theme override after theme output', () => {
+    it('should output theme override after theme output (make sure overrides are with the overridden)', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -381,7 +269,7 @@ describe('output theme', () => {
         ].join('\n'));
     });
 
-    it('should output theme override from multiple levels from sheet marked for output', () => {
+    it('should output nested themes and resolve overrides', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -431,14 +319,9 @@ describe('output theme', () => {
 
             '.entry--root .entry--c { color:green; }'
         ].join('\n'));
-
-        // <div class="entry--root theme--root">
-        //     <div class="theme-a"></div>
-        // </div>
     });
-
     
-    it.skip('xxx should output theme override from multiple levels from sheet marked for output', () => {
+    it('should output stronger theme override then used files that import it (lower in CSS)', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -451,10 +334,19 @@ describe('output theme', () => {
                     content: `
                         :import {
                             -st-theme: true;
-                            -st-from: "./theme.st.css";
+                            -st-from: "./base-theme.st.css";
                             color1: gold;
                         }
-                        .c { color:green; } 
+                        .a { color:green; } 
+                    `
+                },
+                "/base-theme.st.css": {
+                    namespace: 'baseTheme',
+                    content: `
+                        :vars {
+                            color1:red;
+                        }
+                        .c { color:value(color1); }
                     `
                 },
                 "/theme.st.css": {
@@ -465,48 +357,169 @@ describe('output theme', () => {
                             -st-from: "./base-theme.st.css";
                             -st-named: color1;
                         }
-                        .b { color:value(color1); }
                     `
                 },
                 "/comp.st.css": {
                     namespace: 'comp',
                     content: `
                         :import {
-                            -st-theme: true;
-                            -st-from: "./base-theme.st.css";
+                            -st-from: "./theme.st.css";
                             -st-named: color1;
                         }
-                        .b { color:value(color1); }
-                    `
-                },
-                "/base-theme.st.css": {
-                    namespace: 'base-theme',
-                    content: `
-                        :vars {
-                            color1:red;
-                        }
-                        .a { color:value(color1); }
+                        .d { color:value(color1); }
                     `
                 }
             }
         });
 
         expect(cssOutput).to.eql([
-            '.base-theme--root .base-theme--a { color:red; }',
-            '.entry--root .base-theme--a { color:gold; }',
+            '.comp--root .comp--d { color:red; }',
+            '.entry--root .comp--d { color:gold; }',
+            /* theme is stronger then used files that just import it */
+            '.baseTheme--root .baseTheme--c { color:red; }',
+            '.entry--root .baseTheme--c { color:gold; }',
 
-            '.comp--root .comp--b { color:red; }',
-            // '.entry--root .comp--b { color:gold; }',
+            '.entry--root .entry--a { color:green; }'
+        ].join('\n'));
+    });
 
+    it('should override entry CSS effected from the override itself', () => {
+        const cssOutput = generateStylableOutput({
+            entry: '/entry.st.css',
+            usedFiles: [
+                '/entry.st.css'
+            ],
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./theme.st.css";
+                            -st-named: color1;
+                            color1: gold;
+                        }
+                        .a { color:value(color1); } 
+                    `
+                },
+                "/theme.st.css": {
+                    namespace: 'theme',
+                    content: `
+                        :vars {
+                            color1:red;
+                        }
+                        .b { color:value(color1); }
+                    `
+                }
+            }
+        });
+
+        expect(cssOutput).to.eql([
             '.theme--root .theme--b { color:red; }',
             '.entry--root .theme--b { color:gold; }',
 
-            '.entry--root .entry--c { color:green; }'
+            '.entry--root .entry--a { color:red; }',
+            '.entry--root .entry--a { color:gold; }' /* <-- */
         ].join('\n'));
+    });
 
-        // <div class="entry--root theme--root">
-        //     <div class="theme-a"></div>
-        // </div>
+    it('should add override entry to global classes (naive)', () => {
+        const cssOutput = generateStylableOutput({
+            entry: '/entry.st.css',
+            usedFiles: [
+                '/entry.st.css'
+            ],
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./theme.st.css";
+                            color1: gold;
+                        }
+                    `
+                },
+                "/theme.st.css": {
+                    namespace: 'theme',
+                    content: `
+                        :vars {
+                            color1:green;
+                        }
+                        :global(.x) { color:value(color1); }
+                    `
+                }
+            }
+        });
+
+        expect(cssOutput).to.eql([
+            '.x { color:green; }',
+            '.entry--root .x { color:gold; }'
+        ].join('\n'));
+    });
+
+    it('should output entry point override before sub entry override', () => {
+        const cssOutput = generateStylableOutput({
+            entry: '/entry.st.css',
+            usedFiles: [
+                '/entry.st.css',
+                '/sub-entry.st.css',
+                // '/comp.st.css'
+            ],
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./theme.st.css";
+                            color1: gold;
+                        }
+                        .a { color:green; } 
+                    `
+                },
+                "/sub-entry.st.css": {
+                    namespace: 'subEntry',
+                    content: `
+                        :import {
+                            -st-theme: true;
+                            -st-from: "./theme.st.css";
+                            color1: silver;
+                        }
+                        .b { color:green; } 
+                    `
+                },
+                "/theme.st.css": {
+                    namespace: 'theme',
+                    content: `
+                        :vars {
+                            color1:red;
+                        }
+                        .x { color:value(color1); }
+                    `
+                },
+                "/comp.st.css": {
+                    namespace: 'comp',
+                    content: `
+                        :import {
+                            -st-from: "./theme.st.css";
+                            -st-named: color1;
+                        }
+                        .c { color:value(color1); }
+                    `
+                }
+            }
+        });
+
+        expect(cssOutput).to.eql([
+            '.theme--root .theme--x { color:red; }',
+            '.entry--root .theme--x { color:gold; }',
+            '.subEntry--root .theme--x { color:silver; }',
+
+            '.subEntry--root .subEntry--b { color:green; }',
+
+            '.entry--root .entry--a { color:green; }'
+        ].join('\n'));
     });
 
 })
