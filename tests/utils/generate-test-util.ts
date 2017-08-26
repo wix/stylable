@@ -13,7 +13,7 @@ import { isAbsolute } from "path";
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
 
-export function generateInfra(config:Config){
+function generateInfra(config:Config){
     const { fs, requireModule } = createMinimalFS(config);
     
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
@@ -22,7 +22,7 @@ export function generateInfra(config:Config){
         return meta;
     }, fs);
 
-    return { fs, requireModule, fileProcessor };
+    return { requireModule, fileProcessor };
 }
 
 export function generateFromMock(config: Config, resolver?:StylableResolver) {
