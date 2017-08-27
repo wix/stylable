@@ -80,7 +80,7 @@ describe('emit-css: base', () => {
         expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
     });
 
-    it('should not output un-used file', () => {
+    it('should not output unused file', () => {
         const output = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -152,7 +152,7 @@ describe('emit-css: base', () => {
         ].join('\n'));
     });
 
-    it('should not output selectors which contain un-used files roots', () => {
+    it('should not output selectors which contain unused files roots', () => {
         const output = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
