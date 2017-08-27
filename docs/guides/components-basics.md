@@ -6,15 +6,20 @@ This guide will walk you through the basics of styling components with **Stylabl
 
 Let's assume we have a `Button` component with a render function like this, we can style its different nodes using the `className` attribute.
 
-```jsx
+```tsx
 /* button.ts */
-<button className="myBtn">
-    <icon className="btnIcon"/>
-    <label className="btnLabel"/>
-</button>
+render(){
+    return (
+        <button className="myBtn">
+            <icon className="btnIcon"/>
+            <label className="btnLabel"/>
+        </button>
+    );
+}
+
 ```
 
-And in the component's Stylable CSS file `button.st.css` we will declare this:
+Now in the component's **Stylable CSS** file `button.st.css` we can declare each of the classes as a ruleset:
 
 ```css
 /* button.st.css */
@@ -23,7 +28,7 @@ And in the component's Stylable CSS file `button.st.css` we will declare this:
     background: #b0e0e6;
 }
 .btnIcon {
-    background-image: url(./assets/btnIcon.svg);
+    background-image: url('./assets/btnIcon.svg');
 }
 .btnLabel {
     font-size: 16px;
@@ -31,21 +36,29 @@ And in the component's Stylable CSS file `button.st.css` we will declare this:
 }
 ```
 
+
 ## Exposing the Component Stylable API
 
-Every **Stylable** component exposes an API that's usable by a parent component.
+**Stylable** styles are similar to a type-system. Once we have declared that something is of the type `Button`, we know its internal structure and can match its internal parts are states.
+
+Whether creating your own components or using components you imported from a 3rd party, you want to be able to style the internal parts of every component in your page or application scope. 
+
+When using **Stylable**, every component exposes an API that's usable by its parent component.
 
 The API includes:
-* The component's internal parts, any HTML element that has the className attribute, and is therefore exposed via a [stylable pseudo-class](../references/pseudo-classes.md).
-* The component's custom states, any state declared and connected to the component logic, and then styled to appear differently.
+
+* _The component's internal parts_: any HTML element that has the className attribute, and is therefore exposed via a [stylable pseudo-element](../references/pseudo-elements.md).
+ 
+* _The component's custom states_: any state connected to the component logic, and declared as a [stylable pseudo-class](../references/pseudo-classes.md).
 
 ### Creating and Exposing Internal Parts
 
-In the example above, we created a very simple button component. Now we [import](../references/imports.md) this button into our `Form` component, and the classes that we created are available to us as internal parts of the component we import. We can then style it in the scope of our `Form` to fit our needs.
+In the example above, we created a very simple button component. Now we [import](../references/imports.md) this button into a `Form` component, and the classes that we created are available to us as internal parts of the component we import. Each class is available by its name as a [stylable pseudo-element](../references/pseudo-elements.md). And we can now style our `Button` in the scope of our `Form` to fit our needs.
 
-We will take the `Button` component import it into our TypeScript file:
+We take the `Button` component and import it into our TypeScript file, also adding it to our render:
 
 ```tsx
+/* form.tsx */
 import {Button} from './button.ts'
 
 render(){
@@ -57,7 +70,7 @@ render(){
 }
 ```
 
-We will also import `Button`'s Stylable CSS into our `Form` CSS, and be able to match internal parts of the component we imported:
+We also import `Button`'s Stylable CSS into the `Form` CSS, and are then able to match internal parts of the component we imported:
 
 ```css
 /* form.st.css */
@@ -72,7 +85,7 @@ We will also import `Button`'s Stylable CSS into our `Form` CSS, and be able to 
     -st-extends: Button;
     background: cornflowerblue;
 }
-.formBtn::btnLabel {
+.formBtn::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
     color: honeydew;
     font-weight: bold;
 }
@@ -80,7 +93,21 @@ We will also import `Button`'s Stylable CSS into our `Form` CSS, and be able to 
 
 ### Creating and Exposing States
 
-In our component we can also create custom states that will be available to anyone using our component.
+In our component we can also create custom states that will be available to anyone using our component as [pseudo-classes](../references/pseudo-classes.md).
+
+A state can be used to reflect any Boolean property in our component. For example, our `Button` has a Boolean property called `clicked` (for the sake of this example, it will be triggered when it is first clicked, and never turned off).
+
+```tsx
+/* button.ts */
+render(){
+    return (
+        <button className="myBtn" style-state={this.state.clicked} onClick={this.setState({clicked:true})}>
+            <icon className="btnIcon"/>
+            <label className="btnLabel"/>
+        </button>
+    );
+}
+```
 
 ```css
 /* button.st.css */
