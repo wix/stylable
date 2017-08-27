@@ -45,14 +45,15 @@ In the example above, we created a very simple button component. Now we [import]
 
 We will take the `Button` component import it into our TypeScript file:
 
-```jsx
+```tsx
 import {Button} from './button.ts'
 
 render(){
     return (
     <div className="myForm">
         <Button className="formBtn">
-    </div>);
+    </div>
+    );
 }
 ```
 
