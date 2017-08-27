@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
-    "build": "tsc && ncp ./modules ./dist/modules",
+    "build": "tsc",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
     "prepublish": "npm run build",
     "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
