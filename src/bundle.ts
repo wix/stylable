@@ -18,38 +18,42 @@ type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate pa
 export type Generate = (entry: string) => StylableResults;
 
 export function bundle(usedFiles:string[], resolver:StylableResolver, generate:Generate):{css:string} {
+    const bundler = new Bundler(resolver, generate);
+
+    usedFiles.forEach(path => bundler.addUsedFile(path));
+
     return {
-        css:generateOutputCSS(usedFiles, resolver, generate)
+        css: bundler.generateCSS()
     };
 }
+export class Bundler {
+    private themeAcc: ThemeEntries = {};
+    private outputCSS: StylableMeta[] = [];
+    constructor(
+        private resolver:StylableResolver, 
+        private generate:Generate
+    ){}
 
-function generateOutputCSS(usedFiles: string[], resolver:StylableResolver, generate: Generate) {
-
-    const themeAcc:ThemeEntries  = {};
-    const outputCSS: StylableMeta[] = [];
-
-    // aggregate used files: insert used files to output, collect theme files, remove unused imports CSS
-    usedFiles.map((path, entryIndex) => {
-        const { meta:entryMeta } = generate(path);
-
-        function aggragateDependencies(srcMeta:StylableMeta, overrideVars:OverrideVars){
+    public addUsedFile(path:string):void {
+        const entryIndex = this.outputCSS.length;
+        const { meta:entryMeta } = this.generate(path);
+        const aggragateDependencies = (srcMeta:StylableMeta, overrideVars:OverrideVars) => {
             srcMeta.imports.forEach(importRequest => {
                 if(!importRequest.from.match(/.css$/)){
                     return;
-                }
-                removeUnusedRules(srcMeta, importRequest, usedFiles);                
+                }       
 
                 const isImportTheme = !!importRequest.theme;
-                let themeOverrideData = themeAcc[importRequest.from]; // some entry already imported as theme
+                let themeOverrideData = this.themeAcc[importRequest.from]; // some entry already imported as theme
 
-                const { meta: importMeta } = generate(importRequest.from);
+                const { meta: importMeta } = this.generate(importRequest.from);
                 let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
                     // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
                     //     throw new Error('theme should not be imported from JS')
                     // }
-                    themeOverrideData = themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, themeMeta: importMeta, overrideDefs: []};
+                    themeOverrideData = this.themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, themeMeta: importMeta, overrideDefs: []};
                     themeOverrideVars = generateThemeOverrideVars(srcMeta, importRequest, overrideVars);
 
                     if(themeOverrideVars){
@@ -65,72 +69,68 @@ function generateOutputCSS(usedFiles: string[], resolver:StylableResolver, gener
 
         aggragateDependencies(entryMeta, {});
         
-        outputCSS.push(entryMeta);
-    });
-
-    // insert theme to output
-    const themePaths = Object.keys(themeAcc);
-    themePaths.reverse().forEach(themePath => {
-        const { index, themeMeta } = themeAcc[themePath];
-        outputCSS.splice(index + 1, 0, themeMeta);
-    });
-
-    // apply theme
-    applyTheme(outputCSS, themeAcc, resolver);
-
-    // emit output CSS
-    return outputCSS.reverse()
-                    .map(meta => meta.ast.toString())
-                    .filter(entryCSS => !!entryCSS)
-                    .join('\n');
-}
-
-function getSheetNSRootSelector(meta:StylableMeta):string {
-    return meta.namespace + '--' + meta.root;
-}
-
-function generateThemeOverrideVars(
-    srcMeta:StylableMeta, 
-    {overrides:srcImportOverrides, from:themePath}:Imported, 
-    overrides:OverrideVars):OverrideVars|null {
-    // get override vars from import
-    let importOverrides = srcImportOverrides.reduce<OverrideVars>((acc, dec) => {
-        acc[dec.prop] = dec.value;
-        return acc;
-    }, {});
-    // add context override ? there is a bug in here...
-    for(let overrideProp in overrides){
-        const symbol = srcMeta.mappedSymbols[overrideProp];
-        if(symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
-            importOverrides[overrideProp] = overrides[overrideProp];
-        }
+        this.outputCSS.push(entryMeta);
     }
-    return Object.keys(importOverrides).length ? importOverrides : null;
-}
 
-function applyTheme(outputCSS:StylableMeta[], themeAcc:ThemeEntries, resolver:StylableResolver) {
-    // index each output entry position
-    const pathToIndex = outputCSS.reduce<Pojo<number>>((acc, meta, index) => {
-        acc[meta.source] = index;
-        return acc;
-    }, {})
+    public getDependencyPaths():string[] {
+        const results = this.outputCSS.map(meta => meta.source);
+        const themePaths = Object.keys(this.themeAcc);
+        themePaths.reverse().forEach(themePath => {
+            const { index, themeMeta } = this.themeAcc[themePath];
+            results.splice(index + 1, 0, themeMeta.source);
+        });
+        return results;
+    }
 
-    // 
-    for(let i = outputCSS.length - 1; i >= 0; --i) {
-        const outputMeta = outputCSS[i];
-        const outputAST = outputMeta.ast;
-        const outputRootSelector = getSheetNSRootSelector(outputMeta);
+    public generateCSS(usedSheetPaths:string[] = this.outputCSS.map(meta => meta.source)):string {
+        let outputMetaList = this.outputCSS.concat();
+
+        // insert theme to output
+        const themePaths = Object.keys(this.themeAcc);
+        themePaths.reverse().forEach(themePath => {
+            const { index, themeMeta } = this.themeAcc[themePath];
+            outputMetaList.splice(index + 1, 0, themeMeta);
+        });
+
+        // index each output entry position
+        const pathToIndex = outputMetaList.reduce<Pojo<number>>((acc, meta, index) => {
+            acc[meta.source] = index;
+            return acc;
+        }, {})
+
+        // clean unused and add overrides
+        outputMetaList = outputMetaList.map(entryMeta => {
+            entryMeta = {...entryMeta, ast:entryMeta.ast.clone()};
+            this.cleanUnused(entryMeta, usedSheetPaths);
+            this.applyOverrides(entryMeta, pathToIndex);
+            return entryMeta;
+        });         
+
+        // emit output CSS
+        return outputMetaList.reverse()
+                .map(meta => meta.ast.toString())
+                .filter(entryCSS => !!entryCSS)
+                .join('\n');
+    }
+
+    private cleanUnused(meta:StylableMeta, usedPaths:string[]):void {
+        meta.imports.forEach(importRequest => removeUnusedRules(meta, importRequest, usedPaths));
+    }
+
+    private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>):void {
+        const outputAST = entryMeta.ast;
+        const outputRootSelector = getSheetNSRootSelector(entryMeta);
 
         // get overrides from each overridden stylesheet 
-        const overrideInstructions = Object.keys(outputMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
-            const symbol = outputMeta.mappedSymbols[symbolId];
+        const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
+            const symbol = entryMeta.mappedSymbols[symbolId];
             const isLocalVar = (symbol._kind === 'var');
-            const resolve = resolver.deepResolve(symbol);
+            const resolve = this.resolver.deepResolve(symbol);
             //ToDo: check resolve._kind === 'css'
-            const originMeta = isLocalVar ? outputMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
+            const originMeta = isLocalVar ? entryMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
             if(originMeta) {
                 const overridePath = originMeta.source;
-                const themeEntry = themeAcc[overridePath];
+                const themeEntry = this.themeAcc[overridePath];
                 if(themeEntry){
                     themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
                         if(overrideDef.overrideVars[symbolId]){
@@ -190,6 +190,28 @@ function applyTheme(outputCSS:StylableMeta[], themeAcc:ThemeEntries, resolver:St
     }
 }
 
+function getSheetNSRootSelector(meta:StylableMeta):string {
+    return meta.namespace + '--' + meta.root;
+}
+
+function generateThemeOverrideVars(
+    srcMeta:StylableMeta, 
+    {overrides:srcImportOverrides, from:themePath}:Imported, 
+    overrides:OverrideVars):OverrideVars|null {
+    // get override vars from import
+    let importOverrides = srcImportOverrides.reduce<OverrideVars>((acc, dec) => {
+        acc[dec.prop] = dec.value;
+        return acc;
+    }, {});
+    // add context override ? there is a bug in here...
+    for(let overrideProp in overrides){
+        const symbol = srcMeta.mappedSymbols[overrideProp];
+        if(symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
+            importOverrides[overrideProp] = overrides[overrideProp];
+        }
+    }
+    return Object.keys(importOverrides).length ? importOverrides : null;
+}
 
 //createAllModulesRelations
 //expendRelationsToDeepImports
