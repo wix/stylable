@@ -84,7 +84,7 @@ describe('emit-css: theme', () => {
         ].join('\n'));
     });
 
-    it('should output theme above used file nomally importing it', () => {
+    it('should output theme above used file normally importing it', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -321,7 +321,7 @@ describe('emit-css: theme', () => {
         ].join('\n'));
     });
     
-    it('should output stronger theme override then used files that import it (lower in CSS)', () => {
+    it('should output theme import above any component importing it (weaker)', () => {
         const cssOutput = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -373,11 +373,11 @@ describe('emit-css: theme', () => {
         });
 
         expect(cssOutput).to.eql([
-            '.comp--root .comp--d { color:red; }',
-            '.entry--root .comp--d { color:gold; }',
-            /* theme is stronger then used files that just import it */
             '.baseTheme--root .baseTheme--c { color:red; }',
             '.entry--root .baseTheme--c { color:gold; }',
+
+            '.comp--root .comp--d { color:red; }',
+            '.entry--root .comp--d { color:gold; }',
 
             '.entry--root .entry--a { color:green; }'
         ].join('\n'));
@@ -463,8 +463,7 @@ describe('emit-css: theme', () => {
             entry: '/entry.st.css',
             usedFiles: [
                 '/entry.st.css',
-                '/sub-entry.st.css',
-                // '/comp.st.css'
+                '/sub-entry.st.css'
             ],
             files: {
                 "/entry.st.css": {
@@ -496,16 +495,6 @@ describe('emit-css: theme', () => {
                             color1:red;
                         }
                         .x { color:value(color1); }
-                    `
-                },
-                "/comp.st.css": {
-                    namespace: 'comp',
-                    content: `
-                        :import {
-                            -st-from: "./theme.st.css";
-                            -st-named: color1;
-                        }
-                        .c { color:value(color1); }
                     `
                 }
             }

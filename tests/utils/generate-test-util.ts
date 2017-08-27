@@ -13,7 +13,7 @@ import { isAbsolute } from "path";
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
 
-function generateInfra(config:Config){
+function generateInfra(config:Config){ // ToDo: return resolver, transformer , generate function
     const { fs, requireModule } = createMinimalFS(config);
     
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
@@ -60,7 +60,7 @@ export function generateStylableOutput(config: Config) {
     }
 
     const { requireModule, fileProcessor } = generateInfra(config);
-    const resolver = new StylableResolver(fileProcessor, requireModule);
+    const resolver = new StylableResolver(fileProcessor, requireModule); // ToDo: move to infra
 
     return generateStylableBundle(config.usedFiles, resolver, (entry) => {
         return generateFromMock({ ...config, entry }, resolver);
@@ -87,30 +87,33 @@ export function generateStylableBundle(usedFiles: string[], resolver:StylableRes
         const { meta:entryMeta } = generate(path);
 
         function aggragateDependencies(srcMeta:StylableMeta, overrideVars:OverrideVars){
-            walkImports(srcMeta, metaImport => {
-                removeUnusedRules(srcMeta, metaImport, usedFiles);
+            walkImports(srcMeta, importRequest => {
+                if(!importRequest.from.match(/.css$/)){
+                    return;
+                }
+                removeUnusedRules(srcMeta, importRequest, usedFiles);                
 
-                const isImportTheme = !!metaImport.theme;
-                let themeOverrideData = themeAcc[metaImport.from]; // some entry already imported as theme
+                const isImportTheme = !!importRequest.theme;
+                let themeOverrideData = themeAcc[importRequest.from]; // some entry already imported as theme
+
+                const { meta: importMeta } = generate(importRequest.from);
+                let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
                     // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
                     //     throw new Error('theme should not be imported from JS')
                     // }
-                    const { meta: themeMeta } = generate(metaImport.from);
-                    themeOverrideData = themeAcc[metaImport.from] = themeOverrideData || { index:entryIndex, themeMeta: themeMeta, overrideDefs: []};
-                    let themeOverrideVars = generateThemeOverrideVars(srcMeta, metaImport, overrideVars);
+                    themeOverrideData = themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, themeMeta: importMeta, overrideDefs: []};
+                    themeOverrideVars = generateThemeOverrideVars(srcMeta, importRequest, overrideVars);
 
                     if(themeOverrideVars){
                         themeOverrideData.overrideDefs.unshift({ overrideRoot:entryMeta, overrideVars: themeOverrideVars });
                     }
-
-                    aggragateDependencies(themeMeta, themeOverrideVars || {});
-                    
                 }
                 if(themeOverrideData){ // push theme above import
                     themeOverrideData.index = entryIndex;
                 }
+                aggragateDependencies(importMeta, themeOverrideVars || {});
             });
         }
 
@@ -181,13 +184,13 @@ function applyTheme(outputCSS:StylableMeta[], themeAcc:ThemeEntries, resolver:St
             const symbol = outputMeta.mappedSymbols[symbolId];
             const isLocalVar = (symbol._kind === 'var');
             const resolve = resolver.deepResolve(symbol);
-            
-            const originMeta = isLocalVar ? outputMeta : resolve && resolve.meta;
+            //ToDo: check resolve._kind === 'css'
+            const originMeta = isLocalVar ? outputMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
             if(originMeta) {
                 const overridePath = originMeta.source;
                 const themeEntry = themeAcc[overridePath];
                 if(themeEntry){
-                    themeEntry.overrideDefs.forEach(overrideDef => {
+                    themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
                         if(overrideDef.overrideVars[symbolId]){
                             const overridePath = overrideDef.overrideRoot.source;
                             const overrideIndex = pathToIndex[overridePath];
