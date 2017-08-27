@@ -98,11 +98,11 @@ A state can be used to reflect any Boolean property in our component. For exampl
 
 ```tsx
 /* button.ts */
-render(){
+render () {
     return (
-        <button className="myBtn" style-state={this.state.clicked} onClick={this.setState({clicked:true})}>
-            <icon className="btnIcon"/>
-            <label className="btnLabel"/>
+        <button className="myBtn" style-state={this.state.clicked} onClick={()=>this.setState({clicked:true})}>
+            <div className="btnIcon"/>
+            <span className="btnLabel">Click Here!</span>
         </button>
     );
 }
