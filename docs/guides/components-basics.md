@@ -12,7 +12,7 @@ render () {
     return (
         <button className="myBtn">
             <div className="btnIcon"/>
-            <span className="btnLabel">Click Here!</span>
+            <span className="btnLabel">Submit</span>
         </button>
     );
 }
@@ -62,9 +62,9 @@ import {Button} from './button.ts'
 
 render(){
     return (
-    <div className="myForm">
-        <Button className="formBtn">
-    </div>
+        <div className="myForm">
+            <Button className="formBtn">
+        </div>
     );
 }
 ```
