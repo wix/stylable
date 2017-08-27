@@ -8,15 +8,14 @@ Let's assume we have a `Button` component with a render function like this, we c
 
 ```tsx
 /* button.ts */
-render(){
+render () {
     return (
         <button className="myBtn">
-            <icon className="btnIcon"/>
-            <label className="btnLabel"/>
+            <div className="btnIcon"/>
+            <span className="btnLabel">Click Here!</span>
         </button>
     );
 }
-
 ```
 
 Now in the component's **Stylable CSS** file `button.st.css` we can declare each of the classes as a ruleset:
