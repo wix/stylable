@@ -10,7 +10,7 @@ Let's assume we have a `Button` component with a render function like this, we c
 /* button.ts */
 render () {
     return (
-        <button className="myBtn">
+        <button className="root">
             <div className="btnIcon"/>
             <span className="btnLabel">Submit</span>
         </button>
@@ -22,7 +22,7 @@ Now in the component's **Stylable CSS** file `button.st.css` we can declare each
 
 ```css
 /* button.st.css */
-.myBtn {
+.root {
     -st-extends: root; 
     background: #b0e0e6;
 }
@@ -38,21 +38,21 @@ Now in the component's **Stylable CSS** file `button.st.css` we can declare each
 
 ## Exposing the Component Stylable API
 
-**Stylable** styles are similar to a type-system. Once we have declared that something is of the type `Button`, we know its internal structure and can match its internal parts are states.
+**Stylable** styles are similar to a type-system. Once we have declared that something is of the type `Button`, we know its internal structure and can match its internal parts and states.
 
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to style the internal parts of every component in your page or application scope. 
 
-When using **Stylable**, every component exposes an API that's usable by its parent component.
+When using **Stylable**, every component exposes an API that's usable by its parent components.
 
 The API includes:
 
-* _The component's internal parts_: any HTML element that has the className attribute, and is therefore exposed via a [stylable pseudo-element](../references/pseudo-elements.md).
+* _The component's internal parts_: any HTML element that has the className attribute, and is therefore exposed via a [Stylable pseudo-element](../references/pseudo-elements.md).
  
-* _The component's custom states_: any state connected to the component logic, and declared as a [stylable pseudo-class](../references/pseudo-classes.md).
+* _The component's custom states_: any state connected to the component logic, and declared as a [Stylable pseudo-class](../references/pseudo-classes.md).
 
 ### Creating and Exposing Internal Parts
 
-In the example above, we created a very simple button component. Now we [import](../references/imports.md) this button into a `Form` component, and the classes that we created are available to us as internal parts of the component we import. Each class is available by its name as a [stylable pseudo-element](../references/pseudo-elements.md). And we can now style our `Button` in the scope of our `Form` to fit our needs.
+In the example above, we created a very simple button component. Now we [import](../references/imports.md) this button into a `Form` component, and the classes that we created are available to us as internal parts of the component we import. Each class is available by its name as a [Stylable pseudo-element](../references/pseudo-elements.md). And we can now style our `Button` in the scope of our `Form` to fit our needs.
 
 We take the `Button` component and import it into our TypeScript file, also adding it to our render:
 
@@ -62,7 +62,7 @@ import {Button} from './button.ts'
 
 render(){
     return (
-        <div className="myForm">
+        <div className="root">
             <Button className="formBtn">
         </div>
     );
@@ -77,14 +77,14 @@ We also import `Button`'s Stylable CSS into the `Form` CSS, and are then able to
     -st-from: './button.st.css';
     -st-default: Button;
 }
-.myForm {
+.root {
     background: floralwhite;
 }
 .formBtn {
     -st-extends: Button;
     background: cornflowerblue;
 }
-.formBtn::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
+.root::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
     color: honeydew;
     font-weight: bold;
 }
@@ -100,7 +100,7 @@ A state can be used to reflect any Boolean property in our component. For exampl
 /* button.ts */
 render () {
     return (
-        <button className="myBtn" style-state={this.state.clicked} onClick={()=>this.setState({clicked:true})}>
+        <button className="root" style-state={this.state.clicked} onClick={()=>this.setState({clicked:true})}>
             <div className="btnIcon"/>
             <span className="btnLabel">Click Here!</span>
         </button>
@@ -110,7 +110,7 @@ render () {
 
 ```css
 /* button.st.css */
-.myBtn {
+.root {
     -st-extends: root; 
     -st-states: clicked;
     background: #b0e0e6;
@@ -122,7 +122,7 @@ render () {
     font-size: 16px;
     color: rgba(81, 12, 68, 1.0)
 }
-:clicked { /* places the state on the root of the component */
+.root:clicked { /* places the state on the root of the component */
     box-shadow: 2px 2px 2px 1px darkslateblue;
 }
 ```
@@ -131,7 +131,7 @@ We can then match this state of `Button` in our `Form` this way:
 
 ```css
 /* form.st.css */
-.myForm {
+.root {
     background: floralwhite;
 }
 .formBtn {
