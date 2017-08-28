@@ -11,7 +11,7 @@ type OverrideVars = Pojo<string>;
 type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
 interface ThemeOverrideData {
     index: number;
-    themeMeta: StylableMeta;
+    path: string;
     overrideDefs: OverrideDef[];
 }
 type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
@@ -28,7 +28,7 @@ export function bundle(usedFiles:string[], resolver:StylableResolver, generate:G
 }
 export class Bundler {
     private themeAcc: ThemeEntries = {};
-    private outputCSS: StylableMeta[] = [];
+    private outputCSS: string[] = [];
     constructor(
         private resolver:StylableResolver, 
         private generate:Generate
@@ -53,7 +53,7 @@ export class Bundler {
                     // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
                     //     throw new Error('theme should not be imported from JS')
                     // }
-                    themeOverrideData = this.themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, themeMeta: importMeta, overrideDefs: []};
+                    themeOverrideData = this.themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, path: importMeta.source, overrideDefs: []};
                     themeOverrideVars = generateThemeOverrideVars(srcMeta, importRequest, overrideVars);
 
                     if(themeOverrideVars){
@@ -69,28 +69,24 @@ export class Bundler {
 
         aggragateDependencies(entryMeta, {});
         
-        this.outputCSS.push(entryMeta);
+        this.outputCSS.push(entryMeta.source);
     }
 
-    public getDependencyPaths():string[] {
-        const results = this.outputCSS.map(meta => meta.source);
-        const themePaths = Object.keys(this.themeAcc);
-        themePaths.reverse().forEach(themePath => {
-            const { index, themeMeta } = this.themeAcc[themePath];
-            results.splice(index + 1, 0, themeMeta.source);
-        });
+    public getDependencyPaths(excludeTheme:boolean = false):string[] {
+        const results = this.outputCSS.concat();
+        if(excludeTheme === false) {
+            const themePaths = Object.keys(this.themeAcc);
+            themePaths.reverse().forEach(themePath => {
+                const { index, path } = this.themeAcc[themePath];
+                results.splice(index + 1, 0, path);
+            });
+        }
         return results;
     }
 
-    public generateCSS(usedSheetPaths:string[] = this.outputCSS.map(meta => meta.source)):string {
-        let outputMetaList = this.outputCSS.concat();
-
-        // insert theme to output
-        const themePaths = Object.keys(this.themeAcc);
-        themePaths.reverse().forEach(themePath => {
-            const { index, themeMeta } = this.themeAcc[themePath];
-            outputMetaList.splice(index + 1, 0, themeMeta);
-        });
+    public generateCSS(usedSheetPaths:string[] = this.getDependencyPaths(true)):string {
+        // collect stylesheet meta list
+        let outputMetaList = this.getDependencyPaths(false).map(path => this.generate(path).meta);
 
         // index each output entry position
         const pathToIndex = outputMetaList.reduce<Pojo<number>>((acc, meta, index) => {
@@ -116,7 +112,12 @@ export class Bundler {
     private cleanUnused(meta:StylableMeta, usedPaths:string[]):void {
         meta.imports.forEach(importRequest => removeUnusedRules(meta, importRequest, usedPaths));
     }
-
+    // resolveFrom(_import){
+    //     return {
+    //         ..._import
+    //         from: this.resolvePath(_import.from)
+    //     }
+    // }
     private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>):void {
         const outputAST = entryMeta.ast;
         const outputRootSelector = getSheetNSRootSelector(entryMeta);
