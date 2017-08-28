@@ -126,6 +126,7 @@ export class Bundler {
             const symbol = entryMeta.mappedSymbols[symbolId];
             const isLocalVar = (symbol._kind === 'var');
             const resolve = this.resolver.deepResolve(symbol);
+            const varSourceId = isLocalVar ? symbolId : resolve && resolve.symbol.name
             //ToDo: check resolve._kind === 'css'
             const originMeta = isLocalVar ? entryMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
             if(originMeta) {
@@ -133,13 +134,13 @@ export class Bundler {
                 const themeEntry = this.themeAcc[overridePath];
                 if(themeEntry){
                     themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
-                        if(overrideDef.overrideVars[symbolId]){
+                        if(overrideDef.overrideVars[varSourceId]){
                             const overridePath = overrideDef.overrideRoot.source;
                             const overrideIndex = pathToIndex[overridePath];
                             if(!acc.overrideVarsPerDef[overridePath]){
-                                acc.overrideVarsPerDef[overridePath] = { [symbolId]: overrideDef.overrideVars[symbolId] };
+                                acc.overrideVarsPerDef[overridePath] = { [symbolId]: overrideDef.overrideVars[varSourceId] };
                             } else {
-                                acc.overrideVarsPerDef[overridePath][symbolId] = overrideDef.overrideVars[symbolId];
+                                acc.overrideVarsPerDef[overridePath][symbolId] = overrideDef.overrideVars[varSourceId];
                             }
                             acc.overrideDefs[overrideIndex] = overrideDef;
                         }
@@ -203,11 +204,11 @@ function generateThemeOverrideVars(
         acc[dec.prop] = dec.value;
         return acc;
     }, {});
-    // add context override ? there is a bug in here...
+    // add context override
     for(let overrideProp in overrides){
         const symbol = srcMeta.mappedSymbols[overrideProp];
         if(symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
-            importOverrides[overrideProp] = overrides[overrideProp];
+            importOverrides[symbol.name] = overrides[overrideProp];
         }
     }
     return Object.keys(importOverrides).length ? importOverrides : null;

@@ -327,6 +327,58 @@ describe('emit-css: theme', () => {
             ].join('\n'));
         });
 
+        it('should override import as vars', () => {
+            const cssOutput = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    "/entry.st.css": {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                colorX: gold;
+                            }
+                            .c { color:green; } 
+                        `
+                    },
+                    "/theme.st.css": {
+                        namespace: 'theme',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./base-theme.st.css";
+                                -st-named: color1 as colorX;
+                            }
+                            .b { color:value(colorX); }
+                        `
+                    },
+                    "/base-theme.st.css": {
+                        namespace: 'base-theme',
+                        content: `
+                            :vars {
+                                color1:red;
+                            }
+                            .a { color:value(color1); }
+                        `
+                    }
+                }
+            });
+    
+            expect(cssOutput).to.eql([
+                '.base-theme--root .base-theme--a { color:red; }',
+                '.entry--root .base-theme--a { color:gold; }',
+    
+                '.theme--root .theme--b { color:red; }',
+                '.entry--root .theme--b { color:gold; }',
+    
+                '.entry--root .entry--c { color:green; }'
+            ].join('\n'));
+        });
+
         it('should add override CSS to any stylesheet using the overridden vars', () => {
             const cssOutput = generateStylableOutput({
                 entry: '/entry.st.css',
