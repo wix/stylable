@@ -119,7 +119,7 @@ render () {
     background-image: url(./assets/btnIcon.svg);
 }
 .btnLabel {
-    font-size: 16px;
+    font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
 .root:clicked { /* places the state on the root of the component */
