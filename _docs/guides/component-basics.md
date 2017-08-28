@@ -52,7 +52,7 @@ import {Button} from './button.ts'
 render() {
     return ( 
         <div className="root">
-            <Button className="formBtn">
+            <Button className="formBtn"/>
         </div>
     );
 }
