@@ -4,7 +4,7 @@ This guide will walk you through the basics of styling components with **Stylabl
 
 ## Styling A Component 
 
-Let's assume we have a `Button` component with a render function like this, we can style its different nodes using the `className` attribute.
+Let's assume we have a `Button` component with a render function like this, we can style its different HTML elements using the `className` attribute.
 
 ```tsx
 /* button.ts */
