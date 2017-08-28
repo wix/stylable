@@ -124,7 +124,10 @@ export class StylableResolver {
         return resolved;
     }
     resolveExtends(meta: StylableMeta, className: string): CSSResolve[] {
-        
+        if (!meta.classes[className]) {
+            return []
+        }
+
         let extendPath = [];
         const resolvedClass = this.resolveClass(meta, meta.classes[className])
 
