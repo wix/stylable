@@ -30,7 +30,7 @@ Now in the component's **Stylable CSS** file `button.st.css` we can declare each
     background-image: url('./assets/btnIcon.svg');
 }
 .btnLabel {
-    font-size: 16px;
+    font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
 ```
