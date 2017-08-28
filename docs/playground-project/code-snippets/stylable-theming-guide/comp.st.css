@@ -1,0 +1,12 @@
+@namespace "Comp";
+:import {
+    -st-from: "./backoffice-theme.st.css";
+    -st-named: cancelButton;
+}
+.myBtn {
+    -st-extends: cancelButton;
+    color: maroon;
+}
+.cancelButton {
+    color: fuchsia;
+}

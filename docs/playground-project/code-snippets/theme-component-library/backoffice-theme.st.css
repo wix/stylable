@@ -1,0 +1,13 @@
+@namespace "BackofficeTheme";
+:vars {
+    pink1: #ffb3ff;
+    pink2: #ff00ff;
+}
+:import {
+    -st-from: '../components/project.st.css';
+    -st-default: Project;
+    -st-named: cancelButton, submitButton, horizontalSlider, verticalSlider;
+}
+.cancelButton {
+    background: value(pink1);
+}

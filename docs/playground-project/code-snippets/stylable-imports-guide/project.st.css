@@ -1,0 +1,10 @@
+@namespace "Project";
+:import {
+    -st-from: "./button.st.css";
+    -st-default: Button;
+}
+.cancelButton {
+    -st-variant: true;
+    -st-extends: Button;
+    color: red;
+}
