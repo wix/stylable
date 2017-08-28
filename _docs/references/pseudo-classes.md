@@ -95,7 +95,7 @@ You can use this feature to define states even if the existing components you ar
 
 ## Enable custom pseudo-classes
 
-Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. They are declared on the element using the attribute `style-state`.
+Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. 
 
 **Stylable** offers [React CSS state integration](./react-integration.md) to help components manage custom pseudo-classes easily.
 
@@ -104,7 +104,7 @@ Custom pseudo-classes are implemented using `data-*` attributes and need additio
 ```jsx
 /* render of stylable component */
 render() {
-    return <div style-state={{
+    return <div style-state={{ /* used in stylable-react-integration to implement pseudo-classes */
         toggled:true,
         selected:false
     }} ></div>
