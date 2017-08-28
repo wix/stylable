@@ -13,7 +13,7 @@ We recommend creating a `project.st.css` file in the `src` directory of your com
 ```css
 /* project.st.css */
 @namespace "Project";
-:vars { /* see the Declaring Vars section */
+:vars {
     red1: #F012BE;
     red2: #FF4136;
     grey1: #DDDDDD;
@@ -23,14 +23,6 @@ We recommend creating a `project.st.css` file in the `src` directory of your com
 :import {
     -st-from: './button/button.st.css';
     -st-default: Button;
-}
-:import {
-    -st-from: './slider/slider.st.css';
-    -st-default: Slider;
-}
-:import {
-    -st-from: './number-input/number-input.st.css';
-    -st-default: NumberInput;
 }
 .cancelButton {
     -st-extends: Button;
@@ -42,14 +34,6 @@ We recommend creating a `project.st.css` file in the `src` directory of your com
     -st-variant: true;
     color: value(grey1);
     background: value(blue1);
-}
-.horizontalSlider {
-    -st-extends: Slider;
-    -st-variant: true;
-}
-.verticalSlider {
-    -st-extends: Slider;
-    -st-variant: true;
 }
 ```
 
@@ -94,11 +78,22 @@ One of the markings of a theme is a standardization of styles across the applica
 For example, the `cancelButton` variant of the `Button` component, will want to use the tone of Red used elsewhere in the application theme.
 
 ```css
+@namespace "Button";
 :vars {
     wonderRed: #F012BE;
 }
+.root {
+    background: #b0e0e6;
+}
+.icon {
+    background-image: url(./assets/btnIcon.svg);
+}
+.label {
+    font-size: 16px;
+    color: rgba(81, 12, 68, 1.0)
+}
 .cancelButton {
-    -st-extends: Button;
+    -st-extends: root;
     -st-variant: true;
     color: value(wonderRed);
 }
@@ -111,7 +106,7 @@ Lastly, in our theme, we will import our `project.st.css` and apply theming to i
 The structure of this file will be very similar to the `project.st.css`, and set all values specific to it. 
 
 ```css
-@namespace "BackofficeTheme"
+@namespace "BackofficeTheme";
 :vars {
     pink1: #ffb3ff;
     pink2: #ff00ff;
