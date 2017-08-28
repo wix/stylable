@@ -87,6 +87,10 @@ export class Bundler {
         return results;
     }
 
+    public getUsedFilePaths():string[] {
+        return this.getDependencyPaths({entries:this.outputCSS, themeEntries:{}});
+    }
+
     public generateCSS(usedSheetPaths?:string[]):string {
         // collect stylesheet meta list
         let outputMetaList:StylableMeta[];
