@@ -1,8 +1,8 @@
-import * as chai from "chai";
-import { generateStylableOutput } from "../utils/generate-test-util";
-const expect = chai.expect;
+import { expect } from "chai";
+import { generateStylableOutput, generateInfra, createProcess, createTransform } from "../utils/generate-test-util";
+import { Bundler } from "../../src";
 
-describe('emit-css: base', () => {
+describe('bundle: base', () => {
 
     it('should output used file as css bundle', () => {
         const output = generateStylableOutput({
@@ -190,6 +190,74 @@ describe('emit-css: base', () => {
         expect(output).to.eql([
             `.entry--root .entry--c { color:gold; }`
         ].join('\n'));
+    });
+
+    describe('specific used files', () => {
+        
+        it('should be output from larger collection', () => {
+            const { resolver, fileProcessor, requireModule } = generateInfra({
+                files:{
+                    "/entry-a.st.css": {
+                        namespace: 'entryA',
+                        content: `
+                        .a { color:red; } 
+                        `
+                    },
+                    "/entry-b.st.css": {
+                        namespace: 'entryB',
+                        content: `
+                        .b { color:green; } 
+                        `
+                    }
+                }
+            });
+            const bundler = new Bundler(resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule));
+            bundler.addUsedFile('/entry-a.st.css');
+            bundler.addUsedFile('/entry-b.st.css');
+
+            const entryA_output = bundler.generateCSS(['/entry-a.st.css']);
+            const entryB_output = bundler.generateCSS(['/entry-b.st.css']);
+
+            expect(entryA_output).to.eql([
+                `.entryA--root .entryA--a { color:red; }`
+            ].join('\n'));
+            expect(entryB_output).to.eql([
+                `.entryB--root .entryB--b { color:green; }`
+            ].join('\n'));
+        });
+
+        it('should be output with relevent theme', () => {
+            const { resolver, fileProcessor, requireModule } = generateInfra({
+                files:{
+                    "/entry-a.st.css": {
+                        namespace: 'entryA',
+                        content: `
+                        .a { color:red; } 
+                        `
+                    },
+                    "/entry-b.st.css": {
+                        namespace: 'entryB',
+                        content: `
+                        .b { color:green; } 
+                        `
+                    }
+                }
+            });
+            const bundler = new Bundler(resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule));
+            bundler.addUsedFile('/entry-a.st.css');
+            bundler.addUsedFile('/entry-b.st.css');
+
+            const entryA_output = bundler.generateCSS(['/entry-a.st.css']);
+            const entryB_output = bundler.generateCSS(['/entry-b.st.css']);
+
+            expect(entryA_output).to.eql([
+                `.entryA--root .entryA--a { color:red; }`
+            ].join('\n'));
+            expect(entryB_output).to.eql([
+                `.entryB--root .entryB--b { color:green; }`
+            ].join('\n'));
+        });
+
     });
 
 })

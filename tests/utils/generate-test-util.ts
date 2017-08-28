@@ -1,5 +1,5 @@
 import { Pojo } from "../../src/types";
-import { cachedProcessFile } from "../../src/cached-process-file";
+import { cachedProcessFile, FileProcessor } from "../../src/cached-process-file";
 import { StylableMeta, process } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
 import { StylableTransformer, StylableResults } from "../../src/stylable-transformer";
@@ -10,9 +10,10 @@ import { bundle } from "../../src/bundle";
 import { isAbsolute } from "path";
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
+export interface InfraConfig { files: Pojo<File> }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
-
-function generateInfra(config:Config){
+export type RequireType = (path:string) => any;
+export function generateInfra(config:InfraConfig):{resolver:StylableResolver, requireModule:RequireType, fileProcessor:FileProcessor<StylableMeta>}{
     const { fs, requireModule } = createMinimalFS(config);
     
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
@@ -47,6 +48,21 @@ export function generateFromMock(config: Config, resolver?:StylableResolver):Sty
     return result;
 }
 
+export function createProcess(fileProcessor:FileProcessor<StylableMeta>):(path:string) => StylableResults {
+    return (path:string) => ({meta:fileProcessor.process(path), exports:{}});
+}
+
+export function createTransform(fileProcessor:FileProcessor<StylableMeta>, requireModule:RequireType):(meta:StylableMeta) => StylableMeta {
+    return (meta:StylableMeta) => {
+        return new StylableTransformer({
+            fileProcessor,
+            requireModule,
+            diagnostics: new Diagnostics(),
+            keepValues: false
+        }).transform(meta).meta;
+    };
+}
+
 export function generateStylableRoot(config: Config) {
     return generateFromMock(config).meta.ast;
 }
@@ -60,9 +76,7 @@ export function generateStylableOutput(config: Config) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
 
-    const { resolver } = generateInfra(config);
+    const { resolver, fileProcessor, requireModule } = generateInfra(config);
     
-    return bundle(config.usedFiles, resolver, entry => {
-        return generateFromMock({ ...config, entry }, resolver);
-    }).css;
+    return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule)).css;
 }

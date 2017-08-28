@@ -3,7 +3,7 @@ import { generateStylableOutput } from "../utils/generate-test-util";
 
 const expect = chai.expect;
 
-describe('emit-css: theme', () => {
+describe('bundle: theme', () => {
 
     describe('insertion', () => {
 

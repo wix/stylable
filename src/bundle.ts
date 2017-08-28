@@ -7,18 +7,19 @@ import { StylableResults } from "./stylable-transformer";
 import { StylableResolver } from "./postcss-resolver";
 import { valueReplacer } from "./value-template";
 
-type OverrideVars = Pojo<string>;
-type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
-interface ThemeOverrideData {
+export type OverrideVars = Pojo<string>;
+export type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
+export interface ThemeOverrideData {
     index: number;
     path: string;
     overrideDefs: OverrideDef[];
 }
-type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
-export type Generate = (entry: string) => StylableResults;
+export type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
+export type Process = (entry: string) => StylableResults;
+export type Transform = (meta: StylableMeta) => StylableMeta;
 
-export function bundle(usedFiles:string[], resolver:StylableResolver, generate:Generate):{css:string} {
-    const bundler = new Bundler(resolver, generate);
+export function bundle(usedFiles:string[], resolver:StylableResolver, process:Process, transform:Transform):{css:string} {
+    const bundler = new Bundler(resolver, process, transform);
 
     usedFiles.forEach(path => bundler.addUsedFile(path));
 
@@ -31,29 +32,35 @@ export class Bundler {
     private outputCSS: string[] = [];
     constructor(
         private resolver:StylableResolver, 
-        private generate:Generate
+        private process:Process,
+        private transform:Transform
     ){}
 
     public addUsedFile(path:string):void {
         const entryIndex = this.outputCSS.length;
-        const { meta:entryMeta } = this.generate(path);
-        const aggragateDependencies = (srcMeta:StylableMeta, overrideVars:OverrideVars) => {
+        const { meta:entryMeta } = this.process(path);
+        this.aggregateTheme(entryMeta, entryIndex, this.themeAcc);
+        this.outputCSS.push(entryMeta.source);
+    }
+
+    private aggregateTheme(entryMeta:StylableMeta, entryIndex:number, themeEntries:ThemeEntries):void {
+        const aggregateDependencies = (srcMeta:StylableMeta, overrideVars:OverrideVars) => {
             srcMeta.imports.forEach(importRequest => {
                 if(!importRequest.from.match(/.css$/)){
                     return;
                 }       
 
                 const isImportTheme = !!importRequest.theme;
-                let themeOverrideData = this.themeAcc[importRequest.from]; // some entry already imported as theme
+                let themeOverrideData = themeEntries[importRequest.from]; // some entry already imported as theme
 
-                const { meta: importMeta } = this.generate(importRequest.from);
+                const { meta: importMeta } = this.process(importRequest.from);
                 let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
                     // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
                     //     throw new Error('theme should not be imported from JS')
                     // }
-                    themeOverrideData = this.themeAcc[importRequest.from] = themeOverrideData || { index:entryIndex, path: importMeta.source, overrideDefs: []};
+                    themeOverrideData = themeEntries[importRequest.from] = themeOverrideData || { index:entryIndex, path: importMeta.source, overrideDefs: []};
                     themeOverrideVars = generateThemeOverrideVars(srcMeta, importRequest, overrideVars);
 
                     if(themeOverrideVars){
@@ -63,30 +70,34 @@ export class Bundler {
                 if(themeOverrideData){ // push theme above import
                     themeOverrideData.index = entryIndex;
                 }
-                aggragateDependencies(importMeta, themeOverrideVars || {});
+                aggregateDependencies(importMeta, themeOverrideVars || {});
             });
         }
 
-        aggragateDependencies(entryMeta, {});
-        
-        this.outputCSS.push(entryMeta.source);
+        aggregateDependencies(entryMeta, {});
     }
 
-    public getDependencyPaths(excludeTheme:boolean = false):string[] {
-        const results = this.outputCSS.concat();
-        if(excludeTheme === false) {
-            const themePaths = Object.keys(this.themeAcc);
-            themePaths.reverse().forEach(themePath => {
-                const { index, path } = this.themeAcc[themePath];
-                results.splice(index + 1, 0, path);
-            });
-        }
+    public getDependencyPaths({entries, themeEntries}:{entries:string[], themeEntries:ThemeEntries}={entries:this.outputCSS, themeEntries:this.themeAcc}):string[] {
+        const results = entries.concat();
+        const themePaths = Object.keys(themeEntries);
+        themePaths.reverse().forEach(themePath => {
+            const { index, path } = themeEntries[themePath];
+            results.splice(index + 1, 0, path);
+        });
         return results;
     }
 
-    public generateCSS(usedSheetPaths:string[] = this.getDependencyPaths(true)):string {
+    public generateCSS(usedSheetPaths?:string[]):string {
         // collect stylesheet meta list
-        let outputMetaList = this.getDependencyPaths(false).map(path => this.generate(path).meta);
+        let outputMetaList:StylableMeta[];
+        if(!usedSheetPaths){
+            usedSheetPaths = this.getDependencyPaths({entries:this.outputCSS, themeEntries:{/*no theme entries*/}});
+            outputMetaList = this.getDependencyPaths().map(path => this.process(path).meta);
+        } else {
+            const themeEntries:ThemeEntries = {};
+            usedSheetPaths.forEach((path, index) => this.aggregateTheme(this.process(path).meta, index, themeEntries));
+            outputMetaList = this.getDependencyPaths({entries:usedSheetPaths, themeEntries}).map(path => this.process(path).meta);
+        }
 
         // index each output entry position
         const pathToIndex = outputMetaList.reduce<Pojo<number>>((acc, meta, index) => {
@@ -96,8 +107,8 @@ export class Bundler {
 
         // clean unused and add overrides
         outputMetaList = outputMetaList.map(entryMeta => {
-            entryMeta = {...entryMeta, ast:entryMeta.ast.clone()};
-            this.cleanUnused(entryMeta, usedSheetPaths);
+            entryMeta = this.transform({...entryMeta, ast:entryMeta.ast.clone()});
+            this.cleanUnused(entryMeta, usedSheetPaths!);
             this.applyOverrides(entryMeta, pathToIndex);
             return entryMeta;
         });         
