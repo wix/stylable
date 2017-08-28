@@ -3,6 +3,7 @@
 import { StylableMeta, ImportSymbol, StylableSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { stripQuotation } from "./utils";
+import { valueMapping } from "./stylable-value-parsers";
 
 export interface CSSResolve {
     _kind: 'css'
@@ -121,6 +122,36 @@ export class StylableResolver {
             resolved = this.resolve(resolved.symbol);
         }
         return resolved;
+    }
+    resolveExtends(meta: StylableMeta, className: string): CSSResolve[] {
+        if (!meta.classes[className]) {
+            return []
+        }
+
+        let extendPath = [];
+        const resolvedClass = this.resolveClass(meta, meta.classes[className])
+
+        if (resolvedClass && resolvedClass._kind === 'css' && resolvedClass.symbol._kind === 'class') {
+            let current = resolvedClass;
+            let extend= resolvedClass.symbol[valueMapping.extends];
+
+            while (current) {
+                extendPath.push(current);
+                if (!extend) {
+                    break;
+                }
+                let res = this.resolve(extend);
+                if (res && res._kind === 'css' && res.symbol._kind === 'class') {
+                    current = res;
+                    extend = res.symbol[valueMapping.extends];
+                } else {
+                    break;
+                }
+            }
+
+        }
+
+        return extendPath
     }
 }
 
