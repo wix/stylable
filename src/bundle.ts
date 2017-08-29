@@ -17,8 +17,8 @@ export type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indi
 export type Process = (entry: string) => StylableMeta;
 export type Transform = (meta: StylableMeta) => StylableMeta;
 
-export function bundle(usedFiles:string[], resolver:StylableResolver, process:Process, transform:Transform):{css:string} {
-    const bundler = new Bundler(resolver, process, transform);
+export function bundle(usedFiles:string[], resolver:StylableResolver, process:Process, transform:Transform, resolvePath: (ctx: string, path:string)=>string):{css:string} {
+    const bundler = new Bundler(resolver, process, transform, resolvePath);
 
     usedFiles.forEach(path => bundler.addUsedFile(path));
 
@@ -32,7 +32,8 @@ export class Bundler {
     constructor(
         private resolver:StylableResolver, 
         private process:Process,
-        private transform:Transform
+        private transform:Transform,
+        private resolvePath: (ctx: string, path:string)=>string
     ){}
 
     public addUsedFile(path:string):void {
@@ -122,9 +123,8 @@ export class Bundler {
                 .filter(entryCSS => !!entryCSS)
                 .join('\n');
     }
-
     private cleanUnused(meta:StylableMeta, usedPaths:string[]):void {
-        meta.imports.forEach(importRequest => removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths));
+        meta.imports.forEach(importRequest => removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths, this.resolvePath));
     }
     // resolveFrom(_import){
     //     return {

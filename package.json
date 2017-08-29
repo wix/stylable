@@ -17,6 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.0.1",
+    "@types/enhanced-resolve": "^3.0.4",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.2",
     "c3-platform": "^1.0.0",
@@ -36,6 +37,7 @@
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",
     "deindent": "^0.1.0",
+    "enhanced-resolve": "^3.4.1",
     "lodash.clonedeep": "^4.5.0",
     "murmurhash": "0.0.2",
     "postcss": "^6.0.3",

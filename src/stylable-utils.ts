@@ -112,7 +112,7 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
 }
 
 
-export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import: Imported, usedFiles: string[]) {
+export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import: Imported, usedFiles: string[], resolvePath: (ctx: string, path:string)=>string) {
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
@@ -126,7 +126,7 @@ export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import:
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
                     const extend = symbol[valueMapping.extends];
-                    if (extend && extend._kind === 'import' && usedFiles.indexOf(extend.import.from) === -1) {
+                    if (extend && extend._kind === 'import' && usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
                         return shouldOutput = false;
                     }
                 }

@@ -12,27 +12,27 @@ import { isAbsolute } from "path";
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface InfraConfig { files: Pojo<File> }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
-export type RequireType = (path:string) => any;
-export function generateInfra(config:InfraConfig):{resolver:StylableResolver, requireModule:RequireType, fileProcessor:FileProcessor<StylableMeta>}{
+export type RequireType = (path: string) => any;
+export function generateInfra(config: InfraConfig): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
     const { fs, requireModule } = createMinimalFS(config);
-    
+
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
         const meta = process(postcss.parse(content, { from }));
         meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
     }, fs);
 
-    const resolver = new StylableResolver(fileProcessor, requireModule); 
+    const resolver = new StylableResolver(fileProcessor, requireModule);
 
     return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config):StylableResults {
+export function generateFromMock(config: Config): StylableResults {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
     const entry = config.entry;
-    
+
     const { requireModule, fileProcessor } = generateInfra(config);
 
     const t = new StylableTransformer({
@@ -47,12 +47,12 @@ export function generateFromMock(config: Config):StylableResults {
     return result;
 }
 
-export function createProcess(fileProcessor:FileProcessor<StylableMeta>):(path:string) => StylableMeta {
-    return (path:string) => fileProcessor.process(path);
+export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path: string) => StylableMeta {
+    return (path: string) => fileProcessor.process(path);
 }
 
-export function createTransform(fileProcessor:FileProcessor<StylableMeta>, requireModule:RequireType):(meta:StylableMeta) => StylableMeta {
-    return (meta:StylableMeta) => {
+export function createTransform(fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
+    return (meta: StylableMeta) => {
         return new StylableTransformer({
             fileProcessor,
             requireModule,
@@ -76,6 +76,6 @@ export function generateStylableOutput(config: Config) {
     }
 
     const { resolver, fileProcessor, requireModule } = generateInfra(config);
-    
-    return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule)).css;
+
+    return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
 }

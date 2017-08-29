@@ -8,4 +8,5 @@ export { createGenerator } from "./generator";
 export { createMinimalFS, File, MinimalFSSetup } from "./memory-minimal-fs";
 export { valueMapping } from "./stylable-value-parsers";
 export { bundle, Bundler } from "./bundle";
+export { Stylable, createInfrastructure, StylableInfrastructure, fsLike } from "./stylable";
 export * from "./runtime";
