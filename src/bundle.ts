@@ -3,8 +3,8 @@ import * as postcss from 'postcss';
 import { Pojo } from "./types";
 import { removeUnusedRules } from "./stylable-utils";
 import { StylableMeta, SDecl, Imported } from "./stylable-processor";
-import { StylableResolver } from "./postcss-resolver";
 import { valueReplacer } from "./value-template";
+import { Stylable } from "./stylable";
 
 export type OverrideVars = Pojo<string>;
 export type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
@@ -17,25 +17,22 @@ export type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indi
 export type Process = (entry: string) => StylableMeta;
 export type Transform = (meta: StylableMeta) => StylableMeta;
 
-export function bundle(usedFiles:string[], resolver:StylableResolver, process:Process, transform:Transform, resolvePath: (ctx: string, path:string)=>string):{css:string} {
-    const bundler = new Bundler(resolver, process, transform, resolvePath);
 
-    usedFiles.forEach(path => bundler.addUsedFile(path));
-
-    return {
-        css: bundler.generateCSS()
-    };
-}
 export class Bundler {
     private themeAcc: ThemeEntries = {};
     private outputCSS: string[] = [];
-    constructor(
-        private resolver:StylableResolver, 
-        private process:Process,
-        private transform:Transform,
-        private resolvePath: (ctx: string, path:string)=>string
-    ){}
+    constructor(private stylable: Stylable){}
 
+    private process(fullpath: string){
+        return this.stylable.process(fullpath);
+    }
+    private transform(meta: StylableMeta){
+        return this.stylable.transform(meta).meta;
+    }
+    private resolvePath(ctx: string, path: string){
+        return this.stylable.resolvePath(ctx, path);
+    }
+    
     public addUsedFile(path:string):void {
         const entryIndex = this.outputCSS.length;
         const entryMeta = this.process(path);
@@ -122,7 +119,7 @@ export class Bundler {
                 .join('\n');
     }
     private cleanUnused(meta:StylableMeta, usedPaths:string[]):void {
-        meta.imports.forEach(importRequest => removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths, this.resolvePath));
+        meta.imports.forEach(importRequest => removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths, this.resolvePath.bind(this)));
     }
     // resolveFrom(_import){
     //     return {
@@ -132,14 +129,14 @@ export class Bundler {
     // }
     private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>, themeEntries:ThemeEntries):void {
         const outputAST = entryMeta.outputAst!;
-        const outputRootSelector = getSheetNSRootSelector(entryMeta);
+        const outputRootSelector = getSheetNSRootSelector(entryMeta, this.stylable.delimiter);
         const isTheme = !!themeEntries[entryMeta.source];
 
         // get overrides from each overridden stylesheet 
         const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
             const symbol = entryMeta.mappedSymbols[symbolId];
             const isLocalVar = (symbol._kind === 'var');
-            const resolve = this.resolver.deepResolve(symbol);
+            const resolve = this.stylable.resolver.deepResolve(symbol);
             const varSourceId = isLocalVar ? symbolId : resolve && resolve.symbol.name
             //ToDo: check resolve._kind === 'css'
             const originMeta = isLocalVar ? entryMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
@@ -169,7 +166,7 @@ export class Bundler {
         for(let i = 0; i < overrideInstructions.overrideDefs.length; ++i) {
             const overrideDef = overrideInstructions.overrideDefs[i];
             if(overrideDef){
-                const rootSelector = getSheetNSRootSelector(overrideDef.overrideRoot);
+                const rootSelector = getSheetNSRootSelector(overrideDef.overrideRoot, this.stylable.delimiter);
                 const overrideVars = overrideInstructions.overrideVarsPerDef[overrideDef.overrideRoot.source];
                 sortedOverrides.push({ rootSelector , overrideVars });
             }
@@ -208,8 +205,8 @@ export class Bundler {
     }
 }
 
-function getSheetNSRootSelector(meta:StylableMeta):string {
-    return meta.namespace + '--' + meta.root;
+function getSheetNSRootSelector(meta:StylableMeta, delimiter: string):string {
+    return meta.namespace + delimiter + meta.root;
 }
 
 function generateThemeOverrideVars(

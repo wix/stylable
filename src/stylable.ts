@@ -33,21 +33,16 @@ export class Stylable {
     constructor(
         protected projectRoot: string,
         protected fileSystem: fsLike,
-        protected requireModule: (path: string) => any = require,
-        protected delimiter?: string,
-        protected transformCSSContent?: (path: string, content: string) => string) {
-        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, transformCSSContent);
+        protected requireModule: (path: string) => any = (s: string) => require(s),
+        public delimiter: string = '--',
+        protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta) {
+        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
     createBundler(): Bundler {
-        return new Bundler(
-            this.resolver,
-            (path: string) => this.fileProcessor.process(path),
-            (meta: StylableMeta) => this.transform(meta).meta,
-            this.resolvePath
-        );
+        return new Bundler(this);
     }
 
     transform(meta: StylableMeta): StylableResults
@@ -70,8 +65,9 @@ export class Stylable {
 
         return transformer.transform(meta);
     }
-    generate() { }
-    process() { }
+    process(fullpath: string) {
+        return this.fileProcessor.process(fullpath)
+    }
 }
 
 
@@ -82,18 +78,17 @@ export interface StylableInfrastructure {
 
 
 
-export function createInfrastructure(projectRoot: string, fileSystem: fsLike = fs, transformSrc?: (path: string, content: string) => string): StylableInfrastructure {
-    const eResolver =  ResolverFactory.createResolver({
+export function createInfrastructure(projectRoot: string, fileSystem: fsLike = fs, onProcess: (meta: StylableMeta, path: string) => StylableMeta = (x) => x): StylableInfrastructure {
+    const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
         fileSystem: fileSystem
-    })
+    });
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
         if (!path.isAbsolute(from)) {
             from = eResolver.resolveSync({}, projectRoot, from);
         }
-        content = transformSrc ? transformSrc(from, content) : content;
-        return process(safeParse(content, { from }));
+        return onProcess(process(safeParse(content, { from })), from);
     }, {
             readFileSync(moduleId: string) {
                 if (!path.isAbsolute(moduleId)) {
@@ -118,7 +113,7 @@ export function createInfrastructure(projectRoot: string, fileSystem: fsLike = f
 
     return {
         resolvePath(context: string, moduleId: string) {
-            if (!path.isAbsolute(moduleId)) {
+            if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
                 moduleId = eResolver.resolveSync({}, context, moduleId);
             }
             return moduleId;

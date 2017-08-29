@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import { generateStylableOutput, generateInfra, createProcess, createTransform } from "../utils/generate-test-util";
-import { Bundler } from "../../src";
+import { generateStylableOutput, createTestBundler } from "../utils/generate-test-util";
 
 describe('bundle: base', () => {
 
@@ -195,7 +194,9 @@ describe('bundle: base', () => {
     describe('specific used files', () => {
 
         it('should be output from larger collection', () => {
-            const { resolver, fileProcessor, requireModule } = generateInfra({
+            const bundler = createTestBundler({
+                entry: '',
+                usedFiles:[],
                 files: {
                     "/entry-a.st.css": {
                         namespace: 'entryA',
@@ -211,7 +212,7 @@ describe('bundle: base', () => {
                     }
                 }
             });
-            const bundler = new Bundler(resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx, path) => path);
+
             bundler.addUsedFile('/entry-a.st.css');
             bundler.addUsedFile('/entry-b.st.css');
 
@@ -227,7 +228,9 @@ describe('bundle: base', () => {
         });
 
         it('should be output with relevent theme', () => {
-            const { resolver, fileProcessor, requireModule } = generateInfra({
+            const bundler = createTestBundler({
+                entry: '',
+                usedFiles:[],
                 files: {
                     "/entry-a.st.css": {
                         namespace: 'entryA',
@@ -243,7 +246,7 @@ describe('bundle: base', () => {
                     }
                 }
             });
-            const bundler = new Bundler(resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx, path) => path);
+          
             bundler.addUsedFile('/entry-a.st.css');
             bundler.addUsedFile('/entry-b.st.css');
 

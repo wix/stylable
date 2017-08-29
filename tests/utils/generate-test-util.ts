@@ -6,8 +6,9 @@ import { StylableTransformer, StylableResults } from "../../src/stylable-transfo
 import { StylableResolver } from "../../src/postcss-resolver";
 import { Diagnostics } from "../../src/diagnostics";
 import { createMinimalFS } from "../../src/memory-minimal-fs";
-import { bundle } from "../../src/bundle";
+import { Bundler } from "../../src/bundle";
 import { isAbsolute } from "path";
+import { Stylable } from "../../src/stylable";
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface InfraConfig { files: Pojo<File> }
@@ -70,12 +71,29 @@ export function generateStylableExports(config: Config) {
     return generateFromMock(config).exports;
 }
 
-export function generateStylableOutput(config: Config) {
+export function createTestBundler(config: Config) {
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
 
-    const { resolver, fileProcessor, requireModule } = generateInfra(config);
+    const { fs, requireModule } = createMinimalFS(config);
 
-    return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
+    const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
+        meta.namespace = config.files[path].namespace || meta.namespace;
+        return meta;
+    });
+
+    return new Bundler(stylable);
+}
+
+export function generateStylableOutput(config: Config) {
+    if (!config.usedFiles) {
+        throw new Error('usedFiles is not optional in generateStylableOutput');
+    }
+    const bundler = createTestBundler(config);
+
+    config.usedFiles.forEach(path => bundler.addUsedFile(path));
+
+    return bundler.generateCSS();
+    // return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
 }
