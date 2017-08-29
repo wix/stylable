@@ -49,25 +49,6 @@ export class Stylable {
             this.resolvePath
         );
     }
-    // transform(source: string, resourcePath: string): StylableResults {
-
-    //     const diagnostics = new Diagnostics();
-
-    //     const root = safeParse(source, { from: resourcePath });
-
-    //     const meta = process(root, diagnostics);
-
-    //     const transformer = new StylableTransformer({
-    //         delimiter: this.delimiter,
-    //         diagnostics,
-    //         fileProcessor: this.fileProcessor,
-    //         requireModule: this.requireModule
-    //     });
-
-    //     this.fileProcessor.add(meta.source, meta);
-
-    //     return transformer.transform(meta);
-    // }
 
     transform(meta: StylableMeta): StylableResults
     transform(source: string, resourcePath: string): StylableResults

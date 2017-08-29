@@ -57,9 +57,6 @@ export class Bundler {
                 let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
-                    // if (usedFiles.indexOf(_import.from) !== -1) { // theme cannot be used in JS - can we fix this?
-                    //     throw new Error('theme should not be imported from JS')
-                    // }
                     themeOverrideData = themeEntries[importRequest.from] = themeOverrideData || { index:entryIndex, path: importMeta.source, overrideDefs: []};
                     themeOverrideVars = generateThemeOverrideVars(srcMeta, importRequest, overrideVars);
 
