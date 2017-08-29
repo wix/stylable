@@ -186,8 +186,15 @@ export class Bundler {
                 }
                 let ruleOverride = postcss.rule({selector:overrideSelector});
                 srcRule.walkDecls((decl: SDecl) => {
-                    const overriddenValue = valueReplacer(decl.sourceValue, overrideVars, (value) => {
-                        return value;
+                    const overriddenValue = valueReplacer(decl.sourceValue, entryMeta.mappedSymbols, (_value, name, _match) => {
+                        if(overrideVars[name]){
+                            return overrideVars[name];
+                        }
+                        const symbol = entryMeta.mappedSymbols[name];
+                        if(symbol._kind === 'var'){
+                            return symbol.text;
+                        }
+                        return `invalid value(${name}) with value of ${symbol._kind}`;
                     });
                     if (decl.value !== overriddenValue) {
                         ruleOverride.append(postcss.decl({prop:decl.prop, value:overriddenValue}));

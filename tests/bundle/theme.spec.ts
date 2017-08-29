@@ -379,6 +379,42 @@ describe('bundle: theme', () => {
             ].join('\n'));
         });
 
+        it('should override value(var)', () => {
+            const cssOutput = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    "/entry.st.css": {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                color1: gold;
+                            }
+                        `
+                    },
+                    "/theme.st.css": {
+                        namespace: 'theme',
+                        content: `
+                            :vars {
+                                color1:red;
+                                color2:value(color1)
+                            }
+                            .t { color:value(color1); border:value(color2); }
+                        `
+                    }
+                }
+            });
+    
+            expect(cssOutput).to.eql([    
+                '.theme--root .theme--t { color:red; border:red; }',
+                '.entry--root .theme--t { color:gold; border:gold; }',    
+            ].join('\n'));
+        });
+
         it('should add override CSS to none theme stylesheets using the overridden vars', () => {
             const cssOutput = generateStylableOutput({
                 entry: '/entry.st.css',
