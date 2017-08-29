@@ -379,7 +379,7 @@ describe('bundle: theme', () => {
             ].join('\n'));
         });
 
-        it('should add override CSS to any stylesheet using the overridden vars', () => {
+        it('should add override CSS to none theme stylesheets using the overridden vars', () => {
             const cssOutput = generateStylableOutput({
                 entry: '/entry.st.css',
                 usedFiles: [
@@ -414,6 +414,7 @@ describe('bundle: theme', () => {
                                 -st-from: "./theme.st.css";
                                 -st-named: color1;
                             }
+                            .root { color:value(color1); }
                             .d { color:value(color1); }
                         `
                     }
@@ -424,8 +425,10 @@ describe('bundle: theme', () => {
                 '.theme--root .theme--c { color:red; }',
                 '.entry--root .theme--c { color:gold; }',
     
+                '.comp--root { color:red; }',
+                '.entry--root .comp--root { color:gold; }',
                 '.comp--root .comp--d { color:red; }',
-                '.entry--root .comp--d { color:gold; }',
+                '.entry--root .comp--root .comp--d { color:gold; }',
     
                 '.entry--root .entry--a { color:green; }'
             ].join('\n'));
@@ -487,7 +490,7 @@ describe('bundle: theme', () => {
                 '.entry--root .baseTheme--c { color:gold; }',
     
                 '.comp--root .comp--d { color:red; }',
-                '.entry--root .comp--d { color:gold; }',
+                '.entry--root .comp--root .comp--d { color:gold; }',
     
                 '.entry--root .entry--a { color:green; }'
             ].join('\n'));
@@ -529,7 +532,61 @@ describe('bundle: theme', () => {
                 '.entry--root .theme--b { color:gold; }',
     
                 '.entry--root .entry--a { color:red; }',
-                '.entry--root .entry--a { color:gold; }' /* <-- */
+                '.entry--root.entry--root .entry--a { color:gold; }' /* <-- */
+            ].join('\n'));
+        });
+
+        it('should add override multiple theme using sheets', () => {
+            const cssOutput = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/a.st.css',
+                    '/b.st.css',
+                ],
+                files: {
+                    "/a.st.css": {
+                        namespace: 'a',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                -st-named: color1;
+                                color1: gold;
+                            }
+                            .a { color:value(color1); } 
+                        `
+                    },
+                    "/b.st.css": {
+                        namespace: 'b',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                -st-named: color1;
+                                color1: silver;
+                            }
+                            .b { color:value(color1); } 
+                        `
+                    },
+                    "/theme.st.css": {
+                        namespace: 'theme',
+                        content: `
+                            :vars {
+                                color1:red;
+                            }
+                        `
+                    }
+                }
+            });
+    
+            expect(cssOutput).to.eql([
+                '.b--root .b--b { color:red; }',
+                '.a--root .b--root .b--b { color:gold; }',
+                '.b--root.b--root .b--b { color:silver; }',
+
+                '.a--root .a--a { color:red; }',
+                '.a--root.a--root .a--a { color:gold; }',
+                '.b--root .a--root .a--a { color:silver; }' /* ToDo: doesn't have any effect in any of our current use cases, but containers with theme might use something like this */
             ].join('\n'));
         });
 

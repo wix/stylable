@@ -94,11 +94,12 @@ export class Bundler {
     public generateCSS(usedSheetPaths?:string[]):string {
         // collect stylesheet meta list
         let outputMetaList:StylableMeta[];
+        let themeEntries:ThemeEntries = this.themeAcc;
         if(!usedSheetPaths){
             usedSheetPaths = this.getDependencyPaths({entries:this.outputCSS, themeEntries:{/*no theme entries*/}});
             outputMetaList = this.getDependencyPaths().map(path => this.process(path));
         } else {
-            const themeEntries:ThemeEntries = {};
+            themeEntries = {};
             usedSheetPaths.forEach((path, index) => this.aggregateTheme(this.process(path), index, themeEntries));
             outputMetaList = this.getDependencyPaths({entries:usedSheetPaths, themeEntries}).map(path => this.process(path));
         }
@@ -113,7 +114,7 @@ export class Bundler {
         outputMetaList = outputMetaList.map(entryMeta => {
             entryMeta = this.transform(entryMeta);
             this.cleanUnused(entryMeta, usedSheetPaths!);
-            this.applyOverrides(entryMeta, pathToIndex);
+            this.applyOverrides(entryMeta, pathToIndex, themeEntries);
             return entryMeta;
         });         
 
@@ -132,9 +133,10 @@ export class Bundler {
     //         from: this.resolvePath(_import.from)
     //     }
     // }
-    private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>):void {
+    private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>, themeEntries:ThemeEntries):void {
         const outputAST = entryMeta.outputAst!;
         const outputRootSelector = getSheetNSRootSelector(entryMeta);
+        const isTheme = !!themeEntries[entryMeta.source];
 
         // get overrides from each overridden stylesheet 
         const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
@@ -146,7 +148,7 @@ export class Bundler {
             const originMeta = isLocalVar ? entryMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
             if(originMeta) {
                 const overridePath = originMeta.source;
-                const themeEntry = this.themeAcc[overridePath];
+                const themeEntry = themeEntries[overridePath];
                 if(themeEntry){
                     themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
                         if(overrideDef.overrideVars[varSourceId]){
@@ -181,9 +183,12 @@ export class Bundler {
         outputAST.walkRules(srcRule => {
             sortedOverrides.forEach(({rootSelector, overrideVars}) => {
                 let overrideSelector = srcRule.selector;
-                if(rootSelector !== outputRootSelector) {
+                if(isTheme){
                     overrideSelector = overrideSelector.replace(new RegExp(outputRootSelector), rootSelector); // scope override
                     overrideSelector = (overrideSelector === srcRule.selector) ? '.' + rootSelector + ' ' + overrideSelector : overrideSelector; // scope globals
+                } else {
+                    const isNestedSep = outputRootSelector !== rootSelector ? ' ' : '';
+                    overrideSelector = '.' + rootSelector + isNestedSep + overrideSelector; // none theme selector
                 }
                 let ruleOverride = postcss.rule({selector:overrideSelector});
                 srcRule.walkDecls((decl: SDecl) => {
