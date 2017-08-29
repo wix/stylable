@@ -165,8 +165,12 @@ export class StylableProcessor {
 
     protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
         if (name.charAt(0).match(/[A-Z]/) && !this.meta.elements[name]) {
-            this.checkRedeclareSymbol(name, rule);
-            this.meta.elements[name] = { _kind: "element", name };
+            let alias = <ImportSymbol | undefined>this.meta.mappedSymbols[name];
+            if (alias && alias._kind !== 'import') {
+                this.checkRedeclareSymbol(name, rule);
+                alias = undefined;
+            }
+            this.meta.elements[name] = { _kind: "element", name, alias };
         }
     }
 
@@ -177,7 +181,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias: alias };
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias };
         }
     }
 
@@ -407,6 +411,7 @@ export interface ClassSymbol extends StylableDirectives {
 export interface ElementSymbol extends StylableDirectives {
     _kind: 'element';
     name: string;
+    alias?: ImportSymbol;
 }
 
 export interface ImportSymbol {
