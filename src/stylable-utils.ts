@@ -47,10 +47,18 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
 
     if (mixinRoot.nodes) {
         let nextRule = rule;
+        let mixinEntry:postcss.Declaration;
+
+        rule.walkDecls(valueMapping.mixin, (decl) => {
+            mixinEntry = decl;
+        });
+        if (!mixinEntry!) {
+            throw rule.error('missing mixin entry');
+        }
         mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
             if (node.type === 'decl') {
                 if (isValidDeclaration(node)) {
-                    rule.insertBefore(rule.mixinEntry, node);
+                    rule.insertBefore(mixinEntry, node);
                 } else {
                     //TODO: warn invalid mixin value
                 }
@@ -73,7 +81,6 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                 throw new Error('mixins @ rules are not supported yet!');
             }
         });
-        rule.walkDecls(new RegExp(valueMapping.mixin), (node) => node.remove());
     }
 
     return rule;
@@ -105,12 +112,12 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
 }
 
 
-export function removeUnusedRules(meta: StylableMeta, _import: Imported, usedFiles: string[]) {
+export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import: Imported, usedFiles: string[]) {
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
         const symbols = Object.keys(_import.named).concat(_import.defaultExport);
-        meta.ast.walkRules((rule: SRule) => {
+        ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
             traverseNode(rule.selectorAst, (node) => {
                 if (symbols.indexOf(node.name) !== -1) {
@@ -141,4 +148,34 @@ export function createImportString(importDef: Imported, path: string) {
         imports.push(`var ${importDef.defaultExport} = require("${(path)}")[${JSON.stringify(importDef.named[k])}];`);
     }
     return imports.join('\n');
+}
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj: any) { return typeof obj; } : function (obj: any) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function cloneAst(obj: any, parent?: any) {
+    var cloned = new obj.constructor();
+
+    for (var i in obj) {
+        if (!obj.hasOwnProperty(i)) continue;
+        if (i === '') {
+
+        }
+        var value = obj[i];
+        var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+
+        if (i === 'parent' && type === 'object') {
+            if (parent) cloned[i] = parent;
+        } else if (i === 'source') {
+            cloned[i] = value;
+        } else if (value instanceof Array) {
+            cloned[i] = value.map(function (j) {
+                return cloneAst(j, cloned);
+            });
+        } else {
+            if (type === 'object' && value !== null) value = cloneAst(value);
+            cloned[i] = value;
+        }
+    }
+
+    return cloned;
 }

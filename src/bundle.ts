@@ -3,7 +3,6 @@ import * as postcss from 'postcss';
 import { Pojo } from "./types";
 import { removeUnusedRules } from "./stylable-utils";
 import { StylableMeta, SDecl, Imported } from "./stylable-processor";
-import { StylableResults } from "./stylable-transformer";
 import { StylableResolver } from "./postcss-resolver";
 import { valueReplacer } from "./value-template";
 
@@ -15,7 +14,7 @@ export interface ThemeOverrideData {
     overrideDefs: OverrideDef[];
 }
 export type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
-export type Process = (entry: string) => StylableResults;
+export type Process = (entry: string) => StylableMeta;
 export type Transform = (meta: StylableMeta) => StylableMeta;
 
 export function bundle(usedFiles:string[], resolver:StylableResolver, process:Process, transform:Transform):{css:string} {
@@ -38,7 +37,7 @@ export class Bundler {
 
     public addUsedFile(path:string):void {
         const entryIndex = this.outputCSS.length;
-        const { meta:entryMeta } = this.process(path);
+        const entryMeta = this.process(path);
         this.aggregateTheme(entryMeta, entryIndex, this.themeAcc);
         this.outputCSS.push(entryMeta.source);
     }
@@ -53,7 +52,7 @@ export class Bundler {
                 const isImportTheme = !!importRequest.theme;
                 let themeOverrideData = themeEntries[importRequest.from]; // some entry already imported as theme
 
-                const { meta: importMeta } = this.process(importRequest.from);
+                const importMeta = this.process(importRequest.from);
                 let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
@@ -96,11 +95,11 @@ export class Bundler {
         let outputMetaList:StylableMeta[];
         if(!usedSheetPaths){
             usedSheetPaths = this.getDependencyPaths({entries:this.outputCSS, themeEntries:{/*no theme entries*/}});
-            outputMetaList = this.getDependencyPaths().map(path => this.process(path).meta);
+            outputMetaList = this.getDependencyPaths().map(path => this.process(path));
         } else {
             const themeEntries:ThemeEntries = {};
-            usedSheetPaths.forEach((path, index) => this.aggregateTheme(this.process(path).meta, index, themeEntries));
-            outputMetaList = this.getDependencyPaths({entries:usedSheetPaths, themeEntries}).map(path => this.process(path).meta);
+            usedSheetPaths.forEach((path, index) => this.aggregateTheme(this.process(path), index, themeEntries));
+            outputMetaList = this.getDependencyPaths({entries:usedSheetPaths, themeEntries}).map(path => this.process(path));
         }
 
         // index each output entry position
@@ -111,7 +110,7 @@ export class Bundler {
 
         // clean unused and add overrides
         outputMetaList = outputMetaList.map(entryMeta => {
-            entryMeta = this.transform({...entryMeta, ast:entryMeta.ast.clone()});
+            entryMeta = this.transform(entryMeta);
             this.cleanUnused(entryMeta, usedSheetPaths!);
             this.applyOverrides(entryMeta, pathToIndex);
             return entryMeta;
@@ -119,13 +118,13 @@ export class Bundler {
 
         // emit output CSS
         return outputMetaList.reverse()
-                .map(meta => meta.ast.toString())
+                .map(meta => meta.outputAst!.toString())
                 .filter(entryCSS => !!entryCSS)
                 .join('\n');
     }
 
     private cleanUnused(meta:StylableMeta, usedPaths:string[]):void {
-        meta.imports.forEach(importRequest => removeUnusedRules(meta, importRequest, usedPaths));
+        meta.imports.forEach(importRequest => removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths));
     }
     // resolveFrom(_import){
     //     return {
@@ -134,7 +133,7 @@ export class Bundler {
     //     }
     // }
     private applyOverrides(entryMeta:StylableMeta, pathToIndex:Pojo<number>):void {
-        const outputAST = entryMeta.ast;
+        const outputAST = entryMeta.outputAst!;
         const outputRootSelector = getSheetNSRootSelector(entryMeta);
 
         // get overrides from each overridden stylesheet 

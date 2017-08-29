@@ -27,7 +27,7 @@ export function generateInfra(config:InfraConfig):{resolver:StylableResolver, re
     return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config, resolver?:StylableResolver):StylableResults {
+export function generateFromMock(config: Config):StylableResults {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
@@ -41,15 +41,14 @@ export function generateFromMock(config: Config, resolver?:StylableResolver):Sty
         diagnostics: new Diagnostics(),
         keepValues: false
     });
-    resolver && t.setResolver(resolver); /*ToDo: pass through options... */
 
     const result = t.transform(fileProcessor.process(entry));
 
     return result;
 }
 
-export function createProcess(fileProcessor:FileProcessor<StylableMeta>):(path:string) => StylableResults {
-    return (path:string) => ({meta:fileProcessor.process(path), exports:{}});
+export function createProcess(fileProcessor:FileProcessor<StylableMeta>):(path:string) => StylableMeta {
+    return (path:string) => fileProcessor.process(path);
 }
 
 export function createTransform(fileProcessor:FileProcessor<StylableMeta>, requireModule:RequireType):(meta:StylableMeta) => StylableMeta {
@@ -64,7 +63,7 @@ export function createTransform(fileProcessor:FileProcessor<StylableMeta>, requi
 }
 
 export function generateStylableRoot(config: Config) {
-    return generateFromMock(config).meta.ast;
+    return generateFromMock(config).meta.outputAst!;
 }
 
 export function generateStylableExports(config: Config) {

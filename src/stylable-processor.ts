@@ -81,7 +81,7 @@ export class StylableProcessor {
         return this.meta;
 
     }
-    
+
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
         const toRemove: postcss.Node[] = [];
@@ -286,7 +286,7 @@ export class StylableProcessor {
             parseMixin(decl.value).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
-                    mixins.unshift({
+                    mixins.push({
                         mixin,
                         ref: mixinRefSymbol,
                     });
@@ -300,7 +300,6 @@ export class StylableProcessor {
             }
 
             rule.mixins = mixins;
-            rule.mixinEntry = decl;
         } else if (decl.prop === valueMapping.compose) {
             const composes = parseCompose(decl.value);
             if (rule.isSimpleSelector) {
@@ -429,6 +428,7 @@ export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSym
 export interface StylableMeta {
     ast: postcss.Root;
     rawAst: postcss.Root;
+    outputAst?: postcss.Root;
     root: 'root';
     source: string;
     namespace: string;
@@ -442,7 +442,7 @@ export interface StylableMeta {
 }
 
 export interface RefedMixin {
-    mixin: MixinValue<any>,
+    mixin: MixinValue,
     ref: ImportSymbol | ClassSymbol
 }
 
@@ -452,7 +452,6 @@ export interface SRule extends postcss.Rule {
     isSimpleSelector: boolean;
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
-    mixinEntry: postcss.Declaration;
 }
 
 
