@@ -237,7 +237,6 @@ export class StylableTransformer {
                 //TODO: report unresolvable
             }
         });
-        debugger;
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
     replaceValueFunction(value: string, meta: StylableMeta) {
