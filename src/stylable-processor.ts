@@ -228,6 +228,7 @@ export class StylableProcessor {
                 _kind: 'var',
                 name: decl.prop,
                 value: value,
+                text: decl.value,
                 import: importSymbol
             }
             this.meta.vars.push(varSymbol);
@@ -425,6 +426,7 @@ export interface VarSymbol {
     _kind: 'var';
     name: string;
     value: string;
+    text: string;
     import: ImportSymbol | null;
 }
 
