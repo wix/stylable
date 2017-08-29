@@ -6,7 +6,9 @@ import { StylableResults, StylableTransformer } from "./stylable-transformer";
 import { Diagnostics } from "./diagnostics";
 import { safeParse } from "./parser";
 import { Bundler } from "./bundle";
-import { ResolverFactory } from 'enhanced-resolve';
+
+const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
+
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -100,10 +102,9 @@ export interface StylableInfrastructure {
 
 
 export function createInfrastructure(projectRoot: string, fileSystem: fsLike = fs, transformSrc?: (path: string, content: string) => string): StylableInfrastructure {
-
-    const eResolver = ResolverFactory.createResolver({
-        fileSystem,
-        useSyncFileSystemCalls: true
+    const eResolver =  ResolverFactory.createResolver({
+        useSyncFileSystemCalls: true,
+        fileSystem: fileSystem
     })
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
