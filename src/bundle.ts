@@ -226,10 +226,12 @@ function generateThemeOverrideVars(
         return acc;
     }, {});
     // add context override
-    for(let overrideProp in overrides){
+    for(let overrideProp in overrides) {
         const symbol = srcMeta.mappedSymbols[overrideProp];
-        if(symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
+        if(symbol && symbol._kind === 'import' && symbol.import.from === themePath && !importOverrides[overrideProp]){
             importOverrides[symbol.name] = overrides[overrideProp];
+        } else {
+            //TODO: warn
         }
     }
     return Object.keys(importOverrides).length ? importOverrides : null;
