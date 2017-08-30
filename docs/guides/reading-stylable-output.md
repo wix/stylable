@@ -1,6 +1,6 @@
 # How to Understand Stylable Output
 
-It's useful to be able to read **Stylable** output to understand what is affecting a specific element. You want to be able to see what has been applied, and connect it to specific declarations in the code.
+For advanced CSS users, it's useful to be able to read **Stylable** output to understand what is affecting a specific element and to debug if necessary. You want to be able to see what has been applied, and connect it to specific declarations in the code.
 
 ## Basics of Namespacing
 
@@ -60,7 +60,8 @@ Let's examine the differences between using [tag-selectors](../references/tag-se
     -st-from: './toggle-btn.st.css';
     -st-default: ToggleBtn;
 }
-
+```
+```css
 /* TAG SELECTORS */
 
 CSS 
@@ -89,7 +90,9 @@ CSS OUTPUT
 @selector ".DefaultImport__root .ToggleBtn__root .ToggleBtn__checkBox"
 @exports ""
 */
+```
 
+```css
 /* CLASS SELECTORS */
 
 CSS
