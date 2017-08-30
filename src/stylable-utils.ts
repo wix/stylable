@@ -47,18 +47,18 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
 
     if (mixinRoot.nodes) {
         let nextRule = rule;
-        let mixinEntry:postcss.Declaration;
+        let mixinEntry:postcss.Declaration|null = null;
 
         rule.walkDecls(valueMapping.mixin, (decl) => {
             mixinEntry = decl;
         });
-        if (!mixinEntry!) {
+        if (!mixinEntry) {
             throw rule.error('missing mixin entry');
         }
         mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
             if (node.type === 'decl') {
                 if (isValidDeclaration(node)) {
-                    rule.insertBefore(mixinEntry, node);
+                    rule.insertBefore(mixinEntry!, node);
                 } else {
                     //TODO: warn invalid mixin value
                 }
