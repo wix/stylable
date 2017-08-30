@@ -23,6 +23,7 @@ export interface Options {
     requireModule: (modulePath: string) => any
     diagnostics: Diagnostics
     delimiter?: string;
+    keepValues?: boolean;
 }
 
 export class StylableTransformer {
@@ -30,20 +31,22 @@ export class StylableTransformer {
     diagnostics: Diagnostics;
     resolver: StylableResolver;
     delimiter: string;
+    keepValues: boolean;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
+        this.keepValues = options.keepValues || false;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
 
-        const ast = meta.ast;
+        const ast = meta.outputAst = meta.ast.clone();
 
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
-        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
+        !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
@@ -54,7 +57,7 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
-            rule.walkDecls((decl: SDecl) => {
+            !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
@@ -216,7 +219,7 @@ export class StylableTransformer {
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
                     if (typeof resolvedMixin.symbol === 'function') {
-                        const res = resolvedMixin.symbol(mix.mixin.options);
+                        const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
                         const mixinRoot = cssObjectToAst(res).root;
                         mergeRules(mixinRoot, rule);
                     }
@@ -233,7 +236,8 @@ export class StylableTransformer {
             } else {
                 //TODO: report unresolvable
             }
-        })
+        });
+        rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
     replaceValueFunction(value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
@@ -274,7 +278,7 @@ export class StylableTransformer {
         //     "paused"
         // ];
 
-        const root = meta.ast;
+        const root = meta.outputAst!;
         const keyframesExports: Pojo<string> = {};
 
         root.walkAtRules(/keyframes$/, (atRule) => {
@@ -476,7 +480,7 @@ export class StylableTransformer {
                 }
                 return current;
             }
-            
+
         }
 
         while (current && currentSymbol) {
