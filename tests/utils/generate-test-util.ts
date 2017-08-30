@@ -1,190 +1,99 @@
 import { Pojo } from "../../src/types";
-import { cachedProcessFile } from "../../src/cached-process-file";
-import { StylableMeta, process, SDecl } from "../../src/postcss-process";
+import { cachedProcessFile, FileProcessor } from "../../src/cached-process-file";
+import { StylableMeta, process } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
 import { StylableTransformer, StylableResults } from "../../src/stylable-transformer";
+import { StylableResolver } from "../../src/postcss-resolver";
 import { Diagnostics } from "../../src/diagnostics";
-import { removeUnusedRules } from "../../src/stylable-utils";
-import { valueReplacer } from "../../src/value-template";
-const deindent = require('deindent');
+import { createMinimalFS } from "../../src/memory-minimal-fs";
+import { Bundler } from "../../src/bundle";
+import { isAbsolute } from "path";
+import { Stylable } from "../../src/stylable";
+// const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
+export interface InfraConfig { files: Pojo<File> }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
-
-export function generateFromMock(config: Config) {
-    const files = config.files;
-
-    for (var file in files) {
-        if (files[file].mtime === undefined) {
-            files[file].mtime = new Date();
-        }
-    }
+export type RequireType = (path: string) => any;
+export function generateInfra(config: InfraConfig): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
+    const { fs, requireModule } = createMinimalFS(config);
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
         const meta = process(postcss.parse(content, { from }));
-        meta.namespace = files[from].namespace || meta.namespace;
+        meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
-    },
-        {
-            readFileSync(path) {
-                return deindent(files[path].content).trim()
-            },
-            statSync(path) {
-                return {
-                    mtime: files[path].mtime!
-                };
-            }
-        }
-    )
+    }, fs);
 
-    function requireModule(path: string) {
-        if (!path.match(/\.js$/)) {
-            path += '.js';
-        }
-        const fn = new Function("module", "exports", files[path].content);
-        const _module = {
-            id: path,
-            exports: {}
-        }
-        fn(_module, _module.exports);
-        return _module.exports;
+    const resolver = new StylableResolver(fileProcessor, requireModule);
+
+    return { resolver, requireModule, fileProcessor };
+}
+
+export function generateFromMock(config: Config): StylableResults {
+    if (!isAbsolute(config.entry)) {
+        throw new Error('entry must be absolute path: ' + config.entry)
     }
+    const entry = config.entry;
+
+    const { requireModule, fileProcessor } = generateInfra(config);
 
     const t = new StylableTransformer({
         fileProcessor,
         requireModule,
-        diagnostics: new Diagnostics()
+        diagnostics: new Diagnostics(),
+        keepValues: false
     });
 
-    const result = t.transform(fileProcessor.process(config.entry));
+    const result = t.transform(fileProcessor.process(entry));
 
-    return result
+    return result;
+}
+
+export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path: string) => StylableMeta {
+    return (path: string) => fileProcessor.process(path);
+}
+
+export function createTransform(fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
+    return (meta: StylableMeta) => {
+        return new StylableTransformer({
+            fileProcessor,
+            requireModule,
+            diagnostics: new Diagnostics(),
+            keepValues: false
+        }).transform(meta).meta;
+    };
 }
 
 export function generateStylableRoot(config: Config) {
-    return generateFromMock(config).meta.ast;
+    return generateFromMock(config).meta.outputAst!;
 }
-
 
 export function generateStylableExports(config: Config) {
     return generateFromMock(config).exports;
 }
 
+export function createTestBundler(config: Config) {
+    if (!config.usedFiles) {
+        throw new Error('usedFiles is not optional in generateStylableOutput');
+    }
+
+    const { fs, requireModule } = createMinimalFS(config);
+
+    const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
+        meta.namespace = config.files[path].namespace || meta.namespace;
+        return meta;
+    });
+
+    return new Bundler(stylable);
+}
 
 export function generateStylableOutput(config: Config) {
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
+    const bundler = createTestBundler(config);
 
-    return generateStylableBundle(config.usedFiles, (entry) => {
-        return generateFromMock({ ...config, entry });
-    });
+    config.usedFiles.forEach(path => bundler.addUsedFile(path));
+
+    return bundler.generateCSS();
+    // return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
 }
-
-
-
-
-export function generateStylableBundle(usedFiles: string[], generate: (entry: string) => StylableResults) {
-
-    // interface ExtraModule {
-    //     id: string
-    //     imports: string[]
-    // }
-
-    // const extraEntries: ExtraModule[] = [];
-    interface ThemeEntry {
-        index: number;
-        themeMeta: StylableMeta;
-        overrides: Array<{ srcMeta: StylableMeta, declarations: postcss.Declaration[] }>;
-    }
-    const themeEntries: { [s: string]: ThemeEntry } = {};
-
-    const outputCSS = usedFiles.map((entry, index) => {
-
-        // const moduleImports: ExtraModule = { id: entry, imports: [] };
-        const { meta } = generate(entry);
-        meta.imports.forEach((_import) => {
-            if (_import.theme || themeEntries[_import.from]) {
-
-                if (usedFiles.indexOf(_import.from) !== -1) {
-                    throw new Error('theme should not be imported from JS')
-                } else if (themeEntries[_import.from]) {
-                    themeEntries[_import.from].index = index;
-                    if(_import.overrides.length) {
-                        themeEntries[_import.from].overrides.unshift({ srcMeta: meta, declarations: _import.overrides });
-                    }
-                } else {
-                    const { meta: depMeta } = generate(_import.from);
-                    themeEntries[_import.from] = { index, themeMeta: depMeta, overrides: _import.overrides.length ? [{ srcMeta: meta, declarations: _import.overrides }] : [] };
-                }
-                // moduleImports.imports.push(_import.from);
-            }
-            removeUnusedRules(meta, _import, usedFiles);
-        });
-        // extraEntries.push(moduleImports);
-        return meta.ast.toString();
-
-    });
-
-    Object.keys(themeEntries).reverse().forEach(themePath => {
-        const { index, themeMeta, overrides } = themeEntries[themePath];
-
-
-        themeMeta.imports.forEach((_import) => {
-            removeUnusedRules(themeMeta, _import, usedFiles);
-        });
-
-        const themeEntry = [themeMeta.ast.toString()];
-        
-        overrides.forEach(({ srcMeta, declarations }) => {
-            const clone = themeMeta.ast.clone();
-            var data: Pojo<string> = {}
-            declarations.forEach((declOverride) => {
-                data[declOverride.prop] = declOverride.value;
-            });
-            const toRemove: postcss.Declaration[] = [];
-
-            clone.walkRules((rule) => {
-                rule.selector = rule.selector.replace(new RegExp(themeMeta.namespace + '--' + themeMeta.root), srcMeta.namespace + '--' + srcMeta.root);
-                rule.walkDecls((decl: SDecl) => {
-
-                    const output = valueReplacer(decl.sourceValue, data, (value) => {
-                        return value;
-                    });
-
-                    if (decl.value === output) {
-                        toRemove.push(decl);
-                    } else {
-                        decl.value = output;
-                    }
-                });
-
-            });
-
-            toRemove.forEach((decl)=>{
-                const parent = decl.parent;
-                decl.remove();
-                if(parent && parent.nodes && parent.nodes.length === 0){
-                    parent.remove();
-                }
-            })
-
-            themeEntry.unshift(clone.toString());
-        });
-
-        outputCSS.splice(index + 1, 0, ...themeEntry);
-    });
-
-    // extraEntries.forEach((mod) => {
-    //     if (mod.imports.length) {
-    //         outputCSS.push(generateStylableBundle(mod.imports, generate));
-    //     }
-    // })
-
-
-    return outputCSS.reverse().join('\n');
-
-}
-
-
-
-//

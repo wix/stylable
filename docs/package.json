@@ -16,7 +16,7 @@
   "author": "talh@wix.com",
   "license": "ISC",
   "dependencies": {
-    "generic-playground": "^0.0.15",
-    "gitbook-plugin-playground": "^0.0.21"
+    "generic-playground": "^0.0.18",
+    "gitbook-plugin-playground": "^0.0.24"
   }
 }
