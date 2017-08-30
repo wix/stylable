@@ -149,33 +149,3 @@ export function createImportString(importDef: Imported, path: string) {
     }
     return imports.join('\n');
 }
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj: any) { return typeof obj; } : function (obj: any) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-function cloneAst(obj: any, parent?: any) {
-    var cloned = new obj.constructor();
-
-    for (var i in obj) {
-        if (!obj.hasOwnProperty(i)) continue;
-        if (i === '') {
-
-        }
-        var value = obj[i];
-        var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-
-        if (i === 'parent' && type === 'object') {
-            if (parent) cloned[i] = parent;
-        } else if (i === 'source') {
-            cloned[i] = value;
-        } else if (value instanceof Array) {
-            cloned[i] = value.map(function (j) {
-                return cloneAst(j, cloned);
-            });
-        } else {
-            if (type === 'object' && value !== null) value = cloneAst(value);
-            cloned[i] = value;
-        }
-    }
-
-    return cloned;
-}
