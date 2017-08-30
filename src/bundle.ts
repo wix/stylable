@@ -191,10 +191,17 @@ export class Bundler {
                             return overrideVars[name];
                         }
                         const symbol = entryMeta.mappedSymbols[name];
-                        if(symbol._kind === 'var'){
+                        if(symbol._kind === 'var') {
                             return symbol.text;
+                        }else if(symbol._kind === 'import') {
+                            const resolvedValue =this.stylable.resolver.resolveVarValue(entryMeta, name);
+                            if(resolvedValue){
+                                return resolvedValue;
+                            } else {
+                                return "unresolved imported var value " + name;
+                            }
                         }
-                        return `invalid value(${name}) with value of ${symbol._kind}`;
+                        return "invalid value " + name + " of type " + symbol._kind;
                     });
                     if (decl.value !== overriddenValue) {
                         ruleOverride.append(postcss.decl({prop:decl.prop, value:overriddenValue}));

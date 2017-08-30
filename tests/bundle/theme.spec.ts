@@ -415,6 +415,55 @@ describe('bundle: theme', () => {
             ].join('\n'));
         });
 
+        it('should resolve none overridden vars', () => {
+            /**
+             * this is a side effect of resolving overrides, where any value might be overridden
+             * just because there is an override. need to see that normal imported vars are resolved correctly.
+             */
+            const cssOutput = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css',
+                    '/comp.st.css'
+                ],
+                files: {
+                    "/entry.st.css": {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                color2: silver;
+                            }
+                        `
+                    },
+                    "/comp.st.css": {
+                        namespace: 'comp',
+                        content: `
+                            :import {
+                                -st-from: "./theme.st.css";
+                                -st-named: color1, color2;
+                            }
+                            .c { color:value(color1); }
+                        `
+                    },
+                    "/theme.st.css": {
+                        namespace: 'theme',
+                        content: `
+                            :vars {
+                                color1:red;
+                                color2:blue;
+                            }
+                        `
+                    }
+                }
+            });
+    
+            expect(cssOutput).to.eql([
+                '.comp--root .comp--c { color:red; }' 
+            ].join('\n'));
+        });
+
         it('should add override CSS to none theme stylesheets using the overridden vars', () => {
             const cssOutput = generateStylableOutput({
                 entry: '/entry.st.css',
