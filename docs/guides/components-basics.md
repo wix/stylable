@@ -4,7 +4,7 @@ This guide walks you through the basics of how to style and work with components
 
 You use **Stylable** with a component file, generally written in TypeScript or React, along with a **Stylable** CSS file that has the extention `.st.css`. 
 
-**Stylable** styles are similar to a type-system. Once you have declared that something is of the type `Button`, **Stylable** knows its internal structure and can match its internal parts and states.
+**Stylable** styles are similar to a type-system. Once you have declared that something is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
 
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application. 
 
