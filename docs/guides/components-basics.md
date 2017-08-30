@@ -56,7 +56,7 @@ The API includes:
 
 Let's see how to create your own parts and states and expose them for use throughout a page or application.
 
-### A Create and Expose Internal Parts
+### A. Create and Expose Internal Parts
 
 In the example above, you created a very simple button component. Now let's [import](../references/imports.md) this button into a `Form` component. The classes that you created above are available as internal parts of the imported component. Each class is available by its name as a [Stylable pseudo-element](../references/pseudo-elements.md). 
 
@@ -98,7 +98,7 @@ Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then 
 }
 ```
 
-### B Create and Expose States
+### B. Create and Expose States
 
 You can also create custom states for the component that are available as [pseudo-classes](../references/pseudo-classes.md) to anyone using your component.
 
