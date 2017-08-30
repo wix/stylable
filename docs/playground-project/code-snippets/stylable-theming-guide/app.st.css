@@ -1,0 +1,10 @@
+@namespace "App";
+:import {
+    -st-theme: true;
+    -st-from: "./backoffice-theme.st.css";
+    -st-named: cancelButton, submitButton, passwordInput, emailInput;
+}
+.cancelButton{}
+.submitButton{}
+.passwordInput{}
+.emailInput {}

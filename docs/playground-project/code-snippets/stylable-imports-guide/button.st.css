@@ -1,0 +1,11 @@
+@namespace "Button";
+.root {
+    background: #b0e0e6;
+}
+.icon {
+    background-image: url(./assets/btnIcon.svg);
+}
+.label {
+    font-size: 16px;
+    color: rgba(81, 12, 68, 1.0)
+}

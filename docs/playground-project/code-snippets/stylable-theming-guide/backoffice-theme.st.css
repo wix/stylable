@@ -1,0 +1,19 @@
+/* backoffice-theme.st.css */
+@namespace "Backoffice";
+:import { /* root="Backoffice__root Project__root"  */
+   -st-theme: true; /* auto compose to root */
+   -st-from: "./project.st.css";
+   -st-default: Project;
+   -st-named: cancelButton; /* scoped to Project__cancelButton */
+}
+:import {
+   -st-from: "./button.st.css";
+   -st-default: Button;
+}
+Button {
+   outline: gold;
+}
+/* We have the option of matching cancelButton directly by name, scoped to Project__cancelButton */
+.cancelButton { /* Project__cancelButton */
+   background: silver;
+}

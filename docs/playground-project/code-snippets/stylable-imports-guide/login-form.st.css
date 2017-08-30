@@ -1,0 +1,17 @@
+@namespace "Form";
+:import {
+    -st-from: "./button.st.css";
+    -st-default: Button;
+}
+:import {
+    -st-from: "./project.st.css";
+    -st-named: cancelButton;
+}
+.email {}
+.password {}
+.OK {
+    -st-extends: Button; /* OK pseudo-element extending a button */
+}
+.cancel { 
+    -st-extends: cancelButton; /* cancel pseudo-element extending a button */
+}
