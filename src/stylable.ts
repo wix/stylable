@@ -1,4 +1,3 @@
-
 import { FileProcessor, cachedProcessFile } from "./cached-process-file";
 import { StylableMeta, process } from "./stylable-processor";
 import { StylableResolver } from "./postcss-resolver";
@@ -25,7 +24,6 @@ export interface fsLike {
     mkdirSync: typeof fs.mkdirSync;
 }
 
-
 export class Stylable {
     fileProcessor: FileProcessor<StylableMeta>;
     resolver: StylableResolver;
@@ -44,7 +42,6 @@ export class Stylable {
     createBundler(): Bundler {
         return new Bundler(this);
     }
-
     transform(meta: StylableMeta): StylableResults
     transform(source: string, resourcePath: string): StylableResults
     transform(meta: string | StylableMeta, resourcePath?: string): StylableResults {
@@ -65,18 +62,15 @@ export class Stylable {
 
         return transformer.transform(meta);
     }
-    process(fullpath: string) {
-        return this.fileProcessor.process(fullpath)
+    process(fullpath: string): StylableMeta {
+        return this.fileProcessor.process(fullpath);
     }
 }
-
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>,
     resolvePath: (context: string, path: string) => string
 }
-
-
 
 export function createInfrastructure(projectRoot: string, fileSystem: fsLike = fs, onProcess: (meta: StylableMeta, path: string) => StylableMeta = (x) => x): StylableInfrastructure {
     const eResolver = ResolverFactory.createResolver({
