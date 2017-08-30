@@ -25,7 +25,8 @@ export function createGenerator(
         const transformer = new StylableTransformer({
             fileProcessor,
             requireModule,
-            diagnostics
+            diagnostics,
+            delimiter
         });
 
         const { exports } = transformer.transform(meta);

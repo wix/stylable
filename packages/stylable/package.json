@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
-    "build": "tsc && ncp ./modules ./dist/modules",
+    "build": "tsc",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
     "prepublish": "npm run build",
     "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
@@ -17,6 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.0.1",
+    "@types/enhanced-resolve": "^3.0.4",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.2",
     "c3-platform": "^1.0.0",
@@ -34,18 +35,16 @@
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
-    "camelcase-css": "^1.0.1",
     "css-selector-tokenizer": "^0.7.0",
     "deindent": "^0.1.0",
-    "kebab-case": "^1.0.0",
+    "enhanced-resolve": "^3.4.1",
     "lodash.clonedeep": "^4.5.0",
     "murmurhash": "0.0.2",
     "postcss": "^6.0.3",
     "postcss-js": "^1.0.0",
     "postcss-nested": "^2.0.2",
     "postcss-safe-parser": "^3.0.1",
-    "postcss-value-parser": "^3.3.0",
-    "stylis": "^3.2.3"
+    "postcss-value-parser": "^3.3.0"
   },
   "files": [
     "dist",

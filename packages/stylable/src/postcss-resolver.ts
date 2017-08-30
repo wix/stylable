@@ -18,7 +18,7 @@ export interface JSResolve {
 }
 
 export class StylableResolver {
-    constructor(protected fileProcessor: FileProcessor<StylableMeta>, protected requireModule: (modulePath: string) => any) {}
+    constructor(protected fileProcessor: FileProcessor<StylableMeta>, protected requireModule: (modulePath: string) => any) { }
     resolveVarValue(meta: StylableMeta, name: string) {
         let value;
         let symbol = meta.mappedSymbols[name];
@@ -49,17 +49,23 @@ export class StylableResolver {
 
         return value;
     }
-    resolveClass(meta: StylableMeta, symbol: StylableSymbol): CSSResolve | null {
-
+    resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
+        return this.resolveName(meta, symbol, false);
+    }
+    resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
+        return this.resolveName(meta, symbol, true);
+    }
+    resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
+        const type = isElement ? 'element' : 'class';
         let finalSymbol;
         let finalMeta;
-        if (symbol._kind === 'class') {
+        if (symbol._kind === type) {
             finalSymbol = symbol;
             finalMeta = meta;
         } else if (symbol._kind === 'import') {
             const resolved = this.deepResolve(symbol);
             if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                if (resolved.symbol._kind === 'class') {
+                if (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') {
                     finalSymbol = resolved.symbol;
                     finalMeta = resolved.meta;
                 } else {
@@ -123,17 +129,21 @@ export class StylableResolver {
         }
         return resolved;
     }
-    resolveExtends(meta: StylableMeta, className: string): CSSResolve[] {
-        if (!meta.classes[className]) {
-            return []
+    resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
+
+        const bucket = isElement ? meta.elements : meta.classes;
+        const type = isElement ? 'element' : 'class';
+
+        if (!bucket[className]) {
+            return [];
         }
 
-        let extendPath = [];
-        const resolvedClass = this.resolveClass(meta, meta.classes[className])
+        const extendPath = [];
+        const resolvedClass = this.resolveName(meta, bucket[className], isElement);
 
-        if (resolvedClass && resolvedClass._kind === 'css' && resolvedClass.symbol._kind === 'class') {
+        if (resolvedClass && resolvedClass._kind === 'css' && resolvedClass.symbol._kind === type) {
             let current = resolvedClass;
-            let extend= resolvedClass.symbol[valueMapping.extends];
+            let extend = resolvedClass.symbol[valueMapping.extends] || resolvedClass.symbol.alias;
 
             while (current) {
                 extendPath.push(current);
@@ -141,14 +151,13 @@ export class StylableResolver {
                     break;
                 }
                 let res = this.resolve(extend);
-                if (res && res._kind === 'css' && res.symbol._kind === 'class') {
+                if (res && res._kind === 'css' && (res.symbol._kind === 'element' || res.symbol._kind === 'class')) {
                     current = res;
                     extend = res.symbol[valueMapping.extends];
                 } else {
                     break;
                 }
             }
-
         }
 
         return extendPath

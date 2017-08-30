@@ -48,8 +48,13 @@ export function createMinimalFS(config: MinimalFSSetup) {
         return _module.exports;
     }
 
+    const resolvePath = function resolvePath(_ctx: string, path: string) {
+        return path;
+    }
+
     return {
         fs,
-        requireModule
+        requireModule,
+        resolvePath
     }
 }
