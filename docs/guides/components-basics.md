@@ -41,7 +41,7 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
     color: rgba(81, 12, 68, 1.0)
 }
 ```
-In this example, the **Stylable** CSS [extends](../references/extend-stylesheet.md) the [root](../references/root.md) class and styles it.
+In this example, the **Stylable** CSS [extends](../references/extend-stylesheet.md) the [root](../references/root.md) class and styles it. The `root` class is automatically added as part of the **Stylable** integration and doesn't actually have to be written separately.
 
 
 ## 2 Expose the Component's Stylable API
