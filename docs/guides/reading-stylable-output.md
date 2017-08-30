@@ -1,35 +1,40 @@
-# Reading Stylable Output
+# How to Understand Stylable Output
 
-Reading **Stylable** output is often necessary in order to understand what is affecting a specific element. You want to be able to see what is applied, and connect it to specific declarations in the code.
+It's useful to be able to read **Stylable** output to understand what is affecting a specific element. You want to be able to see what has been applied, and connect it to specific declarations in the code.
 
 ## Basics of Namespacing
 
-**Stylable** automatically [namespaces](../references/namespace.md) all style rules, to scope each component and prevent styles from "leaking" into other components. The CSS output will show some hash that replaces the class in order to namespace it. Components will also reflect their source component, relative to the scope. 
+**Stylable** automatically [namespaces](../references/namespace.md) all style rules, to scope each component and prevent styles from "leaking" into other components. The CSS output displays a randomly generated hash string that replaces the class to namespace it. Components also reflect their source component, relative to from where they were scoped. For example in the following code example, the selector gets a hash string with underscore root (`_root`) because it was scoped to the root class. 
+
 
 ```css
+CSS
 .some-class {}
 
+CSS OUTPUT
 /*
-@selector ".[some hash]__root"
+@selector ".<randomly generated hash string>__root"
 @exports "" - see Default Import section
 */
 ```
 
-You can declare a specific namespace for your component, in order to track it easier (**Stylable** automatic namespacing is not human-readable). In the example below, when we declare the namespace `ToggleBtn`, the CSS output will reflect our namespacing:
+You can declare a specific namespace for your component, to more easily track it. **Stylable's** automatic namespacing is not human-readable. In the example below, when you declare the namespace `ToggleBtn`, the CSS output reflects the namespacing so you can identify it in the output.
 
 ```css
+CSS
 @namespace "ToggleBtn";
 .some-class {}
 
+CSS OUTPUT
 /*
-@selector ".ToggleBtn[some hash]__root"
+@selector ".ToggleBtn<randomly generated hash string>__root"
 @exports "ToggleBtn__root"
 */
 ```
 
-## Imports Output
+## Imports 
 
-Let's continue with a component `ToggleBtn` that we will want to import into our `DefaultImport`, `NamedImport` and `ThemeImport` examples.
+Let's continue with the `ToggleBtn` component that is now [imported](../references/imports.md) into the `DefaultImport` and `NamedImport` examples. Here the component is namespaced and the sections following describe the different ways to import the component.
 
 ```css
 /* toggle-btn.st.css */
@@ -47,7 +52,7 @@ Let's continue with a component `ToggleBtn` that we will want to import into our
 
 ### Default Imports
 
-We can then see the intricacies of the differences between using [tag-selectors](../references/tag-selectors.md) and [class-selectors](../references/class-selectors.md). The scoping in the former is to the component itself, whereas in the latter it is attached to the local scope.
+Let's examine the differences between using [tag-selectors](../references/tag-selectors.md) and [class-selectors](../references/class-selectors.md) when importing a namespaced component. The tag selector is scoped to the component itself, whereas the class selector is scoped to the local stylesheet.
 
 ```css
 @namespace "DefaultImport";
@@ -58,19 +63,28 @@ We can then see the intricacies of the differences between using [tag-selectors]
 
 /* TAG SELECTORS */
 
+CSS 
 ToggleBtn {}
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .ToggleBtn__root"
 @exports "" - tag selectors are not exported
 */
 
+CSS 
 ToggleBtn:toggled {}
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .ToggleBtn__root[data-ToggleBtn-toggled]"
 @exports ""
 */
 
+CSS
 ToggleBtn::checkBox {}
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .ToggleBtn__root .ToggleBtn__checkBox"
 @exports ""
@@ -78,21 +92,30 @@ ToggleBtn::checkBox {}
 
 /* CLASS SELECTORS */
 
+CSS
 .main-toggle {
     -st-extends: ToggleBtn;
 }
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .DefaultImport__main-toggle.ToggleBtn__root"
 @exports "DefaultImport__main-toggle"
 */
 
+CSS
 .main-toggle:toggled {}
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .DefaultImport__main-toggle.ToggleBtn__root[data-ToggleBtn-toggled]"
 @exports "" - custom pseudo-class overrides are not exported
 */
 
+CSS
 .main-toggle::highContrast {}
+
+CSS OUTPUT
 /*
 @selector ".DefaultImport__root .DefaultImport__main-toggle.ToggleBtn__root  .ToggleBtn__highContrast"
 @exports "" - custom pseudo-elements are not exported
@@ -101,9 +124,10 @@ ToggleBtn::checkBox {}
 
 ### Named Imports
 
-Named imports will result in slightly different output, and will not extend the root of the component like the default component does.
+Named imports result in slightly different output, and do not extend the root of the component as the default import of the component does. Let's take a look at the differences.
 
 ```css
+CSS
 @namespace "NamedImport";
 :import {
     -st-from: './ToggleBtn.st.css';
@@ -111,27 +135,36 @@ Named imports will result in slightly different output, and will not extend the 
 }
 
 .myToggle {}
+
+CSS OUTPUT
 /*
 @selector ".NamedImport__root .ToggleBtn__checkBox"
 @exports "ToggleBtn__checkBox"
 */
 
+CSS
 .local {
     -st-extends: highContrast;
 }
+
+CSS OUTPUT
 /*
 @selector ".NamedImport__root .NamedImport__local.ToggleBtn__highContrast"
 @exports "NamedImport__local ToggleBtn__highContrast"
 */
 
+CSS
 .highContrast {
     -st-extends: highContrast;
 }
+
+CSS OUTPUT
 /*
 @selector ".NamedImport__root .NamedImport__highContrast.ToggleBtn__highContrast"
 @exports "NamedImport__highContrast ToggleBtn__highContrast"
 */
 
+CSS
 .someclass {
     border: 1px solid value(main-background-color)
 }
