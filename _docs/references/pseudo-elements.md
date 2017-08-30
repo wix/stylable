@@ -131,5 +131,5 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 ```
 
 > **Note**:  
-> Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended. This can have adverse effects on performance.
+> Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended.
 
