@@ -47,10 +47,18 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
 
     if (mixinRoot.nodes) {
         let nextRule = rule;
+        let mixinEntry:postcss.Declaration;
+
+        rule.walkDecls(valueMapping.mixin, (decl) => {
+            mixinEntry = decl;
+        });
+        if (!mixinEntry!) {
+            throw rule.error('missing mixin entry');
+        }
         mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
             if (node.type === 'decl') {
                 if (isValidDeclaration(node)) {
-                    rule.insertBefore(rule.mixinEntry, node);
+                    rule.insertBefore(mixinEntry, node);
                 } else {
                     //TODO: warn invalid mixin value
                 }
@@ -73,7 +81,6 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                 throw new Error('mixins @ rules are not supported yet!');
             }
         });
-        rule.walkDecls(new RegExp(valueMapping.mixin), (node) => node.remove());
     }
 
     return rule;
@@ -105,12 +112,12 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
 }
 
 
-export function removeUnusedRules(meta: StylableMeta, _import: Imported, usedFiles: string[]) {
+export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import: Imported, usedFiles: string[], resolvePath: (ctx: string, path:string)=>string) {
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
         const symbols = Object.keys(_import.named).concat(_import.defaultExport);
-        meta.ast.walkRules((rule: SRule) => {
+        ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
             traverseNode(rule.selectorAst, (node) => {
                 if (symbols.indexOf(node.name) !== -1) {
@@ -119,7 +126,7 @@ export function removeUnusedRules(meta: StylableMeta, _import: Imported, usedFil
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
                     const extend = symbol[valueMapping.extends];
-                    if (extend && extend._kind === 'import' && usedFiles.indexOf(extend.import.from) === -1) {
+                    if (extend && extend._kind === 'import' && usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
                         return shouldOutput = false;
                     }
                 }

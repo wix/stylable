@@ -106,7 +106,7 @@ describe('Generator variables interpolation', function () {
 
         const rule = <postcss.Rule>result.nodes![0];
 
-        expect((<postcss.Declaration>rule.nodes![0]).value).to.equal('value(param1)');
+        expect((<postcss.Declaration>rule.nodes![0]).value).to.equal('cyclic value');
 
     });
 

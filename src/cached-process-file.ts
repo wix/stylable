@@ -17,10 +17,10 @@ export interface FileProcessor<T> {
 export function cachedProcessFile<T = any>(processor: processFn<T>, fs: MinimalFS): FileProcessor<T> {
     const cache: { [key: string]: CacheItem<T> } = {};
 
-    const process = function (fullpath: string) {
+    const process = function (fullpath: string, ignoreCache: boolean = false) {
         var stat = fs.statSync(fullpath);
         var cached = cache[fullpath];
-        if (!cached || (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())) {
+        if (ignoreCache || !cached || (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())) {
             var content = fs.readFileSync(fullpath, 'utf8');
             var value = processor(fullpath, content);
             cache[fullpath] = { value, stat };

@@ -11,9 +11,9 @@ export interface TypedClass {
     "-st-variant"?: boolean;
 }
 
-export interface MixinValue<T = any[]> {
+export interface MixinValue {
     type: string;
-    options: T;
+    options: { value: string }[];
 }
 
 export const valueMapping = {
@@ -79,7 +79,7 @@ export const SBTypesParsers = {
     "-st-mixin"(value: string) {
 
         const ast = valueParser(value);
-        var mixins: { type: string, options: string[] }[] = [];
+        var mixins: { type: string, options: { value: string }[] }[] = [];
         ast.nodes.forEach((node: any) => {
 
             if (node.type === 'function') {
@@ -100,12 +100,12 @@ export const SBTypesParsers = {
         return mixins;
 
     },
-    "-st-compose"(value: string){
+    "-st-compose"(value: string) {
         const ast = valueParser(value);
         const composes: string[] = [];
-        ast.walk((node: any)=>{
+        ast.walk((node: any) => {
             if (node.type === 'function') {
-                
+
             } else if (node.type === 'word') {
                 composes.push(node.value);
             } else if (node.type === 'string') {
@@ -146,5 +146,5 @@ function createOptions(node: any) {
         } else {
             return undefined;
         }
-    })).filter((x: string) => typeof x === 'string');
+    })).filter((x: string) => typeof x === 'string').map((value) => ({ value }));
 }
