@@ -1,6 +1,6 @@
 # Theme a Component Library
 
-Stylabe allows you to author a [component library](), that can be themed, and easily styled by its consumers.  
+Stylabe allows you to author a [component library](), that can be themed, and easily styled, by its consumers.  
 
 ## The `project.st.css` File
 
@@ -39,19 +39,20 @@ We recommend creating a `project.st.css` file in the `src` directory of your com
 
 ## Themable Components
 
-The components in the library should be as easy to style and theme as possible. We recommend following these guidelines when planning 
+The components in the library should be as easy to style and theme as possible. We recommend following these guidelines when planning: 
 
-* Component authors should expose a good Style API and its [custom states](../references/pseudo-classes.md), and contain the least possible styling required for the component to function, e.g., layout only. (When styling is required as part of the component functionality, it should be explained in a comment, as well as documentation).
-* Reusable vars should be declared outside of component. The component can use vars for common values that are less likely to be override-able. For example, don't define colors in a component
+* Component authors should expose a good style API and its [custom states](../references/pseudo-classes.md). 
+* The API should contain the least possible styling required for the component to function, for example only the layout. (When styling is required as part of the component functionality, it should be explained in a comment and well documented).
+* Reusable vars should be declared outside of the component. The component can use vars for common values that are less likely to be override-able. For example, don't define colors in a component.
 * Variants should be declared in the main `project.st.css` file, and should not be part of the component code unless required.
 
 ## Themable Project Structure
 
 As a best practice we recommend following this folder structure:
 
-* the `src/components` folder will contain a folder for each component, where each component will have a Stylable CSS file using the naming convention `my-component.st.css`
-* the `src/components` folder will include a `project.st.css` [file](#the-project-file) that helps theme our library
-* the `src/themes` folder will include the relevant theme files
+* The `src/components` folder contains a folder for each component, where each component has a **Stylable** CSS file using the naming convention `my-component.st.css`.
+* The `src/components` folder includes the `project.st.css` [file](#the-project-file) that helps theme the library.
+* The `src/themes` folder includes the relevant theme files.
 
 ```
 src/
@@ -73,9 +74,9 @@ src/
 ```
 ## Declaring Vars
 
-One of the primary uses of themes is to standardise styles across an application. [Vars](../references/variables.md) offer a tools to standardize specific CSS values across the application.
+One of the primary uses of themes is to standardize styles across an application. [Vars](../references/variables.md) enables you to standardize specific CSS values across the application.
 
-For example, the cancelButton variant of the Button component needs to use the tone of Red used elsewhere in the application theme.
+For example, the `cancelButton` variant of the `Button` component needs to use the Red tone which is used elsewhere in the application theme.
 
 ```css
 @namespace "Button";
@@ -99,11 +100,11 @@ For example, the cancelButton variant of the Button component needs to use the t
 }
 ```
 
-## Applying the Theme to our Project
+## Applying the Theme to Your Project
 
-Lastly, in our theme, we will import our `project.st.css` and apply theming to it.
+In your theme, you import the `project.st.css` and apply theming to it.
 
-The structure of this file will be very similar to the `project.st.css`, and set all values specific to it. 
+The structure of this file is very similar to the `project.st.css`, and sets all values specific to it. 
 
 ```css
 @namespace "BackofficeTheme";
