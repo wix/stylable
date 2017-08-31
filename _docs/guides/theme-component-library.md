@@ -4,7 +4,7 @@ When creating a [component library](), you should create it to enable easy and f
 
 ## The `project.st.css` File
 
-We recommend creating a `project.st.css` file in the `src` directory of your component library. This file should expose an API for the entire project. Importing this CSS into the theme would provide access to all the library's features, enabling you to: 
+We recommend creating a `project.st.css` file in the `src` directory of your component library. This can expose an API for the entire project. Importing this CSS into the theme  provides access to all the library's features, enabling you to: 
 
 * Expose all vars in use in the project.
 * Import and expose all components in the project.
@@ -41,8 +41,8 @@ We recommend creating a `project.st.css` file in the `src` directory of your com
 
 The components in the library should be as easy to style and theme as possible. We recommend following these guidelines when planning 
 
-* Components should be styled as minimally as possible, other than to describe layout or [custom states](../references/pseudo-classes.md). A component should expose a good [**Style API**](./component-basics.md) and its custom states, and contain the minimal styling required for the component to function. (When styling is required as part of the component functionality, it should be explained in a comment, as well as documentation).
-* Reusable vars should be declared outside of component. The component can use vars for common values that are less likely to be override-able. Colors, for example, should almost never be hard-coded in a component. 
+* Component authors should expose a good Style API and its [custom states](../references/pseudo-classes.md), and contain the least possible styling required for the component to function, e.g., layout only. (When styling is required as part of the component functionality, it should be explained in a comment, as well as documentation).
+* Reusable vars should be declared outside of component. The component can use vars for common values that are less likely to be override-able. For example, don't define colors in a component
 * Variants should be declared in the main `project.st.css` file, and should not be part of the component code unless required.
 
 ## Themable Project Structure
@@ -73,9 +73,9 @@ src/
 ```
 ## Declaring Vars
 
-One of the markings of a theme is a standardization of styles across the application. [Vars](../references/variables.md) offer a tools to standardize specific CSS values across the application.
+One of the primary uses of themes is to standardise styles across an application. [Vars](../references/variables.md) offer a tools to standardize specific CSS values across the application.
 
-For example, the `cancelButton` variant of the `Button` component, will want to use the tone of Red used elsewhere in the application theme.
+For example, the cancelButton variant of the Button component needs to use the tone of Red used elsewhere in the application theme.
 
 ```css
 @namespace "Button";
