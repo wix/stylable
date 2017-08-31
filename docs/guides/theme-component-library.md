@@ -7,7 +7,7 @@ Stylabe allows you to author a [component library](), that can be themed, and ea
 We recommend creating a `project.st.css` file in the `src` directory of your component library. This can expose an API for the entire project. Importing this CSS into the theme provides access to all the library's features, enabling you to: 
 
 * Expose all vars in use in the project.
-* Import and expose all components in the project.
+* Import all components in the project.
 * Declare and expose all the [variants](../references/variants.md) of these components.
 
 ```css
@@ -44,23 +44,21 @@ The components in the library should be as easy to style and theme as possible. 
 * Component authors should expose a good style API and its [custom states](../references/pseudo-classes.md). 
 * The API should contain the least possible styling required for the component to function, for example only the layout. (When styling is required as part of the component functionality, it should be explained in a comment and well documented).
 * Reusable vars should be declared outside of the component. The component can use vars for common values that are less likely to be override-able. For example, don't define colors in a component.
-* Variants should be declared in the main `project.st.css` file, and should not be part of the component code unless required.
+* Variants should be declared in the main `project.st.css` file, and should not be part of the component code.
 
 ## Themable Project Structure
 
 As a best practice we recommend following this folder structure:
 
+* The `src` folder includes the `project.st.css` [file](#the-project-file) that helps theme the library - as described above.
 * The `src/components` folder contains a folder for each component, where each component has a **Stylable** CSS file using the naming convention `my-component.st.css`.
-* The `src/components` folder includes the `project.st.css` [file](#the-project-file) that helps theme the library.
 * The `src/themes` folder includes the relevant theme files.
 
 ```
 src/
+    project.st.css
     |
     --- components/
-    |   |
-    |   project.st.css
-    |   |
     |   --- my-component/
     |       |
     |       index.ts
