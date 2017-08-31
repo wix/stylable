@@ -1,4 +1,4 @@
-# Stylable Component Basics
+# Stylable Basics
 
 This guide walks you through the basics of how to style and work with components using **Stylable**. 
 
