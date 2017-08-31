@@ -7,8 +7,7 @@ Stylabe allows you to author a [component library](), that can be themed, and ea
 We recommend creating a `project.st.css` file in the `src` directory of your component library. This can expose an API for the entire project. Importing this CSS into the theme provides access to all the library's features, enabling you to: 
 
 * Expose all vars in use in the project.
-* Import all components in the project.
-* Declare and expose all the [variants](../references/variants.md) of these components.
+* Import all components, and declare and expose all the [variants](../references/variants.md) of these components.
 
 ```css
 /* project.st.css */
@@ -72,9 +71,9 @@ src/
 ```
 ## Declaring Vars
 
-One of the primary uses of themes is to standardize styles across an application. [Vars](../references/variables.md) enables you to standardize specific CSS values across the application.
+One of the primary uses of themes is to standardize styles across an application. [Vars](../references/variables.md) enable you to standardize specific CSS values across the application.
 
-For example, the `cancelButton` variant of the `Button` component needs to use the Red tone which is used elsewhere in the application theme.
+For example, the `.label` CSS class of the `Button` component needs to use the red tone which is used elsewhere in the application theme.
 
 ```css
 @namespace "Button";
@@ -89,12 +88,7 @@ For example, the `cancelButton` variant of the `Button` component needs to use t
 }
 .label {
     font-size: 16px;
-    color: rgba(81, 12, 68, 1.0)
-}
-.cancelButton {
-    -st-extends: root;
-    -st-variant: true;
-    color: value(wonderRed);
+    color: value(red);
 }
 ```
 
