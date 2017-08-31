@@ -189,12 +189,14 @@ describe('Stylable postcss process', function () {
                 _kind: 'var',
                 name: 'name',
                 value: 'value',
+                text: 'value',
                 import: null
             },
             myname: {
                 _kind: 'var',
                 name: 'myname',
                 value: 'value',
+                text: 'value(name)',
                 import: null
             }
         });

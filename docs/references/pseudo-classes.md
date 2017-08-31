@@ -54,7 +54,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
     -st-extends: Comp1;
     -st-states: toggled, selected;
 }
-.media-button:hover { border: 10px solid black; } /* native CSS because no custom declaration*/
+.media-button:hover { border: 0.2em solid black; } /* native CSS because no custom declaration*/
 .media-button:loading { color: silver; } /* from Example1 */
 .media-button:selected { color: salmon; } /* from Example2 */
 .media-button:toggled { color: gold; } /* included in Example1 but overridden by Example2 */
@@ -64,7 +64,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 ```css
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
-.Example2__root .Example2__media-button:hover { border: 10px solid black; } /* native hover - not declared */
+.Example2__root .Example2__media-button:hover { border: 0.2em solid black; } /* native hover - not declared */
 .Example2__root .Example2__media-button[data-Example1-loading] { color: silver; } /* loading scoped to Example1 - only one to declare */
 .Example2__root .Example2__media-button[data-Example2-selected] { color: salmon; } /* selected scoped to Example2 - only one to declare */
 .Example2__root .Example2__media-button[data-Example2-toggled] { color: gold;} /* toggled scoped to Example2 - last to declare */
@@ -72,7 +72,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ## Map custom pseudo-classes
 
-You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. In the CSS output,instead of the default behavior in **Stylable** of generating the `data-*` attributes to target states, it uses the custom implementation defined in the source. 
+You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. .Stylable generates selectors using custom `data-*` attributes. The CSS output uses the custom implementation defined in `-st-states` rather then its default generated `data-*` attributes.
 
 ### CSS API:
 ```css
@@ -91,11 +91,12 @@ You can use this feature to define states even if the existing components you ar
 .ExampleCustom__root[data-spinner] { color: green; }
 ```
 
-> Note: custom mapping should define selector that target one element (no CSS child elements) 
+> **Note**:  
+> When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
 ## Enable custom pseudo-classes
 
-Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off.
+Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. 
 
 **Stylable** offers [React CSS state integration](./react-integration.md) to help components manage custom pseudo-classes easily.
 
@@ -104,7 +105,7 @@ Custom pseudo-classes are implemented using `data-*` attributes and need additio
 ```jsx
 /* render of stylable component */
 render() {
-    return <div cssStates={{
+    return <div style-state={{ /* used in stylable-react-integration to implement pseudo-classes */
         toggled:true,
         selected:false
     }} ></div>
