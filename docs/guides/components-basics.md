@@ -2,7 +2,7 @@
 
 This guide walks you through the basics of how to style and work with components using **Stylable**. 
 
-You use **Stylable** with a component file (generally, using React), along with a **Stylable** CSS file that has the extention `.st.css`.
+You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extention `.st.css`.
 
 > **Note**:
 > This guide shows the HTML side of our [stylable-integration](https://github.com/wixplosives/stylable-integration) with React. 
@@ -64,7 +64,7 @@ In the example above, you created a very simple button component. Now let's [imp
 
 You can now style your `Button` in the scope of the `Form` so that it fits the needs of this page.
 
-Let's take the `Button` component and import it into the TypeScript file, and also add it to the render:
+Let's take the `Button` component and import it into the JavaScript file, and also add it to the render:
 
 ```tsx
 /* form.tsx */
@@ -128,7 +128,7 @@ render () {
     font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
-.root:clicked { /* places the state on the root of the component */
+.root:clicked { /* matches the state on the root of the component */
     box-shadow: 2px 2px 2px 1px darkslateblue;
 }
 ```
