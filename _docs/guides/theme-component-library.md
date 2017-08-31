@@ -1,10 +1,10 @@
 # Theme a Component Library
 
-When creating a [component library](), you should create it to enable easy and featureful styling. 
+Stylabe allows you to author a [component library](), that can be themed, and easily styled by its consumers.  
 
 ## The `project.st.css` File
 
-We recommend creating a `project.st.css` file in the `src` directory of your component library. This can expose an API for the entire project. Importing this CSS into the theme  provides access to all the library's features, enabling you to: 
+We recommend creating a `project.st.css` file in the `src` directory of your component library. This can expose an API for the entire project. Importing this CSS into the theme provides access to all the library's features, enabling you to: 
 
 * Expose all vars in use in the project.
 * Import and expose all components in the project.
