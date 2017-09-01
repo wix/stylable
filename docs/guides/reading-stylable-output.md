@@ -127,7 +127,6 @@ Page["main-toggle"] === "Page__main-toggle"
 #### CSS:
 ```css
 .main-toggle:toggled {} /* CLASS SELECTOR WITH CUSTOM PSEUDO-CLASS */
-}
 ```
 
 #### CSS Selector: 
@@ -219,4 +218,5 @@ PageCSS["highContrast"] === "hightContrast ToggleBtn__highContrast"
 ```css
 .someclass { /* To illustrate use of value(var) */
     border: 1px solid value(main-background-color)
-}```
+}
+```
