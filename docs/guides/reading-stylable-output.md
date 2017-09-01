@@ -72,85 +72,96 @@ Let's examine the differences between using [tag-selectors](../references/tag-se
 }
 ```
 
-#### CSS: 
+#### Tag Selectors
+
+**CSS**: 
 ```css
-ToggleBtn {} /* TAG SELECTOR */
+ToggleBtn {} 
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .ToggleBtn__root
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 /* tag selectors are not exported */
 ```
 
-#### CSS:
+#### Tag Selectors with Custom Pseudo-Classes
+
+**CSS**:
 ```css
-ToggleBtn:toggled {} /* TAG SELECTOR WITH PSEUDO-CLASS */
+ToggleBtn:toggled {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .ToggleBtn__root[data-ToggleBtn-toggled]
 ```
 
-#### CSS:
+#### Tag Selectors with Custom Pseudo-Elements
+
+**CSS**:
 ```css
-ToggleBtn::checkBox {} /* TAG SELECTOR WITH PSEUDO-ELEMENT */
+ToggleBtn::checkBox {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .ToggleBtn__root .ToggleBtn__checkBox
 ```
 
-#### CSS:
+#### Class Selectors
+
+**CSS**:
 ```css
-.main-toggle { /* CLASS SELECTOR */
+.main-toggle {
     -st-extends: ToggleBtn;
 }
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .Page__main-toggle.ToggleBtn__root
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 Page["main-toggle"] === "Page__main-toggle"
 ```
 
-#### CSS:
+#### Class Selectors with Custom Pseudo-Classes
+
+**CSS**:
 ```css
-.main-toggle:toggled {} /* CLASS SELECTOR WITH CUSTOM PSEUDO-CLASS */
-}
+.main-toggle:toggled {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .Page__main-toggle.ToggleBtn__root[data-ToggleBtn-toggled]
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 /* custom pseudo-classees are not exported */
 ```
 
-#### CSS:
+#### Class Selectors with Custom Pseudo-Elements
+
+**CSS**:
 ```css
-.main-toggle::highContrast {} /* CLASS SELECTOR WITH CUSTOM PSEUDO-ELEMENT */
+.main-toggle::highContrast {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .Page__main-toggle.ToggleBtn__root .ToggleBtn__highContrast
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 /* custom pseudo-elements are not exported */
 ```
@@ -167,55 +178,62 @@ Named imports result in slightly different output, and do not extend the root of
     -st-named: highContrast, main-background-color;
 }
 ```
+#### Class Selectors
 
-#### CSS:
+**CSS**:
 ```css
 .myToggle {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .ToggleBtn__checkBox
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 PageCSS["myToggle"] === "ToggleBtn__checkBox"
 ```
 
-#### CSS:
+#### Class Selectors Extending a Named Internal Part
+
+**CSS**:
 ```css
-.myContrast { /* CLASS SELECTOR EXTENDING A NAMED INTERNAL PART */
+.myContrast {
     -st-extends: highContrast;
 }
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .Page__myContrast.ToggleBtn__highContrast
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 PageCSS["myContrast"] === "myContrast ToggleBtn__highContrast"
 ```
 
-#### CSS:
+#### Class Selectors Using a Named Internal Part
+
+**CSS**:
 ```css
-.highContrast {} /* CLASS SELECTOR USING A NAMED INTERNAL PART */
+.highContrast {}
 ```
 
-#### CSS Selector: 
+**CSS Selector**: 
 ```css
 .Page__root .Page__highContrast.ToggleBtn__highContrast
 ```
 
-#### JS value: 
+**JS value**: 
 ```js
 PageCSS["highContrast"] === "hightContrast ToggleBtn__highContrast"
 ```
 
-#### CSS:
+#### Vars Output
+
+**CSS**:
 ```css
 .someclass { /* To illustrate use of value(var) */
     border: 1px solid value(main-background-color)
