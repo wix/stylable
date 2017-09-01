@@ -1,5 +1,5 @@
 
-![](./branding/logo/PNG/96-logo-OnlySymbol.png)
+![](../branding/logo/PNG/96-logo-OnlySymbol.png)
 
 # Stylable - CSS for Components
 
@@ -29,44 +29,44 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 ## Guides
 
-* [Install & Configure Stylable](./docs/guides/install-configure.md)
+* [Install & Configure Stylable](./guides/install-configure.md)
 
-* [Component Basics](./docs/guides/component-basics.md)
+* [Component Basics](./guides/component-basics.md)
 
-* [Stylable Imports Guide](./docs/guides/stylable-imports-guide.md)
+* [Stylable Imports Guide](./guides/stylable-imports-guide.md)
 
-* [Stylable Theming Guide](./docs/guides/stylable-theming-guide.md)
+* [Stylable Theming Guide](./guides/stylable-theming-guide.md)
 
-* [Theming a Component Library](./docs/guides/theming-component-library.md)
+* [Theming a Component Library](./guides/theming-component-library.md)
 
 ## References
 
-* [Imports](./docs/references/imports.md)
+* [Imports](./references/imports.md)
 
-* [Root](./docs/references/root.md)
+* [Root](./references/root.md)
 
-* [Class Selectors](./docs/references/class-selectors.md)
+* [Class Selectors](./references/class-selectors.md)
 
-* [Tag Selectors](./docs/references/tag-selectors.md)
+* [Tag Selectors](./references/tag-selectors.md)
 
-* [Extend stylesheet](./docs/references/extend-stylesheet.md)
+* [Extend stylesheet](./references/extend-stylesheet.md)
 
-* [Pseudo-Classes](./docs/references/pseudo-classes.md)
+* [Pseudo-Classes](./references/pseudo-classes.md)
 
-* [Pseudo-Elements](./docs/references/pseudo-elements.md)
+* [Pseudo-Elements](./references/pseudo-elements.md)
 
-* [Global selectors](./docs/references/global-selectors.md)
+* [Global selectors](./references/global-selectors.md)
 
-* [Compose CSS Class](./docs/references/compose-css-class.md)
+* [Compose CSS Class](./references/compose-css-class.md)
 
-* [Mixins](./docs/references/mixin-syntax.md)
+* [Mixins](./references/mixin-syntax.md)
 
-* [Variants](./docs/references/variants.md)
+* [Variants](./references/variants.md)
 
-* [Variables](./docs/references/variables.md)
+* [Variables](./references/variables.md)
 
-* [Namespace](./docs/references/namespace.md)
+* [Namespace](./references/namespace.md)
 
 ## Useful Information
 
-* [Cheatsheet](./docs/usefulInfo/cheatsheet.md)
+* [Cheatsheet](./usefulInfo/cheatsheet.md)

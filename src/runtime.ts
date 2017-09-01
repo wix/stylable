@@ -1,7 +1,16 @@
-export interface SmallSheet { }
+
 export interface StateMap { [key: string]: boolean }
 
-export function create(root: string, namespace: string, classes: { $stylesheet?: SmallSheet }, css: string, moduleId: string) {
+export interface Stylesheet {
+    namespace: string;
+    root: string;
+    get: (localName: string) => string;
+    cssStates: (stateMapping: StateMap) => StateMap;
+}
+
+export type RuntimeStylesheet = { [key: string]: string } & { $stylesheet: Stylesheet }
+
+export function create(root: string, namespace: string, locals: { [key: string]: string } & { $stylesheet?: Stylesheet }, css: string, moduleId: string): RuntimeStylesheet {
     var style = null;
 
     if (css && typeof document !== 'undefined') {
@@ -12,11 +21,11 @@ export function create(root: string, namespace: string, classes: { $stylesheet?:
         document.head.appendChild(style);
     }
 
-    classes.$stylesheet = {
+    locals.$stylesheet = {
         namespace: namespace,
         root: root,
         get(localName: string) {
-            return (classes as { [key: string]: string })[localName];
+            return (locals as { [key: string]: string })[localName];
         },
         cssStates(stateMapping: StateMap) {
             return stateMapping ? Object.keys(stateMapping).reduce(function (states, key) {
@@ -26,5 +35,5 @@ export function create(root: string, namespace: string, classes: { $stylesheet?:
         }
     };
 
-    return classes;
+    return <RuntimeStylesheet>locals;
 }

@@ -1,15 +1,15 @@
 # Variables
 
-Use variables to define common values to be used across the stylesheet and are exposed for sharing and theming.
+Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.
 
 > **Note**:  
-> Variables are scoped and will not conflict with variables from another stylesheet.
+> Variables are scoped to the specific stylesheet and do not conflict with variables from another stylesheet.
 
 ## Use in stylesheet
 
-Use `:vars` to define variables, and apply them with the `value()`:
+Use the syntax `:vars` to define variables, and apply them with a `value()`:
 
-### CSS API:
+CSS 
 ```css
 @namespace "Example1";
 :vars {
@@ -22,7 +22,7 @@ Use `:vars` to define variables, and apply them with the `value()`:
 }
 ```
 
-### CSS OUTPUT:
+CSS OUTPUT:
 ```css
 .Example1__root {
     color: red; /* color1 */
@@ -32,9 +32,9 @@ Use `:vars` to define variables, and apply them with the `value()`:
 
 ## Import variables
 
-Any var defined in stylesheet is exported as a named export and can be imported by other stylesheets:
+Any var defined in a stylesheet is exported as a named export and can be [imported](./imports.md) by other stylesheets.
 
-### CSS API:
+CSS
 ```css
 @namespace "Example2";
 :import {
@@ -49,7 +49,7 @@ Any var defined in stylesheet is exported as a named export and can be imported 
 }
 ```
 
-### CSS OUTPUT:
+CSS OUTPUT
 ```css
 .Example2__root {
     border: 10px solid red; /* color1 */
@@ -59,14 +59,14 @@ Any var defined in stylesheet is exported as a named export and can be imported 
 }
 ```
 
-> **Note**:  
-> Imported variables are not exported from the stylesheet.
+> **Note** Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
 
-## Composing Variables
+
+## Composing variables
 
 You can set the value of a variable using another variable.
 
-### CSS API:
+CSS API
 ```css
 @namespace "Example3";
 :import {
@@ -81,7 +81,7 @@ You can set the value of a variable using another variable.
 }
 ```
 
-### CSS OUTPUT:
+CSS OUTPUT
 ```css
 .Example3__root {
     border: 10px solid red; /* 10px solid {color1} */

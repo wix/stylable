@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl } from './postcss-process';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -23,6 +23,7 @@ export interface Options {
     requireModule: (modulePath: string) => any
     diagnostics: Diagnostics
     delimiter?: string;
+    keepValues?: boolean;
 }
 
 export class StylableTransformer {
@@ -30,20 +31,22 @@ export class StylableTransformer {
     diagnostics: Diagnostics;
     resolver: StylableResolver;
     delimiter: string;
+    keepValues: boolean;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
+        this.keepValues = options.keepValues || false;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
 
-        const ast = meta.ast;
+        const ast = meta.outputAst = meta.ast.clone();
 
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
-        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
+        !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
         });
@@ -54,7 +57,7 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             rule.selector = this.scopeRule(meta, rule, metaExports);
-            rule.walkDecls((decl: SDecl) => {
+            !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
                 decl.value = this.replaceValueFunction(decl.value, meta);
             });
@@ -216,7 +219,7 @@ export class StylableTransformer {
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
                     if (typeof resolvedMixin.symbol === 'function') {
-                        const res = resolvedMixin.symbol(mix.mixin.options);
+                        const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
                         const mixinRoot = cssObjectToAst(res).root;
                         mergeRules(mixinRoot, rule);
                     }
@@ -233,7 +236,8 @@ export class StylableTransformer {
             } else {
                 //TODO: report unresolvable
             }
-        })
+        });
+        rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
     replaceValueFunction(value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
@@ -274,7 +278,7 @@ export class StylableTransformer {
         //     "paused"
         // ];
 
-        const root = meta.ast;
+        const root = meta.outputAst!;
         const keyframesExports: Pojo<string> = {};
 
         root.walkAtRules(/keyframes$/, (atRule) => {
@@ -299,30 +303,42 @@ export class StylableTransformer {
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
         let symbol: StylableSymbol;
-
+        let nestedSymbol: StylableSymbol | null;
+        let originSymbol: ClassSymbol | ElementSymbol;
         let selectorAst = parseSelector(rule.selector) //.selectorAst;
         traverseNode(selectorAst, (node) => {
             const { name, type } = node;
             if (type === 'selector' || type === 'spacing' || type === 'operator') {
-                current = meta;
-                symbol = meta.classes[meta.root];
+                if (nestedSymbol) {
+                    symbol = nestedSymbol;
+                    nestedSymbol = null;
+                } else {
+                    current = meta;
+                    symbol = meta.classes[meta.root];
+                    originSymbol = symbol;
+                }
             } else if (type === 'class') {
                 const next = this.handleClass(current, node, name, metaExports);
+                originSymbol = current.classes[name];
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'element') {
-                current = this.handleElement(current, node, name);
+                const next = this.handleElement(current, node, name);
+                originSymbol = current.elements[name];
+                symbol = next.symbol;
+                current = next.meta;
             } else if (type === 'pseudo-element') {
                 const next = this.handlePseudoElement(current, node, name);
                 symbol = next.symbol;
                 current = next.meta;
             } else if (type === 'pseudo-class') {
-                current = this.handlePseudoClass(current, node, name, symbol);
+                current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol);
             } else if (type === 'nested-pseudo-class') {
                 if (name === 'global') {
                     node.type = 'selector';
                     return true;
                 }
+                nestedSymbol = symbol;
             }
             /* do nothing */
             return undefined;
@@ -359,6 +375,10 @@ export class StylableTransformer {
             if (next && next._kind === 'css' && next.symbol._kind === 'class') {
 
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
+                // const extended = this.resolver.resolve(next.symbol[valueMapping.extends]);
+                // if (extended && extended._kind === 'css') {
+                //     return extended;
+                // }
                 return next;
             } else {
                 //TODO: warn or handle
@@ -396,16 +416,16 @@ export class StylableTransformer {
         return { _kind: 'css', meta, symbol };
     }
     handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
-        const tRule = meta.elements[name];
+        const tRule = <StylableSymbol>meta.elements[name];
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
         const next = this.resolver.resolve(extend);
-        if (next && next.meta) {
+        if (next && next._kind === 'css') {
             node.type = 'class';
             node.name = this.scope(next.symbol.name, next.meta.namespace);
-            return next.meta;
+            return next;
         }
 
-        return meta;
+        return { meta, symbol: tRule };
     }
     handlePseudoElement(meta: StylableMeta, node: SelectorAstNode, name: string): CSSResolve {
         let next: JSResolve | CSSResolve | null;
@@ -430,7 +450,11 @@ export class StylableTransformer {
                 node.before = symbol[valueMapping.root] ? '' : ' ';
                 node.name = this.scope(symbol.name, current.namespace);
 
-                next = this.resolver.resolve(symbol[valueMapping.extends]);
+                let extend = symbol[valueMapping.extends];
+                if (extend && extend._kind === 'class' && extend.alias) {
+                    extend = extend.alias;
+                }
+                next = this.resolver.resolve(extend);
 
                 if (next && next._kind === 'css') {
                     return next;
@@ -440,9 +464,24 @@ export class StylableTransformer {
 
         return { _kind: 'css', meta: current, symbol };
     }
-    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol) {
+    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol, origin: StylableMeta, originSymbol: ClassSymbol | ElementSymbol) {
         let current = meta;
         let currentSymbol = symbol;
+
+        if (symbol !== originSymbol) {
+            const states = originSymbol[valueMapping.states];
+            if (states && states.hasOwnProperty(name)) {
+                if (states[name] === null) {
+                    node.type = 'attribute';
+                    node.content = this.autoStateAttrName(name, origin.namespace);
+                } else {
+                    node.type = 'invalid';// simply concat global mapped selector - ToDo: maybe change to 'selector'
+                    node.value = states[name];
+                }
+                return current;
+            }
+
+        }
 
         while (current && currentSymbol) {
             if (currentSymbol && currentSymbol._kind === 'class') {
