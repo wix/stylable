@@ -237,4 +237,5 @@ PageCSS["highContrast"] === "hightContrast ToggleBtn__highContrast"
 ```css
 .someclass { /* To illustrate use of value(var) */
     border: 1px solid value(main-background-color)
-}```
+}
+```
