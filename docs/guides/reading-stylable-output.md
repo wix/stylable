@@ -15,12 +15,12 @@ Components also reflect their source component, relative to from where they were
 
 ### CSS Selector: 
 ```css
-.<filename>__root .<filename>__some-class
+.[filename]__root .[filename]__some-class
 ```
 
 ### JS value: 
 ```js
-<filename>CSS["some-class"] === "<filename>__some-class"
+filenameCSS["some-class"] === "filename__some-class"
 ```
 
 You can declare a specific namespace for your component, to more easily track it. In the example below, when you declare the namespace `ToggleBtn`, the CSS output reflects the namespacing so you can identify it in the output.
