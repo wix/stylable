@@ -35,9 +35,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Stylable Application](./guides/stylable-application.md)
 
-* [Stylable Theming Guide](./guides/stylable-theming-guide.md)
-
-* [Stylable a Component Library](./guides/stylable-component-library.md)
+* [Stylable Component Library](./guides/stylable-component-library.md)
 
 ## References
 
