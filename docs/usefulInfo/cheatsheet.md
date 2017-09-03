@@ -28,4 +28,5 @@ Syntax unique to Stylable - Click each to access code examples and descriptions 
     * [**`-st-from`**](../references/imports.md) Location of file to import
     * [**`-st-default`**](../references/imports.md) Import the file's default export value
     * [**`-st-named`**](../references/imports.md) Import the file's named export value or values
+    * [**`-st-theme`**](../references/theme.md) Use stylesheet import as theme of stylesheet
 * [**`@namespace "readable name";`**](../references/namespace.md) Development display name for debugging
