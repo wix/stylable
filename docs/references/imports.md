@@ -74,6 +74,7 @@ When importing another stylesheet the default represent the root of the styleshe
 
 * [Tag selectors](./tag-selectors.md)
 * [Extend a stylesheet](./extend-stylesheet.md)
-* [Import variables](./variables.md#Import variables)
-* [Import classes](./class-selectors.md#import-classes)
-* [Mixins](./mixin-syntax.md) and [Variants](./variants.md)
+* [Import variables](./variables.md#Import variables.md)
+* [Import classes](./class-selectors.md#import-classes.md)
+* [Mixins](./mixin-syntax.md)
+* [Component Variants](../guides/component-variants.md) and [Shared Classes](../guides/shared-classes.md)

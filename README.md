@@ -61,8 +61,6 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Mixins](./docs/references/mixin-syntax.md)
 
-* [Variants](./docs/references/variants.md)
-
 * [Variables](./docs/references/variables.md)
 
 * [Namespace](./docs/references/namespace.md)

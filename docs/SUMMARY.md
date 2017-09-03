@@ -36,8 +36,6 @@
 
 * [Mixins](./references/mixin-syntax.md)
 
-* [Variants](./references/variants.md)
-
 * [Variables](./references/variables.md)
 
 * [Namespace](./references/namespace.md)

@@ -5,7 +5,6 @@ You can use **Stylable** to apply complex styles and behaviors to a CSS rule set
 
 Here are some use cases where you can use mixins with other **Stylable** features:
 * [Layouts](./create-layouts.md) - easily describe complex layouts.
-* [Variants](./variants.md) - apply a specific theme to a component.
 * Helpers - use custom CSS shortcuts, like timers, effects and macros.
 
 ## Example
