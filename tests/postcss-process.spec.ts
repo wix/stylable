@@ -1,6 +1,6 @@
 import * as postcss from 'postcss';
 import { cachedProcessFile } from '../src/cached-process-file';
-import { process, StylableMeta, processNamespace, ImportSymbol } from '../src/postcss-process';
+import { process, StylableMeta, processNamespace, ImportSymbol } from '../src/stylable-processor';
 
 import { flatMatch } from "./matchers/falt-match";
 import * as chai from "chai";
@@ -189,12 +189,14 @@ describe('Stylable postcss process', function () {
                 _kind: 'var',
                 name: 'name',
                 value: 'value',
+                text: 'value',
                 import: null
             },
             myname: {
                 _kind: 'var',
                 name: 'myname',
                 value: 'value',
+                text: 'value(name)',
                 import: null
             }
         });

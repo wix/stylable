@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { process } from '../src/postcss-process';
+import { process } from '../src/stylable-processor';
 
 import { safeParse } from "../src/parser";
 
@@ -116,7 +116,7 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
     // console.log(src, warnings, extraFiles);
 }
 
-xdescribe('diagnostics: warnings and errors', function () {
+describe('diagnostics: warnings and errors', function () {
 
     xdescribe('syntax', function () {
 
@@ -273,7 +273,7 @@ xdescribe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
             });
-            it('should warn when defining states on element selector', function () {
+            xit('should warn when defining states on element selector', function () {
                 expectWarnings(`
                     MyElement{
                         |-st-states|:shmover;
@@ -346,7 +346,7 @@ xdescribe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define ":import" inside a complex selector', file: "main.css" }])
             })
-            it('should return warning for non import rules inside imports', function () {
+            xit('should return warning for non import rules inside imports', function () {
 
                 expectWarnings(`
                     :import{
@@ -386,7 +386,7 @@ xdescribe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
-            it('should warn on not imported extends', function () {
+            xit('should warn on not imported extends', function () {
                 expectWarnings(`
                     .root {
                         |-st-extends: @Comp@|;
@@ -434,7 +434,7 @@ xdescribe('diagnostics: warnings and errors', function () {
 
     describe('redeclare symbols', function () {
 
-        it('should warn override mixin on same rule', function () {
+        xit('should warn override mixin on same rule', function () {
             expectWarnings(`
                    .a {}
                    .b {
@@ -487,7 +487,7 @@ xdescribe('diagnostics: warnings and errors', function () {
     });
 
 
-    describe('complex examples', function () {
+    xdescribe('complex examples', function () {
         describe(':import', function () {
 
             it('should return warning for unknown file', function () {
@@ -678,7 +678,7 @@ xdescribe('diagnostics: warnings and errors', function () {
 
     describe('selectors', function () {
 
-        it('should not allow conflicting extends', function () {
+        xit('should not allow conflicting extends', function () {
             expectWarnings(`
                 :import {
                     -st-from: "./sheetA";

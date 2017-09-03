@@ -4,7 +4,7 @@ import { Diagnostics } from "./diagnostics";
 import { safeParse } from "./parser";
 import { cachedProcessFile, FileProcessor, MinimalFS } from "./cached-process-file";
 import { create } from "./runtime";
-import { StylableMeta, process } from "./postcss-process";
+import { StylableMeta, process } from "./stylable-processor";
 import { readFileSync, statSync } from "fs";
 
 export interface PluginOptions { }
@@ -21,7 +21,7 @@ export function createGenerator(fileProcessor: FileProcessor<StylableMeta>, fs: 
     }, fs)
 
 
-    return function (source: string, path: string) {
+    return function generate(source: string, path: string) {
 
         const root = safeParse(source, { from: path });
 
