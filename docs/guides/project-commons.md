@@ -1,6 +1,6 @@
 # Project Commons
 
-The goal of the project file is to contain the CSS commons for the project, including [variables](../references/variables.md), [component variants](./component-variants.md) and [shared class](./shared classes.md).
+The goal of the project file is to contain the CSS commons for the project, including [variables](../references/variables.md), [component variants](./component-variants.md) and [shared classes](./shared classes.md).
 
 In the following code we are describing a project with:
  * 2 colors and 2 font sizes variables 

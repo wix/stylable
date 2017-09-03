@@ -6,11 +6,6 @@ Stylable allows you to author a component library, that can be themed, and easil
 
 As a best practice we recommend following this folder structure:
 
-* The `src/components` folder contains:
-    * a project stylesheet describing the project CSS api
-    * a folder for each component with its stylable stylesheet
-* The `src/themes` folder includes the relevant theme files
-
 ```
 src/
     
@@ -29,6 +24,11 @@ src/
     |   app-theme.st.css
 ```
 
+* The `src/components` folder contains:
+    * a project stylesheet describing the project CSS API
+    * a folder for each component with its stylable stylesheet
+* The `src/themes` folder includes the relevant theme files
+
 ## The `project.st.css` file
 
 We create a [project commons stylesheet](./project-commons.md) named `project.st.css` in the `src/components` directory. This exposes the API for the project. 
@@ -44,7 +44,7 @@ Our components should be as easy to style and theme as possible. We recommend fo
 * Component API should contain the minimum styling required for the component to function, for example layout is sometimes required. 
 * Because the effect of CSS combination is not always easy to understood and style is usually less tested, try adding comments that explain the reason for unclear CSS.
 * Reusable vars should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.
-* Use [component variants](./component-variants.md) and [shared class](./shared classes.md) from `project.st.css` file.
+* Use [component variants](./component-variants.md) and [shared classes](./shared classes.md) from `project.st.css` file.
 
 More best practices for themable components can be found in the [component style best practices guide](./component-style-best-practices.md).
 
@@ -69,7 +69,7 @@ In the following code we are describing a component with:
 
 ## Theme
 
-Our library can offer multiple theme files that will render it with different look an feel. A theme imports the `project.st.css` file as [theme](../references/theme.md) to override variables and variants and classes the library offer.
+Our library can offer multiple theme files that will render it with different look an feel. A theme imports the `project.st.css` file as [theme](../references/theme.md) to override variables, variants and classes the library offer.
 
 In the following code we are describing a theme file customizing out library:
 * override `color1` and `color2`
@@ -80,7 +80,7 @@ In the following code we are describing a theme file customizing out library:
 @namespace "backofficeTheme";
 :import {
     -st-from: '../project.st.css';
-    -st-named: color1, color2, fontBig, fontSmall, cancelButton, emphasisBox;
+    -st-named: color1, color2, cancelButton, emphasisBox;
     color1: white;
     color2: red;
 }

@@ -28,7 +28,7 @@ Any variable defined in a theme file can be overridden. every CSS declaration th
 
 ## Override classes
 
-Style defined classes and component variants:
+Style defined [shared classes](../guides/shared-classes.ms) and [component variants](../guides/component-variants.md):
 
 ```css
 @namespace "project";
@@ -37,7 +37,7 @@ Style defined classes and component variants:
     -st-from: 'comp-lib/backoffice-theme.st.css';
     -st-named: emphasisBox, mainGallery;
 }
-.mainGallery { /* extends Gallery in library */
+.mainGallery { /* component variant extends Gallery */
     background: black;
 }
 .mainGallery::navButton {

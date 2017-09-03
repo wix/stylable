@@ -6,13 +6,13 @@ When building a stylable application we might want to share definitions between 
 
 It is recommended to have a [project commons stylesheet](./project-commons.md) for:
 
-* [theme stylesheets](../references/theme.md) - use 3rd party component library themes
+* [theme stylesheets](../references/theme.md) - apply 3rd party component library themes
 * share common CSS definitions between parts of the project:
-    * [variables](../references/variables.md) - string values to reuse in declarations
-    * [shared class](./shared classes.md) - classes that can be reused in components
+    * [variables](../references/variables.md) - values to reuse in declarations
+    * [shared classes](./shared classes.md) - classes that can be reused in components
     * [component variants](./component-variants.md) - semantic component classes
 
-An application would define CSS with final declarations:
+An application would define CSS with the final style definitions:
 
 ```css
 /* project.st.css */

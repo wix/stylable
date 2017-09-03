@@ -2,7 +2,7 @@
 
 When building a [stylbale component library](./stylable-component-library.md) or a [stylable application](./stylable-application.md), it is useful to reuse some classes across components in order to achieve common CSS with lower specificity.
 
-## Defining shared class
+## Defining a shared class
 
 In the [commons stylable stylesheet](./project-commons.md) of your project (usually named `project.st.css`) you define a css class with a descriptive name like `emphasisBox`.
 
