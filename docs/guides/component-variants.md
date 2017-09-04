@@ -38,10 +38,10 @@ js value: "project__cancelButton"
 */
 .cancelButton { }
 /*
-selector: .comp__root .comp__messageBox.project__cancelButton.button__root
-js value: "comp__messageBox project__cancelButton"
+selector: .comp__root .comp__cancel.project__cancelButton.button__root
+js value: "comp__cancel project__cancelButton"
 */
-.messageBox {
-    -st-extends: emphasisBox;
+.cancel {
+    -st-extends: cancelButton;
 }
 ```

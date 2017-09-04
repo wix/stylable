@@ -12,23 +12,9 @@ When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its 
 }
 ```
 
-## Override theme variables
-
-Any variable defined in a theme file can be overridden. every CSS declaration that use that variable will be overridden under our stylesheet.
-
-```css
-@namespace "project";
-:import {
-    -st-theme: true;
-    -st-from: 'comp-lib/backoffice-theme.st.css';
-    color1: black; /* override color1 with black */
-    color2: purple; /* override color2 with purple */
-}
-```
-
 ## Override classes
 
-Style defined [shared classes](../guides/shared-classes.ms) and [component variants](../guides/component-variants.md):
+Any [shared classes](../guides/shared-classes.ms) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet, by simply redefining them:
 
 ```css
 @namespace "project";
@@ -45,5 +31,19 @@ Style defined [shared classes](../guides/shared-classes.ms) and [component varia
 }
 .emphasisBox {
     border: 5px dashed black;
+}
+```
+
+## Override theme variables
+
+Any variable defined in a theme file can be overridden. every CSS declaration that use that variable will be overridden under our stylesheet.
+
+```css
+@namespace "project";
+:import {
+    -st-theme: true;
+    -st-from: 'comp-lib/backoffice-theme.st.css';
+    color1: black; /* override color1 with black */
+    color2: purple; /* override color2 with purple */
 }
 ```

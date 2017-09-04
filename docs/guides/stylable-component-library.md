@@ -8,14 +8,14 @@ As a best practice we recommend following this folder structure:
 
 ```
 src/
-    
     |
     --- components/
     |   |
     |   --- my-component/
-    |       |
-    |       my-component.jsx
-    |       my-component.st.css
+    |   |   |
+    |   |   my-component.jsx
+    |   |   my-component.st.css
+    |   |
     |   project.st.css
     |
     --- themes/
@@ -50,7 +50,7 @@ More best practices for themable components can be found in the [component style
 
 In the following code we are describing a component with:
 * 2 colors used from project
-* 1 shared class used to mark a DOM element
+* 1 shared class 
 
 ```css
 :import {

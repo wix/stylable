@@ -36,7 +36,7 @@ An application would define CSS with the final style definitions:
 
 ## Apply component library theme
 
-Usually in the project commons use [`-st-theme`](../references/theme.md) directive for each import of a desired theme from a library:
+As best practice, the project commons will use the [`-st-theme`](../references/theme.md) directive to apply 3rd party library themes. Each theme will influence the components from its library.
 
 ```css
 @namespace "project";
@@ -50,18 +50,16 @@ Usually in the project commons use [`-st-theme`](../references/theme.md) directi
 }
 ```
 
-> **Notice**:
+> **Note**:
 > Usually theme is only used on project commons file, but there are cases where you would want to show different styles between pages of your application, in which case a [multiple theme project structure](./stylable-component-library.md) might work better.
 
 ## Stylable component
-
-It is important to have reuseable components that can be styled from the outside. 
-
-The [component style best practices guide](./component-style-best-practices.md) describes ways to design a good component that can be styled and themed. However it is important to notice that in a specific application it is common to define components with their final CSS. still stylable from the outside, but not designed for theming.
+The [component style best practices guide](./component-style-best-practices.md) describes ways to design a good component that can be styled and themed.
+However, when building your application, it is common to define components with their final CSS. This makes them less "themable", but is much simpler.
 
 In the following code we are describing a component with:
 * 2 colors used from project
-* 1 component variant used to mark a DOM element
+* 1 component variant
 
 ```css
 @namespace "dialog"

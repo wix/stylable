@@ -26,5 +26,5 @@ In the following code we are describing a project with:
 .emphasisBox {}
 ```
 
-> **Notice**:
+> **Note**:
 > It's recommended to call the project commons file `project.st.css`.
