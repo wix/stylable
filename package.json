@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "devDependencies": {
     "@types/chai": "^4.0.1",
     "@types/enhanced-resolve": "^3.0.4",
