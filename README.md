@@ -31,7 +31,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Install & Configure Stylable](./docs/guides/install-configure.md)
 
-* [Component Basics](./docs/guides/component-basics.md)
+* [Component Basics](./docs/guides/components-basics.md)
 
 * [Stylable Application](./guides/stylable-application.md)
 
