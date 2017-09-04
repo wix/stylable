@@ -1,0 +1,17 @@
+@namespace "Project";
+:vars {
+    color1: #F012BE;
+    color2: #FF4136;
+    fontBig: 30px;
+    fontSmall: 10px;
+}
+:import {
+    -st-from: './button/button.st.css';
+    -st-default: Button;
+}
+.cancelButton {
+    -st-extends: Button;
+}
+.emphasisBox {
+    border: 2px solid firebrick;
+}

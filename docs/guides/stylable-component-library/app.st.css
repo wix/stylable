@@ -1,0 +1,13 @@
+@namespace "App";
+:import {
+    -st-from: '../project.st.css';
+    -st-named: color1, color2, emphasisBox;
+}
+.root {
+    color: value(color1);
+    background: value(color2);
+}
+.messageBox {
+    /* append emphasisBox CSS class to messageBox JS output */
+    -st-extends: emphasisBox;
+}
