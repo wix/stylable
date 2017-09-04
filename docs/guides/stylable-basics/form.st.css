@@ -1,0 +1,23 @@
+@namespace "Form";
+
+:import {
+    -st-from: "./button.st.css";
+    -st-default: Button;
+}
+
+.root {
+    background: floralwhite;
+}
+
+.formEmail {}
+
+.formPassword {}
+
+.formBtn {
+    -st-extends: Button;
+    background: cornflowerblue;
+}
+
+.formBtn:clicked {
+    box-shadow: 2px 2px 2px 1px indigo;
+}
