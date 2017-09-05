@@ -1,25 +1,18 @@
 import * as React from 'react';
 import {SBComponent} from 'stylable-react-component';
-import style from './App.st.css';
-import {MessageBox} from './message-box';
-import {Button} from './button'
+import Button from './button';
+import style from './app.st.css';
 
 export interface AppProps {
     className: string;
 }
 
-class App extends React.Component<AppProps, {clicked: boolean}> {
+class App extends React.Component<AppProps, {}> {
     static defaultProps: AppProps = {className: ''};
-    
-    constructor(props: any) {
-        super(props);
-        this.state = {clicked: false};
-    }
 
     render() {
         return (
             <div>
-                <MessageBox/>
                 <Button/>
             </div>
         );
