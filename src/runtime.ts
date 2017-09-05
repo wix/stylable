@@ -1,7 +1,7 @@
 
-export interface StateMap { [key: string]: boolean }
+export type StateMap = { [key: string]: boolean }
 
-export interface Stylesheet {
+export type Stylesheet = {
     namespace: string;
     root: string;
     get: (localName: string) => string;
