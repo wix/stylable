@@ -14,7 +14,7 @@ export function create(root: string, namespace: string, locals: { [key: string]:
     var style = null;
 
     if (css && typeof document !== 'undefined') {
-        style = document.getElementById(moduleId) || document.createElement('style');
+        style = document.querySelector('[data-module-id="'+ moduleId +'"]') || document.createElement('style');
         style.setAttribute('data-module-id', moduleId);
         style.id = namespace;
         style.textContent = css;

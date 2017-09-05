@@ -8,6 +8,7 @@
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
     "build": "tsc",
+    "build:web": "webpack --config webpack.web.config.js",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
     "prepublish": "npm run build",
     "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
@@ -31,7 +32,10 @@
     "ts-mocha": "^1.0.3",
     "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
+    "uglify-js": "^3.0.28",
+    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.0.0",
+    "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
