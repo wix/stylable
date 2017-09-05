@@ -1,7 +1,10 @@
 import { expect } from "chai";
 import { process } from '../src/stylable-processor';
-
+import {StylableTransformer} from '../src/stylable-transformer'
 import { safeParse } from "../src/parser";
+import { MinimalFS } from "../src/cached-process-file";
+import { generateFromMock, Config } from "./utils/generate-test-util";
+import { cachedProcessFile, StylableMeta, Diagnostics } from "../src";
 
 const customButton = `
     .root{
@@ -114,6 +117,45 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
     expect(res.diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
 
     // console.log(src, warnings, extraFiles);
+}
+
+function expectWarnings2(config: Config, warnings: warning[]) {
+    const m: any = {}
+    for(var path in config.files){
+        var source = findTestLocations(config.files[path].content);
+        config.files[path].content = source.css;
+        m[path] = source; 
+    }
+    
+    let { meta } = generateFromMock(config);
+    
+    var root = safeParse(source.css);
+    var res = process(root);
+
+    res.diagnostics.reports.forEach((report, i) => {
+        expect(report.message).to.equal(warnings[i].message);
+        expect(report.node.source.start).to.eql(source.start);
+        if (source.word !== null) {
+            expect(report.options.word).to.eql(source.word);
+        }
+    });
+
+    expect(res.diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
+
+    // console.log(src, warnings, extraFiles);
+}
+
+
+
+function getTransformDiagnostics(fs:MinimalFS, toTransform:string){
+    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
+        return process(safeParse(content, {from: fullpath}))
+    }, fs);
+    const diagnostics = new Diagnostics()
+    const root = safeParse(fs.readFileSync(toTransform, 'utf8'), {from:toTransform})
+    const transformer = new StylableTransformer({diagnostics:diagnostics, fileProcessor:processFile, requireModule:()=>({default:{}})})
+    transformer.transform(root)
+    return diagnostics
 }
 
 describe('diagnostics: warnings and errors', function () {
@@ -317,6 +359,9 @@ describe('diagnostics: warnings and errors', function () {
                     
                 `, [{ message: 'cannot define ":vars" inside a complex selector', file: "main.css" }])
             });
+            it.only('should return warning if var already exist', function(){
+               
+            })
         });
 
         xdescribe('-st-variant', function () {

@@ -28,7 +28,7 @@ export function generateInfra(config: InfraConfig): { resolver: StylableResolver
     return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config): StylableResults {
+export function generateFromMock(config: Config, diagnostics:Diagnostics = new Diagnostics): StylableResults {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
@@ -39,7 +39,7 @@ export function generateFromMock(config: Config): StylableResults {
     const t = new StylableTransformer({
         fileProcessor,
         requireModule,
-        diagnostics: new Diagnostics(),
+        diagnostics,
         keepValues: false
     });
 

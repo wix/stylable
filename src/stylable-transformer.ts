@@ -95,6 +95,7 @@ export class StylableTransformer {
         Object.keys(keyframeMapping).forEach((name) => {
             if (metaExports[name]) {
                 //TODO: warn on discard
+                console.log('WOHO!!!!!')
             } else {
                 metaExports[name] = keyframeMapping[name];
             }
