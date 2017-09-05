@@ -6,7 +6,7 @@
 }
 
 .btnIcon {
-    background-image: url(./assets/btnIcon.svg);
+    border: 2px solid greenyellow;
 }
 
 .btnLabel {

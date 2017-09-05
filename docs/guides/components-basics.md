@@ -36,7 +36,7 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
     background: #b0e0e6;
 }
 .btnIcon {
-    background-image: url('./assets/btnIcon.svg');
+    border: 2px solid greenyellow;
 }
 .btnLabel {
     font-size: 1.2em;
