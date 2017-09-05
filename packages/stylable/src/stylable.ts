@@ -31,7 +31,7 @@ export class Stylable {
     constructor(
         protected projectRoot: string,
         protected fileSystem: fsLike,
-        protected requireModule: (path: string) => any = (s: string) => require(s),
+        protected requireModule: (path: string) => any,
         public delimiter: string = '--',
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta) {
         const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
