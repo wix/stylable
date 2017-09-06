@@ -13,9 +13,9 @@ class Form extends React.Component<FormProps, {}> {
     render() {
         return (
             <div>
-                <input className="formEmail" />
-                <input className="formPassword" />
-                <Button className="formBtn" />
+                <input className="email" />
+                <input className="password" />
+                <Button className="button" />
             </div>
         );
     }

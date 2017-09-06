@@ -3,17 +3,25 @@
 .root {
     -st-states: clicked;
     background: #b0e0e6;
+    color: black;
+    outline: none;
+    border: none;
+    line-height: 60px;
 }
 
-.btnIcon {
-    border: 2px solid greenyellow;
+.status {
+    border: 2px solid grey;
 }
 
-.btnLabel {
-    font-size: 16px;
-    color: rgba(81, 12, 68, 1.0)
+.label {
+    font-size: 1.2em;
 }
 
-:clicked { /* places the state on the root of the component */
-    box-shadow: 2px 2px 2px 1px darkslateblue;
+.root:clicked { /* places the state on the root of the component */
+    background: lightcyan;
+}
+
+.root:clicked .status {
+    border: 2px solid yellowgreen;
+    box-shadow: 0px 0px 1px yellowgreen;
 }

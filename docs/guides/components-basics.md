@@ -32,17 +32,21 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
 
 ```css
 /* button.st.css */
+@namespace "Button";
 .root { /* note that the root class is automatically placed on the root HTML element by stylable-integration */
     background: #b0e0e6;
+    color: black;
+    outline: none;
+    border: none;
 }
-.btnIcon {
-    border: 2px solid greenyellow;
+.status {
+    border: 2px solid grey;
 }
-.btnLabel {
+.label {
     font-size: 1.2em;
-    color: rgba(81, 12, 68, 1.0)
 }
 ```
+
 In this example, the **Stylable** CSS [extends](../references/extend-stylesheet.md) the [root](../references/root.md) class and styles it. The `root` class is automatically added as part of the **Stylable** integration and doesn't actually have to be written separately.
 
 
@@ -73,7 +77,7 @@ import {Button} from './button.ts'
 render(){
     return (
         <div>
-            <Button className="formBtn">
+            <Button className="button">
         </div>
     );
 }
@@ -87,13 +91,12 @@ Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then 
     -st-from: './button.st.css';
     -st-default: Button;
 }
-.formBtn {
+.button {
     -st-extends: Button;
-    background: cornflowerblue;
+    background: lightgrey;
 }
-.root::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
-    color: honeydew;
-    font-weight: bold;
+.button::label { /* since button extends Button, it also includes all of its internal parts */
+    font-weight: bolder;
 }
 ```
 
@@ -107,9 +110,9 @@ A state can be used to reflect any Boolean property in your component. For examp
 /* button.ts */
 render () {
     return (
-        <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:true})}>
-            <div className="btnIcon"/>
-            <span className="btnLabel">Click Here!</span>
+        <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:!this.state.clicked})}>
+            <div className="icon"/>
+            <span className="label">Status</span>
         </button>
     );
 }
@@ -117,19 +120,20 @@ render () {
 
 ```css
 /* button.st.css */
+@namespace "Button";
 .root {
     -st-states: clicked;
     background: #b0e0e6;
+    color: black;
+    outline: none;
+    border: none;
 }
-.btnIcon {
-    background-image: url(./assets/btnIcon.svg);
+.root:clicked { /* places the state on the root of the component */
+    background: lightcyan;
 }
-.btnLabel {
-    font-size: 1.2em;
-    color: rgba(81, 12, 68, 1.0)
-}
-.root:clicked { /* matches the state on the root of the component */
-    box-shadow: 2px 2px 2px 1px darkslateblue;
+.root:clicked .status { /* paints the status indicator when button root is clicked */
+    border: 2px solid yellowgreen;
+    box-shadow: 0px 0px 1px yellowgreen;
 }
 ```
 
@@ -137,11 +141,11 @@ You can then match `Button`'s `clicked` state in your `Form` as follows:
 
 ```css
 /* form.st.css */
-.formBtn {
-    background: cornflowerblue;
+.button {
+    background: lightgrey;
 }
-.formBtn:clicked {
-    box-shadow: 2px 2px 2px 1px indigo;
+.button:clicked {
+    color: red;
 }
 ```
 

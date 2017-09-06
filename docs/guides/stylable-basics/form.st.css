@@ -9,15 +9,19 @@
     background: floralwhite;
 }
 
-.formEmail {}
+.email {}
 
-.formPassword {}
+.password {}
 
-.formBtn {
+.button {
     -st-extends: Button;
-    background: cornflowerblue;
+    background: lightgrey;
 }
 
-.formBtn:clicked {
-    box-shadow: 2px 2px 2px 1px indigo;
+.button::label {
+    font-weight: bolder;
+}
+
+.button:clicked {
+    color: red;
 }
