@@ -41,7 +41,7 @@ https://github.com/wixplosives/stylable-integration
 
 ## Contributing
 
-Read our [contributing guidelines]() for details on our code of conduct, and the process for submitting pull requests. *Need guideline doc from Bruce*
+Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests. *Need guideline doc from Bruce*
 
 ## License
 
