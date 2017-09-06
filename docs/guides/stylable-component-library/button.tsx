@@ -17,8 +17,8 @@ class Button extends React.Component<ButtonProps, {clicked: boolean}> {
     render() {
         return (
             <button cssStates={{clicked: this.state.clicked}} onClick={() => this.setState({clicked: !this.state.clicked})}>
-                <div className="btnIcon"/>
-                <span className="btnLabel">Click Here!</span>
+                <div className="status"/>
+                <span className="label">Status</span>
             </button>
         );
     }

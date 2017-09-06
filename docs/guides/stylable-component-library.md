@@ -100,5 +100,5 @@ See more info on using theme in [theme an application guide](./styalble-applicat
 
 ## Playground
 
-{% playground id="stylableComponentLibrary", title="Stylable Component Library", dir="./stylable-component-library", entry="app", active="app.tsx", readOnly=false %}{% endplayground %}
+{% playground id="stylableComponentLibrary", title="Stylable Component Library", dir="./guides/stylable-component-library", entry="app", active="app.tsx", readOnly=false %}{% endplayground %}
 

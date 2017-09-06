@@ -13,7 +13,7 @@ class App extends React.Component<AppProps, {}> {
     render() {
         return (
             <div>
-                <Button/>
+                <Button className="cancel">Cancel</Button>
             </div>
         );
     }

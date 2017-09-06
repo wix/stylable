@@ -12,6 +12,8 @@
 .cancelButton {
     -st-extends: Button;
     background: value(color2);
+    border: 2px solid indianred;
+    box-shadow: 0px 0px 1px indianred;
 }
 .emphasisBox {
     border: 2px solid firebrick;
