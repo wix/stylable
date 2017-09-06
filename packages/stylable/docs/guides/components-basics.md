@@ -145,8 +145,12 @@ You can then match `Button`'s `clicked` state in your `Form` as follows:
 }
 ```
 
+## Playground
+
+{% playground id="stylableBasics", title="Stylable Basics", dir="./stylable-basics", entry="form", active="form.tsx", readOnly=false %}{% endplayground %}
+
 ## See also:
 
-* [Stylable Imports](./stylable-imports-guide.md)
-* [Stylable Theming](./stylable-theming-guide.md)
+* [Building an Application](./stylable-application.md)
+* [Building a Component Library](./stylable-component-library.md)
 * [Stylable Cheatsheet](../usefulIngo/cheatsheet.md)
