@@ -42,9 +42,7 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
 .status {
     border: 2px solid grey;
 }
-.label {
-    font-size: 1.2em;
-}
+.label {} /* note that in Stylable you will have empty CSS classes that act only as API for external users */
 ```
 
 In this example, the **Stylable** CSS [extends](../references/extend-stylesheet.md) the [root](../references/root.md) class and styles it. The `root` class is automatically added as part of the **Stylable** integration and doesn't actually have to be written separately.
@@ -128,10 +126,10 @@ render () {
     outline: none;
     border: none;
 }
-.root:clicked { /* places the state on the root of the component */
+.root:clicked { /* matches the clicked state on the root of the component */
     background: lightcyan;
 }
-.root:clicked .status { /* paints the status indicator when button root is clicked */
+.root:clicked .status { /* matches the status class when button root is in clicked state */
     border: 2px solid yellowgreen;
     box-shadow: 0px 0px 1px yellowgreen;
 }
@@ -141,6 +139,7 @@ You can then match `Button`'s `clicked` state in your `Form` as follows:
 
 ```css
 /* form.st.css */
+@namespace "Form"
 .button {
     background: lightgrey;
 }

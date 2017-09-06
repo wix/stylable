@@ -13,11 +13,9 @@
     border: 2px solid grey;
 }
 
-.label {
-    font-size: 1.2em;
-}
+.label {}
 
-.root:clicked { /* places the state on the root of the component */
+.root:clicked {
     background: lightcyan;
 }
 
