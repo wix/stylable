@@ -5,10 +5,12 @@
     color1: white;
     color2: red;
 }
+
 .cancelButton {
     color: value(color1);
     background: value(color2);
 }
+
 .emphasisBox {
     border: 3px solid value(color2);
 }

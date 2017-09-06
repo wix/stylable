@@ -1,16 +1,18 @@
 @namespace "App";
 :import {
-    -st-from: '../project.st.css';
+    -st-from: './project.st.css';
     -st-named: color1, color2, emphasisBox, cancelButton;
 }
 .root {
     color: value(color1);
     background: value(color2);
 }
-.cancel {
-    -st-extends: cancelButton;
-}
+
 .messageBox {
     /* append emphasisBox CSS class to messageBox JS output */
     -st-extends: emphasisBox;
+}
+
+.cancel {
+    -st-extends: cancelButton;
 }
