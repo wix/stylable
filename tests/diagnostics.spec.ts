@@ -48,7 +48,7 @@ function findTestLocations(css: string) {
             } else {
                 end = { line, column };
             }
-        } else if (ch === '@') {
+        } else if (ch === '$') {
             inWord = !inWord;
             if (inWord) { word = ''; }
         } else if (inWord) {
@@ -57,7 +57,7 @@ function findTestLocations(css: string) {
             column++;
         }
     }
-    return { start, end, word, css: css.replace(/[|@]/gm, '') };
+    return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
 describe('findTestLocations', () => {
@@ -76,16 +76,16 @@ describe('findTestLocations', () => {
     });
 
     it('find single location with word', function () {
-        var l = findTestLocations('\n  |@a@\n  |');
+        var l = findTestLocations('\n  |$a$\n  |');
         expect(l.start, 'start').to.eql({ line: 2, column: 3 });
         expect(l.end, 'end').to.eql({ line: 3, column: 3 });
         expect(l.word, 'end').to.eql('a');
     });
 
     it('striped css', function () {
-        var css = '\n  |@a@\n  |';
+        var css = '\n  |$a$\n  |';
         var l = findTestLocations(css);
-        expect(l.css, 'start').to.eql(css.replace(/[|@]/gm, ''));
+        expect(l.css, 'start').to.eql(css.replace(/[|$]/gm, ''));
     });
 
 });
@@ -99,7 +99,7 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
 
     res.diagnostics.reports.forEach((report, i) => {
         expect(report.message).to.equal(warnings[i].message);
-        expect(report.node.source.start).to.eql(source.start);
+        expect(report.node.source.start, 'start').to.eql(source.start);
         if (source.word !== null) {
             expect(report.options.word).to.eql(source.word);
         }
@@ -131,7 +131,6 @@ function expectWarningsFromTransform(config: Config, warnings:warning[]) {
             expect(report.options.word).to.eql(locations[path].word);
         }
     })
-
     expect(diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
 }
 
@@ -307,7 +306,7 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown mixin', function () {
                 expectWarnings(`
                     .gaga{
-                        |-st-mixin: @myMixin@|;
+                        |-st-mixin: $myMixin$|;
                     }
                 `, [{ message: 'unknown mixin: "myMixin"', file: "main.css" }])
             });
@@ -318,14 +317,14 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown var', function () {
                 expectWarnings(`
                     .gaga{
-                        |color:value(@myColor@)|;
+                        |color:value($myColor$)|;
                     }
                 `, [{ message: 'unknown var "myColor"', file: "main.css" }])
             });
             it('should return warning for unresolvable var', function () {
                 expectWarnings(`
                     :vars{
-                        |myvar: @value(myvar)@|;
+                        |myvar: $value(myvar)$|;
                     }
                 `, [{ message: 'cannot resolve variable value for "myvar"', file: "main.css" }])
             });
@@ -346,7 +345,7 @@ describe('diagnostics: warnings and errors', function () {
                             content: `
                                .a {}
                                :vars {
-                                 |@a@: red|;
+                                 |$a$: red|;
                                 }
                           `
                         }
@@ -388,7 +387,7 @@ describe('diagnostics: warnings and errors', function () {
                     :import{
                         -st-from:"./file";
                         -st-default:Comp;
-                        |@color@:red;|
+                        |$color$:red;|
                     }
                 `, [{ message: '"color" css attribute cannot be used inside :import block', file: "main.css" }]
                     , [{ content: customButton, path: 'file.css' }])
@@ -425,7 +424,7 @@ describe('diagnostics: warnings and errors', function () {
             xit('should warn on not imported extends', function () {
                 expectWarnings(`
                     .root {
-                        |-st-extends: @Comp@|;
+                        |-st-extends: $Comp$|;
                     }
                 `, [{ message: 'cannot resolve extends type for "Comp"', file: "main.css" }]
                 )
@@ -487,7 +486,7 @@ describe('diagnostics: warnings and errors', function () {
                     |:import {
                         -st-from: './file.css';
                         -st-default: name;
-                        -st-named: @name@;
+                        -st-named: $name$;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -500,7 +499,7 @@ describe('diagnostics: warnings and errors', function () {
                     }
                     |:import {
                         -st-from: './file.css';
-                        -st-default: @name@;
+                        -st-default: $name$;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -513,7 +512,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-default: name;
                     }
                     :vars {
-                        |@name@: red;
+                        |$name$: red;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -633,7 +632,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-mixin:|my-variant|;
                     }
                 `, [{
-                        message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "@namespace of comp"',
+                        message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "$namespace of comp"',
                         file: "main.css"
                     }]
                     , [{ content: customButton, path: 'file.css' }])
@@ -657,7 +656,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-apply:|my-variant2|;
                     }
                 `, [{
-                        message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "@namespace of comp" and "my-variant" can only be spplied to "@namespace of Comp2"',
+                        message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "$namespace of comp" and "my-variant" can only be spplied to "$namespace of Comp2"',
                         file: "main.css"
                     }]
                     , [
@@ -744,21 +743,22 @@ describe('diagnostics: warnings and errors', function () {
     });
 
     describe('keyframes', function() {
-        it.only('should return warning if keyframe symbol is used', function(){
+        it('should return warning if keyframe symbol is used', function(){
             let config = {
                 entry:'/main.css', 
                 files: {
                     '/main.css': {
                         content: `
-                           .wow {}
-                            @keyframes |@wow@|  {
-                                from{}
-                                to{}
-                            }
+                        .name {}
+                        |@keyframes $name$| {
+                            from {}
+                            to {}
+                        }
+                     
                       `
                     }
             }}
-            expectWarningsFromTransform(config, [{message:'symbol a is already in use', file:'/main.css'}])
+            expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
     })
 

@@ -955,7 +955,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
     describe('@keyframes scoping', function () {
         it('scope animation and animation name', () => {
-
+            
             var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
@@ -981,7 +981,6 @@ describe('Stylable postcss transform (Scoping)', function () {
                     }
                 }
             });
-
             expect((<postcss.AtRule>result.nodes![0]).params).to.equal('entry--name');
             expect((<postcss.AtRule>result.nodes![1]).params).to.equal('entry--name2');
             expect((<postcss.Rule>result.nodes![2]).nodes![0].toString()).to.equal('animation: 2s entry--name infinite, 1s entry--name2 infinite');

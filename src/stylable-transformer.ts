@@ -13,6 +13,11 @@ import { createClassSubsetRoot, mergeRules } from "./stylable-utils";
 
 const valueParser = require("postcss-value-parser");
 
+export interface KeyFrameWithNode {
+    value: string, 
+    node:postcss.Node
+}
+
 export interface StylableResults {
     meta: StylableMeta;
     exports: Pojo<string>;
@@ -45,7 +50,7 @@ export class StylableTransformer {
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
-
+        
         !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
@@ -91,12 +96,12 @@ export class StylableTransformer {
             }
         });
     }
-    exportKeyframes(keyframeMapping: Pojo<string>, metaExports: Pojo<string>) {
+    exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach((name) => {
-            if (metaExports[name]) {
-                //TODO: warn on discard
+            if (metaExports[name] === keyframeMapping[name].value) {
+                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, {word: name})
             } else {
-                metaExports[name] = keyframeMapping[name];
+                metaExports[name] = keyframeMapping[name].value;
             }
         });
     }
@@ -118,6 +123,7 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
+
                     //TODO: warn
                 }
             }
@@ -279,17 +285,22 @@ export class StylableTransformer {
         // ];
 
         const root = meta.outputAst!;
-        const keyframesExports: Pojo<string> = {};
-
+        const keyframesExports: Pojo<KeyFrameWithNode> = {};
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
-            atRule.params = keyframesExports[name] || (keyframesExports[name] = this.scope(name, meta.namespace));
+            if (!keyframesExports[name]) {
+                keyframesExports[name] = {
+                    value: this.scope(name, meta.namespace),
+                    node: atRule
+                }
+            }   
+            atRule.params = keyframesExports[name].value
         });
 
         root.walkDecls(/animation$|animation-name$/, decl => {
             const parsed = valueParser(decl.value);
             parsed.nodes.forEach((node: any) => {
-                const alias = keyframesExports[node.value];
+                const alias =  keyframesExports[node.value] && keyframesExports[node.value].value;
                 if (node.type === "word" && Boolean(alias)) {
                     node.value = alias;
                 }
@@ -298,7 +309,6 @@ export class StylableTransformer {
         });
 
         return keyframesExports;
-
     }
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
