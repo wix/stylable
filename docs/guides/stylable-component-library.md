@@ -1,10 +1,10 @@
-# Stylable Component Library
+# Create a Stylable Component Library
 
-Stylable allows you to author a component library, that can be themed, and easily consumed and styled, by other stylable projects.  
+Stylable enables you to author a component library, that can be themed, and easily consumed and styled, by other **Stylable** projects.  
 
 ## Library recommended folder structure
 
-As a best practice we recommend following this folder structure:
+As a best practice, we recommend following this folder structure:
 
 ```
 src/
@@ -27,28 +27,28 @@ src/
 * The `src/components` folder contains:
     * a project stylesheet describing the project CSS API
     * a folder for each component with its stylable stylesheet
-* The `src/themes` folder includes the relevant theme files
+* The `src/themes` folder contains the relevant theme files.
 
 ## The `project.st.css` file
 
-We create a [project commons stylesheet](./project-commons.md) named `project.st.css` in the `src/components` directory. This exposes the API for the project. 
+As a first step, create a [project commons stylesheet](./project-commons.md) named `project.st.css` in the `src/components` directory. This exposes the API for the project. 
 
-> **Notice**:
-> It is recommended to leave project CSS ruleset empty to be defined in a theme file. 
+> **Note**:
+> It is recommended to leave the project's CSS ruleset empty so it can be defined in a theme file. 
 
 ## Themable components
 
-Our components should be as easy to style and theme as possible. We recommend following these guidelines when planning: 
+Your components should be as easy to style and theme as possible. We recommend following these guidelines when planning: 
 
 * Expose a good style API and its [custom states](../references/pseudo-classes.md). 
-* Component API should contain the minimum styling required for the component to function, for example layout is sometimes required. 
-* Because the effect of CSS combination is not always easy to understood and style is usually less tested, try adding comments that explain the reason for unclear CSS.
+* The component API should contain the minimum styling required for the component to function, for example layout is sometimes required. 
+* The effect of CSS combinations is not always easy to understood and styles are generally less tested, therefore, we recommend adding comments that explain the reason for unclear CSS.
 * Reusable vars should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.
-* Use [component variants](./component-variants.md) and [shared classes](./shared classes.md) from `project.st.css` file.
+* Use [component variants](./component-variants.md) and [shared classes](./shared-classes.md) from the project file (`project.st.css`).
 
 More best practices for themable components can be found in the [component style best practices guide](./component-style-best-practices.md).
 
-In the following code we are describing a component with:
+In the following code, you can see a component described with:
 * 2 colors used from project
 * 1 shared class 
 
@@ -69,9 +69,9 @@ In the following code we are describing a component with:
 
 ## Theme
 
-Our library can offer multiple theme files that will render it with different look an feel. A theme imports the `project.st.css` file as [theme](../references/theme.md) to override variables, variants and classes the library offer.
+Our library can offer multiple theme files that render a different look and feel per theme. A theme imports the `project.st.css` file as [theme](../references/theme.md) to override variables, variants and classes from the library.
 
-In the following code we are describing a theme file customizing out library:
+In the following code, you can see a theme file customizing the library:
 * override `color1` and `color2`
 * CSS for `cancelButton` variant component
 * CSS for `emphsisBox` shared class
@@ -93,4 +93,4 @@ In the following code we are describing a theme file customizing out library:
 }
 ```
 
-See more info on using theme in [theme an application guide](./styalble-application.md#Apply component library theme).
+Read more about using themes in [theme an application](./styalble-application.md#Apply component library theme).
