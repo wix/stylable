@@ -1,6 +1,7 @@
 {
   "exclude": [
     "docs",
+    "_docs",
     "node_modules",
     "dist",
     "modules",

@@ -135,29 +135,36 @@ export class Bundler {
         // get overrides from each overridden stylesheet 
         const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs:OverrideDef[], overrideVarsPerDef:Pojo<OverrideVars> }>((acc, symbolId) => {
             const symbol = entryMeta.mappedSymbols[symbolId];
-            const isLocalVar = (symbol._kind === 'var');
-            const resolve = this.stylable.resolver.deepResolve(symbol);
-            const varSourceId = isLocalVar ? symbolId : resolve && resolve.symbol.name
-            //ToDo: check resolve._kind === 'css'
-            const originMeta = isLocalVar ? entryMeta : resolve && resolve.meta; // ToDo: filter just vars and imported vars
-            if(originMeta) {
-                const overridePath = originMeta.source;
-                const themeEntry = themeEntries[overridePath];
-                if(themeEntry){
-                    themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
-                        if(overrideDef.overrideVars[varSourceId]){
-                            const overridePath = overrideDef.overrideRoot.source;
-                            const overrideIndex = pathToIndex[overridePath];
-                            if(!acc.overrideVarsPerDef[overridePath]){
-                                acc.overrideVarsPerDef[overridePath] = { [symbolId]: overrideDef.overrideVars[varSourceId] };
-                            } else {
-                                acc.overrideVarsPerDef[overridePath][symbolId] = overrideDef.overrideVars[varSourceId];
-                            }
-                            acc.overrideDefs[overrideIndex] = overrideDef;
-                        }
-                    });
+            let varSourceId = symbolId;
+            let originMeta = entryMeta;
+            if(symbol._kind === 'import') {
+                const resolve = this.stylable.resolver.deepResolve(symbol);
+                if(resolve && resolve._kind === 'css' && resolve.symbol){
+                    varSourceId = resolve.symbol.name;
+                    originMeta = resolve.meta;
+                } else {
+                    //TODO: maybe warn
+                    return acc;
                 }
             }
+        
+            const overridePath = originMeta.source;
+            const themeEntry = themeEntries[overridePath];
+            if(themeEntry){
+                themeEntry.overrideDefs.forEach(overrideDef => { // ToDo: check import as
+                    if(overrideDef.overrideVars[varSourceId]){
+                        const overridePath = overrideDef.overrideRoot.source;
+                        const overrideIndex = pathToIndex[overridePath];
+                        if(!acc.overrideVarsPerDef[overridePath]){
+                            acc.overrideVarsPerDef[overridePath] = { [symbolId]: overrideDef.overrideVars[varSourceId] };
+                        } else {
+                            acc.overrideVarsPerDef[overridePath][symbolId] = overrideDef.overrideVars[varSourceId];
+                        }
+                        acc.overrideDefs[overrideIndex] = overrideDef;
+                    }
+                });
+            }
+            
             return acc;
         }, { overrideDefs:[], overrideVarsPerDef:{} });
 

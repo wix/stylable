@@ -33,9 +33,9 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Component Basics](./docs/guides/components-basics.md)
 
-* [Stylable Application](./guides/stylable-application.md)
+* [Stylable Application](./docs/guides/stylable-application.md)
 
-* [Stylable Component Library](./guides/stylable-component-library.md)
+* [Stylable Component Library](./docs/guides/stylable-component-library.md)
 
 ## References
 
@@ -61,7 +61,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Variables](./docs/references/variables.md)
 
-* [Theme](./references/theme.md)
+* [Theme](./docs/references/theme.md)
 
 * [Namespace](./docs/references/namespace.md)
 
