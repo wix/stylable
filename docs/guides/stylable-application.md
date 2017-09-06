@@ -1,15 +1,15 @@
-# Stylable Application
+# Build a Stylable Application
 
-When building a stylable application we might want to share definitions between parts of the application and consume 3rd party stylable component libraries.
+When building a **Stylable** application, you probably want to share definitions between parts of the application and consume 3rd party **Stylable** component libraries. 
 
 ## The `project.st.css` file
 
-It is recommended to have a [project commons stylesheet](./project-commons.md) for:
+It is recommended to have a [project commons stylesheet](./project-commons.md) that includes:
 
-* [theme stylesheets](../references/theme.md) - apply 3rd party component library themes
-* share common CSS definitions between parts of the project:
+* [Theme stylesheets](../references/theme.md) - to apply 3rd party component library themes
+* Shared common CSS definitions between parts of the project:
     * [variables](../references/variables.md) - values to reuse in declarations
-    * [shared classes](./shared classes.md) - classes that can be reused in components
+    * [shared classes](./shared-classes.md) - classes that can be reused in components
     * [component variants](./component-variants.md) - semantic component classes
 
 An application would define CSS with the final style definitions:
@@ -36,7 +36,7 @@ An application would define CSS with the final style definitions:
 
 ## Apply component library theme
 
-As best practice, the project commons will use the [`-st-theme`](../references/theme.md) directive to apply 3rd party library themes. Each theme will influence the components from its library.
+As a best practice, the project commons should use the [`-st-theme`](../references/theme.md) directive to apply 3rd party library themes. Each theme influences the components from its own library.
 
 ```css
 @namespace "project";
@@ -51,13 +51,13 @@ As best practice, the project commons will use the [`-st-theme`](../references/t
 ```
 
 > **Note**:
-> Usually theme is only used on project commons file, but there are cases where you would want to show different styles between pages of your application, in which case a [multiple theme project structure](./stylable-component-library.md) might work better.
+> Usually a theme is used only in a project commons file, but there are cases where you may want to show different styles between pages of your application, in which case a [multiple theme project structure](./stylable-component-library.md) might work better.
 
 ## Stylable component
-The [component style best practices guide](./component-style-best-practices.md) describes ways to design a good component that can be styled and themed.
-However, when building your application, it is common to define components with their final CSS. This makes them less "themable", but is much simpler.
 
-In the following code we are describing a component with:
+The [component style best practices guide](./component-style-best-practices.md) describes ways to design a good component that can be styled and themed. However, when building your application, it is also common to define components with their final CSS. This makes them less "themable", but is much simpler.
+
+In the following code you can see a component that is described with:
 * 2 colors used from project
 * 1 component variant
 
