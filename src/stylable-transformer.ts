@@ -84,7 +84,7 @@ export class StylableTransformer {
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
             if (metaExports[varSymbol.name]) {
-                //TODO: warn on discard
+                this.diagnostics.warn(varSymbol.node, `symbol ${varSymbol.name} is already in use`, {word:varSymbol.name})
             } else {
                 let value = this.resolver.resolveVarValue(meta, varSymbol.name);
                 metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
@@ -95,7 +95,6 @@ export class StylableTransformer {
         Object.keys(keyframeMapping).forEach((name) => {
             if (metaExports[name]) {
                 //TODO: warn on discard
-                console.log('WOHO!!!!!')
             } else {
                 metaExports[name] = keyframeMapping[name];
             }
