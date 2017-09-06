@@ -372,7 +372,7 @@ export class StylableTransformer {
 
         if (!extend && symbol && symbol.alias) {
             const next = this.resolver.deepResolve(symbol.alias);
-            if (next && next._kind === 'css' && next.symbol._kind === 'class') {
+            if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
 
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
                 // const extended = this.resolver.resolve(next.symbol[valueMapping.extends]);

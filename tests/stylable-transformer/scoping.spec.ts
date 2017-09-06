@@ -672,6 +672,35 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        
+        it('handle not existing imported class', () => {
+
+            var result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-named: b;
+                            }
+                            .b {}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                      
+                    `,
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns--b');
+
+        });
+
     })
 
     describe('scoped states', function () {
