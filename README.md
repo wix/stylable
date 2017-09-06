@@ -1,5 +1,7 @@
-
 ![Stylable CSS for Components](./branding/logo/PNG/96-logo-horizontal.png)
+
+[![npm version](https://badge.fury.io/js/stylable.svg)](https://www.npmjs.com/package/stylable)
+[![Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
 
 **Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
