@@ -97,6 +97,7 @@ export class Bundler {
             usedSheetPaths.forEach((path, index) => this.aggregateTheme(this.process(path), index, themeEntries));
             outputMetaList = this.getDependencyPaths({entries:usedSheetPaths, themeEntries}).map(path => this.process(path));
         }
+        const outputPaths = outputMetaList.map(meta => meta.source);
 
         // index each output entry position
         const pathToIndex = outputMetaList.reduce<Pojo<number>>((acc, meta, index) => {
@@ -107,7 +108,7 @@ export class Bundler {
         // clean unused and add overrides
         outputMetaList = outputMetaList.map(entryMeta => {
             entryMeta = this.transform(entryMeta);
-            this.cleanUnused(entryMeta, usedSheetPaths!);
+            this.cleanUnused(entryMeta, outputPaths);
             this.applyOverrides(entryMeta, pathToIndex, themeEntries);
             return entryMeta;
         });         
