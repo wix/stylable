@@ -1,20 +1,30 @@
 {
   "name": "stylable",
-  "version": "4.0.10",
-  "description": "",
+  "version": "4.0.11",
+  "description": "CSS for Components",
+  "license": "BSD-3-Clause",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "scripts": {
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
     "build": "tsc",
+    "build:web": "webpack --config webpack.web.config.js",
     "test:node": "ts-mocha ./tests/**/*.spec.ts",
-    "prepublish": "npm run build",
-    "typedoc": "typedoc --out documentation --name Stylable --readme none --hideGenerator --excludeExternals --mode modules"
+    "prepublish": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "css-selector-tokenizer": "^0.7.0",
+    "deindent": "^0.1.0",
+    "enhanced-resolve": "^3.4.1",
+    "lodash.clonedeep": "^4.5.0",
+    "murmurhash": "^0.0.2",
+    "postcss": "^6.0.3",
+    "postcss-js": "^1.0.0",
+    "postcss-nested": "^2.0.2",
+    "postcss-safe-parser": "^3.0.1",
+    "postcss-value-parser": "^3.3.0"
+  },
   "devDependencies": {
     "@types/chai": "^4.0.1",
     "@types/enhanced-resolve": "^3.0.4",
@@ -29,27 +39,21 @@
     "ncp": "^2.0.0",
     "ts-loader": "^2.2.0",
     "ts-mocha": "^1.0.3",
-    "typedoc": "^0.7.1",
     "typescript": "^2.3.4",
+    "uglify-js": "^3.0.28",
+    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.0.0",
+    "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.5.0"
-  },
-  "dependencies": {
-    "css-selector-tokenizer": "^0.7.0",
-    "deindent": "^0.1.0",
-    "enhanced-resolve": "^3.4.1",
-    "lodash.clonedeep": "^4.5.0",
-    "murmurhash": "0.0.2",
-    "postcss": "^6.0.3",
-    "postcss-js": "^1.0.0",
-    "postcss-nested": "^2.0.2",
-    "postcss-safe-parser": "^3.0.1",
-    "postcss-value-parser": "^3.3.0"
   },
   "files": [
     "dist",
     "src",
-    "runtime.js",
-    "tsconfig.json"
-  ]
+    "runtime.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wix/stylable.git"
+  },
+  "author": "Wix.com"
 }
