@@ -16,13 +16,13 @@ Whether creating your own components or using components you imported from a 3rd
 
 Let's say you have a `Button` component with a render function per this example. You can style its different HTML elements using the `className` attribute.
 
-```tsx
+```jsx
 /* button.ts */
 render () {
     return (
         <button>
-            <div className="btnIcon"/>
-            <span className="btnLabel">Submit</span>
+            <div className="icon"/>
+            <span className="label">Submit</span>
         </button>
     );
 }
@@ -68,7 +68,7 @@ You can now style your `Button` in the scope of the `Form` so that it fits the n
 
 Let's take the `Button` component and import it into the JavaScript file, and also add it to the render:
 
-```tsx
+```jsx
 /* form.tsx */
 import {Button} from './button.ts'
 
@@ -104,7 +104,7 @@ You can also create custom states for the component that are available as [pseud
 
 A state can be used to reflect any Boolean property in your component. For example, your `Button` has a Boolean property called `clicked`. In this example, it is triggered when it is first clicked, and never turned off.
 
-```tsx
+```jsx
 /* button.ts */
 render () {
     return (

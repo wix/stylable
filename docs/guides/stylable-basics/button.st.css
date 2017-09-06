@@ -3,17 +3,20 @@
 .root {
     -st-states: clicked;
     background: #b0e0e6;
-    color: black;
     outline: none;
     border: none;
-    line-height: 60px;
+    cursor: pointer;
+    padding: 10px;
 }
 
 .status {
     border: 2px solid grey;
 }
 
-.label {}
+.label {
+   line-height: 60px;
+
+}
 
 .root:clicked {
     background: lightcyan;
