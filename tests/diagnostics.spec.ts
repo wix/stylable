@@ -122,7 +122,7 @@ function expectWarningsFromTransform(config: Config, warnings:warning[]) {
     }
     const diagnostics = new Diagnostics()
     generateFromMock(config, diagnostics)
-   
+    
     diagnostics.reports.forEach((report, i) => {
         let path = warnings[i].file
         expect(report.message).to.equal(warnings[i].message);
@@ -430,6 +430,52 @@ describe('diagnostics: warnings and errors', function () {
                 )
 
             });
+            it('Only import of type class can be used to extend', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: './file.css';   
+                                |-st-named: $special$|;   
+                            }
+                            .myclass {
+                                -st-extends: special; 
+                            }
+                            `
+                        },
+                        '/file.css': {
+                            content: `
+                                :vars {
+                                    special: red
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'Import is not extendable', file:'/main.css'}])  
+            })
+            it('Only import css can be used to extend', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                |-st-from: $'./file.js'$|;   
+                                -st-default: special;   
+                            }
+                            .myclass {
+                                -st-extends: special
+                            }
+                            `
+                        },
+                        '/file.js': {
+                            content: ``
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
+            })
 
         });
 
@@ -758,7 +804,25 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
-        // it('should return erro ')
+        it('should return error when trying to import theme from js', function () {
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: `
+                        :import {
+                            -st-theme: true;
+                            |-st-from: $"./file.js"$|;
+                        }
+                        `
+                    },
+                    '/file.js': {
+                        content: ``
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
+        })
+      
     })
 
 

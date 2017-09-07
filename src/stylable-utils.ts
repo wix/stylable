@@ -149,3 +149,8 @@ export function createImportString(importDef: Imported, path: string) {
     }
     return imports.join('\n');
 }
+
+export function getCorrectNodeFromImport(importNode: Imported, test:any){
+    const fromIndex = importNode.rule.nodes!.findIndex(test)
+    return importNode.rule.nodes![fromIndex] as postcss.Declaration    
+}

@@ -8,7 +8,7 @@ import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, getCorrectNodeFromImport } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
@@ -123,16 +123,16 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-
-                    //TODO: warn
+                    const node = getCorrectNodeFromImport(_import, (node:any) => node.prop === valueMapping.from)
+                    this.diagnostics.error(node, "Trying to import unknown file", {word:node.value})
                 }
             }
         });
         metaExports[meta.root] = scopedName;
     }
     exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
+        debugger
         const scopedName = this.scope(name, meta.namespace);
-
         if (!metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
             const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
@@ -154,14 +154,14 @@ export class StylableTransformer {
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            //TODO: warn
+                            const node = getCorrectNodeFromImport(extend.import, (node:any) => node.prop === valueMapping.named || node.prop === valueMapping.default)
+                            this.diagnostics.error(node, "Import is not extendable", {word:resolved.symbol.name})
                         }
                     } else {
-                        //TODO: warn
+                        const node = getCorrectNodeFromImport(extend.import, (node:any) => node.prop === valueMapping.from)
+                        this.diagnostics.error(node, "import is not extendable: js or file not found", {word:node.value})
                     }
-                } else {
-                    //TODO: warn
-                }
+                } 
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
                     const classExports: Pojo<string> = {};
@@ -174,7 +174,7 @@ export class StylableTransformer {
                 }
             }
 
-            if (compose) {
+            if (compose) {  0.
                 compose.forEach((symbol) => {
                     let finalName;
                     let finalMeta;
