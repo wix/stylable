@@ -53,6 +53,8 @@ In the following code we are describing a component with:
 * 1 shared class 
 
 ```css
+/* app.st.css */
+@namespace "App";
 :import {
     -st-from: '../project.st.css';
     -st-named: color1, color2, emphasisBox;
@@ -77,6 +79,7 @@ In the following code we are describing a theme file customizing out library:
 * CSS for `emphsisBox` shared class
 
 ```css
+/* backoffice-theme.st.css */
 @namespace "backofficeTheme";
 :import {
     -st-from: '../project.st.css';
@@ -94,3 +97,8 @@ In the following code we are describing a theme file customizing out library:
 ```
 
 See more info on using theme in [theme an application guide](./styalble-application.md#Apply component library theme).
+
+<!-- ## Playground
+
+{% playground id="stylableComponentLibrary", title="Stylable Component Library", dir="./guides/stylable-component-library", entry="app", active="app.tsx", readOnly=false %}{% endplayground %} -->
+
