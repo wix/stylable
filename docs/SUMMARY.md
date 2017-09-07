@@ -12,6 +12,8 @@
 
 * [Stylable Component Library](./guides/stylable-component-library.md)
 
+* [React Integration](./guides/react-integration.md)
+
 ## References
 
 * [Imports](./references/imports.md)

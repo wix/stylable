@@ -37,6 +37,8 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 * [Stylable Component Library](./guides/stylable-component-library.md)
 
+* [React Integration](./guides/react-integration.md)
+
 ## Reference
 
 * [Imports](./references/imports.md)
