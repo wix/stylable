@@ -1,0 +1,613 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Pseudo-Elements · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-playground/iframe.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="global-selectors.html" />
+    
+    
+    <link rel="prev" href="pseudo-classes.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                    Stylable
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Guides</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../guides/install-configure.html">
+            
+                <a href="../guides/install-configure.html">
+            
+                    
+                    Install & Configure Stylable
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../guides/components-basics.html">
+            
+                <a href="../guides/components-basics.html">
+            
+                    
+                    Component Basics
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="../guides/stylable-application.html">
+            
+                <a href="../guides/stylable-application.html">
+            
+                    
+                    Stylable Application
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="../guides/stylable-component-library.html">
+            
+                <a href="../guides/stylable-component-library.html">
+            
+                    
+                    Stylable Component Library
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">References</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="imports.html">
+            
+                <a href="imports.html">
+            
+                    
+                    Imports
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="root.html">
+            
+                <a href="root.html">
+            
+                    
+                    Root
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="class-selectors.html">
+            
+                <a href="class-selectors.html">
+            
+                    
+                    Class Selectors
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="tag-selectors.html">
+            
+                <a href="tag-selectors.html">
+            
+                    
+                    Tag Selectors
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="extend-stylesheet.html">
+            
+                <a href="extend-stylesheet.html">
+            
+                    
+                    Extend stylesheet
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="pseudo-classes.html">
+            
+                <a href="pseudo-classes.html">
+            
+                    
+                    Pseudo-Classes
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="3.7" data-path="pseudo-elements.html">
+            
+                <a href="pseudo-elements.html">
+            
+                    
+                    Pseudo-Elements
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.8" data-path="global-selectors.html">
+            
+                <a href="global-selectors.html">
+            
+                    
+                    Global selectors
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.9" data-path="compose-css-class.html">
+            
+                <a href="compose-css-class.html">
+            
+                    
+                    Compose CSS Class
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10" data-path="mixin-syntax.html">
+            
+                <a href="mixin-syntax.html">
+            
+                    
+                    Mixins
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.11" data-path="variables.html">
+            
+                <a href="variables.html">
+            
+                    
+                    Variables
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.12" data-path="theme.html">
+            
+                <a href="theme.html">
+            
+                    
+                    Theme
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.13" data-path="namespace.html">
+            
+                <a href="namespace.html">
+            
+                    
+                    Namespace
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Useful Information</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../usefulInfo/cheatsheet.html">
+            
+                <a href="../usefulInfo/cheatsheet.html">
+            
+                    
+                    Cheatsheet
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Pseudo-Elements</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="pseudo-elements">Pseudo-elements</h1>
+<p>In addition to CSS&apos;s native <a href="https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-elements" target="_blank">pseudo-elements</a>, <strong>Stylable</strong> stylesheets automatically expose CSS classes as custom pseudo-elements. This enables you to access internal parts of a component to apply styling.</p>
+<h2 id="define-a-custom-pseudo-element">Define a custom pseudo-element</h2>
+<p>Any <a href="class-selectors.html">CSS class</a> is accessible as a pseudo-element of an <a href="extend-stylesheet">extending stylesheet</a>.</p>
+<p>When you define a CSS class inside a component, in this case a <code>play-button</code> in a <code>VideoPlayer</code>, that class may be targeted as a pseudo-element of any class that extends the component <code>VideoPlayer</code>.</p>
+<h3 id="css-api">CSS API:</h3>
+<pre><code class="lang-css"><span class="hljs-comment">/* video-player.st.css */</span>
+@<span class="hljs-keyword">namespace</span> <span class="hljs-string">&quot;VideoPlayer&quot;</span>
+.root {}
+<span class="hljs-selector-class">.play-button</span> { 
+    <span class="hljs-attribute">background</span>: black; 
+    <span class="hljs-attribute">color</span>: white;
+}
+</code></pre>
+<h2 id="style-custom-pseudo-elements">Style custom pseudo-elements</h2>
+<p>Use <code>::</code> to access an internal part of a component after a <a href="tag-selectors.html#custom-element">custom tag selector</a> or after an <a href="extend-stylesheet.html">extended class selector</a>.</p>
+<p>In this example, you <a href="imports.html">import</a> a <code>VideoPlayer</code> component into your stylesheet, and style an internal part called <code>play-button</code> overriding its original styling.</p>
+<h3 id="css-api">CSS API:</h3>
+<pre><code class="lang-css">@namespace &quot;Page&quot;
+:import {
+    -st-from: &apos;./video-player.st.css&apos;;
+    -st-default: VideoPlayer;
+}
+.main-video {
+    -st-extends: VideoPlayer; /* define main-video as VideoPlayer */
+}
+.main-video::play-button { /* override main-video play button */
+    background: green;
+    color: purple;
+}
+</code></pre>
+<h3 id="css-output">CSS OUTPUT:</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.Page__root</span> <span class="hljs-selector-class">.Page__main-video</span><span class="hljs-selector-class">.VideoPlayer__root</span> <span class="hljs-selector-class">.VideoPlayer__play-button</span> {
+    <span class="hljs-attribute">background</span>: green;
+    <span class="hljs-attribute">color</span>: purple;
+}
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>:<br>Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: <code>.my-gallery::nav-btn::label</code>.</p>
+</blockquote>
+<h2 id="extend-stylesheet-pseudo-elements">Extend stylesheet pseudo-elements</h2>
+<p>When a Stylable stylesheet <a href="root.html">root</a> extends another stylesheet, pseudo-elements are automatically exposed on the extending stylesheet and available inline.</p>
+<p>In this example, the class <code>play-button</code> is available from the original component file <code>video-player.css</code>, and extended and styled in the <code>super-video-player.css</code> stylesheet as a custom pseudo-element on the <code>root</code> class. </p>
+<p>The <code>page.css</code> stylesheet can then extend <code>super-video-player.css</code> and on the <code>.main-player</code> class, style <code>play-button</code> differently.</p>
+<h3 id="css-api">CSS API:</h3>
+<pre><code class="lang-css">/* super-video-player.st.css */
+@namespace &quot;SuperVideoPlayer&quot;
+:import {
+    -st-from: &apos;./video-player.st.css&apos;;
+    -st-default: VideoPlayer;
+}
+.root {
+    -st-extends: VideoPlayer;
+}
+.root::play-button {
+    color: gold;
+}
+</code></pre>
+<pre><code class="lang-css">/* page.st.css */
+@namespace &quot;Page&quot;
+:import {
+    -st-from: &apos;./super-video-player.st.css&apos;;
+    -st-default: SuperVideoPlayer;
+}
+.main-player {
+    -st-extends: SuperVideoPlayer;
+}
+.main-player::play-button {
+    color: silver;
+}
+</code></pre>
+<h3 id="css-output">CSS OUTPUT:</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.SuperVideoPlayer__root</span><span class="hljs-selector-class">.VideoPlayer__root</span> <span class="hljs-selector-class">.VideoPlayer__play-button</span> { <span class="hljs-attribute">color</span>: gold; }
+<span class="hljs-selector-class">.Page__root</span> <span class="hljs-selector-class">.Page__main-player</span><span class="hljs-selector-class">.SuperVideoPlayer__root</span> <span class="hljs-selector-class">.VideoPlayer__play-button</span> { <span class="hljs-attribute">color</span>: silver; }
+</code></pre>
+<h2 id="override-custom-pseudo-elements">Override custom pseudo-elements</h2>
+<p>You can use CSS classes to override extended pseudo-elements. </p>
+<blockquote>
+<p><strong>Note</strong>:<br>You can also override native pseudo-elements using <strong>Stylable&apos;s</strong> custom pseudo-elements but this is not recommended as it can lead to code that&apos;s confusing and hard to maintain.</p>
+</blockquote>
+<p>In this example, <code>root</code> extends <code>VideoPlayer</code> and so any class placed on the <code>root</code> overrides the pseudo-element.</p>
+<h3 id="css-api">CSS API:</h3>
+<pre><code class="lang-css">@namespace &quot;SuperVideoPlayer&quot;
+:import {
+    -st-from: &apos;./video-player.css&apos;;
+    -st-default: VideoPlayer;
+}
+.root {
+    -st-extends: VideoPlayer;
+}
+.play-button { /* override VideoPlayer play-button */
+    color: gold;
+}
+</code></pre>
+<h3 id="css-output">CSS OUTPUT</h3>
+<pre><code class="lang-css"><span class="hljs-selector-class">.SuperVideoPlayer__root</span><span class="hljs-selector-class">.VideoPlayer__root</span> <span class="hljs-selector-class">.SuperVideoPlayer__play-button</span> { <span class="hljs-attribute">color</span>: gold; }
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>:<br>Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended.</p>
+</blockquote>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="pseudo-classes.html" class="navigation navigation-prev " aria-label="Previous page: Pseudo-Classes">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="global-selectors.html" class="navigation navigation-next " aria-label="Next page: Global selectors">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Pseudo-Elements","level":"3.7","depth":1,"next":{"title":"Global selectors","level":"3.8","depth":1,"path":"references/global-selectors.md","ref":"./references/global-selectors.md","articles":[]},"previous":{"title":"Pseudo-Classes","level":"3.6","depth":1,"path":"references/pseudo-classes.md","ref":"./references/pseudo-classes.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["highlight","playground","livereload"],"pluginsConfig":{"playground":{"playgroundUrl":"http://localhost:4000/Playground.bundle.js","loaderUrl":"http://localhost:4000/vs/loader.js"},"highlight":{},"livereload":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"references/pseudo-elements.md","mtime":"2017-09-06T19:03:01.113Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2017-09-07T06:38:43.402Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-playground/playFrame.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-playground/pageLoad.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

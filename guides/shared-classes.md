@@ -1,0 +1,39 @@
+# Shared classes
+
+When building a [stylbale component library](./stylable-component-library.md) or a [stylable application](./stylable-application.md), it is useful to reuse some classes across components in order to achieve common CSS with lower specificity.
+
+## Defining a shared class
+
+In the [commons stylable stylesheet](./project-commons.md) of your project (usually named `project.st.css`) you define a css class with a descriptive name like `emphasisBox`.
+
+```css
+@namespace "project";
+.emphasisBox {
+    background: pink;
+    color: white;
+}
+```
+
+## Use shared classes in components
+
+Component stylable stylesheet can use and extend shared classes:
+
+```css
+@namespace "comp";
+:import {
+    -st-from: './project.st.css';
+    -st-named: emphasisBox;
+}
+/*
+selector: .comp__root .project__emphasisBox
+js value: "project__emphasisBox"
+*/
+.emphasisBox { }
+/*
+selector: .comp__root .comp__messageBox.project__emphasisBox
+js value: "comp__messageBox project__emphasisBox"
+*/
+.messageBox {
+    -st-extends: emphasisBox;
+}
+```

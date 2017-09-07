@@ -1,59 +1,23 @@
 {
-  "name": "stylable",
-  "version": "4.0.12",
-  "description": "CSS for Components",
-  "license": "BSD-3-Clause",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "name": "stylable-gitbook",
+  "version": "1.0.0",
+  "description": "Stylable documentation GitBook",
+  "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --inline",
-    "test": "npm run test:node",
-    "build": "tsc",
-    "build:web": "webpack --config webpack.web.config.js",
-    "test:node": "ts-mocha ./tests/**/*.spec.ts",
-    "prepublish": "npm run build"
-  },
-  "dependencies": {
-    "css-selector-tokenizer": "^0.7.0",
-    "deindent": "^0.1.0",
-    "enhanced-resolve": "^3.4.1",
-    "lodash.clonedeep": "^4.5.0",
-    "murmurhash": "^0.0.2",
-    "postcss": "^6.0.3",
-    "postcss-js": "^1.0.0",
-    "postcss-nested": "^2.0.2",
-    "postcss-safe-parser": "^3.0.1",
-    "postcss-value-parser": "^3.3.0"
+    "copyPlayground": "cp node_modules/generic-playground/build/Playground.bundle.js . && cp -r node_modules/generic-playground/build/vs .",
+    "postinstall": "npm run copyPlayground && gitbook install",
+    "build": "gitbook build",
+    "start": "gitbook build && gitbook serve",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm build && node publish.js"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.1",
-    "@types/enhanced-resolve": "^3.0.4",
-    "@types/mocha": "^2.2.41",
-    "@types/node": "^8.0.2",
-    "c3-platform": "^1.0.0",
-    "chai": "^4.0.2",
-    "flat": "^4.0.0",
-    "glob": "^7.1.2",
-    "mocha": "^3.4.2",
-    "mocha-loader": "^1.1.1",
-    "ncp": "^2.0.0",
-    "ts-loader": "^2.2.0",
-    "ts-mocha": "^1.0.3",
-    "typescript": "^2.3.4",
-    "uglify-js": "^3.0.28",
-    "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.0.0",
-    "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.5.0"
+    "gitbook-cli": "^2.3.2"
   },
-  "files": [
-    "dist",
-    "src",
-    "runtime.js"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:wix/stylable.git"
-  },
-  "author": "Wix.com"
+  "author": "talh@wix.com",
+  "license": "ISC",
+  "dependencies": {
+    "generic-playground": "^0.0.20",
+    "gitbook-plugin-playground": "^0.0.24"
+  }
 }

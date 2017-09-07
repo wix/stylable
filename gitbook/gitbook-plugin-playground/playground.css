@@ -1,0 +1,9 @@
+body {
+    margin: 0;
+}
+
+button {
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
