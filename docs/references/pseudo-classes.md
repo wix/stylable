@@ -16,7 +16,7 @@ The `-st-states` directive rule can be defined only for simple selectors like [t
 
 To define custom states for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then assigned different colors. 
 
-### CSS API:
+**CSS API**
 ```css
 /* example1.st.css */
 @namespace "Example1"
@@ -28,7 +28,7 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 .root:loading:toggled { color: blue; }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
@@ -42,7 +42,7 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 
 You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.media-button`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `media-button` component. 
 
-### CSS API:
+**CSS API**
 ```css
 /* example2.st.css */
 @namespace "Example2"
@@ -60,7 +60,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 .media-button:toggled { color: gold; } /* included in Example1 but overridden by Example2 */
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
@@ -74,7 +74,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. .Stylable generates selectors using custom `data-*` attributes. The CSS output uses the custom implementation defined in `-st-states` rather then its default generated `data-*` attributes.
 
-### CSS API:
+**CSS API**
 ```css
 /* example-custom.st.css */
 @namespace "ExampleCustom"
@@ -85,7 +85,7 @@ You can use this feature to define states even if the existing components you ar
 .root:loading { color: green; }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .ExampleCustom__root.on { color: red; }
 .ExampleCustom__root[data-spinner] { color: green; }

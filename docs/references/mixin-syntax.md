@@ -11,7 +11,7 @@ Here are some use cases where you can use mixins with other **Stylable** feature
 
 The value `textTooltip` of the external file `my-mixins` is imported. The class selector `.submit-button` uses the mixin syntax and applies parameters. In this case, to wait `300` milliseconds to display the `data-tooltip` hover text on the button. 
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: "./my-mixins";
@@ -26,7 +26,7 @@ The value `textTooltip` of the external file `my-mixins` is imported. The class 
 
 You can use mixins with parameters, without parameters, and with multiple mixins.
 
-### CSS API:
+**CSS API**
 ```css
 .a {
     /* no parameters */
@@ -44,7 +44,7 @@ You can use mixins with parameters, without parameters, and with multiple mixins
 
 Any parameter you add to the mixin is considered a string.
 
-### CSS API:
+**CSS API**
 ```css
 .a {
     -st-mixin: mix(300, xxx); /* ["300", "xxx"] */
@@ -68,7 +68,7 @@ Mixins can add CSS declarations to the CSS rule set to which they are applied:
 * Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.
 * Multiple mixins are applied according to the order that they are specified.
 
-### CSS API:
+**CSS API**
 ```css
 .a {
     color: red;
@@ -80,7 +80,7 @@ Mixins can add CSS declarations to the CSS rule set to which they are applied:
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .a {
     color: red;
