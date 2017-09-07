@@ -10,14 +10,14 @@ Tag selectors are **not** scoped themselves. Other selectors used with a tag sel
 
 Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Page"
 form { background: green; }
 .side-bar:hover form { background: red; }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 /* form is not namespaced - affects any nested form */
 .Page__root form { background: green; } 
@@ -27,7 +27,7 @@ form { background: green; }
 > **Note**:  
 > `form` is not namespaced.
 
-### React:
+**React**
 ```jsx
 /* inside a stylable component render */
 <div className="gallery">
@@ -42,7 +42,7 @@ form { background: green; }
 
 When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Page"
 :import{
@@ -53,14 +53,14 @@ ToggleButton { background: green; }
 .side-bar:hover ToggleButton { background: red; }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 /* ToggleButton is not namespaced - affects any nested toggle button */
 .Page__root .ToggleButton__root { background: green; }
 .Page__root .Page__root.side-bar:hover .ToggleButton__root { background: red; }
 ```
 
-### React Implementation:
+**React Implementation**
 ```jsx
 /* Button component implements toggle-button.css */
 import ToggleButton from './toggle-button';
