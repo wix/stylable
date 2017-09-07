@@ -438,10 +438,10 @@ describe('diagnostics: warnings and errors', function () {
                             content: `
                             :import {
                                 -st-from: './file.css';   
-                                |-st-named: $special$|;   
+                                -st-named: special;   
                             }
                             .myclass {
-                                -st-extends: special; 
+                                |-st-extends: $special$|; 
                             }
                             `
                         },

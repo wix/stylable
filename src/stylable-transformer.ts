@@ -8,7 +8,7 @@ import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules, getCorrectNodeFromImport } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, getCorrectNodeImport } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
@@ -123,7 +123,7 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-                    const node = getCorrectNodeFromImport(_import, (node:any) => node.prop === valueMapping.from)
+                    const node = getCorrectNodeImport(_import, (node:any) => node.prop === valueMapping.from)
                     this.diagnostics.error(node, "Trying to import unknown file", {word:node.value})
                 }
             }
@@ -131,7 +131,6 @@ export class StylableTransformer {
         metaExports[meta.root] = scopedName;
     }
     exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
-        debugger
         const scopedName = this.scope(name, meta.namespace);
         if (!metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
@@ -154,14 +153,25 @@ export class StylableTransformer {
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            const node = getCorrectNodeFromImport(extend.import, (node:any) => node.prop === valueMapping.named || node.prop === valueMapping.default)
-                            this.diagnostics.error(node, "Import is not extendable", {word:resolved.symbol.name})
+                            let found:any = null
+                            meta.ast.walkRules('.' + classSymbol.name, function(rule:SRule) {
+                                let declrationIndex = rule.nodes ? rule.nodes.findIndex((statment:any) => statment.prop === valueMapping.extends): -1
+                                if (rule.isSimpleSelector && !!~declrationIndex) {
+                                    found = rule.nodes![declrationIndex]
+                                }
+                            })
+                            
+                            if (!!found){
+                                this.diagnostics.error(found, "Import is not extendable", {word:found.value})
+                            } 
                         }
                     } else {
-                        const node = getCorrectNodeFromImport(extend.import, (node:any) => node.prop === valueMapping.from)
+                        const node = getCorrectNodeImport(extend.import, (node:any) => node.prop === valueMapping.from)
                         this.diagnostics.error(node, "import is not extendable: js or file not found", {word:node.value})
                     }
-                } 
+                } else {
+                    //TODO: warn second phase
+                }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
                     const classExports: Pojo<string> = {};
@@ -174,7 +184,7 @@ export class StylableTransformer {
                 }
             }
 
-            if (compose) {  0.
+            if (compose) {
                 compose.forEach((symbol) => {
                     let finalName;
                     let finalMeta;

@@ -181,7 +181,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias };
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias};
         }
     }
 
