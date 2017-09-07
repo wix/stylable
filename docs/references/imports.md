@@ -19,7 +19,7 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 
 Import the `toggle-button.css` stylesheet from a local location. Assign the name `ToggleButton` to the default export of that stylesheet for use in this scoped stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: './toggle-button.css';
@@ -27,7 +27,7 @@ Import the `toggle-button.css` stylesheet from a local location. Assign the name
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import ToggleButton from './toggle-button.css';
 ```
@@ -36,7 +36,7 @@ import ToggleButton from './toggle-button.css';
 
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. These named exports are now imported into this scoped stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: "./my-mixins";
@@ -44,7 +44,7 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import { gridMixin, tooltipMixin } from "./my-mixins";
 ```
@@ -53,7 +53,7 @@ import { gridMixin, tooltipMixin } from "./my-mixins";
 
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as ```tooltip```. These mixins should be referred to as `gridMixin` and `tooltip` in this stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: "./my-mixins";
@@ -61,7 +61,7 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import { gridMixin, tooltipMixin as tooltip } from "./my-mixins";
 ```
