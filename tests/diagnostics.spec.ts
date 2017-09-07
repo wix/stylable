@@ -742,8 +742,8 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-    describe('keyframes', function() {
-        it('should return warning if keyframe symbol is used', function(){
+    describe('transforms', function() {
+        it('should return warning if @keyframe symbol is used', function(){
             let config = {
                 entry:'/main.css', 
                 files: {
@@ -753,13 +753,13 @@ describe('diagnostics: warnings and errors', function () {
                         |@keyframes $name$| {
                             from {}
                             to {}
-                        }
-                     
-                      `
+                        }`
                     }
             }}
             expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
+        // it('should return erro ')
     })
+
 
 });
