@@ -1,5 +1,5 @@
 
-![](../branding/logo/PNG/96-logo-OnlySymbol.png)
+![Stylable logo](../branding/logo/PNG/96-logo-OnlySymbol.png)
 
 # Stylable - CSS for Components
 
@@ -15,9 +15,9 @@ We want to extend CSS so that it is easier to use in a component ecosystem, but 
 
 So what does **Stylable** do?
 
-* Scopes styles to components so they don't "leak" and clash with other styles.
-* Provides a style API to enable abstracting the internal structure of a component so that it can be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
-* Uses mixins and variants so, for example, you can tell the same component to use a Wix theme or a Bootstrap theme.
+*  Scopes styles to components so they don't "leak" and clash with other styles.
+* Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
+* Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 
@@ -25,19 +25,19 @@ Viva CSS, and welcome **Stylable**. We hope you like it. Learn how to use it wit
 
 ## Components
 
-[Stylable-components](https://github.com/wix/stylable-components) - react stylable components with mobx
+[Stylable-components](https://github.com/wix/stylable-components) - React **Stylable** components with MobX
 
 ## Guides
 
 * [Install & Configure Stylable](./guides/install-configure.md)
 
-* [Component Basics](./guides/component-basics.md)
+* [Component Basics](./guides/components-basics.md)
 
 * [Stylable Application](./guides/stylable-application.md)
 
 * [Stylable Component Library](./guides/stylable-component-library.md)
 
-## References
+## Reference
 
 * [Imports](./references/imports.md)
 

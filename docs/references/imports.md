@@ -15,11 +15,11 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 
 ## Import Basic usage
 
-#### Import the default export of a local reference stylesheet for use in the scoped stylesheet
+### Import the default export of a local reference stylesheet for use in the scoped stylesheet
 
 Import the `toggle-button.css` stylesheet from a local location. Assign the name `ToggleButton` to the default export of that stylesheet for use in this scoped stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: './toggle-button.css';
@@ -27,16 +27,16 @@ Import the `toggle-button.css` stylesheet from a local location. Assign the name
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import ToggleButton from './toggle-button.css';
 ```
 
-#### Import named exports from a local JS module
+### Import named exports from a local JS module
 
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. These named exports are now imported into this scoped stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: "./my-mixins";
@@ -44,16 +44,16 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import { gridMixin, tooltipMixin } from "./my-mixins";
 ```
 
-#### Import named exports from a local JS module and locally refer to one of the export values as a different name
+### Import named exports from a local JS module and locally refer to one of the export values as a different name
 
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as ```tooltip```. These mixins should be referred to as `gridMixin` and `tooltip` in this stylesheet.
 
-### CSS API:
+**CSS API**
 ```css
 :import {
     -st-from: "./my-mixins";
@@ -61,7 +61,7 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 }
 ```
 
-### ES6 equivalent:
+**ES6 equivalent**
 ```js
 import { gridMixin, tooltipMixin as tooltip } from "./my-mixins";
 ```
@@ -70,7 +70,7 @@ import { gridMixin, tooltipMixin as tooltip } from "./my-mixins";
 
 When importing another stylesheet the default represent the root of the stylesheet, and named imports represent vars and classes.
 
- ## Usage
+## Usage
 
 * [Tag selectors](./tag-selectors.md)
 * [Extend a stylesheet](./extend-stylesheet.md)

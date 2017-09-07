@@ -4,7 +4,7 @@ You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_sel
 
 In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Page"
 .thumbnail { background:green; }
@@ -12,14 +12,14 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 .gallery:hover .thumbnail { background:red; }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Page__root .Page__thumbnail { background:green;}
 .Page__root .Page__thumbnail:hover { background:blue; }
 .Page__root .Page__gallery:hover .Page__thumbnail { background:red; }
 ```
 
-### React:
+**React**
 ```jsx
 /* inside a stylable render */
 <div className="gallery">

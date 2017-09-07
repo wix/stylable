@@ -2,7 +2,7 @@
 
 Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Comp";
 .item {
@@ -14,7 +14,7 @@ Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Comp__item { color: red }
 .Comp__selected.Comp__item { color: green }
@@ -24,7 +24,7 @@ Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector
 
 You can compose multiple items by order.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Comp";
 .item {
@@ -39,7 +39,7 @@ You can compose multiple items by order.
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Comp__item { color: red }
 .Comp__round { border-radius: 10px }

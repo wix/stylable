@@ -765,4 +765,40 @@ describe('bundle: theme', () => {
 
     });
 
+    describe('cleanup', () => {
+
+        it('should not remove ruleset imported from theme', ()=>{
+            const cssOutput = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    "/entry.st.css": {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-theme: true;
+                                -st-from: "./theme.st.css";
+                                -st-named: myClass;
+                            }
+                            .myClass { color:red; } 
+                        `
+                    },
+                    "/theme.st.css": {
+                        namespace: 'theme',
+                        content: `
+                           .myClass {}
+                        `
+                    }
+                }
+            });
+    
+            expect(cssOutput).to.eql([
+                '.theme--root .theme--myClass {}',
+                '.entry--root .theme--myClass { color:red; }'
+            ].join('\n'));
+
+        })
+    });
 })

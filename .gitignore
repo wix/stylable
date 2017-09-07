@@ -46,3 +46,8 @@ jspm_packages
 
 # docs 
 documentation
+docs/_book
+docs/vs
+docs/playground.bundle.js
+docs/playground.json
+docs/index.html

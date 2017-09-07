@@ -4,7 +4,7 @@ In **Stylable**, selectors are scoped to the stylesheet. But what if you want to
 
 In this example `.classB` and `.classC` are not scoped to `Comp` but are part of the selector query.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Comp";
 .classA :global(.classB > .classC) .classD:hover {
@@ -12,7 +12,7 @@ In this example `.classB` and `.classC` are not scoped to `Comp` but are part of
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Comp__root .Comp__classA .classB > .classC .Comp__classD:hover {
     color: red;

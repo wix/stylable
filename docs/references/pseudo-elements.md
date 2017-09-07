@@ -9,7 +9,7 @@ Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [e
 
 When you define a CSS class inside a component, in this case a `play-button` in a `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `VideoPlayer`.
 
-### CSS API:
+**CSS API**
 ```css
 /* video-player.st.css */
 @namespace "VideoPlayer"
@@ -26,7 +26,7 @@ Use `::` to access an internal part of a component after a [custom tag selector]
 
 In this example, you [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "Page"
 :import {
@@ -42,7 +42,7 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Page__root .Page__main-video.VideoPlayer__root .VideoPlayer__play-button {
     background: green;
@@ -62,7 +62,7 @@ In this example, the class `play-button` is available from the original componen
 
 The `page.css` stylesheet can then extend `super-video-player.css` and on the `.main-player` class, style `play-button` differently.
 
-### CSS API:
+**CSS API**
 ```css
 /* super-video-player.st.css */
 @namespace "SuperVideoPlayer"
@@ -93,7 +93,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 }
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: gold; }
 .Page__root .Page__main-player.SuperVideoPlayer__root .VideoPlayer__play-button { color: silver; }
@@ -110,7 +110,7 @@ You can use CSS classes to override extended pseudo-elements.
 
 In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
-### CSS API:
+**CSS API**
 ```css
 @namespace "SuperVideoPlayer"
 :import {
@@ -125,7 +125,7 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 }
 ```
 
-### CSS OUTPUT
+**CSS OUTPUT**
 ```css
 .SuperVideoPlayer__root.VideoPlayer__root .SuperVideoPlayer__play-button { color: gold; }
 ```

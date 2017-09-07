@@ -6,7 +6,7 @@
 
 * [Install & Configure Stylable](./guides/install-configure.md)
 
-* [Component Basics](./guides/component-basics.md)
+* [Component Basics](./guides/components-basics.md)
 
 * [Stylable Application](./guides/stylable-application.md)
 
