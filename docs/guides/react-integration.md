@@ -19,7 +19,7 @@ yarn add wix-react-tools
 
 ## Use
 
-When applying Stylable to a React component, any className or `data-*` properties are copied to the resulting root element of the component. Further more the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
+When applying Stylable to a React component, any className or `data-*` properties are copied to the resulting root element of the component. Furthermore the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
 
 ```jsx 
 import {stylable} from 'wix-react-tools';
