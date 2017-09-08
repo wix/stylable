@@ -1,0 +1,25 @@
+@namespace "Form";
+
+:import {
+    -st-from: "./button.st.css";
+    -st-default: Button;
+}
+
+.root {}
+
+.email {}
+
+.password {}
+
+.button {
+    -st-extends: Button;
+    background: lightgrey;
+}
+
+.button::label {
+    font-weight: bolder;
+}
+
+.button:clicked {
+    box-shadow: 0px 0px 1px black;;
+}
