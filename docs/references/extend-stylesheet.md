@@ -6,7 +6,7 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 
 In this example, the stylesheet is extending the `toggle-button.css` stylesheet. The `check-btn` class has a `label`, which is a custom pseudo-element, and can be `toggled`, a custom pseudo-class. 
 
-### CSS API:
+**CSS API**
 ```css
 /* page.st.css */
 @namespace "Page"
@@ -22,14 +22,14 @@ In this example, the stylesheet is extending the `toggle-button.css` stylesheet.
 .check-btn:toggled::label { color:red; } /* style pseudo element label when check-box is toggled */
 ```
 
-### CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Page__root .Page__check-btn.ToggleButton__root { background: white; }
 .Page__root .Page__check-btn.ToggleButton__root .ToggleButton__label { color: green; }
 .Page__root .Page__check-btn.ToggleButton__root[data-ToggleButton-toggled] .ToggleButton__label { color: red; }
 ```
 
-### React
+**React**
 ```jsx
 /* Page component uses toggle-button component */
 import ToggleButton from './toggle-button';

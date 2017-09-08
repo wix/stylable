@@ -9,7 +9,7 @@ Use variables to define common values to be used across the stylesheet and so th
 
 Use the syntax `:vars` to define variables, and apply them with a `value()`:
 
-CSS 
+**CSS** 
 ```css
 @namespace "Example1";
 :vars {
@@ -22,7 +22,7 @@ CSS
 }
 ```
 
-CSS OUTPUT:
+**CSS OUTPUT**
 ```css
 .Example1__root {
     color: red; /* color1 */
@@ -34,7 +34,7 @@ CSS OUTPUT:
 
 Any var defined in a stylesheet is exported as a named export and can be [imported](./imports.md) by other stylesheets.
 
-CSS
+**CSS**
 ```css
 @namespace "Example2";
 :import {
@@ -49,7 +49,7 @@ CSS
 }
 ```
 
-CSS OUTPUT
+**CSS OUTPUT**
 ```css
 .Example2__root {
     border: 10px solid red; /* color1 */
@@ -66,7 +66,7 @@ CSS OUTPUT
 
 You can set the value of a variable using another variable.
 
-CSS API
+**CSS API**
 ```css
 @namespace "Example3";
 :import {
@@ -81,7 +81,7 @@ CSS API
 }
 ```
 
-CSS OUTPUT
+**CSS OUTPUT**
 ```css
 .Example3__root {
     border: 10px solid red; /* 10px solid {color1} */

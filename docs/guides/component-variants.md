@@ -1,13 +1,13 @@
-# Component variants
+# Component Variants
 
-When building a [stylable component library](./stylable-component-library.md) or a [stylable application](./stylable-application.md), it is useful to define several semantics "flavors" of some components like `Button` component that meant to represent `cancel` or a `Gallery` component for the `main` gallery instance. 
+When building a [Stylable component library](./stylable-component-library.md) or a [Stylable application](./stylable-application.md), it is useful to define several semantic "flavors" of some components, for example a `Button` component that represents `cancel` or a `Gallery` component for the `main` gallery instance. 
 
 ## Defining a component variant
 
-In the [commons stylable stylesheet](./project-commons.md) of your project (usually named `project.st.css`) you:
-.1 import a component stylesheet 
-.2 define a css class with a descriptive name like `cancelButton`
-.3 extend the component on the class
+In your project's [Stylable stylesheet](./project-commons.md) used for the commonly used components in your project (usually named `project.st.css`) you:
+1. Import a component stylesheet. 
+2. Define a CSS class with a descriptive name like `cancelButton`.
+3. Extend the component on the class you just defined.
 
 ```css
 @namespace "project";
@@ -24,7 +24,7 @@ In the [commons stylable stylesheet](./project-commons.md) of your project (usua
 
 ## Use component variants in components
 
-Component stylable stylesheet can use and extend component variants:
+A component Stylable stylesheet can use and extend component variants:
 
 ```css
 @namespace "comp";

@@ -14,7 +14,7 @@
 
 * [React Integration](./guides/react-integration.md)
 
-## References
+## Reference
 
 * [Imports](./references/imports.md)
 
