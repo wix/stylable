@@ -12,7 +12,7 @@
 
 * [Stylable Component Library](./guides/stylable-component-library.md)
 
-## References
+## Reference
 
 * [Imports](./references/imports.md)
 
