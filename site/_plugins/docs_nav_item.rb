@@ -1,9 +1,10 @@
 module Jekyll
     module SidebarItemFilter
         def sidebar_item(item)
+            baseurl = Jekyll.configuration({})['baseurl']
             pageID = @context.registers[:page]["id"]
             itemID = item["id"]
-            href = item["href"] || "/docs/#{itemID}.html"
+            href = item["href"] || "/#{baseurl}/docs/#{itemID}"
             isActive = pageID == itemID
             isActiveClassName = isActive ? "active" : ""
             categoryLink = "<a href=\"#{href}\" class=\"#{isActiveClassName} docs-nav-item\">#{item["title"]}</a>"

@@ -5,7 +5,7 @@
 layout: home
 ---
 
-![Stylable - CSS for Components](/images/96-logo-horizontal.png){: .center-image }
+![Stylable - CSS for Components]({{ site.baseurl }}/images/96-logo-horizontal.png){: .center-image }
 
 **Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
@@ -15,4 +15,4 @@ layout: home
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 
-Learn more in our [Documentation Center](/docs/getting-started.html).
+Learn more in our [Documentation Center]({{ site.baseurl }}/docs/getting-started.html).

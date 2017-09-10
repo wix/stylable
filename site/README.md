@@ -15,7 +15,7 @@ The site is build using (Jekyll)[http://jekyllrb.com/]. In order to modify the s
 
 Run 
 ```
-bundle exec jekyll serve
+bundle exec jekyll serve --baseurl /stylable
 ```
 
 ## Build
