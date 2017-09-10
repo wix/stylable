@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Mixins</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/index.html">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav round-corners">
+    
+    <div class="docs-nav-section">
+        <h2>Getting Started</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/getting-started/install-configure.html" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/docs/getting-started/react-integration.html" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet.html" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Guides</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/guides/components-basics.html" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-application.html" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-library.html" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Reference</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/references/imports.html" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/docs/references/root.html" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/docs/references/class-selectors.html" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/tag-selectors.html" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/extend-stylesheet.html" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-classes.html" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-elements.html" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/docs/references/global-selectors.html" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/docs/references/compose-css-class.html" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class="active"><a href="/docs/references/mixin-syntax.html" class="active docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/docs/references/variables.html" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/docs/references/theme.html" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/docs/references/namespace.html" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content round-corners">
+    <h1>Mixins</h1>
+    <p>You can use <strong>Stylable</strong> to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets.</p>
+
+<p>Here are some use cases where you can use mixins with other <strong>Stylable</strong> features:</p>
+<ul>
+  <li><a href="./create-layouts">Layouts</a> - easily describe complex layouts.</li>
+  <li>Helpers - use custom CSS shortcuts, like timers, effects and macros.</li>
+</ul>
+
+<h2 id="example">Example</h2>
+
+<p>The value <code class="highlighter-rouge">textTooltip</code> of the external file <code class="highlighter-rouge">my-mixins</code> is imported. The class selector <code class="highlighter-rouge">.submit-button</code> uses the mixin syntax and applies parameters. In this case, to wait <code class="highlighter-rouge">300</code> milliseconds to display the <code class="highlighter-rouge">data-tooltip</code> hover text on the button.</p>
+
+<p><strong>CSS API</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
+    <span class="py">-st-names</span><span class="p">:</span> <span class="n">textTooltip</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.submit-button</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">textTooltip</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="n">data-tooltip</span><span class="p">);</span> <span class="c">/* apply mixin */</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="syntax">Syntax</h2>
+
+<p>You can use mixins with parameters, without parameters, and with multiple mixins.</p>
+
+<p><strong>CSS API</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.a</span> <span class="p">{</span>
+    <span class="c">/* no parameters */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.b</span> <span class="p">{</span>
+    <span class="c">/* multiple parameters */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.c</span> <span class="p">{</span>
+    <span class="c">/* apply multiple mixins */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">,</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Any parameter you add to the mixin is considered a string.</p>
+
+<p><strong>CSS API</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.a</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="n">xxx</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
+<span class="p">}</span>
+<span class="nc">.b</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xxx"</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
+<span class="p">}</span>
+<span class="nc">.c</span> <span class="p">{</span> <span class="c">/* use quotations to include comma */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xx,x"</span><span class="p">);</span> <span class="c">/* ["300", "xx,x"] */</span>
+<span class="p">}</span>
+<span class="nc">.d</span> <span class="p">{</span> <span class="c">/* escape slashes */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"\"xxx\""</span><span class="p">);</span> <span class="c">/* ["300", "\"xxx\""] */</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="how-mixins-are-applied">How mixins are applied</h2>
+
+<p>Mixins can add CSS declarations to the CSS rule set to which they are applied:</p>
+
+<ul>
+  <li>Rules are added at the position in the CSS where the <code class="highlighter-rouge">-st-mixin</code> is declared.</li>
+  <li>Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.</li>
+  <li>Multiple mixins are applied according to the order that they are specified.</li>
+</ul>
+
+<p><strong>CSS API</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.a</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">golden</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p><strong>CSS OUTPUT</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.a</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/js/prism.js"></script>
+</body>
+</html>

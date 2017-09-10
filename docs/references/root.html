@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Root</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/index.html">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav round-corners">
+    
+    <div class="docs-nav-section">
+        <h2>Getting Started</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/getting-started/install-configure.html" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/docs/getting-started/react-integration.html" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet.html" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Guides</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/guides/components-basics.html" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-application.html" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-library.html" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Reference</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/references/imports.html" class=" docs-nav-item">Imports</a></li>
+            
+                <li class="active"><a href="/docs/references/root.html" class="active docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/docs/references/class-selectors.html" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/tag-selectors.html" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/extend-stylesheet.html" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-classes.html" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-elements.html" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/docs/references/global-selectors.html" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/docs/references/compose-css-class.html" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/docs/references/mixin-syntax.html" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/docs/references/variables.html" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/docs/references/theme.html" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/docs/references/namespace.html" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content round-corners">
+    <h1>Root</h1>
+    <p>Every Stylable stylesheet has a reserved class called <code class="highlighter-rouge">root</code> that matches the root node of the component.</p>
+
+<p>You can apply default styling and behavior to the component on the root class itself.</p>
+
+<h2 id="examples">Examples</h2>
+
+<p>The <code class="highlighter-rouge">root</code> class is added automatically to root in <a href="react-integration">react integration</a>. No need to write <code class="highlighter-rouge">className="root"</code>.</p>
+
+<p><strong>CSS API</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="nc">.root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* set component background to red */</span>
+</code></pre>
+</div>
+
+<p><strong>CSS OUTPUT</strong></p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Comp__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+</code></pre>
+</div>
+
+<blockquote>
+  <p><strong>Note</strong>:<br />
+Root can also define <a href="./pseudo-classes">states</a> and <a href="./extend-stylesheet">extend another component</a>.</p>
+</blockquote>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/js/prism.js"></script>
+</body>
+</html>

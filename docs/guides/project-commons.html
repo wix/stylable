@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Project Commons</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/index.html">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav round-corners">
+    
+    <div class="docs-nav-section">
+        <h2>Getting Started</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/getting-started/install-configure.html" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/docs/getting-started/react-integration.html" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet.html" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Guides</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/guides/components-basics.html" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-application.html" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-library.html" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Reference</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/references/imports.html" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/docs/references/root.html" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/docs/references/class-selectors.html" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/tag-selectors.html" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/extend-stylesheet.html" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-classes.html" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-elements.html" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/docs/references/global-selectors.html" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/docs/references/compose-css-class.html" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/docs/references/mixin-syntax.html" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/docs/references/variables.html" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/docs/references/theme.html" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/docs/references/namespace.html" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content round-corners">
+    <h1>Project Commons</h1>
+    <p>The goal of the project file is to contain the CSS commons for the project, including <a href="../references/variables">variables</a>, <a href="./component-variants">component variants</a> and <a href="./shared-classes">shared classes</a>.</p>
+
+<p>In the following code, you can see a project with:</p>
+<ul>
+  <li>2 colors and 2 font sizes variables</li>
+  <li>1 <code class="highlighter-rouge">Button</code> component variant named <code class="highlighter-rouge">cancelButton</code></li>
+  <li>1 shared class for <code class="highlighter-rouge">emphasisBox</code></li>
+</ul>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* project.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"Project"</span><span class="p">;</span>
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="m">#F012BE</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="m">#FF4136</span><span class="p">;</span>
+    <span class="py">fontBig</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="py">fontSmall</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button/button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancelButton</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.emphasisBox</span> <span class="p">{}</span>
+</code></pre>
+</div>
+
+<blockquote>
+  <p><strong>Note</strong>:
+We recommend calling the project commons file <code class="highlighter-rouge">project.st.css</code>.</p>
+</blockquote>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/js/prism.js"></script>
+</body>
+</html>

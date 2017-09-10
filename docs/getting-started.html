@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Getting Started</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/index.html">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav round-corners">
+    
+    <div class="docs-nav-section">
+        <h2>Getting Started</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/getting-started/install-configure.html" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/docs/getting-started/react-integration.html" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet.html" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Guides</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/guides/components-basics.html" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-application.html" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-library.html" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <h2>Reference</h2>
+        <ul>
+            
+                <li class=""><a href="/docs/references/imports.html" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/docs/references/root.html" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/docs/references/class-selectors.html" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/tag-selectors.html" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/extend-stylesheet.html" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-classes.html" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-elements.html" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/docs/references/global-selectors.html" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/docs/references/compose-css-class.html" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/docs/references/mixin-syntax.html" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/docs/references/variables.html" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/docs/references/theme.html" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/docs/references/namespace.html" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content round-corners">
+    <h1>Getting Started</h1>
+    <blockquote>
+  <p>“New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.”</p>
+
+  <p><a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS</p>
+</blockquote>
+
+<p>At Wix, we agree. We love CSS. It’s simple, declarative syntax that is native in browsers and is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.</p>
+
+<p>We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created <strong>Stylable</strong>.</p>
+
+<p><strong>Styable</strong> is a preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.</p>
+
+<p>So what does <strong>Stylable</strong> do?</p>
+
+<ul>
+  <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
+  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.</li>
+  <li>Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.</li>
+</ul>
+
+<p>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid vanilla CSS that works cross-browser.</p>
+
+<p>Viva CSS, and welcome <strong>Stylable</strong>. We hope you like it. Learn how to use it with step by step instructions and code examples.</p>
+
+<h2 id="components">Components</h2>
+
+<p><a href="https://github.com/wix/stylable-components">Stylable-components</a> - <strong>Stylable</strong>, fully-tested &amp; strictly-typed component library based on React.</p>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/js/prism.js"></script>
+</body>
+</html>
