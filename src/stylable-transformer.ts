@@ -8,7 +8,7 @@ import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules, getCorrectNodeImport } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
@@ -153,21 +153,16 @@ export class StylableTransformer {
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            let found:any = null
-                            meta.ast.walkRules('.' + classSymbol.name, function(rule:SRule) {
-                                let declrationIndex = rule.nodes ? rule.nodes.findIndex((statment:any) => statment.prop === valueMapping.extends): -1
-                                if (rule.isSimpleSelector && !!~declrationIndex) {
-                                    found = rule.nodes![declrationIndex]
-                                }
-                            })
-                            
+                            const found = getRuleFromMeta(meta, '.' + classSymbol.name)
                             if (!!found){
-                                this.diagnostics.error(found, "Import is not extendable", {word:found.value})
+                                this.diagnostics.error(found, "import is not extendable", {word:found.value})
                             } 
                         }
                     } else {
-                        const node = getCorrectNodeImport(extend.import, (node:any) => node.prop === valueMapping.from)
-                        this.diagnostics.error(node, "import is not extendable: js or file not found", {word:node.value})
+                        const found = getRuleFromMeta(meta, '.' + classSymbol.name)
+                        if (!!found){
+                            this.diagnostics.error(found, "import is not extendable: js or file not found", {word:found.value})
+                        } 
                     }
                 } else {
                     //TODO: warn second phase
@@ -176,7 +171,7 @@ export class StylableTransformer {
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
                     const classExports: Pojo<string> = {};
                     this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
-                    if (classExports[finalName]) {
+                    if (classExports[  ]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
                         //TODO: warn

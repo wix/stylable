@@ -453,20 +453,20 @@ describe('diagnostics: warnings and errors', function () {
                             `
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'Import is not extendable', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.css'}])  
             })
-            it('Only import css can be used to extend', function () {
+            it('should warn if extends by js import', function () {
                 let config = {
                     entry:'/main.css', 
                     files: {
                         '/main.css': {
                             content: `
                             :import {
-                                |-st-from: $'./file.js'$|;   
+                                -st-from: './file.js';   
                                 -st-default: special;   
                             }
                             .myclass {
-                                -st-extends: special
+                                |-st-extends: $special$|
                             }
                             `
                         },
