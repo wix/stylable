@@ -30,7 +30,7 @@ body, html{
 blockquote{
     margin: .5em 0;
     padding: 0.5em 1em;
-    background-color: #FFF5D4;
+    background-color: #d8eaf3;
 }
 
 blockquote::first-line {
@@ -74,7 +74,7 @@ header > .header-content {
 header .logo {
     display: inline-block;
     font-size: 24px;
-    color:#fc0;
+    color:#eebc52;
     text-decoration: none;
 }
 header .logo a{
@@ -151,7 +151,7 @@ header .main-nav a{
 
 .docs-nav-section h2 {
     padding: 5px 10px;
-    background: #FFCC1B;
+    background: #333333;
     color: #FFFFFF;
     margin: 0 0 10px 0;
     text-transform: uppercase;
@@ -227,7 +227,7 @@ header .main-nav a{
 }
 
 .docs-nav-section li.active{
-    color: #E1B211;
+    color: #00a7f3;
     background: #F8F8F8;
 }
 
