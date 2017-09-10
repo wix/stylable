@@ -1,2 +1,0 @@
-# Component Style - Best Practices
-

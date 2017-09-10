@@ -1,0 +1,21 @@
+---
+layout: default
+---
+
+<nav class="docs-nav round-corners">
+    {% for section in site.data.docs_nav %}
+    <div class="docs-nav-section">
+        <h2>{{ section.title }}</h2>
+        <ul>
+            {% for item in section.items %}
+                {{ item | sidebar_item }}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</nav>
+
+<section class="docs-content round-corners">
+    <h1>{{ page.title }}</h1>
+    {{ content }}
+</section>
