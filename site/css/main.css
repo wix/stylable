@@ -146,7 +146,7 @@ header .main-nav a{
 }
 
 .docs-content h1{
-    font-size:2.2em;
+    font-size:2em;
 }
 
 .docs-nav-section h2 {
@@ -159,12 +159,18 @@ header .main-nav a{
     letter-spacing: 1px;
 }
 
-.docs-content h2,
-.docs-content h3{
-    font-size:2em;
+.docs-content h2 {
+    font-size:1.5em;
     margin: 1em 0px 10px;
     font-weight: normal;
-    position:relative;
+    border-bottom: 1px solid #eaecef;
+}
+
+.docs-content h3{
+    font-size:1.2em;
+    margin: 1em 0px 10px;
+    font-weight: 600;
+    line-height: 1.25;
 }
 
 .docs-content h1,
@@ -176,6 +182,7 @@ header .main-nav a{
     position: relative;
     margin-top: -85px;
     padding-top: 85px;
+    pointer-events: none;
 }
 
 .docs-content h2 > a,
