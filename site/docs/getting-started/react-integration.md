@@ -4,7 +4,7 @@ title: React integration
 layout: docs
 ---
 
-Use [Stylable React integration](https://github.com/wix/wix-react-tools/blob/master/docs/react-component-features/stylable.md) from `wix-react-tools` in order to set a stylable stylesheet for a React component or stateless functional component (SFC).
+Use Stylable React integration from `wix-react-tools` in order to set a stylable stylesheet for a React component or stateless functional component (SFC).
 
 
 ## Installation
