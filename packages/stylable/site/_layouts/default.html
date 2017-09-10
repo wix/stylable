@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ page.title }}</title>
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="{{ site.baseurl }}/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+{% include header.html %}
+
+<div class="main-content">
+    {{ content }}
+</div>
+
+{% include footer.html %}
+<script src="{{ site.baseurl }}/js/prism.js"></script>
+</body>
+</html>
