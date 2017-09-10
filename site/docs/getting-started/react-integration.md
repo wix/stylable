@@ -37,6 +37,9 @@ class Comp extends React.Component {...}
 @stylable(stylesheet)(props => {...});
 ```
 
+> **Note**  
+> There is a [bug](https://github.com/wix/wix-react-tools/issues/107) in `cloneElement` not applying the same abilities as `createElement`
+
 ### CSS classes
 
 All [CSS class selectors](../references/class-selectors.md) existing in the stylesheet can be applied to any element **in the render** through the `className` property.
