@@ -8,7 +8,7 @@ In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/d
 
 ## Define a custom pseudo-element
 
-Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [extending stylesheet](./extend-stylesheet).
+Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [extending stylesheet](./extend-stylesheet.md).
 
 When you define a CSS class inside a component, in this case a `play-button` in a `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `VideoPlayer`.
 
@@ -25,7 +25,7 @@ When you define a CSS class inside a component, in this case a `play-button` in 
 
 ## Style custom pseudo-elements
 
-Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#custom-element) or after an [extended class selector](./extend-stylesheet.md).
+Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#component-element) or after an [extended class selector](./extend-stylesheet.md).
 
 In this example, you [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
 

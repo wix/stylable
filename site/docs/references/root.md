@@ -4,7 +4,7 @@ title: Root
 layout: docs
 ---
 
-Every [Stylable stylesheet]() has a reserved class called `root` that is matches the root node of the component. 
+Every Stylable stylesheet has a reserved class called `root` that matches the root node of the component. 
 
 You can apply default styling and behavior to the component on the root class itself.
 

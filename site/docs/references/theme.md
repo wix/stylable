@@ -18,7 +18,7 @@ When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its 
 
 ## Override classes
 
-Any [shared classes](../guides/shared-classes.ms) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet, by simply redefining them.
+Any [shared classes](../guides/shared-classes.md) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet, by simply redefining them.
 
 ```css
 @namespace "project";
