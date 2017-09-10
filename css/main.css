@@ -83,7 +83,7 @@ header .logo a{
 }
 header .logo::before {
     content: " ";
-    background: url(/images/96-logo-OnlySymbol.svg);
+    background: url(../images/96-logo-OnlySymbol.svg);
     width: 24px;
     height: 24px;
     display: inline-block;
