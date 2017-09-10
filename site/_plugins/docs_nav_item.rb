@@ -4,7 +4,7 @@ module Jekyll
             baseurl = Jekyll.configuration({})['baseurl']
             pageID = @context.registers[:page]["id"]
             itemID = item["id"]
-            href = item["href"] || "/#{baseurl}/docs/#{itemID}"
+            href = item["href"] || "#{baseurl}/docs/#{itemID}"
             isActive = pageID == itemID
             isActiveClassName = isActive ? "active" : ""
             categoryLink = "<a href=\"#{href}\" class=\"#{isActiveClassName} docs-nav-item\">#{item["title"]}</a>"
