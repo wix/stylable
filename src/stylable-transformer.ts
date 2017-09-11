@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -165,7 +165,7 @@ export class StylableTransformer {
                         } 
                     }
                 } else {
-                    //TODO: warn second phase
+                    //TODO2: warn second phase
                 }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
@@ -174,7 +174,7 @@ export class StylableTransformer {
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
-                        //TODO: warn second phase
+                        //TODO2: warn second phase
                         
                     }
                 }
@@ -194,13 +194,13 @@ export class StylableTransformer {
                                 finalName = resolved.symbol.name;
                                 finalMeta = resolved.meta;
                             } else {
-                                //TODO: warn second phase
+                                //TODO2: warn second phase
                             }
                         } else {
-                            //TODO: warn second phase
+                            //TODO2: warn second phase
                         }
                     } else {
-                        //TODO: warn second phase
+                        //TODO2: warn second phase
                     }
 
                     if (finalName && finalMeta) {
@@ -209,7 +209,7 @@ export class StylableTransformer {
                         if (classExports[finalName]) {
                             exportedClasses += ' ' + classExports[finalName];
                         } else {
-                            //TODO: warn second phase
+                            //TODO2: warn second phase
                         }
                     }
 
@@ -231,17 +231,25 @@ export class StylableTransformer {
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
                     if (typeof resolvedMixin.symbol === 'function') {
-                        const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
-                        const mixinRoot = cssObjectToAst(res).root;
+                        let mixinRoot = null
+                        try {
+                            const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
+                            mixinRoot = cssObjectToAst(res).root;
+                        } catch (e) {
+                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word:mix.mixin.type})
+                            return 
+                        }
+                        
                         mergeRules(mixinRoot, rule);
                     }
                 } else {
-                    // const resolvedClass = this.resolver.deepResolve(mix.ref);
-                    // if (resolvedClass && resolvedClass._kind === 'css') {
-                    //     mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
-                    // } else {
-                    //     //TODO: add warn
-                    // }
+                    const resolvedClass = this.resolver.deepResolve(mix.ref);
+                    if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
+                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
+                    } else {
+                        let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
+                        this.diagnostics.error(importNode, 'import mixin does not exist', {word:mix.ref.name})
+                    }
                 }
             } else if (mix.ref._kind === 'class') {
                 mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);

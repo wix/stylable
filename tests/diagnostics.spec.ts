@@ -311,6 +311,53 @@ describe('diagnostics: warnings and errors', function () {
                 `, [{ message: 'unknown mixin: "myMixin"', file: "main.css" }])
             });
 
+            it('should add error when can not append css mixins', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                |-st-named: $my-mixin$;|
+                            }
+                            .container {
+                                -st-mixin: my-mixin;                           
+                            }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: ``
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'import mixin does not exist', file:'/main.css'}])  
+            });
+            it('should add diagnostics when there is a bug in mixin', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            |.container {
+                                -st-mixin: $myMixin$;  
+                            }|
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    throw 'bug in mixin'
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'could not apply mixin: bug in mixin', file:'/main.css'}])  
+            });
+
         });
 
         describe(':vars', function () {
@@ -823,19 +870,6 @@ describe('diagnostics: warnings and errors', function () {
             expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
         })
 
-        it.only('', function () {
-            let config = {
-                entry:'/main.css', 
-                files: {
-                    '/main.css': {
-                        content: ``
-                    },
-                    '/file.js': {
-                        content: ``
-                    }
-            }}
-            expectWarningsFromTransform(config, [{message:'', file:'/main.css'}])  
-        })
       
     })
 
