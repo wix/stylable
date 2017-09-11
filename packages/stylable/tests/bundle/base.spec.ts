@@ -74,7 +74,6 @@ describe('bundle: base', () => {
                     `
                 }
             }
-
         });
 
         expect(output).to.eql([

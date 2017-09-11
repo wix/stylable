@@ -115,7 +115,6 @@ describe('Exports (Compose)', function () {
 
         it('compose when extending class that is not root', function () {
 
-
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {

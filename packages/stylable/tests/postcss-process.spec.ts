@@ -4,6 +4,7 @@ import { process, StylableMeta, processNamespace, ImportSymbol } from '../src/st
 
 import { flatMatch } from "./matchers/falt-match";
 import * as chai from "chai";
+import { VarSymbol } from "../src";
 
 const expect = chai.expect;
 chai.use(flatMatch);
@@ -176,13 +177,17 @@ describe('Stylable postcss process', function () {
     });
 
     it('resolve local :vars (by order of definition)', function () {
-
         const result = processSource(`
             :vars {
                 name: value;
                 myname: value(name);
             }
         `, { from: "path/to/style.css" });
+        
+        //should be refactored out of here.
+        for (let name in result.mappedSymbols){
+            delete (result.mappedSymbols[name] as VarSymbol).node
+        }
         
         expect(result.mappedSymbols).to.deep.include({
             name: {
