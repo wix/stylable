@@ -20,13 +20,13 @@ Whether creating your own components or using components you imported from a 3rd
 
 Let's say you have a `Button` component with a render function per this example. You can style its different HTML elements using the `className` attribute.
 
-```tsx
+```jsx
 /* button.ts */
 render () {
     return (
         <button>
-            <div className="btnIcon"/>
-            <span className="btnLabel">Submit</span>
+            <div className="icon"/>
+            <span className="label">Submit</span>
         </button>
     );
 }
@@ -39,10 +39,10 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
 .root { /* note that the root class is automatically placed on the root HTML element by stylable-integration */
     background: #b0e0e6;
 }
-.btnIcon {
+.icon {
     background-image: url('./assets/btnIcon.svg');
 }
-.btnLabel {
+.label {
     font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
@@ -70,14 +70,14 @@ You can now style your `Button` in the scope of the `Form` so that it fits the n
 
 Let's take the `Button` component and import it into the JavaScript file, and also add it to the render:
 
-```tsx
+```jsx
 /* form.tsx */
 import {Button} from './button.ts'
 
 render(){
     return (
         <div>
-            <Button className="formBtn">
+            <Button className="formBtn"/>
         </div>
     );
 }
@@ -95,7 +95,7 @@ Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then 
     -st-extends: Button;
     background: cornflowerblue;
 }
-.formBtn::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
+.formBtn::label { /* since formBtn extends Button, it also includes all of its internal parts */
     color: honeydew;
     font-weight: bold;
 }
@@ -107,11 +107,11 @@ You can also create custom states for the component that are available as [pseud
 
 A state can be used to reflect any Boolean property in your component. For example, your `Button` has a Boolean property called `clicked`. In this example, it is triggered when it is first clicked, and never turned off.
 
-```tsx
+```jsx
 /* button.ts */
 render () {
     return (
-        <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:true})}>
+        <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:!this.state.clicked})}>
             <div className="btnIcon"/>
             <span className="btnLabel">Click Here!</span>
         </button>
@@ -125,10 +125,10 @@ render () {
     -st-states: clicked;
     background: #b0e0e6;
 }
-.btnIcon {
+.icon {
     background-image: url(./assets/btnIcon.svg);
 }
-.btnLabel {
+.label {
     font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
