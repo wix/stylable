@@ -373,13 +373,8 @@ export class StylableTransformer {
         const next = this.resolver.resolve(extend);
 
         if (next && next._kind === 'css') {
-            if (next.symbol._kind === 'class') {
-                node.before = '.' + scopedName;
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
-            } else {
-              
-                //TODO: warn
-            }
+            node.before = '.' + scopedName;
+            node.name = this.scope(next.symbol.name, next.meta.namespace);
             return next;
         }
 
