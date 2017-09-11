@@ -3,6 +3,7 @@ import { process } from '../src/stylable-processor';
 import { safeParse } from "../src/parser";
 import { generateFromMock, Config } from "./utils/generate-test-util";
 import { Diagnostics } from "../src";
+import {reservedKeyFrames} from '../src/stylable-utils'
 const deindent = require('deindent')
 const customButton = `
     .root{
@@ -874,19 +875,22 @@ describe('diagnostics: warnings and errors', function () {
             expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
 
-        it('should not allow @keyframe of reserved words', function(){
-            let config = {
-                entry:'/main.css', 
-                files: {
-                    '/main.css': {
-                        content: `
-                        |@keyframes $normal$| {
-                            from {}
-                            to {}
-                        }`
-                    }
-            }}
-            expectWarningsFromTransform(config, [{message:'normal is reserved', file:'/main.css'}])
+        it  ('should not allow @keyframe of reserved words', function(){
+            reservedKeyFrames.map(function(key){
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            |@keyframes $${key}$| {
+                                from {}
+                                to {}
+                            }`
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:`${key} is reserved`, file:'/main.css'}])
+            })
+            
         })
         it('should return error when trying to import theme from js', function () {
             let config = {
