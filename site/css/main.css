@@ -1,0 +1,242 @@
+/**************/
+/*** GLOBAL ***/
+/**************/
+
+*{
+    box-sizing: border-box;
+}
+
+body, html{
+    font-family: HelveticaNeueW01-45Ligh,sans-serif;
+    background:#f0f3f5;
+    width:100%;
+    height:100%;
+}
+
+.main-content{
+    height:100%;
+    max-width:980px;
+    min-height: 100%;
+    margin:0 auto;
+    padding-bottom: 20px;
+    padding-top: 85px;
+    overflow:visible;
+}
+
+.round-corners{
+    border-radius: 8px;
+}
+
+blockquote{
+    margin: .5em 0;
+    padding: 0.5em 1em;
+    background-color: #d8eaf3;
+}
+
+blockquote::first-line {
+    line-height: 2em;
+}
+
+blockquote.warning {
+    background-color: #FFD4D4;
+}
+
+a {
+    color:#31BBCD;
+    text-decoration: none;
+}
+
+.center-image {
+    margin: 0 auto;
+    display: block;
+}
+
+/**************/
+/*** HEADER ***/
+/**************/
+
+header {
+    position:fixed;
+    height:65px;
+    background:#333;
+    padding: 0 10px;
+    top:0;
+    left:0;
+    right:0;
+    z-index: 10;
+}
+
+header > .header-content {
+    max-width:980px;
+    margin:0 auto;
+}
+
+header .logo {
+    display: inline-block;
+    font-size: 24px;
+    color:#eebc52;
+    text-decoration: none;
+}
+header .logo a{
+    color:inherit;
+    text-decoration: inherit;
+}
+header .logo::before {
+    content: " ";
+    background: url(../images/96-logo-OnlySymbol.svg);
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+header .main-nav {
+    color:#FFFFFF;
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+header .main-nav > li{
+    display:inline;
+}
+header .main-nav a{
+    text-decoration: none;
+    color: #FFFFFF;
+    display: inline-block;
+    padding: 0 10px;
+    height: 65px;
+    line-height: 65px;
+}
+
+/**************/
+/**** PAGE ****/
+/**************/
+
+.page-content{
+    background:#FFFFFF;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.12);
+    padding: 10px;
+    min-height: 100%;
+    margin-bottom: 20px;
+}
+
+/**************/
+/**** DOCS ****/
+/**************/
+
+.docs-nav{
+    position: fixed;
+    width:250px;
+    background:#FFFFFF;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.12);
+    margin-right:10px;
+    overflow:auto;
+    max-height: calc( 100% - 105px );
+    top: 85px;
+}
+
+.docs-content{
+    background:#FFFFFF;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.12);
+    padding: 10px;
+    min-height: 100%;
+    margin-left: 260px;
+    margin-bottom: 20px;
+}
+
+.docs-content h1{
+    font-size:2em;
+}
+
+.docs-nav-section h2 {
+    padding: 5px 10px;
+    background: #333333;
+    color: #FFFFFF;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    font-size: 1em;
+    letter-spacing: 1px;
+}
+
+.docs-content h2 {
+    font-size:1.5em;
+    margin: 1em 0px 10px;
+    font-weight: normal;
+    border-bottom: 1px solid #eaecef;
+}
+
+.docs-content h3{
+    font-size:1.2em;
+    margin: 1em 0px 10px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.docs-content h1,
+.docs-content h2,
+.docs-content h3,
+.docs-content h4,
+.docs-content h5,
+.docs-content h6 {
+    position: relative;
+    margin-top: -85px;
+    padding-top: 85px;
+    pointer-events: none;
+}
+
+.docs-content h2 > a,
+.docs-content h3 > a {
+    visibility: hidden;
+    top: -85px;
+    left:initial;
+    position: absolute;
+}
+
+.docs-content h2:hover > a:before,
+.docs-content h3:hover > a:before {
+    content:"#";
+    visibility: visible;
+    position:absolute;
+    display: inline-block;
+    font-style:italic;
+    top: 85px;
+    left:initial;
+}
+
+.docs-content h4{
+    font-weight: normal;
+    font-size: 1.2em;
+}
+
+.docs-nav-section ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 10px;
+    margin-bottom: 20px;
+}
+
+.docs-nav-section li ul {
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+.docs-nav-section li{
+    color:#333;
+    margin-bottom: 5px;
+}
+
+.docs-nav-section li.active{
+    color: #00a7f3;
+    background: #F8F8F8;
+}
+
+.docs-nav-section .docs-nav-item {
+    color:inherit;
+    text-decoration: none;
+}
+
+.docs-nav-section .docs-nav-subitem{
+    color:inherit;
+    text-decoration: none;
+}

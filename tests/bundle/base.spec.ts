@@ -22,6 +22,37 @@ describe('bundle: base', () => {
         expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
     });
 
+
+    
+    it('should support unresolveable vars', () => {
+        
+        const output = generateStylableOutput({
+            entry: '/entry.st.css',
+            usedFiles: [
+                '/entry.st.css'
+            ],
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./theme.st.css";
+                            -st-named: NAME;
+                        }
+                        .b { color:green; } 
+                    `
+                },
+                "/theme.st.css": {
+                    namespace: 'theme',
+                    content: ``
+                }
+            }
+        });
+
+        expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
+
+    });
+
     it('should output according to import order (entry strongest - bottom of CSS)', () => {
         const output = generateStylableOutput({
             entry: '/entry.st.css',
