@@ -77,7 +77,7 @@ import {Button} from './button.ts'
 render(){
     return (
         <div>
-            <Button className="formBtn">
+            <Button className="formBtn"/>
         </div>
     );
 }
