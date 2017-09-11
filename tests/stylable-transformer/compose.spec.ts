@@ -113,7 +113,7 @@ describe('Exports (Compose)', function () {
 
     describe('compose by extends', function () {
 
-        it.only('compose when extending class that is not root', function () {
+        it('compose when extending class that is not root', function () {
 
 
             const cssExports = generateStylableExports({

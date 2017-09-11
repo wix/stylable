@@ -169,14 +169,13 @@ export class StylableTransformer {
                 }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
-                    debugger
                     const classExports: Pojo<string> = {};
                     this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
-                        //TODO: warn
-                        console.log('ninja')
+                        //TODO: warn second phase
+                        
                     }
                 }
             }
@@ -195,13 +194,13 @@ export class StylableTransformer {
                                 finalName = resolved.symbol.name;
                                 finalMeta = resolved.meta;
                             } else {
-                                //TODO: warn
+                                //TODO: warn second phase
                             }
                         } else {
-                            //TODO: warn
+                            //TODO: warn second phase
                         }
                     } else {
-                        //TODO: warn
+                        //TODO: warn second phase
                     }
 
                     if (finalName && finalMeta) {
@@ -210,7 +209,7 @@ export class StylableTransformer {
                         if (classExports[finalName]) {
                             exportedClasses += ' ' + classExports[finalName];
                         } else {
-                            //TODO: warn
+                            //TODO: warn second phase
                         }
                     }
 
@@ -237,12 +236,12 @@ export class StylableTransformer {
                         mergeRules(mixinRoot, rule);
                     }
                 } else {
-                    const resolvedClass = this.resolver.deepResolve(mix.ref);
-                    if (resolvedClass && resolvedClass._kind === 'css') {
-                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
-                    } else {
-                        //TODO: add warn
-                    }
+                    // const resolvedClass = this.resolver.deepResolve(mix.ref);
+                    // if (resolvedClass && resolvedClass._kind === 'css') {
+                    //     mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
+                    // } else {
+                    //     //TODO: add warn
+                    // }
                 }
             } else if (mix.ref._kind === 'class') {
                 mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);

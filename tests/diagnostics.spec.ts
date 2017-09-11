@@ -822,6 +822,20 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
         })
+
+        it.only('', function () {
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: ``
+                    },
+                    '/file.js': {
+                        content: ``
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'', file:'/main.css'}])  
+        })
       
     })
 
