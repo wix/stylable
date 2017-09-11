@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { process } from '../src/stylable-processor';
-
 import { safeParse } from "../src/parser";
-
+import { generateFromMock, Config } from "./utils/generate-test-util";
+import { Diagnostics } from "../src";
+const deindent = require('deindent')
 const customButton = `
     .root{
         -st-states:shmover;
@@ -47,7 +48,7 @@ function findTestLocations(css: string) {
             } else {
                 end = { line, column };
             }
-        } else if (ch === '@') {
+        } else if (ch === '$') {
             inWord = !inWord;
             if (inWord) { word = ''; }
         } else if (inWord) {
@@ -56,14 +57,7 @@ function findTestLocations(css: string) {
             column++;
         }
     }
-    // if (!start) {
-    //     start = { line: 1, column: 1 };
-    // }
-    // if (!end) {
-    //     end = { line, column };
-    // }
-
-    return { start, end, word, css: css.replace(/[|@]/gm, '') };
+    return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
 describe('findTestLocations', () => {
@@ -82,16 +76,16 @@ describe('findTestLocations', () => {
     });
 
     it('find single location with word', function () {
-        var l = findTestLocations('\n  |@a@\n  |');
+        var l = findTestLocations('\n  |$a$\n  |');
         expect(l.start, 'start').to.eql({ line: 2, column: 3 });
         expect(l.end, 'end').to.eql({ line: 3, column: 3 });
         expect(l.word, 'end').to.eql('a');
     });
 
     it('striped css', function () {
-        var css = '\n  |@a@\n  |';
+        var css = '\n  |$a$\n  |';
         var l = findTestLocations(css);
-        expect(l.css, 'start').to.eql(css.replace(/[|@]/gm, ''));
+        expect(l.css, 'start').to.eql(css.replace(/[|$]/gm, ''));
     });
 
 });
@@ -105,7 +99,7 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
 
     res.diagnostics.reports.forEach((report, i) => {
         expect(report.message).to.equal(warnings[i].message);
-        expect(report.node.source.start).to.eql(source.start);
+        expect(report.node.source.start, 'start').to.eql(source.start);
         if (source.word !== null) {
             expect(report.options.word).to.eql(source.word);
         }
@@ -115,6 +109,32 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
 
     // console.log(src, warnings, extraFiles);
 }
+
+function expectWarningsFromTransform(config: Config, warnings:warning[]) {
+    
+    config.trimWS = false;
+
+    let locations:any = {}
+    for(var path in config.files) {
+        let source = findTestLocations(deindent(config.files[path].content).trim())
+        config.files[path].content = source.css
+        locations[path] = source
+    }
+    const diagnostics = new Diagnostics()
+    generateFromMock(config, diagnostics)
+    
+    diagnostics.reports.forEach((report, i) => {
+        let path = warnings[i].file
+        expect(report.message).to.equal(warnings[i].message);
+        expect(report.node.source.start).to.eql(locations[path].start);
+        if (locations[path].word !== null) {
+            expect(report.options.word).to.eql(locations[path].word);
+        }
+    })
+    expect(diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
+}
+
+
 
 describe('diagnostics: warnings and errors', function () {
 
@@ -286,9 +306,56 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown mixin', function () {
                 expectWarnings(`
                     .gaga{
-                        |-st-mixin: @myMixin@|;
+                        |-st-mixin: $myMixin$|;
                     }
                 `, [{ message: 'unknown mixin: "myMixin"', file: "main.css" }])
+            });
+
+            it('should add error when can not append css mixins', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                |-st-named: $my-mixin$;|
+                            }
+                            .container {
+                                -st-mixin: my-mixin;                           
+                            }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: ``
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'import mixin does not exist', file:'/main.css'}])  
+            });
+            it('should add diagnostics when there is a bug in mixin', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            |.container {
+                                -st-mixin: $myMixin$;  
+                            }|
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    throw 'bug in mixin'
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'could not apply mixin: bug in mixin', file:'/main.css'}])  
             });
 
         });
@@ -297,14 +364,14 @@ describe('diagnostics: warnings and errors', function () {
             it('should return warning for unknown var', function () {
                 expectWarnings(`
                     .gaga{
-                        |color:value(@myColor@)|;
+                        |color:value($myColor$)|;
                     }
                 `, [{ message: 'unknown var "myColor"', file: "main.css" }])
             });
             it('should return warning for unresolvable var', function () {
                 expectWarnings(`
                     :vars{
-                        |myvar: @value(myvar)@|;
+                        |myvar: $value(myvar)$|;
                     }
                 `, [{ message: 'cannot resolve variable value for "myvar"', file: "main.css" }])
             });
@@ -317,6 +384,21 @@ describe('diagnostics: warnings and errors', function () {
                     
                 `, [{ message: 'cannot define ":vars" inside a complex selector', file: "main.css" }])
             });
+            it('should return warning if var symbol is used', function(){
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                               .a {}
+                               :vars {
+                                 |$a$: red|;
+                                }
+                          `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'symbol a is already in use', file:'/main.css'}])
+            })
         });
 
         xdescribe('-st-variant', function () {
@@ -352,7 +434,7 @@ describe('diagnostics: warnings and errors', function () {
                     :import{
                         -st-from:"./file";
                         -st-default:Comp;
-                        |@color@:red;|
+                        |$color$:red;|
                     }
                 `, [{ message: '"color" css attribute cannot be used inside :import block', file: "main.css" }]
                     , [{ content: customButton, path: 'file.css' }])
@@ -389,12 +471,58 @@ describe('diagnostics: warnings and errors', function () {
             xit('should warn on not imported extends', function () {
                 expectWarnings(`
                     .root {
-                        |-st-extends: @Comp@|;
+                        |-st-extends: $Comp$|;
                     }
                 `, [{ message: 'cannot resolve extends type for "Comp"', file: "main.css" }]
                 )
 
             });
+            it('Only import of type class can be used to extend', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: './file.css';   
+                                -st-named: special;   
+                            }
+                            .myclass {
+                                |-st-extends: $special$|; 
+                            }
+                            `
+                        },
+                        '/file.css': {
+                            content: `
+                                :vars {
+                                    special: red
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.css'}])  
+            })
+            it('should warn if extends by js import', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: './file.js';   
+                                -st-default: special;   
+                            }
+                            .myclass {
+                                |-st-extends: $special$|
+                            }
+                            `
+                        },
+                        '/file.js': {
+                            content: ``
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
+            })
 
         });
 
@@ -451,7 +579,7 @@ describe('diagnostics: warnings and errors', function () {
                     |:import {
                         -st-from: './file.css';
                         -st-default: name;
-                        -st-named: @name@;
+                        -st-named: $name$;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -464,7 +592,7 @@ describe('diagnostics: warnings and errors', function () {
                     }
                     |:import {
                         -st-from: './file.css';
-                        -st-default: @name@;
+                        -st-default: $name$;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -477,7 +605,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-default: name;
                     }
                     :vars {
-                        |@name@: red;
+                        |$name$: red;
                     }
                 `, [{ message: 'redeclare symbol "name"', file: "main.css" }])
             });
@@ -597,7 +725,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-mixin:|my-variant|;
                     }
                 `, [{
-                        message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "@namespace of comp"',
+                        message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "$namespace of comp"',
                         file: "main.css"
                     }]
                     , [{ content: customButton, path: 'file.css' }])
@@ -621,7 +749,7 @@ describe('diagnostics: warnings and errors', function () {
                         -st-apply:|my-variant2|;
                     }
                 `, [{
-                        message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "@namespace of comp" and "my-variant" can only be spplied to "@namespace of Comp2"',
+                        message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "$namespace of comp" and "my-variant" can only be spplied to "$namespace of Comp2"',
                         file: "main.css"
                     }]
                     , [
@@ -706,5 +834,44 @@ describe('diagnostics: warnings and errors', function () {
         });
 
     });
+
+    describe('transforms', function() {
+        it('should return warning if @keyframe symbol is used', function(){
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: `
+                        .name {}
+                        |@keyframes $name$| {
+                            from {}
+                            to {}
+                        }`
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
+        })
+        it('should return error when trying to import theme from js', function () {
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: `
+                        :import {
+                            -st-theme: true;
+                            |-st-from: $"./file.js"$|;
+                        }
+                        `
+                    },
+                    '/file.js': {
+                        content: ``
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
+        })
+
+      
+    })
+
 
 });

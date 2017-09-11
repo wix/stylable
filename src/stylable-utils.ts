@@ -149,3 +149,19 @@ export function createImportString(importDef: Imported, path: string) {
     }
     return imports.join('\n');
 }
+
+export function getCorrectNodeImport(importNode: Imported, test:any){
+    const fromIndex = importNode.rule.nodes!.findIndex(test)
+    return importNode.rule.nodes![fromIndex] as postcss.Declaration    
+}
+
+export function getRuleFromMeta(meta:StylableMeta, selector: string ) {
+    let found:any = null
+    meta.ast.walkRules(selector, function(rule:SRule) {
+        let declrationIndex = rule.nodes ? rule.nodes.findIndex((statment:any) => statment.prop === valueMapping.extends): -1
+        if (rule.isSimpleSelector && !!~declrationIndex) {
+            found = rule.nodes![declrationIndex]
+        }
+    })
+    return found
+}
