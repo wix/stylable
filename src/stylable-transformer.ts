@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -8,10 +8,15 @@ import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
+
+export interface KeyFrameWithNode {
+    value: string, 
+    node:postcss.Node
+}
 
 export interface StylableResults {
     meta: StylableMeta;
@@ -45,7 +50,7 @@ export class StylableTransformer {
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
-
+        
         !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule.params, meta);
@@ -84,19 +89,19 @@ export class StylableTransformer {
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
             if (metaExports[varSymbol.name]) {
-                //TODO: warn on discard
+                this.diagnostics.warn(varSymbol.node, `symbol ${varSymbol.name} is already in use`, {word:varSymbol.name})
             } else {
                 let value = this.resolver.resolveVarValue(meta, varSymbol.name);
                 metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
             }
         });
     }
-    exportKeyframes(keyframeMapping: Pojo<string>, metaExports: Pojo<string>) {
+    exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach((name) => {
-            if (metaExports[name]) {
-                //TODO: warn on discard
+            if (metaExports[name] === keyframeMapping[name].value) {
+                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, {word: name})
             } else {
-                metaExports[name] = keyframeMapping[name];
+                metaExports[name] = keyframeMapping[name].value;
             }
         });
     }
@@ -118,7 +123,8 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-                    //TODO: warn
+                    const node = getCorrectNodeImport(_import, (node:any) => node.prop === valueMapping.from)
+                    this.diagnostics.error(node, "Trying to import unknown file", {word:node.value})
                 }
             }
         });
@@ -126,7 +132,6 @@ export class StylableTransformer {
     }
     exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
-
         if (!metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
             const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
@@ -148,13 +153,19 @@ export class StylableTransformer {
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            //TODO: warn
+                            const found = getRuleFromMeta(meta, '.' + classSymbol.name)
+                            if (!!found){
+                                this.diagnostics.error(found, "import is not extendable", {word:found.value})
+                            } 
                         }
                     } else {
-                        //TODO: warn
+                        const found = getRuleFromMeta(meta, '.' + classSymbol.name)
+                        if (!!found){
+                            this.diagnostics.error(found, "import is not extendable: js or file not found", {word:found.value})
+                        } 
                     }
                 } else {
-                    //TODO: warn
+                    //TODO2: warn second phase
                 }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
@@ -163,7 +174,8 @@ export class StylableTransformer {
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
-                        //TODO: warn
+                        //TODO2: warn second phase
+                        
                     }
                 }
             }
@@ -182,13 +194,13 @@ export class StylableTransformer {
                                 finalName = resolved.symbol.name;
                                 finalMeta = resolved.meta;
                             } else {
-                                //TODO: warn
+                                //TODO2: warn second phase
                             }
                         } else {
-                            //TODO: warn
+                            //TODO2: warn second phase
                         }
                     } else {
-                        //TODO: warn
+                        //TODO2: warn second phase
                     }
 
                     if (finalName && finalMeta) {
@@ -197,7 +209,7 @@ export class StylableTransformer {
                         if (classExports[finalName]) {
                             exportedClasses += ' ' + classExports[finalName];
                         } else {
-                            //TODO: warn
+                            //TODO2: warn second phase
                         }
                     }
 
@@ -219,16 +231,24 @@ export class StylableTransformer {
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
                     if (typeof resolvedMixin.symbol === 'function') {
-                        const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
-                        const mixinRoot = cssObjectToAst(res).root;
+                        let mixinRoot = null
+                        try {
+                            const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
+                            mixinRoot = cssObjectToAst(res).root;
+                        } catch (e) {
+                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word:mix.mixin.type})
+                            return 
+                        }
+                        
                         mergeRules(mixinRoot, rule);
                     }
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
-                    if (resolvedClass && resolvedClass._kind === 'css') {
+                    if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
                     } else {
-                        //TODO: add warn
+                        let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
+                        this.diagnostics.error(importNode, 'import mixin does not exist', {word:mix.ref.name})
                     }
                 }
             } else if (mix.ref._kind === 'class') {
@@ -279,17 +299,22 @@ export class StylableTransformer {
         // ];
 
         const root = meta.outputAst!;
-        const keyframesExports: Pojo<string> = {};
-
+        const keyframesExports: Pojo<KeyFrameWithNode> = {};
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
-            atRule.params = keyframesExports[name] || (keyframesExports[name] = this.scope(name, meta.namespace));
+            if (!keyframesExports[name]) {
+                keyframesExports[name] = {
+                    value: this.scope(name, meta.namespace),
+                    node: atRule
+                }
+            }   
+            atRule.params = keyframesExports[name].value
         });
 
         root.walkDecls(/animation$|animation-name$/, decl => {
             const parsed = valueParser(decl.value);
             parsed.nodes.forEach((node: any) => {
-                const alias = keyframesExports[node.value];
+                const alias =  keyframesExports[node.value] && keyframesExports[node.value].value;
                 if (node.type === "word" && Boolean(alias)) {
                     node.value = alias;
                 }
@@ -298,7 +323,6 @@ export class StylableTransformer {
         });
 
         return keyframesExports;
-
     }
     scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
         let current = meta;
@@ -373,12 +397,7 @@ export class StylableTransformer {
         if (!extend && symbol && symbol.alias) {
             const next = this.resolver.deepResolve(symbol.alias);
             if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
-
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
-                // const extended = this.resolver.resolve(next.symbol[valueMapping.extends]);
-                // if (extended && extended._kind === 'css') {
-                //     return extended;
-                // }
                 return next;
             } else {
                 //TODO: warn or handle

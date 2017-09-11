@@ -3,7 +3,7 @@ const deindent = require('deindent');
 import { MinimalFS } from "./cached-process-file";
 
 export interface File { content: string; mtime?: Date; }
-export interface MinimalFSSetup { files: { [absolutePath: string]: File } }
+export interface MinimalFSSetup { files: { [absolutePath: string]: File }, trimWS?: boolean }
 
 export function createMinimalFS(config: MinimalFSSetup) {
     const files = config.files;
@@ -19,7 +19,10 @@ export function createMinimalFS(config: MinimalFSSetup) {
             if (!files[path]) {
                 throw new Error('Cannot find file: ' + path)
             }
-            return deindent(files[path].content).trim()
+            if(config.trimWS){
+                return deindent(files[path].content).trim()
+            }
+            return files[path].content;
         },
         statSync(path: string) {
             if (!files[path]) {

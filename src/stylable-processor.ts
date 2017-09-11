@@ -181,7 +181,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias };
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias};
         }
     }
 
@@ -208,7 +208,6 @@ export class StylableProcessor {
     }
 
     protected addVarSymbols(rule: postcss.Rule) {
-
         rule.walkDecls((decl) => {
             this.checkRedeclareSymbol(decl.prop, decl);
             let importSymbol = null;
@@ -229,7 +228,8 @@ export class StylableProcessor {
                 name: decl.prop,
                 value: value,
                 text: decl.value,
-                import: importSymbol
+                import: importSymbol,
+                node: decl
             }
             this.meta.vars.push(varSymbol);
             this.meta.mappedSymbols[decl.prop] = varSymbol;
@@ -428,6 +428,7 @@ export interface VarSymbol {
     value: string;
     text: string;
     import: ImportSymbol | null;
+    node: postcss.Node
 }
 
 export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;

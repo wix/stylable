@@ -11,8 +11,8 @@ import { isAbsolute } from "path";
 import { Stylable } from "../../src/stylable";
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
-export interface InfraConfig { files: Pojo<File> }
-export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[] }
+export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
+export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean }
 export type RequireType = (path: string) => any;
 export function generateInfra(config: InfraConfig): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
     const { fs, requireModule } = createMinimalFS(config);
@@ -28,7 +28,7 @@ export function generateInfra(config: InfraConfig): { resolver: StylableResolver
     return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config): StylableResults {
+export function generateFromMock(config: Config, diagnostics:Diagnostics = new Diagnostics): StylableResults {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
@@ -39,7 +39,7 @@ export function generateFromMock(config: Config): StylableResults {
     const t = new StylableTransformer({
         fileProcessor,
         requireModule,
-        diagnostics: new Diagnostics(),
+        diagnostics,
         keepValues: false
     });
 
@@ -72,6 +72,7 @@ export function generateStylableExports(config: Config) {
 }
 
 export function createTestBundler(config: Config) {
+    config.trimWS = true
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
@@ -87,6 +88,7 @@ export function createTestBundler(config: Config) {
 }
 
 export function generateStylableOutput(config: Config) {
+    config.trimWS = true
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
