@@ -108,12 +108,12 @@ This guide shows the HTML side of our <a href="https://github.com/wixplosives/st
 
 <p>Let’s say you have a <code class="highlighter-rouge">Button</code> component with a render function per this example. You can style its different HTML elements using the <code class="highlighter-rouge">className</code> attribute.</p>
 
-<pre><code class="language-tsx">/* button.ts */
+<pre><code class="language-jsx">/* button.ts */
 render () {
     return (
         &lt;button&gt;
-            &lt;div className="btnIcon"/&gt;
-            &lt;span className="btnLabel"&gt;Submit&lt;/span&gt;
+            &lt;div className="icon"/&gt;
+            &lt;span className="label"&gt;Submit&lt;/span&gt;
         &lt;/button&gt;
     );
 }
@@ -125,10 +125,10 @@ render () {
 <span class="nc">.root</span> <span class="p">{</span> <span class="c">/* note that the root class is automatically placed on the root HTML element by stylable-integration */</span>
     <span class="nl">background</span><span class="p">:</span> <span class="m">#b0e0e6</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.btnIcon</span> <span class="p">{</span>
+<span class="nc">.icon</span> <span class="p">{</span>
     <span class="nl">background-image</span><span class="p">:</span> <span class="sx">url('./assets/btnIcon.svg')</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.btnLabel</span> <span class="p">{</span>
+<span class="nc">.label</span> <span class="p">{</span>
     <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
 <span class="p">}</span>
@@ -161,13 +161,13 @@ render () {
 
 <p>Let’s take the <code class="highlighter-rouge">Button</code> component and import it into the JavaScript file, and also add it to the render:</p>
 
-<pre><code class="language-tsx">/* form.tsx */
+<pre><code class="language-jsx">/* form.tsx */
 import {Button} from './button.ts'
 
 render(){
     return (
         &lt;div&gt;
-            &lt;Button className="formBtn"&gt;
+            &lt;Button className="formBtn"/&gt;
         &lt;/div&gt;
     );
 }
@@ -184,7 +184,7 @@ render(){
     <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">cornflowerblue</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.root</span><span class="nd">::btnLabel</span> <span class="p">{</span> <span class="c">/* since formBtn extends Button, it also includes all of its internal parts */</span>
+<span class="nc">.formBtn</span><span class="nd">::label</span> <span class="p">{</span> <span class="c">/* since formBtn extends Button, it also includes all of its internal parts */</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">honeydew</span><span class="p">;</span>
     <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
 <span class="p">}</span>
@@ -197,12 +197,12 @@ render(){
 
 <p>A state can be used to reflect any Boolean property in your component. For example, your <code class="highlighter-rouge">Button</code> has a Boolean property called <code class="highlighter-rouge">clicked</code>. In this example, it is triggered when it is first clicked, and never turned off.</p>
 
-<pre><code class="language-tsx">/* button.ts */
+<pre><code class="language-jsx">/* button.ts */
 render () {
     return (
-        &lt;button style-state={this.state.clicked} onClick={()=&gt;this.setState({clicked:true})}&gt;
-            &lt;div className="btnIcon"/&gt;
-            &lt;span className="btnLabel"&gt;Click Here!&lt;/span&gt;
+        &lt;button style-state={this.state.clicked} onClick={()=&gt;this.setState({clicked:!this.state.clicked})}&gt;
+            &lt;div className="icon"/&gt;
+            &lt;span className="label"&gt;Click Here!&lt;/span&gt;
         &lt;/button&gt;
     );
 }
@@ -213,10 +213,10 @@ render () {
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">clicked</span><span class="p">;</span>
     <span class="nl">background</span><span class="p">:</span> <span class="m">#b0e0e6</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.btnIcon</span> <span class="p">{</span>
+<span class="nc">.icon</span> <span class="p">{</span>
     <span class="nl">background-image</span><span class="p">:</span> <span class="sx">url(./assets/btnIcon.svg)</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.btnLabel</span> <span class="p">{</span>
+<span class="nc">.label</span> <span class="p">{</span>
     <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
 <span class="p">}</span>
@@ -237,8 +237,6 @@ render () {
 <span class="p">}</span>
 </code></pre>
 </div>
-
-<h2 id="playground">Playground</h2>
 
 <h2 id="see-also">See also:</h2>
 
