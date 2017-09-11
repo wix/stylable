@@ -357,7 +357,30 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'could not apply mixin: bug in mixin', file:'/main.css'}])  
             });
-
+           
+            it('js mixin must be a function', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-named: myMixin;
+                            }
+                            |.container {
+                                -st-mixin: $myMixin$;  
+                            }|
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'js mixin must be a function', file:'/main.css'}])  
+            });
         });
 
         describe(':vars', function () {
@@ -523,7 +546,6 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
             })
-
         });
 
         describe('override -st-* warnings', function () {
@@ -851,6 +873,21 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
+
+        it('should not allow @keyframe of reserved words', function(){
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: `
+                        |@keyframes $normal$| {
+                            from {}
+                            to {}
+                        }`
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'normal is reserved', file:'/main.css'}])
+        })
         it('should return error when trying to import theme from js', function () {
             let config = {
                 entry:'/main.css', 
@@ -868,6 +905,31 @@ describe('diagnostics: warnings and errors', function () {
                     }
             }}
             expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
+        })
+
+        it('should error on unresolved alias', function () {
+            let config = {
+                entry:'/main.st.css', 
+                files: {
+                    '/main.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            |:import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                                -st-named: $inner-class$;
+                            }|
+
+                            .Imported{}
+                            .inner-class{}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.root{}`,
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
         })
 
       
