@@ -4,7 +4,7 @@ title: Build a Stylable Application
 layout: docs
 ---
 
-When building a **Stylable** application, you probably want to share definitions between parts of the application and consume 3rd party **Stylable** component libraries. 
+When building a **Stylable** application, you want to share definitions between parts of the application and consume 3rd party **Stylable** component libraries. 
 
 ## The `project.st.css` file
 
