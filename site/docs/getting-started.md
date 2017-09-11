@@ -21,7 +21,7 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
 
-3. While **Stylable** can work with any type system, the most commonly used is React. Install the latest version.
+3. While **Stylable** can work with any component framework, here at Wix we use it with React. Install the latest version.
 
 ## What can I do
 
@@ -38,5 +38,4 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 ## Components
 
-**Stylable** includes a rich [component library](https://github.com/wix/stylable-components) for out-of-the-box use.
-**Stylable** components are a fully-tested & strictly-typed component library based on React.
+We recommend using our component library, [Stylable-components](https://github.com/wix/stylable-components). **Stylable components** are a fully-tested & strictly-typed component library based on React.
