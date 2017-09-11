@@ -112,8 +112,8 @@ A state can be used to reflect any Boolean property in your component. For examp
 render () {
     return (
         <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:!this.state.clicked})}>
-            <div className="btnIcon"/>
-            <span className="btnLabel">Click Here!</span>
+            <div className="icon"/>
+            <span className="label">Click Here!</span>
         </button>
     );
 }
