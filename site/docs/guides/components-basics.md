@@ -95,7 +95,7 @@ Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then 
     -st-extends: Button;
     background: cornflowerblue;
 }
-.root::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
+.formBtn::btnLabel { /* since formBtn extends Button, it also includes all of its internal parts */
     color: honeydew;
     font-weight: bold;
 }
