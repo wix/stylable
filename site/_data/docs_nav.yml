@@ -43,6 +43,8 @@
     title: Global selectors
   - id: references/compose-css-class
     title: Compose CSS Class
+  - id: references/custom-selectors
+    title: Custom selectors
   - id: references/mixin-syntax
     title: Mixins
   - id: references/variables
