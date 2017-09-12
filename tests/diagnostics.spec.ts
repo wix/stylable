@@ -382,6 +382,33 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'js mixin must be a function', file:'/main.css'}])  
             });
+            it('should add diagnostics when declartion is invalid', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        color: true
+                                    }
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'not valid mixin declaration', file:'/main.css'}])  
+            });    
         });
 
         describe(':vars', function () {
@@ -503,12 +530,12 @@ describe('diagnostics: warnings and errors', function () {
             });
             it('Only import of type class can be used to extend', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry:'/main.st.css', 
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import {
-                                -st-from: './file.css';   
+                                -st-from: './file.st.css';   
                                 -st-named: special;   
                             }
                             .myclass {
@@ -516,7 +543,7 @@ describe('diagnostics: warnings and errors', function () {
                             }
                             `
                         },
-                        '/file.css': {
+                        '/file.st.css': {
                             content: `
                                 :vars {
                                     special: red
@@ -524,7 +551,7 @@ describe('diagnostics: warnings and errors', function () {
                             `
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.st.css'}])  
             })
             it('should warn if extends by js import', function () {
                 let config = {
@@ -889,7 +916,7 @@ describe('diagnostics: warnings and errors', function () {
                             }`
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:`${key} is reserved`, file:'/main.css'}])
+                expectWarningsFromTransform(config, [{message:`keyframes ${key} is reserved`, file:'/main.css'}])
             })
             
         })
@@ -936,32 +963,7 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
         })
-        it.only('should not', function(){
-            let config = {
-                entry:'/main.st.css', 
-                files: {
-                    '/main.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :vars {
-                                color: red;
-                            }
-
-                           .myClass {
-                               -st-extends: color
-                           }
-
-                        `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: ``,
-                    }
-            }}
-            expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
-
-        })
-
+       
       
     })
 

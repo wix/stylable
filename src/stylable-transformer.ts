@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol, VarSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -234,21 +234,21 @@ export class StylableTransformer {
                             this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word:mix.mixin.type})
                             return 
                         }
-                        mergeRules(mixinRoot, rule);
+                        mergeRules(mixinRoot, rule, this.diagnostics);
                     } else { 
                         this.diagnostics.error(rule, 'js mixin must be a function', {word:mix.mixin.type})
                     }
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
-                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
+                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
                         let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
                         this.diagnostics.error(importNode, 'import mixin does not exist', {word:mix.ref.name})
                     }
                 }
             } else if (mix.ref._kind === 'class') {
-                mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);
+                mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule, this.diagnostics);
             }
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
@@ -265,7 +265,7 @@ export class StylableTransformer {
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
             if (!!~reservedKeyFrames.indexOf(name)){
-                this.diagnostics.error(atRule, `${name} is reserved`, {word:name})
+                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, {word:name})
             }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
@@ -371,21 +371,10 @@ export class StylableTransformer {
         const scopedName = this.exportClass(meta, name, symbol, metaExports);
 
         const next = this.resolver.resolve(extend);
-
-        if (next && next._kind === 'css') {
-            if (next.symbol && next.symbol._kind === 'class'){
-                node.before = '.' + scopedName;
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
-                return next;
-            } else { 
-                if (!next.symbol) {
-                    this.diagnostics.error(getRuleFromMeta(meta, '.' + name), `can not resolve ${name}`, {word:name})
-                } else {
-                    this.diagnostics.error((next.symbol as VarSymbol).node || getRuleFromMeta(meta, '.' + name), `can not extend ${name}`, {word:name})
-                }
-            }
-            
-            
+        if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
+            node.before = '.' + scopedName;
+            node.name = this.scope(next.symbol.name, next.meta.namespace);
+            return next;
         }
 
         if (extend && extend._kind === 'class') {

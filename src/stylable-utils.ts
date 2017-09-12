@@ -2,13 +2,14 @@ import * as postcss from 'postcss';
 import { SRule, StylableMeta, Imported } from "./stylable-processor";
 import { parseSelector, stringifySelector, traverseNode } from "./selector-utils";
 import { valueMapping } from "./stylable-value-parsers";
+import { Diagnostics } from "./diagnostics";
 const cloneDeep = require('lodash.clonedeep');
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
-export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
+export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Diagnostics) {
     mixinRoot.walkRules((mixinRule: SRule) => {
 
         const ruleSelectorAst = parseSelector(rule.selector);
@@ -29,7 +30,6 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                         value: ' '
                     })
                 }
-
                 nodes.push({
                     type: 'selector',
                     before: ruleSelector.before || mixinSelector.before,
@@ -60,7 +60,7 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(mixinEntry!, node);
                 } else {
-                    //TODO: warn invalid mixin value
+                    diagnostics.warn(mixinEntry!, 'not valid mixin declaration', {word:mixinEntry!.value})
                 }
             } else if (node.type === 'rule') {
                 if (rule.parent.last === nextRule) {
