@@ -4,11 +4,11 @@ title: Custom Selectors
 layout: docs
 ---
 
-You use [Custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define a local name alias for complex selectors.
+You use [Custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define a an alias name matching complex selectors.
 
 ## Usage
 
-The following code example demonstrate a `custom-selector` alias named `controlBtn` that matches any `.btn` CSS class nested under the `.controls` CSS class:
+The following code maps the alias name `controlBtn` that matches any `.btn` CSS class nested under the `.controls` CSS class:
 
 **CSS API**
 ```css
