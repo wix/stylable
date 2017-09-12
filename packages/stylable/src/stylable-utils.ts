@@ -2,13 +2,14 @@ import * as postcss from 'postcss';
 import { SRule, StylableMeta, Imported } from "./stylable-processor";
 import { parseSelector, stringifySelector, traverseNode } from "./selector-utils";
 import { valueMapping } from "./stylable-value-parsers";
+import { Diagnostics } from "./diagnostics";
 const cloneDeep = require('lodash.clonedeep');
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
-export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
+export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Diagnostics) {
     mixinRoot.walkRules((mixinRule: SRule) => {
 
         const ruleSelectorAst = parseSelector(rule.selector);
@@ -29,7 +30,6 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                         value: ' '
                     })
                 }
-
                 nodes.push({
                     type: 'selector',
                     before: ruleSelector.before || mixinSelector.before,
@@ -60,7 +60,7 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(mixinEntry!, node);
                 } else {
-                    //TODO: warn invalid mixin value
+                    diagnostics.warn(mixinEntry!, `not a valid mixin declaration ${mixinEntry!.value}`, {word:mixinEntry!.value})
                 }
             } else if (node.type === 'rule') {
                 if (rule.parent.last === nextRule) {
@@ -69,10 +69,10 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule) {
                     rule.parent.insertAfter(nextRule, node);
                 }
                 const toRemove: postcss.Declaration[] = [];
-                rule.walkDecls((decl) => {
+                node.walkDecls((decl) => {
                     if (!isValidDeclaration(decl)) {
                         toRemove.push(decl);
-                        //TODO: warn invalid mixin value
+                        diagnostics.warn(mixinEntry!,`not a valid mixin declaration ${decl.prop}, and was removed`, {word:mixinEntry!.value})
                     }
                 })
                 toRemove.forEach((decl) => decl.remove());
@@ -165,3 +165,34 @@ export function getRuleFromMeta(meta:StylableMeta, selector: string ) {
     })
     return found
 }
+
+export const reservedKeyFrames = [
+    "none",
+    "inherited",
+    "initial",
+    "unset",
+    /* single-timing-function */
+    "linear",
+    "ease",
+    "ease-in",
+    "ease-in-out",
+    "ease-out",
+    "step-start",
+    "step-end",
+    "start",
+    "end",
+    /* single-animation-iteration-count */
+    "infinite",
+    /* single-animation-direction */
+    "normal",
+    "reverse",
+    "alternate",
+    "alternate-reverse",
+    /* single-animation-fill-mode */
+    "forwards",
+    "backwards",
+    "both",
+    /* single-animation-play-state */
+    "running",
+    "paused"
+];

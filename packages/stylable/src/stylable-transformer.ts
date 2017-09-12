@@ -8,7 +8,7 @@ import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta, reservedKeyFrames } from "./stylable-utils";
 
 
 const valueParser = require("postcss-value-parser");
@@ -79,7 +79,6 @@ export class StylableTransformer {
         //scopeKeyframes() DONE!
         //handleAtMediaValue() DONE!
         //createExports() DONE!
-
         return {
             meta,
             exports: metaExports
@@ -164,8 +163,6 @@ export class StylableTransformer {
                             this.diagnostics.error(found, "import is not extendable: js or file not found", {word:found.value})
                         } 
                     }
-                } else {
-                    //TODO2: warn second phase
                 }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
@@ -174,8 +171,7 @@ export class StylableTransformer {
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
-                        //TODO2: warn second phase
-                        
+                        console.error(`something went wrong when exporting ${finalName}, file an issue in stylable. With specific use case`)
                     }
                 }
             }
@@ -225,7 +221,6 @@ export class StylableTransformer {
         if (!rule.mixins || rule.mixins.length === 0) {
             return;
         }
-
         rule.mixins.forEach((mix) => {
             const resolvedMixin = this.resolver.deepResolve(mix.ref);
             if (resolvedMixin) {
@@ -239,22 +234,21 @@ export class StylableTransformer {
                             this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word:mix.mixin.type})
                             return 
                         }
-                        
-                        mergeRules(mixinRoot, rule);
+                        mergeRules(mixinRoot, rule, this.diagnostics);
+                    } else { 
+                        this.diagnostics.error(rule, 'js mixin must be a function', {word:mix.mixin.type})
                     }
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
-                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule);
+                        mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
                         let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
                         this.diagnostics.error(importNode, 'import mixin does not exist', {word:mix.ref.name})
                     }
                 }
             } else if (mix.ref._kind === 'class') {
-                mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule);
-            } else {
-                //TODO: report unresolvable
+                mergeRules(createClassSubsetRoot(root, '.' + mix.ref.name), rule, this.diagnostics);
             }
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
@@ -266,42 +260,13 @@ export class StylableTransformer {
         });
     }
     scopeKeyframes(meta: StylableMeta) {
-        //TODO: handle reserved
-        // const reserved = [
-        //     "none",
-        //     "inherited",
-        //     "initial",
-        //     "unset",
-        //     /* single-timing-function */
-        //     "linear",
-        //     "ease",
-        //     "ease-in",
-        //     "ease-in-out",
-        //     "ease-out",
-        //     "step-start",
-        //     "step-end",
-        //     "start",
-        //     "end",
-        //     /* single-animation-iteration-count */
-        //     "infinite",
-        //     /* single-animation-direction */
-        //     "normal",
-        //     "reverse",
-        //     "alternate",
-        //     "alternate-reverse",
-        //     /* single-animation-fill-mode */
-        //     "forwards",
-        //     "backwards",
-        //     "both",
-        //     /* single-animation-play-state */
-        //     "running",
-        //     "paused"
-        // ];
-
         const root = meta.outputAst!;
         const keyframesExports: Pojo<KeyFrameWithNode> = {};
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
+            if (!!~reservedKeyFrames.indexOf(name)){
+                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, {word:name})
+            }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
                     value: this.scope(name, meta.namespace),
@@ -393,28 +358,22 @@ export class StylableTransformer {
     handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
         const symbol = meta.classes[name];
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
-
         if (!extend && symbol && symbol.alias) {
             const next = this.resolver.deepResolve(symbol.alias);
             if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
                 return next;
             } else {
-                //TODO: warn or handle
+                this.diagnostics.error(symbol.alias.import.rule, 'Trying to import unknown alias', {word:symbol.alias.name})
             }
         }
 
         const scopedName = this.exportClass(meta, name, symbol, metaExports);
 
         const next = this.resolver.resolve(extend);
-
-        if (next && next._kind === 'css') {
-            if (next.symbol._kind === 'class') {
-                node.before = '.' + scopedName;
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
-            } else {
-                //TODO: warn
-            }
+        if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
+            node.before = '.' + scopedName;
+            node.name = this.scope(next.symbol.name, next.meta.namespace);
             return next;
         }
 

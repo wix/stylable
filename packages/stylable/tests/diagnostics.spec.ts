@@ -3,6 +3,7 @@ import { process } from '../src/stylable-processor';
 import { safeParse } from "../src/parser";
 import { generateFromMock, Config } from "./utils/generate-test-util";
 import { Diagnostics } from "../src";
+import {reservedKeyFrames} from '../src/stylable-utils'
 const deindent = require('deindent')
 const customButton = `
     .root{
@@ -137,7 +138,7 @@ function expectWarningsFromTransform(config: Config, warnings:warning[]) {
 
 
 describe('diagnostics: warnings and errors', function () {
-
+    // TODO2: next phase
     xdescribe('syntax', function () {
 
         describe('selectors', function () {
@@ -357,7 +358,88 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'could not apply mixin: bug in mixin', file:'/main.css'}])  
             });
+           
+            it('js mixin must be a function', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-named: myMixin;
+                            }
+                            |.container {
+                                -st-mixin: $myMixin$;  
+                            }|
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'js mixin must be a function', file:'/main.css'}])  
+            });
+            it('should add diagnostics when declartion is invalid', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        color: true
+                                    }
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'not a valid mixin declaration myMixin', file:'/main.css'}])  
+            });    
 
+            it('should add diagnostics when declartion is invalid (rule)', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        '.x':{ 
+                                            color:true
+                                        }
+                                    }
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{message:'not a valid mixin declaration color, and was removed', file:'/main.css'}])  
+            });    
         });
 
         describe(':vars', function () {
@@ -479,12 +561,12 @@ describe('diagnostics: warnings and errors', function () {
             });
             it('Only import of type class can be used to extend', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry:'/main.st.css', 
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import {
-                                -st-from: './file.css';   
+                                -st-from: './file.st.css';   
                                 -st-named: special;   
                             }
                             .myclass {
@@ -492,7 +574,7 @@ describe('diagnostics: warnings and errors', function () {
                             }
                             `
                         },
-                        '/file.css': {
+                        '/file.st.css': {
                             content: `
                                 :vars {
                                     special: red
@@ -500,7 +582,7 @@ describe('diagnostics: warnings and errors', function () {
                             `
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.st.css'}])  
             })
             it('should warn if extends by js import', function () {
                 let config = {
@@ -523,7 +605,6 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
             })
-
         });
 
         describe('override -st-* warnings', function () {
@@ -561,7 +642,7 @@ describe('diagnostics: warnings and errors', function () {
 
 
     describe('redeclare symbols', function () {
-
+        //TODO: this
         xit('should warn override mixin on same rule', function () {
             expectWarnings(`
                    .a {}
@@ -614,7 +695,7 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-
+    //TODO: do everything besides internal X
     xdescribe('complex examples', function () {
         describe(':import', function () {
 
@@ -642,7 +723,7 @@ describe('diagnostics: warnings and errors', function () {
         });
         describe('cross variance', function () {
 
-            it('variant cannot be used as var', function () {
+            xit('variant cannot be used as var', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -713,7 +794,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('component variant cannot be used for native node', function () {
+            xit('component variant cannot be used for native node', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -732,7 +813,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variants can only be used for a specific component', function () {
+            xit('variants can only be used for a specific component', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -757,7 +838,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variant cannot be used with params', function () {
+            xit('variant cannot be used with params', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -805,6 +886,7 @@ describe('diagnostics: warnings and errors', function () {
     });
 
     describe('selectors', function () {
+    // TODO2: next phase
 
         xit('should not allow conflicting extends', function () {
             expectWarnings(`
@@ -851,6 +933,24 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
         })
+
+        it  ('should not allow @keyframe of reserved words', function(){
+            reservedKeyFrames.map(function(key){
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            |@keyframes $${key}$| {
+                                from {}
+                                to {}
+                            }`
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:`keyframes ${key} is reserved`, file:'/main.css'}])
+            })
+            
+        })
         it('should return error when trying to import theme from js', function () {
             let config = {
                 entry:'/main.css', 
@@ -870,6 +970,31 @@ describe('diagnostics: warnings and errors', function () {
             expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
         })
 
+        it('should error on unresolved alias', function () {
+            let config = {
+                entry:'/main.st.css', 
+                files: {
+                    '/main.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            |:import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                                -st-named: $inner-class$;
+                            }|
+
+                            .Imported{}
+                            .inner-class{}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.root{}`,
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
+        })
+       
       
     })
 
