@@ -15,4 +15,4 @@ Using yarn:
 yarn add stylable
 ```
 While the stylable package includes a programmatic API and can be used directly, we strongly suggest also installing
-the **stylable-integration** package that powers integration of `.st.css` files in your project's build cycle: [stylable-integration](https://github.com/wixplosives/stylable-integration)
+the [stylable-integration package](https://github.com/wixplosives/stylable-integration) that powers the integration of `.st.css` files in your project's build cycle.
