@@ -5,7 +5,9 @@
 *{
     box-sizing: border-box;
 }
-
+body {
+    overflow-y: scroll;
+}
 body, html{
     font-family: HelveticaNeueW01-45Ligh,sans-serif;
     background:#f0f3f5;
