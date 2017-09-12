@@ -60,7 +60,7 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(mixinEntry!, node);
                 } else {
-                    diagnostics.warn(mixinEntry!, 'not valid mixin declaration', {word:mixinEntry!.value})
+                    diagnostics.warn(mixinEntry!, `not a valid mixin declaration ${mixinEntry!.value}`, {word:mixinEntry!.value})
                 }
             } else if (node.type === 'rule') {
                 if (rule.parent.last === nextRule) {
@@ -69,10 +69,10 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
                     rule.parent.insertAfter(nextRule, node);
                 }
                 const toRemove: postcss.Declaration[] = [];
-                rule.walkDecls((decl) => {
+                node.walkDecls((decl) => {
                     if (!isValidDeclaration(decl)) {
                         toRemove.push(decl);
-                        //TODO: warn invalid mixin value
+                        diagnostics.warn(mixinEntry!,`not a valid mixin declaration ${decl.prop}, and was removed`, {word:mixinEntry!.value})
                     }
                 })
                 toRemove.forEach((decl) => decl.remove());

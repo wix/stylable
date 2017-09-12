@@ -407,7 +407,38 @@ describe('diagnostics: warnings and errors', function () {
                             `
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'not valid mixin declaration', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'not a valid mixin declaration myMixin', file:'/main.css'}])  
+            });    
+
+            it('should add diagnostics when declartion is invalid (rule)', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        '.x':{ 
+                                            color:true
+                                        }
+                                    }
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{message:'not a valid mixin declaration color, and was removed', file:'/main.css'}])  
             });    
         });
 
