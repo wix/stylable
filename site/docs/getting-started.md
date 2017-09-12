@@ -13,7 +13,7 @@ layout: docs
 * Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
 * Uses themes so you can apply different look and feel across your web application.
 
-At build time, the preprocessor converts the Stylable CSS into flat, static, valid vanilla CSS that works cross-browser.
+At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
 ## How do I install
 
@@ -21,7 +21,7 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
 
-3. While **Stylable** can work with any component framework, here at Wix we use it with React. Install the latest version.
+3. While **Stylable** can work with any component framework, we use it with [React](https://facebook.github.io/react/docs/installation.html). 
 
 ## What can I do
 
@@ -38,4 +38,4 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 ## Components
 
-We recommend using our component library, [Stylable-Components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library based.
+We recommend using our component library, [Stylable-Components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library.
