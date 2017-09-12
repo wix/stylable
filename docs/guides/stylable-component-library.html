@@ -91,9 +91,11 @@
 
 <section class="docs-content round-corners">
     <h1>Create a Stylable Component Library</h1>
-    <p>Stylable enables you to author a component library, that can be themed, and easily consumed and styled, by other <strong>Stylable</strong> projects.</p>
+    <p><strong>Stylable</strong> enables you to author a component library, that can be themed, and easily consumed and styled, by other <strong>Stylable</strong> projects.</p>
 
-<h2 id="library-recommended-folder-structure">Library recommended folder structure</h2>
+<p><strong>Stylable</strong> is the styling, CSS side of working with components. For the <strong>Stylable</strong> CSS to be fully useful, it must integrate with a component library from another source, for example React.</p>
+
+<h2 id="recommended-folder-structure">Recommended folder structure</h2>
 
 <p>As a best practice, we recommend following this folder structure:</p>
 
@@ -125,13 +127,17 @@
   <li>The <code class="highlighter-rouge">src/themes</code> folder contains the relevant theme files.</li>
 </ul>
 
+<blockquote>
+  <p><strong>Note:</strong> Although you may think the project file should be at the <code class="highlighter-rouge">src</code> level, we recommend you to create the <code class="highlighter-rouge">project.st.css</code> file at the same level as your components because there are many links between this file and your component files.</p>
+</blockquote>
+
 <h2 id="the-projectstcss-file">The <code class="highlighter-rouge">project.st.css</code> file</h2>
 
 <p>As a first step, create a <a href="./project-commons">project commons stylesheet</a> named <code class="highlighter-rouge">project.st.css</code> in the <code class="highlighter-rouge">src/components</code> directory. This exposes the API for the project.</p>
 
 <blockquote>
   <p><strong>Note</strong>:
-It is recommended to leave the project’s CSS ruleset empty so it can be defined in a theme file.</p>
+It is recommended to leave the project’s CSS rulesets empty with no declarations. These should be defined in a theme file.</p>
 </blockquote>
 
 <h2 id="themable-components">Themable components</h2>
@@ -140,9 +146,9 @@ It is recommended to leave the project’s CSS ruleset empty so it can be define
 
 <ul>
   <li>Expose a good style API and its <a href="../references/pseudo-classes">custom states</a>.</li>
-  <li>The component API should contain the minimum styling required for the component to function, for example layout is sometimes required.</li>
+  <li>The component API should contain the minimum styling required for the component to function. For example some components may require layout.</li>
   <li>The effect of CSS combinations is not always easy to understood and styles are generally less tested, therefore, we recommend adding comments that explain the reason for unclear CSS.</li>
-  <li>Reusable vars should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.</li>
+  <li>Reusable <a href="../references/variables">vars</a> should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.</li>
   <li>Use <a href="./component-variants">component variants</a> and <a href="./shared-classes">shared classes</a> from the project file (<code class="highlighter-rouge">project.st.css</code>).</li>
 </ul>
 
@@ -173,7 +179,7 @@ It is recommended to leave the project’s CSS ruleset empty so it can be define
 
 <h2 id="theme">Theme</h2>
 
-<p>Our library can offer multiple theme files that render a different look and feel per theme. A theme imports the <code class="highlighter-rouge">project.st.css</code> file as <a href="../references/theme">theme</a> to override variables, variants and classes from the library.</p>
+<p>The <strong>Stylable</strong> library can include multiple theme files that render a different look and feel per theme. A theme imports the <code class="highlighter-rouge">project.st.css</code> file as <a href="../references/theme">theme</a> to override variables, variants and classes from the library.</p>
 
 <p>In the following code, you can see a theme file customizing the library:</p>
 <ul>

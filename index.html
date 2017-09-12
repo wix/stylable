@@ -29,17 +29,43 @@
     <section class="page-content round-corners">
     <p><img src="/stylable/images/96-logo-horizontal.png" alt="Stylable - CSS for Components" class="center-image" /></p>
 
+<blockquote>
+  <p>“New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.”</p>
+
+  <p><a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS</p>
+</blockquote>
+
+<p>At Wix, we agree. We love CSS. It’s simple, declarative syntax that is native in browsers and is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.</p>
+
+<p>We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created <strong>Stylable</strong>.</p>
+
+<p><strong>Styable</strong> is a preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.</p>
+
+<p>So what does <strong>Stylable</strong> do?</p>
+
 <p><strong>Stylable</strong> enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
 
 <ul>
   <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
-  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.</li>
-  <li>Uses themes so you can apply different look and feel across your web application.</li>
+  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.</li>
+  <li>Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.</li>
 </ul>
 
 <p>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid vanilla CSS that works cross-browser.</p>
 
-<p>Learn more in our <a href="/stylable/docs/getting-started.html">Documentation Center</a>.</p>
+<p>Viva CSS, and welcome <strong>Stylable</strong>. We hope you like it. Learn how to use it with step by step instructions and code examples.</p>
+
+<h2 id="learn">Learn</h2>
+
+<p>Learn more about <strong>Stylable</strong> and how to get started <a href="./docs/getting-started">here</a>.</p>
+
+<h2 id="components">Components</h2>
+
+<p><a href="https://github.com/wix/stylable-components">Stylable-components</a> - <strong>Stylable</strong>, fully-tested &amp; strictly-typed component library based on React.</p>
+
+<h2 id="project">Project</h2>
+
+<p>Access the <strong>Stylable</strong> GitHub project <a href="https://github.com/wix/stylable" target="_blank">here</a>.</p>
 
 </section>
 </div>
