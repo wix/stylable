@@ -4,12 +4,12 @@ title: React integration
 layout: docs
 ---
 
-Use Stylable React integration from `wix-react-tools` to set a **Stylable** stylesheet for a React component or stateless functional component (SFC).
+Use Stylable React integration from [wix-react-tools](https://github.com/wix/wix-react-tools) to set a **Stylable** stylesheet for a React component or stateless functional component (SFC).
 
 
 ## Installation
 
-Install **wix-react-tools** as a dependency in your local project
+Install **wix-react-tools** as a dependency in your local project.
 
 Using npm:
 ```bash
@@ -27,7 +27,7 @@ When applying **Stylable** to a React component, any className or `data-*` prope
 
 ```jsx 
 import {stylable} from 'wix-react-tools';
-import stylesheet from './style.css'
+import stylesheet from './style.st.css'
 
 // Class
 @stylable(stylesheet)
@@ -59,7 +59,7 @@ class Comp extends React.Component {
 
 ### Custom states
 
-**Stylable** offers [custom states](../references/pseudo-classes.md) that can be defined on any CSS class selectors. Add a `style-state` property to any element to control if a certain custom state is enabled or not.  
+**Stylable** offers [custom states](../references/pseudo-classes.md) that can be defined on any CSS class selectors. Add a `style-state` property to any element to control whether to enable a custom state or not.  
 
 ```jsx 
 @stylable(stylesheet)
@@ -75,4 +75,4 @@ class Comp extends React.Component {
 ## Other Stylable integrations (future)
 
 * Polymer - web-components with shadow DOM transformer
-* Document - expose JS api to manage selectors state and dynamic updates
+* Document - expose JS API to manage selector states and dynamic updates
