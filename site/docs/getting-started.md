@@ -29,7 +29,7 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 * **Build an app** - If you want to use **Stylable** while building a web application, go to [Build a Stylable Application](../docs/guides/stylable-application.md). Read the steps and recommendations for building a performant web application that doesn't depend on other libraries for styling.
 
-* **Create a library** - If you want guidance in creating a component library, read [Create a Stylable Component Library](../docs/guides/stylable-component-library.md). Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reuable components.
+* **Create a library** - If you want guidance in creating a component library, read [Create a Stylable Component Library](../docs/guides/stylable-component-library.md). Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.
 
 * **Learn** - Take a look at our reference documents to get more acquanted with our code and for specific code examples.
 
@@ -38,4 +38,4 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 ## Components
 
-We recommend using our component library, [Stylable-components](https://github.com/wix/stylable-components). **Stylable components** are a fully-tested & strictly-typed component library based on React.
+We recommend using our component library, [Stylable-Components](https://github.com/wix/stylable-components). **Stylable components** are a stylbale, fully-tested & strictly-typed component library based.
