@@ -13,7 +13,7 @@ layout: docs
  * **CSS declaration Block**: List of CSS declarations
  * **CSS ruleset**: CSS declaration block paired with a selector
 
-[MDN docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
+[MDN docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations){:target="_blank"}
 
 ## Stylable
 
@@ -35,3 +35,4 @@ Syntax unique to Stylable - Click each to access code examples and descriptions 
     * [**`-st-named`**](../references/imports.md) Import the file's named export value or values
     * [**`-st-theme`**](../references/theme.md) Use stylesheet import as theme of stylesheet
 * [**`@namespace "readable name";`**](../references/namespace.md) Development display name for debugging
+* [**`:vars{}`**](../references/variables.md) Define common values to be used across the stylesheet or project
