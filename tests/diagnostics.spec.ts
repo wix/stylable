@@ -138,7 +138,7 @@ function expectWarningsFromTransform(config: Config, warnings:warning[]) {
 
 
 describe('diagnostics: warnings and errors', function () {
-
+    // TODO2: next phase
     xdescribe('syntax', function () {
 
         describe('selectors', function () {
@@ -584,7 +584,7 @@ describe('diagnostics: warnings and errors', function () {
 
 
     describe('redeclare symbols', function () {
-
+        //TODO: this
         xit('should warn override mixin on same rule', function () {
             expectWarnings(`
                    .a {}
@@ -637,7 +637,7 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-
+    //TODO: do everything besides internal X
     xdescribe('complex examples', function () {
         describe(':import', function () {
 
@@ -665,7 +665,7 @@ describe('diagnostics: warnings and errors', function () {
         });
         describe('cross variance', function () {
 
-            it('variant cannot be used as var', function () {
+            xit('variant cannot be used as var', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -736,7 +736,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('component variant cannot be used for native node', function () {
+            xit('component variant cannot be used for native node', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -755,7 +755,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variants can only be used for a specific component', function () {
+            xit('variants can only be used for a specific component', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -780,7 +780,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variant cannot be used with params', function () {
+            xit('variant cannot be used with params', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -828,6 +828,7 @@ describe('diagnostics: warnings and errors', function () {
     });
 
     describe('selectors', function () {
+    // TODO2: next phase
 
         xit('should not allow conflicting extends', function () {
             expectWarnings(`
@@ -934,6 +935,31 @@ describe('diagnostics: warnings and errors', function () {
                     }
             }}
             expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
+        })
+        it.only('should not', function(){
+            let config = {
+                entry:'/main.st.css', 
+                files: {
+                    '/main.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :vars {
+                                color: red;
+                            }
+
+                           .myClass {
+                               -st-extends: color
+                           }
+
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: ``,
+                    }
+            }}
+            expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
+
         })
 
       

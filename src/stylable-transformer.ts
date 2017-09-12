@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol, VarSymbol } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -373,9 +373,19 @@ export class StylableTransformer {
         const next = this.resolver.resolve(extend);
 
         if (next && next._kind === 'css') {
-            node.before = '.' + scopedName;
-            node.name = this.scope(next.symbol.name, next.meta.namespace);
-            return next;
+            if (next.symbol && next.symbol._kind === 'class'){
+                node.before = '.' + scopedName;
+                node.name = this.scope(next.symbol.name, next.meta.namespace);
+                return next;
+            } else { 
+                if (!next.symbol) {
+                    this.diagnostics.error(getRuleFromMeta(meta, '.' + name), `can not resolve ${name}`, {word:name})
+                } else {
+                    this.diagnostics.error((next.symbol as VarSymbol).node || getRuleFromMeta(meta, '.' + name), `can not extend ${name}`, {word:name})
+                }
+            }
+            
+            
         }
 
         if (extend && extend._kind === 'class') {
