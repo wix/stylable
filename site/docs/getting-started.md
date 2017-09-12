@@ -38,4 +38,4 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 ## Components
 
-We recommend using our component library, [Stylable-Components](https://github.com/wix/stylable-components). **Stylable components** are a stylbale, fully-tested & strictly-typed component library based.
+We recommend using our component library, [Stylable-Components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library based.
