@@ -29,8 +29,7 @@ yarn add stylable
 ```
 
 While the **stylable** package includes a programmatic API and can be used directly, we strongly suggest using
-the **stylable-integration** package that powers and enables using the `.st.css` files in your project's build cycle:
-https://github.com/wixplosives/stylable-integration
+the **stylable-integration** package that powers and enables using the `.st.css` files in your project's build cycle: [stylable-integration package](https://github.com/wixplosives/stylable-integration)
 
 ## Component Library
 
