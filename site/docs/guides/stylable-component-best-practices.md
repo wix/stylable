@@ -4,46 +4,50 @@ title: Stylable Component - Best Practices
 layout: docs
 ---
 
-One of the goals of a stylable-component is to be easily stylable / themable from the outside. This means that the stylesheet describing the component CSS should be as **simple** and **generic** as possible. 
+**Stylable** components should, as much as possible, be easily stylable / themable from the outside. This means that the stylesheet describing the component CSS should be as **simple** and **generic** as possible, and should expose a clear and concise API for its internal parts. 
 
-## Component root
+When building your components, we recommend following the guidelines below, that we've accumulated through our work with **Stylable**:
+
+## Play nice with other page elements
 
 Since our stylesheet represent a component that should be flexible and play nice by default with other elements on the page, in most cases it should have `display:inline-block` or `display:inline-flex` and avoid setting `position`. 
 
-## Size
+## Avoid size declarations
 
-Try avoiding size declaration, because it offers an easier API for an owner component to override, However when setting a default size or size limitations use `em` units to resize to the html context.
+Try avoiding size declaration, because it offers an easier API. To override a component specifying size limitations you need to override multiple css declarations.
 
-## Specificity
+If you do set a default size or size limitations use `em` units to resize to the HTML context.
 
-Write low specificity selectors that will be easy to override from a parent component.
+## Give meaningful names
 
-## Internal parts
-
-Any CSS class selector can be targeted from the outside as a `pseudo-element` and should be considered part of the component API. Expose meaningful class names that will make sense as part of a selector:
+Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a [`pseudo-element`](../references/pseudo-elements.md) and should be considered part of the component API.
 
 ```css
 /* good */
 Gallery::navBtn::label {} /* camelCase with clear pseudo-element names  */
+```
 
+```css
 /* bad */
-Gallery::galleryNavBtn {} /* don't reuse component id */
+Gallery::galleryNavBtn {} /* it is better to reuse the generic component id */
 Gallery::nav-btn {} /* don't use kebab-case - stylable exports JS */
 ```
 
-## Global CSS
+## Avoid global settings in your stylesheet
 
-Try to avoiding global related selectors like `@media` or matching DOM outside of the component scope like `body`.
+Try to avoid global related selectors like `@media` or matching DOM outside of the component scope like `body`. These will potentially cause side-effects when others use it.
 
-[Tag selectors](../references/tag-selectors.md) should be avoided inside a component, as they effect any nested component or element unless specifically targeting the tag with **child selector** (e.g. `.root > p`) and not a **descendent selector** (e.g. `.root p`).
+[Tag selectors](../references/tag-selectors.md) should be avoided inside a component, as they affect any nested component or element. The exception to this, is when specifically targeting the tag with **child selector** (e.g. `.root > p`) and not a **descendent selector** (e.g. `.root p`).
 
-## Layout
+## Keep your layout minimal
 
-Internal structure demands some CSS in order to work correctly. Try to find the minimal combination of CSS to make the component layout work as it should.
+While internal structure does demand some CSS in order to work correctly, you should strive to find the minimal combination of CSS to make the component layout work as it should.
 
-## Visibility
+## Keep coloring to a minimum
 
-Component stylesheet should describe the bare minimum, and colors should be used sparsely just to achieve visibility without any outside styling. Best practice is to use 2 colors across the project for contrast text and background.
+The Component stylesheet should describe the bare minimum coloring as to make its parts visible. Colors should be used sparsely, and just to achieve visibility. 
+
+The best practice is to use 2 colors across the project for contrasting text and background.
 
 ```css
 @namespace "dropdown";
@@ -54,27 +58,33 @@ Component stylesheet should describe the bare minimum, and colors should be used
 ```
 
 > **Note**:
-> We might want to implement stylable formatters to help minimize the amount of colors needed in a color scheme:  
+> In the future, we may implement stylable formatters to help minimize the amount of colors needed in a color scheme:  
 > ```css
 > .options { 
 >    background: darker(value(color1), 0.5); 
->    color: lighter(value(color2)); 
+>    color: lighter(value(color2), 0.3); 
 >}
 > ```
 
-## Override browser defaults
+## Keep browser defaults intact
 
 Browsers add a default UA stylesheets to provide the HTML with default "style". 
 
-It is tempting to cleanup a `button` default style in the component, but we want our component to "blend" in the context it is used in. A button tag in our component should look like other button tags in the context application so set CSS only for behaviors that **must** be overridden in order for the component to function.
+It is tempting to "clean up" a `button` default style in the component. But, we want our component to "blend" in every context it is used in. A button tag in our component should look like other button tags in the context application.
 
-## Composability
+As such, when building a component, it is best to set CSS only for behaviors that **must** be overridden in order for the component to function.
 
-Similar to browser default, we want to allow the context application to style the component internals. 
+## Keep specificity low
+
+Write low specificity selectors that will be easy to override from a parent component.
+
+## Keep your selectors as simple as possible
+
+You will want to allow the context application to style your component's internals. 
 
 Override CSS only for behaviors that **must** be overridden in order for the component to function and minimize usage of `tag selectors` and `pseudo-elements` of nested components. 
 
-When a component customize its internal DOM parts, it generates selectors with high specificity that make it hard to style from the outside:
+When a component customizes its internal DOM parts, it generates selectors with high specificity that make it hard to style from the outside:
 
 ```css
 @namespace "comp";
@@ -88,16 +98,16 @@ specificity: 0,0,4,0
 ```css
 @namespace "page";
 /* 
-> less specific then component override 
+> less specific than component override 
 selector: .page__root button
 specificity: 0,0,1,1
 */
 button {} 
 ```
 
-## Comments
+## Justify your CSS declarations in comments
 
-A good way to validate minimal CSS is to add comments. There should be a 1-5 words clarifying why a certain declaration or ruleset combination is found in the stylesheet.
+A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet (ie, each of them should be justified):
 
 ```css
 .root {
@@ -114,7 +124,7 @@ A good way to validate minimal CSS is to add comments. There should be a 1-5 wor
 
 This helps with maintenance and development, since we don't test CSS as thoroughly as other code.
 
-## Variables
+## Use consistent variables from a theme
 
 Import theme variables from the [project commons stylesheet](../guides/project-commons.md):
 
@@ -128,10 +138,10 @@ Import theme variables from the [project commons stylesheet](../guides/project-c
 }
 ```
 
-## Images and svg
+## Keep SVG and images overridable
 
 When using image element source or svg directly in the DOM, it is not easy and in some cases not possible to modify the asset from outside the component using CSS.
 
-When asset is part of the style API, it should be placed in the background of an element, Allowing background to be overridden from a parent component.
+When asset is part of the style API, it should be placed in the background of an element, allowing it to be overridden from a parent component.
 
-It is not encouraged to use `::before` and `::after` if possible, because they are generic and hard to override.
+It is not recommended to use `::before` and `::after`, because they are generic and hard to override.
