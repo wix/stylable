@@ -30,5 +30,4 @@ In the following code, you can see a project with:
 .emphasisBox {}
 ```
 
-> **Note**:
-> We recommend calling the project commons file `project.st.css`.
+ We recommend calling the project commons file `project.st.css`.
