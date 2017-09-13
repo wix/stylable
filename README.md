@@ -35,6 +35,10 @@ the **stylable-integration** package that powers and enables using the `.st.css`
 
 **Stylable** includes a rich [component library](https://github.com/wix/stylable-components) for out-of-the-box use.
 
+## Roadmap
+
+Come see [what we're working on](./site/docs/roadmap.md) for the near and far future. Give us feedback.
+
 ## Contributing
 
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
