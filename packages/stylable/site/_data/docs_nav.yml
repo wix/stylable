@@ -19,6 +19,8 @@
   items:
   - id: guides/components-basics
     title: Component Basics
+  - id: guides/stylable-component-best-practices
+    title: Component Best Practices
   - id: guides/stylable-application
     title: Stylable Application
   - id: guides/stylable-component-library
