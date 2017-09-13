@@ -47,6 +47,8 @@
             
                 <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
             
+                <li class=""><a href="/stylable/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
                 <li class=""><a href="/stylable/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
             
                 <li class=""><a href="/stylable/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
@@ -91,33 +93,55 @@
 
 <section class="docs-content round-corners">
     <h1>Getting Started</h1>
-    <blockquote>
-  <p>“New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.”</p>
+    <h2 id="what-is-stylable">What is Stylable</h2>
 
-  <p><a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS</p>
-</blockquote>
-
-<p>At Wix, we agree. We love CSS. It’s simple, declarative syntax that is native in browsers and is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.</p>
-
-<p>We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created <strong>Stylable</strong>.</p>
-
-<p><strong>Styable</strong> is a preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.</p>
-
-<p>So what does <strong>Stylable</strong> do?</p>
+<p><strong>Stylable</strong> enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
 
 <ul>
   <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
-  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.</li>
-  <li>Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.</li>
+  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.</li>
+  <li>Uses themes so you can apply different look and feel across your web application.</li>
 </ul>
 
-<p>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid vanilla CSS that works cross-browser.</p>
+<p>At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.</p>
 
-<p>Viva CSS, and welcome <strong>Stylable</strong>. We hope you like it. Learn how to use it with step by step instructions and code examples.</p>
+<h2 id="how-do-i-install">How do I install</h2>
+
+<ol>
+  <li>
+    <p>Install <strong>Stylable</strong> from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
+  </li>
+  <li>
+    <p>Install the <strong>Stylable</strong> <a href="https://github.com/wix/stylable-integration">integrations package</a>.</p>
+  </li>
+  <li>
+    <p>While <strong>Stylable</strong> can work with any component framework, we use it with <a href="https://facebook.github.io/react/docs/installation.html">React</a>.</p>
+  </li>
+</ol>
+
+<h2 id="what-can-i-do">What can I do</h2>
+
+<ul>
+  <li>
+    <p><strong>Build a Stylable component</strong> - If you are looking to style a component, follow the steps in the <a href="../docs/guides/components-basics">Stylable Basics Guide</a> and <a href="../docs/guides/stylable-component-best-practices">Best Practices Guide</a></p>
+  </li>
+  <li>
+    <p><strong>Build an app</strong> - If you want to use <strong>Stylable</strong> while building a web application, go to <a href="../docs/guides/stylable-application">Build a Stylable Application</a>. Read the steps and recommendations for building a performant web application that doesn’t depend on other libraries for styling.</p>
+  </li>
+  <li>
+    <p><strong>Create a library</strong> - If you want guidance in creating a component library, read <a href="../docs/guides/stylable-component-library">Create a Stylable Component Library</a>. Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.</p>
+  </li>
+  <li>
+    <p><strong>Learn</strong> - Take a look at our reference documents to get more acquanted with our code and for specific code examples.</p>
+  </li>
+  <li>
+    <p><strong>Remember</strong> - Our <a href="../docs/getting-started/cheatsheet">cheatsheet</a> helps you keep track of <strong>Stylable</strong> syntax.</p>
+  </li>
+</ul>
 
 <h2 id="components">Components</h2>
 
-<p><a href="https://github.com/wix/stylable-components">Stylable-components</a> - <strong>Stylable</strong>, fully-tested &amp; strictly-typed component library based on React.</p>
+<p>We recommend using our component library, <a href="https://github.com/wix/stylable-components"><strong>Stylable-Components</strong></a> - a stylable, fully-tested &amp; strictly-typed component library.</p>
 
 </section>
 

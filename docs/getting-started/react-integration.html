@@ -47,6 +47,8 @@
             
                 <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
             
+                <li class=""><a href="/stylable/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
                 <li class=""><a href="/stylable/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
             
                 <li class=""><a href="/stylable/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
@@ -91,11 +93,11 @@
 
 <section class="docs-content round-corners">
     <h1>React integration</h1>
-    <p>Use Stylable React integration from <code class="highlighter-rouge">wix-react-tools</code> to set a <strong>Stylable</strong> stylesheet for a React component or stateless functional component (SFC).</p>
+    <p>Use Stylable React integration from <a href="https://github.com/wix/wix-react-tools">wix-react-tools</a> to set a <strong>Stylable</strong> stylesheet for a React component or stateless functional component (SFC).</p>
 
 <h2 id="installation">Installation</h2>
 
-<p>Install <strong>wix-react-tools</strong> as a dependency in your local project</p>
+<p>Install <strong>wix-react-tools</strong> as a dependency in your local project.</p>
 
 <p>Using npm:</p>
 <div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install wix-react-tools --save
@@ -112,7 +114,7 @@
 <p>When applying <strong>Stylable</strong> to a React component, any className or <code class="highlighter-rouge">data-*</code> properties are copied to the resulting root element of the component. Further, the <a href="../references/root">root class</a> of the stylesheet is added to the root element automatically.</p>
 
 <pre><code class="language-jsx">import {stylable} from 'wix-react-tools';
-import stylesheet from './style.css'
+import stylesheet from './style.st.css'
 
 // Class
 @stylable(stylesheet)
@@ -145,7 +147,7 @@ class Comp extends React.Component {
 
 <h3 id="custom-states">Custom states</h3>
 
-<p><strong>Stylable</strong> offers <a href="../references/pseudo-classes">custom states</a> that can be defined on any CSS class selectors. Add a <code class="highlighter-rouge">style-state</code> property to any element to control if a certain custom state is enabled or not.</p>
+<p><strong>Stylable</strong> offers <a href="../references/pseudo-classes">custom states</a> that can be defined on any CSS class selectors. Add a <code class="highlighter-rouge">style-state</code> property to any element to control whether to enable a custom state or not.</p>
 
 <pre><code class="language-jsx">@stylable(stylesheet)
 class Comp extends React.Component {
@@ -161,7 +163,7 @@ class Comp extends React.Component {
 
 <ul>
   <li>Polymer - web-components with shadow DOM transformer</li>
-  <li>Document - expose JS api to manage selectors state and dynamic updates</li>
+  <li>Document - expose JS API to manage selector states and dynamic updates</li>
 </ul>
 
 </section>
