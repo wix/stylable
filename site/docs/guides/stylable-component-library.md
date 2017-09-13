@@ -35,7 +35,7 @@ src/
     * a folder for each component with its stylable stylesheet
 * The `src/themes` folder contains the relevant theme files.
 
-> **Note:** Although you may think the project file should be at the `src` level, we recommend you to create the `project.st.css` file at the same level as your components because there are many links between this file and your component files.
+> **Note:** Although you may think the project file should be at the `src` level, we recommend the `project.st.css` file be at the same level as your components because there are many links between this file and your component files.
 
 ## The `project.st.css` file
 
@@ -84,7 +84,7 @@ The **Stylable** library can include multiple theme files that render a differen
 In the following code, you can see a theme file customizing the library:
 * override `color1` and `color2`
 * CSS for `cancelButton` variant component
-* CSS for `emphsisBox` shared class
+* CSS for `emphasisBox` shared class
 
 ```css
 /* backoffice-theme.st.css */
