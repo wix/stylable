@@ -41,16 +41,21 @@ export class Bundler {
     }
 
     private aggregateTheme(entryMeta:StylableMeta, entryIndex:number, themeEntries:ThemeEntries):void {
-        const aggregateDependencies = (srcMeta:StylableMeta, overrideVars:OverrideVars) => {
+        const aggregateDependencies = (srcMeta:StylableMeta, overrideVars:OverrideVars, importPath:string[]) => {
             srcMeta.imports.forEach(importRequest => {
                 if(!importRequest.from.match(/.css$/)){
                     return;
-                }       
+                }
 
                 const isImportTheme = !!importRequest.theme;
                 let themeOverrideData = themeEntries[importRequest.from]; // some entry already imported as theme
 
                 const importMeta = this.process(importRequest.from);
+                
+                if(importPath.indexOf(importMeta.source) !== -1){ // circular dependency
+                    return ;
+                }
+
                 let themeOverrideVars;
 
                 if(isImportTheme){ // collect and search sub-themes
@@ -64,11 +69,11 @@ export class Bundler {
                 if(themeOverrideData){ // push theme above import
                     themeOverrideData.index = entryIndex;
                 }
-                aggregateDependencies(importMeta, themeOverrideVars || {});
+                aggregateDependencies(importMeta, themeOverrideVars || {}, importPath.concat(importMeta.source));
             });
         }
 
-        aggregateDependencies(entryMeta, {});
+        aggregateDependencies(entryMeta, {}, [entryMeta.source]);
     }
 
     public getDependencyPaths({entries, themeEntries}:{entries:string[], themeEntries:ThemeEntries}={entries:this.outputCSS, themeEntries:this.themeAcc}):string[] {

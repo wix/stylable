@@ -22,8 +22,6 @@ describe('bundle: base', () => {
         expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
     });
 
-
-    
     it('should support unresolveable vars', () => {
         
         const output = generateStylableOutput({
@@ -218,6 +216,48 @@ describe('bundle: base', () => {
 
         expect(output).to.eql([
             `.entry--root .entry--c { color:gold; }`
+        ].join('\n'));
+    });
+
+    it('should handle circular dependencies', () => {
+        let output = null;
+        
+        expect(() => {
+            output = generateStylableOutput({
+                entry: '/entry-a.st.css',
+                usedFiles: [
+                    '/entry-a.st.css',
+                    '/entry-b.st.css'
+                ],
+                files: {
+                    "/entry-a.st.css": {
+                        namespace: 'entryA',
+                        content: `
+                            :import {
+                                -st-from: "./entry-b.st.css";
+                                -st-default: EntryB;
+                            }
+                            EntryB { color: red; }
+                        `
+                    },
+                    "/entry-b.st.css": {
+                        namespace: 'entryB',
+                        content: `
+                            :import {
+                                -st-from: "./entry-a.st.css";
+                                -st-default: EntryA;
+                            }
+                            EntryA { color: green; }
+                        `
+                    }
+                }
+            });
+        }).not.to.throw();
+
+        expect(output).to.eql([
+            `.entryB--root .entryA--root { color: green; }`,
+
+            `.entryA--root .entryB--root { color: red; }`
         ].join('\n'));
     });
 
