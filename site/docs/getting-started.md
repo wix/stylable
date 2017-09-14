@@ -15,8 +15,6 @@ layout: docs
 
 At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
-<hr />
-
 ## How do I install
 
 1. Install **Stylable** from our GitHub [repository](https://github.com/wix/stylable).
@@ -24,8 +22,6 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
 
 3. While **Stylable** can work with any component framework, we use it with [React](https://facebook.github.io/react/docs/installation.html). 
-
-<hr />
 
 ## What can I do
 
@@ -38,8 +34,6 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 * **Learn** - Take a look at our reference documents to get more acquanted with our code and for specific code examples.
 
 * **Remember** - Our [cheatsheet](../docs/getting-started/cheatsheet.md) helps you keep track of **Stylable** syntax.
-
-<hr />
 
 ## Components
 
