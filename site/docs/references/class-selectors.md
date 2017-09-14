@@ -8,35 +8,34 @@ You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_sel
 
 In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Page"
 .thumbnail { background:green; }
 .thumbnail:hover { background:blue; }
 .gallery:hover .thumbnail { background:red; }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Page__root .Page__thumbnail { background:green;}
 .Page__root .Page__thumbnail:hover { background:blue; }
 .Page__root .Page__gallery:hover .Page__thumbnail { background:red; }
 ```
 
-**React**
 ```jsx
-/* inside a stylable render */
+/* React - inside a stylable render */
 <div className="gallery">
     <img className="thumbnail" />
     ...
 </div>
 ```
 
-> **Notes:**  
+> **Note:**  
 > In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).  
 > CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
 
-## Class Selector Export
+## Class selector export
 
 Any class defined in a Stylable stylesheet is exported as a named export and can be imported by other stylesheets using the directive `-st-named`.
 

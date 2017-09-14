@@ -1,6 +1,6 @@
 ---
 id: references/pseudo-elements
-title: Pseudo-elements
+title: Pseudo-Elements
 layout: docs
 ---
 
@@ -12,7 +12,6 @@ Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [e
 
 When you define a CSS class inside a component, in this case a `play-button` in a `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `VideoPlayer`.
 
-**CSS API**
 ```css
 /* video-player.st.css */
 @namespace "VideoPlayer"
@@ -29,8 +28,9 @@ Use `::` to access an internal part of a component after a [custom tag selector]
 
 In this example, you [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `play-button` overriding its original styling.
 
-**CSS API**
+
 ```css
+/* CSS */
 @namespace "Page"
 :import {
     -st-from: './video-player.st.css';
@@ -45,15 +45,15 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Page__root .Page__main-video.VideoPlayer__root .VideoPlayer__play-button {
     background: green;
     color: purple;
 }
 ```
 
-> **Note**:  
+> **Note**    
 > Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
 
 
@@ -65,7 +65,6 @@ In this example, the class `play-button` is available from the original componen
 
 The `page.css` stylesheet can then extend `super-video-player.css` and on the `.main-player` class, style `play-button` differently.
 
-**CSS API**
 ```css
 /* super-video-player.st.css */
 @namespace "SuperVideoPlayer"
@@ -96,25 +95,24 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__play-button { color: gold; }
 .Page__root .Page__main-player.SuperVideoPlayer__root .VideoPlayer__play-button { color: silver; }
 ```
-
 
 
 ## Override custom pseudo-elements
 
 You can use CSS classes to override extended pseudo-elements. 
 
-> **Note**:  
+> **Note**    
 > You can also override native pseudo-elements using **Stylable's** custom pseudo-elements but this is not recommended as it can lead to code that's confusing and hard to maintain.
 
 In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "SuperVideoPlayer"
 :import {
     -st-from: './video-player.css';
@@ -128,11 +126,11 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .SuperVideoPlayer__root.VideoPlayer__root .SuperVideoPlayer__play-button { color: gold; }
 ```
 
-> **Note**:  
+> **Note**    
 > Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended.
 
