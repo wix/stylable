@@ -8,9 +8,10 @@ layout: docs
 
 * [**Custom Selectors**](./references/custom-selectors.md)
 * [**Formatters**](./references/formatters.md)
+* 
 
 ## Features we wish we were working on
-
+* [**Handling SVGs**](./)
 * [**DefinitelyStyled**](./)
 
 ## Known issues
