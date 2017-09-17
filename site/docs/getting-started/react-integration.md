@@ -29,12 +29,15 @@ When applying **Stylable** to a React component, any className or `data-*` prope
 import {stylable} from 'wix-react-tools';
 import stylesheet from './style.st.css'
 
-// Class
+// Decorate class
 @stylable(stylesheet)
 class Comp extends React.Component {...}
 
+// Class without decorator
+stylable(stylesheet)(class Comp extends React.Component {...});
+
 // SFC
-@stylable(stylesheet)(props => {...});
+stylable(stylesheet)(props => {...});
 ```
 
 > **Note**  
