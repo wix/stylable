@@ -17,7 +17,7 @@ Targeting a native element matches any element with the same tag name that is fo
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 form { background: green; }
 .side-bar:hover form { background: red; }
 ```
@@ -47,7 +47,7 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 :import{
     -st-from: "./toggle-button.st.css";
     -st-default: ToggleButton;
