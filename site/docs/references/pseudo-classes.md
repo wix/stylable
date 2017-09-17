@@ -22,7 +22,7 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 
 ```css
 /* example1.st.css */
-@namespace "Example1"
+@namespace "Example1";
 .root {
     -st-states: toggled, loading;
 }
@@ -47,7 +47,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ```css
 /* example2.st.css */
-@namespace "Example2"
+@namespace "Example2";
 :import {
     -st-from: "./example1.st.css";
     -st-default: Comp1;
@@ -78,7 +78,7 @@ You can use this feature to define states even if the existing components you ar
 
 ```css
 /* example-custom.st.css */
-@namespace "ExampleCustom"
+@namespace "ExampleCustom";
 .root {
     -st-states: toggled(".on"), loading("[data-spinner]");
 }

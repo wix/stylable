@@ -13,7 +13,7 @@ In this example, the stylesheet is extending the `toggle-button.css` stylesheet.
 
 ```css
 /* page.st.css */
-@namespace "Page"
+@namespace "Page";
 :import {
     -st-from: "./toggle-button.st.css";
     -st-default: ToggleButton;
