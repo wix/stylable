@@ -10,7 +10,7 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 .thumbnail { background:green; }
 .thumbnail:hover { background:blue; }
 .gallery:hover .thumbnail { background:red; }
@@ -43,7 +43,7 @@ Any class defined in a Stylable stylesheet is exported as a named export and can
 
 ```css
 /* button.st.css */
-@namespace "Button"
+@namespace "Button";
 .root { background:green; }
 .icon { border: 2px solid black; } 
 .label { font-size: 20px; } 
@@ -51,7 +51,7 @@ Any class defined in a Stylable stylesheet is exported as a named export and can
 
 ```css
 /* form.st.css */
-@namespace "Form"
+@namespace "Form";
 :import {
     -st-from: './button.st.css';
     -st-named: icon, label; 
