@@ -6,6 +6,7 @@ import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
 import { matchValue, valueReplacer } from "./value-template";
 import { Pojo } from "./types";
+import { transformMatchesOnRule, CUSTOM_SELECTOR_RE } from './stylable-utils';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -39,6 +40,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
         mappedSymbols: {
             [reservedRootName]: rootSymbol
         },
+        customSelectors: {},
         diagnostics
     };
 
@@ -74,6 +76,7 @@ export class StylableProcessor {
         this.handleAtRules(root);
 
         root.walkRules((rule: SRule) => {
+            this.handleCustomSelectors(rule);
             this.handleRule(rule);
             this.handleDeclarations(rule);
         });
@@ -94,6 +97,16 @@ export class StylableProcessor {
                     break;
                 case 'keyframes':
                     this.meta.keyframes.push(atRule);
+                    break;
+                case 'custom-selector':
+                    const params = atRule.params.split(/\s/);
+                    const customName = params.shift();
+                    toRemove.push(atRule);
+                    if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
+                        this.meta.customSelectors[customName] = atRule.params.replace(customName, "").trim();
+                    } else {
+                        //TODO: add warn there are two types one is not valid name and the other is empty name.
+                    }
                     break;
             }
         });
@@ -181,7 +194,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias};
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias };
         }
     }
 
@@ -235,6 +248,24 @@ export class StylableProcessor {
             this.meta.mappedSymbols[decl.prop] = varSymbol;
         });
         rule.remove();
+    }
+
+    handleCustomSelectors(rule: postcss.Rule) {
+        const customSelectors = this.meta.customSelectors;
+        if (rule.selector.indexOf(":--") > -1) {
+            rule.selector = rule.selector.replace(
+                CUSTOM_SELECTOR_RE,
+                (extensionName, _matches, selector) => {
+                    if (!customSelectors[extensionName]) {
+                        this.meta.diagnostics.warn(rule, "The selector '" + rule.selector + "' is undefined", { word: rule.selector });
+                        return selector;
+                    }
+                    return ":matches(" + customSelectors[extensionName] + ")";
+                }
+            )
+
+            rule.selector = transformMatchesOnRule(rule, false);
+        }
     }
 
     protected handleDeclarations(rule: SRule) {
@@ -447,6 +478,7 @@ export interface StylableMeta {
     elements: Pojo<ElementSymbol>;
     mappedSymbols: Pojo<StylableSymbol>;
     diagnostics: Diagnostics;
+    customSelectors: Pojo<string>;
 }
 
 export interface RefedMixin {
