@@ -4,11 +4,12 @@ title: Theme
 layout: docs
 ---
 
-Used in the [top part of an application](../guides/stylable-application.md#Apply component library theme) and to [create a theme](../guides/stylable-component-library.md#Theme) for a component library.
+You can use theming at the [top level of an application](../guides/stylable-application.md#Apply component library theme) and to [create a theme](../guides/stylable-component-library.md#Theme) for a component library.
 
 When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its look and feel to your stylesheet. Any CSS definitions written inside the imported stylesheet will output to the final CSS.
 
 ```css
+/* CSS */
 @namespace "project";
 :import {
     -st-theme: true;
@@ -21,6 +22,7 @@ When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its 
 Any [shared classes](../guides/shared-classes.md) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet, by simply redefining them.
 
 ```css
+/* CSS */
 @namespace "project";
 :import {
     -st-theme: true;
@@ -43,6 +45,7 @@ Any [shared classes](../guides/shared-classes.md) and [component variants](../gu
 Any variable defined in a theme file can be overridden. every CSS declaration that use that variable will be overridden under our stylesheet.
 
 ```css
+/* CSS */
 @namespace "project";
 :import {
     -st-theme: true;

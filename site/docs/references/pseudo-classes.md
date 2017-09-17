@@ -1,6 +1,6 @@
 ---
 id: references/pseudo-classes
-title: Pseudo-classes
+title: Pseudo-Classes
 layout: docs
 ---
 
@@ -20,7 +20,6 @@ The `-st-states` directive rule can be defined only for simple selectors like [t
 
 To define custom states for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then assigned different colors. 
 
-**CSS API**
 ```css
 /* example1.st.css */
 @namespace "Example1"
@@ -32,21 +31,20 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 .root:loading:toggled { color: blue; }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
 .Example1__root[data-Example1-loading][data-Example1-toggled] { color: blue; }
 ```
 
-> **Note**:  
+> **Note**    
 > You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
 ## Extend external stylesheet
 
 You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.media-button`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `media-button` component. 
 
-**CSS API**
 ```css
 /* example2.st.css */
 @namespace "Example2"
@@ -64,8 +62,8 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 .media-button:toggled { color: gold; } /* included in Example1 but overridden by Example2 */
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
 .Example2__root .Example2__media-button:hover { border: 0.2em solid black; } /* native hover - not declared */
@@ -78,7 +76,6 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. .Stylable generates selectors using custom `data-*` attributes. The CSS output uses the custom implementation defined in `-st-states` rather then its default generated `data-*` attributes.
 
-**CSS API**
 ```css
 /* example-custom.st.css */
 @namespace "ExampleCustom"
@@ -89,13 +86,13 @@ You can use this feature to define states even if the existing components you ar
 .root:loading { color: green; }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .ExampleCustom__root.on { color: red; }
 .ExampleCustom__root[data-spinner] { color: green; }
 ```
 
-> **Note**:  
+> **Note**    
 > When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
 ## Enable custom pseudo-classes
