@@ -35,7 +35,6 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 * **Remember** - Our [cheatsheet](../docs/getting-started/cheatsheet.md) helps you keep track of **Stylable** syntax.
 
-
 ## Components
 
 We recommend using our component library, [**Stylable-Components**](https://github.com/wix/stylable-components) - a stylable, fully-tested & strictly-typed component library.

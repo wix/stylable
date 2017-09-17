@@ -2,10 +2,11 @@
 # You don't need to edit this file, it's empty on purpose.
 # Edit theme's home layout instead if you wanna make some changes
 # See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-layout: home
+layout: page
+title: Welcome to Stylable
 ---
 
-![Stylable - CSS for Components]({{ site.baseurl }}/images/96-logo-horizontal.png){: .center-image }
+<img class="home-logo" src="{{ site.baseurl }}/images/96-logo-horizontal.png" alt="Stylable - CSS for Components" />
 
  *"New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now."*  [Håkon Wium Lie](https://dev.opera.com/articles/css-twenty-years-hakon/), co-creator of CSS 
 
