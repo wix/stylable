@@ -8,10 +8,6 @@ layout: docs
 
 When building your components, we recommend following the guidelines below. We've accumulated these through our work with **Stylable**:
 
-## Play nice with other page elements
-
-Since our stylesheet represents a component that should be flexible and by default, play nice with other elements on the page, in most cases it should have `display:inline-block` or `display:inline-flex` and avoid setting `position`. 
-
 ## Avoid size declarations
 
 Try avoiding size declaration just because it offers an easier API. To override a component specifying size limitations, you would need to override multiple CSS declarations.
