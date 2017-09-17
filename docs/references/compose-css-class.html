@@ -95,8 +95,8 @@
     <h1>Compose CSS Class</h1>
     <p>Use <code class="highlighter-rouge">-st-compose</code> to apply a CSS class to another CSS class or to a tag selector.</p>
 
-<p><strong>CSS API</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
 <span class="nc">.item</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
@@ -107,18 +107,18 @@
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
 <span class="nc">.Comp__selected.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
 </code></pre>
 </div>
 
-<h2 id="multiple-classes">Multiple Classes</h2>
+<h2 id="multiple-classes">Multiple classes</h2>
 
 <p>You can compose multiple items by order.</p>
 
-<p><strong>CSS API</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
 <span class="nc">.item</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
@@ -132,8 +132,8 @@
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
 <span class="nc">.Comp__round</span> <span class="p">{</span> <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span> <span class="p">}</span>
 <span class="nc">.Comp__selected.Comp__item.Comp__round</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
 </code></pre>

@@ -93,11 +93,12 @@
 
 <section class="docs-content">
     <h1>Theme</h1>
-    <p>Used in the <a href="../guides/stylable-application#Apply component library theme">top part of an application</a> and to <a href="../guides/stylable-component-library#Theme">create a theme</a> for a component library.</p>
+    <p>You can use theming at the <a href="../guides/stylable-application#Apply component library theme">top level of an application</a> and to <a href="../guides/stylable-component-library#Theme">create a theme</a> for a component library.</p>
 
 <p>When <a href="./imports">importing</a> a stylesheet use<code class="highlighter-rouge">-st-theme</code> directive to add its look and feel to your stylesheet. Any CSS definitions written inside the imported stylesheet will output to the final CSS.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./theme.st.css'</span><span class="p">;</span>
@@ -109,7 +110,8 @@
 
 <p>Any <a href="../guides/shared-classes">shared classes</a> and <a href="../guides/component-variants">component variants</a> defined at the theme level can be overridden in our stylesheet, by simply redefining them.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'comp-lib/backoffice-theme.st.css'</span><span class="p">;</span>
@@ -131,7 +133,8 @@
 
 <p>Any variable defined in a theme file can be overridden. every CSS declaration that use that variable will be overridden under our stylesheet.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'comp-lib/backoffice-theme.st.css'</span><span class="p">;</span>
