@@ -695,7 +695,7 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-    //TODO: do everything besides internal X
+    //TODO: remove all .skip tests
     describe('complex examples', function () {
         describe(':import', function () {
             it.skip('should return warning for unknown file', function () {
@@ -757,31 +757,28 @@ describe('diagnostics: warnings and errors', function () {
                         }
                 }}
                 expectWarningsFromTransform(config, [{message:'"my-mixin" is a mixin and cannot be used as a var', file:'/main.css'}])
-                
-                // expectWarnings(`
-                //     :import{
-                //         -st-from:"./mixins";
-                //         -st-named:my-mixin;
-                //     }
-                //     .root{
-                //         color:|value(my-mixin)|;
-                //     }
-                // `, [{ message: '"my-mixin" is a mixin and cannot be used as a var', file: "main.css" }]
-                //     , [{ content: mixins, path: 'mixins.ts' }])
-
             });
 
             it.skip('mixin cannot be used as stylesheet', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:my-mixin;
-                    }
-                    .root{
-                        -st-extend:|my-mixin|;
-                    }
-                `, [{ message: '"my-mixin" is a mixin and cannot be used as a stylesheet', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./mixins";
+                                -st-default:my-mixin;
+                            }
+                            .root{
+                                -st-extend:|my-mixin|;
+                            }
+                            `
+                        },
+                        '/mixins.js': {
+                            content: ``
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'"my-mixin" is a mixin and cannot be used as a stylesheet', file:'/main.css'}])
 
             });
 

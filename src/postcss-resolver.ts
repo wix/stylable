@@ -133,7 +133,6 @@ export class StylableResolver {
         return resolved;
     }
     resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
-
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 

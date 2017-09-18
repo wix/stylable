@@ -44,7 +44,6 @@ export class StylableTransformer {
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
-
         const ast = meta.outputAst = meta.ast.clone();
 
         const metaExports: Pojo<string> = {};

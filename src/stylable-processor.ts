@@ -103,6 +103,7 @@ export class StylableProcessor {
     }
 
     protected handleRule(rule: SRule) {
+        
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
@@ -238,7 +239,6 @@ export class StylableProcessor {
     }
 
     protected handleDeclarations(rule: SRule) {
-
         rule.walkDecls(decl => {
 
             decl.value.replace(matchValue, (match, varName) => {
@@ -257,7 +257,6 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
-
         if (decl.prop === valueMapping.states) {
             if (rule.isSimpleSelector) {
                 this.extendTypedRule(
