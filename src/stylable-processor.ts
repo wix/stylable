@@ -102,7 +102,7 @@ export class StylableProcessor {
         this.meta.namespace = processNamespace(namespace, this.meta.source);
     }
 
-    protected handleRule(rule: SRule) {
+    protected handleRule(rule: SRule) {    
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
@@ -238,7 +238,6 @@ export class StylableProcessor {
     }
 
     protected handleDeclarations(rule: SRule) {
-
         rule.walkDecls(decl => {
 
             decl.value.replace(matchValue, (match, varName) => {
@@ -257,7 +256,6 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
-
         if (decl.prop === valueMapping.states) {
             if (rule.isSimpleSelector) {
                 this.extendTypedRule(
@@ -372,6 +370,11 @@ export class StylableProcessor {
                     break;
             }
         });
+        if (!importObj.theme) {
+            importObj.overrides.forEach((decl) => {
+                this.diagnostics.warn(decl,`"${decl.prop}" css attribute cannot be used inside :import block`, {word:decl.prop})
+            })
+        }
 
         if (!importObj.from) {
             this.diagnostics.error(rule, `"${valueMapping.from}" is missing in :import block`);

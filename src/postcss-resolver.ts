@@ -20,11 +20,14 @@ export interface JSResolve {
 export class StylableResolver {
     constructor(protected fileProcessor: FileProcessor<StylableMeta>, protected requireModule: (modulePath: string) => any) { }
     resolveVarValue(meta: StylableMeta, name: string) {
+        return this.resolveVarValueDeep(meta, name).value
+    }        
+    resolveVarValueDeep(meta: StylableMeta, name: string) {
         let value;
         let symbol = meta.mappedSymbols[name];
+        let next;
 
         while (symbol) {
-            let next;
             if (symbol._kind === 'var' && symbol.import) {
                 next = this.resolve(symbol.import);
             } else if (symbol._kind === 'import') {
@@ -47,7 +50,7 @@ export class StylableResolver {
             value = null;
         }
 
-        return value;
+        return {value, next};
     }
     resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, false);
@@ -130,7 +133,6 @@ export class StylableResolver {
         return resolved;
     }
     resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
-
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 

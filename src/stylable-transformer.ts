@@ -44,7 +44,6 @@ export class StylableTransformer {
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
-
         const ast = meta.outputAst = meta.ast.clone();
 
         const metaExports: Pojo<string> = {};
@@ -53,7 +52,7 @@ export class StylableTransformer {
         
         !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
-            atRule.params = this.replaceValueFunction(atRule.params, meta);
+            atRule.params = this.replaceValueFunction(atRule, atRule.params, meta);
         });
 
         ast.walkRules((rule: SRule) => {
@@ -64,7 +63,7 @@ export class StylableTransformer {
             rule.selector = this.scopeRule(meta, rule, metaExports);
             !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
-                decl.value = this.replaceValueFunction(decl.value, meta);
+                decl.value = this.replaceValueFunction(decl, decl.value, meta);
             });
         });
 
@@ -87,12 +86,8 @@ export class StylableTransformer {
     }
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
-            if (metaExports[varSymbol.name]) {
-                this.diagnostics.warn(varSymbol.node, `symbol ${varSymbol.name} is already in use`, {word:varSymbol.name})
-            } else {
-                let value = this.resolver.resolveVarValue(meta, varSymbol.name);
-                metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
-            }
+            let value = this.resolver.resolveVarValue(meta, varSymbol.name);
+            metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
         });
     }
     exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
@@ -253,9 +248,12 @@ export class StylableTransformer {
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
-    replaceValueFunction(value: string, meta: StylableMeta) {
+    replaceValueFunction(node:postcss.Node, value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
-            let value = this.resolver.resolveVarValue(meta, name);
+            let {value, next} = this.resolver.resolveVarValueDeep(meta, name);
+            if (next && next._kind === 'js'){
+                this.diagnostics.error(node,`"${name}" is a mixin and cannot be used as a var`, {word:name})
+            }
             return typeof value === 'string' ? value : match;
         });
     }
