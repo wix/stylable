@@ -368,6 +368,7 @@ export class StylableProcessor {
                     importObj.theme = parseTheme(decl.value);
                     break;
                 default:
+                    this.diagnostics.warn(decl,`"${decl.prop}" css attribute cannot be used inside :import block`, {word:decl.prop})
                     importObj.overrides.push(decl);
                     break;
             }
