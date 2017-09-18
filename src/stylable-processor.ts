@@ -102,8 +102,7 @@ export class StylableProcessor {
         this.meta.namespace = processNamespace(namespace, this.meta.source);
     }
 
-    protected handleRule(rule: SRule) {
-        
+    protected handleRule(rule: SRule) {    
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
