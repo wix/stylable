@@ -10,7 +10,7 @@
     "test": "npm run test:node",
     "build": "tsc",
     "build:web": "webpack --config webpack.web.config.js",
-    "test:node": "ts-mocha ./tests/**/*.spec.ts",
+    "test:node": "ts-mocha \"./tests/**/*.spec.ts\"",
     "prepublish": "npm run build"
   },
   "dependencies": {
