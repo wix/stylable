@@ -759,54 +759,59 @@ describe('diagnostics: warnings and errors', function () {
                 expectWarningsFromTransform(config, [{message:'"my-mixin" is a mixin and cannot be used as a var', file:'/main.css'}])
             });
 
-            it.skip('mixin cannot be used as stylesheet', function () {
+            it('stylesheet cannot be used as var', function () {
                 let config = {
                     entry:'/main.css', 
                     files: {
                         '/main.css': {
                             content: `
                             :import{
-                                -st-from:"./mixins";
-                                -st-default:my-mixin;
+                                -st-from:"./file.css";
+                                -st-default:Comp;
                             }
                             .root{
-                                -st-extend:|my-mixin|;
+                                |color:value($Comp$)|;
                             }
-                            `
+                          `
                         },
-                        '/mixins.js': {
-                            content: ``
+                        '/file.css': {
+                            content: customButton
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'"my-mixin" is a mixin and cannot be used as a stylesheet', file:'/main.css'}])
-
+                expectWarningsFromTransform(config, [{message:'"Comp" is a stylesheet and cannot be used as a var', file:'/main.css'}])
             });
 
-            it.skip('stylesheet cannot be used as var', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                    .root{
-                        color:|value(Comp)|;
-                    }
-                `, [{ message: '"Comp" is a stylesheet and cannot be used as a var', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
-            });
-
-            it.skip('stylesheet cannot be used as mixin', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-                    .root{
-                        -st-mixin:|Comp|;
-                    }
-                `, [{ message: '"Comp" is a stylesheet and cannot be used as a mixin', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
+            it('stylesheet cannot be used as mixin', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                |-st-default:$Comp$|;
+                            }
+                            .root{
+                                -st-mixin:Comp;
+                            }
+                          `
+                        },
+                        '/file.css': {
+                            content: customButton
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'"Comp" is a stylesheet and cannot be used as a mixin', file:'/main.css'}])
+                // expectWarnings(`
+                //     :import{
+                //         -st-from:"./file";
+                //         -st-default:Comp;
+                //         -st-named:my-variant;
+                //     }
+                //     .root{
+                //         -st-mixin:|Comp|;
+                //     }
+                // `, [{ message: '"Comp" is a stylesheet and cannot be used as a mixin', file: "main.css" }]
+                //     , [{ content: customButton, path: 'file.css' }])
 
             });
 
@@ -870,6 +875,7 @@ describe('diagnostics: warnings and errors', function () {
             });
 
             it.skip('mixins cant be used with wrong number of params', function () {
+            
                 expectWarnings(`
                     :import{
                         -st-from:"./mixins";
@@ -882,21 +888,6 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: mixins, path: 'mixins.ts' }])
 
             });
-
-            it.skip('error running mixin', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:mixinThatExplodes;
-                    }
-                    .root{
-                        -st-mixin:|mixinThatExplodes(param)|;
-                    }
-                `, [{ message: '"mixinThatExplodes" has thrown an error: error text', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
-            });
-
         });
 
     });

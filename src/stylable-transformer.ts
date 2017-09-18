@@ -236,10 +236,14 @@ export class StylableTransformer {
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
+                        if ((resolvedClass.symbol as any)['-st-root']){
+                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> {debugger; return node.prop === valueMapping.default })
+                            this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, {word:importNode.value})    
+                        }
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
                         let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
-                        this.diagnostics.error(importNode, 'import mixin does not exist', {word:mix.ref.name})
+                        this.diagnostics.error(importNode, 'import mixin does not exist', {word:importNode.value})
                     }
                 }
             } else if (mix.ref._kind === 'class') {
@@ -253,6 +257,8 @@ export class StylableTransformer {
             let {value, next} = this.resolver.resolveVarValueDeep(meta, name);
             if (next && next._kind === 'js'){
                 this.diagnostics.error(node,`"${name}" is a mixin and cannot be used as a var`, {word:name})
+            } else if (next && next.symbol._kind === 'class'){
+                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, {word:name})
             }
             return typeof value === 'string' ? value : match;
         });
