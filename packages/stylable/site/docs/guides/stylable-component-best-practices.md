@@ -64,7 +64,7 @@ The best practice is to use 2 colors across the project for contrasting text and
 
 ## Keep browser defaults intact
 
-Browsers add a default UA stylesheet to provide the HTML with a default "style". 
+Browsers add a default user agent stylesheet to provide the HTML with a default "style". 
 
 It is tempting to "clean up" a `button`'s default style in the component. But, we want our component to "blend in" in every context it's used. A button tag in our component should look like other button tags in the context of the application where it is used.
 
@@ -76,11 +76,11 @@ Write low specificity selectors that will be easy to override from a parent comp
 
 ## Keep your selectors as simple as possible
 
-You want to allow the context of the application to style your component's internals. 
+It takes a more complex selector to override a high specificity selector that was defined in a component stylesheet.
 
 Override CSS only for behaviors that **must** be overridden for the component to function and minimize the use of `tag selectors` and `pseudo-elements` of nested components. 
 
-When a component customizes its internal DOM parts, it generates selectors with high specificity that make it hard to style from the outside.
+Styling pseudo-elements in a component creates a selector that takes more specificity to override
 
 ```css
 @namespace "comp";
@@ -106,12 +106,8 @@ button {}
 A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify each of them with a comment per this example.
 
 ```css
-.root {
-    /* mouse click hint */
-    cursor: pointer;
-}
 .link {
-    /* override UA style */
+    /* override default anchor color */
     color: currentColor;
     /* cover entire line */
     display: block;
@@ -139,5 +135,3 @@ Import theme variables from the [project commons stylesheet](../guides/project-c
 When using an image element source or svg directly in the DOM, it is not easy, and in some cases not possible, to modify the asset from outside the component using CSS.
 
 When an asset is part of the style API, it should be placed in the background of an element, allowing it to be overridden from a parent component.
-
-It is not recommended to use `::before` and `::after`, because they are generic and hard to override.
