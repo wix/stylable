@@ -101,8 +101,13 @@ export class StylableResolver {
 
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
-
-            const meta = this.fileProcessor.process(from);
+            let meta;
+            try {
+                meta = this.fileProcessor.process(from);
+            }catch(e){
+                return null
+            }
+            
 
             if (importSymbol.type === 'default') {
                 symbol = meta.mappedSymbols[meta.root];
@@ -113,7 +118,7 @@ export class StylableResolver {
             return <CSSResolve>{ _kind: "css", symbol, meta };
 
         } else {
-
+            
             const _module = this.requireModule(from);
 
             if (importSymbol.type === 'default') {

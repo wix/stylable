@@ -18,7 +18,7 @@ const customButton = `
     }
     
 `;
-const mixins = ``;
+// const mixins = ``;
 
 interface warning {
     message: string;
@@ -695,28 +695,29 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-    //TODO: remove all .skip tests
     describe('complex examples', function () {
         describe(':import', function () {
-            it.skip('should return warning for unknown file', function () {
-                expectWarnings(`
-
-                    :import{
-                        -st-from:|"./file"|;
-                        -st-default:Theme;
-                    }
-                `, [{ message: 'could not find file "./file"', file: "main.css" }])
-            });
-
-            it.skip('should return warning for unknown import', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:|variant|;
-                    }
-                `, [{ message: 'cannot find export "variant" in "./file"', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }]);
+            it('should return warning for unknown var import', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                -st-default:Comp;
+                                |-st-named:$variant$|;
+                            }
+                            .root {
+                                color:value(variant)
+                            }`
+                        },
+                        '/file.css':{
+                            content: customButton
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'cannot find export "variant" in "./file.css"', file:'/main.css'}])
+          
             });
 
         });
@@ -801,18 +802,6 @@ describe('diagnostics: warnings and errors', function () {
                         }
                 }}
                 expectWarningsFromTransform(config, [{message:'"Comp" is a stylesheet and cannot be used as a mixin', file:'/main.css'}])
-                // expectWarnings(`
-                //     :import{
-                //         -st-from:"./file";
-                //         -st-default:Comp;
-                //         -st-named:my-variant;
-                //     }
-                //     .root{
-                //         -st-mixin:|Comp|;
-                //     }
-                // `, [{ message: '"Comp" is a stylesheet and cannot be used as a mixin', file: "main.css" }]
-                //     , [{ content: customButton, path: 'file.css' }])
-
             });
 
             xit('component variant cannot be used for native node', function () {
@@ -874,20 +863,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it.skip('mixins cant be used with wrong number of params', function () {
             
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:mixinWith2Args;
-                    }
-                    .root{
-                        -st-mixin:|mixinWith2Args(param)|;
-                    }
-                `, [{ message: 'invalid mixin arguments: "mixinWith2Args" expects 2 arguments but recieved 1', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
-            });
         });
 
     });

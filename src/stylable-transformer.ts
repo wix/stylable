@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol, Imported } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -237,7 +237,7 @@ export class StylableTransformer {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
                         if ((resolvedClass.symbol as any)['-st-root']){
-                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> {debugger; return node.prop === valueMapping.default })
+                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> { return node.prop === valueMapping.default })
                             this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, {word:importNode.value})    
                         }
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
@@ -257,8 +257,13 @@ export class StylableTransformer {
             let {value, next} = this.resolver.resolveVarValueDeep(meta, name);
             if (next && next._kind === 'js'){
                 this.diagnostics.error(node,`"${name}" is a mixin and cannot be used as a var`, {word:name})
-            } else if (next && next.symbol._kind === 'class'){
+            } else if (next && next.symbol && next.symbol._kind === 'class'){
                 this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, {word:name})
+            } else if (!value){
+                const importIndex = meta.imports.findIndex((imprt:Imported)=>!!imprt.named[name]);
+                let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node:any)=>node.prop ===valueMapping.named)
+                this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, {word:name})
+                
             }
             return typeof value === 'string' ? value : match;
         });
