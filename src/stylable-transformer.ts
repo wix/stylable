@@ -248,7 +248,7 @@ export class StylableTransformer {
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
-    replaceValueFunction(node:any, value: string, meta: StylableMeta) {
+    replaceValueFunction(node:postcss.Node, value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
             let {value, next} = this.resolver.resolveVarValueDeep(meta, name);
             if (next && next._kind === 'js'){

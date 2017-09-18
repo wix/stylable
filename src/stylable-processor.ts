@@ -367,11 +367,15 @@ export class StylableProcessor {
                     importObj.theme = parseTheme(decl.value);
                     break;
                 default:
-                    this.diagnostics.warn(decl,`"${decl.prop}" css attribute cannot be used inside :import block`, {word:decl.prop})
                     importObj.overrides.push(decl);
                     break;
             }
         });
+        if (!importObj.theme) {
+            importObj.overrides.forEach((decl) => {
+                this.diagnostics.warn(decl,`"${decl.prop}" css attribute cannot be used inside :import block`, {word:decl.prop})
+            })
+        }
 
         if (!importObj.from) {
             this.diagnostics.error(rule, `"${valueMapping.from}" is missing in :import block`);
