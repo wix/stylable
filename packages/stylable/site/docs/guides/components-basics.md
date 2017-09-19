@@ -9,16 +9,16 @@ This guide walks you through the basics of how to style and work with components
 You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extention `.st.css`.
 
 > **Note**:
-> This guide shows the HTML side of our [stylable-integration](https://github.com/wixplosives/stylable-integration) with React. 
+> This guide shows the JSX side of our [stylable-integration](https://github.com/wixplosives/stylable-integration) with React. 
 
-**Stylable** styles are similar to a type-system. Once you have declared that something is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
+**Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
 
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application. 
 
 
 ## 1 Style a Component 
 
-Let's say you have a `Button` component with a render function per this example. You can style its different HTML elements using the `className` attribute.
+Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property.
 
 ```jsx
 /* button.ts */
@@ -36,7 +36,12 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
 
 ```css
 /* button.st.css */
-.root { /* note that the root class is automatically placed on the root HTML element by stylable-integration */
+
+/* 
+note that the root class is automatically placed on the root HTML 
+element by Stylable React integration 
+*/
+.root { 
     background: #b0e0e6;
 }
 .icon {
@@ -47,8 +52,6 @@ Now in the component's **Stylable** CSS file called `button.st.css`, you can dec
     color: rgba(81, 12, 68, 1.0)
 }
 ```
-In this example, the **Stylable** CSS [extends](../references/extend-stylesheet.md) the [root](../references/root.md) class and styles it. The `root` class is automatically added as part of the **Stylable** integration and doesn't actually have to be written separately.
-
 
 ## 2 Expose the Component's Stylable API
 
@@ -56,46 +59,48 @@ When using **Stylable**, every component exposes an API that's usable by its par
 
 The API includes:
 
-* _The component's internal parts_: any HTML element that has the className attribute, and is therefore exposed via a [Stylable pseudo-element](../references/pseudo-elements.md).
+* _Pseudo-elements_: any HTML element that has the className attribute, and is therefore exposed via a [pseudo-element](../references/pseudo-elements.md).
  
-* _The component's custom states_: any state connected to the component logic, and declared as a [Stylable pseudo-class](../references/pseudo-classes.md).
+* _Pseudo-classes_: any state connected to the component logic, and declared as a [pseudo-class](../references/pseudo-classes.md).
 
 Let's see how to create your own parts and states and expose them for use throughout a page or application.
 
 ### A. Create and Expose Internal Parts
 
-In the example above, you created a very simple button component. Now let's [import](../references/imports.md) this button into a `Form` component. The classes that you created above are available as internal parts of the imported component. Each class is available by its name as a [Stylable pseudo-element](../references/pseudo-elements.md). 
+In the example above, you created a very simple button component. Now let's [import](../references/imports.md) this button into a `Panel` component. The classes that you created above are available as pseudo-elements of the imported component.
 
-You can now style your `Button` in the scope of the `Form` so that it fits the needs of this page.
+You can now style your `Button` in the scope of the `Panel` so that it fits its needs.
 
-Let's take the `Button` component and import it into the JavaScript file, and also add it to the render:
+Let's take the `Button` component and import it into the JSX file, and also add it to the render:
 
 ```jsx
-/* form.tsx */
-import {Button} from './button.ts'
+/* panel.jsx */
+import {Button} from './button'
 
 render(){
     return (
         <div>
-            <Button className="formBtn"/>
+            <Button className="cancelBtn"/>
         </div>
     );
 }
 ```
 
-Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then match the internal parts of the component that you imported:
+Let's also import `Button`'s stylesheet into the `Panel` stylesheet. You can then target the internal parts of the component that you imported:
 
 ```css
-/* form.st.css */
+/* panel.st.css */
 :import {
     -st-from: './button.st.css';
     -st-default: Button;
 }
-.formBtn {
+/* cancelBtn is of type Button */
+.cancelBtn { 
     -st-extends: Button;
     background: cornflowerblue;
 }
-.formBtn::label { /* since formBtn extends Button, it also includes all of its internal parts */
+/* targets the label of <Button className="cancelBtn" /> */
+.cancelBtn::label { 
     color: honeydew;
     font-weight: bold;
 }
@@ -105,13 +110,13 @@ Let's also import `Button`'s **Stylable** CSS into the `Form` CSS. You can then 
 
 You can also create custom states for the component that are available as [pseudo-classes](../references/pseudo-classes.md) to anyone using your component.
 
-A state can be used to reflect any Boolean property in your component. For example, your `Button` has a Boolean property called `clicked`. In this example, it is triggered when it is first clicked, and never turned off.
+A custom pseudo-class can be used to reflect any logical state of your component. For example, your `Button` has a property called `on`. In this example, it is toggled when the button is clicked.
 
 ```jsx
-/* button.ts */
+/* button.jsx */
 render () {
     return (
-        <button style-state={this.state.clicked} onClick={()=>this.setState({clicked:!this.state.clicked})}>
+        <button style-state={this.state.on} onClick={()=>this.setState({on:!this.state.on})}>
             <div className="icon"/>
             <span className="label">Click Here!</span>
         </button>
@@ -122,7 +127,7 @@ render () {
 ```css
 /* button.st.css */
 .root {
-    -st-states: clicked;
+    -st-states: on;
     background: #b0e0e6;
 }
 .icon {
@@ -132,19 +137,20 @@ render () {
     font-size: 1.2em;
     color: rgba(81, 12, 68, 1.0)
 }
-.root:clicked { /* matches the state on the root of the component */
+/* targets the state on the root of the component */
+.root:on { 
     box-shadow: 2px 2px 2px 1px darkslateblue;
 }
 ```
 
-You can then match `Button`'s `clicked` state in your `Form` as follows:
+You can then target `Button`'s `on` state in your `Panel` as follows:
 
 ```css
-/* form.st.css */
-.formBtn {
+/* panel.st.css */
+.cancelBtn {
     background: cornflowerblue;
 }
-.formBtn:clicked {
+.cancelBtn:on {
     box-shadow: 2px 2px 2px 1px indigo;
 }
 ```
