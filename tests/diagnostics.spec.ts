@@ -107,8 +107,6 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
     });
 
     expect(res.diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
-
-    // console.log(src, warnings, extraFiles);
 }
 
 function expectWarningsFromTransform(config: Config, warnings:warning[]) {

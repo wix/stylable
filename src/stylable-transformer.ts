@@ -263,7 +263,6 @@ export class StylableTransformer {
                 const importIndex = meta.imports.findIndex((imprt:Imported)=>!!imprt.named[name]);
                 let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node:any)=>node.prop ===valueMapping.named)
                 this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, {word:name})
-                
             }
             return typeof value === 'string' ? value : match;
         });
