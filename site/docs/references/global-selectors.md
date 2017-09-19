@@ -23,8 +23,8 @@ In this example `.classB` and `.classC` are not scoped to `Comp` but are part of
 }
 ```
 
-> **Note**   
->You can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
+> ![notice](../assets/notice.svg)  
+> You can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
 >
 > ```css
 > .classA:global(:selected) {

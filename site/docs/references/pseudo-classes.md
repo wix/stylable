@@ -38,7 +38,7 @@ To define custom states for a simple selector, you tell **Stylable** the list of
 .Example1__root[data-Example1-loading][data-Example1-toggled] { color: blue; }
 ```
 
-> **Note**    
+> ![notice](../assets/notice.svg)  
 > You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
 ## Extend external stylesheet
@@ -92,7 +92,7 @@ You can use this feature to define states even if the existing components you ar
 .ExampleCustom__root[data-spinner] { color: green; }
 ```
 
-> **Note**    
+> ![notice](../assets/notice.svg)  
 > When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
 ## Enable custom pseudo-classes

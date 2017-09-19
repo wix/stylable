@@ -6,7 +6,7 @@ layout: docs
 
 Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.
 
-> **Note**    
+> ![notice](../assets/notice.svg)  
 > Variables are scoped to the specific stylesheet and do not conflict with variables from another stylesheet.
 
 ## Use in stylesheet
@@ -63,8 +63,8 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 }
 ```
 
-> **Note**  
->Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
+> ![notice](../assets/notice.svg)  
+> Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
 
 
 ## Compose variables

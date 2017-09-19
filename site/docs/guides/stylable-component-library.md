@@ -35,13 +35,14 @@ src/
     * a folder for each component with its stylable stylesheet
 * The `src/themes` folder contains the relevant theme files.
 
-> **Note:** Although you may think the project file should be at the `src` level, we recommend you to create the `project.st.css` file at the same level as your components because there are many links between this file and your component files.
+> ![info](../assets/info.svg)  
+> Although you may think the project file should be at the `src` level, we recommend you to create the `project.st.css` file at the same level as your components because there are many links between this file and your component files.
 
 ## The `project.st.css` file
 
 As a first step, create a [project commons stylesheet](./project-commons.md) named `project.st.css` in the `src/components` directory. This exposes the API for the project. 
 
-> **Note**:
+> ![info](../assets/info.svg)  
 > It is recommended to leave the project's CSS rulesets empty with no declarations. These should be defined in a theme file. 
 
 ## Themable components
