@@ -292,13 +292,12 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
             });
-            it.skip('should warn when defining states on element selector', function () {
+            it('should warn when defining states on element selector', function () {
                 let config = {
                     entry:'/main.css', 
                     files: {
                         '/main.css': {
                             content: `
-                            .root {}
                             MyElement{
                                 |-st-states|:shmover;
                             }`

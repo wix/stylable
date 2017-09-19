@@ -256,8 +256,8 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
-        if (decl.prop === valueMapping.states) {
-            if (rule.isSimpleSelector) {
+        if (decl.prop === valueMapping.states ) {
+            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
@@ -265,7 +265,11 @@ export class StylableProcessor {
                     parseStates(decl.value)
                 );
             } else {
-                this.diagnostics.warn(decl, 'cannot define pseudo states inside complex selectors');
+                if (rule.selectorType === 'element') {
+                    this.diagnostics.warn(decl, 'cannot define pseudo states inside element selectors');
+                } else {
+                    this.diagnostics.warn(decl, 'cannot define pseudo states inside complex selectors');
+                }
             }
         } else if (decl.prop === valueMapping.extends) {
             if (rule.isSimpleSelector) {
@@ -332,10 +336,12 @@ export class StylableProcessor {
     protected extendTypedRule(node: postcss.Node, selector: string, key: keyof StylableDirectives, value: any) {
         const name = selector.replace('.', '');
         const typedRule = <ClassSymbol | ElementSymbol>this.meta.mappedSymbols[name];
-        if (typedRule[key]) {
+        if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, `override "${key}" on typed rule "${name}"`, { word: name });
         }
-        typedRule[key] = value;
+        if (typedRule) {
+            typedRule[key] = value;
+        }
     }
 
     protected handleImport(rule: postcss.Rule) {
