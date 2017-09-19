@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="17px" viewBox="0 0 20 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>notice</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Desktop" transform="translate(-534.000000, -553.000000)" stroke="#FB7D33">
+            <g id="notice" transform="translate(535.000000, 553.000000)">
+                <path d="M7.82315789,1.56631579 L0.690526316,13.4736842 C0.39127716,13.9919155 0.389490471,14.6300184 0.685832859,15.1499174 C0.982175248,15.6698163 1.53213644,15.993423 2.13052632,16 L16.3957895,16 C16.9941794,15.993423 17.5441405,15.6698163 17.8404829,15.1499174 C18.1368253,14.6300184 18.1350386,13.9919155 17.8357895,13.4736842 L10.7031579,1.56631579 C10.3978394,1.06297374 9.85186204,0.755583996 9.26315789,0.755583996 C8.67445375,0.755583996 8.12847635,1.06297374 7.82315789,1.56631579 Z" id="Shape"></path>
+                <path d="M9,5.89473684 L9,10.2631579" id="Shape"></path>
+                <path d="M9,12.8947368 L9,13.2631579" id="Shape"></path>
+            </g>
+        </g>
+    </g>
+</svg>
