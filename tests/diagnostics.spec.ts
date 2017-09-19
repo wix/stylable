@@ -444,6 +444,28 @@ describe('diagnostics: warnings and errors', function () {
                 }
                 expectWarningsFromTransform(config, [{message:'not a valid mixin declaration color, and was removed', file:'/main.css'}])  
             });    
+            it('should not add warning when mixin value is a string', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $"myMixin"$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: ``
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{message:'value can not be a string (remove quotes?)', file:'/main.css'}])  
+            });    
         });
 
         describe(':vars', function () {
@@ -973,6 +995,28 @@ describe('diagnostics: warnings and errors', function () {
             }}
             expectWarningsFromTransform(config, [{message:'Trying to import unknown alias', file:'/main.st.css'}])  
         })
+        it('should not add warning when compose value is a string', function () {
+            let config = {
+                entry:'/main.css', 
+                files: {
+                    '/main.css': {
+                        content: `
+                        :import {
+                            -st-from: "./imported.css";
+                            -st-default: myCompose;
+                        }
+                        .container {
+                            |-st-compose: $"myCompose"$|;  
+                        }
+                        `
+                    },
+                    '/imported.css': {
+                        content: ``
+                    }
+                }
+            }
+            expectWarningsFromTransform(config, [{message:'value can not be a string (remove quotes?)', file:'/main.css'}])  
+        });
        
       
     })

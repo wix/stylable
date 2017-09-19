@@ -137,7 +137,9 @@ export class StylableProcessor {
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
                 const prev = nodes[index - 1];
-                if (prev) { /*TODO: maybe warn on element that is not a direct child div vs > div*/ }
+                if (prev) { 
+                    /*TODO: maybe warn on element that is not a direct child div vs > div*/ 
+                }
             }
             return void 0;
         });
@@ -158,7 +160,6 @@ export class StylableProcessor {
     protected checkRedeclareSymbol(symbolName: string, node: postcss.Node) {
         const symbol = this.meta.mappedSymbols[symbolName];
         if (symbol) {
-            //TODO: can output match better error;
             this.diagnostics.warn(node, `redeclare symbol "${symbolName}"`, { word: symbolName })
         }
     }
@@ -290,7 +291,7 @@ export class StylableProcessor {
 
         } else if (decl.prop === valueMapping.mixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(decl.value).forEach((mixin) => {
+            parseMixin(decl, this.diagnostics).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
                     mixins.push({
@@ -308,7 +309,7 @@ export class StylableProcessor {
 
             rule.mixins = mixins;
         } else if (decl.prop === valueMapping.compose) {
-            const composes = parseCompose(decl.value);
+            const composes = parseCompose(decl, this.diagnostics);
             if (rule.isSimpleSelector) {
                 const composeSymbols = composes.map((name) => {
                     const extendsRefSymbol = this.meta.mappedSymbols[name];
