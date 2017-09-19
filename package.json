@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "4.0.15",
+  "version": "4.0.16",
   "description": "CSS for Components",
   "license": "BSD-3-Clause",
   "main": "./dist/src/index.js",
@@ -30,7 +30,6 @@
     "@types/enhanced-resolve": "^3.0.4",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.2",
-    "c3-platform": "^1.0.0",
     "chai": "^4.0.2",
     "flat": "^4.0.0",
     "glob": "^7.1.2",
@@ -49,7 +48,8 @@
   "files": [
     "dist",
     "src",
-    "runtime.js"
+    "runtime.js",
+    "runtime.d.ts"
   ],
   "repository": {
     "type": "git",
