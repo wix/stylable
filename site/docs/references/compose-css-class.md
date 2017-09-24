@@ -4,7 +4,7 @@ title: Compose CSS Class
 layout: docs
 ---
 
-Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector.
+Use `-st-compose` to apply a CSS class to another CSS [class](./class-selectors.md) or to a [tag selector](./tag-selectors.md).
 
 ```css
 /* CSS */
@@ -26,7 +26,7 @@ Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector
 
 ## Multiple classes
 
-You can compose multiple items by order.
+You can compose multiple classes or tag selectors by order.
 
 ```css
 /* CSS */

@@ -7,7 +7,7 @@ layout: docs
 You can use **Stylable** to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets. 
 
 Here are some use cases where you can use mixins with other **Stylable** features:
-* [Layouts](./create-layouts.md) - easily describe complex layouts.
+* Layouts - easily describe complex layouts.
 * Helpers - use custom CSS shortcuts, like timers, effects and macros.
 
 ## Example
