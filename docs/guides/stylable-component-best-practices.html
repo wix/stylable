@@ -155,11 +155,7 @@ In the future, we may implement <strong>Stylable</strong> formatters to help min
 
 <h2 id="keep-browser-defaults-intact">Keep browser defaults intact</h2>
 
-<<<<<<< HEAD
 <p>Browsers add a default user agent stylesheet to provide the HTML with a default “style”.</p>
-=======
-<p>Browsers add a default UA stylesheet to provide the HTML with a default “style”.</p>
->>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
 
 <p>It is tempting to “clean up” a <code class="highlighter-rouge">button</code>’s default style in the component. But, we want our component to “blend in” in every context it’s used. A button tag in our component should look like other button tags in the context of the application where it is used.</p>
 
@@ -171,19 +167,11 @@ In the future, we may implement <strong>Stylable</strong> formatters to help min
 
 <h2 id="keep-your-selectors-as-simple-as-possible">Keep your selectors as simple as possible</h2>
 
-<<<<<<< HEAD
 <p>It takes a more complex selector to override a high specificity selector that was defined in a component stylesheet.</p>
 
 <p>Override CSS only for behaviors that <strong>must</strong> be overridden for the component to function and minimize the use of <code class="highlighter-rouge">tag selectors</code> and <code class="highlighter-rouge">pseudo-elements</code> of nested components.</p>
 
 <p>Styling pseudo-elements in a component creates a selector that takes more specificity to override</p>
-=======
-<p>You want to allow the context of the application to style your component’s internals.</p>
-
-<p>Override CSS only for behaviors that <strong>must</strong> be overridden for the component to function and minimize the use of <code class="highlighter-rouge">tag selectors</code> and <code class="highlighter-rouge">pseudo-elements</code> of nested components.</p>
-
-<p>When a component customizes its internal DOM parts, it generates selectors with high specificity that make it hard to style from the outside.</p>
->>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
 <span class="c">/* 
