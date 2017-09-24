@@ -118,8 +118,13 @@
 <p>In this example, you <a href="./imports">import</a> a <code class="highlighter-rouge">VideoPlayer</code> component into your stylesheet, and style an internal part called <code class="highlighter-rouge">play-button</code> overriding its original styling.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<<<<<<< HEAD
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
+=======
+<span class="k">@namespace</span> <span class="s1">"Page"</span>
+<span class="p">:</span><span class="n">import</span> <span class="p">{</span>
+>>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./video-player.st.css'</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">VideoPlayer</span><span class="p">;</span>
 <span class="p">}</span>
@@ -143,7 +148,11 @@
 
 <blockquote>
   <p><strong>Note</strong>  <br />
+<<<<<<< HEAD
 Custom pseudo-elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: <code class="highlighter-rouge">.my-gallery::nav-btn::label</code>.</p>
+=======
+Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: <code class="highlighter-rouge">.my-gallery::nav-btn::label</code>.</p>
+>>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
 </blockquote>
 
 <h2 id="extend-stylesheet-pseudo-elements">Extend stylesheet pseudo-elements</h2>
@@ -202,8 +211,13 @@ You can also override native pseudo-elements using <strong>Stylable’s</strong>
 <p>In this example, <code class="highlighter-rouge">root</code> extends <code class="highlighter-rouge">VideoPlayer</code> and so any class placed on the <code class="highlighter-rouge">root</code> overrides the pseudo-element.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<<<<<<< HEAD
 <span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
+=======
+<span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span>
+<span class="p">:</span><span class="n">import</span> <span class="p">{</span>
+>>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./video-player.css'</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">VideoPlayer</span><span class="p">;</span>
 <span class="p">}</span>

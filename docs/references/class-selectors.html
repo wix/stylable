@@ -98,8 +98,13 @@
 <p>In <strong>Stylable</strong>, class selectors are scoped to the <a href="./namespace">namespace</a> of the stylesheet.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<<<<<<< HEAD
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nc">.thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+=======
+<span class="k">@namespace</span> <span class="s1">"Page"</span>
+<span class="p">.</span><span class="n">thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+>>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
 <span class="nc">.thumbnail</span><span class="nd">:hover</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.gallery</span><span class="nd">:hover</span> <span class="nc">.thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre>
@@ -121,7 +126,11 @@
 
 <blockquote>
   <p><strong>Note:</strong><br />
+<<<<<<< HEAD
 In <strong>Stylable</strong>, as you can see in these examples, <code class="highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
+=======
+In Stylable, as you can see in these examples, <code class="highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
+>>>>>>> 71b0e000c0236c234b3a1dad35dd0b68f4cf5ddf
 CSS class can also define <a href="./pseudo-classes">states</a> and <a href="./extend-stylesheet">extend another component</a>.</p>
 </blockquote>
 
