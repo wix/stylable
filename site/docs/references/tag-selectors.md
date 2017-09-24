@@ -8,8 +8,8 @@ Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_
 
 Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped. The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
-> **Note**  
->In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
+> ![info](../assets/info.svg)  
+> In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
 
 ## Native Element
 
@@ -28,7 +28,7 @@ form { background: green; }
 .Page__root.side-bar:hover form { background: red; }
 ```
 
-> **Note**    
+> ![notice](../assets/notice.svg)  
 > `form` is not namespaced.
 
 ```jsx

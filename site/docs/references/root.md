@@ -23,5 +23,5 @@ The `root` class is added automatically to root in [react integration](react-int
 .Comp__root { background: red; }
 ```
 
-> **Note**    
+> ![info](../assets/info.svg)  
 > Root can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).

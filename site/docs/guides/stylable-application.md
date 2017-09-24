@@ -54,7 +54,7 @@ As a best practice, the project commons should use the [`-st-theme`](../referenc
 }
 ```
 
-> **Note**:
+> ![info](../assets/info.svg)  
 > Usually a theme is used only in a project commons file, but there are cases where you may want to show different styles between pages of your application, in which case a [multiple theme project structure](./stylable-component-library.md) might work better.
 
 ## Stylable component

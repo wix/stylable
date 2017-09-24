@@ -31,7 +31,7 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 </div>
 ```
 
-> **Note:**  
+> ![info](../assets/info.svg)  
 > In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).  
 > CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
 

@@ -106,7 +106,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 
 You can use CSS classes to override extended pseudo-elements. 
 
-> **Note**    
+> ![info](../assets/info.svg)  
 > You can also override native pseudo-elements using **Stylable's** custom pseudo-elements but this is not recommended as it can lead to code that's confusing and hard to maintain.
 
 In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
@@ -131,6 +131,6 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 .SuperVideoPlayer__root.VideoPlayer__root .SuperVideoPlayer__play-button { color: gold; }
 ```
 
-> **Note**    
+> ![notice](../assets/notice.svg)  
 > Overriding pseudo-elements changes the targeting in the overriding stylesheet and not in the stylesheet being extended.
 

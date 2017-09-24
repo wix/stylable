@@ -12,7 +12,7 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 * `-st-default:` Imports the default export of the module named in `-st-from:`. Use with the name by which to identify the imported value in the scoped stylesheet.
 * `-st-named:` List of the named exports to import into the local scoped stylesheet from the file named in `-st-from:`.
 
-> **Note**  
+> ![notice](../assets/notice.svg)  
 > * `:import` is a Stylable directive and not a selector.
 > * Using `import` as part of a complex selector or inside a CSS ruleset does not import.
 > * Multiple imports may conflict and the last one in the file wins.
