@@ -17,7 +17,7 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 > * Using `import` as part of a complex selector or inside a CSS ruleset does not import.
 > * Multiple imports may conflict and the last one in the file wins.
 
-## Import Basic usage
+## Imports - basic usage
 
 ### Import the default export of a local reference stylesheet for use in the scoped stylesheet
 
@@ -55,7 +55,7 @@ import { gridMixin, tooltipMixin } from "./my-mixins";
 
 ### Import named exports from a local JS module and locally refer to one of the export values as a different name
 
-The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as ```tooltip```. These mixins should be referred to as `gridMixin` and `tooltip` in this stylesheet.
+The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. The value `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as `tooltip`. These mixins are referred to as `gridMixin` and `tooltip` in this stylesheet.
 
 ```css
 /* CSS */
@@ -70,9 +70,9 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 import { gridMixin, tooltipMixin as tooltip } from "./my-mixins";
 ```
 
-## Import Stylesheet
+## Import stylesheet
 
-When importing another stylesheet the default represent the root of the stylesheet, and named imports represent vars and classes.
+When importing another stylesheet, the default import represents the root of the stylesheet, and named imports represent vars and classes.
 
 ## Usage
 
@@ -81,4 +81,4 @@ When importing another stylesheet the default represent the root of the styleshe
 * [Import variables](./variables.md#import-variables)
 * [Import classes](./class-selectors.md#import-classes)
 * [Mixins](./mixin-syntax.md)
-* [Component Variants](../guides/component-variants.md) and [Shared Classes](../guides/shared-classes.md)
+* [Component variants](../guides/component-variants.md) and [Shared classes](../guides/shared-classes.md)

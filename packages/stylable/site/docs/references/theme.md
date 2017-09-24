@@ -6,7 +6,7 @@ layout: docs
 
 You can use theming at the [top level of an application](../guides/stylable-application.md#Apply component library theme) and to [create a theme](../guides/stylable-component-library.md#Theme) for a component library.
 
-When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its look and feel to your stylesheet. Any CSS definitions written inside the imported stylesheet will output to the final CSS.
+When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its look and feel to your stylesheet. Any CSS definitions written inside the imported stylesheet are output to the final CSS.
 
 ```css
 /* CSS */
@@ -19,7 +19,7 @@ When [importing](./imports.md) a stylesheet use`-st-theme` directive to add its 
 
 ## Override classes
 
-Any [shared classes](../guides/shared-classes.md) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet, by simply redefining them.
+Any [shared classes](../guides/shared-classes.md) and [component variants](../guides/component-variants.md) defined at the theme level can be overridden in our stylesheet by simply redefining them.
 
 ```css
 /* CSS */
@@ -42,7 +42,7 @@ Any [shared classes](../guides/shared-classes.md) and [component variants](../gu
 
 ## Override theme variables
 
-Any variable defined in a theme file can be overridden. every CSS declaration that use that variable will be overridden under our stylesheet.
+Any variable defined in a theme file can be overridden. Every CSS declaration that uses that variable is overridden under our stylesheet.
 
 ```css
 /* CSS */

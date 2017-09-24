@@ -54,7 +54,7 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 ```
 
 > **Note**    
-> Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
+> Custom pseudo-elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
 
 
 ## Extend stylesheet pseudo-elements

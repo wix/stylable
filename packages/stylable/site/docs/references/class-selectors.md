@@ -4,9 +4,9 @@ title: CSS Class Selectors
 layout: docs
 ---
 
-You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to define the local name of internal component parts, for example you can define `.button` in a menu component.
+You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to define the local name of internal component parts. For example, you can define a `.button` in a menu component.
 
-In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
+In **Stylable**, class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
 
 ```css
 /* CSS */
@@ -32,12 +32,12 @@ In **Stylable** class selectors are scoped to the [namespace](./namespace.md) of
 ```
 
 > **Note:**  
-> In Stylable, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).  
+> In **Stylable**, as you can see in these examples, `.root` as a class name is reserved for the main [root](./root.md).  
 > CSS class can also define [states](./pseudo-classes) and [extend another component](./extend-stylesheet.md).
 
 ## Class selector export
 
-Any class defined in a Stylable stylesheet is exported as a named export and can be imported by other stylesheets using the directive `-st-named`.
+Any class defined in a **Stylable** stylesheet is exported as a named export and can be imported by other stylesheets using the directive `-st-named`.
 
 ### Example
 
