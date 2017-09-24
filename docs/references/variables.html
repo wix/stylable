@@ -26,10 +26,10 @@
 </header>
 
 <div class="main-content">
-    <nav class="docs-nav round-corners">
+    <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <h2>Getting Started</h2>
+        <div class="docs-nav-section-header">Getting Started</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
@@ -42,7 +42,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Guides</h2>
+        <div class="docs-nav-section-header">Guides</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
@@ -57,7 +57,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Reference</h2>
+        <div class="docs-nav-section-header">Reference</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
@@ -91,12 +91,12 @@
     
 </nav>
 
-<section class="docs-content round-corners">
+<section class="docs-content">
     <h1>Variables</h1>
     <p>Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.</p>
 
 <blockquote>
-  <p><strong>Note</strong>:<br />
+  <p><strong>Note</strong>  <br />
 Variables are scoped to the specific stylesheet and do not conflict with variables from another stylesheet.</p>
 </blockquote>
 
@@ -104,8 +104,8 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 
 <p>Use the syntax <code class="highlighter-rouge">:vars</code> to define variables, and apply them with a <code class="highlighter-rouge">value()</code>:</p>
 
-<p><strong>CSS</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Example1"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Example1"</span><span class="p">;</span>
 <span class="nd">:vars</span> <span class="p">{</span>
     <span class="py">color1</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
     <span class="py">color2</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
@@ -117,8 +117,8 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Example1__root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.Example1__root</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="c">/* color1 */</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* color2 */</span>
 <span class="p">}</span>
@@ -129,8 +129,8 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 
 <p>Any var defined in a stylesheet is exported as a named export and can be <a href="./imports">imported</a> by other stylesheets.</p>
 
-<p><strong>CSS</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Example2"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Example2"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./example1.css"</span><span class="p">;</span> <span class="c">/* Example1 stylesheet */</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">;</span> <span class="c">/* import color1 and color2 variables */</span>
@@ -144,8 +144,8 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Example2__root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Example2__root</span> <span class="p">{</span>
     <span class="nl">border</span><span class="p">:</span> <span class="m">10px</span> <span class="nb">solid</span> <span class="no">red</span><span class="p">;</span> <span class="c">/* color1 */</span>
 <span class="p">}</span>
 <span class="nc">.Example2__root</span><span class="nd">:hover</span> <span class="p">{</span>
@@ -155,15 +155,16 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 </div>
 
 <blockquote>
-  <p><strong>Note</strong> Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.</p>
+  <p><strong>Note</strong><br />
+Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.</p>
 </blockquote>
 
-<h2 id="composing-variables">Composing variables</h2>
+<h2 id="compose-variables">Compose variables</h2>
 
 <p>You can set the value of a variable using another variable.</p>
 
-<p><strong>CSS API</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Example3"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Example3"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./example1.css"</span><span class="p">;</span> <span class="c">/* Example1 stylesheet */</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">;</span>
@@ -177,8 +178,8 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Example3__root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Example3__root</span> <span class="p">{</span>
     <span class="nl">border</span><span class="p">:</span> <span class="m">10px</span> <span class="nb">solid</span> <span class="no">red</span><span class="p">;</span> <span class="c">/* 10px solid {color1} */</span>
 <span class="p">}</span>
 </code></pre>

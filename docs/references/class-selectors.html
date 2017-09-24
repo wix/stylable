@@ -26,10 +26,10 @@
 </header>
 
 <div class="main-content">
-    <nav class="docs-nav round-corners">
+    <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <h2>Getting Started</h2>
+        <div class="docs-nav-section-header">Getting Started</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
@@ -42,7 +42,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Guides</h2>
+        <div class="docs-nav-section-header">Guides</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
@@ -57,7 +57,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Reference</h2>
+        <div class="docs-nav-section-header">Reference</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
@@ -91,29 +91,28 @@
     
 </nav>
 
-<section class="docs-content round-corners">
+<section class="docs-content">
     <h1>CSS Class Selectors</h1>
-    <p>You use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors">CSS classes</a> to define the local name of internal component parts, for example you can define <code class="highlighter-rouge">.button</code> in a menu component.</p>
+    <p>You use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors">CSS classes</a> to define the local name of internal component parts. For example, you can define a <code class="highlighter-rouge">.button</code> in a menu component.</p>
 
-<p>In <strong>Stylable</strong> class selectors are scoped to the <a href="./namespace">namespace</a> of the stylesheet.</p>
+<p>In <strong>Stylable</strong>, class selectors are scoped to the <a href="./namespace">namespace</a> of the stylesheet.</p>
 
-<p><strong>CSS API</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Page"</span>
-<span class="p">.</span><span class="n">thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
+<span class="nc">.thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.thumbnail</span><span class="nd">:hover</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.gallery</span><span class="nd">:hover</span> <span class="nc">.thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Page__root</span> <span class="nc">.Page__thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Page__root</span> <span class="nc">.Page__thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;}</span>
 <span class="nc">.Page__root</span> <span class="nc">.Page__thumbnail</span><span class="nd">:hover</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Page__root</span> <span class="nc">.Page__gallery</span><span class="nd">:hover</span> <span class="nc">.Page__thumbnail</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre>
 </div>
 
-<p><strong>React</strong></p>
-<pre><code class="language-jsx">/* inside a stylable render */
+<pre><code class="language-jsx">/* React - inside a stylable render */
 &lt;div className="gallery"&gt;
     &lt;img className="thumbnail" /&gt;
     ...
@@ -121,28 +120,28 @@
 </code></pre>
 
 <blockquote>
-  <p><strong>Notes:</strong><br />
-In Stylable, as you can see in these examples, <code class="highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
+  <p><strong>Note:</strong><br />
+In <strong>Stylable</strong>, as you can see in these examples, <code class="highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
 CSS class can also define <a href="./pseudo-classes">states</a> and <a href="./extend-stylesheet">extend another component</a>.</p>
 </blockquote>
 
-<h2 id="class-selector-export">Class Selector Export</h2>
+<h2 id="class-selector-export">Class selector export</h2>
 
-<p>Any class defined in a Stylable stylesheet is exported as a named export and can be imported by other stylesheets using the directive <code class="highlighter-rouge">-st-named</code>.</p>
+<p>Any class defined in a <strong>Stylable</strong> stylesheet is exported as a named export and can be imported by other stylesheets using the directive <code class="highlighter-rouge">-st-named</code>.</p>
 
 <h3 id="example">Example</h3>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
-<span class="k">@namespace</span> <span class="s1">"Button"</span>
-<span class="p">.</span><span class="n">root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">@namespace</span> <span class="s1">"Button"</span><span class="p">;</span>
+<span class="nc">.root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span><span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.icon</span> <span class="p">{</span> <span class="nl">border</span><span class="p">:</span> <span class="m">2px</span> <span class="nb">solid</span> <span class="no">black</span><span class="p">;</span> <span class="p">}</span> 
 <span class="nc">.label</span> <span class="p">{</span> <span class="nl">font-size</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span> <span class="p">}</span> 
 </code></pre>
 </div>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* form.st.css */</span>
-<span class="k">@namespace</span> <span class="s1">"Form"</span>
-<span class="p">:</span><span class="n">import</span> <span class="p">{</span>
+<span class="k">@namespace</span> <span class="s1">"Form"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="nb">icon</span><span class="p">,</span> <span class="n">label</span><span class="p">;</span> 
 <span class="p">}</span>

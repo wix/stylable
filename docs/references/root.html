@@ -26,10 +26,10 @@
 </header>
 
 <div class="main-content">
-    <nav class="docs-nav round-corners">
+    <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <h2>Getting Started</h2>
+        <div class="docs-nav-section-header">Getting Started</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
@@ -42,7 +42,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Guides</h2>
+        <div class="docs-nav-section-header">Guides</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
@@ -57,7 +57,7 @@
     </div>
     
     <div class="docs-nav-section">
-        <h2>Reference</h2>
+        <div class="docs-nav-section-header">Reference</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
@@ -91,7 +91,7 @@
     
 </nav>
 
-<section class="docs-content round-corners">
+<section class="docs-content">
     <h1>Root</h1>
     <p>Every Stylable stylesheet has a reserved class called <code class="highlighter-rouge">root</code> that matches the root node of the component.</p>
 
@@ -101,19 +101,19 @@
 
 <p>The <code class="highlighter-rouge">root</code> class is added automatically to root in <a href="react-integration">react integration</a>. No need to write <code class="highlighter-rouge">className="root"</code>.</p>
 
-<p><strong>CSS API</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* set component background to red */</span>
 </code></pre>
 </div>
 
-<p><strong>CSS OUTPUT</strong></p>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.Comp__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Comp__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre>
 </div>
 
 <blockquote>
-  <p><strong>Note</strong>:<br />
+  <p><strong>Note</strong>  <br />
 Root can also define <a href="./pseudo-classes">states</a> and <a href="./extend-stylesheet">extend another component</a>.</p>
 </blockquote>
 
