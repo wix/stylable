@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Stylable Basics</title>
+    <link rel="stylesheet" href="/stylable/css/normalize.css">
+    <link rel="stylesheet" href="/stylable/css/main.css">
+    <link rel="stylesheet" href="/stylable/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/stylable/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/stylable/">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/stylable/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Getting Started</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/stylable/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/stylable/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class="active"><a href="/stylable/docs/guides/components-basics" class="active docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Reference</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/extend-stylesheet" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/theme" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>Stylable Basics</h1>
+    <p>This guide walks you through the basics of how to style and work with components using <strong>Stylable</strong>.</p>
+
+<p>You use <strong>Stylable</strong> with a component file (for example using React), along with a <strong>Stylable</strong> CSS file that has the extention <code class="highlighter-rouge">.st.css</code>.</p>
+
+<blockquote>
+  <p><strong>Note</strong>:
+This guide shows the JSX side of our <a href="https://github.com/wixplosives/stylable-integration">stylable-integration</a> with React.</p>
+</blockquote>
+
+<p><strong>Stylable</strong> styles are similar to a type-system. Once you have declared that a CSS class is of the type <code class="highlighter-rouge">Button</code> for example, <strong>Stylable</strong> knows its internal structure and can match its internal parts and states.</p>
+
+<p>Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application.</p>
+
+<h2 id="1-style-a-component">1 Style a Component</h2>
+
+<p>Let’s say you have a <code class="highlighter-rouge">Button</code> component with a render function per this example. You can style its JSX using the <code class="highlighter-rouge">className</code> property.</p>
+
+<pre><code class="language-jsx">/* button.ts */
+render () {
+    return (
+        &lt;button&gt;
+            &lt;div className="icon"/&gt;
+            &lt;span className="label"&gt;Submit&lt;/span&gt;
+        &lt;/button&gt;
+    );
+}
+</code></pre>
+
+<p>Now in the component’s <strong>Stylable</strong> CSS file called <code class="highlighter-rouge">button.st.css</code>, you can declare each of the classes as a ruleset as follows:</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
+
+<span class="c">/* 
+note that the root class is automatically placed on the root HTML 
+element by Stylable React integration 
+*/</span>
+<span class="nc">.root</span> <span class="p">{</span> 
+    <span class="nl">background</span><span class="p">:</span> <span class="m">#b0e0e6</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.icon</span> <span class="p">{</span>
+    <span class="nl">background-image</span><span class="p">:</span> <span class="sx">url('./assets/btnIcon.svg')</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.label</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="2-expose-the-components-stylable-api">2 Expose the Component’s Stylable API</h2>
+
+<p>When using <strong>Stylable</strong>, every component exposes an API that’s usable by its parent components.</p>
+
+<p>The API includes:</p>
+
+<ul>
+  <li>
+    <p><em>Pseudo-elements</em>: any HTML element that has the className attribute, and is therefore exposed via a <a href="../references/pseudo-elements">pseudo-element</a>.</p>
+  </li>
+  <li>
+    <p><em>Pseudo-classes</em>: any state connected to the component logic, and declared as a <a href="../references/pseudo-classes">pseudo-class</a>.</p>
+  </li>
+</ul>
+
+<p>Let’s see how to create your own parts and states and expose them for use throughout a page or application.</p>
+
+<h3 id="a-create-and-expose-internal-parts">A. Create and Expose Internal Parts</h3>
+
+<p>In the example above, you created a very simple button component. Now let’s <a href="../references/imports">import</a> this button into a <code class="highlighter-rouge">Panel</code> component. The classes that you created above are available as pseudo-elements of the imported component.</p>
+
+<p>You can now style your <code class="highlighter-rouge">Button</code> in the scope of the <code class="highlighter-rouge">Panel</code> so that it fits its needs.</p>
+
+<p>Let’s take the <code class="highlighter-rouge">Button</code> component and import it into the JSX file, and also add it to the render:</p>
+
+<pre><code class="language-jsx">/* panel.jsx */
+import {Button} from './button'
+
+render(){
+    return (
+        &lt;div&gt;
+            &lt;Button className="cancelBtn"/&gt;
+        &lt;/div&gt;
+    );
+}
+</code></pre>
+
+<p>Let’s also import <code class="highlighter-rouge">Button</code>’s stylesheet into the <code class="highlighter-rouge">Panel</code> stylesheet. You can then target the internal parts of the component that you imported:</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/* cancelBtn is of type Button */</span>
+<span class="nc">.cancelBtn</span> <span class="p">{</span> 
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">cornflowerblue</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/* targets the label of &lt;Button className="cancelBtn" /&gt; */</span>
+<span class="nc">.cancelBtn</span><span class="nd">::label</span> <span class="p">{</span> 
+    <span class="nl">color</span><span class="p">:</span> <span class="no">honeydew</span><span class="p">;</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h3 id="b-create-and-expose-states">B. Create and Expose States</h3>
+
+<p>You can also create custom states for the component that are available as <a href="../references/pseudo-classes">pseudo-classes</a> to anyone using your component.</p>
+
+<p>A custom pseudo-class can be used to reflect any logical state of your component. For example, your <code class="highlighter-rouge">Button</code> has a property called <code class="highlighter-rouge">on</code>. In this example, it is toggled when the button is clicked.</p>
+
+<pre><code class="language-jsx">/* button.jsx */
+render () {
+    return (
+        &lt;button style-state={this.state.on} onClick={()=&gt;this.setState({on:!this.state.on})}&gt;
+            &lt;div className="icon"/&gt;
+            &lt;span className="label"&gt;Click Here!&lt;/span&gt;
+        &lt;/button&gt;
+    );
+}
+</code></pre>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">-st-states</span><span class="p">:</span> <span class="n">on</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="m">#b0e0e6</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.icon</span> <span class="p">{</span>
+    <span class="nl">background-image</span><span class="p">:</span> <span class="sx">url(./assets/btnIcon.svg)</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.label</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c">/* targets the state on the root of the component */</span>
+<span class="nc">.root</span><span class="nd">:on</span> <span class="p">{</span> 
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">1px</span> <span class="no">darkslateblue</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>You can then target <code class="highlighter-rouge">Button</code>’s <code class="highlighter-rouge">on</code> state in your <code class="highlighter-rouge">Panel</code> as follows:</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
+<span class="nc">.cancelBtn</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">cornflowerblue</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancelBtn</span><span class="nd">:on</span> <span class="p">{</span>
+    <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">1px</span> <span class="no">indigo</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="see-also">See also:</h2>
+
+<ul>
+  <li><a href="./stylable-application">Building an Application</a></li>
+  <li><a href="./stylable-component-library">Building a Component Library</a></li>
+  <li><a href="../usefulIngo/cheatsheet">Stylable Cheatsheet</a></li>
+</ul>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/stylable/js/prism.js"></script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Compose CSS Class</title>
+    <link rel="stylesheet" href="/stylable/css/normalize.css">
+    <link rel="stylesheet" href="/stylable/css/main.css">
+    <link rel="stylesheet" href="/stylable/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/stylable/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/stylable/">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/stylable/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Getting Started</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/stylable/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/stylable/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Reference</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/extend-stylesheet" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class="active"><a href="/stylable/docs/references/compose-css-class" class="active docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/theme" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>Compose CSS Class</h1>
+    <p>Use <code class="highlighter-rouge">-st-compose</code> to apply a CSS class to another CSS <a href="./class-selectors">class</a> or to a <a href="./tag-selectors">tag selector</a>.</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="nc">.item</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.selected</span> <span class="p">{</span>
+    <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
+<span class="nc">.Comp__selected.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="multiple-classes">Multiple classes</h2>
+
+<p>You can compose multiple classes or tag selectors by order.</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="nc">.item</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.round</span> <span class="p">{</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.selected</span> <span class="p">{</span>
+    <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span> <span class="n">round</span><span class="p">;</span> <span class="c">/* pass multiple classes */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
+<span class="nc">.Comp__round</span> <span class="p">{</span> <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span> <span class="p">}</span>
+<span class="nc">.Comp__selected.Comp__item.Comp__round</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
+</code></pre>
+</div>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/stylable/js/prism.js"></script>
+</body>
+</html>

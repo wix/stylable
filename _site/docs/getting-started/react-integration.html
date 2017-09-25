@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>React integration</title>
+    <link rel="stylesheet" href="/stylable/css/normalize.css">
+    <link rel="stylesheet" href="/stylable/css/main.css">
+    <link rel="stylesheet" href="/stylable/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/stylable/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+</head>
+<body>
+<header>
+    <div class="header-content">
+
+        <div class="logo">
+            <a href="/stylable/">Stylable</a>
+        </div>
+
+        <ul class="main-nav">
+            <li><a href="/stylable/docs/getting-started.html">Docs</a></li>
+            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+        </ul>
+
+    </div>
+</header>
+
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Getting Started</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class="active"><a href="/stylable/docs/getting-started/react-integration" class="active docs-nav-item">React Integration</a><ul><li><a href="#installation" class="docs-nav-subitem">Installation</a></li><li><a href="#use" class="docs-nav-subitem">Use</a></li><li><a href="#css-classes" class="docs-nav-subitem">CSS Classes</a></li><li><a href="#custom-states" class="docs-nav-subitem">Custom states</a></li></ul></li>
+            
+                <li class=""><a href="/stylable/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Reference</div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/extend-stylesheet" class=" docs-nav-item">Extend stylesheet</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global selectors</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/theme" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>React integration</h1>
+    <p>Use Stylable React integration from <a href="https://github.com/wix/wix-react-tools">wix-react-tools</a> to set a <strong>Stylable</strong> stylesheet for a React component or stateless functional component (SFC).</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>Install <strong>wix-react-tools</strong> as a dependency in your local project.</p>
+
+<p>Using npm:</p>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install wix-react-tools --save
+</code></pre>
+</div>
+
+<p>Using yarn:</p>
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>yarn add wix-react-tools
+</code></pre>
+</div>
+
+<h2 id="use">Use</h2>
+
+<p>When applying <strong>Stylable</strong> to a React component, any className or <code class="highlighter-rouge">data-*</code> properties are copied to the resulting root element of the component. Further, the <a href="../references/root">root class</a> of the stylesheet is added to the root element automatically.</p>
+
+<pre><code class="language-jsx">import {stylable} from 'wix-react-tools';
+import stylesheet from './style.st.css'
+
+// Decorate class
+@stylable(stylesheet)
+class Comp extends React.Component {...}
+
+// Class without decorator
+stylable(stylesheet)(class Comp extends React.Component {...});
+
+// SFC
+stylable(stylesheet)(props =&gt; {...});
+</code></pre>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+There is a <a href="https://github.com/wix/wix-react-tools/issues/107">bug</a> in <code class="highlighter-rouge">cloneElement</code>. It does not apply the same abilities as <code class="highlighter-rouge">createElement</code>.</p>
+</blockquote>
+
+<h3 id="css-classes">CSS classes</h3>
+
+<p>All <a href="../references/class-selectors">CSS class selectors</a> that are in the stylesheet can be applied to any element <strong>in the render</strong> through the <code class="highlighter-rouge">className</code> property.</p>
+
+<pre><code class="language-jsx">@stylable(stylesheet)
+class Comp extends React.Component {
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;div className="item" /&gt;
+            &lt;/div&gt;
+        );
+    }
+}
+</code></pre>
+
+<h3 id="custom-states">Custom states</h3>
+
+<p><strong>Stylable</strong> offers <a href="../references/pseudo-classes">custom states</a> that can be defined on any CSS class selectors. Add a <code class="highlighter-rouge">style-state</code> property to any element to control whether to enable a custom state or not.</p>
+
+<pre><code class="language-jsx">@stylable(stylesheet)
+class Comp extends React.Component {
+    render() {
+        return &lt;div style-state={ {"a": true, "b": false} } &gt;
+            &lt;div style-state={ {"x": true, "y": false} } /&gt;
+        &lt;/div&gt;;
+    }
+}
+</code></pre>
+
+<h2 id="other-stylable-integrations-future">Other Stylable integrations (future)</h2>
+
+<ul>
+  <li>Polymer - web-components with shadow DOM transformer</li>
+  <li>Document - expose JS API to manage selector states and dynamic updates</li>
+</ul>
+
+</section>
+
+</div>
+
+<footer></footer>
+<script src="/stylable/js/prism.js"></script>
+</body>
+</html>
