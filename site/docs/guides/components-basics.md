@@ -8,17 +8,17 @@ This guide walks you through the basics of how to style and work with components
 
 You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extention `.st.css`.
 
-> **Note**:
+> **Note**:  
 > This guide shows the JSX side of our [stylable-integration](https://github.com/wixplosives/stylable-integration) with React. 
 
-**Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
+**Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
 
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application. 
 
 
-## 1 Style a Component 
+## 1 Style a component 
 
-Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property.
+Let's say you have a `button` component with a render function per this example. You can style its JSX using the `className` property.
 
 ```jsx
 /* button.ts */
@@ -53,7 +53,7 @@ element by Stylable React integration
 }
 ```
 
-## 2 Expose the Component's Stylable API
+## 2 Expose the component's Stylable API
 
 When using **Stylable**, every component exposes an API that's usable by its parent components.
 
@@ -65,7 +65,7 @@ The API includes:
 
 Let's see how to create your own parts and states and expose them for use throughout a page or application.
 
-### A. Create and Expose Internal Parts
+### A. Create and expose internal parts
 
 In the example above, you created a very simple button component. Now let's [import](../references/imports.md) this button into a `Panel` component. The classes that you created above are available as pseudo-elements of the imported component.
 
@@ -86,31 +86,31 @@ render(){
 }
 ```
 
-Let's also import `Button`'s stylesheet into the `Panel` stylesheet. You can then target the internal parts of the component that you imported:
+Let's also import `button`'s stylesheet into the `panel` stylesheet. You can then target the internal parts of the component that you imported:
 
 ```css
 /* panel.st.css */
 :import {
     -st-from: './button.st.css';
-    -st-default: Button;
+    -st-default: button;
 }
-/* cancelBtn is of type Button */
+/* cancelBtn is of type button */
 .cancelBtn { 
-    -st-extends: Button;
+    -st-extends: button;
     background: cornflowerblue;
 }
-/* targets the label of <Button className="cancelBtn" /> */
+/* targets the label of <button className="cancelBtn" /> */
 .cancelBtn::label { 
     color: honeydew;
     font-weight: bold;
 }
 ```
 
-### B. Create and Expose States
+### B. Create and expose states
 
 You can also create custom states for the component that are available as [pseudo-classes](../references/pseudo-classes.md) to anyone using your component.
 
-A custom pseudo-class can be used to reflect any logical state of your component. For example, your `Button` has a property called `on`. In this example, it is toggled when the button is clicked.
+A custom pseudo-class can be used to reflect any logical state of your component. For example, your `button` has a property called `on`. In this example, it is toggled when the button is clicked.
 
 ```jsx
 /* button.jsx */
@@ -143,7 +143,7 @@ render () {
 }
 ```
 
-You can then target `Button`'s `on` state in your `Panel` as follows:
+You can then target `button`'s `on` state in your `panel` as follows:
 
 ```css
 /* panel.st.css */
