@@ -57,10 +57,10 @@ Any class defined in a **Stylable** stylesheet is exported as a named export and
     -st-named: icon, label; 
 }
 /* 
-    @selector .Form__root .Form__my-icon.Button__icon 
-    @export Form__my-icon Button__icon
+    @selector .Form__root .Form__myIcon.Button__icon 
+    @export Form__myIcon Button__icon
 */
-.my-icon { 
+.myIcon { 
     -st-extends: icon; 
 }
 /* 

@@ -21,19 +21,19 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 
 ### Import the default export of a local reference stylesheet for use in the scoped stylesheet
 
-Import the `toggle-button.css` stylesheet from a local location. Assign the name `ToggleButton` to the default export of that stylesheet for use in this scoped stylesheet.
+Import the `toggle-button.css` stylesheet from a local location. Assign the name `toggleButton` to the default export of that stylesheet for use in this scoped stylesheet.
 
 ```css
 /* CSS */
 :import {
     -st-from: './toggle-button.css';
-    -st-default: ToggleButton;
+    -st-default: toggleButton;
 }
 ```
 
 ```js
 /* ES6 equivalent */
-import ToggleButton from './toggle-button.css';
+import toggleButton from './toggle-button.css';
 ```
 
 ### Import named exports from a local JS module

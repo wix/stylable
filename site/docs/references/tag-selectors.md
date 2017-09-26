@@ -9,7 +9,7 @@ Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_
 Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped. The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
 > **Note**  
->As part of the **Stylable** roadmap, we may add scoped tag selectors which will require **Stylable** to include additional [DOM integration](./react-integration.md). 
+>As part of the **Stylable** roadmap, we may add scoped tag selectors which will require **Stylable** to include additional [DOM integration](../getting-started/react-integration.md). 
 
 ## Native element
 
@@ -19,13 +19,13 @@ Targeting a native element matches any element with the same tag name that is fo
 /* CSS */
 @namespace "Page";
 form { background: green; }
-.side-bar:hover form { background: red; }
+.sideBar:hover form { background: red; }
 ```
 
 ```css
 /* CSS output - form is not namespaced - affects any nested form */
 .Page__root form { background: green; } 
-.Page__root.side-bar:hover form { background: red; }
+.Page__root.sideBar:hover form { background: red; }
 ```
 
 > **Note**    
@@ -34,7 +34,7 @@ form { background: green; }
 ```jsx
 /* React - inside a Stylable component render */
 <div className="gallery">
-    <div className="side-bar">
+    <div className="sideBar">
         <form></form> /* green background and red while hovering parent */
     </div>
     <form></form> /* green background */
@@ -50,27 +50,27 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 @namespace "Page";
 :import{
     -st-from: "./toggle-button.st.css";
-    -st-default: ToggleButton;
+    -st-default: toggleButton;
 }
-ToggleButton { background: green; }
-.side-bar:hover ToggleButton { background: red; }
+toggleButton { background: green; }
+.sideBar:hover toggleButton { background: red; }
 ```
 
 ```css
-/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */
-.Page__root .ToggleButton__root { background: green; }
-.Page__root .Page__root.side-bar:hover .ToggleButton__root { background: red; }
+/* CSS output - toggleButton is not namespaced - affects any nested toggle button */
+.Page__root .toggleButton__root { background: green; }
+.Page__root .Page__root.sideBar:hover .toggleButton__root { background: red; }
 ```
 
 
 ```jsx
 /* React implementation - button component implements toggle-button.css */
-import ToggleButton from './toggle-button';
+import toggleButton from './toggle-button';
 /* inside a stylable render */
 <div className="gallery">
-    <div className="side-bar">
-        <ToggleButton></ToggleButton> /* green background and red while hovering parent */
+    <div className="sideBar">
+        <toggleButton></toggleButton> /* green background and red while hovering parent */
     </div>
-    <ToggleButton></ToggleButton> /* green background */
+    <toggleButton></toggleButton> /* green background */
 </div>
 ```

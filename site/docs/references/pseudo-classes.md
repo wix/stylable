@@ -43,33 +43,33 @@ To define custom pseudo-classes, or states, for a simple selector, you tell **St
 
 ## Extend external stylesheet
 
-You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.media-button`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `media-button` component. 
+You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `comp1`is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
 
 ```css
 /* example2.st.css */
 @namespace "Example2";
 :import {
     -st-from: "./example1.st.css";
-    -st-default: Comp1;
+    -st-default: comp1;
 }
-.media-button {
-    -st-extends: Comp1;
+.mediaButton {
+    -st-extends: comp1;
     -st-states: toggled, selected;
 }
-.media-button:hover { border: 0.2em solid black; } /* native CSS because no custom declaration*/
-.media-button:loading { color: silver; } /* from Example1 */
-.media-button:selected { color: salmon; } /* from Example2 */
-.media-button:toggled { color: gold; } /* included in Example1 but overridden by Example2 */
+.mediaButton:hover { border: 0.2em solid black; } /* native CSS because no custom declaration*/
+.mediaButton:loading { color: silver; } /* from Example1 */
+.mediaButton:selected { color: salmon; } /* from Example2 */
+.mediaButton:toggled { color: gold; } /* included in Example1 but overridden by Example2 */
 ```
 
 ```css
 /* CSS output*/
 .Example1__root[data-Example1-toggled] { color: red; }
 .Example1__root[data-Example1-loading] { color: green; }
-.Example2__root .Example2__media-button:hover { border: 0.2em solid black; } /* native hover - not declared */
-.Example2__root .Example2__media-button[data-Example1-loading] { color: silver; } /* loading scoped to Example1 - only one to declare */
-.Example2__root .Example2__media-button[data-Example2-selected] { color: salmon; } /* selected scoped to Example2 - only one to declare */
-.Example2__root .Example2__media-button[data-Example2-toggled] { color: gold;} /* toggled scoped to Example2 - last to declare */
+.Example2__root .Example2__mediaButton:hover { border: 0.2em solid black; } /* native hover - not declared */
+.Example2__root .Example2__mediaButton[data-Example1-loading] { color: silver; } /* loading scoped to Example1 - only one to declare */
+.Example2__root .Example2__mediaButton[data-Example2-selected] { color: salmon; } /* selected scoped to Example2 - only one to declare */
+.Example2__root .Example2__mediaButton[data-Example2-toggled] { color: gold;} /* toggled scoped to Example2 - last to declare */
 ```
 
 ## Map custom pseudo-classes
@@ -80,7 +80,7 @@ You can use this feature to define states even if the existing components you ar
 /* example-custom.st.css */
 @namespace "ExampleCustom";
 .root {
-    -st-states: toggled(".on"), loading("[data-spinner]");
+    -st-states: toggled(".on"), loading("[dataSpinner]");
 }
 .root:toggled { color: red; }
 .root:loading { color: green; }
@@ -89,7 +89,7 @@ You can use this feature to define states even if the existing components you ar
 ```css
 /* CSS output*/
 .ExampleCustom__root.on { color: red; }
-.ExampleCustom__root[data-spinner] { color: green; }
+.ExampleCustom__root[dataSpinner] { color: green; }
 ```
 
 > **Note**    
@@ -99,7 +99,7 @@ You can use this feature to define states even if the existing components you ar
 
 Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. 
 
-**Stylable** offers [React CSS state integration](./react-integration.md) to help components manage custom pseudo-classes easily.
+**Stylable** offers [React CSS state integration](../getting-started/react-integration.md) to help components manage custom pseudo-classes easily.
 
 {% raw %}
 
