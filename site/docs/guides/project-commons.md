@@ -8,7 +8,7 @@ The goal of the project file is to contain the CSS commons for the project, incl
 
 In the following code, you can see a project with:
  * 2 color and 2 font size variables 
- * 1 `button` component variant named `cancelButton` 
+ * 1 `Button` component variant named `cancelButton` 
  * 1 shared class for `emphasisBox`
 
 ```css
@@ -22,10 +22,10 @@ In the following code, you can see a project with:
 }
 :import {
     -st-from: './button/button.st.css';
-    -st-default: button;
+    -st-default: Button;
 }
 .cancelButton {
-    -st-extends: button;
+    -st-extends: Button;
 }
 .emphasisBox {}
 ```

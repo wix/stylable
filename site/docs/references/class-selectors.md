@@ -8,6 +8,8 @@ You use [CSS classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_sel
 
 In **Stylable**, class selectors are scoped to the [namespace](./namespace.md) of the stylesheet. 
 
+You should use camelCase to name class selectors. Avoid using hyphens (-) and capital first letters.
+
 ```css
 /* CSS */
 @namespace "Page";

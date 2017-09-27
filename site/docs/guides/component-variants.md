@@ -17,10 +17,10 @@ In your project's [Stylable stylesheet](./project-commons.md) used for the commo
 @namespace "project";
 :import {
     -st-from: "./button.st.css";
-    -st-default: button; 
+    -st-default: Button; 
 }
 .cancelButton {
-    -st-extend: button;
+    -st-extend: Button;
     color: red;
     border: 1px solid red;
 }

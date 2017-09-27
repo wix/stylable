@@ -10,7 +10,7 @@ In addition to CSS's native [pseudo-elements](https://developer.mozilla.org/en/d
 
 Any [CSS class](./class-selectors.md) is accessible as a pseudo-element of an [extending stylesheet](./extend-stylesheet.md).
 
-When you define a CSS class inside a component, in this case a `playButton` in a `videoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `videoPlayer`.
+When you define a CSS class inside a component, in this case a `playButton` in a `VideoPlayer`, that class may be targeted as a pseudo-element of any class that extends the component `videoPlayer`.
 
 ```css
 /* video-player.st.css */
@@ -26,7 +26,7 @@ When you define a CSS class inside a component, in this case a `playButton` in a
 
 Use `::` to access an internal part of a component after a [custom tag selector](./tag-selectors.md#component-element) or after an [extended class selector](./extend-stylesheet.md).
 
-In this example, you [import](./imports.md) a `videoPlayer` component into your stylesheet, and style an internal part called `playButton` overriding its original styling.
+In this example, you [import](./imports.md) a `VideoPlayer` component into your stylesheet, and style an internal part called `playButton` overriding its original styling.
 
 
 ```css
@@ -34,10 +34,10 @@ In this example, you [import](./imports.md) a `videoPlayer` component into your 
 @namespace "Page";
 :import {
     -st-from: './video-player.st.css';
-    -st-default: videoPlayer;
+    -st-default: VideoPlayer;
 }
 .mainVideo {
-    -st-extends: videoPlayer; /* define mainVideo as VideoPlayer */
+    -st-extends: VideoPlayer; /* define mainVideo as VideoPlayer */
 }
 .mainVideo::playButton { /* override mainVideo playButton */
     background: green;
@@ -47,7 +47,7 @@ In this example, you [import](./imports.md) a `videoPlayer` component into your 
 
 ```css
 /* CSS output*/
-.Page__root .Page__mainVideo.videoPlayer__root .videoPlayer__playButton {
+.Page__root .Page__mainVideo.VideoPlayer__root .VideoPlayer__playButton {
     background: green;
     color: purple;
 }
@@ -70,10 +70,10 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 @namespace "SuperVideoPlayer";
 :import {
     -st-from: './video-player.st.css';
-    -st-default: videoPlayer;
+    -st-default: VideoPlayer;
 }
 .root {
-    -st-extends: videoPlayer;
+    -st-extends: VideoPlayer;
 }
 .root::playButton {
     color: gold;
@@ -85,10 +85,10 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 @namespace "Page";
 :import {
     -st-from: './super-video-player.st.css';
-    -st-default: superVideoPlayer;
+    -st-default: SuperVideoPlayer;
 }
 .mainPlayer {
-    -st-extends: superVideoPlayer;
+    -st-extends: SuperVideoPlayer;
 }
 .mainPlayer::playButton {
     color: silver;
@@ -97,8 +97,8 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 
 ```css
 /* CSS output*/
-.SuperVideoPlayer__root.videoPlayer__root .videoPlayer__playButton { color: gold; }
-.Page__root .Page__mainPlayer.superVideoPlayer__root .videoPlayer__playButton { color: silver; }
+.SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__playButton { color: gold; }
+.Page__root .Page__mainPlayer.SuperVideoPlayer__root .VideoPlayer__playButton { color: silver; }
 ```
 
 
@@ -109,26 +109,26 @@ You can use CSS classes to override extended pseudo-elements.
 > **Note**    
 > You can also override native pseudo-elements using **Stylable's** custom pseudo-elements but this is not recommended as it can lead to code that's confusing and hard to maintain.
 
-In this example, `root` extends `videoPlayer` and so any class placed on the `root` overrides the pseudo-element.
+In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
 ```css
 /* CSS */
 @namespace "SuperVideoPlayer";
 :import {
     -st-from: './video-player.css';
-    -st-default: videoPlayer;
+    -st-default: VideoPlayer;
 }
 .root {
-    -st-extends: videoPlayer;
+    -st-extends: VideoPlayer;
 }
-.playButton { /* override videoPlayer playButton */
+.playButton { /* override VideoPlayer playButton */
     color: gold;
 }
 ```
 
 ```css
 /* CSS output*/
-.SuperVideoPlayer__root.videoPlayer__root .superVideoPlayer__playButton { color: gold; }
+.SuperVideoPlayer__root.VideoPlayer__root .SuperVideoPlayer__playButton { color: gold; }
 ```
 
 > **Note**    

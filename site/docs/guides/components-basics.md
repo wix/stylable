@@ -59,9 +59,9 @@ When using **Stylable**, every component exposes an API that's usable by its par
 
 The API includes:
 
-* _Pseudo-elements_: any HTML element that has the className attribute, and is therefore exposed via a [pseudo-element](../references/pseudo-elements.md).
+* **Pseudo-elements**: any HTML element that has the className attribute, and is therefore exposed via a [pseudo-element](../references/pseudo-elements.md).
  
-* _Pseudo-classes_: any state connected to the component logic, and declared as a [pseudo-class](../references/pseudo-classes.md).
+* **Pseudo-classes**: any state connected to the component logic, and declared as a [pseudo-class](../references/pseudo-classes.md).
 
 Let's see how to create your own parts and states and expose them for use throughout a page or application.
 
@@ -86,20 +86,20 @@ render(){
 }
 ```
 
-Let's also import `button`'s stylesheet into the `panel` stylesheet. You can then target the internal parts of the component that you imported:
+Let's also import `Button`'s stylesheet into the `panel` stylesheet. You can then target the internal parts of the component that you imported:
 
 ```css
 /* panel.st.css */
 :import {
     -st-from: './button.st.css';
-    -st-default: button;
+    -st-default: Button;
 }
-/* cancelBtn is of type button */
+/* cancelBtn is of type Button */
 .cancelBtn { 
-    -st-extends: button;
+    -st-extends: Button;
     background: cornflowerblue;
 }
-/* targets the label of <button className="cancelBtn" /> */
+/* targets the label of <Button className="cancelBtn" /> */
 .cancelBtn::label { 
     color: honeydew;
     font-weight: bold;
@@ -110,7 +110,7 @@ Let's also import `button`'s stylesheet into the `panel` stylesheet. You can the
 
 You can also create custom states for the component that are available as [pseudo-classes](../references/pseudo-classes.md) to anyone using your component.
 
-A custom pseudo-class can be used to reflect any logical state of your component. For example, your `button` has a property called `on`. In this example, it is toggled when the button is clicked.
+A custom pseudo-class can be used to reflect any logical state of your component. For example, your `Button` has a property called `on`. In this example, it is toggled when the button is clicked.
 
 ```jsx
 /* button.jsx */
@@ -143,7 +143,7 @@ render () {
 }
 ```
 
-You can then target `button`'s `on` state in your `panel` as follows:
+You can then target `Button`'s `on` state in your `panel` as follows:
 
 ```css
 /* panel.st.css */

@@ -9,17 +9,17 @@ Use the `-st-extends` directive rule to extend a CSS class with another styleshe
 > **Note**  
 >`-st-extends` can be applied only to [class selectors](./class-selectors.md) and [root](./root.md).
 
-In this example, the stylesheet is extending the `toggle-button.css` stylesheet. The `checkBtn` class has a `label`, which is a custom pseudo-element, and can be `toggled`, a custom pseudo-class. 
+In this example, the stylesheet is extending the `toggle-button.css` stylesheet. The `checkBtn` class has a `label`, which is a custom pseudo-element, and has a custom pseudo-class, `toggled`. 
 
 ```css
 /* page.st.css */
 @namespace "Page";
 :import {
     -st-from: "./toggle-button.st.css";
-    -st-default: toggleButton;
+    -st-default: ToggleButton;
 }
 .checkBtn {
-    -st-extends: toggleButton;
+    -st-extends: ToggleButton;
     background: white;
 }
 .checkBtn::label { color:green; } /* style pseudo element label */
@@ -28,16 +28,16 @@ In this example, the stylesheet is extending the `toggle-button.css` stylesheet.
 
 ```css
 /* CSS output*/
-.Page__root .Page__checkBtn.toggleButton__root { background: white; }
-.Page__root .Page__checkBtn.toggleButton__root .toggleButton__label { color: green; }
-.Page__root .Page__checkBtn.toggleButton__root[data-toggleButton-toggled] .toggleButton__label { color: red; }
+.Page__root .Page__checkBtn.ToggleButton__root { background: white; }
+.Page__root .Page__checkBtn.ToggleButton__root .ToggleButton__label { color: green; }
+.Page__root .Page__checkBtn.ToggleButton__root[data-ToggleButton-toggled] .ToggleButton__label { color: red; }
 ```
 
 ```jsx
 /* React - Page component uses toggleButton component */
-import toggleButton from './toggle-button';
+import ToggleButton from './toggle-button';
 /* inside a stylable render */
 <div>
-    <toggleButton className="checkBtn" />
+    <ToggleButton className="checkBtn" />
 </div>
 ```

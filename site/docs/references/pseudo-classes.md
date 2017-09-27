@@ -43,17 +43,17 @@ To define custom pseudo-classes, or states, for a simple selector, you tell **St
 
 ## Extend external stylesheet
 
-You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `comp1`is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
+You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
 
 ```css
 /* example2.st.css */
 @namespace "Example2";
 :import {
     -st-from: "./example1.st.css";
-    -st-default: comp1;
+    -st-default: Comp1;
 }
 .mediaButton {
-    -st-extends: comp1;
+    -st-extends: Comp1;
     -st-states: toggled, selected;
 }
 .mediaButton:hover { border: 0.2em solid black; } /* native CSS because no custom declaration*/

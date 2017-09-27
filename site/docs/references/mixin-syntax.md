@@ -18,7 +18,7 @@ The value `textTooltip` of the external file `my-mixins` is imported. The class 
 /* CSS */
 :import {
     -st-from: "./my-mixins";
-    -st-names: textTooltip;
+    -st-named: textTooltip;
 }
 .submitButton {
     -st-mixin: textTooltip(300, dataTooltip); /* apply mixin */

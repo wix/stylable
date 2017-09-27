@@ -50,27 +50,27 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 @namespace "Page";
 :import{
     -st-from: "./toggle-button.st.css";
-    -st-default: toggleButton;
+    -st-default: ToggleButton;
 }
-toggleButton { background: green; }
-.sideBar:hover toggleButton { background: red; }
+ToggleButton { background: green; }
+.sideBar:hover ToggleButton { background: red; }
 ```
 
 ```css
-/* CSS output - toggleButton is not namespaced - affects any nested toggle button */
-.Page__root .toggleButton__root { background: green; }
-.Page__root .Page__root.sideBar:hover .toggleButton__root { background: red; }
+/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */
+.Page__root .ToggleButton__root { background: green; }
+.Page__root .Page__root.sideBar:hover .ToggleButton__root { background: red; }
 ```
 
 
 ```jsx
 /* React implementation - button component implements toggle-button.css */
-import toggleButton from './toggle-button';
+import ToggleButton from './toggle-button';
 /* inside a stylable render */
 <div className="gallery">
     <div className="sideBar">
-        <toggleButton></toggleButton> /* green background and red while hovering parent */
+        <ToggleButton></ToggleButton> /* green background and red while hovering parent */
     </div>
-    <toggleButton></toggleButton> /* green background */
+    <ToggleButton></ToggleButton> /* green background */
 </div>
 ```
