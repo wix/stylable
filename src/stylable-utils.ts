@@ -155,10 +155,10 @@ export function getCorrectNodeImport(importNode: Imported, test:any){
     return importNode.rule.nodes![fromIndex] as postcss.Declaration    
 }
 
-export function getRuleFromMeta(meta:StylableMeta, selector: string ) {
+export function getRuleFromMeta(meta:StylableMeta, selector: string, test:any =(statment:any) => statment.prop === valueMapping.extends ) {
     let found:any = null
     meta.ast.walkRules(selector, function(rule:SRule) {
-        let declrationIndex = rule.nodes ? rule.nodes.findIndex((statment:any) => statment.prop === valueMapping.extends): -1
+        let declrationIndex = rule.nodes ? rule.nodes.findIndex(test): -1
         if (rule.isSimpleSelector && !!~declrationIndex) {
             found = rule.nodes![declrationIndex]
         }
