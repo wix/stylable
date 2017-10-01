@@ -56,12 +56,11 @@ We want people to know who we are! So always write with a capital and bold: **St
 
 4. Try not to follow headings with headings. Write some text between headings.
 
-    **Do**: <h2>Use Stylable to create a component library</h2>
-            <p>You can create a component library...<p>
-            <h3>File structure<h3>
+    **Do**:     
+    <img style="float: center;" src="./images/heading-example.do.jpg">
+    **Don't**:  
+    <img style="float: center;" src="./images/heading-example.dont.jpg">
 
-    **Don't**:<h2>Use Stylable to create a component library</h2>
-              <h3>File structure<h3>
 
 ### Syntax
 
