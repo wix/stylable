@@ -9,15 +9,15 @@ Like CSS [type selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_
 Tag selectors are **not** scoped themselves. Other selectors used with a tag selector can be scoped. For example if a [class selector](./class-selectors.md) is used with a tag selector, the class is scoped and the tag selector is not.  [Root](./root.md) is always added and is always scoped. The matching qualified name of a tag selector can therefore target any element in the subtree of the component. 
 
 > **Note**  
->In the future we may add scoped tag selectors which will require Stylable to include additional [DOM integration](./react-integration.md). 
+>As part of the **Stylable** roadmap, we may add scoped tag selectors which will require **Stylable** to include additional [DOM integration](./react-integration.md). 
 
-## Native Element
+## Native element
 
 Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 form { background: green; }
 .side-bar:hover form { background: red; }
 ```
@@ -29,10 +29,10 @@ form { background: green; }
 ```
 
 > **Note**    
-> `form` is not namespaced.
+> The value `form` is not namespaced.
 
 ```jsx
-/* React - inside a stylable component render */
+/* React - inside a Stylable component render */
 <div className="gallery">
     <div className="side-bar">
         <form></form> /* green background and red while hovering parent */
@@ -41,13 +41,13 @@ form { background: green; }
 </div>
 ```
 
-## Component Element
+## Component element
 
 When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 :import{
     -st-from: "./toggle-button.st.css";
     -st-default: ToggleButton;

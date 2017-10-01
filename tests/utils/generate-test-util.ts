@@ -14,11 +14,12 @@ export interface File { content: string; mtime?: Date; namespace?: string }
 export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
 export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean }
 export type RequireType = (path: string) => any;
-export function generateInfra(config: InfraConfig): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
+
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
     const { fs, requireModule } = createMinimalFS(config);
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
-        const meta = process(postcss.parse(content, { from }));
+        const meta = process(postcss.parse(content, { from }), diagnostics);
         meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
     }, fs);
@@ -34,7 +35,7 @@ export function generateFromMock(config: Config, diagnostics:Diagnostics = new D
     }
     const entry = config.entry;
 
-    const { requireModule, fileProcessor } = generateInfra(config);
+    const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
 
     const t = new StylableTransformer({
         fileProcessor,

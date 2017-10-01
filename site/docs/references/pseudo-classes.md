@@ -18,11 +18,11 @@ The `-st-states` directive rule can be defined only for simple selectors like [t
 
 ## Name custom pseudo-classes and assign a style to them
 
-To define custom states for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then assigned different colors. 
+To define custom pseudo-classes, or states, for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then assigned different colors. 
 
 ```css
 /* example1.st.css */
-@namespace "Example1"
+@namespace "Example1";
 .root {
     -st-states: toggled, loading;
 }
@@ -47,7 +47,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ```css
 /* example2.st.css */
-@namespace "Example2"
+@namespace "Example2";
 :import {
     -st-from: "./example1.st.css";
     -st-default: Comp1;
@@ -74,11 +74,11 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ## Map custom pseudo-classes
 
-You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. .Stylable generates selectors using custom `data-*` attributes. The CSS output uses the custom implementation defined in `-st-states` rather then its default generated `data-*` attributes.
+You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. In this example, `toggled` and `loading` are defined on the root class with their custom implementation. **Stylable** generates selectors using custom `data-*` attributes. The CSS output uses the custom implementation defined in `-st-states` rather than its default generated `data-*` attributes.
 
 ```css
 /* example-custom.st.css */
-@namespace "ExampleCustom"
+@namespace "ExampleCustom";
 .root {
     -st-states: toggled(".on"), loading("[data-spinner]");
 }

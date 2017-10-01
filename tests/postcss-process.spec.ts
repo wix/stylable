@@ -109,21 +109,21 @@ describe('Stylable postcss process', function () {
         });
 
         expect((<ImportSymbol>result.mappedSymbols.a).import).to.deep.include({
-            from: '/path/to/some/other/path',
+            // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' }
         });
 
         expect((<ImportSymbol>result.mappedSymbols.c).import).to.deep.include({
-            from: '/path/to/some/other/path',
+            // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' }
         });
 
         expect((<ImportSymbol>result.mappedSymbols.name).import).to.deep.include({
-            from: '/path/some/global/path',
+            // from: '/path/some/global/path',
             fromRelative: '../some/global/path',
             defaultExport: 'name',
             named: {}
@@ -245,7 +245,7 @@ describe('Stylable postcss process', function () {
                     _kind: 'import',
                     type: 'default',
                     import: {
-                        from: '/path/to/file.css',
+                        // from: '/path/to/file.css',
                         fromRelative: './file.css',
                         defaultExport: 'Style'
                     }
@@ -278,7 +278,7 @@ describe('Stylable postcss process', function () {
                         _kind: 'import',
                         type: 'default',
                         import: {
-                            from: '/path/to/file.css',
+                            // from: '/path/to/file.css',
                             fromRelative: './file.css',
                             defaultExport: 'Style'
                         }

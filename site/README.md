@@ -6,10 +6,11 @@ The actual site and documentation center is published to [http://wix.github.com/
 
 ## Installation
 
-The site is build using (Jekyll)[http://jekyllrb.com/]. In order to modify the site you will need to have the following:
+The site is build using [Jekyll](http://jekyllrb.com/). To modify the site, you have to have the following:
 
-* (Ruby)[https://www.ruby-lang.org/en/downloads/]
-* Install `Jekyll` - `gem install jekyll`
+* [Ruby](https://www.ruby-lang.org/en/downloads/)
+* [RubyGems](https://rubygems.org/pages/download) 
+* Jekyll installed: `gem install jekyll bundler` 
 
 ## Development
 
@@ -18,7 +19,7 @@ Run
 bundle exec jekyll serve --baseurl /stylable
 ```
 
-## Build
+Build
 
 ```
 jekyll build

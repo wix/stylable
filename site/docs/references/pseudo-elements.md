@@ -14,7 +14,7 @@ When you define a CSS class inside a component, in this case a `play-button` in 
 
 ```css
 /* video-player.st.css */
-@namespace "VideoPlayer"
+@namespace "VideoPlayer";
 .root {}
 .play-button { 
     background: black; 
@@ -31,7 +31,7 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 
 ```css
 /* CSS */
-@namespace "Page"
+@namespace "Page";
 :import {
     -st-from: './video-player.st.css';
     -st-default: VideoPlayer;
@@ -54,7 +54,7 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 ```
 
 > **Note**    
-> Custom pseudo elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
+> Custom pseudo-elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: `.my-gallery::nav-btn::label`.
 
 
 ## Extend stylesheet pseudo-elements
@@ -67,7 +67,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 
 ```css
 /* super-video-player.st.css */
-@namespace "SuperVideoPlayer"
+@namespace "SuperVideoPlayer";
 :import {
     -st-from: './video-player.st.css';
     -st-default: VideoPlayer;
@@ -82,7 +82,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 
 ```css
 /* page.st.css */
-@namespace "Page"
+@namespace "Page";
 :import {
     -st-from: './super-video-player.st.css';
     -st-default: SuperVideoPlayer;
@@ -113,7 +113,7 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 
 ```css
 /* CSS */
-@namespace "SuperVideoPlayer"
+@namespace "SuperVideoPlayer";
 :import {
     -st-from: './video-player.css';
     -st-default: VideoPlayer;

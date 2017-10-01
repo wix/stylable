@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol } from './stylable-processor';
+import { StylableMeta, SRule, ClassSymbol, StylableSymbol, SAtRule, SDecl, ElementSymbol, ImportSymbol, Imported } from './stylable-processor';
 import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
@@ -51,7 +51,6 @@ export class StylableTransformer {
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
-
         const ast = meta.outputAst = meta.ast.clone();
 
         const metaExports: Pojo<string> = {};
@@ -60,18 +59,20 @@ export class StylableTransformer {
 
         !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
-            atRule.params = this.replaceValueFunction(atRule.params, meta);
+            atRule.params = this.replaceValueFunction(atRule, atRule.params, meta);
         });
 
-        ast.walkRules((rule: SRule) => {
-            this.appendMixins(ast, rule);
-        });
+        ast.walkRules((rule: SRule) => this.appendMixins(ast, rule));
 
         ast.walkRules((rule: SRule) => {
-            rule.selector = this.scopeRule(meta, rule, metaExports);
+
+            if(!this.isChildOfAtRule(rule, 'keyframes')){
+                rule.selector = this.scopeRule(meta, rule, metaExports);
+            }
+
             !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
-                decl.value = this.replaceValueFunction(decl.value, meta);
+                decl.value = this.replaceValueFunction(decl, decl.value, meta);
             });
         });
 
@@ -91,6 +92,9 @@ export class StylableTransformer {
             exports: metaExports
         }
 
+    }
+    isChildOfAtRule(rule: postcss.Rule, atRuleName: string){
+        return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
     }
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
@@ -248,10 +252,14 @@ export class StylableTransformer {
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
+                        if ((resolvedClass.symbol as ClassSymbol | ElementSymbol)[valueMapping.root]) {
+                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => { return node.prop === valueMapping.default })
+                            this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, { word: importNode.value })
+                        }
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
                         let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named)
-                        this.diagnostics.error(importNode, 'import mixin does not exist', { word: mix.ref.name })
+                        this.diagnostics.error(importNode, 'import mixin does not exist', { word: importNode.value })
                     }
                 }
             } else if (mix.ref._kind === 'class') {
@@ -260,9 +268,18 @@ export class StylableTransformer {
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
-    replaceValueFunction(value: string, meta: StylableMeta) {
+    replaceValueFunction(node: postcss.Node, value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
-            let value = this.resolver.resolveVarValue(meta, name);
+            let { value, next } = this.resolver.resolveVarValueDeep(meta, name);
+            if (next && next._kind === 'js') {
+                this.diagnostics.error(node, `"${name}" is a mixin and cannot be used as a var`, { word: name })
+            } else if (next && next.symbol && next.symbol._kind === 'class') {
+                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, { word: name })
+            } else if (!value) {
+                const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
+                let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
+                this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
+            }
             return typeof value === 'string' ? value : match;
         });
     }

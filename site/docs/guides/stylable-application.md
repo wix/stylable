@@ -66,7 +66,7 @@ In the following code you can see a component that is described with:
 * 1 component variant
 
 ```css
-@namespace "dialog"
+@namespace "dialog";
 :import {
     -st-from: './project.st.css';
     -st-named: color1, color2, cancelButton;
