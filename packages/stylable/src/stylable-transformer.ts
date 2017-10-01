@@ -10,7 +10,7 @@ import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
 import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta, reservedKeyFrames } from "./stylable-utils";
 
-
+const cloneDeep = require('lodash.clonedeep');
 const valueParser = require("postcss-value-parser");
 
 export interface KeyFrameWithNode {
@@ -21,6 +21,13 @@ export interface KeyFrameWithNode {
 export interface StylableResults {
     meta: StylableMeta;
     exports: Pojo<string>;
+}
+
+export interface ScopedSelectorResults {
+    current: StylableMeta;
+    symbol: StylableSymbol | null;
+    selectorAst: SelectorAstNode;
+    selector: string;
 }
 
 export interface Options {
@@ -91,8 +98,12 @@ export class StylableTransformer {
     }
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
-            let value = this.resolver.resolveVarValue(meta, varSymbol.name);
-            metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
+            if (metaExports[varSymbol.name]) {
+                this.diagnostics.warn(varSymbol.node, `symbol ${varSymbol.name} is already in use`, { word: varSymbol.name })
+            } else {
+                let value = this.resolver.resolveVarValue(meta, varSymbol.name);
+                metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
+            }
         });
     }
     exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
@@ -302,49 +313,66 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    scopeRule(meta: StylableMeta, rule: SRule, metaExports: Pojo<string>) {
+    scopeSelector(meta: StylableMeta, selector: string, metaExports: Pojo<string>): ScopedSelectorResults {
         let current = meta;
-        let symbol: StylableSymbol;
+        let symbol: StylableSymbol | null = null;
         let nestedSymbol: StylableSymbol | null;
         let originSymbol: ClassSymbol | ElementSymbol;
-        let selectorAst = parseSelector(rule.selector) //.selectorAst;
-        traverseNode(selectorAst, (node) => {
-            const { name, type } = node;
-            if (type === 'selector' || type === 'spacing' || type === 'operator') {
-                if (nestedSymbol) {
-                    symbol = nestedSymbol;
-                    nestedSymbol = null;
-                } else {
-                    current = meta;
-                    symbol = meta.classes[meta.root];
-                    originSymbol = symbol;
+        let selectorAst = parseSelector(selector);
+        const addedSelectors: any[] = [];
+
+        selectorAst.nodes.forEach((selectorNode) => {
+            traverseNode(selectorNode, (node) => {
+                const { name, type } = node;
+                if (type === 'selector' || type === 'spacing' || type === 'operator') {
+                    if (nestedSymbol) {
+                        symbol = nestedSymbol;
+                        nestedSymbol = null;
+                    } else {
+                        current = meta;
+                        symbol = meta.classes[meta.root];
+                        originSymbol = symbol;
+                    }
+                } else if (type === 'class') {
+                    const next = this.handleClass(current, node, name, metaExports);
+                    originSymbol = current.classes[name];
+                    symbol = next.symbol;
+                    current = next.meta;
+                } else if (type === 'element') {
+                    const next = this.handleElement(current, node, name);
+                    originSymbol = current.elements[name];
+                    symbol = next.symbol;
+                    current = next.meta;
+                } else if (type === 'pseudo-element') {
+                    const next = this.handlePseudoElement(current, node, name, selectorNode, addedSelectors);
+                    symbol = next.symbol;
+                    current = next.meta;
+                } else if (type === 'pseudo-class') {
+                    current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol);
+                } else if (type === 'nested-pseudo-class') {
+                    if (name === 'global') {
+                        node.type = 'selector';
+                        return true;
+                    }
+                    nestedSymbol = symbol;
                 }
-            } else if (type === 'class') {
-                const next = this.handleClass(current, node, name, metaExports);
-                originSymbol = current.classes[name];
-                symbol = next.symbol;
-                current = next.meta;
-            } else if (type === 'element') {
-                const next = this.handleElement(current, node, name);
-                originSymbol = current.elements[name];
-                symbol = next.symbol;
-                current = next.meta;
-            } else if (type === 'pseudo-element') {
-                const next = this.handlePseudoElement(current, node, name);
-                symbol = next.symbol;
-                current = next.meta;
-            } else if (type === 'pseudo-class') {
-                current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol);
-            } else if (type === 'nested-pseudo-class') {
-                if (name === 'global') {
-                    node.type = 'selector';
-                    return true;
-                }
-                nestedSymbol = symbol;
+                /* do nothing */
+                return undefined;
+            });
+        })
+
+        addedSelectors.forEach((s) => {
+            const clone = cloneDeep(s.selectorNode);
+            const i = s.selectorNode.nodes.indexOf(s.node);
+            if (i === -1) {
+                throw new Error('not supported inside nested classes');
+            } else {
+                clone.nodes[i].value = s.customElementChunk;
             }
-            /* do nothing */
-            return undefined;
-        });
+            selectorAst.nodes.push(clone);
+        })
+
+
 
         const scopedRoot = this.scope(meta.root, meta.namespace);
         selectorAst.nodes.forEach((selector) => {
@@ -365,8 +393,16 @@ export class StylableTransformer {
             }
         });
 
-        return stringifySelector(selectorAst);
+        return {
+            current,
+            symbol,
+            selectorAst,
+            selector: stringifySelector(selectorAst)
+        };
 
+    }
+    scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
+        return this.scopeSelector(meta, rule.selector, metaExports).selector;
     }
     handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
         const symbol = meta.classes[name];
@@ -418,8 +454,40 @@ export class StylableTransformer {
 
         return { meta, symbol: tRule };
     }
-    handlePseudoElement(meta: StylableMeta, node: SelectorAstNode, name: string): CSSResolve {
+
+    handlePseudoElement(meta: StylableMeta, node: SelectorAstNode, name: string, selectorNode: SelectorAstNode, addedSelectors: any[]): CSSResolve {
         let next: JSResolve | CSSResolve | null;
+
+        let customSelector = meta.customSelectors[":--" + name];
+        if (customSelector) {
+
+            let res = this.scopeSelector(meta, customSelector, {});
+            res.selectorAst.nodes = res.selectorAst.nodes.map((sel) => nonRootNonSpacingSelector(this, meta, sel));
+
+            let sel = res.selectorAst.nodes[0];
+
+            if (sel) {
+                node.type = 'invalid'; /*just take it */
+                node.before = ' ';
+                node.value = stringifySelector(sel);
+            }
+
+            for (var i = 1; i < res.selectorAst.nodes.length; i++) {
+                addedSelectors.push({
+                    selectorNode,
+                    node,
+                    customElementChunk: stringifySelector(res.selectorAst.nodes[i])
+                });
+            }
+
+            if (res.selectorAst.nodes.length === 1 && res.symbol) {
+                return { _kind: 'css', meta: res.current, symbol: res.symbol };
+            }
+
+            //this is an error mode fallback
+            return { _kind: 'css', meta, symbol: { _kind: "element", name: '*' } };
+
+        }
 
         let symbol = meta.mappedSymbols[name];
         let current = meta;
@@ -455,7 +523,7 @@ export class StylableTransformer {
 
         return { _kind: 'css', meta: current, symbol };
     }
-    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol, origin: StylableMeta, originSymbol: ClassSymbol | ElementSymbol) {
+    handlePseudoClass(meta: StylableMeta, node: SelectorAstNode, name: string, symbol: StylableSymbol | null, origin: StylableMeta, originSymbol: ClassSymbol | ElementSymbol) {
         let current = meta;
         let currentSymbol = symbol;
 
@@ -522,3 +590,26 @@ export class StylableTransformer {
 }
 
 
+
+
+
+function nonRootNonSpacingSelector(ctx: StylableTransformer, meta: StylableMeta, scopeSelectorNode: SelectorAstNode) {
+    let sliceCount = 0;
+    const t = scopeSelectorNode.nodes[0];
+    if (t && t.type === 'class' && t.name === ctx.scope(meta.root, meta.namespace)) {
+        sliceCount++;
+        const t = scopeSelectorNode.nodes[1];
+        if (t.type === 'spacing') {
+            sliceCount++;
+        }
+    }
+    
+    scopeSelectorNode.nodes = scopeSelectorNode.nodes.slice(sliceCount);
+    if (scopeSelectorNode.before) {
+        scopeSelectorNode.before = scopeSelectorNode.before!.replace(/^\s+/, '');
+    }    
+    if (scopeSelectorNode.nodes[0].before) {
+        scopeSelectorNode.nodes[0].before = scopeSelectorNode.nodes[0].before!.replace(/^\s+/, '');
+    }
+    return scopeSelectorNode
+}

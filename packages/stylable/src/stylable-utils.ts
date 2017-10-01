@@ -3,10 +3,17 @@ import { SRule, StylableMeta, Imported } from "./stylable-processor";
 import { parseSelector, stringifySelector, traverseNode } from "./selector-utils";
 import { valueMapping } from "./stylable-value-parsers";
 import { Diagnostics } from "./diagnostics";
+const replaceRuleSelector = require("postcss-selector-matches/dist/replaceRuleSelector");
 const cloneDeep = require('lodash.clonedeep');
+
+export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g; 
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
+}
+
+export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
+    return replaceRuleSelector(rule, { lineBreak });
 }
 
 export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Diagnostics) {
@@ -165,6 +172,8 @@ export function getRuleFromMeta(meta:StylableMeta, selector: string, test:any =(
     })
     return found
 }
+
+
 
 export const reservedKeyFrames = [
     "none",
