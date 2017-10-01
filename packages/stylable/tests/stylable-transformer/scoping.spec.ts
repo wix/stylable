@@ -1017,6 +1017,37 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('not scope rules that are child of keyframe atRule', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @keyframes name {
+                                from {}
+                                to {}
+                            }
+                            @keyframes name2 {
+                                0% {}
+                                100% {}
+                            }
+                        `
+                    }
+                }
+            });
+ 
+            const at = <postcss.AtRule>result.nodes![0];            
+            expect((<postcss.Rule>at.nodes![0]).selector).to.equal('from');
+            expect((<postcss.Rule>at.nodes![1]).selector).to.equal('to');
+         
+            const at1 = <postcss.AtRule>result.nodes![1];            
+            expect((<postcss.Rule>at1.nodes![0]).selector).to.equal('0%');
+            expect((<postcss.Rule>at1.nodes![1]).selector).to.equal('100%');
+
+        });
+
     })
 
 
