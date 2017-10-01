@@ -57,9 +57,9 @@ We want people to know who we are! So always write with a capital and bold: **St
 4. Try not to follow headings with headings. Write some text between headings.
 
     **Do**:     
-    <img style="float: center;" src="./images/heading-example.do.jpg">
+    ![headingexample](./images/heading-example-do.jpg)
     **Don't**:  
-    <img style="float: center;" src="./images/heading-example.dont.jpg">
+    <img style="float: center;" src="./images/heading-example-dont.jpg">
 
 
 ### Syntax
