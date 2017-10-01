@@ -33,7 +33,8 @@ export class Stylable {
         protected fileSystem: fsLike,
         protected requireModule: (path: string) => any,
         public delimiter: string = '--',
-        protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta) {
+        protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
+        protected diagnostics = new Diagnostics()) {
         const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
@@ -45,15 +46,14 @@ export class Stylable {
     transform(meta: StylableMeta): StylableResults
     transform(source: string, resourcePath: string): StylableResults
     transform(meta: string | StylableMeta, resourcePath?: string): StylableResults {
-        const diagnostics = new Diagnostics();
         if (typeof meta === 'string') {
             const root = safeParse(meta, { from: resourcePath });
-            meta = process(root, diagnostics);
+            meta = process(root, this.diagnostics);
         }
 
         const transformer = new StylableTransformer({
             delimiter: this.delimiter,
-            diagnostics: new Diagnostics(),
+            diagnostics: this.diagnostics,
             fileProcessor: this.fileProcessor,
             requireModule: this.requireModule
         });

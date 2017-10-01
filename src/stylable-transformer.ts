@@ -55,12 +55,14 @@ export class StylableTransformer {
             atRule.params = this.replaceValueFunction(atRule, atRule.params, meta);
         });
 
-        ast.walkRules((rule: SRule) => {
-            this.appendMixins(ast, rule);
-        });
+        ast.walkRules((rule: SRule) => this.appendMixins(ast, rule));
 
         ast.walkRules((rule: SRule) => {
-            rule.selector = this.scopeRule(meta, rule, metaExports);
+
+            if(!this.isChildOfAtRule(rule, 'keyframes')){
+                rule.selector = this.scopeRule(meta, rule, metaExports);
+            }
+
             !this.keepValues && rule.walkDecls((decl: SDecl) => {
                 decl.sourceValue = decl.value;
                 decl.value = this.replaceValueFunction(decl, decl.value, meta);
@@ -83,6 +85,9 @@ export class StylableTransformer {
             exports: metaExports
         }
 
+    }
+    isChildOfAtRule(rule: postcss.Rule, atRuleName: string){
+        return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
     }
     exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
