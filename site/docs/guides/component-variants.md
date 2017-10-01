@@ -4,7 +4,7 @@ title: Component Variants
 layout: docs
 ---
 
-When building a [Stylable component library](./stylable-component-library.md) or a [Stylable application](./stylable-application.md), it is useful to define several semantic "flavors" of some components, for example a `button` component that represents `cancel` or a `gallery` component for the `main` gallery instance. 
+When building a [Stylable component library](./stylable-component-library.md) or a [Stylable application](./stylable-application.md), it is useful to define several semantic "flavors" of some components, for example a `Button` component that represents `cancel` or a `Gallery` component for the `main` gallery instance. 
 
 ## Defining a component variant
 

@@ -29,10 +29,10 @@ An application would define CSS with the final style definitions:
 }
 :import {
     -st-from: './button/button.st.css';
-    -st-default: button;
+    -st-default: Button;
 }
 .cancelButton {
-    -st-extends: button;
+    -st-extends: Button;
     color: value(color1);
     background: value(color2);
 }

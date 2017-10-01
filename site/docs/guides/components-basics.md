@@ -18,7 +18,7 @@ Whether creating your own components or using components you imported from a 3rd
 
 ## 1 Style a component 
 
-Let's say you have a `button` component with a render function per this example. You can style its JSX using the `className` property.
+Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property.
 
 ```jsx
 /* button.ts */
@@ -86,7 +86,7 @@ render(){
 }
 ```
 
-Let's also import `Button`'s stylesheet into the `panel` stylesheet. You can then target the internal parts of the component that you imported:
+Let's also import `Button`'s stylesheet into the `Panel` stylesheet. You can then target the internal parts of the component that you imported:
 
 ```css
 /* panel.st.css */
