@@ -133,7 +133,7 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-                    const node = getCorrectNodeImport(_import, (node: any) => node.prop === valueMapping.from)
+                    const node = getCorrectNodeImport(_import, (node: any) => node.prop === valueMapping.from);
                     this.diagnostics.error(node, "Trying to import unknown file", { word: node.value })
                 }
             }
@@ -278,7 +278,11 @@ export class StylableTransformer {
             } else if (!value) {
                 const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
                 let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
-                this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
+                if(correctNode){
+                    this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
+                } else {
+                    //catched in the process step.
+                }
             }
             return typeof value === 'string' ? value : match;
         });
