@@ -14,8 +14,8 @@ import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMet
 const valueParser = require("postcss-value-parser");
 
 export interface KeyFrameWithNode {
-    value: string, 
-    node:postcss.Node
+    value: string,
+    node: postcss.Node
 }
 
 export interface StylableResults {
@@ -49,7 +49,7 @@ export class StylableTransformer {
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
-        
+
         !this.keepValues && ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
             atRule.params = this.replaceValueFunction(atRule, atRule.params, meta);
@@ -93,7 +93,7 @@ export class StylableTransformer {
     exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach((name) => {
             if (metaExports[name] === keyframeMapping[name].value) {
-                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, {word: name})
+                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, { word: name })
             } else {
                 metaExports[name] = keyframeMapping[name].value;
             }
@@ -117,8 +117,8 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-                    const node = getCorrectNodeImport(_import, (node:any) => node.prop === valueMapping.from)
-                    this.diagnostics.error(node, "Trying to import unknown file", {word:node.value})
+                    const node = getCorrectNodeImport(_import, (node: any) => node.prop === valueMapping.from)
+                    this.diagnostics.error(node, "Trying to import unknown file", { word: node.value })
                 }
             }
         });
@@ -148,15 +148,15 @@ export class StylableTransformer {
                             finalMeta = resolved.meta;
                         } else {
                             const found = getRuleFromMeta(meta, '.' + classSymbol.name)
-                            if (!!found){
-                                this.diagnostics.error(found, "import is not extendable", {word:found.value})
-                            } 
+                            if (!!found) {
+                                this.diagnostics.error(found, "import is not extendable", { word: found.value })
+                            }
                         }
                     } else {
                         const found = getRuleFromMeta(meta, '.' + classSymbol.name)
-                        if (!!found){
-                            this.diagnostics.error(found, "import is not extendable: js or file not found", {word:found.value})
-                        } 
+                        if (!!found) {
+                            this.diagnostics.error(found, "import is not extendable: js or file not found", { word: found.value })
+                        }
                     }
                 }
 
@@ -226,24 +226,24 @@ export class StylableTransformer {
                             const res = resolvedMixin.symbol(mix.mixin.options.map((v) => v.value));
                             mixinRoot = cssObjectToAst(res).root;
                         } catch (e) {
-                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word:mix.mixin.type})
-                            return 
+                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, { word: mix.mixin.type })
+                            return
                         }
                         mergeRules(mixinRoot, rule, this.diagnostics);
-                    } else { 
-                        this.diagnostics.error(rule, 'js mixin must be a function', {word:mix.mixin.type})
+                    } else {
+                        this.diagnostics.error(rule, 'js mixin must be a function', { word: mix.mixin.type })
                     }
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
-                        if ((resolvedClass.symbol as any)['-st-root']){
-                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> { return node.prop === valueMapping.default })
-                            this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, {word:importNode.value})    
+                        if ((resolvedClass.symbol as ClassSymbol | ElementSymbol)[valueMapping.root]) {
+                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => { return node.prop === valueMapping.default })
+                            this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, { word: importNode.value })
                         }
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
-                        let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node:any)=> node.prop === valueMapping.named)
-                        this.diagnostics.error(importNode, 'import mixin does not exist', {word:importNode.value})
+                        let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named)
+                        this.diagnostics.error(importNode, 'import mixin does not exist', { word: importNode.value })
                     }
                 }
             } else if (mix.ref._kind === 'class') {
@@ -252,17 +252,17 @@ export class StylableTransformer {
         });
         rule.walkDecls(valueMapping.mixin, (node) => node.remove());
     }
-    replaceValueFunction(node:postcss.Node, value: string, meta: StylableMeta) {
+    replaceValueFunction(node: postcss.Node, value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
-            let {value, next} = this.resolver.resolveVarValueDeep(meta, name);
-            if (next && next._kind === 'js'){
-                this.diagnostics.error(node,`"${name}" is a mixin and cannot be used as a var`, {word:name})
-            } else if (next && next.symbol && next.symbol._kind === 'class'){
-                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, {word:name})
-            } else if (!value){
-                const importIndex = meta.imports.findIndex((imprt:Imported)=>!!imprt.named[name]);
-                let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node:any)=>node.prop ===valueMapping.named)
-                this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, {word:name})
+            let { value, next } = this.resolver.resolveVarValueDeep(meta, name);
+            if (next && next._kind === 'js') {
+                this.diagnostics.error(node, `"${name}" is a mixin and cannot be used as a var`, { word: name })
+            } else if (next && next.symbol && next.symbol._kind === 'class') {
+                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, { word: name })
+            } else if (!value) {
+                const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
+                let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
+                this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
             }
             return typeof value === 'string' ? value : match;
         });
@@ -272,22 +272,22 @@ export class StylableTransformer {
         const keyframesExports: Pojo<KeyFrameWithNode> = {};
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
-            if (!!~reservedKeyFrames.indexOf(name)){
-                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, {word:name})
+            if (!!~reservedKeyFrames.indexOf(name)) {
+                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, { word: name })
             }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
                     value: this.scope(name, meta.namespace),
                     node: atRule
                 }
-            }   
+            }
             atRule.params = keyframesExports[name].value
         });
 
         root.walkDecls(/animation$|animation-name$/, decl => {
             const parsed = valueParser(decl.value);
             parsed.nodes.forEach((node: any) => {
-                const alias =  keyframesExports[node.value] && keyframesExports[node.value].value;
+                const alias = keyframesExports[node.value] && keyframesExports[node.value].value;
                 if (node.type === "word" && Boolean(alias)) {
                     node.value = alias;
                 }
@@ -372,7 +372,7 @@ export class StylableTransformer {
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
                 return next;
             } else {
-                this.diagnostics.error(symbol.alias.import.rule, 'Trying to import unknown alias', {word:symbol.alias.name})
+                this.diagnostics.error(symbol.alias.import.rule, 'Trying to import unknown alias', { word: symbol.alias.name })
             }
         }
 
