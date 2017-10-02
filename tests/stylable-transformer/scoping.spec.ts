@@ -138,6 +138,37 @@ describe('Stylable postcss transform (Scoping)', function () {
             
         });
 
+        it('component/tag selector with -st-scoped', () => {
+            var result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }                
+                            Container {}
+                            
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .root {
+                                -st-scoped: x;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .x');
+        });
+
+
+
         it('class selector that extends root with inner class targeting (deep)', () => {
 
             var result = generateStylableRoot({
@@ -301,6 +332,36 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root.inner--root .inner--inner, .entry--root .entry--inner');
+
+        });
+
+        it('resolve and transform pseudo-element with -st-scoped output', () => {
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            } 
+                            Inner {}
+                            Inner::a {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            .root { -st-scoped: x;}
+                            .a { -st-scoped: y;}
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .x');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .x .y');
 
         });
 
@@ -481,6 +542,30 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('scope according to -st-scoped', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-scoped: x;
+                            }
+                            .a {
+                                -st-scoped: y;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.x');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.x .y');
+
+        });
+
         it('scope selector that extends local root', () => {
 
             var result = generateStylableRoot({
@@ -548,7 +633,37 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a.imported--root');
 
         });
+        
+        it('scope selector that extends a style with -st-scoped root', () => {
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                            }
+                            .a {
+                                -st-extends: Imported;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                -st-scoped: x;
+                            }
+                        `,
+                    }
+                }
+            });
 
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a.x');
+
+        });
 
         it('scope class alias', () => {
 

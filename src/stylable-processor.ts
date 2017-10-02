@@ -360,9 +360,26 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, 'cannot define "' + valueMapping.compose + '" inside a complex selector');
             }
+        } else if (decl.prop === valueMapping.scoped) {
+            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
+                this.setClassTargetName(
+                    decl.value,
+                    rule.selector
+                );
+            } else {
+                // TODO: diagnostics - scoped on none class
+            }
         }
 
 
+    }
+
+    protected setClassTargetName(value: string, selector: string) {
+        const name = selector.replace('.', '');
+        const typedRule = this.meta.classes[name];
+        if (typedRule) {
+            typedRule[valueMapping.scoped] = value;
+        }
     }
 
     protected extendTypedRule(node: postcss.Node, selector: string, key: keyof StylableDirectives, value: any) {
@@ -442,12 +459,14 @@ export interface StylableDirectives {
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
     "-st-theme"?: boolean;
+    "-st-scoped"?: string;
 }
 
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
     name: string;
     alias?: ImportSymbol;
+    scoped?: string; 
 }
 
 export interface ElementSymbol extends StylableDirectives {

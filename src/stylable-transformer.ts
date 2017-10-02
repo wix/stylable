@@ -141,7 +141,7 @@ export class StylableTransformer {
         metaExports[meta.root] = scopedName;
     }
     exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
-        const scopedName = this.scope(name, meta.namespace);
+        const scopedName = classSymbol && classSymbol[valueMapping.scoped] || this.scope(name, meta.namespace);
         if (!metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
             const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
@@ -378,7 +378,7 @@ export class StylableTransformer {
 
 
 
-        const scopedRoot = this.scope(meta.root, meta.namespace);
+        const scopedRoot = (meta.mappedSymbols[meta.root] as any)[valueMapping.scoped] || this.scope(meta.root, meta.namespace);
         selectorAst.nodes.forEach((selector) => {
             const first = selector.nodes[0];
             if (first && first.type === 'selector' && first.name === 'global') {
@@ -426,7 +426,7 @@ export class StylableTransformer {
         const next = this.resolver.resolve(extend);
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
             node.before = '.' + scopedName;
-            node.name = this.scope(next.symbol.name, next.meta.namespace);
+            node.name = (next.symbol as any)[valueMapping.scoped] || this.scope(next.symbol.name, next.meta.namespace);
             return next;
         }
 
@@ -435,7 +435,7 @@ export class StylableTransformer {
             if (extend === symbol && extend.alias) {
                 const next = this.resolver.deepResolve(extend.alias);
                 if (next && next._kind === 'css') {
-                    node.name = this.scope(next.symbol.name, next.meta.namespace);
+                    node.name = (next.symbol as any)[valueMapping.scoped] || this.scope(next.symbol.name, next.meta.namespace);
                     return next;
                 }
             } else {
@@ -452,7 +452,7 @@ export class StylableTransformer {
         const next = this.resolver.resolve(extend);
         if (next && next._kind === 'css') {
             node.type = 'class';
-            node.name = this.scope(next.symbol.name, next.meta.namespace);
+            node.name = (next.symbol as any)[valueMapping.scoped] || this.scope(next.symbol.name, next.meta.namespace);
             return next;
         }
 
@@ -511,7 +511,7 @@ export class StylableTransformer {
 
                 node.type = 'class';
                 node.before = symbol[valueMapping.root] ? '' : ' ';
-                node.name = this.scope(symbol.name, current.namespace);
+                node.name = symbol[valueMapping.scoped] || this.scope(symbol.name, current.namespace);
 
                 let extend = symbol[valueMapping.extends];
                 if (extend && extend._kind === 'class' && extend.alias) {

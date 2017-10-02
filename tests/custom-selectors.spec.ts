@@ -56,7 +56,7 @@ describe('@custom-selector', function () {
 
 
 
-    it('expand custom-selector in pseudo-element in the owner context', function () {
+    it('expand pseudo-element custom-selector in the owner context', function () {
         
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
@@ -81,10 +81,6 @@ describe('@custom-selector', function () {
 
                         :--root-icon, .class {
                             color: red;
-                        }
-
-                        .icon {
-                            
                         }
                     `
                 }

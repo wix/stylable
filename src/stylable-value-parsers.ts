@@ -28,7 +28,8 @@ export const valueMapping = {
     mixin: '-st-mixin' as "-st-mixin",
     variant: '-st-variant' as "-st-variant",
     compose: '-st-compose' as "-st-compose",
-    theme: '-st-theme' as "-st-theme"
+    theme: '-st-theme' as "-st-theme",
+    scoped: '-st-scoped' as "-st-scoped"
 };
 
 export type stKeys = keyof typeof valueMapping;
@@ -47,6 +48,9 @@ export const SBTypesParsers = {
     },
     "-st-theme"(value: string) {
         return value === 'false' ? false : true;
+    },
+    "-st-scoped"(value: string) {
+        return value;
     },
     "-st-states"(value: string) {
         if (!value) {
