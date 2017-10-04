@@ -20,7 +20,7 @@ In the [commons stylable stylesheet](./project-commons.md) of your project (usua
 
 ## Use shared classes in components
 
-Component stylable stylesheet can use and extend shared classes:
+A component's **Stylable** stylesheet can use and extend shared classes:
 
 ```css
 @namespace "comp";
