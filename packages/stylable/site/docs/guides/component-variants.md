@@ -28,7 +28,7 @@ In your project's [Stylable stylesheet](./project-commons.md) used for the commo
 
 ## Use component variants in components
 
-A component Stylable stylesheet can use and extend component variants:
+A component **Stylable** stylesheet can use and extend component variants:
 
 ```css
 @namespace "comp";

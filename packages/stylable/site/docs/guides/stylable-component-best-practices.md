@@ -16,7 +16,9 @@ If you do set a default size or size limitations, use `em` units to resize to th
 
 ## Give meaningful names
 
-Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a [`pseudo-element`](../references/pseudo-elements.md) and should be considered part of the component API.
+Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a [`pseudo-element`](../references/pseudo-elements.md) and should be considered part of the component API. 
+
+Use camelCase and avoid hyphens (-) and capital letters at the beginning. 
 
 ```css
 /* good */
