@@ -1,5 +1,5 @@
 ---
-id: getting-started
+id: get-started
 title: Getting Started
 redirect_from: "docs/index.html"
 layout: docs
