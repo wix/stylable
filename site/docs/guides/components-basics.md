@@ -11,7 +11,7 @@ You use **Stylable** with a component file (for example using React), along with
 > **Note**:  
 > This guide shows the JSX side of our [stylable-integration](https://github.com/wixplosives/stylable-integration) with React. 
 
-**Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
+**Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
 
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application. 
 
