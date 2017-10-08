@@ -1,4 +1,4 @@
-import { FileProcessor, cachedProcessFile } from "./cached-process-file";
+import { FileProcessor, cachedProcessFile, MinimalFS } from "./cached-process-file";
 import { StylableMeta, process } from "./stylable-processor";
 import { StylableResolver } from "./postcss-resolver";
 import { StylableResults, StylableTransformer } from "./stylable-transformer";
@@ -8,21 +8,8 @@ import { Bundler } from "./bundle";
 
 const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
 
-import * as fs from 'fs';
 import * as path from 'path';
 
-export interface fsLike {
-    readFileSync: typeof fs.readFileSync;
-    readFile: typeof fs.readFile;
-    stat: typeof fs.stat;
-    statSync: typeof fs.statSync;
-    readdir: typeof fs.readdir;
-    readdirSync: typeof fs.readdirSync;
-    readlink: typeof fs.readlink;
-    existsSync: typeof fs.existsSync;
-    writeFileSync: typeof fs.writeFileSync;
-    mkdirSync: typeof fs.mkdirSync;
-}
 
 export class Stylable {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -30,7 +17,7 @@ export class Stylable {
     resolvePath: (ctx: string, path: string) => string;
     constructor(
         protected projectRoot: string,
-        protected fileSystem: fsLike,
+        protected fileSystem: MinimalFS,
         protected requireModule: (path: string) => any,
         public delimiter: string = '--',
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
@@ -72,7 +59,7 @@ export interface StylableInfrastructure {
     resolvePath: (context: string, path: string) => string
 }
 
-export function createInfrastructure(projectRoot: string, fileSystem: fsLike = fs, onProcess: (meta: StylableMeta, path: string) => StylableMeta = (x) => x): StylableInfrastructure {
+export function createInfrastructure(projectRoot: string, fileSystem: MinimalFS, onProcess: (meta: StylableMeta, path: string) => StylableMeta = (x) => x): StylableInfrastructure {
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
         fileSystem: fileSystem
