@@ -613,7 +613,25 @@ describe('diagnostics: warnings and errors', function () {
                             content: ``
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'JS import is not extendable', file:'/main.css'}])  
+            })
+            it('should warn if file not found', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                |-st-from: $'./file.css'$|;   
+                                -st-default: special;   
+                            }
+                            .myclass {
+                                -st-extends: special
+                            }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'Imported file "/file.css" not found', file:'/main.css'}])  
             })
         });
 

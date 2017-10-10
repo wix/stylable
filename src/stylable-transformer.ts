@@ -170,8 +170,11 @@ export class StylableTransformer {
                         }
                     } else {
                         const found = getRuleFromMeta(meta, '.' + classSymbol.name)
-                        if (!!found) {
-                            this.diagnostics.error(found, "import is not extendable: js or file not found", { word: found.value })
+                        if (found && resolved) {
+                            this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
+                        } else {
+                            let importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.from)
+                            this.diagnostics.error(importNode, `Imported file "${extend.import.from}" not found`, { word: importNode.value})
                         }
                     }
                 }
