@@ -7,7 +7,7 @@ layout: docs
 
 ## What is Stylable
 
-**Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
+**Stylable** is a css preprocessor that enables you to write reusable, highly-performant styled components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
 * Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
@@ -21,7 +21,7 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
 
-3. While **Stylable** can work with any component framework, we use it with [React](https://facebook.github.io/react/docs/installation.html). 
+3. While **Stylable** can work with any component framework, we offer a [React](https://facebook.github.io/react/docs/installation.html) [component integration](TODO: link to wix-react-tools). 
 
 ## What can I do
 

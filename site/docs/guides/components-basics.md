@@ -1,6 +1,6 @@
 ---
 id: guides/components-basics
-title: Stylable Basics
+title: Component Basics
 layout: docs
 ---
 
@@ -16,7 +16,7 @@ You use **Stylable** with a component file (for example using React), along with
 Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application. 
 
 
-## 1 Style a component 
+## 1. Style a component 
 
 Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property.
 
@@ -53,7 +53,7 @@ element by Stylable React integration
 }
 ```
 
-## 2 Expose the component's Stylable API
+## 2. Expose the component's Stylable API
 
 When using **Stylable**, every component exposes an API that's usable by its parent components.
 
@@ -116,7 +116,10 @@ A custom pseudo-class can be used to reflect any logical state of your component
 /* button.jsx */
 render () {
     return (
-        <button style-state={this.state.on} onClick={()=>this.setState({on:!this.state.on})}>
+        <button 
+            style-state={{on: this.state.on}} 
+            onClick={()=>this.setState({on:!this.state.on})}
+        >
             <div className="icon"/>
             <span className="label">Click Here!</span>
         </button>

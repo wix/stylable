@@ -4,6 +4,43 @@ title: React integration
 layout: docs
 ---
 
+
+
+## Vanilla integration 
+
+Stylable integration consist of 
+four simple steps that each supports different feature.
+
+1. Enable shared root by passing parent data-* to your root node.
+2. Enable overrides by putting the parent className on your root node.
+3. Enable custom css states by generating data-* from your stylesheet.
+4. Enable scoped styling by putting the root class on your root node. ( the result of step 2 + 4 is just className concatenation)
+
+```jsx
+    ...
+    import style from "style.st.css";
+    
+    class Comp extends React.Component {
+        render() {
+            return (
+                <div                    
+                    {...this.props}  //this will enable shared root states
+                    
+                    {...style.$stylesheet.cssStates({on: this.state.on})} // this will enable custom css states.
+                    
+                    className={[style.root, this.props.className].join(' ')}  // this will enable styling and overrides
+                >                    
+                    <div className={style.item} />
+                </div>
+            );
+        }
+    }
+
+```
+
+
+## Auto integration
+
 Use Stylable React integration from [wix-react-tools](https://github.com/wix/wix-react-tools) to set a **Stylable** stylesheet for a React component or stateless functional component (SFC).
 
 
@@ -74,8 +111,3 @@ class Comp extends React.Component {
     }
 }
 ```
-
-## Other Stylable integrations (future)
-
-* Polymer - web-components with shadow DOM transformer
-* Document - expose JS API to manage selector states and dynamic updates
