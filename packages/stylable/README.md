@@ -1,4 +1,4 @@
-![Stylable CSS for Components](./branding/logo/PNG/96-logo-horizontal.png)
+![Stylable CSS for Components](./branding/logo/SVG/96-logo-horizontal.svg)
 
 [![npm version](https://badge.fury.io/js/stylable.svg)](https://www.npmjs.com/package/stylable)
 [![Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
