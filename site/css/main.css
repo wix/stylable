@@ -118,7 +118,7 @@ code.highlighter-rouge {
 header {
     position:fixed;
     height:65px;
-    background:#2b5672;
+    background:#2e5d4c;
     padding: 0 10px;
     top:0;
     left:0;
@@ -136,7 +136,7 @@ header > .header-content {
 header .logo {
     display: inline-block;
     font-size: 24px;
-    color:#eebc52;
+    color:#FFFFFF;
     text-decoration: none;
 }
 header .logo a{
