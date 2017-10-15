@@ -18,7 +18,7 @@
         </div>
 
         <ul class="main-nav">
-            <li><a href="/stylable/docs/getting-started.html">Docs</a></li>
+            <li><a href="/stylable/docs/get-started.html">Docs</a></li>
             <li><a href="https://github.com/wix/stylable">GitHub</a></li>
         </ul>
 
@@ -29,8 +29,10 @@
     <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Getting Started</div>
+        <div class="docs-nav-section-header">Discover Stylable</div>
         <ul>
+            
+                <li class=""><a href="/stylable/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
             
                 <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
             
@@ -68,13 +70,13 @@
             
                 <li class=""><a href="/stylable/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
             
-                <li class=""><a href="/stylable/docs/references/extend-stylesheet" class=" docs-nav-item">Extend stylesheet</a></li>
+                <li class=""><a href="/stylable/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
             
                 <li class=""><a href="/stylable/docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
             
                 <li class=""><a href="/stylable/docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
             
-                <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global selectors</a></li>
+                <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
             
                 <li class=""><a href="/stylable/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
             
@@ -85,6 +87,10 @@
                 <li class=""><a href="/stylable/docs/references/theme" class=" docs-nav-item">Theme</a></li>
             
                 <li class=""><a href="/stylable/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
+                <li class=""><a href="/stylable/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
             
         </ul>
     </div>
@@ -114,9 +120,16 @@
 
 <h2 id="imports---basic-usage">Imports - basic usage</h2>
 
+<p>Here are some examples of how you can use imports in your <strong>Stylable</strong> stylesheet.</p>
+
 <h3 id="import-the-default-export-of-a-local-reference-stylesheet-for-use-in-the-scoped-stylesheet">Import the default export of a local reference stylesheet for use in the scoped stylesheet</h3>
 
 <p>Import the <code class="highlighter-rouge">toggle-button.css</code> stylesheet from a local location. Assign the name <code class="highlighter-rouge">ToggleButton</code> to the default export of that stylesheet for use in this scoped stylesheet.</p>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+Generally when importing a <strong>default</strong> value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet.</p>
+</blockquote>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
@@ -134,6 +147,11 @@
 <h3 id="import-named-exports-from-a-local-js-module">Import named exports from a local JS module</h3>
 
 <p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. These named exports are now imported into this scoped stylesheet.</p>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.</p>
+</blockquote>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
@@ -167,7 +185,7 @@
 
 <h2 id="import-stylesheet">Import stylesheet</h2>
 
-<p>When importing another stylesheet, the default import represents the root of the stylesheet, and named imports represent vars and classes.</p>
+<p>When importing another stylesheet, the default import represents the root of the stylesheet and is generally treated as a component, and named imports represent vars and classes.</p>
 
 <h2 id="usage">Usage</h2>
 

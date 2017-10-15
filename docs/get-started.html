@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Stylable Components</title>
+    <title>Getting Started</title>
     <link rel="stylesheet" href="/stylable/css/normalize.css">
     <link rel="stylesheet" href="/stylable/css/main.css">
     <link rel="stylesheet" href="/stylable/css/highlight.css">
@@ -32,7 +32,7 @@
         <div class="docs-nav-section-header">Discover Stylable</div>
         <ul>
             
-                <li class=""><a href="/stylable/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
+                <li class="active"><a href="/stylable/docs/get-started" class="active docs-nav-item">Getting Started</a></li>
             
                 <li class=""><a href="/stylable/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
             
@@ -98,13 +98,56 @@
 </nav>
 
 <section class="docs-content">
-    <h1>Stylable Components</h1>
-    <h2 id="what-are-stylable-components">What are Stylable Components?</h2>
+    <h1>Getting Started</h1>
+    <h2 id="what-is-stylable">What is Stylable</h2>
 
-<p>Stylable Components are re-usable pieces of CSS that allow developers to create User Interfaces in a quick and</p>
+<p><strong>Stylable</strong> enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
 
-<h2 id="component-thinking">Component thinking</h2>
+<ul>
+  <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
+  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.</li>
+  <li>Uses themes so you can apply different look and feel across your web application.</li>
+</ul>
 
+<p>At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.</p>
+
+<h2 id="how-do-i-install">How do I install</h2>
+
+<ol>
+  <li>
+    <p>Install <strong>Stylable</strong> from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
+  </li>
+  <li>
+    <p>Install the <strong>Stylable</strong> <a href="https://github.com/wix/stylable-integration">integrations package</a>.</p>
+  </li>
+  <li>
+    <p>While <strong>Stylable</strong> can work with any component framework, we use it with <a href="https://facebook.github.io/react/docs/installation.html">React</a>.</p>
+  </li>
+</ol>
+
+<h2 id="what-can-i-do">What can I do</h2>
+
+<ul>
+  <li>
+    <p><strong>Build a Stylable component</strong> - If you are looking to style a component, follow the steps in the <a href="../docs/guides/components-basics">Stylable Basics Guide</a> and <a href="../docs/guides/stylable-component-best-practices">Best Practices Guide</a></p>
+  </li>
+  <li>
+    <p><strong>Build an app</strong> - If you want to use <strong>Stylable</strong> while building a web application, go to <a href="../docs/guides/stylable-application">Build a Stylable Application</a>. Read the steps and recommendations for building a performant web application that doesn’t depend on other libraries for styling.</p>
+  </li>
+  <li>
+    <p><strong>Create a library</strong> - If you want guidance in creating a component library, read <a href="../docs/guides/stylable-component-library">Create a Stylable Component Library</a>. Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.</p>
+  </li>
+  <li>
+    <p><strong>Learn</strong> - Take a look at our reference documents to get more acquanted with our code and for specific code examples.</p>
+  </li>
+  <li>
+    <p><strong>Remember</strong> - Our <a href="../docs/getting-started/cheatsheet">cheatsheet</a> helps you keep track of <strong>Stylable</strong> syntax.</p>
+  </li>
+</ul>
+
+<h2 id="components">Components</h2>
+
+<p>We recommend using our component library, <a href="https://github.com/wix/stylable-components"><strong>Stylable-Components</strong></a> - a stylable, fully-tested &amp; strictly-typed component library.</p>
 
 </section>
 
