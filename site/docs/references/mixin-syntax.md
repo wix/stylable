@@ -12,16 +12,16 @@ Here are some use cases where you can use mixins with other **Stylable** feature
 
 ## Example
 
-The value `textTooltip` of the external file `my-mixins` is imported. The class selector `.submit-button` uses the mixin syntax and applies parameters. In this case, to wait `300` milliseconds to display the `data-tooltip` hover text on the button. 
+The value `textTooltip` of the external file `my-mixins` is imported. The class selector `.submitButton` uses the mixin syntax and applies parameters. In this case, to wait `300` milliseconds to display the `dataTooltip` hover text on the button. 
 
 ```css
 /* CSS */
 :import {
     -st-from: "./my-mixins";
-    -st-names: textTooltip;
+    -st-named: textTooltip;
 }
-.submit-button {
-    -st-mixin: textTooltip(300, data-tooltip); /* apply mixin */
+.submitButton {
+    -st-mixin: textTooltip(300, dataTooltip); /* apply mixin */
 }
 ```
 

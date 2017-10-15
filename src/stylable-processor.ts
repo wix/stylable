@@ -75,11 +75,15 @@ export class StylableProcessor {
 
         this.handleAtRules(root);
 
+        const stubs = this.insertCustomSelectorsStubs();
+
         root.walkRules((rule: SRule) => {
             this.handleCustomSelectors(rule);
             this.handleRule(rule);
             this.handleDeclarations(rule);
         });
+
+        stubs.forEach((s) => s.remove());
 
         return this.meta;
 
@@ -115,7 +119,7 @@ export class StylableProcessor {
         this.meta.namespace = processNamespace(namespace, this.meta.source);
     }
 
-    protected handleRule(rule: SRule) {    
+    protected handleRule(rule: SRule) {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
@@ -150,8 +154,8 @@ export class StylableProcessor {
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
                 const prev = nodes[index - 1];
-                if (prev) { 
-                    /*TODO: maybe warn on element that is not a direct child div vs > div*/ 
+                if (prev) {
+                    /*TODO: maybe warn on element that is not a direct child div vs > div*/
                 }
             }
             return void 0;
@@ -251,6 +255,14 @@ export class StylableProcessor {
         rule.remove();
     }
 
+    insertCustomSelectorsStubs() {
+        return Object.keys(this.meta.customSelectors).map((selector) => {
+            const rule = postcss.rule({ selector });
+            this.meta.ast.append(rule);
+            return rule;
+        });
+    }
+
     handleCustomSelectors(rule: postcss.Rule) {
         const customSelectors = this.meta.customSelectors;
         if (rule.selector.indexOf(":--") > -1) {
@@ -288,7 +300,7 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
-        if (decl.prop === valueMapping.states ) {
+        if (decl.prop === valueMapping.states) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.extendTypedRule(
                     decl,
@@ -427,7 +439,7 @@ export class StylableProcessor {
         });
         if (!importObj.theme) {
             importObj.overrides.forEach((decl) => {
-                this.diagnostics.warn(decl,`"${decl.prop}" css attribute cannot be used inside :import block`, {word:decl.prop})
+                this.diagnostics.warn(decl, `"${decl.prop}" css attribute cannot be used inside :import block`, { word: decl.prop })
             })
         }
 

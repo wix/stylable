@@ -19,9 +19,14 @@ You use the **Stylable** syntax beginning with `-st-` for the `:import` config:
 
 ## Imports - basic usage
 
+Here are some examples of how you can use imports in your **Stylable** stylesheet.
+
 ### Import the default export of a local reference stylesheet for use in the scoped stylesheet
 
-Import the `toggle-button.css` stylesheet from a local location. Assign the name `ToggleButton` to the default export of that stylesheet for use in this scoped stylesheet.
+Import the `toggle-button.css` stylesheet from a local location. Assign the name `ToggleButton` to the default export of that stylesheet for use in this scoped stylesheet. 
+
+> **Note**  
+> Generally when importing a **default** value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet. 
 
 ```css
 /* CSS */
@@ -39,6 +44,9 @@ import ToggleButton from './toggle-button.css';
 ### Import named exports from a local JS module
 
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. These named exports are now imported into this scoped stylesheet.
+
+> **Note**  
+> When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.
 
 ```css
 /* CSS */
@@ -72,7 +80,7 @@ import { gridMixin, tooltipMixin as tooltip } from "./my-mixins";
 
 ## Import stylesheet
 
-When importing another stylesheet, the default import represents the root of the stylesheet, and named imports represent vars and classes.
+When importing another stylesheet, the default import represents the root of the stylesheet and is generally treated as a component, and named imports represent vars and classes.
 
 ## Usage
 

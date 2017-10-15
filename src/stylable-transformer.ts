@@ -170,8 +170,11 @@ export class StylableTransformer {
                         }
                     } else {
                         const found = getRuleFromMeta(meta, '.' + classSymbol.name)
-                        if (!!found) {
-                            this.diagnostics.error(found, "import is not extendable: js or file not found", { word: found.value })
+                        if (found && resolved) {
+                            this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
+                        } else {
+                            let importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.from)
+                            this.diagnostics.error(importNode, `Imported file "${extend.import.from}" not found`, { word: importNode.value})
                         }
                     }
                 }
@@ -277,11 +280,13 @@ export class StylableTransformer {
                 this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, { word: name })
             } else if (!value) {
                 const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
-                let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
-                if(correctNode){
-                    this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
-                } else {
-                    //catched in the process step.
+                if(importIndex !== -1) {  
+                    let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
+                    if(correctNode){
+                        this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
+                    } else {
+                        //catched in the process step.
+                    }
                 }
             }
             return typeof value === 'string' ? value : match;

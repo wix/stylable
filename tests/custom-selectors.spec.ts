@@ -54,6 +54,15 @@ describe('@custom-selector', function () {
 
     });
 
+    it('expand custom-selector before process (reflect on ast when not written)', function () {
+        const from = "/path/to/style.css";
+        const result = processSource(`
+            @custom-selector :--icon .root > .icon;
+        `, { from });
+        
+        expect(result.classes['icon']).to.contain({ "_kind": "class", "name": "icon" })
+
+    });
 
 
     it('expand pseudo-element custom-selector in the owner context', function () {
