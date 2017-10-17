@@ -646,10 +646,10 @@ describe('diagnostics: warnings and errors', function () {
                             content: `
                             :import {
                                 -st-from: './file.st.css';   
-                                -st-named: special;   
+                                |-st-named: $special$;|   
                             }
                             .myclass {
-                                |-st-extends: $special$;|
+                                -st-extends: special;
                             }
                             `
                         },
@@ -748,13 +748,13 @@ describe('diagnostics: warnings and errors', function () {
                             content: `
                             :import{
                                 -st-from:"./import.css";
-                                -st-named: shlomo, momo;
+                                |-st-named: shlomo, $momo$;|
                             }
                             .myClass {
-                                -st-extends: shlomo
+                                -st-extends: shlomo;
                             }
                             .myClass1 {
-                                |-st-extends: $momo$|
+                                -st-extends: momo;
                             }
                           `
                         },
