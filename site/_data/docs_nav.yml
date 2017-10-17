@@ -1,4 +1,8 @@
-- title: Discover Stylable
+- title:
+  items:
+  - id: welcome
+    title: Welcome to Stylable
+- title: Discover
   items:
   - id: get-started
     title: Getting Started
