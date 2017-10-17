@@ -65,7 +65,7 @@ module.exports = {
 // @remove-on-eject-begin
 const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
-// config before eject: we're in ./node_modules/react-scripts/config/
+// config before eject: we're in ./node_modules/stylable-scripts/config/
 module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
@@ -91,10 +91,10 @@ const reactScriptsLinked =
   fs.existsSync(reactScriptsPath) &&
   fs.lstatSync(reactScriptsPath).isSymbolicLink();
 
-// config before publish: we're in ./packages/react-scripts/config/
+// config before publish: we're in ./packages/stylable-scripts/config/
 if (
   !reactScriptsLinked &&
-  __dirname.indexOf(path.join('packages', 'react-scripts', 'config')) !== -1
+  __dirname.indexOf(path.join('packages', 'stylable-scripts', 'config')) !== -1
 ) {
   module.exports = {
     dotenv: resolveOwn('template/.env'),

@@ -143,7 +143,7 @@ inquirer
     console.log(cyan('Updating the dependencies'));
     const ownPackageName = ownPackage.name;
     if (appPackage.devDependencies) {
-      // We used to put react-scripts in devDependencies
+      // We used to put stylable-scripts in devDependencies
       if (appPackage.devDependencies[ownPackageName]) {
         console.log(`  Removing ${cyan(ownPackageName)} from devDependencies`);
         delete appPackage.devDependencies[ownPackageName];
@@ -219,7 +219,7 @@ inquirer
     // "Don't destroy what isn't ours"
     if (ownPath.indexOf(appPath) === 0) {
       try {
-        // remove react-scripts and react-scripts binaries from app node_modules
+        // remove stylable-scripts and stylable-scripts binaries from app node_modules
         Object.keys(ownPackage.bin).forEach(binKey => {
           fs.removeSync(path.join(appPath, 'node_modules', '.bin', binKey));
         });
