@@ -130,6 +130,28 @@ module.exports = function(
     }
   }
 
+  // Install @types packages
+  if (!isTypesReactInstalled(appPackage)) {
+    if (useYarn) {
+      args = ['add', '@types/react', '@types/react-dom', '--dev'];
+    } else {
+      args = ['install', '@types/react', '@types/react-dom', '--save-dev', verbose && '--verbose'].filter(e => e);
+    }
+    console.log(`Installing @types/react and @types/react-dom using ${command}...`);
+    const proc = spawn.sync(command, args, { stdio: 'inherit' });
+    if (proc.status !== 0) {
+      console.error(`\`${command} ${args.join(' ')}\` failed`);
+      return;
+    }
+  }
+
+  // create tsconfig.json
+  fs.writeFileSync(
+    path.join(appPath, 'tsconfig.json'),
+    fs.readFileSync(path.join(ownPath, 'tsconfig.template.json'))
+  );
+
+
   // Display the most elegant way to cd.
   // This needs to handle an undefined originalDirectory for
   // backward compatibility with old global-cli's.
@@ -190,5 +212,14 @@ function isReactInstalled(appPackage) {
   return (
     typeof dependencies.react !== 'undefined' &&
     typeof dependencies['react-dom'] !== 'undefined'
+  );
+}
+
+function isTypesReactInstalled(appPackage) {
+  const dependencies = appPackage.devDependencies || {};
+
+  return (
+    typeof dependencies['@types/react'] !== 'undefined' &&
+    typeof dependencies['@types/react-dom'] !== 'undefined'
   );
 }

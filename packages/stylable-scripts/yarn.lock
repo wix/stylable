@@ -2,6 +2,21 @@
 # yarn lockfile v1
 
 
+"@types/node@*":
+  version "8.0.44"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.44.tgz#5c39800fda4b76dab39a5f28fda676fc500015ac"
+
+"@types/react-dom@^16.0.1":
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.0.1.tgz#de159d00dd70050000f462e8bcff0c08ef803dee"
+  dependencies:
+    "@types/node" "*"
+    "@types/react" "*"
+
+"@types/react@*", "@types/react@^16.0.13":
+  version "16.0.13"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.13.tgz#973836e6deec10184937322cd10a1605f9de81fc"
+
 abab@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
@@ -5488,9 +5503,9 @@ webpack-sources@^1.0.1:
     source-list-map "^2.0.0"
     source-map "~0.5.3"
 
-webpack@3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.8.0.tgz#36ed73aa62e86959fbc9b7b3a90f0f094e672708"
+webpack@3.8.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-3.8.1.tgz#b16968a81100abe61608b0153c9159ef8bb2bd83"
   dependencies:
     acorn "^5.0.0"
     acorn-dynamic-import "^2.0.0"

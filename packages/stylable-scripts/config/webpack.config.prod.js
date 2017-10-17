@@ -16,7 +16,6 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
@@ -64,7 +63,7 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: shouldUseSourceMap ? 'source-map' : false,
   // In production, we only want to load the polyfills and the app code.
-  entry: [require.resolve('./polyfills'), paths.appIndexJs],
+  entry: [require.resolve('./polyfills'), paths.appIndexTs],
   output: {
     // The build folder.
     path: paths.appBuild,
@@ -96,15 +95,15 @@ module.exports = {
     // https://github.com/facebookincubator/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+    extensions: ['.web.ts', '.ts', 'web.tsx', '.tsx', '.web.js', '.js', '.json'],
     alias: {
       // @remove-on-eject-begin
-      // Resolve Babel runtime relative to stylable-scripts.
+      // Resolve TypeScript runtime relative to stylable-scripts.
       // It usually still works on npm 3 without this but it would be
       // unfortunate to rely on, as stylable-scripts could be symlinked,
-      // and thus babel-runtime might not be resolvable from the source.
-      'babel-runtime': path.dirname(
-        require.resolve('babel-runtime/package.json')
+      // and thus tslib might not be resolvable from the source.
+      'tslib': path.dirname(
+        require.resolve('tslib/package.json')
       ),
       // @remove-on-eject-end
       // Support React Native Web
@@ -127,31 +126,6 @@ module.exports = {
       // We are waiting for https://github.com/facebookincubator/create-react-app/issues/2176.
       // { parser: { requireEnsure: false } },
 
-      // First, run the linter.
-      // It's important to do this before Babel processes the JS.
-      {
-        test: /\.(js|jsx)$/,
-        enforce: 'pre',
-        use: [
-          {
-            options: {
-              formatter: eslintFormatter,
-              eslintPath: require.resolve('eslint'),
-              // @remove-on-eject-begin
-              // TODO: consider separate config for production,
-              // e.g. to enable no-console and no-debugger only in production.
-              baseConfig: {
-                extends: [require.resolve('eslint-config-react-app')],
-              },
-              ignore: false,
-              useEslintrc: false,
-              // @remove-on-eject-end
-            },
-            loader: require.resolve('eslint-loader'),
-          },
-        ],
-        include: paths.appSrc,
-      },
       {
         // "oneOf" will traverse all following loaders until one will
         // match the requirements. When no loader matches it will fall
@@ -167,17 +141,16 @@ module.exports = {
               name: 'static/media/[name].[hash:8].[ext]',
             },
           },
-          // Process JS with Babel.
+          // Process ts/tsx with TypeScript.
           {
-            test: /\.(js|jsx)$/,
+            test: /\.(ts|tsx)$/,
             include: paths.appSrc,
-            loader: require.resolve('babel-loader'),
+            loader: require.resolve('ts-loader'),
             options: {
               // @remove-on-eject-begin
-              babelrc: false,
-              presets: [require.resolve('babel-preset-react-app')],
+              // babelrc: false,
+              // presets: [require.resolve('babel-preset-react-app')],
               // @remove-on-eject-end
-              compact: true,
             },
           },
           // The notation here is somewhat confusing.
