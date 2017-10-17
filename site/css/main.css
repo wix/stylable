@@ -22,22 +22,21 @@ body {
 }
 
 body, html {
-    color: #20455e;
+    color: #162d3d;
     background: white;
     width: 100%;
     height: 100%;
-    font-family: HelveticaNeueW01-45Light, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 16px;
-    font-weight: 300;
-    line-height: 24px;
+    font-weight: normal;
+    line-height: 26px;
     text-align: left;
-    letter-spacing: 0.1px;
     -webkit-font-smoothing: antialiased;
 }
 
-/* strong {
-    font-family: HelveticaNeueW01-55Roman;
-} */
+strong {
+    font-weight: 600;
+}
 
 .main-content {
     /* max-width:980px; */
@@ -61,7 +60,6 @@ p {
 }
 
 h1 {
-    font-family: HelveticaNeueW01-Thin, Helvetica, Arial, sans-serif;
     font-size: 36px;
     line-height: 48px;
     margin-top: 0;
@@ -76,17 +74,15 @@ h2, h3, h4, h5, h6 {
 }
 
 h2 {
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1.2em;
-    font-weight: 500;
-    font-family: HelveticaNeueW01-55Roman;
+    font-weight: 600;
 }
 
 h3 {
-    font-size: 20px;
+    font-size: 16px;
     line-height: 1.2em;
-    font-weight: 500;
-    font-family: HelveticaNeueW01-55Roman;
+    font-weight: 600;
 }
 
 h2:nth-of-type(n+2)::before {
@@ -301,7 +297,6 @@ body .docs-nav-item {
     font-size: 14px;
     font-weight: 400;
     color: #32536a;
-    font-family: HelveticaNeueW01-55Roman;
 }
 
 .docs-nav-section-header {
@@ -310,13 +305,12 @@ body .docs-nav-item {
     text-transform: uppercase;
     font-size: 11px;
     line-height: 18px;
-    font-weight: 400;
+    font-weight: 500;
     text-align: left;
     color: #7A92A5;
     padding-top: 32px;
     padding-bottom: 4px;
     pointer-events: none;
-    font-family: HelveticaNeueW01-65Medium;
 }
 
 .docs-nav-section ul {
