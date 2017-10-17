@@ -740,6 +740,35 @@ describe('diagnostics: warnings and errors', function () {
         })
 
         describe('from import', function () {
+            it('should warn for unknown import', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./import.css";
+                                -st-named: shlomo, momo;
+                            }
+                            .myClass {
+                                -st-extends: shlomo
+                            }
+                            .myClass1 {
+                                |-st-extends: $momo$|
+                            }
+                          `
+                        },
+                        '/import.css': {
+                            content: `
+                                .shlomo {
+                                    color: red
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'Could not resolve momo', file: '/main.css' }])
+            })
 
             it('should warn when import redeclare same symbol (in same block)', function () {
                 expectWarnings(`
