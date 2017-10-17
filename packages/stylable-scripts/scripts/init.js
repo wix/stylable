@@ -216,10 +216,10 @@ function isReactInstalled(appPackage) {
 }
 
 function isTypesReactInstalled(appPackage) {
-  const dependencies = appPackage.devDependencies || {};
+  const devDependencies = appPackage.devDependencies || {};
 
   return (
-    typeof dependencies['@types/react'] !== 'undefined' &&
-    typeof dependencies['@types/react-dom'] !== 'undefined'
+    typeof devDependencies['@types/react'] !== 'undefined' &&
+    typeof devDependencies['@types/react-dom'] !== 'undefined'
   );
 }
