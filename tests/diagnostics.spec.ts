@@ -661,7 +661,7 @@ describe('diagnostics: warnings and errors', function () {
                             `
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:`Could not resolve special`, file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:`Could not resolve "special"`, file:'/main.css'}])  
             })
             it('should warn if file not found', function () {
                 let config = {
@@ -767,7 +767,7 @@ describe('diagnostics: warnings and errors', function () {
                         }
                     }
                 }
-                expectWarningsFromTransform(config, [{ message: 'Could not resolve momo', file: '/main.css' }])
+                expectWarningsFromTransform(config, [{ message: 'Could not resolve "momo"', file: '/main.css' }])
             })
 
             it('should warn when import redeclare same symbol (in same block)', function () {

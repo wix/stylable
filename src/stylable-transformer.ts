@@ -172,7 +172,7 @@ export class StylableTransformer {
                         const found = getRuleFromMeta(meta, '.' + classSymbol.name)
                         if (found && resolved) {
                             if (!resolved.symbol) {
-                                this.diagnostics.error(found, `Could not resolve ${found.value}`, { word: found.value })
+                                this.diagnostics.error(found, `Could not resolve "${found.value}"`, { word: found.value })
                             } else {
                                 this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
                             }
