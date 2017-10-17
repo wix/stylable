@@ -638,6 +638,31 @@ describe('diagnostics: warnings and errors', function () {
                 }}
                 expectWarningsFromTransform(config, [{message:'JS import is not extendable', file:'/main.css'}])  
             })
+            it('should warn if named extends does not exist', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: './file.st.css';   
+                                -st-named: special;   
+                            }
+                            .myclass {
+                                |-st-extends: $special$;|
+                            }
+                            `
+                        },
+                        '/file.st.css': {
+                            content: `
+                                .notSpecial {
+                                    color: red;
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:`Could not resolve special`, file:'/main.css'}])  
+            })
             it('should warn if file not found', function () {
                 let config = {
                     entry:'/main.css', 
