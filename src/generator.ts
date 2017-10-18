@@ -2,7 +2,7 @@ import { StylableTransformer } from "./stylable-transformer";
 import { Diagnostics } from "./diagnostics";
 import { safeParse } from "./parser";
 import { cachedProcessFile, MinimalFS, FileProcessor } from "./cached-process-file";
-import { create, RuntimeStylesheet } from "./runtime";
+import { create } from "./runtime";
 import { StylableMeta, process } from "./stylable-processor";
 
 
@@ -35,7 +35,7 @@ export function createGenerator(
             meta,
             transformer,
             diagnostics,
-            runtime: <RuntimeStylesheet>create(meta.root, meta.namespace, exports, '', meta.source)
+            runtime: <Stylable.RuntimeStylesheet>create(meta.root, meta.namespace, exports, '', meta.source)
         };
     }
 
