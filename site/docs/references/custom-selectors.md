@@ -4,31 +4,37 @@ title: Custom Selectors
 layout: docs
 ---
 
-You use [Custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define a an alias name matching complex selectors.
+You use [Custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define an alias that can match complex selectors. 
+
+For example, a specific type of button within a form that appears only when hovered can be defined as a custom selector. By defining the button as a custom selector with its own name, the button is exposed in the API and available for use by using just the custom selector name.
+
+You could also use custom selectors to define a group of selectors with one name. For example, you can access all the headings on a page as one custom selector. This could be useful if you want to style just their color the same.
 
 ## Usage
 
-The following code maps the alias name `controlBtn` that matches any `.btn` CSS class nested under the `.controls` CSS class:
+The following code maps the alias name `controlBtn` that matches any `.btn` CSS class nested under the `.controls` CSS class.
 
-**CSS API**
+****
 ```css
+/* CSS */
 @namespace "Comp";
 @custom-selector :--controlBtn .controls .btn;
-/*
-selector: .Comp__root .Comp__controls .Comp__btn
+/* 
+selector: .Comp__root .Comp__controls .Comp__btn 
 */
 :--controlBtn { border: 1px solid grey; }
-/*
-selector: .Comp__root .Comp__controls .Comp__btn:hover
+/* 
+selector: .Comp__root .Comp__controls .Comp__btn:hover 
 */
 :--controlBtn:hover { border-color: red; }
 ```
 
 ### Expose pseudo-element
 
-Custom selectors generate a [pseudo-element](./pseudo-elements.md), So for example [importing](./imports.md) the previous stylesheet into another stylesheet allows access to the `form-input` pseudo-element:
+Custom selectors generate a [pseudo-element](./pseudo-elements.md). So, for example, [importing](./imports.md) a stylesheet into another stylesheet enables access to the `form-input` pseudo-element.
 
 ```css
+/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";
@@ -42,26 +48,31 @@ Comp::controlBtn {
 }
 ```
 
-> **Notice**:  
-> In case a `custom-selector` alias conflicts with a local CSS class name, the exposed `pseudo-element` will target the `custom-selector`. However the the exported CSS class will still be exported to Javascript.
+> **Note**:    
+> If a `custom-selector` alias conflicts with a local CSS class name, the exposed `pseudo-element` targets the `custom-selector`. However, the exported CSS class is still exported to JavaScript.
 
 ## Use cases
 
+The following examples demonstrate how to effectively use custom selectors in **Stylable**.
+
 ### Container and recursive components
 
-Some components might contain nested instances of themselves, because they're a container or a "recursive" component (e.g. Tree component might render itself). 
+Some components might contain nested instances of themselves because they're a container or a "recursive" component. For example, a tree component might render itself. 
 
-In case the component exposes any `pseudo-elements`, it is a good practice to define them as `custom-selectors` with [child selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors) to avoid effecting internal instances inner parts.
+If the component exposes any `pseudo-elements`, it is a good practice to define them as `custom selectors` with [child selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors) to avoid effecting the inner parts of internal instances.
 
-The following example show how a tree component exposes an icon:
+The following example shows how a tree component exposes an icon.
 
 ```css
+/* CSS */
 @namespace "Tree";
 @custom-selector :--icon .root > .icon;
 ```
 
-Using the icon `pseudo-selector` from the outside just like a CSS class selector:
+Here you can use the icon `custom selector` from the outside just like you would use a CSS class selector or `pseudo-element`.
+
 ```css
+/* CSS */
 @namespace "Panel";
 :import {
     -st-from: "./tree.st.css";
@@ -75,12 +86,14 @@ Tree::icon {
 }
 ```
 
-### Expose deep inner parts
+### Expose inner parts that are deeply defined
 
-When you want to make some internal parts more accessible in your component API, you can simply describe `pseudo-elements` using `custom selectors`.
+When you want to make internal parts of your component API more accessible, you can describe `pseudo-elements` using `custom selectors`.
 
-For example exposing a `pseudo-element` named `navigationBtn` that allow to style an internal gallery component `navBtn` element:
+For example, you can expose a `pseudo-element` named `navigationBtn` that enables you to style an internal gallery component's `navBtn` element.
+
 ```css
+/* CSS */
 :import {
     -st-from: "./gallery.st.css";
     -st-default: Gallery;
@@ -90,15 +103,18 @@ For example exposing a `pseudo-element` named `navigationBtn` that allow to styl
 
 ### Combination selector
 
-Sometimes a component has several basic CSS classes (with corresponding `pseudo-elements`) and we want to expose a combination `pseudo-element`.
+You may have a component with several basic CSS classes and with corresponding `pseudo-elements`. You could expose a combination `pseudo-element`.
 
-For example a `pseudo-element` named `navBtn` will match any `btn` CSS class nested in a `nav` CSS class:
+For example, a `pseudo-element` named `navBtn` matches any `btn` CSS class nested in a `nav` CSS class.
+
 ```css
+/* CSS */
 @namespace "Comp";
 @custom-selector :--navBtn .nav .btn;
 ```
 
 ```css
+/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";
@@ -112,11 +128,12 @@ Comp::navBtn {
 }
 ```
 
-### Selectors group
+### Group of selectors
 
-In some cases you might want to gather up a collection of selectors into a single selector.
+You could also use custom selectors to gather a collection of selectors into a single selector. For example, you may want to access the headings regardless of type and size.
 
 ```css
+/* CSS */
 @namespace "Comp";
 @custom-selector :--symbol .icon, .thumb, .picture;
 /*
@@ -130,14 +147,14 @@ selector:
 }
 ```
 
-#### Caveats
+#### Issues to consider
 
-Aliasing multiple selectors in a `custom-selector` is a [footgun feature](https://en.wiktionary.org/wiki/footgun#English) that might generate lots of CSS.
+Aliasing multiple selectors in a `custom selector` is a [footgun feature](https://en.wiktionary.org/wiki/footgun#English) that might generate lots of CSS.
 
-When we import the last example into another stylesheet it will split the selector for each override:
+For example, when you import Comp stylesheet (the selector described in the previous example) into another stylesheet, in the ouput the selector is split for each override.
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";
@@ -148,8 +165,8 @@ Comp::symbol {
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS Output *?
 .Comp__root .Comp__icon, 
 .Comp__root .Comp__thumb, 
 .Comp__root .Comp__picture {
