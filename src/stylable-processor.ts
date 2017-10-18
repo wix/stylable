@@ -5,7 +5,6 @@ import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
 import { matchValue, valueReplacer } from "./value-template";
-import { Pojo } from "./types";
 import { transformMatchesOnRule, CUSTOM_SELECTOR_RE } from './stylable-utils';
 const hash = require('murmurhash');
 
@@ -458,7 +457,7 @@ export class StylableProcessor {
 export interface Imported {
     from: string;
     defaultExport: string;
-    named: Pojo<string>;
+    named: Stylable.Pojo<string>;
     overrides: postcss.Declaration[];
     theme: boolean;
     rule: postcss.Rule;
@@ -515,11 +514,11 @@ export interface StylableMeta {
     imports: Imported[];
     vars: VarSymbol[];
     keyframes: postcss.AtRule[];
-    classes: Pojo<ClassSymbol>;
-    elements: Pojo<ElementSymbol>;
-    mappedSymbols: Pojo<StylableSymbol>;
+    classes: Stylable.Pojo<ClassSymbol>;
+    elements: Stylable.Pojo<ElementSymbol>;
+    mappedSymbols: Stylable.Pojo<StylableSymbol>;
     diagnostics: Diagnostics;
-    customSelectors: Pojo<string>;
+    customSelectors: Stylable.Pojo<string>;
 }
 
 export interface RefedMixin {

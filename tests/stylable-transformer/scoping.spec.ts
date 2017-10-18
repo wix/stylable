@@ -850,7 +850,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'entry',
                         content: `
                             .my-class { 
-                                -st-states: my-state(".x"), my-other-state("  .y[data-z=\"value\"]  ");
+                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\"value\"]  ");
                             }
                             .my-class:my-state {} 
                             .my-class:my-other-state {}
