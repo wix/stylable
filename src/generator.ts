@@ -5,7 +5,6 @@ import { cachedProcessFile, MinimalFS, FileProcessor } from "./cached-process-fi
 import { create } from "./runtime";
 import { StylableMeta, process } from "./stylable-processor";
 
-
 export function createGenerator(
     fs: MinimalFS = {
         readFileSync(_path: string) { return '' },
@@ -35,7 +34,7 @@ export function createGenerator(
             meta,
             transformer,
             diagnostics,
-            runtime: <Stylable.RuntimeStylesheet>create(meta.root, meta.namespace, exports, '', meta.source)
+            runtime: create(meta.root, meta.namespace, exports, '', meta.source)
         };
     }
 
