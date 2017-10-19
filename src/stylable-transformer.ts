@@ -333,7 +333,7 @@ export class StylableTransformer {
         let originSymbol: ClassSymbol | ElementSymbol;
         let selectorAst = parseSelector(selector);
         const addedSelectors: any[] = [];
-
+        
         selectorAst.nodes.forEach((selectorNode) => {
             traverseNode(selectorNode, (node) => {
                 const { name, type } = node;
@@ -421,10 +421,17 @@ export class StylableTransformer {
         const symbol = meta.classes[name];
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
         if (!extend && symbol && symbol.alias) {
-            const next = this.resolver.deepResolve(symbol.alias);
+            let next = this.resolver.deepResolve(symbol.alias);
             if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
                 node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
-                return next;
+                if(next.symbol[valueMapping.extends]){
+                    next = this.resolver.deepResolve(next.symbol[valueMapping.extends]); 
+                    if(next && next._kind === 'css'){
+                        return next;
+                    }
+                } else {
+                    return next;
+                }
             } else {
                 this.diagnostics.error(symbol.alias.import.rule, 'Trying to import unknown alias', { word: symbol.alias.name })
             }
