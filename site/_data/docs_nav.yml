@@ -44,7 +44,7 @@
   - id: references/compose-css-class
     title: Compose CSS Class
   - id: references/custom-selectors
-    title: Custom selectors
+    title: Custom Selectors
   - id: references/mixin-syntax
     title: Mixins
   - id: references/variables
