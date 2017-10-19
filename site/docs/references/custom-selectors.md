@@ -31,7 +31,7 @@ selector: .Comp__root .Comp__controls .Comp__btn:hover
 
 ### Expose pseudo-element
 
-Custom selectors generate a [pseudo-element](./pseudo-elements.md). So, for example, [importing](./imports.md) a stylesheet into another stylesheet enables access to the `form-input` pseudo-element.
+Custom selectors generate a [pseudo-element](./pseudo-elements.md). So, for example, [importing](./imports.md) a stylesheet into another stylesheet enables access to the `controlBtn` pseudo-element. In this example, the stylesheet `comp.st.css` from the previous example is imported into this stylesheet.
 
 ```css
 /* CSS */
@@ -69,7 +69,7 @@ The following example shows how a tree component exposes an icon.
 @custom-selector :--icon .root > .icon;
 ```
 
-Here you can use the icon `custom selector` from the outside just like you would use a CSS class selector or `pseudo-element`.
+Here you can use the icon `custom selector` from the outside just like you would use any other `pseudo-element`.
 
 ```css
 /* CSS */
@@ -82,7 +82,7 @@ Here you can use the icon `custom selector` from the outside just like you would
 selector: .Panel__root .Tree__root > .Tree__icon
 */
 Tree::icon {
-    background: yellow;
+    background: yellow;  /* paints the icons all the way down the tree */
 }
 ```
 
@@ -130,28 +130,27 @@ Comp::navBtn {
 
 ### Group of selectors
 
-You could also use custom selectors to gather a collection of selectors into a single selector. For example, you may want to access the headings regardless of type and size.
+You could also use custom selectors to gather a collection of selectors into a single selector. For example, you may want to access media that includes both images and videos.
 
 ```css
 /* CSS */
 @namespace "Comp";
-@custom-selector :--symbol .icon, .thumb, .picture;
+@custom-selector :--media .image, .video;
 /*
 selector: 
-.Comp__root .Comp__icon, 
-.Comp__root .Comp__thumb, 
-.Comp__root .Comp__picture
+.Comp__root .Comp__image, 
+.Comp__root .Comp__video 
 */
-:--heading { 
+:--media { 
     border: 1px solid grey; 
 }
 ```
 
 #### Issues to consider
 
-Aliasing multiple selectors in a `custom selector` is a [footgun feature](https://en.wiktionary.org/wiki/footgun#English) that might generate lots of CSS.
+Aliasing multiple selectors in a `custom selector` may generate lots of CSS that could affect performance.
 
-For example, when you import Comp stylesheet (the selector described in the previous example) into another stylesheet, in the ouput the selector is split for each override.
+For example, when you import the `Comp` stylesheet (the selector described in the previous example) into another stylesheet, in the ouput the selector is split for each override.
 
 ```css
 /* CSS */
@@ -160,22 +159,20 @@ For example, when you import Comp stylesheet (the selector described in the prev
     -st-from: "./comp.st.css";
     -st-default: Comp;
 }
-Comp::symbol { 
+Comp::media { 
     border-color: red; 
 }
 ```
 
 ```css
 /* CSS Output *?
-.Comp__root .Comp__icon, 
-.Comp__root .Comp__thumb, 
-.Comp__root .Comp__picture {
+.Comp__root .Comp__image, 
+.Comp__root .Comp__video {
     border: 1px solid grey; 
 }
 
-.Page__root .Comp__root .Comp__icon, 
-.Page__root .Comp__root .Comp__thumb, 
-.Page__root .Comp__root .Comp__picture {
+.Page__root .Comp__root .Comp__image, 
+.Page__root .Comp__root .Comp__video {
     border-color: red;
 }
 ```
