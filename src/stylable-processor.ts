@@ -13,6 +13,7 @@ const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseCompose = SBTypesParsers[valueMapping.compose];
 const parseTheme = SBTypesParsers[valueMapping.theme];
+const parseGlobal = SBTypesParsers[valueMapping.global];
 
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
@@ -82,7 +83,7 @@ export class StylableProcessor {
             this.handleDeclarations(rule);
         });
 
-        stubs.forEach((s) => s.remove());
+        stubs.forEach((s) => s && s.remove());
 
         return this.meta;
 
@@ -256,9 +257,12 @@ export class StylableProcessor {
 
     insertCustomSelectorsStubs() {
         return Object.keys(this.meta.customSelectors).map((selector) => {
-            const rule = postcss.rule({ selector });
-            this.meta.ast.append(rule);
-            return rule;
+            if(this.meta.customSelectors[selector]){
+                const rule = postcss.rule({ selector });
+                this.meta.ast.append(rule);
+                return rule;
+            }
+            return null;
         });
     }
 
@@ -371,9 +375,9 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, 'cannot define "' + valueMapping.compose + '" inside a complex selector');
             }
-        } else if (decl.prop === valueMapping.scoped) {
+        } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
-                this.setClassTargetName(
+                this.setClassGlobalMapping(
                     decl.value,
                     rule.selector
                 );
@@ -385,11 +389,11 @@ export class StylableProcessor {
 
     }
 
-    protected setClassTargetName(value: string, selector: string) {
+    protected setClassGlobalMapping(value: string, selector: string) {
         const name = selector.replace('.', '');
         const typedRule = this.meta.classes[name];
         if (typedRule) {
-            typedRule[valueMapping.scoped] = value;
+            typedRule[valueMapping.global] = parseGlobal(value);
         }
     }
 
@@ -470,7 +474,7 @@ export interface StylableDirectives {
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
     "-st-theme"?: boolean;
-    "-st-scoped"?: string;
+    "-st-global"?: string;
 }
 
 export interface ClassSymbol extends StylableDirectives {
