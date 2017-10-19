@@ -145,12 +145,11 @@ module.exports = function(
     }
   }
 
-  // create tsconfig.json
+  // copy tsconfig.json
   fs.writeFileSync(
     path.join(appPath, 'tsconfig.json'),
     fs.readFileSync(path.join(ownPath, 'tsconfig.template.json'))
   );
-
 
   // Display the most elegant way to cd.
   // This needs to handle an undefined originalDirectory for
