@@ -165,7 +165,7 @@ Comp::media {
 ```
 
 ```css
-/* CSS Output *?
+/* CSS Output */
 .Comp__root .Comp__image, 
 .Comp__root .Comp__video {
     border: 1px solid grey; 
