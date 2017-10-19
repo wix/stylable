@@ -59,14 +59,14 @@ As a best practice, the project commons should use the [`-st-theme`](../referenc
 
 ## Stylable component
 
-The [component style best practices guide](./component-style-best-practices.md) describes ways to design a good component that can be styled and themed. However, when building your application, it is also common to define components with their final CSS. This makes them less "themable", but is much simpler.
+The [Stylable component best practices guide](./stylable-component-best-practices.md) describes ways to design a good component that can be styled and themed. However, when building your application, it is also common to define components with their final CSS. This makes them less "themable", but is much simpler.
 
 In the following code you can see a component that is described with:
 * 2 colors used from project
 * 1 component variant
 
 ```css
-@namespace "dialog"
+@namespace "dialog";
 :import {
     -st-from: './project.st.css';
     -st-named: color1, color2, cancelButton;

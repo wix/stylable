@@ -1,5 +1,7 @@
-- title: Getting Started
+- title: Discover Stylable
   items:
+  - id: get-started
+    title: Getting Started
   - id: getting-started/install-configure
     title: Installation
   - id: getting-started/react-integration
@@ -19,6 +21,8 @@
   items:
   - id: guides/components-basics
     title: Component Basics
+  - id: guides/stylable-component-best-practices
+    title: Component Best Practices
   - id: guides/stylable-application
     title: Stylable Application
   - id: guides/stylable-component-library
@@ -34,13 +38,13 @@
   - id: references/tag-selectors
     title: Tag Selectors
   - id: references/extend-stylesheet
-    title: Extend stylesheet
+    title: Extend Stylesheet
   - id: references/pseudo-classes
     title: Pseudo-Classes
   - id: references/pseudo-elements
     title: Pseudo-Elements
   - id: references/global-selectors
-    title: Global selectors
+    title: Global Selectors
   - id: references/compose-css-class
     title: Compose CSS Class
   - id: references/custom-selectors
@@ -53,3 +57,7 @@
     title: Theme
   - id: references/namespace
     title: Namespace
+  - id: guides/component-variants
+    title: Component Variants
+  - id: guides/shared-classes
+    title: Shared Classes 

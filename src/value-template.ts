@@ -1,13 +1,11 @@
-import { Pojo } from "./types";
-
 export const matchValue = /value\((.*?)\)/g
 
-export function valueReplacer(value: string, data: Pojo, onMatch: (value: string, name: string, match: string) => any, debug: boolean = false): string {
+export function valueReplacer(value: string, data: Stylable.Pojo, onMatch: (value: string, name: string, match: string) => any, debug: boolean = false): string {
     const result = replaceValue(value, data, onMatch, debug, []);
     return result + ((debug && result !== value) ? ` /* ${value} */` : '');
 }
 
-function replaceValue(value: string, data: Pojo, onMatch: (value: string, name: string, match: string) => any, debug:boolean, visited:string[]):string {
+function replaceValue(value: string, data: Stylable.Pojo, onMatch: (value: string, name: string, match: string) => any, debug:boolean, visited:string[]):string {
     const result = value.replace(matchValue, function (match: string, name: string) {
         const visitedIndex = visited.indexOf(name);
         if(visitedIndex !== -1) {

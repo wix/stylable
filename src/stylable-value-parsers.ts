@@ -1,3 +1,5 @@
+import { Diagnostics } from "./diagnostics";
+import * as postcss from 'postcss'
 
 const valueParser = require("postcss-value-parser");
 
@@ -51,7 +53,7 @@ export const SBTypesParsers = {
             return {};
         }
         const mappedStates: MappedStates = {};
-        const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
+        const parts = value.split(/,?([\w-]+)(\(["']([^),]*)["']\))?/g);
         for (let i = 0; i < parts.length; i += 4) {
             const stateName = parts[i + 1];
             const mapToSelector = parts[i + 3];
@@ -76,9 +78,8 @@ export const SBTypesParsers = {
         });
         return namedMap;
     },
-    "-st-mixin"(value: string) {
-
-        const ast = valueParser(value);
+    "-st-mixin"( mixinNode: postcss.Declaration, diagnostics: Diagnostics) {
+        const ast = valueParser(mixinNode.value);
         var mixins: { type: string, options: { value: string }[] }[] = [];
         ast.nodes.forEach((node: any) => {
 
@@ -93,15 +94,15 @@ export const SBTypesParsers = {
                     options: []
                 })
             } else if (node.type === 'string') {
-                //TODO: warn
+                diagnostics.error(mixinNode, `value can not be a string (remove quotes?)`,{word:mixinNode.value})
             }
         });
 
         return mixins;
 
     },
-    "-st-compose"(value: string) {
-        const ast = valueParser(value);
+    "-st-compose"(composeNode: postcss.Declaration, diagnostics: Diagnostics) {
+        const ast = valueParser(composeNode.value);
         const composes: string[] = [];
         ast.walk((node: any) => {
             if (node.type === 'function') {
@@ -109,7 +110,7 @@ export const SBTypesParsers = {
             } else if (node.type === 'word') {
                 composes.push(node.value);
             } else if (node.type === 'string') {
-                //TODO: warn
+                diagnostics.error(composeNode, `value can not be a string (remove quotes?)`,{word:composeNode.value})
             }
         })
         return composes;

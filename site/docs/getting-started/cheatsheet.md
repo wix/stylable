@@ -13,11 +13,11 @@ layout: docs
  * **CSS declaration Block**: List of CSS declarations
  * **CSS ruleset**: CSS declaration block paired with a selector
 
-[MDN docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations){:target="_blank"}
+<a href=“https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations” target=“_blank”>MDN docs</a>
 
 ## Stylable
 
-Syntax unique to Stylable - Click each to access code examples and descriptions in GitHub
+Syntax unique to Stylable - Click each to access code examples and descriptions
 
  * **Directive rules** `-st-*` Instructions for the **Stylable** pre-processor, removed during transpilation
     * [**`-st-extends`**](../references/extend-stylesheet.md) Simple selector base class

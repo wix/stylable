@@ -9,7 +9,6 @@ module.exports = {
         filename: '[name].bundle.js'
     },
     resolve: {
-        
         // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: ['.ts', '.tsx', '.js'] // note if using webpack 1 you'd also need a '' in the array as well
     },
@@ -24,7 +23,7 @@ module.exports = {
                 use: 'mocha-loader',
                 exclude: /node_modules/,
             },
-            { test: /\.tsx?$/, loader: 'ts-loader' }
+            { test: /\.tsx?$/, loader: 'ts-loader', options: {compilerOptions: {declaration: false}} }
         ]
     }
 }

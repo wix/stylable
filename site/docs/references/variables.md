@@ -6,15 +6,15 @@ layout: docs
 
 Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.
 
-> **Note**:  
+> **Note**    
 > Variables are scoped to the specific stylesheet and do not conflict with variables from another stylesheet.
 
 ## Use in stylesheet
 
 Use the syntax `:vars` to define variables, and apply them with a `value()`:
 
-**CSS** 
 ```css
+/* CSS */
 @namespace "Example1";
 :vars {
     color1: red;
@@ -26,8 +26,8 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output */
 .Example1__root {
     color: red; /* color1 */
     background: green; /* color2 */
@@ -38,8 +38,8 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 
 Any var defined in a stylesheet is exported as a named export and can be [imported](./imports.md) by other stylesheets.
 
-**CSS**
 ```css
+/* CSS */
 @namespace "Example2";
 :import {
     -st-from: "./example1.css"; /* Example1 stylesheet */
@@ -53,8 +53,8 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Example2__root {
     border: 10px solid red; /* color1 */
 }
@@ -63,15 +63,16 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 }
 ```
 
-> **Note** Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
+> **Note**  
+>Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
 
 
-## Composing variables
+## Compose variables
 
 You can set the value of a variable using another variable.
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Example3";
 :import {
     -st-from: "./example1.css"; /* Example1 stylesheet */
@@ -85,8 +86,8 @@ You can set the value of a variable using another variable.
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Example3__root {
     border: 10px solid red; /* 10px solid {color1} */
 }

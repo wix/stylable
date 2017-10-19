@@ -4,6 +4,7 @@
     "_docs",
     "node_modules",
     "dist",
+    "runtime.d.ts",
     "modules",
     "**/*~~.ts"
   ],

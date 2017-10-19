@@ -5,7 +5,7 @@ import { Diagnostics } from "./diagnostics";
 import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
 import { matchValue, valueReplacer } from "./value-template";
-import { Pojo } from "./types";
+import { transformMatchesOnRule, CUSTOM_SELECTOR_RE } from './stylable-utils';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -39,6 +39,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
         mappedSymbols: {
             [reservedRootName]: rootSymbol
         },
+        customSelectors: {},
         diagnostics
     };
 
@@ -73,10 +74,15 @@ export class StylableProcessor {
 
         this.handleAtRules(root);
 
+        const stubs = this.insertCustomSelectorsStubs();
+
         root.walkRules((rule: SRule) => {
+            this.handleCustomSelectors(rule);
             this.handleRule(rule);
             this.handleDeclarations(rule);
         });
+
+        stubs.forEach((s) => s.remove());
 
         return this.meta;
 
@@ -94,6 +100,16 @@ export class StylableProcessor {
                     break;
                 case 'keyframes':
                     this.meta.keyframes.push(atRule);
+                    break;
+                case 'custom-selector':
+                    const params = atRule.params.split(/\s/);
+                    const customName = params.shift();
+                    toRemove.push(atRule);
+                    if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
+                        this.meta.customSelectors[customName] = atRule.params.replace(customName, "").trim();
+                    } else {
+                        //TODO: add warn there are two types one is not valid name and the other is empty name.
+                    }
                     break;
             }
         });
@@ -137,7 +153,9 @@ export class StylableProcessor {
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
                 const prev = nodes[index - 1];
-                if (prev) { /*TODO: maybe warn on element that is not a direct child div vs > div*/ }
+                if (prev) {
+                    /*TODO: maybe warn on element that is not a direct child div vs > div*/
+                }
             }
             return void 0;
         });
@@ -158,7 +176,6 @@ export class StylableProcessor {
     protected checkRedeclareSymbol(symbolName: string, node: postcss.Node) {
         const symbol = this.meta.mappedSymbols[symbolName];
         if (symbol) {
-            //TODO: can output match better error;
             this.diagnostics.warn(node, `redeclare symbol "${symbolName}"`, { word: symbolName })
         }
     }
@@ -181,7 +198,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias};
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: "class", name, alias };
         }
     }
 
@@ -237,8 +254,33 @@ export class StylableProcessor {
         rule.remove();
     }
 
-    protected handleDeclarations(rule: SRule) {
+    insertCustomSelectorsStubs() {
+        return Object.keys(this.meta.customSelectors).map((selector) => {
+            const rule = postcss.rule({ selector });
+            this.meta.ast.append(rule);
+            return rule;
+        });
+    }
 
+    handleCustomSelectors(rule: postcss.Rule) {
+        const customSelectors = this.meta.customSelectors;
+        if (rule.selector.indexOf(":--") > -1) {
+            rule.selector = rule.selector.replace(
+                CUSTOM_SELECTOR_RE,
+                (extensionName, _matches, selector) => {
+                    if (!customSelectors[extensionName]) {
+                        this.meta.diagnostics.warn(rule, "The selector '" + rule.selector + "' is undefined", { word: rule.selector });
+                        return selector;
+                    }
+                    return ":matches(" + customSelectors[extensionName] + ")";
+                }
+            )
+
+            rule.selector = transformMatchesOnRule(rule, false);
+        }
+    }
+
+    protected handleDeclarations(rule: SRule) {
         rule.walkDecls(decl => {
 
             decl.value.replace(matchValue, (match, varName) => {
@@ -257,9 +299,8 @@ export class StylableProcessor {
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
-
         if (decl.prop === valueMapping.states) {
-            if (rule.isSimpleSelector) {
+            if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.extendTypedRule(
                     decl,
                     rule.selector,
@@ -267,7 +308,11 @@ export class StylableProcessor {
                     parseStates(decl.value)
                 );
             } else {
-                this.diagnostics.warn(decl, 'cannot define pseudo states inside complex selectors');
+                if (rule.selectorType === 'element') {
+                    this.diagnostics.warn(decl, 'cannot define pseudo states inside element selectors');
+                } else {
+                    this.diagnostics.warn(decl, 'cannot define pseudo states inside complex selectors');
+                }
             }
         } else if (decl.prop === valueMapping.extends) {
             if (rule.isSimpleSelector) {
@@ -288,7 +333,7 @@ export class StylableProcessor {
 
         } else if (decl.prop === valueMapping.mixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(decl.value).forEach((mixin) => {
+            parseMixin(decl, this.diagnostics).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
                     mixins.push({
@@ -306,7 +351,7 @@ export class StylableProcessor {
 
             rule.mixins = mixins;
         } else if (decl.prop === valueMapping.compose) {
-            const composes = parseCompose(decl.value);
+            const composes = parseCompose(decl, this.diagnostics);
             if (rule.isSimpleSelector) {
                 const composeSymbols = composes.map((name) => {
                     const extendsRefSymbol = this.meta.mappedSymbols[name];
@@ -334,10 +379,12 @@ export class StylableProcessor {
     protected extendTypedRule(node: postcss.Node, selector: string, key: keyof StylableDirectives, value: any) {
         const name = selector.replace('.', '');
         const typedRule = <ClassSymbol | ElementSymbol>this.meta.mappedSymbols[name];
-        if (typedRule[key]) {
+        if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, `override "${key}" on typed rule "${name}"`, { word: name });
         }
-        typedRule[key] = value;
+        if (typedRule) {
+            typedRule[key] = value;
+        }
     }
 
     protected handleImport(rule: postcss.Rule) {
@@ -372,6 +419,11 @@ export class StylableProcessor {
                     break;
             }
         });
+        if (!importObj.theme) {
+            importObj.overrides.forEach((decl) => {
+                this.diagnostics.warn(decl, `"${decl.prop}" css attribute cannot be used inside :import block`, { word: decl.prop })
+            })
+        }
 
         if (!importObj.from) {
             this.diagnostics.error(rule, `"${valueMapping.from}" is missing in :import block`);
@@ -388,7 +440,7 @@ export class StylableProcessor {
 export interface Imported {
     from: string;
     defaultExport: string;
-    named: Pojo<string>;
+    named: Stylable.Pojo<string>;
     overrides: postcss.Declaration[];
     theme: boolean;
     rule: postcss.Rule;
@@ -443,10 +495,11 @@ export interface StylableMeta {
     imports: Imported[];
     vars: VarSymbol[];
     keyframes: postcss.AtRule[];
-    classes: Pojo<ClassSymbol>;
-    elements: Pojo<ElementSymbol>;
-    mappedSymbols: Pojo<StylableSymbol>;
+    classes: Stylable.Pojo<ClassSymbol>;
+    elements: Stylable.Pojo<ElementSymbol>;
+    mappedSymbols: Stylable.Pojo<StylableSymbol>;
     diagnostics: Diagnostics;
+    customSelectors: Stylable.Pojo<string>;
 }
 
 export interface RefedMixin {

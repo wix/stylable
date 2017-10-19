@@ -3,6 +3,7 @@ import { process } from '../src/stylable-processor';
 import { safeParse } from "../src/parser";
 import { generateFromMock, Config } from "./utils/generate-test-util";
 import { Diagnostics } from "../src";
+import { reservedKeyFrames } from '../src/stylable-utils';
 const deindent = require('deindent')
 const customButton = `
     .root{
@@ -17,7 +18,7 @@ const customButton = `
     }
     
 `;
-const mixins = ``;
+// const mixins = ``;
 
 interface warning {
     message: string;
@@ -106,23 +107,21 @@ function expectWarnings(css: string, warnings: warning[], extraFiles?: file[]) {
     });
 
     expect(res.diagnostics.reports.length, "diagnostics reports match").to.equal(warnings.length);
-
-    // console.log(src, warnings, extraFiles);
 }
 
-function expectWarningsFromTransform(config: Config, warnings:warning[]) {
-    
+function expectWarningsFromTransform(config: Config, warnings: warning[]) {
+
     config.trimWS = false;
 
-    let locations:any = {}
-    for(var path in config.files) {
+    let locations: any = {}
+    for (var path in config.files) {
         let source = findTestLocations(deindent(config.files[path].content).trim())
         config.files[path].content = source.css
         locations[path] = source
     }
     const diagnostics = new Diagnostics()
     generateFromMock(config, diagnostics)
-    
+
     diagnostics.reports.forEach((report, i) => {
         let path = warnings[i].file
         expect(report.message).to.equal(warnings[i].message);
@@ -137,7 +136,7 @@ function expectWarningsFromTransform(config: Config, warnings:warning[]) {
 
 
 describe('diagnostics: warnings and errors', function () {
-
+    // TODO2: next phase
     xdescribe('syntax', function () {
 
         describe('selectors', function () {
@@ -293,12 +292,19 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
             });
-            xit('should warn when defining states on element selector', function () {
-                expectWarnings(`
-                    MyElement{
-                        |-st-states|:shmover;
+            it('should warn when defining states on element selector', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            MyElement{
+                                |-st-states|:shmover;
+                            }`
+                        }
                     }
-                `, [{ message: 'cannot define pseudo states inside complex selectors', file: "main.css" }])
+                }
+                expectWarningsFromTransform(config, [{ message: 'cannot define pseudo states inside element selectors', file: '/main.css' }])
             });
         });
 
@@ -313,7 +319,7 @@ describe('diagnostics: warnings and errors', function () {
 
             it('should add error when can not append css mixins', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry: '/main.css',
                     files: {
                         '/main.css': {
                             content: `
@@ -329,12 +335,13 @@ describe('diagnostics: warnings and errors', function () {
                         '/imported.st.css': {
                             content: ``
                         }
-                }}
-                expectWarningsFromTransform(config, [{message:'import mixin does not exist', file:'/main.css'}])  
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'import mixin does not exist', file: '/main.css' }])
             });
             it('should add diagnostics when there is a bug in mixin', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry: '/main.css',
                     files: {
                         '/main.css': {
                             content: `
@@ -354,10 +361,116 @@ describe('diagnostics: warnings and errors', function () {
                                 }
                             `
                         }
-                }}
-                expectWarningsFromTransform(config, [{message:'could not apply mixin: bug in mixin', file:'/main.css'}])  
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'could not apply mixin: bug in mixin', file: '/main.css' }])
             });
 
+            it('js mixin must be a function', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-named: myMixin;
+                            }
+                            |.container {
+                                -st-mixin: $myMixin$;  
+                            }|
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }])
+            });
+            it('should add diagnostics when declartion is invalid', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        color: true
+                                    }
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'not a valid mixin declaration myMixin', file: '/main.css' }])
+            });
+
+            it('should add diagnostics when declartion is invalid (rule)', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $myMixin$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: `
+                                module.exports = function(){
+                                    return {
+                                        '.x':{ 
+                                            color:true
+                                        }
+                                    }
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'not a valid mixin declaration color, and was removed', file: '/main.css' }])
+            });
+            it('should not add warning when mixin value is a string', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: "./imported.js";
+                                -st-default: myMixin;
+                            }
+                            .container {
+                                |-st-mixin: $"myMixin"$|;  
+                            }
+                            `
+                        },
+                        '/imported.js': {
+                            content: ``
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }])
+            });
         });
 
         describe(':vars', function () {
@@ -368,6 +481,22 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'unknown var "myColor"', file: "main.css" }])
             });
+
+            it('should return warning for unknown var on transform', function () {
+                expectWarningsFromTransform({
+                    entry: '/style.st.css',
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                            .gaga{
+                                |color:value($myColor$)|;
+                            }
+                        `
+                        }
+                    }
+                }, [{ message: 'unknown var "myColor"', file: "/style.st.css" }])
+            });
+
             it('should return warning for unresolvable var', function () {
                 expectWarnings(`
                     :vars{
@@ -384,21 +513,6 @@ describe('diagnostics: warnings and errors', function () {
                     
                 `, [{ message: 'cannot define ":vars" inside a complex selector', file: "main.css" }])
             });
-            it('should return warning if var symbol is used', function(){
-                let config = {
-                    entry:'/main.css', 
-                    files: {
-                        '/main.css': {
-                            content: `
-                               .a {}
-                               :vars {
-                                 |$a$: red|;
-                                }
-                          `
-                        }
-                }}
-                expectWarningsFromTransform(config, [{message:'symbol a is already in use', file:'/main.css'}])
-            })
         });
 
         xdescribe('-st-variant', function () {
@@ -428,17 +542,25 @@ describe('diagnostics: warnings and errors', function () {
                     }
                 `, [{ message: 'cannot define ":import" inside a complex selector', file: "main.css" }])
             })
-            xit('should return warning for non import rules inside imports', function () {
-
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        |$color$:red;|
+            it('should return warning for non import rules inside imports', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                -st-default:Comp;
+                                |$color$:red;|
+                            }
+                          `
+                        },
+                        'file.css': {
+                            content: customButton
+                        }
                     }
-                `, [{ message: '"color" css attribute cannot be used inside :import block', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
+                }
+                expectWarningsFromTransform(config, [{ message: '"color" css attribute cannot be used inside :import block', file: '/main.css' }])
             });
 
             it('should return warning for import with missing "from"', function () {
@@ -468,23 +590,15 @@ describe('diagnostics: warnings and errors', function () {
                     , [{ content: customButton, path: 'file.css' }])
 
             });
-            xit('should warn on not imported extends', function () {
-                expectWarnings(`
-                    .root {
-                        |-st-extends: $Comp$|;
-                    }
-                `, [{ message: 'cannot resolve extends type for "Comp"', file: "main.css" }]
-                )
 
-            });
             it('Only import of type class can be used to extend', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry: '/main.st.css',
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import {
-                                -st-from: './file.css';   
+                                -st-from: './file.st.css';   
                                 -st-named: special;   
                             }
                             .myclass {
@@ -492,19 +606,20 @@ describe('diagnostics: warnings and errors', function () {
                             }
                             `
                         },
-                        '/file.css': {
+                        '/file.st.css': {
                             content: `
                                 :vars {
                                     special: red
                                 }
                             `
                         }
-                }}
-                expectWarningsFromTransform(config, [{message:'import is not extendable', file:'/main.css'}])  
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'import is not extendable', file: '/main.st.css' }])
             })
             it('should warn if extends by js import', function () {
                 let config = {
-                    entry:'/main.css', 
+                    entry: '/main.css',
                     files: {
                         '/main.css': {
                             content: `
@@ -521,9 +636,51 @@ describe('diagnostics: warnings and errors', function () {
                             content: ``
                         }
                 }}
-                expectWarningsFromTransform(config, [{message:'import is not extendable: js or file not found', file:'/main.css'}])  
+                expectWarningsFromTransform(config, [{message:'JS import is not extendable', file:'/main.css'}])  
             })
-
+            it('should warn if named extends does not exist', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                -st-from: './file.st.css';   
+                                |-st-named: $special$;|   
+                            }
+                            .myclass {
+                                -st-extends: special;
+                            }
+                            `
+                        },
+                        '/file.st.css': {
+                            content: `
+                                .notSpecial {
+                                    color: red;
+                                }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:`Could not resolve "special"`, file:'/main.css'}])  
+            })
+            it('should warn if file not found', function () {
+                let config = {
+                    entry:'/main.css', 
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import {
+                                |-st-from: $'./file.css'$|;   
+                                -st-default: special;   
+                            }
+                            .myclass {
+                                -st-extends: special
+                            }
+                            `
+                        }
+                }}
+                expectWarningsFromTransform(config, [{message:'Imported file "/file.css" not found', file:'/main.css'}])  
+            })
         });
 
         describe('override -st-* warnings', function () {
@@ -561,18 +718,57 @@ describe('diagnostics: warnings and errors', function () {
 
 
     describe('redeclare symbols', function () {
-
-        xit('should warn override mixin on same rule', function () {
-            expectWarnings(`
-                   .a {}
-                   .b {
-                       -st-mixin: a;
-                       -st-mixin: a;
-                   }
-                `, [{ message: 'override mixin on same rule', file: "main.css" }])
+        it('should warn override mixin on same rule', function () {
+            let config = {
+                entry: '/main.css',
+                files: {
+                    '/main.css': {
+                        content: `
+                        .a {}
+                        .b {
+                            -st-mixin: a;
+                            |-st-mixin: a|;
+                        }
+                      `
+                    },
+                    'file.css': {
+                        content: customButton
+                    }
+                }
+            }
+            expectWarningsFromTransform(config, [{ message: 'override mixin on same rule', file: '/main.css' }])
         })
 
         describe('from import', function () {
+            it('should warn for unknown import', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./import.css";
+                                |-st-named: shlomo, $momo$;|
+                            }
+                            .myClass {
+                                -st-extends: shlomo;
+                            }
+                            .myClass1 {
+                                -st-extends: momo;
+                            }
+                          `
+                        },
+                        '/import.css': {
+                            content: `
+                                .shlomo {
+                                    color: red
+                                }
+                            `
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: 'Could not resolve "momo"', file: '/main.css' }])
+            })
 
             it('should warn when import redeclare same symbol (in same block)', function () {
                 expectWarnings(`
@@ -614,35 +810,36 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-
-    xdescribe('complex examples', function () {
+    describe('complex examples', function () {
         describe(':import', function () {
-
-            it('should return warning for unknown file', function () {
-                expectWarnings(`
-
-                    :import{
-                        -st-from:|"./file"|;
-                        -st-default:Theme;
+            it('should return warning for unknown var import', function () {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                -st-default:Comp;
+                                |-st-named:$variant$|;
+                            }
+                            .root {
+                                color:value(variant)
+                            }`
+                        },
+                        '/file.css': {
+                            content: customButton
+                        }
                     }
-                `, [{ message: 'could not find file "./file"', file: "main.css" }])
-            });
+                }
+                expectWarningsFromTransform(config, [{ message: 'cannot find export "variant" in "./file.css"', file: '/main.css' }])
 
-            it('should return warning for unknown import', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:|variant|;
-                    }
-                `, [{ message: 'cannot find export "variant" in "./file"', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }]);
             });
 
         });
         describe('cross variance', function () {
 
-            it('variant cannot be used as var', function () {
+            xit('variant cannot be used as var', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -658,62 +855,75 @@ describe('diagnostics: warnings and errors', function () {
             });
 
             it('mixin cannot be used as var', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:my-mixin;
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./mixins";
+                                -st-named:my-mixin;
+                            }
+                            .root{
+                                |color:value($my-mixin$)|;
+                            }
+                          `
+                        },
+                        '/mixins.js': {
+                            content: ``
+                        }
                     }
-                    .root{
-                        color:|value(my-mixin)|;
-                    }
-                `, [{ message: '"my-mixin" is a mixin and cannot be used as a var', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
-            });
-
-            it('mixin cannot be used as stylesheet', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:my-mixin;
-                    }
-                    .root{
-                        -st-extend:|my-mixin|;
-                    }
-                `, [{ message: '"my-mixin" is a mixin and cannot be used as a stylesheet', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
+                }
+                expectWarningsFromTransform(config, [{ message: '"my-mixin" is a mixin and cannot be used as a var', file: '/main.css' }])
             });
 
             it('stylesheet cannot be used as var', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                    .root{
-                        color:|value(Comp)|;
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                -st-default:Comp;
+                            }
+                            .root{
+                                |color:value($Comp$)|;
+                            }
+                          `
+                        },
+                        '/file.css': {
+                            content: customButton
+                        }
                     }
-                `, [{ message: '"Comp" is a stylesheet and cannot be used as a var', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
+                }
+                expectWarningsFromTransform(config, [{ message: '"Comp" is a stylesheet and cannot be used as a var', file: '/main.css' }])
             });
 
             it('stylesheet cannot be used as mixin', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.css";
+                                |-st-default:$Comp$|;
+                            }
+                            .root{
+                                -st-mixin:Comp;
+                            }
+                          `
+                        },
+                        '/file.css': {
+                            content: customButton
+                        }
                     }
-                    .root{
-                        -st-mixin:|Comp|;
-                    }
-                `, [{ message: '"Comp" is a stylesheet and cannot be used as a mixin', file: "main.css" }]
-                    , [{ content: customButton, path: 'file.css' }])
-
+                }
+                expectWarningsFromTransform(config, [{ message: '"Comp" is a stylesheet and cannot be used as a mixin', file: '/main.css' }])
             });
 
-            it('component variant cannot be used for native node', function () {
+            xit('component variant cannot be used for native node', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -732,7 +942,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variants can only be used for a specific component', function () {
+            xit('variants can only be used for a specific component', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -757,7 +967,7 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('variant cannot be used with params', function () {
+            xit('variant cannot be used with params', function () {
                 expectWarnings(`
                     :import{
                         -st-from:"./file";
@@ -772,40 +982,13 @@ describe('diagnostics: warnings and errors', function () {
 
             });
 
-            it('mixins cant be used with wrong number of params', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:mixinWith2Args;
-                    }
-                    .root{
-                        -st-mixin:|mixinWith2Args(param)|;
-                    }
-                `, [{ message: 'invalid mixin arguments: "mixinWith2Args" expects 2 arguments but recieved 1', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
-            });
-
-            it('error running mixin', function () {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./mixins";
-                        -st-named:mixinThatExplodes;
-                    }
-                    .root{
-                        -st-mixin:|mixinThatExplodes(param)|;
-                    }
-                `, [{ message: '"mixinThatExplodes" has thrown an error: error text', file: "main.css" }]
-                    , [{ content: mixins, path: 'mixins.ts' }])
-
-            });
 
         });
 
     });
 
     describe('selectors', function () {
-
+        // TODO2: next phase
         xit('should not allow conflicting extends', function () {
             expectWarnings(`
                 :import {
@@ -835,10 +1018,10 @@ describe('diagnostics: warnings and errors', function () {
 
     });
 
-    describe('transforms', function() {
-        it('should return warning if @keyframe symbol is used', function(){
+    describe('transforms', function () {
+        it('should return warning if @keyframe symbol is used', function () {
             let config = {
-                entry:'/main.css', 
+                entry: '/main.css',
                 files: {
                     '/main.css': {
                         content: `
@@ -848,12 +1031,32 @@ describe('diagnostics: warnings and errors', function () {
                             to {}
                         }`
                     }
-            }}
-            expectWarningsFromTransform(config, [{message:'symbol name is already in use', file:'/main.css'}])
+                }
+            }
+            expectWarningsFromTransform(config, [{ message: 'symbol name is already in use', file: '/main.css' }])
+        })
+
+        it('should not allow @keyframe of reserved words', function () {
+            reservedKeyFrames.map(function (key) {
+                let config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            |@keyframes $${key}$| {
+                                from {}
+                                to {}
+                            }`
+                        }
+                    }
+                }
+                expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }])
+            })
+
         })
         it('should return error when trying to import theme from js', function () {
             let config = {
-                entry:'/main.css', 
+                entry: '/main.css',
                 files: {
                     '/main.css': {
                         content: `
@@ -866,11 +1069,60 @@ describe('diagnostics: warnings and errors', function () {
                     '/file.js': {
                         content: ``
                     }
-            }}
-            expectWarningsFromTransform(config, [{message:'Trying to import unknown file', file:'/main.css'}])  
+                }
+            }
+            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown file', file: '/main.css' }])
         })
 
-      
+        it('should error on unresolved alias', function () {
+            let config = {
+                entry: '/main.st.css',
+                files: {
+                    '/main.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            |:import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                                -st-named: $inner-class$;
+                            }|
+
+                            .Imported{}
+                            .inner-class{}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.root{}`,
+                    }
+                }
+            }
+            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }])
+        })
+        it('should not add warning when compose value is a string', function () {
+            let config = {
+                entry: '/main.css',
+                files: {
+                    '/main.css': {
+                        content: `
+                        :import {
+                            -st-from: "./imported.css";
+                            -st-default: myCompose;
+                        }
+                        .container {
+                            |-st-compose: $"myCompose"$|;  
+                        }
+                        `
+                    },
+                    '/imported.css': {
+                        content: ``
+                    }
+                }
+            }
+            expectWarningsFromTransform(config, [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }])
+        });
+
+
     })
 
 

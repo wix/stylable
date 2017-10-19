@@ -735,7 +735,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'entry',
                         content: `
                             .my-class { 
-                                -st-states: my-state(".x"), my-other-state("  .y[data-z=\"value\"]  ");
+                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\"value\"]  ");
                             }
                             .my-class:my-state {} 
                             .my-class:my-other-state {}
@@ -1014,6 +1014,37 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.AtRule>result.nodes![1]).params).to.equal('entry--name2');
             expect((<postcss.Rule>result.nodes![2]).nodes![0].toString()).to.equal('animation: 2s entry--name infinite, 1s entry--name2 infinite');
             expect((<postcss.Rule>result.nodes![2]).nodes![1].toString()).to.equal('animation-name: entry--name');
+
+        });
+
+        it('not scope rules that are child of keyframe atRule', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @keyframes name {
+                                from {}
+                                to {}
+                            }
+                            @keyframes name2 {
+                                0% {}
+                                100% {}
+                            }
+                        `
+                    }
+                }
+            });
+ 
+            const at = <postcss.AtRule>result.nodes![0];            
+            expect((<postcss.Rule>at.nodes![0]).selector).to.equal('from');
+            expect((<postcss.Rule>at.nodes![1]).selector).to.equal('to');
+         
+            const at1 = <postcss.AtRule>result.nodes![1];            
+            expect((<postcss.Rule>at1.nodes![0]).selector).to.equal('0%');
+            expect((<postcss.Rule>at1.nodes![1]).selector).to.equal('100%');
 
         });
 

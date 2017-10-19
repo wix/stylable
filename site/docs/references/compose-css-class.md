@@ -4,10 +4,10 @@ title: Compose CSS Class
 layout: docs
 ---
 
-Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector.
+Use `-st-compose` to apply a CSS class to another CSS [class](./class-selectors.md) or to a [tag selector](./tag-selectors.md).
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Comp";
 .item {
     color: red;
@@ -18,18 +18,18 @@ Use `-st-compose` to apply a CSS class to another CSS class or to a tag selector
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Comp__item { color: red }
 .Comp__selected.Comp__item { color: green }
 ```
 
-## Multiple Classes
+## Multiple classes
 
-You can compose multiple items by order.
+You can compose multiple classes or tag selectors by order.
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Comp";
 .item {
     color: red;
@@ -43,8 +43,8 @@ You can compose multiple items by order.
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Comp__item { color: red }
 .Comp__round { border-radius: 10px }
 .Comp__selected.Comp__item.Comp__round { color: green }

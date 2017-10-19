@@ -8,22 +8,23 @@ In **Stylable**, selectors are scoped to the stylesheet. But what if you want to
 
 In this example `.classB` and `.classC` are not scoped to `Comp` but are part of the selector query.
 
-**CSS API**
 ```css
+/* CSS */
 @namespace "Comp";
 .classA :global(.classB > .classC) .classD:hover {
     color: red;
 }
 ```
 
-**CSS OUTPUT**
 ```css
+/* CSS output*/
 .Comp__root .Comp__classA .classB > .classC .Comp__classD:hover {
     color: red;
 }
 ```
 
-> **Note**: You can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
+> **Note**   
+>You can also use global to keep pseudo-classes native. You can describe them using the syntax below where `classA` is scoped and `:selected` is native.
 >
 > ```css
 > .classA:global(:selected) {
