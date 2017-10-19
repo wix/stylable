@@ -35,12 +35,12 @@ export class Stylable {
     transform(meta: string | StylableMeta, resourcePath?: string): StylableResults {
         if (typeof meta === 'string') {
             const root = safeParse(meta, { from: resourcePath });
-            meta = process(root, this.diagnostics);
+            meta = process(root, new Diagnostics());
         }
 
         const transformer = new StylableTransformer({
             delimiter: this.delimiter,
-            diagnostics: this.diagnostics,
+            diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,
             requireModule: this.requireModule
         });
