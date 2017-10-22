@@ -11,7 +11,7 @@
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 
-Learn more in our [Documentation Center](https://wix.github.io/stylable/).
+Learn more in our [Documentation Center](https://stylable.io/).
 
 <!-- ## Code Example -->
 
