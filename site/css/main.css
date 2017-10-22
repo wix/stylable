@@ -456,7 +456,7 @@ li.active > .docs-nav-item {
     header {
         height: 54px;
         background: #FFFFFF;
-        box-shadow: 0 1px 2px 0 rgba(22, 45, 61, 0.24);s
+        box-shadow: 0 1px 2px 0 rgba(22, 45, 61, 0.24);
     }
     header > .header-content {
         display: flex;
