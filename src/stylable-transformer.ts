@@ -4,7 +4,6 @@ import { FileProcessor } from "./cached-process-file";
 import { traverseNode, stringifySelector, SelectorAstNode, parseSelector } from "./selector-utils";
 import { Diagnostics } from "./diagnostics";
 import { valueMapping } from "./stylable-value-parsers";
-import { Pojo } from "./types";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
@@ -20,7 +19,7 @@ export interface KeyFrameWithNode {
 
 export interface StylableResults {
     meta: StylableMeta;
-    exports: Pojo<string>;
+    exports: Stylable.Pojo<string>;
 }
 
 export interface ScopedSelectorResults {
@@ -53,7 +52,7 @@ export class StylableTransformer {
     transform(meta: StylableMeta): StylableResults {
         const ast = meta.outputAst = meta.ast.clone();
 
-        const metaExports: Pojo<string> = {};
+        const metaExports: Stylable.Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
 
@@ -96,7 +95,7 @@ export class StylableTransformer {
     isChildOfAtRule(rule: postcss.Rule, atRuleName: string){
         return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
     }
-    exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>) {
+    exportLocalVars(meta: StylableMeta, metaExports: Stylable.Pojo<string>) {
         meta.vars.forEach((varSymbol) => {
             if (metaExports[varSymbol.name]) {
                 this.diagnostics.warn(varSymbol.node, `symbol ${varSymbol.name} is already in use`, { word: varSymbol.name })
@@ -106,7 +105,7 @@ export class StylableTransformer {
             }
         });
     }
-    exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
+    exportKeyframes(keyframeMapping: Stylable.Pojo<KeyFrameWithNode>, metaExports: Stylable.Pojo<string>) {
         Object.keys(keyframeMapping).forEach((name) => {
             if (metaExports[name] === keyframeMapping[name].value) {
                 this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, { word: name })
@@ -115,9 +114,9 @@ export class StylableTransformer {
             }
         });
     }
-    exportRootClass(meta: StylableMeta, metaExports: Pojo<string>) {
+    exportRootClass(meta: StylableMeta, metaExports: Stylable.Pojo<string>) {
         //TODO: move the theme root composition to the process;
-        const classExports: Pojo<string> = {};
+        const classExports: Stylable.Pojo<string> = {};
         this.handleClass(meta, { type: 'class', name: meta.mappedSymbols[meta.root].name, nodes: [] }, meta.mappedSymbols[meta.root].name, classExports);
         let scopedName = classExports[meta.mappedSymbols[meta.root].name];
         meta.imports.forEach(_import => {
@@ -129,7 +128,7 @@ export class StylableTransformer {
                     import: _import
                 });
                 if (resolved && resolved._kind === 'css') {
-                    const classExports: Pojo<string> = {};
+                    const classExports: Stylable.Pojo<string> = {};
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
@@ -140,7 +139,7 @@ export class StylableTransformer {
         });
         metaExports[meta.root] = scopedName;
     }
-    exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Pojo<string>) {
+    exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports: Stylable.Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
         if (!metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
@@ -171,7 +170,12 @@ export class StylableTransformer {
                     } else {
                         const found = getRuleFromMeta(meta, '.' + classSymbol.name)
                         if (found && resolved) {
-                            this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
+                            if (!resolved.symbol) {
+                                const importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.named)
+                                this.diagnostics.error(importNode, `Could not resolve "${found.value}"`, { word: found.value })
+                            } else {
+                                this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
+                            }
                         } else {
                             let importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.from)
                             this.diagnostics.error(importNode, `Imported file "${extend.import.from}" not found`, { word: importNode.value})
@@ -180,7 +184,7 @@ export class StylableTransformer {
                 }
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
-                    const classExports: Pojo<string> = {};
+                    const classExports: Stylable.Pojo<string> = {};
                     this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
@@ -214,7 +218,7 @@ export class StylableTransformer {
                     }
 
                     if (finalName && finalMeta) {
-                        const classExports: Pojo<string> = {};
+                        const classExports: Stylable.Pojo<string> = {};
                         this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
                         if (classExports[finalName]) {
                             exportedClasses += ' ' + classExports[finalName];
@@ -294,7 +298,7 @@ export class StylableTransformer {
     }
     scopeKeyframes(meta: StylableMeta) {
         const root = meta.outputAst!;
-        const keyframesExports: Pojo<KeyFrameWithNode> = {};
+        const keyframesExports: Stylable.Pojo<KeyFrameWithNode> = {};
         root.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
             if (!!~reservedKeyFrames.indexOf(name)) {
@@ -322,7 +326,7 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    scopeSelector(meta: StylableMeta, selector: string, metaExports: Pojo<string>): ScopedSelectorResults {
+    scopeSelector(meta: StylableMeta, selector: string, metaExports: Stylable.Pojo<string>): ScopedSelectorResults {
         let current = meta;
         let symbol: StylableSymbol | null = null;
         let nestedSymbol: StylableSymbol | null;
@@ -410,10 +414,10 @@ export class StylableTransformer {
         };
 
     }
-    scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
+    scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Stylable.Pojo<string>): string {
         return this.scopeSelector(meta, rule.selector, metaExports).selector;
     }
-    handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
+    handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Stylable.Pojo<string>): CSSResolve {
         const symbol = meta.classes[name];
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
         if (!extend && symbol && symbol.alias) {
@@ -587,8 +591,8 @@ export class StylableTransformer {
     autoStateAttrName(stateName: string, namespace: string) {
         return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }
-    cssStates(stateMapping: Pojo<boolean> | null | undefined, namespace: string) {
-        return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
+    cssStates(stateMapping: Stylable.Pojo<boolean> | null | undefined, namespace: string) {
+        return stateMapping ? Object.keys(stateMapping).reduce((states: Stylable.Pojo<boolean>, key) => {
             if (stateMapping[key]) { states[this.autoStateAttrName(key, namespace)] = true; }
             return states;
         }, {}) : {};

@@ -53,7 +53,7 @@ export const SBTypesParsers = {
             return {};
         }
         const mappedStates: MappedStates = {};
-        const parts = value.split(/,?([\w-]+)(\(\"([^),]*)"\))?/g);
+        const parts = value.split(/,?([\w-]+)(\(["']([^),]*)["']\))?/g);
         for (let i = 0; i < parts.length; i += 4) {
             const stateName = parts[i + 1];
             const mapToSelector = parts[i + 3];

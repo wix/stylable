@@ -1,19 +1,17 @@
 import * as postcss from 'postcss';
-
-import { Pojo } from "./types";
 import { removeUnusedRules } from "./stylable-utils";
 import { StylableMeta, SDecl, Imported } from "./stylable-processor";
 import { valueReplacer } from "./value-template";
 import { Stylable } from "./stylable";
 
-export type OverrideVars = Pojo<string>;
+export type OverrideVars = Stylable.Pojo<string>;
 export type OverrideDef = { overrideRoot: StylableMeta, overrideVars: OverrideVars };
 export interface ThemeOverrideData {
     index: number;
     path: string;
     overrideDefs: OverrideDef[];
 }
-export type ThemeEntries = Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
+export type ThemeEntries = Stylable.Pojo<ThemeOverrideData>; // ToDo: change name to indicate path
 export type Process = (entry: string) => StylableMeta;
 export type Transform = (meta: StylableMeta) => StylableMeta;
 
@@ -105,7 +103,7 @@ export class Bundler {
         const outputPaths = outputMetaList.map(meta => meta.source);
 
         // index each output entry position
-        const pathToIndex = outputMetaList.reduce<Pojo<number>>((acc, meta, index) => {
+        const pathToIndex = outputMetaList.reduce<Stylable.Pojo<number>>((acc, meta, index) => {
             acc[meta.source] = index;
             return acc;
         }, {})
@@ -137,13 +135,13 @@ export class Bundler {
     //         from: this.resolvePath(_import.from)
     //     }
     // }
-    private applyOverrides(entryMeta: StylableMeta, pathToIndex: Pojo<number>, themeEntries: ThemeEntries): void {
+    private applyOverrides(entryMeta: StylableMeta, pathToIndex: Stylable.Pojo<number>, themeEntries: ThemeEntries): void {
         const outputAST = entryMeta.outputAst!;
         const outputRootSelector = getSheetNSRootSelector(entryMeta, this.stylable.delimiter);
         const isTheme = !!themeEntries[entryMeta.source];
 
         // get overrides from each overridden stylesheet 
-        const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs: OverrideDef[], overrideVarsPerDef: Pojo<OverrideVars> }>((acc, symbolId) => {
+        const overrideInstructions = Object.keys(entryMeta.mappedSymbols).reduce<{ overrideDefs: OverrideDef[], overrideVarsPerDef: Stylable.Pojo<OverrideVars> }>((acc, symbolId) => {
             const symbol = entryMeta.mappedSymbols[symbolId];
             let varSourceId = symbolId;
             let originMeta = entryMeta;
