@@ -27,7 +27,7 @@ Syntax unique to Stylable - Click each to access code examples and descriptions
 * **Selectors**
     * [**`::X`**](../references/pseudo-elements.md) Target internal part (pseudo-element) 
     * [**`:X`**](../references/pseudo-classes.md) Target states including native and custom (pseudo-classes)
-    * [**`:--X`**](../references/custom-selectors.md) selector shortcut (custom selector)
+    * [**`:--X`**](../references/custom-selectors.md) selector alias (custom selector)
     * [**`:global(X)`**](../references/global-selectors.md) keep selector global
 * [**`:import {}`**](../references/imports.md) Import external assets like mixins, stylesheets, common CSS and vars
     * [**`-st-from`**](../references/imports.md) Location of file to import
