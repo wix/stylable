@@ -493,5 +493,6 @@ li.active > .docs-nav-item {
     }
     .docs-content {
         padding: 24px;
+        padding-top: 48px;
     }
 }
