@@ -46,6 +46,27 @@ describe('Exports', function () {
 
     });
 
+    
+    
+    it('not contain global class exports', function () {
+        
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                "/entry.st.css": {
+                    namespace: 'entry',
+                    content: `
+                        :global(.classA) {}
+                    `
+                }
+            }
+        });
+
+        expect(cssExports).to.eql({
+            root: 'entry--root'
+        });
+
+    });
         
     it('not contain imported class', function () {
 

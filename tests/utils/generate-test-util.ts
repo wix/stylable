@@ -1,4 +1,3 @@
-import { Pojo } from "../../src/types";
 import { cachedProcessFile, FileProcessor } from "../../src/cached-process-file";
 import { StylableMeta, process } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
@@ -11,8 +10,8 @@ import { isAbsolute } from "path";
 import { Stylable } from "../../src/stylable";
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
-export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
-export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean }
+export interface InfraConfig { files: Stylable.Pojo<File>, trimWS?: boolean }
+export interface Config { entry: string, files: Stylable.Pojo<File>, usedFiles?: string[], trimWS?: boolean }
 export type RequireType = (path: string) => any;
 
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {

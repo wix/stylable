@@ -135,7 +135,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root[data-ns1-state]');
-            
+
         });
 
         it('class selector that extends root with inner class targeting (deep)', () => {
@@ -617,6 +617,51 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('scope class alias that extends and have pseudo elements ', () => {
+
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-named: inner-class;
+                            }
+
+                            .inner-class::base {
+                                
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import{
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .inner-class {
+                                -st-extends: Base;
+                            }
+                        `,
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .base {
+
+                            }
+                        `,
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector, 'class alias').to.equal('.entry--root .imported--inner-class .base--base');
+
+        });
+
         it('scope selector that extends local class', () => {
 
             var result = generateStylableRoot({
@@ -672,7 +717,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
-        
+
         it('handle not existing imported class', () => {
 
             var result = generateStylableRoot({
@@ -748,7 +793,7 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--my-class.y[data-z="value"]');
 
         });
-        
+
         it('custom states lookup order', () => {
 
             var result = generateStylableRoot({
@@ -783,7 +828,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
 
         });
-            
+
 
         it('custom states from imported type', () => {
 
@@ -984,7 +1029,7 @@ describe('Stylable postcss transform (Scoping)', function () {
 
     describe('@keyframes scoping', function () {
         it('scope animation and animation name', () => {
-            
+
             var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
@@ -1018,7 +1063,7 @@ describe('Stylable postcss transform (Scoping)', function () {
         });
 
         it('not scope rules that are child of keyframe atRule', () => {
-            
+
             var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
@@ -1037,12 +1082,12 @@ describe('Stylable postcss transform (Scoping)', function () {
                     }
                 }
             });
- 
-            const at = <postcss.AtRule>result.nodes![0];            
+
+            const at = <postcss.AtRule>result.nodes![0];
             expect((<postcss.Rule>at.nodes![0]).selector).to.equal('from');
             expect((<postcss.Rule>at.nodes![1]).selector).to.equal('to');
-         
-            const at1 = <postcss.AtRule>result.nodes![1];            
+
+            const at1 = <postcss.AtRule>result.nodes![1];
             expect((<postcss.Rule>at1.nodes![0]).selector).to.equal('0%');
             expect((<postcss.Rule>at1.nodes![1]).selector).to.equal('100%');
 
