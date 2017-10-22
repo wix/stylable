@@ -660,7 +660,6 @@ describe('Stylable postcss transform (Scoping)', function () {
         });
         
         it('scope selector that extends a style with -st-global root', () => {
-            debugger;
             var result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {

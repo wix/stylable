@@ -51,16 +51,9 @@ export const SBTypesParsers = {
         return value === 'false' ? false : true;
     },
     "-st-global"(decl: postcss.Declaration, _diagnostics: Diagnostics) {
-        // ".a.b"
-        
-        const v = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
-
-        return v.nodes[0].nodes 
-        // [{
-        //     type: 'nested-pseudo-class',
-        //     name: 'global',
-        //     nodes: v.nodes[0].nodes
-        // }]
+        // Experimental        
+        const selector:any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
+        return selector.nodes[0].nodes;        
     },
     "-st-states"(value: string, _diagnostics: Diagnostics) {
         if (!value) {

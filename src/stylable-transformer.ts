@@ -333,7 +333,7 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    scopeSelector(meta: StylableMeta, selector: string, metaExports: Stylable.Pojo<string>): ScopedSelectorResults {
+    scopeSelector(meta: StylableMeta, selector: string, metaExports: Stylable.Pojo<string>, scopeRoot = true): ScopedSelectorResults {
         let current = meta;
         let symbol: StylableSymbol | null = null;
         let nestedSymbol: StylableSymbol | null;
@@ -383,7 +383,7 @@ export class StylableTransformer {
 
         this.addAdditionalSelectors(addedSelectors, selectorAst);
 
-        this.applyRootScoping(meta, selectorAst);
+        scopeRoot && this.applyRootScoping(meta, selectorAst);
 
         return {
             current,
@@ -505,7 +505,6 @@ export class StylableTransformer {
         return { _kind: 'css', meta, symbol };
     }
     handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
-        debugger
         const tRule = <StylableSymbol>meta.elements[name];
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
         const next = this.resolver.resolve(extend);
@@ -530,22 +529,23 @@ export class StylableTransformer {
         let customSelector = meta.customSelectors[":--" + name];
         if (customSelector) {
 
-            let res = this.scopeSelector(meta, customSelector, {});
-            res.selectorAst.nodes = res.selectorAst.nodes.map((sel) => nonRootNonSpacingSelector(this, meta, sel));
+            let rootRes = this.scopeSelector(meta, '.root', {}, false);
+            let res = this.scopeSelector(meta, customSelector, {}, false);
+            let rootEg = new RegExp('^\\s*' + rootRes.selector.replace(/\./, '\\.') + '\\s*');
+            
+            const selectors = res.selectorAst.nodes.map((sel) => stringifySelector(sel).trim().replace(rootEg, ''));
 
-            let sel = res.selectorAst.nodes[0];
-
-            if (sel) {
+            if (selectors[0]) {
                 node.type = 'invalid'; /*just take it */
                 node.before = ' ';
-                node.value = stringifySelector(sel);
+                node.value = selectors[0];
             }
 
-            for (var i = 1; i < res.selectorAst.nodes.length; i++) {
+            for (var i = 1/*start from second one*/;i < selectors.length; i++) {
                 addedSelectors.push({
                     selectorNode,
                     node,
-                    customElementChunk: stringifySelector(res.selectorAst.nodes[i])
+                    customElementChunk: selectors[i]
                 });
             }
 
@@ -660,29 +660,4 @@ export class StylableTransformer {
     scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
     }
-}
-
-
-
-
-
-function nonRootNonSpacingSelector(ctx: StylableTransformer, meta: StylableMeta, scopeSelectorNode: SelectorAstNode) {
-    let sliceCount = 0;
-    const t = scopeSelectorNode.nodes[0];
-    if (t && t.type === 'class' && t.name === ctx.scope(meta.root, meta.namespace)) {
-        sliceCount++;
-        const t = scopeSelectorNode.nodes[1];
-        if (t.type === 'spacing') {
-            sliceCount++;
-        }
-    }
-
-    scopeSelectorNode.nodes = scopeSelectorNode.nodes.slice(sliceCount);
-    if (scopeSelectorNode.before) {
-        scopeSelectorNode.before = scopeSelectorNode.before!.replace(/^\s+/, '');
-    }
-    if (scopeSelectorNode.nodes[0].before) {
-        scopeSelectorNode.nodes[0].before = scopeSelectorNode.nodes[0].before!.replace(/^\s+/, '');
-    }
-    return scopeSelectorNode
 }
