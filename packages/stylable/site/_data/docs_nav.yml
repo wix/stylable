@@ -1,4 +1,8 @@
-- title: Discover Stylable
+- title:
+  items:
+  - id: welcome
+    title: Welcome to Stylable
+- title: Discover
   items:
   - id: get-started
     title: Getting Started
@@ -47,6 +51,8 @@
     title: Global Selectors
   - id: references/compose-css-class
     title: Compose CSS Class
+  - id: references/custom-selectors
+    title: Custom Selectors
   - id: references/mixin-syntax
     title: Mixins
   - id: references/variables

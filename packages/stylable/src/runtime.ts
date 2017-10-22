@@ -1,16 +1,4 @@
-
-export interface StateMap { [key: string]: boolean }
-
-export interface Stylesheet {
-    namespace: string;
-    root: string;
-    get: (localName: string) => string;
-    cssStates: (stateMapping: StateMap) => StateMap;
-}
-
-export type RuntimeStylesheet = { [key: string]: string } & { $stylesheet: Stylesheet }
-
-export function create(root: string, namespace: string, locals: { [key: string]: string } & { $stylesheet?: Stylesheet }, css: string, moduleId: string): RuntimeStylesheet {
+export function create(root: string, namespace: string, locals: { [key: string]: string } & { $stylesheet?: Stylable.Stylesheet }, css: string, moduleId: string): Stylable.RuntimeStylesheet {
     var style = null;
 
     if (css && typeof document !== 'undefined') {
@@ -27,13 +15,13 @@ export function create(root: string, namespace: string, locals: { [key: string]:
         get(localName: string) {
             return (locals as { [key: string]: string })[localName];
         },
-        cssStates(stateMapping: StateMap) {
+        cssStates(stateMapping: Stylable.StateMap) {
             return stateMapping ? Object.keys(stateMapping).reduce(function (states, key) {
                 if (stateMapping[key]) { states["data-" + namespace.toLowerCase() + "-" + key.toLowerCase()] = true; }
                 return states;
-            }, {} as StateMap) : {};
+            }, {} as Stylable.StateMap) : {};
         }
     };
 
-    return <RuntimeStylesheet>locals;
+    return <Stylable.RuntimeStylesheet>locals;
 }

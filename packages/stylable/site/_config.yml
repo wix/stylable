@@ -17,8 +17,8 @@ title: Stylable
 description: > # this means to ignore newlines until "baseurl:"
   build reusable, highly-performant components. 
   Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
-baseurl: "/stylable" # the subpath of your site, e.g. /blog
-url: "wix.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "stylable.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 markdown: kramdown

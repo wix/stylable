@@ -38,7 +38,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 ## Documentation
 
-Learn [more about **Stylable**](./docs/getting-started.md) and get started with step by step instructions and code examples.
+Learn more about **Stylable** and how to get started [here](./docs/getting-started.md). Includes step by step instructions and code examples.
 
 ## Components
 

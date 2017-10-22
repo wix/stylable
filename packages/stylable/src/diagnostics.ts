@@ -10,8 +10,8 @@ export interface Diagnostic {
 }
 
 export class Diagnostics {
-    reports: Diagnostic[] = [];
-    add(type: DiagnosticType, node: postcss.Node, message: string, options: postcss.NodeErrorOptions = {}){
+    constructor(public reports: Diagnostic[] = []) { }
+    add(type: DiagnosticType, node: postcss.Node, message: string, options: postcss.NodeErrorOptions = {}) {
         this.reports.push({ type, node, message, options });
     }
     error(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
