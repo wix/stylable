@@ -12,24 +12,34 @@
 <body>
 <header>
     <div class="header-content">
-
-        <div class="logo">
-            <a href="/stylable/">Stylable</a>
-        </div>
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="/stylable/"><div class="logo"></div>
+            </a>
 
         <ul class="main-nav">
-            <li><a href="/stylable/docs/get-started.html">Docs</a></li>
-            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+            <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
         </ul>
-
     </div>
+    
+
 </header>
 
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
 <div class="main-content">
     <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Discover Stylable</div>
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
@@ -79,6 +89,8 @@
                 <li class=""><a href="/stylable/docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
             
                 <li class=""><a href="/stylable/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/stylable/docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
                 <li class=""><a href="/stylable/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
             
@@ -151,6 +163,7 @@
 </div>
 
 </section>
+
 
 </div>
 

@@ -12,24 +12,34 @@
 <body>
 <header>
     <div class="header-content">
-
-        <div class="logo">
-            <a href="/stylable/">Stylable</a>
-        </div>
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="/stylable/"><div class="logo"></div>
+            </a>
 
         <ul class="main-nav">
-            <li><a href="/stylable/docs/get-started.html">Docs</a></li>
-            <li><a href="https://github.com/wix/stylable">GitHub</a></li>
+            <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
         </ul>
-
     </div>
+    
+
 </header>
 
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
 <div class="main-content">
     <nav class="docs-nav">
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Discover Stylable</div>
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+                <li class=""><a href="/stylable/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
         <ul>
             
                 <li class=""><a href="/stylable/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
@@ -80,6 +90,8 @@
             
                 <li class=""><a href="/stylable/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
             
+                <li class=""><a href="/stylable/docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
+            
                 <li class=""><a href="/stylable/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="/stylable/docs/references/variables" class=" docs-nav-item">Variables</a></li>
@@ -128,7 +140,7 @@
     <ul>
       <li><a href="../references/pseudo-elements"><strong><code class="highlighter-rouge">::X</code></strong></a> Target internal part (pseudo-element)</li>
       <li><a href="../references/pseudo-classes"><strong><code class="highlighter-rouge">:X</code></strong></a> Target states including native and custom (pseudo-classes)</li>
-      <li><a href="../references/custom-selectors"><strong><code class="highlighter-rouge">:--X</code></strong></a> selector shortcut (custom selector)</li>
+      <li><a href="../references/custom-selectors"><strong><code class="highlighter-rouge">:--X</code></strong></a> selector alias (custom selector)</li>
       <li><a href="../references/global-selectors"><strong><code class="highlighter-rouge">:global(X)</code></strong></a> keep selector global</li>
     </ul>
   </li>
@@ -145,6 +157,7 @@
 </ul>
 
 </section>
+
 
 </div>
 
