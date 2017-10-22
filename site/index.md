@@ -1,40 +1,49 @@
 ---
-id: get-started
-title: Getting Started
+# You don't need to edit this file, it's empty on purpose.
+# Edit theme's home layout instead if you wanna make some changes
+# See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
+
+id: welcome
+title:
 redirect_from: "docs/index.html"
 layout: docs
 ---
 
-## What is Stylable
+<img class="home-logo" src="{{ site.baseurl }}/images/96-logo-vertical.svg" alt="Stylable - CSS for Components" />
+
+<p class="quote">New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.<br>
+– <a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS.
+</p>
+
+
+
+
+At Wix, we agree. We &hearts; CSS. It's simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.
+
+We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created **Stylable**.
+
+**Stylable** is a preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
+
+So what does **Stylable** do?
 
 **Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
-* Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
-* Uses themes so you can apply different look and feel across your web application.
+* Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
+* Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 
-At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
+At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
-## How do I install
+Viva CSS, and welcome **Stylable**. We hope you like it. 
 
-1. Install **Stylable** from our GitHub [repository](https://github.com/wix/stylable).
+## Documentation
 
-2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
-
-3. While **Stylable** can work with any component framework, we use it with [React](https://facebook.github.io/react/docs/installation.html). 
-
-## What can I do
-
-* **Build a Stylable component** - If you are looking to style a component, follow the steps in the [Stylable Basics Guide](../docs/guides/components-basics.md) and [Best Practices Guide](../docs/guides/stylable-component-best-practices.md)
-
-* **Build an app** - If you want to use **Stylable** while building a web application, go to [Build a Stylable Application](../docs/guides/stylable-application.md). Read the steps and recommendations for building a performant web application that doesn't depend on other libraries for styling.
-
-* **Create a library** - If you want guidance in creating a component library, read [Create a Stylable Component Library](../docs/guides/stylable-component-library.md). Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.
-
-* **Learn** - Take a look at our reference documents to get more acquanted with our code and for specific code examples.
-
-* **Remember** - Our [cheatsheet](../docs/getting-started/cheatsheet.md) helps you keep track of **Stylable** syntax.
+Learn more about **Stylable** and how to get started [here](./docs/getting-started.md). Includes step by step instructions and code examples.
 
 ## Components
 
-We recommend using our component library, [**Stylable-Components**](https://github.com/wix/stylable-components) - a stylable, fully-tested & strictly-typed component library.
+We recommend using our component library, [Stylable-components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library based on React.
+
+## Project
+
+Access the **Stylable** GitHub project [here](https://github.com/wix/stylable){:target="_blank"}.
