@@ -43,6 +43,7 @@ if (env.stringified['process.env'].NODE_ENV !== '"production"') {
 
 // Note: defined here because it will be used more than once.
 const cssFilename = 'static/css/[name].[contenthash:8].css';
+const stylableCssFilename = 'static/css/[name].stylable.css';
 
 // ExtractTextPlugin expects the build output to be flat.
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
@@ -169,7 +170,7 @@ module.exports = {
           // use the "style" loader inside the async code so CSS from them won't be
           // in the main CSS file.
           {
-            test: /\.css$/,
+            test:  /(?!<\.st)\.css$/,
             loader: ExtractTextPlugin.extract(
               Object.assign(
                 {
@@ -237,7 +238,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new StylablePlugin(),
+    new StylablePlugin({filename: stylableCssFilename}),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
