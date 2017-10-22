@@ -388,7 +388,7 @@ li.active > .docs-nav-item {
 } */
 
 .home-logo {
-    width: 40%;
+    width: 282px;
     margin: 0 auto;
     display: flex;
     padding-top: 24px;
@@ -490,5 +490,8 @@ li.active > .docs-nav-item {
         z-index: 8;
         left: 0px;
         transition: all 0.3s ease-out;
+    }
+    .docs-content {
+        padding: 24px;
     }
 }
