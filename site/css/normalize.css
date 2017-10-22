@@ -135,7 +135,7 @@ dfn {
 
 h1 {
     font-size: 2em;
-    margin: 0.67em 0;
+    margin-bottom: 16px;
 }
 
 /**
@@ -230,8 +230,10 @@ code,
 kbd,
 pre,
 samp {
-    font-family: monospace, monospace;
-    font-size: 1em;
+    font-family: Menlo;
+    font-size: 13px;
+    padding: 3px;
+    border-radius: 2px;
 }
 
 /* Forms
