@@ -4,18 +4,22 @@
  * Based on dabblet (http://dabblet.com)
  * @author Lea Verou
  */
+ @font-face {
+    font-family: Menlo;
+    src: url('Menlo-Regular.ttf');
+}
 
 code[class*="language-"],
 pre[class*="language-"] {
-    color: black;
-    text-shadow: 0 1px white;
-    font-family: Consolas, Monaco, 'Andale Mono', monospace;
+    color: peru;
+    font-family: Menlo, Consolas, 'Andale Mono', monospace;
     direction: ltr;
     text-align: left;
     white-space: pre;
     word-spacing: normal;
     word-break: normal;
-    line-height: 1.5;
+    line-height: 19px;
+    font-size: 12px;
 
     -moz-tab-size: 4;
     -o-tab-size: 4;
@@ -26,7 +30,6 @@ pre[class*="language-"] {
     -ms-hyphens: none;
     hyphens: none;
 }
-
 pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
 code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
     text-shadow: none;
@@ -49,13 +52,16 @@ code[class*="language-"]::selection, code[class*="language-"] ::selection {
 /* Code blocks */
 pre[class*="language-"] {
     padding: 1em;
-    margin: .5em 0;
+    margin-bottom: 16px;
     overflow: auto;
+   
 }
 
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
     background: #f5f2f0;
+    background: #272c35;
+    border-radius: 2px;
 }
 
 /* Inline code */
@@ -68,11 +74,11 @@ pre[class*="language-"] {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-    color: slategray;
+    color: #7B7E80;
 }
 
 .token.punctuation {
-    color: #999;
+    color: #B9BCC7;
 }
 
 .namespace {
@@ -86,7 +92,11 @@ pre[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-    color: #905;
+    color: #A9B2C0;
+}
+
+.token.tag {
+    color: tomato;
 }
 
 .token.selector,
@@ -95,7 +105,7 @@ pre[class*="language-"] {
 .token.char,
 .token.builtin,
 .token.inserted {
-    color: #690;
+    color: yellowgreen;
 }
 
 .token.operator,
@@ -103,24 +113,24 @@ pre[class*="language-"] {
 .token.url,
 .language-css .token.string,
 .style .token.string {
-    color: #a67f59;
-    background: hsla(0, 0%, 100%, .5);
+    color: yellowgreen;
+    background: rgba(231, 231, 231, 0.1);
 }
 
 .token.atrule,
 .token.attr-value,
 .token.keyword {
-    color: #07a;
+    color: deepskyblue;
 }
 
 .token.function {
-    color: #DD4A68;
+    color: tomato;
 }
 
 .token.regex,
 .token.important,
 .token.variable {
-    color: #e90;
+    color: #EEB600;
 }
 
 .token.important,
@@ -221,4 +231,8 @@ pre.line-numbers > code {
     display: block;
     padding-right: 0.8em;
     text-align: right;
+}
+
+code.language-bash {
+    color: #A9B2C0;
 }
