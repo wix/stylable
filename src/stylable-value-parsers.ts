@@ -1,5 +1,6 @@
 import { Diagnostics } from "./diagnostics";
 import * as postcss from 'postcss'
+import { parseSelector } from "./selector-utils";
 
 const valueParser = require("postcss-value-parser");
 
@@ -49,10 +50,19 @@ export const SBTypesParsers = {
     "-st-theme"(value: string) {
         return value === 'false' ? false : true;
     },
-    "-st-global"(value: string) {
-        return value;
+    "-st-global"(decl: postcss.Declaration, _diagnostics: Diagnostics) {
+        // ".a.b"
+        
+        const v = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
+
+        return v.nodes[0].nodes 
+        // [{
+        //     type: 'nested-pseudo-class',
+        //     name: 'global',
+        //     nodes: v.nodes[0].nodes
+        // }]
     },
-    "-st-states"(value: string) {
+    "-st-states"(value: string, _diagnostics: Diagnostics) {
         if (!value) {
             return {};
         }

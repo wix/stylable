@@ -309,7 +309,7 @@ export class StylableProcessor {
                     decl,
                     rule.selector,
                     valueMapping.states,
-                    parseStates(decl.value)
+                    parseStates(decl.value, this.diagnostics)
                 );
             } else {
                 if (rule.selectorType === 'element') {
@@ -377,10 +377,7 @@ export class StylableProcessor {
             }
         } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
-                this.setClassGlobalMapping(
-                    decl.value,
-                    rule.selector
-                );
+                this.setClassGlobalMapping(decl, rule);
             } else {
                 // TODO: diagnostics - scoped on none class
             }
@@ -389,11 +386,11 @@ export class StylableProcessor {
 
     }
 
-    protected setClassGlobalMapping(value: string, selector: string) {
-        const name = selector.replace('.', '');
+    protected setClassGlobalMapping(decl:postcss.Declaration, rule: postcss.Rule) {
+        const name = rule.selector.replace('.', '');
         const typedRule = this.meta.classes[name];
         if (typedRule) {
-            typedRule[valueMapping.global] = parseGlobal(value);
+            typedRule[valueMapping.global] = parseGlobal(decl, this.diagnostics);
         }
     }
 
@@ -474,7 +471,7 @@ export interface StylableDirectives {
     "-st-states"?: any;
     "-st-extends"?: ImportSymbol | ClassSymbol;
     "-st-theme"?: boolean;
-    "-st-global"?: string;
+    "-st-global"?: SelectorAstNode[];
 }
 
 export interface ClassSymbol extends StylableDirectives {
