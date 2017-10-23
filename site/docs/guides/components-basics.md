@@ -159,4 +159,4 @@ You can then target `Button`'s `on` state in your `panel` as follows:
 
 * [Building an Application](./stylable-application.md)
 * [Building a Component Library](./stylable-component-library.md)
-* [Stylable Cheatsheet](../usefulIngo/cheatsheet.md)
+* [Stylable Cheatsheet](../getting-started/cheatsheet.md)

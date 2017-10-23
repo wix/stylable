@@ -64,4 +64,6 @@
   - id: guides/component-variants
     title: Component Variants
   - id: guides/shared-classes
-    title: Shared Classes 
+    title: Shared Classes
+    id: guides/project-commons
+    title: Project Commons 

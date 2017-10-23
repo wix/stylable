@@ -1,6 +1,6 @@
 ---
 id: getting-started/react-integration
-title: React integration
+title: React Integration
 layout: docs
 ---
 
