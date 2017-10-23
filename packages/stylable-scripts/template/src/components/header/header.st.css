@@ -1,0 +1,19 @@
+.root {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.reactLogo {
+  height: 80px;
+}
+
+.stylableLogo {
+  height: 80px;
+  width: 55px;
+}
+
+.title {
+  font-size: 1.5em;
+}
