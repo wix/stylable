@@ -2,6 +2,7 @@
   "extends": "./node_modules/stylable-scripts/tsconfig.json",  
   "compilerOptions": {
     /* Basic Options */
+    "outDir": "./build/dist"                  /* Redirect output structure to the directory. */
     // "target": "es5",                       /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', or 'ESNEXT'. */
     // "module": "esnext",                    /* Specify module code generation: 'none', commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
     // "lib": ["es2016", "dom"],              /* Specify library files to be included in the compilation:  */
@@ -11,7 +12,6 @@
     // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
-    "outDir": "./build/dist",                 /* Redirect output structure to the directory. */
     // "rootDir": "./"                        /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "removeComments": true,                /* Do not emit comments to output. */
     // "noEmit": true,                        /* Do not emit outputs. */
@@ -51,9 +51,5 @@
     /* Experimental Options */
     // "experimentalDecorators": true         /* Enables experimental support for ES7 decorators. */
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
-  },
-  "include": [
-    "src",
-    "test"
-  ]
+  }
 }
