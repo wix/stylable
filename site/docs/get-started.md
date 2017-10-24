@@ -23,6 +23,8 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 3. While **Stylable** can work with any component framework, we use it with [React](https://facebook.github.io/react/docs/installation.html). 
 
+4. Optionally you can install [**Stylable Intelligence**](./getting-started/stylable-intelligence.md), an extension providing IDE support for code completion and diagnostics.
+
 ## What can I do
 
 * **Build a Stylable component** - If you are looking to style a component, follow the steps in the [Stylable Basics Guide](../docs/guides/components-basics.md) and [Best Practices Guide](../docs/guides/stylable-component-best-practices.md)
@@ -37,4 +39,4 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 ## Components
 
-We recommend using our component library, [**Stylable-Components**](https://github.com/wix/stylable-components) - a stylable, fully-tested & strictly-typed component library.
+We use React components with our component library, [**Stylable-Components**](https://github.com/wix/stylable-components) - fully-tested & strictly-typed components.
