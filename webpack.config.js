@@ -1,13 +1,9 @@
 var glob = require('glob');
 
-const testFiles = glob.sync("./tests/**/*.spec.ts");
-const first = testFiles.shift();
-const withMochaLoader = [`mocha-loader!${first}`].concat(testFiles);
-
 module.exports = {
     devtool: 'eval',
     entry: {
-        tests: withMochaLoader
+        tests: glob.sync("./tests/**/*.spec.ts")
     },
     output: {
         filename: '[name].bundle.js'
@@ -22,6 +18,11 @@ module.exports = {
     module: {
         loaders: [ // loaders will work with webpack 1 or 2; but will be renamed "rules" in future
             // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
+            {
+                test: /spec.tsx?$/,
+                use: 'mocha-loader',
+                exclude: /node_modules/,
+            },
             { test: /\.tsx?$/, loader: 'ts-loader', options: {compilerOptions: {declaration: false}} }
         ]
     }

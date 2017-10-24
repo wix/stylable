@@ -1,6 +1,5 @@
 import { Diagnostics } from "./diagnostics";
 import * as postcss from 'postcss'
-import { parseSelector } from "./selector-utils";
 
 const valueParser = require("postcss-value-parser");
 
@@ -29,8 +28,7 @@ export const valueMapping = {
     mixin: '-st-mixin' as "-st-mixin",
     variant: '-st-variant' as "-st-variant",
     compose: '-st-compose' as "-st-compose",
-    theme: '-st-theme' as "-st-theme",
-    global: '-st-global' as "-st-global"
+    theme: '-st-theme' as "-st-theme"
 };
 
 export type stKeys = keyof typeof valueMapping;
@@ -50,35 +48,19 @@ export const SBTypesParsers = {
     "-st-theme"(value: string) {
         return value === 'false' ? false : true;
     },
-    "-st-global"(decl: postcss.Declaration, _diagnostics: Diagnostics) {
-        // Experimental        
-        const selector:any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
-        return selector.nodes[0].nodes;        
-    },
-    "-st-states"(value: string, _diagnostics: Diagnostics) {
+    "-st-states"(value: string) {
         if (!value) {
             return {};
         }
-
-        const ast = valueParser(value);
         const mappedStates: MappedStates = {};
-
-        ast.nodes.forEach((node: any) => {
-
-            if (node.type === 'function') {
-                if (node.nodes.length === 1) {
-                    mappedStates[node.value] = node.nodes[0].value.trim().replace(/\\["']/g, '"');
-                } else {
-                    //TODO: error
-                }
-
-            } else if (node.type === 'word') {
-                mappedStates[node.value] = null;
-            } else if (node.type === 'string') {
-                //TODO: error
+        const parts = value.split(/,?([\w-]+)(\(["']([^),]*)["']\))?/g);
+        for (let i = 0; i < parts.length; i += 4) {
+            const stateName = parts[i + 1];
+            const mapToSelector = parts[i + 3];
+            if (stateName) {// ToDo: should check the selector has no operators and child
+                mappedStates[stateName] = mapToSelector ? mapToSelector.trim() : null;
             }
-        });
-
+        }
         return mappedStates;
     },
     "-st-extends"(value: string) {
@@ -96,7 +78,7 @@ export const SBTypesParsers = {
         });
         return namedMap;
     },
-    "-st-mixin"(mixinNode: postcss.Declaration, diagnostics: Diagnostics) {
+    "-st-mixin"( mixinNode: postcss.Declaration, diagnostics: Diagnostics) {
         const ast = valueParser(mixinNode.value);
         var mixins: { type: string, options: { value: string }[] }[] = [];
         ast.nodes.forEach((node: any) => {
@@ -112,7 +94,7 @@ export const SBTypesParsers = {
                     options: []
                 })
             } else if (node.type === 'string') {
-                diagnostics.error(mixinNode, `value can not be a string (remove quotes?)`, { word: mixinNode.value })
+                diagnostics.error(mixinNode, `value can not be a string (remove quotes?)`,{word:mixinNode.value})
             }
         });
 
@@ -128,7 +110,7 @@ export const SBTypesParsers = {
             } else if (node.type === 'word') {
                 composes.push(node.value);
             } else if (node.type === 'string') {
-                diagnostics.error(composeNode, `value can not be a string (remove quotes?)`, { word: composeNode.value })
+                diagnostics.error(composeNode, `value can not be a string (remove quotes?)`,{word:composeNode.value})
             }
         })
         return composes;

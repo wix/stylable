@@ -26,11 +26,10 @@ export function stringifySelector(ast: SelectorAstNode): string {
 
 export function traverseNode(node: SelectorAstNode, visitor: Visitor, index: number = 0, nodes: SelectorAstNode[] = [node]): boolean | void {
     if (!node) { return }
-    const cNodes = node.nodes;
     let doNext = visitor(node, index, nodes);
     if (doNext === false) { return false; }
     if (doNext === true) { return true; }
-    if (cNodes) {
+    if (node.nodes) {
         for (var i = 0; i < node.nodes.length; i++) {
             doNext = traverseNode(node.nodes[i], visitor, i, node.nodes);
             if (doNext === true) { continue; }

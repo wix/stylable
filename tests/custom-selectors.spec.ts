@@ -65,7 +65,7 @@ describe('@custom-selector', function () {
     });
 
 
-    it('expand pseudo-element custom-selector in the owner context', function () {
+    it('expand custom-selector in pseudo-element in the owner context', function () {
         
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
@@ -90,6 +90,10 @@ describe('@custom-selector', function () {
 
                         :--root-icon, .class {
                             color: red;
+                        }
+
+                        .icon {
+                            
                         }
                     `
                 }
@@ -159,7 +163,7 @@ describe('@custom-selector', function () {
 
     
 
-    it('expand complex custom-selector in pseudo-element', function () {
+    it('expand custom-selector in pseudo-element in the owner context', function () {
         
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
@@ -191,54 +195,6 @@ describe('@custom-selector', function () {
         
 
     });
-
-
-    it('expand custom-selector when there is global root', function () {
-        
-        const ast = generateStylableRoot({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./interface.st.css";
-                            -st-default: Interface;
-                        }
-                        Interface::cc{
-                            color: blue;
-                        }
-                    `
-                },
-                '/interface.st.css': {
-                    namespace: 'interface',
-                    content: `
-                        :import{
-                            -st-from: "./controls.st.css";
-                            -st-default: Controls;
-                        }
-                        .root {
-                            -st-global: ".xxx"
-                        }
-                        @custom-selector :--cc Controls;
-                    `
-                },
-                '/controls.st.css': {
-                    namespace: 'controls',
-                    content: `
-                        .root {
-                        }
-                    `
-                }
-            }
-        });
-
-        const r = <postcss.Rule>ast.nodes![0];
-        expect(r.selector).to.equal('.entry--root .xxx .controls--root');
-        
-
-    });
-
 
 });
 
