@@ -41,7 +41,8 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
             [reservedRootName]: rootSymbol
         },
         customSelectors: {},
-        diagnostics
+        diagnostics,
+        transformDiagnostics: null
     };
 
 }
@@ -518,8 +519,9 @@ export interface StylableMeta {
     classes: Stylable.Pojo<ClassSymbol>;
     elements: Stylable.Pojo<ElementSymbol>;
     mappedSymbols: Stylable.Pojo<StylableSymbol>;
-    diagnostics: Diagnostics;
     customSelectors: Stylable.Pojo<string>;
+    diagnostics: Diagnostics;
+    transformDiagnostics: Diagnostics | null;
 }
 
 export interface RefedMixin {

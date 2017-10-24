@@ -57,7 +57,7 @@ export class StylableTransformer {
     }
     transform(meta: StylableMeta): StylableResults {
         const ast = meta.outputAst = meta.ast.clone();
-
+        
         const metaExports: Stylable.Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
@@ -85,13 +85,8 @@ export class StylableTransformer {
         this.exportLocalVars(meta, metaExports);
         this.exportKeyframes(keyframeMapping, metaExports);
 
-        //applyMixins() DONE!
-        //applyVariants()
-        //applyVars() DONE!
-        //scopeSelectors() DONE!
-        //scopeKeyframes() DONE!
-        //handleAtMediaValue() DONE!
-        //createExports() DONE!
+        meta.transformDiagnostics = this.diagnostics;
+                
         return {
             meta,
             exports: metaExports
