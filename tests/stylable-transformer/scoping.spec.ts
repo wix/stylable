@@ -138,6 +138,37 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('component/tag selector with -st-global', () => {
+            var result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }                
+                            Container {}
+                            
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .x');
+        });
+
+
+
         it('class selector that extends root with inner class targeting (deep)', () => {
 
             var result = generateStylableRoot({
@@ -301,6 +332,36 @@ describe('Stylable postcss transform (Scoping)', function () {
             });
 
             expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root.inner--root .inner--inner, .entry--root .entry--inner');
+
+        });
+
+        it('resolve and transform pseudo-element with -st-global output', () => {
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            } 
+                            Inner {}
+                            Inner::a {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            .root { -st-global: ".x";}
+                            .a { -st-global: ".y";}
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .x');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .x .y');
 
         });
 
@@ -481,6 +542,55 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        it('scope according to -st-global', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                            .a {
+                                -st-global: ".y";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.x');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.x .y');
+
+        });
+
+        
+        it('scope according to -st-global complex chunk', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-global: ".x.y";
+                            }
+                            .a {
+                                -st-global: ".z";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.x.y');
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.x.y .z');
+
+        });
+
         it('scope selector that extends local root', () => {
 
             var result = generateStylableRoot({
@@ -548,7 +658,37 @@ describe('Stylable postcss transform (Scoping)', function () {
             expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a.imported--root');
 
         });
+        
+        it('scope selector that extends a style with -st-global root', () => {
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                            }
+                            .a {
+                                -st-extends: Imported;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                        `,
+                    }
+                }
+            });
 
+            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a.x');
+
+        });
 
         it('scope class alias', () => {
 
@@ -771,6 +911,8 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        
+
         it('custom states with mapping', () => {
 
             var result = generateStylableRoot({
@@ -780,7 +922,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                         namespace: 'entry',
                         content: `
                             .my-class { 
-                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\"value\"]  ");
+                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\\"value\\"]  ");
                             }
                             .my-class:my-state {} 
                             .my-class:my-other-state {}
@@ -794,6 +936,32 @@ describe('Stylable postcss transform (Scoping)', function () {
 
         });
 
+        
+        it('custom states with focus-within', () => {
+            
+            var result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root { 
+                                -st-states: open(":not(:focus-within):not(:hover)");
+                            }
+                            .root:open {
+
+                            }
+                        `
+                    }
+                }
+            });
+
+
+            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root:not(:focus-within):not(:hover)');
+            
+
+        });
+        
         it('custom states lookup order', () => {
 
             var result = generateStylableRoot({
