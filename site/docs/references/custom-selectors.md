@@ -4,7 +4,7 @@ title: Custom Selectors
 layout: docs
 ---
 
-You use [Custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define an alias that can match complex selectors. 
+You use [custom selectors](https://drafts.csswg.org/css-extensions/#custom-selectors) to define an alias that can match complex selectors. 
 
 For example, a specific type of button within a form that appears only when hovered can be defined as a custom selector. By defining the button as a custom selector with its own name, the button is exposed in the API and available for use by using just the custom selector name.
 
@@ -59,7 +59,7 @@ The following examples demonstrate how to effectively use custom selectors in **
 
 Some components might contain nested instances of themselves because they're a container or a "recursive" component. For example, a tree component might render itself. 
 
-If the component exposes any `pseudo-elements`, it is a good practice to define them as `custom selectors` with [child selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors) to avoid effecting the inner parts of internal instances.
+If the component exposes any `pseudo-elements`, it is a good practice to define them as `custom selectors` with [child selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors) to avoid affecting the inner parts of internal instances.
 
 The following example shows how a tree component exposes an icon.
 

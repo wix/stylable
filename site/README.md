@@ -16,7 +16,7 @@ The site is build using [Jekyll](http://jekyllrb.com/). To modify the site, you 
 
 Run 
 ```
-bundle exec jekyll serve --baseurl /stylable
+bundle exec jekyll serve
 ```
 
 Build
