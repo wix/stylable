@@ -363,7 +363,6 @@ li.active > .docs-nav-item {
     font-size: 14px;
     font-weight: 400;
     line-height: 30px;
-    font-family: HelveticaNeueW01-55Roman;
 }
 
 .docs-nav-subitem:hover {
@@ -388,7 +387,7 @@ li.active > .docs-nav-item {
 } */
 
 .home-logo {
-    width: 282px;
+    width: 40%;
     margin: 0 auto;
     display: flex;
     padding-top: 24px;
@@ -490,9 +489,5 @@ li.active > .docs-nav-item {
         z-index: 8;
         left: 0px;
         transition: all 0.3s ease-out;
-    }
-    .docs-content {
-        padding: 24px;
-        padding-top: 78px;
     }
 }

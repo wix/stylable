@@ -103,7 +103,7 @@
             
                 <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
             
-                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
             
         </ul>
     </div>
@@ -112,7 +112,7 @@
 
 <section class="docs-content">
     <h1>Custom Selectors</h1>
-    <p>You use <a href="https://drafts.csswg.org/css-extensions/#custom-selectors">Custom selectors</a> to define an alias that can match complex selectors.</p>
+    <p>You use <a href="https://drafts.csswg.org/css-extensions/#custom-selectors">custom selectors</a> to define an alias that can match complex selectors.</p>
 
 <p>For example, a specific type of button within a form that appears only when hovered can be defined as a custom selector. By defining the button as a custom selector with its own name, the button is exposed in the API and available for use by using just the custom selector name.</p>
 
@@ -169,7 +169,7 @@ If a <code class="highlighter-rouge">custom-selector</code> alias conflicts with
 
 <p>Some components might contain nested instances of themselves because they’re a container or a “recursive” component. For example, a tree component might render itself.</p>
 
-<p>If the component exposes any <code class="highlighter-rouge">pseudo-elements</code>, it is a good practice to define them as <code class="highlighter-rouge">custom selectors</code> with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors">child selectors</a> to avoid effecting the inner parts of internal instances.</p>
+<p>If the component exposes any <code class="highlighter-rouge">pseudo-elements</code>, it is a good practice to define them as <code class="highlighter-rouge">custom selectors</code> with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors">child selectors</a> to avoid affecting the inner parts of internal instances.</p>
 
 <p>The following example shows how a tree component exposes an icon.</p>
 
