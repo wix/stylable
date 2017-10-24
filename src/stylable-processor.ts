@@ -6,6 +6,7 @@ import { filename2varname, stripQuotation } from "./utils";
 import { valueMapping, SBTypesParsers, stValues, MixinValue } from "./stylable-value-parsers";
 import { matchValue, valueReplacer } from "./value-template";
 import { transformMatchesOnRule, CUSTOM_SELECTOR_RE } from './stylable-utils';
+import {Pojo} from './types';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -459,7 +460,7 @@ export class StylableProcessor {
 export interface Imported {
     from: string;
     defaultExport: string;
-    named: Stylable.Pojo<string>;
+    named: Pojo<string>;
     overrides: postcss.Declaration[];
     theme: boolean;
     rule: postcss.Rule;
@@ -516,10 +517,10 @@ export interface StylableMeta {
     imports: Imported[];
     vars: VarSymbol[];
     keyframes: postcss.AtRule[];
-    classes: Stylable.Pojo<ClassSymbol>;
-    elements: Stylable.Pojo<ElementSymbol>;
-    mappedSymbols: Stylable.Pojo<StylableSymbol>;
-    customSelectors: Stylable.Pojo<string>;
+    classes: Pojo<ClassSymbol>;
+    elements: Pojo<ElementSymbol>;
+    mappedSymbols: Pojo<StylableSymbol>;
+    customSelectors: Pojo<string>;
     diagnostics: Diagnostics;
     transformDiagnostics: Diagnostics | null;
 }
