@@ -1,5 +1,3 @@
-/// <reference path="./types.ts" />
-
 export { safeParse } from "./parser";
 export { cachedProcessFile, FileProcessor, MinimalFS, CacheItem } from "./cached-process-file";
 export { createEmptyMeta, StylableMeta, process, SDecl, SRule, StylableProcessor, StylableSymbol, ClassSymbol, ElementSymbol, Imported, ImportSymbol, VarSymbol } from "./stylable-processor";
@@ -13,5 +11,4 @@ export { Bundler } from "./bundle";
 export { Stylable } from "./stylable";
 export { createInfrastructure, StylableInfrastructure } from "./create-infra-structure";
 export { create } from "./runtime";
-export type Stylesheet = Stylable.Stylesheet;
-export type RuntimeStylesheet = Stylable.RuntimeStylesheet;
+export * from './types';

@@ -4,6 +4,7 @@ import { safeParse } from "./parser";
 import { cachedProcessFile, MinimalFS, FileProcessor } from "./cached-process-file";
 import { create } from "./runtime";
 import { StylableMeta, process } from "./stylable-processor";
+import { RuntimeStylesheet } from "./types";
 
 export function createGenerator(
     fs: MinimalFS = {
@@ -34,7 +35,7 @@ export function createGenerator(
             meta,
             transformer,
             diagnostics,
-            runtime: create(meta.root, meta.namespace, exports, '', meta.source)
+            runtime: <RuntimeStylesheet>create(meta.root, meta.namespace, exports, '', meta.source)
         };
     }
 

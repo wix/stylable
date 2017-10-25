@@ -8,10 +8,12 @@ import { createMinimalFS } from "../../src/memory-minimal-fs";
 import { Bundler } from "../../src/bundle";
 import { isAbsolute } from "path";
 import { Stylable } from "../../src/stylable";
+import {Pojo} from "../../src/types";
+
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
-export interface InfraConfig { files: Stylable.Pojo<File>, trimWS?: boolean }
-export interface Config { entry: string, files: Stylable.Pojo<File>, usedFiles?: string[], trimWS?: boolean }
+export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
+export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean }
 export type RequireType = (path: string) => any;
 
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
