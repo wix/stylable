@@ -7,7 +7,7 @@ import { valueMapping } from "./stylable-value-parsers";
 import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
-import { createClassSubsetRoot, mergeRules, getCorrectNodeImport, getRuleFromMeta, reservedKeyFrames } from "./stylable-utils";
+import { createClassSubsetRoot, mergeRules, findDeclaration, findRule, reservedKeyFrames } from "./stylable-utils";
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require("postcss-value-parser");
@@ -57,7 +57,7 @@ export class StylableTransformer {
     }
     transform(meta: StylableMeta): StylableResults {
         const ast = meta.outputAst = meta.ast.clone();
-        
+
         const metaExports: Stylable.Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
@@ -86,7 +86,7 @@ export class StylableTransformer {
         this.exportKeyframes(keyframeMapping, metaExports);
 
         meta.transformDiagnostics = this.diagnostics;
-                
+
         return {
             meta,
             exports: metaExports
@@ -133,7 +133,7 @@ export class StylableTransformer {
                     this.exportRootClass(resolved.meta, classExports);
                     scopedName += ' ' + classExports[resolved.symbol.name];
                 } else {
-                    const node = getCorrectNodeImport(_import, (node: any) => node.prop === valueMapping.from);
+                    const node = findDeclaration(_import, (node: any) => node.prop === valueMapping.from);
                     this.diagnostics.error(node, "Trying to import unknown file", { word: node.value })
                 }
             }
@@ -164,22 +164,22 @@ export class StylableTransformer {
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            const found = getRuleFromMeta(meta, '.' + classSymbol.name)
+                            const found = findRule(meta.ast, '.' + classSymbol.name)
                             if (!!found) {
                                 this.diagnostics.error(found, "import is not extendable", { word: found.value })
                             }
                         }
                     } else {
-                        const found = getRuleFromMeta(meta, '.' + classSymbol.name)
+                        const found = findRule(meta.ast, '.' + classSymbol.name)
                         if (found && resolved) {
                             if (!resolved.symbol) {
-                                const importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.named)
+                                const importNode = findDeclaration(extend.import, (node: any) => node.prop === valueMapping.named)
                                 this.diagnostics.error(importNode, `Could not resolve "${found.value}"`, { word: found.value })
                             } else {
                                 this.diagnostics.error(found, "JS import is not extendable", { word: found.value })
                             }
                         } else {
-                            let importNode = getCorrectNodeImport(extend.import, (node: any) => node.prop === valueMapping.from)
+                            let importNode = findDeclaration(extend.import, (node: any) => node.prop === valueMapping.from)
                             this.diagnostics.error(importNode, `Imported file "${extend.import.from}" not found`, { word: importNode.value })
                         }
                     }
@@ -261,12 +261,12 @@ export class StylableTransformer {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
                         if ((resolvedClass.symbol as ClassSymbol | ElementSymbol)[valueMapping.root]) {
-                            let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => { return node.prop === valueMapping.default })
+                            let importNode = findDeclaration((mix.ref as ImportSymbol).import, (node: any) => { return node.prop === valueMapping.default })
                             this.diagnostics.error(importNode, `"${importNode.value}" is a stylesheet and cannot be used as a mixin`, { word: importNode.value })
                         }
                         mergeRules(createClassSubsetRoot(resolvedClass.meta.ast, '.' + resolvedClass.symbol.name), rule, this.diagnostics);
                     } else {
-                        let importNode = getCorrectNodeImport((mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named)
+                        let importNode = findDeclaration((mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named)
                         this.diagnostics.error(importNode, 'import mixin does not exist', { word: importNode.value })
                     }
                 }
@@ -286,7 +286,7 @@ export class StylableTransformer {
             } else if (!value) {
                 const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
                 if (importIndex !== -1) {
-                    let correctNode = getCorrectNodeImport(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
+                    let correctNode = findDeclaration(meta.imports[importIndex], (node: any) => node.prop === valueMapping.named)
                     if (correctNode) {
                         this.diagnostics.error(correctNode, `cannot find export "${name}" in "${meta.imports[importIndex].fromRelative}"`, { word: name })
                     } else {
@@ -409,18 +409,20 @@ export class StylableTransformer {
                 return;
             }
             //-st-global can make anther global inside root
-            if (first.nodes === scopedRoot) {
+            if (first && first.nodes === scopedRoot) {
                 return;
             }
             if (first && first.before && first.before === '.' + scopedRoot) {
                 return;
             }
             if (!first || (first.name !== scopedRoot)) {
-                selector.nodes = [typeof scopedRoot !== 'string' ? { type: 'selector', nodes: scopedRoot, name: 'global' } : {
-                    type: 'class', name: scopedRoot, nodes: []
-                }, {
-                    type: 'spacing', value: " ", name: '', nodes: []
-                }, ...selector.nodes];
+                selector.nodes = [
+                    typeof scopedRoot !== 'string' ?
+                        { type: 'selector', nodes: scopedRoot, name: 'global' } :
+                        { type: 'class', name: scopedRoot, nodes: [] },
+                    { type: 'spacing', value: " ", name: '', nodes: [] },
+                    ...selector.nodes
+                ];
             }
         });
     }
@@ -442,9 +444,9 @@ export class StylableTransformer {
                     node.name = this.exportClass(next.meta, next.symbol.name, next.symbol, metaExports);
                 }
 
-                if(next.symbol[valueMapping.extends]){
-                    next = this.resolver.deepResolve(next.symbol[valueMapping.extends]); 
-                    if(next && next._kind === 'css'){
+                if (next.symbol[valueMapping.extends]) {
+                    next = this.resolver.deepResolve(next.symbol[valueMapping.extends]);
+                    if (next && next._kind === 'css') {
                         return next;
                     }
                 } else {
@@ -534,7 +536,7 @@ export class StylableTransformer {
             let rootRes = this.scopeSelector(meta, '.root', {}, false);
             let res = this.scopeSelector(meta, customSelector, {}, false);
             let rootEg = new RegExp('^\\s*' + rootRes.selector.replace(/\./, '\\.') + '\\s*');
-            
+
             const selectors = res.selectorAst.nodes.map((sel) => stringifySelector(sel).trim().replace(rootEg, ''));
 
             if (selectors[0]) {
@@ -543,7 +545,7 @@ export class StylableTransformer {
                 node.value = selectors[0];
             }
 
-            for (var i = 1/*start from second one*/;i < selectors.length; i++) {
+            for (var i = 1/*start from second one*/; i < selectors.length; i++) {
                 addedSelectors.push({
                     selectorNode,
                     node,
@@ -562,6 +564,7 @@ export class StylableTransformer {
 
         let symbol = meta.mappedSymbols[name];
         let current = meta;
+
         while (!symbol) {
             let root = <ClassSymbol>current.mappedSymbols[current.root];
             next = this.resolver.resolve(root[valueMapping.extends]);
