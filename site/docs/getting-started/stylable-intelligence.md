@@ -18,9 +18,6 @@ You can install **Styllable Intelligence** from:
 
 * [GitHub](https://github.com/wix/stylable-intelligence) from the `.vsix` file. 
 
-When installed: 
-* The client is located in `packages/client/`. It is a VSCode extension that loads and registers the server.
-* The server is located in `packages/server/`. It is a language server according to the Laguage Server Protocol.
 
 >**Note:**  
 >Future plans include:
