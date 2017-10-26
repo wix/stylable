@@ -1,0 +1,9 @@
+{
+    "dependencies": {
+        "wix-react-tools": "^4.0.0-rc.2"
+    },
+    "devDependencies": {
+        "@types/react": "^16.0.0",
+        "@types/react-dom": "^16.0.0"
+    }
+}
