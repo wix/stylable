@@ -1,7 +1,6 @@
 # stylable-scripts
 
-This package includes scripts and configuration used by [Create React App](https://github.com/facebookincubator/create-react-app).<br>
-Please refer to its documentation:
-
-* [Getting Started](https://github.com/facebookincubator/create-react-app/blob/master/README.md#getting-started) – How to create a new app.
-* [User Guide](https://github.com/wixplosives/stylable-scripts/blob/master/template/README.md) – How to develop apps bootstrapped with Create React App.
+A fork of react-scripts, with the following changes:
+- Uses TypeScript instead of Babel, configured to work with Webpack's tree-shaking and dynamic chunks on import();
+- Adds built-in support for [Stylable](http://stylable.io/).
+- Uses Mocha for Node.js-based tests, and Karma for browser-based tests.
