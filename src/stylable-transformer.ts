@@ -8,7 +8,8 @@ import { valueReplacer } from "./value-template";
 import { StylableResolver, CSSResolve, JSResolve } from "./postcss-resolver";
 import { cssObjectToAst } from "./parser";
 import { createClassSubsetRoot, mergeRules, findDeclaration, findRule, reservedKeyFrames } from "./stylable-utils";
-import {Pojo} from './types';
+import { Pojo } from './types';
+import { removeSTDirective } from './stylable-optimizer';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require("postcss-value-parser");
@@ -36,6 +37,7 @@ export interface Options {
     diagnostics: Diagnostics
     delimiter?: string;
     keepValues?: boolean;
+    optimize?: boolean;
 }
 
 export interface AdditionalSelector {
@@ -50,15 +52,17 @@ export class StylableTransformer {
     resolver: StylableResolver;
     delimiter: string;
     keepValues: boolean;
+    optimize: boolean;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
         this.keepValues = options.keepValues || false;
+        this.optimize = options.optimize || false;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     transform(meta: StylableMeta): StylableResults {
         const ast = meta.outputAst = meta.ast.clone();
-        
+
         const metaExports: Pojo<string> = {};
 
         const keyframeMapping = this.scopeKeyframes(meta);
@@ -87,7 +91,9 @@ export class StylableTransformer {
         this.exportKeyframes(keyframeMapping, metaExports);
 
         meta.transformDiagnostics = this.diagnostics;
-
+        
+        this.optimize && removeSTDirective(ast);
+        
         return {
             meta,
             exports: metaExports
