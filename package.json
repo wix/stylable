@@ -29,22 +29,21 @@
   "devDependencies": {
     "@types/chai": "^4.0.4",
     "@types/enhanced-resolve": "^3.0.4",
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.44",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "8",
     "chai": "^4.1.2",
     "flat": "^4.0.0",
     "glob": "^7.1.2",
     "mocha": "^4.0.1",
     "mocha-loader": "^1.1.1",
     "ncp": "^2.0.0",
-    "ts-loader": "^3.0.3",
+    "ts-loader": "^3.1.0",
     "ts-mocha": "^1.0.3",
     "typescript": "^2.5.3",
-    "uglify-js": "^3.1.4",
-    "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
+    "uglifyjs-webpack-plugin": "^1.0.1",
     "webpack": "^3.8.1",
     "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.9.2"
+    "webpack-dev-server": "^2.9.3"
   },
   "files": [
     "dist",
