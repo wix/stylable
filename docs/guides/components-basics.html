@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Stylable Basics</title>
+    <title>Component Basics</title>
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/highlight.css">
@@ -49,7 +49,7 @@
             
                 <li class=""><a href="/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
             
-                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+                <li class=""><a href="/docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
             
         </ul>
     </div>
@@ -66,12 +66,20 @@
             
                 <li class=""><a href="/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
             
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
         </ul>
     </div>
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Reference</div>
+        <div class="docs-nav-section-header">Specification Reference</div>
         <ul>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
             
                 <li class=""><a href="/docs/references/imports" class=" docs-nav-item">Imports</a></li>
             
@@ -79,7 +87,7 @@
             
                 <li class=""><a href="/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
             
-                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
             
                 <li class=""><a href="/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
             
@@ -101,17 +109,13 @@
             
                 <li class=""><a href="/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
-                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
-            
-                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
-            
         </ul>
     </div>
     
 </nav>
 
 <section class="docs-content">
-    <h1>Stylable Basics</h1>
+    <h1>Component Basics</h1>
     <p>This guide walks you through the basics of how to style and work with components using <strong>Stylable</strong>.</p>
 
 <p>You use <strong>Stylable</strong> with a component file (for example using React), along with a <strong>Stylable</strong> CSS file that has the extention <code class="highlighter-rouge">.st.css</code>.</p>
@@ -125,7 +129,7 @@ This guide shows the JSX side of our <a href="https://github.com/wixplosives/sty
 
 <p>Whether creating your own components or using components you imported from a 3rd party, you want to be able to access and style the internal parts of every component in the scope of your page or application.</p>
 
-<h2 id="1-style-a-component">1 Style a component</h2>
+<h2 id="1-style-a-component">1. Style a component</h2>
 
 <p>Let’s say you have a <code class="highlighter-rouge">Button</code> component with a render function per this example. You can style its JSX using the <code class="highlighter-rouge">className</code> property.</p>
 
@@ -161,7 +165,7 @@ element by Stylable React integration
 </code></pre>
 </div>
 
-<h2 id="2-expose-the-components-stylable-api">2 Expose the component’s Stylable API</h2>
+<h2 id="2-expose-the-components-stylable-api">2. Expose the component’s Stylable API</h2>
 
 <p>When using <strong>Stylable</strong>, every component exposes an API that’s usable by its parent components.</p>
 
@@ -187,15 +191,16 @@ element by Stylable React integration
 <p>Let’s take the <code class="highlighter-rouge">Button</code> component and import it into the JSX file, and also add it to the render:</p>
 
 <pre><code class="language-jsx">/* panel.jsx */
-import {Button} from './button'
+import * as React from 'react';
+import {properties, stylable} from 'wix-react-tools';
+import {Button} from '../button';
+import style from './panel.st.css';
 
-render(){
-    return (
-        &lt;div&gt;
-            &lt;Button className="cancelBtn"/&gt;
-        &lt;/div&gt;
-    );
-}
+export const Panel: React.SFC = stylable(style)(properties(() =&gt; (
+    &lt;div&gt;
+        &lt;Button /&gt;
+    &lt;/div&gt;
+)));
 </code></pre>
 
 <p>Let’s also import <code class="highlighter-rouge">Button</code>’s stylesheet into the <code class="highlighter-rouge">Panel</code> stylesheet. You can then target the internal parts of the component that you imported:</p>
@@ -227,7 +232,10 @@ render(){
 <pre><code class="language-jsx">/* button.jsx */
 render () {
     return (
-        &lt;button style-state={this.state.on} onClick={()=&gt;this.setState({on:!this.state.on})}&gt;
+        &lt;button 
+            style-state= 
+            onClick={()=&gt;this.setState({on:!this.state.on})}
+        &gt;
             &lt;div className="icon"/&gt;
             &lt;span className="label"&gt;Click Here!&lt;/span&gt;
         &lt;/button&gt;

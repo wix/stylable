@@ -49,7 +49,7 @@
             
                 <li class=""><a href="/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
             
-                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+                <li class=""><a href="/docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
             
         </ul>
     </div>
@@ -66,12 +66,20 @@
             
                 <li class=""><a href="/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
             
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
         </ul>
     </div>
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Reference</div>
+        <div class="docs-nav-section-header">Specification Reference</div>
         <ul>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
             
                 <li class=""><a href="/docs/references/imports" class=" docs-nav-item">Imports</a></li>
             
@@ -79,7 +87,7 @@
             
                 <li class=""><a href="/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
             
-                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
             
                 <li class=""><a href="/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
             
@@ -101,10 +109,6 @@
             
                 <li class=""><a href="/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
-                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
-            
-                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
-            
         </ul>
     </div>
     
@@ -112,29 +116,34 @@
 
 <section class="docs-content">
     <h1>Compose CSS Class</h1>
-    <p>Use <code class="highlighter-rouge">-st-compose</code> to apply a CSS class to another <a href="./class-selectors">CSS class</a> or to a <a href="./tag-selectors">tag selector</a>.</p>
+    <p>Use <code class="highlighter-rouge">-st-compose</code> as a way to automatically connect between two or more style classes so that if one is used, the DOM element will receive the composed classes as well.</p>
 
+<p>For example:</p>
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
 <span class="nc">.item</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.selected</span> <span class="p">{</span>
+<span class="nc">.special</span> <span class="p">{</span>
     <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 </div>
+<p>In the above stylesheet, anyone using <code class="highlighter-rouge">style.special</code> automatically gets both <code class="highlighter-rouge">special</code> and <code class="highlighter-rouge">item</code> classes applied.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
-<span class="nc">.Comp__selected.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
+<p>The output JS mapping for the above is:</p>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* JS */</span>
+<span class="p">{</span>
+    <span class="nl">item</span><span class="p">:</span> <span class="s2">"Comp__item"</span><span class="p">,</span>
+    <span class="nx">special</span><span class="err">:</span> <span class="s2">"Comp__special Comp__item"</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
 <h2 id="multiple-classes">Multiple classes</h2>
 
-<p>You can compose multiple classes or tag selectors by order.</p>
+<p>You can compose multiple classes.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
@@ -144,17 +153,19 @@
 <span class="nc">.round</span> <span class="p">{</span>
     <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.selected</span> <span class="p">{</span>
+<span class="nc">.special</span> <span class="p">{</span>
     <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span> <span class="n">round</span><span class="p">;</span> <span class="c">/* pass multiple classes */</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.Comp__item</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span> <span class="p">}</span>
-<span class="nc">.Comp__round</span> <span class="p">{</span> <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span> <span class="p">}</span>
-<span class="nc">.Comp__selected.Comp__item.Comp__round</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span> <span class="p">}</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* JS */</span>
+<span class="p">{</span>
+    <span class="nl">item</span><span class="p">:</span> <span class="s2">"Comp__item"</span><span class="p">,</span>
+    <span class="nx">round</span><span class="err">:</span> <span class="s2">"Comp__round"</span><span class="p">,</span>
+    <span class="nx">special</span><span class="err">:</span> <span class="s2">"Comp__special Comp__item Comp__round"</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 

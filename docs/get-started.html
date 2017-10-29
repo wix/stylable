@@ -49,7 +49,7 @@
             
                 <li class=""><a href="/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
             
-                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+                <li class=""><a href="/docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
             
         </ul>
     </div>
@@ -66,12 +66,20 @@
             
                 <li class=""><a href="/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
             
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
         </ul>
     </div>
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Reference</div>
+        <div class="docs-nav-section-header">Specification Reference</div>
         <ul>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
             
                 <li class=""><a href="/docs/references/imports" class=" docs-nav-item">Imports</a></li>
             
@@ -79,7 +87,7 @@
             
                 <li class=""><a href="/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
             
-                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
             
                 <li class=""><a href="/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
             
@@ -101,10 +109,6 @@
             
                 <li class=""><a href="/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
-                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
-            
-                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
-            
         </ul>
     </div>
     
@@ -114,7 +118,7 @@
     <h1>Getting Started</h1>
     <h2 id="what-is-stylable">What is Stylable</h2>
 
-<p><strong>Stylable</strong> enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
+<p><strong>Stylable</strong> is a CSS preprocessor that enables you to write reusable, highly-performant, styled components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
 
 <ul>
   <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
@@ -122,21 +126,24 @@
   <li>Uses themes so you can apply different look and feel across your web application.</li>
 </ul>
 
-<p>At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.</p>
+<p>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid, vanilla CSS that works cross-browser.</p>
 
 <h2 id="how-do-i-install">How do I install</h2>
 
-<ol>
+<p>There are currently two options for installing and working with <strong>Stylable</strong>:</p>
+
+<ul>
   <li>
-    <p>Install <strong>Stylable</strong> from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
+    <p>To begin writing your own project, you can create a <strong>Stylable</strong> app from our boilerplate  - follow the instructions <a href="./getting-started/install-configure">here</a>.</p>
   </li>
   <li>
-    <p>Install the <strong>Stylable</strong> <a href="https://github.com/wix/stylable-integration">integrations package</a>.</p>
+    <p>To work with an existing project, you can install <strong>stylable</strong> and the <strong>stylable-integration</strong> packages from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
   </li>
-  <li>
-    <p>While <strong>Stylable</strong> can work with any component framework, we use it with <a href="https://facebook.github.io/react/docs/installation.html">React</a>.</p>
-  </li>
-</ol>
+</ul>
+
+<p>While <strong>Stylable</strong> can work with any component framework, we offer a <a href="./getting-started/react-integration">React component integration</a> that works with both installation options.</p>
+
+<p>Optionally, you can install <a href="./getting-started/stylable-intelligence"><strong>Stylable Intelligence</strong></a>, an extension providing IDE support for code completion and diagnostics. Currently supported for only Visual Studio Code (version 1.16 and later).</p>
 
 <h2 id="what-can-i-do">What can I do</h2>
 
@@ -151,16 +158,10 @@
     <p><strong>Create a library</strong> - If you want guidance in creating a component library, read <a href="../docs/guides/stylable-component-library">Create a Stylable Component Library</a>. Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.</p>
   </li>
   <li>
-    <p><strong>Learn</strong> - Take a look at our reference documents to get more acquanted with our code and for specific code examples.</p>
-  </li>
-  <li>
-    <p><strong>Remember</strong> - Our <a href="../docs/getting-started/cheatsheet">cheatsheet</a> helps you keep track of <strong>Stylable</strong> syntax.</p>
+    <p><strong>Learn</strong> - Take a look at our <a href="./getting-started/cheatsheet">specification reference documents</a> to get more acquanted with our code and for specific code examples. Use the overview as a cheatsheet to help you keep track of <strong>Stylable</strong> syntax.</p>
   </li>
 </ul>
 
-<h2 id="components">Components</h2>
-
-<p>We recommend using our component library, <a href="https://github.com/wix/stylable-components"><strong>Stylable-Components</strong></a> - a stylable, fully-tested &amp; strictly-typed component library.</p>
 
 </section>
 

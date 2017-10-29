@@ -49,7 +49,7 @@
             
                 <li class=""><a href="/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
             
-                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Cheatsheet</a></li>
+                <li class=""><a href="/docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
             
         </ul>
     </div>
@@ -66,12 +66,20 @@
             
                 <li class=""><a href="/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
             
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
         </ul>
     </div>
     
     <div class="docs-nav-section">
-        <div class="docs-nav-section-header">Reference</div>
+        <div class="docs-nav-section-header">Specification Reference</div>
         <ul>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
             
                 <li class=""><a href="/docs/references/imports" class=" docs-nav-item">Imports</a></li>
             
@@ -79,7 +87,7 @@
             
                 <li class=""><a href="/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
             
-                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag Selectors</a></li>
+                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
             
                 <li class=""><a href="/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
             
@@ -101,10 +109,6 @@
             
                 <li class=""><a href="/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
-                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
-            
-                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
-            
         </ul>
     </div>
     
@@ -120,7 +124,7 @@
 
 <p>Try avoiding size declaration just because it offers an easier API. To override a component specifying size limitations, you would need to override multiple CSS declarations.</p>
 
-<p>If you do set a default size or size limitations, use <code class="highlighter-rouge">em</code> units to resize to the HTML context.</p>
+<p>If you do set a default size or size limitations, use <code class="highlighter-rouge">em/rem</code> units to resize to the HTML context.</p>
 
 <h2 id="give-meaningful-names">Give meaningful names</h2>
 
@@ -155,8 +159,7 @@
 
 <p>The best practice is to use 2 colors across the project for contrasting text and background.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"dropdown"</span><span class="p">;</span>
-<span class="nc">.options</span> <span class="p">{</span> 
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.options</span> <span class="p">{</span> 
     <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span> 
     <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span> 
 <span class="p">}</span>
