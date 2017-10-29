@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import {resolve} from 'path';
 import {Diagnostics} from '../src';
 import {safeParse} from '../src/parser';
 import {process} from '../src/stylable-processor';
@@ -684,7 +685,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `Imported file '/file.css' not found`, file: '/main.css'}]);
+                    [{message: `Imported file '${resolve('/file.css')}' not found`, file: '/main.css'}]);
             });
         });
 

@@ -3,6 +3,7 @@ import {cachedProcessFile} from '../src/cached-process-file';
 import {ImportSymbol, process, processNamespace, StylableMeta} from '../src/stylable-processor';
 
 import * as chai from 'chai';
+import {resolve} from 'path';
 import {VarSymbol} from '../src';
 import {flatMatch} from './matchers/falt-match';
 
@@ -51,7 +52,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('collect namespace', () => {
-        const from = '/path/to/style.css';
+        const from = resolve('/path/to/style.css');
         const result = processSource(`
             @namespace "name";
             @namespace 'anther-name';
@@ -62,7 +63,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('use filename as default namespace prefix', () => {
-        const from = '/path/to/style.css';
+        const from = resolve('/path/to/style.css');
 
         const result = processSource(`
 

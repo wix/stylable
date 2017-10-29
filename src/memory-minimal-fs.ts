@@ -1,4 +1,5 @@
 const deindent = require('deindent');
+import {resolve} from 'path';
 
 import {MinimalFS} from './cached-process-file';
 
@@ -17,6 +18,7 @@ export function createMinimalFS(config: MinimalFSSetup) {
     for (const file in files) {
         if (files[file].mtime === undefined) {
             files[file].mtime = new Date();
+            files[resolve(file)] = files[file];
         }
     }
 

@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import {resolve} from 'path';
 import {createMinimalFS, process, safeParse, StylableResolver} from '../src';
 import {cachedProcessFile, MinimalFS} from '../src/cached-process-file';
 import {StylableMeta} from '../src/stylable-processor';
@@ -47,7 +48,7 @@ describe('postcss-resolver', () => {
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
         expect(results[0].symbol.name).to.equal('myClass');
         expect(results[1].symbol.name).to.equal('root');
-        expect(results[1].meta.source).to.equal('/button.st.css');
+        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
 
     });
 
@@ -79,11 +80,11 @@ describe('postcss-resolver', () => {
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
         expect(results[0].symbol.name).to.equal('Button');
         expect(results[1].symbol.name).to.equal('root');
-        expect(results[1].meta.source).to.equal('/button.st.css');
+        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
 
     });
 
-    it('should resolve extend classes', () => {
+    it('should resolve extend classes on broken css', () => {
         const {fs} = createMinimalFS({
             files: {
                 '/button.st.css': {
@@ -93,7 +94,7 @@ describe('postcss-resolver', () => {
                 }
             }
         });
-        const results = createResolveExtendsResults(fs, '/button.st.css', 'gaga');
+        const results = createResolveExtendsResults(fs, resolve('/button.st.css'), 'gaga');
         expect(results).to.eql([]);
     });
 });
