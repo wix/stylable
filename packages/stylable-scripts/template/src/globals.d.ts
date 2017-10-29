@@ -1,5 +1,20 @@
+declare module '*.st.css' {
+    const stylesheet: RuntimeStylesheet;
+    export default stylesheet;
+}
+
+declare module '*.svg' {
+    const urlToFile: string;
+    export default urlToFile;
+}
+
+declare module '*.css' {
+    const stylesheet: void;
+    export default stylesheet;
+}
+
 interface StateMap {
-    [key: string]: boolean
+    [key: string]: boolean;
 }
 
 interface Stylesheet {
@@ -9,18 +24,17 @@ interface Stylesheet {
     cssStates: (stateMapping: StateMap) => StateMap;
 }
 
-type RuntimeStylesheet = {[key: string]: string} & {$stylesheet: Stylesheet};
-
-declare module '*.svg' {
-    const urlToFile: string;
-    export default urlToFile;
-}
-declare module '*.st.css' {
-    const stylesheet: RuntimeStylesheet;
-    export default stylesheet;
+interface RuntimeHelpers {
+    $get: (localName: string) => string;
+    $cssStates: (stateMapping: StateMap) => StateMap;
 }
 
-declare module '*.css' {
-    const stylesheet: void;
-    export default stylesheet;
-}
+type StylesheetLocals = {[key: string]: string} & {$stylesheet: Stylesheet} & RuntimeHelpers;
+type RuntimeStylesheet = StylesheetLocals & (
+    (
+        className: string,
+        states?: StateMap,
+        props?: {className?: string, [key: string]: any}
+    ) => {[key: string]: string}
+);
+

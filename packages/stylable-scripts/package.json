@@ -22,7 +22,7 @@
     "stylable-scripts": "./bin/stylable-scripts.js"
   },
   "dependencies": {
-    "@types/mocha": "2.2.43",
+    "@types/mocha": "2.2.44",
     "autoprefixer": "7.1.6",
     "case-sensitive-paths-webpack-plugin": "2.1.1",
     "chalk": "2.3.0",
@@ -38,7 +38,7 @@
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",
     "react-dev-utils": "4.1.0",
-    "stylable": "4.0.25",
+    "stylable": "4.0.26",
     "stylable-integration": "6.0.0",
     "style-loader": "0.19.0",
     "test-drive-react": "0.7.0",
