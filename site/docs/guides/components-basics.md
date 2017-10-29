@@ -75,15 +75,16 @@ Let's take the `Button` component and import it into the JSX file, and also add 
 
 ```jsx
 /* panel.jsx */
-import {Button} from './button'
+import * as React from 'react';
+import {properties, stylable} from 'wix-react-tools';
+import {Button} from '../button';
+import style from './panel.st.css';
 
-render(){
-    return (
-        <div>
-            <Button className="cancelBtn"/>
-        </div>
-    );
-}
+export const Panel: React.SFC = stylable(style)(properties(() => (
+    <div>
+        <Button />
+    </div>
+)));
 ```
 
 Let's also import `Button`'s stylesheet into the `Panel` stylesheet. You can then target the internal parts of the component that you imported:
@@ -114,14 +115,30 @@ A custom pseudo-class can be used to reflect any logical state of your component
 
 ```jsx
 /* button.jsx */
-render () {
-    return (
-        <button style-state={this.state.on} onClick={()=>this.setState({on:!this.state.on})}>
-            <div className="icon"/>
-            <span className="label">Click Here!</span>
-        </button>
-    );
-}
+import * as React from 'react';
+import {properties, stylable} from 'wix-react-tools';
+import style from './button.st.css';
+
+export interface ButtonProps {}
+
+@stylable(style) // this decorator requires the wix-react-tools integration
+export class Button extends React.Component<ButtonProps, {on:boolean}> {
+    static defaultProps: ButtonProps = { }
+    
+    constructor(props:any) {
+        super(props);
+        this.state = {on:false};
+    }
+
+    render () {
+        return (
+            <button style-state={this.state.on} onClick={()=>this.setState({on:!this.state.on})}>
+                <div className="icon"/>
+                <span className="label">{this.state.on.toString()}</span>
+            </button>
+        );
+    }
+};
 ```
 
 ```css
