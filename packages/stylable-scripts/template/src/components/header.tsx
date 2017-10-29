@@ -13,6 +13,6 @@ export const Header = stylable(style)(properties((props: HeaderProps) => (
     <header>
         <img src={reactLogo} className="reactLogo" alt="logo" />
         <img src={stylableLogo} className="stylableLogo" alt="logo" />
-        <h1 className="title">${props.message}</h1>
+        <h1 className="title">{props.message}</h1>
     </header>
 )));
