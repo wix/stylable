@@ -134,7 +134,7 @@ export class Button extends React.Component<ButtonProps, {on:boolean}> {
         return (
             <button style-state={this.state.on} onClick={()=>this.setState({on:!this.state.on})}>
                 <div className="icon"/>
-                <span className="label">Click Here!</span>
+                <span className="label">{this.state.on.toString()}</span>
             </button>
         );
     }
