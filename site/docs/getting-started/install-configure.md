@@ -21,8 +21,6 @@ For the `my-app-name` value above, replace with the name of your project. Once y
 
 The project includes several basic components and **Stylable** stylesheets which have the suffix `.st.css`.
 
-You can begin writing in **Stylable**.
-
 ## Install Stylable to work with an existing project
 
 To work with an existing project, you can install **stylable** and the **stylable-integration** packages from our GitHub [repository](https://github.com/wix/stylable). 
@@ -38,6 +36,12 @@ Using Yarn:
 yarn add stylable stylable-integration
 ```
 
+## Write in Stylable
+
+Once you've installed either the boilerplate or the packages into your own project, you can begin writing in **Stylable**. Look through the [Specifications Reference](./cheatsheet.md) for specs and code examples. 
+
+To take advantage of code completion and diagnostics, install [**Stylable Intelligence**](./stylable-intelligence.md) currently supported for only Visual Studio Code (version 1.16 and later).
+
 ## Build configuration
 
 Currently we support Webpack as our build system. To author a component library, use our CLI tool to build each CSS separately.
@@ -51,7 +55,7 @@ const StylablePlugin = require('stylable-integration/webpack-plugin');
     module: {
         rules: [
             StylablePlugin.rule(),
-            // in order to load css assets from bundle we need the url loader configured.
+            // to load CSS assets from bundle we need the url loader configured.
             // example configuration
             {
                 test: /\.(png|jpg|gif|svg)$/,

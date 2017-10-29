@@ -25,7 +25,7 @@ There are currently two options for installing and working with **Stylable**:
 
  While **Stylable** can work with any component framework, we offer a [React component integration](./getting-started/react-integration.md) that works with both installation options. 
 
-4. Optionally you can install [**Stylable Intelligence**](./getting-started/stylable-intelligence.md), an extension providing IDE support for code completion and diagnostics.
+Optionally, you can install [**Stylable Intelligence**](./getting-started/stylable-intelligence.md), an extension providing IDE support for code completion and diagnostics. Currently supported for only Visual Studio Code (version 1.16 and later).
 
 ## What can I do
 
@@ -35,5 +35,5 @@ There are currently two options for installing and working with **Stylable**:
 
 * **Create a library** - If you want guidance in creating a component library, read [Create a Stylable Component Library](../docs/guides/stylable-component-library.md). Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.
 
-* **Learn** - Take a look at our [sepcification reference documents] (../docs/getting-started/cheatsheet.md) to get more acquanted with our code and for specific code examples. Use the overview as a cheatsheet to help you keep track of **Stylable** syntax.
+* **Learn** - Take a look at our [specification reference documents](./getting-started/cheatsheet.md) to get more acquanted with our code and for specific code examples. Use the overview as a cheatsheet to help you keep track of **Stylable** syntax.
 

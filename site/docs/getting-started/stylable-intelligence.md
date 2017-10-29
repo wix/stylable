@@ -4,7 +4,7 @@ title: Stylable Intelligence
 layout: docs
 ---
 
-**Stylable Intelligence** is an extension implementing the Language Server Protocol that provides IDE support for **Stylable**. It currently provides:
+**Stylable Intelligence** is an extension implementing the Language Server Protocol that provides IDE support for **Stylable**. It currently includes:
 * Code completion 
 * Diagnostics
 
