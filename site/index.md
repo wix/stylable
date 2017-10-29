@@ -2,15 +2,23 @@
 # You don't need to edit this file, it's empty on purpose.
 # Edit theme's home layout instead if you wanna make some changes
 # See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-layout: page
-title: Welcome to Stylable
+
+id: welcome
+title:
+redirect_from: "docs/index.html"
+layout: docs
 ---
 
-<img class="home-logo" src="{{ site.baseurl }}/images/96-logo-horizontal.png" alt="Stylable - CSS for Components" />
+<img class="home-logo" src="{{ site.baseurl }}/images/96-logo-vertical.svg" alt="Stylable - CSS for Components" />
 
- *"New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now."*  [Håkon Wium Lie](https://dev.opera.com/articles/css-twenty-years-hakon/), co-creator of CSS 
+<p class="quote">New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.<br>
+– <a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS.
+</p>
 
-At Wix, we agree. We love CSS. It's simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.
+
+
+
+At Wix, we agree. We &hearts; CSS. It's simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintanining CSS across large teams and large projects can be tricky.
 
 We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created **Stylable**.
 
@@ -30,7 +38,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 ## Documentation
 
-Learn more about **Stylable** and how to get started [here](./docs/getting-started.md). Includes step by step instructions and code examples.
+[Learn more about **Stylable**](./docs/get-started.md) and get started with step by step instructions and code examples.
 
 ## Project
 

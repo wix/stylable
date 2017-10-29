@@ -1,4 +1,4 @@
-import { Pojo } from "./types";
+import {Pojo} from './types';
 
 export const matchValue = /value\((.*?)\)/g
 

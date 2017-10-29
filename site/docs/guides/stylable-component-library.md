@@ -56,6 +56,7 @@ Your components should be as easy to style and theme as possible. We recommend f
 * Reusable [vars](../references/variables.md) should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.
 * Use [component variants](./component-variants.md) and [shared classes](./shared-classes.md) from the project file (`project.st.css`).
 
+
 More best practices for themable components can be found in the [**Stylable** component best practices guide](./stylable-component-best-practices.md).
 
 In the following code, you can see a component described with:

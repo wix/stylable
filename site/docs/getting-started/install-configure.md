@@ -1,6 +1,7 @@
 ---
 id: getting-started/install-configure
 title: Installation
+redirect_from: "docs/index.html"
 layout: docs
 ---
 

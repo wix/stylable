@@ -4,6 +4,7 @@ title: Compose CSS Class
 layout: docs
 ---
 
+
 Use `-st-compose` as a way to automatically connect between two or more style classes so that if one is used, the DOM element will receive the composed classes as well.
 
 For example:

@@ -25,6 +25,8 @@ There are currently two options for installing and working with **Stylable**:
 
  While **Stylable** can work with any component framework, we offer a [React component integration](./getting-started/react-integration.md) that works with both installation options. 
 
+4. Optionally you can install [**Stylable Intelligence**](./getting-started/stylable-intelligence.md), an extension providing IDE support for code completion and diagnostics.
+
 ## What can I do
 
 * **Build a Stylable component** - If you are looking to style a component, follow the steps in the [Stylable Basics Guide](../docs/guides/components-basics.md) and [Best Practices Guide](../docs/guides/stylable-component-best-practices.md)

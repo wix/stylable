@@ -2,9 +2,9 @@ import { StylableTransformer } from "./stylable-transformer";
 import { Diagnostics } from "./diagnostics";
 import { safeParse } from "./parser";
 import { cachedProcessFile, MinimalFS, FileProcessor } from "./cached-process-file";
-import { create, RuntimeStylesheet } from "./runtime";
+import { create } from "./runtime";
 import { StylableMeta, process } from "./stylable-processor";
-
+import { RuntimeStylesheet } from "./types";
 
 export function createGenerator(
     fs: MinimalFS = {

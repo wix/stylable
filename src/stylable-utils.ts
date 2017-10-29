@@ -148,26 +148,17 @@ export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import:
 }
 
 
-
-export function createImportString(importDef: Imported, path: string) {
-    var imports = importDef.defaultExport ? [`var ${importDef.defaultExport} = require("${(path)}");`] : [];
-    for (var k in importDef.named) {
-        imports.push(`var ${importDef.defaultExport} = require("${(path)}")[${JSON.stringify(importDef.named[k])}];`);
-    }
-    return imports.join('\n');
-}
-
-export function getCorrectNodeImport(importNode: Imported, test:any){
+export function findDeclaration(importNode: Imported, test:any){
     const fromIndex = importNode.rule.nodes!.findIndex(test)
     return importNode.rule.nodes![fromIndex] as postcss.Declaration    
 }
 
-export function getRuleFromMeta(meta:StylableMeta, selector: string, test:any =(statment:any) => statment.prop === valueMapping.extends ) {
+export function findRule(root:postcss.Root, selector: string, test:any =(statment:any) => statment.prop === valueMapping.extends ) {
     let found:any = null
-    meta.ast.walkRules(selector, function(rule:SRule) {
-        let declrationIndex = rule.nodes ? rule.nodes.findIndex(test): -1
-        if (rule.isSimpleSelector && !!~declrationIndex) {
-            found = rule.nodes![declrationIndex]
+    root.walkRules(selector, function(rule:SRule) {
+        let declarationIndex = rule.nodes ? rule.nodes.findIndex(test): -1
+        if (rule.isSimpleSelector && !!~declarationIndex) {
+            found = rule.nodes![declarationIndex]
         }
     })
     return found

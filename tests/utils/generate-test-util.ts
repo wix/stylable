@@ -1,4 +1,3 @@
-import { Pojo } from "../../src/types";
 import { cachedProcessFile, FileProcessor } from "../../src/cached-process-file";
 import { StylableMeta, process } from "../../src/stylable-processor";
 import * as postcss from 'postcss';
@@ -9,10 +8,12 @@ import { createMinimalFS } from "../../src/memory-minimal-fs";
 import { Bundler } from "../../src/bundle";
 import { isAbsolute } from "path";
 import { Stylable } from "../../src/stylable";
+import { Pojo } from "../../src/types";
+
 // const deindent = require('deindent');
 export interface File { content: string; mtime?: Date; namespace?: string }
 export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
-export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean }
+export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean, optimize?: boolean }
 export type RequireType = (path: string) => any;
 
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
@@ -29,7 +30,7 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { 
     return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config, diagnostics:Diagnostics = new Diagnostics): StylableResults {
+export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics): StylableResults {
     if (!isAbsolute(config.entry)) {
         throw new Error('entry must be absolute path: ' + config.entry)
     }
@@ -41,7 +42,8 @@ export function generateFromMock(config: Config, diagnostics:Diagnostics = new D
         fileProcessor,
         requireModule,
         diagnostics,
-        keepValues: false
+        keepValues: false,
+        optimize: config.optimize
     });
 
     const result = t.transform(fileProcessor.process(entry));

@@ -13,7 +13,7 @@ layout: docs
  * **CSS declaration Block**: List of CSS declarations
  * **CSS ruleset**: CSS declaration block paired with a selector
 
-<a href=“https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations” target=“_blank”>MDN docs</a>
+[MDN docs](https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Syntax#CSS_Declarations)
 
 ## Stylable
 
@@ -29,8 +29,8 @@ Syntax unique to Stylable - Click each to access code examples and descriptions
     * [**X**](../references/tag-selectors) Tag/component selectors
     * [**`::X`**](../references/pseudo-elements.md) Target internal part (pseudo-element) 
     * [**`:X`**](../references/pseudo-classes.md) Target states including native and custom (pseudo-classes)
-    * [**`:--X`**](../references/custom-selectors.md) selector shortcut (custom selector)
-    * [**`:global(X)`**](../references/global-selectors.md) keep selector global
+    * [**`:--X`**](../references/custom-selectors.md) Selector alias (custom selector)
+    * [**`:global(X)`**](../references/global-selectors.md) Keep selector global
 * [**`:import {}`**](../references/imports.md) Import external assets like mixins, stylesheets, common CSS and vars
     * [**`-st-from`**](../references/imports.md) Location of file to import
     * [**`-st-default`**](../references/imports.md) Import the file's default export value

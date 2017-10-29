@@ -1,4 +1,8 @@
-- title: Discover Stylable
+- title:
+  items:
+  - id: welcome
+    title: Welcome to Stylable
+- title: Discover
   items:
   - id: get-started
     title: Getting Started
@@ -15,6 +19,8 @@
       title: CSS Classes
     - id: custom-states
       title: Custom states
+  - id: getting-started/stylable-intelligence
+    title: Stylable Intelligence
 - title: Guides
   items:
   - id: guides/components-basics
@@ -29,6 +35,8 @@
     title: Project Commons
   - id: guides/shared-classes
     title: Shared Classes
+  - id: guides/component-variants
+    title: Component Variants
 - title: Specification Reference
   items:
   - id: getting-started/cheatsheet
@@ -51,6 +59,8 @@
     title: Global Selectors
   - id: references/compose-css-class
     title: Compose CSS Class
+  - id: references/custom-selectors
+    title: Custom Selectors
   - id: references/mixin-syntax
     title: Mixins
   - id: references/variables

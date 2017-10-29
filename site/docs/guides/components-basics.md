@@ -75,15 +75,16 @@ Let's take the `Button` component and import it into the JSX file, and also add 
 
 ```jsx
 /* panel.jsx */
-import {Button} from './button'
+import * as React from 'react';
+import {properties, stylable} from 'wix-react-tools';
+import {Button} from '../button';
+import style from './panel.st.css';
 
-render(){
-    return (
-        <div>
-            <Button className="cancelBtn"/>
-        </div>
-    );
-}
+export const Panel: React.SFC = stylable(style)(properties(() => (
+    <div>
+        <Button />
+    </div>
+)));
 ```
 
 Let's also import `Button`'s stylesheet into the `Panel` stylesheet. You can then target the internal parts of the component that you imported:
@@ -162,4 +163,4 @@ You can then target `Button`'s `on` state in your `panel` as follows:
 
 * [Building an Application](./stylable-application.md)
 * [Building a Component Library](./stylable-component-library.md)
-* [Stylable Cheatsheet](../usefulIngo/cheatsheet.md)
+* [Stylable Cheatsheet](../getting-started/cheatsheet.md)
