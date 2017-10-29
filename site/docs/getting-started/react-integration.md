@@ -4,7 +4,7 @@ title: React integration
 layout: docs
 ---
 
-You can integrate **Stylable** manually with a React component per the following example if you want to understand the workings of the integrtation. You can also use our automatic integration using wix-react-tools as described below.
+If you want to understand the workings of the integrtation, you can integrate **Stylable** manually with a React component per the following example. You can also use our automatic integration using **wix-react-tools** as described below.
 
 ## Manual integration 
 
