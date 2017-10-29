@@ -1,28 +1,32 @@
 // import * as postcss from 'postcss';
 // import * as path from 'path';
-import { StylableMeta, ImportSymbol, StylableSymbol } from './stylable-processor';
-import { FileProcessor } from "./cached-process-file";
-import { stripQuotation } from "./utils";
-import { valueMapping } from "./stylable-value-parsers";
+import {FileProcessor} from './cached-process-file';
+import {ImportSymbol, StylableMeta, StylableSymbol} from './stylable-processor';
+import {valueMapping} from './stylable-value-parsers';
+import {stripQuotation} from './utils';
 
 export interface CSSResolve {
-    _kind: 'css'
-    symbol: StylableSymbol
-    meta: StylableMeta
+    _kind: 'css';
+    symbol: StylableSymbol;
+    meta: StylableMeta;
 }
 
 export interface JSResolve {
-    _kind: 'js'
-    symbol: any
-    meta: null
+    _kind: 'js';
+    symbol: any;
+    meta: null;
 }
 
 export class StylableResolver {
-    constructor(protected fileProcessor: FileProcessor<StylableMeta>, protected requireModule: (modulePath: string) => any) { }
-    resolveVarValue(meta: StylableMeta, name: string) {
-        return this.resolveVarValueDeep(meta, name).value
-    }        
-    resolveVarValueDeep(meta: StylableMeta, name: string) {
+    constructor(
+        protected fileProcessor: FileProcessor<StylableMeta>,
+        protected requireModule: (modulePath: string) => any
+    ) {}
+
+    public resolveVarValue(meta: StylableMeta, name: string) {
+        return this.resolveVarValueDeep(meta, name).value;
+    }
+    public resolveVarValueDeep(meta: StylableMeta, name: string) {
         let value;
         let symbol = meta.mappedSymbols[name];
         let next;
@@ -52,13 +56,13 @@ export class StylableResolver {
 
         return {value, next};
     }
-    resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
+    public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, false);
     }
-    resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
+    public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, true);
     }
-    resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
+    public resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
         const type = isElement ? 'element' : 'class';
         let finalSymbol;
         let finalMeta;
@@ -72,13 +76,13 @@ export class StylableResolver {
                     finalSymbol = resolved.symbol;
                     finalMeta = resolved.meta;
                 } else {
-                    //TODO: warn
+                    // TODO: warn
                 }
             } else {
-                //TODO: warn
+                // TODO: warn
             }
         } else {
-            //TODO: warn
+            // TODO: warn
         }
 
         if (finalMeta && finalSymbol) {
@@ -86,28 +90,27 @@ export class StylableResolver {
                 _kind: 'css',
                 symbol: finalSymbol,
                 meta: finalMeta
-            }
+            };
         } else {
             return null;
         }
     }
-    resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             return null;
         }
         const importSymbol: ImportSymbol = maybeImport;
 
-        const { from } = importSymbol.import;
+        const {from} = importSymbol.import;
 
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
             let meta;
             try {
                 meta = this.fileProcessor.process(from);
-            }catch(e){
-                return null
+            } catch (e) {
+                return null;
             }
-            
 
             if (importSymbol.type === 'default') {
                 symbol = meta.mappedSymbols[meta.root];
@@ -115,10 +118,10 @@ export class StylableResolver {
                 symbol = meta.mappedSymbols[importSymbol.name];
             }
 
-            return <CSSResolve>{ _kind: "css", symbol, meta };
+            return {_kind: 'css', symbol, meta} as CSSResolve;
 
         } else {
-            
+
             const _module = this.requireModule(from);
 
             if (importSymbol.type === 'default') {
@@ -127,17 +130,17 @@ export class StylableResolver {
                 symbol = _module[importSymbol.name];
             }
 
-            return <JSResolve>{ _kind: "js", symbol, meta: null };
+            return {_kind: 'js', symbol, meta: null} as JSResolve;
         }
     }
-    deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+    public deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         let resolved = this.resolve(maybeImport);
         while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
             resolved = this.resolve(resolved.symbol);
         }
         return resolved;
     }
-    resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
+    public resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 
@@ -157,7 +160,7 @@ export class StylableResolver {
                 if (!extend) {
                     break;
                 }
-                let res = this.resolve(extend);
+                const res = this.resolve(extend);
                 if (res && res._kind === 'css' && (res.symbol._kind === 'element' || res.symbol._kind === 'class')) {
                     current = res;
                     extend = res.symbol[valueMapping.extends];
@@ -167,9 +170,6 @@ export class StylableResolver {
             }
         }
 
-        return extendPath
+        return extendPath;
     }
 }
-
-
-

@@ -1,12 +1,12 @@
-import { expect } from "chai";
-import * as postcss from "postcss";
-import { generateStylableRoot } from "../utils/generate-test-util";
+import { expect } from 'chai';
+import * as postcss from 'postcss';
+import { generateStylableRoot } from '../utils/generate-test-util';
 
-describe('Stylable postcss transform (Global)', function () {
-    
+describe('Stylable postcss transform (Global)', () => {
+
     it('should support :global()', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -20,10 +20,9 @@ describe('Stylable postcss transform (Global)', function () {
             }
         });
 
-        expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.style--root .btn');
-        expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.btn');
-        expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.btn .style--container');
+        expect((result.nodes![0] as postcss.Rule).selector).to.equal('.style--root .btn');
+        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn');
+        expect((result.nodes![2] as postcss.Rule).selector).to.equal('.btn .style--container');
 
     });
 });
-

@@ -1,46 +1,40 @@
+import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { cachedProcessFile } from '../src/cached-process-file';
 import { process, StylableMeta } from '../src/stylable-processor';
-import { expect } from "chai";
 import { generateStylableRoot } from './utils/generate-test-util';
 
-
-
-export var loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-    return processSource(content, { from: path })
+export let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
+    return processSource(content, { from: path });
 },
     {
         readFileSync() {
             return '';
         },
         statSync() {
-            return { mtime: new Date };
+            return { mtime: new Date() };
         }
     }
-)
-
+);
 
 function processSource(source: string, options: postcss.ProcessOptions = {}) {
     return process(postcss.parse(source, options));
 }
 
-describe('@custom-selector', function () {
+describe('@custom-selector', () => {
 
-
-    it('collect custom-selectors', function () {
-        const from = "/path/to/style.css";
+    it('collect custom-selectors', () => {
+        const from = '/path/to/style.css';
         const result = processSource(`
             @custom-selector :--icon .root > .icon;
         `, { from });
 
-
-        expect(result.customSelectors[":--icon"]).to.equal('.root > .icon');
+        expect(result.customSelectors[':--icon']).to.equal('.root > .icon');
 
     });
 
-
-    it('expand custom-selector before process (reflect on ast)', function () {
-        const from = "/path/to/style.css";
+    it('expand custom-selector before process (reflect on ast)', () => {
+        const from = '/path/to/style.css';
         const result = processSource(`
             @custom-selector :--icon .root > .icon;
             :--icon, .class {
@@ -48,25 +42,24 @@ describe('@custom-selector', function () {
             }
         `, { from });
 
-        const r = <postcss.Rule>result.ast.nodes![0];
+        const r = result.ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.root > .icon, .class');
-        expect(result.classes['icon']).to.contain({ "_kind": "class", "name": "icon" })
+        expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
 
     });
 
-    it('expand custom-selector before process (reflect on ast when not written)', function () {
-        const from = "/path/to/style.css";
+    it('expand custom-selector before process (reflect on ast when not written)', () => {
+        const from = '/path/to/style.css';
         const result = processSource(`
             @custom-selector :--icon .root > .icon;
         `, { from });
-        
-        expect(result.classes['icon']).to.contain({ "_kind": "class", "name": "icon" })
+
+        expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
 
     });
 
+    it('expand pseudo-element custom-selector in the owner context', () => {
 
-    it('expand pseudo-element custom-selector in the owner context', function () {
-        
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -96,16 +89,13 @@ describe('@custom-selector', function () {
             }
         });
 
-        const r = <postcss.Rule>ast.nodes![0];
+        const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon');
-        
 
     });
 
+    it('expand custom-selector in pseudo-element in the owner context', () => {
 
-
-    it('expand custom-selector in pseudo-element in the owner context', function () {
-        
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -128,7 +118,7 @@ describe('@custom-selector', function () {
                         @custom-selector :--root-icon .root > .icon;
                         :import {
                             -st-from: "./child.st.css";
-                            -st-default: Child; 
+                            -st-default: Child;
                         }
                         :--root-icon, .class {
                             color: red;
@@ -143,24 +133,20 @@ describe('@custom-selector', function () {
                     namespace: 'child',
                     content: `
                         .top {
-                            
+
                         }
                     `
                 }
             }
         });
 
-        const r = <postcss.Rule>ast.nodes![0];
+        const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon.child--root .child--top');
-        
 
     });
 
+    it('expand complex custom-selector in pseudo-element', () => {
 
-    
-
-    it('expand complex custom-selector in pseudo-element', function () {
-        
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -186,15 +172,13 @@ describe('@custom-selector', function () {
             }
         });
 
-        const r = <postcss.Rule>ast.nodes![0];
+        const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.entry--root .comp--root .comp--icon,.entry--root .comp--root .comp--class');
-        
 
     });
 
+    it('expand custom-selector when there is global root', () => {
 
-    it('expand custom-selector when there is global root', function () {
-        
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -233,12 +217,9 @@ describe('@custom-selector', function () {
             }
         });
 
-        const r = <postcss.Rule>ast.nodes![0];
+        const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.entry--root .xxx .controls--root');
-        
 
     });
 
-
 });
-

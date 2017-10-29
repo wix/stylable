@@ -1,14 +1,20 @@
 const deindent = require('deindent');
 
-import { MinimalFS } from "./cached-process-file";
+import {MinimalFS} from './cached-process-file';
 
-export interface File { content: string; mtime?: Date; }
-export interface MinimalFSSetup { files: { [absolutePath: string]: File }, trimWS?: boolean }
+export interface File {
+    content: string;
+    mtime?: Date;
+}
+export interface MinimalFSSetup {
+    files: {[absolutePath: string]: File};
+    trimWS?: boolean;
+}
 
 export function createMinimalFS(config: MinimalFSSetup) {
     const files = config.files;
 
-    for (var file in files) {
+    for (const file in files) {
         if (files[file].mtime === undefined) {
             files[file].mtime = new Date();
         }
@@ -17,16 +23,16 @@ export function createMinimalFS(config: MinimalFSSetup) {
     const fs: MinimalFS = {
         readFileSync(path: string) {
             if (!files[path]) {
-                throw new Error('Cannot find file: ' + path)
+                throw new Error('Cannot find file: ' + path);
             }
-            if(config.trimWS){
-                return deindent(files[path].content).trim()
+            if (config.trimWS) {
+                return deindent(files[path].content).trim();
             }
             return files[path].content;
         },
         statSync(path: string) {
             if (!files[path]) {
-                throw new Error('Cannot find file: ' + path)
+                throw new Error('Cannot find file: ' + path);
             }
             return {
                 mtime: files[path].mtime!
@@ -38,20 +44,20 @@ export function createMinimalFS(config: MinimalFSSetup) {
         const _module = {
             id: path,
             exports: {}
-        }
+        };
         try {
             if (!path.match(/\.js$/)) {
                 path += '.js';
             }
-            const fn = new Function("module", "exports", "require", files[path].content);
+            const fn = new Function('module', 'exports', 'require', files[path].content);
             fn(_module, _module.exports, requireModule);
         } catch (e) {
             throw new Error('Cannot require file: ' + path);
         }
         return _module.exports;
-    }
+    };
 
-    const resolvePath = function resolvePath(_ctx: string, path: string) {
+    function resolvePath(_ctx: string, path: string) {
         return path;
     }
 
@@ -59,5 +65,5 @@ export function createMinimalFS(config: MinimalFSSetup) {
         fs,
         requireModule,
         resolvePath
-    }
+    };
 }

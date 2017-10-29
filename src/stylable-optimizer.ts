@@ -5,18 +5,18 @@ export function removeSTDirective(root: postcss.Root) {
     const toRemove: postcss.Node[] = [];
 
     root.walkRules((rule: postcss.Rule) => {
-        if(rule.nodes && rule.nodes.length === 0){
+        if (rule.nodes && rule.nodes.length === 0) {
             toRemove.push(rule);
-            return   
+            return;
         }
         rule.walkDecls((decl: postcss.Declaration) => {
             if (decl.prop.startsWith('-st-')) {
                 toRemove.push(decl);
             }
         });
-    })
+    });
 
-    toRemove.forEach((node) => {
+    toRemove.forEach(node => {
         removeRecursiveIfEmpty(node);
     });
 
