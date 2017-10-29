@@ -1,5 +1,5 @@
 export interface StateMap {
-    [key: string]: boolean
+    [key: string]: boolean;
 }
 
 export interface Stylesheet {
@@ -14,9 +14,15 @@ export interface RuntimeHelpers {
     $cssStates: (stateMapping: StateMap) => StateMap;
 }
 
-export type StylesheetLocals = { [key: string]: string } & { $stylesheet: Stylesheet } & RuntimeHelpers;
-export type RuntimeStylesheet = StylesheetLocals & { (className: string, states?: StateMap, props?: { className?: string, [key: string]: any }): { [key: string]: string }; };
+export type StylesheetLocals = {[key: string]: string} & {$stylesheet: Stylesheet} & RuntimeHelpers;
+export type RuntimeStylesheet = StylesheetLocals & (
+    (
+        className: string,
+        states?: StateMap,
+        props?: {className?: string, [key: string]: any}
+    ) => {[key: string]: string}
+);
 
-export type Pojo<T = any> = { [key: string]: T } & object;
+export type Pojo<T = any> = {[key: string]: T} & object;
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;

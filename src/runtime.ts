@@ -1,6 +1,12 @@
-import { RuntimeStylesheet, StateMap, StylesheetLocals } from './types';
+import {RuntimeStylesheet, StateMap, StylesheetLocals} from './types';
 
-export function create(root: string, namespace: string, localMapping: { [key: string]: string }, css: string | null, moduleId: string): RuntimeStylesheet {
+export function create(
+    root: string,
+    namespace: string,
+    localMapping: {[key: string]: string},
+    css: string | null,
+    moduleId: string
+): RuntimeStylesheet {
 
     if (css && typeof document !== 'undefined') {
         let style = null;
@@ -14,14 +20,16 @@ export function create(root: string, namespace: string, localMapping: { [key: st
     const lo_ns = namespace.toLowerCase();
 
     function cssStates(stateMapping?: StateMap) {
-        return stateMapping ? Object.keys(stateMapping).reduce(function (states, key) {
-            if (stateMapping[key]) { states["data-" + lo_ns + "-" + key.toLowerCase()] = true; }
+        return stateMapping ? Object.keys(stateMapping).reduce((states, key) => {
+            if (stateMapping[key]) {
+                states['data-' + lo_ns + '-' + key.toLowerCase()] = true;
+            }
             return states;
         }, {} as StateMap) : {};
     }
 
     function get(localName: string) {
-        return (locals as { [key: string]: string })[localName];
+        return (locals as {[key: string]: string})[localName];
     }
 
     const locals: StylesheetLocals = localMapping as any;
@@ -36,8 +44,7 @@ export function create(root: string, namespace: string, localMapping: { [key: st
     locals.$get = get;
     locals.$cssStates = cssStates;
 
-
-    const apply = function (className: string, states?: StateMap, props?: { className?: string, [key: string]: any }) {
+    function apply(className: string, states?: StateMap, props?: {className?: string, [key: string]: any}) {
         className = className ? locals.root + ' ' + className : locals.root;
 
         const base: any = cssStates(states);
@@ -54,15 +61,14 @@ export function create(root: string, namespace: string, localMapping: { [key: st
             }
         }
 
-        if(className){
+        if (className) {
             base.className = className;
         }
 
         return base;
-
     }
 
     Object.setPrototypeOf(apply, locals);
 
-    return <RuntimeStylesheet>apply;
+    return apply as RuntimeStylesheet;
 }

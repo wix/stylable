@@ -1,11 +1,10 @@
-import { expect } from "chai";
-import { createGenerator } from "../src/generator";
-import { createMinimalFS } from "../src/memory-minimal-fs";
+import { expect } from 'chai';
+import { createGenerator } from '../src/generator';
+import { createMinimalFS } from '../src/memory-minimal-fs';
 
+describe('generator fromCSS', () => {
 
-describe('generator fromCSS', function () {
-
-    it('should contain locals mapping', function () {
+    it('should contain locals mapping', () => {
 
         const gen = createGenerator();
 
@@ -19,7 +18,7 @@ describe('generator fromCSS', function () {
 
     });
 
-    it('should contain $stylesheet', function () {
+    it('should contain $stylesheet', () => {
 
         const gen = createGenerator();
 
@@ -35,17 +34,17 @@ describe('generator fromCSS', function () {
 
 });
 
-describe('generator fromFile', function () {
+describe('generator fromFile', () => {
 
-    it('should contain locals mapping', function () {
+    it('should contain locals mapping', () => {
 
         const { fs, requireModule } = createMinimalFS({
             files: {
-                "/style.st.css": {
+                '/style.st.css': {
                     content: ''
                 }
             }
-        })
+        });
 
         const gen = createGenerator(fs, requireModule);
 
@@ -55,25 +54,22 @@ describe('generator fromFile', function () {
 
     });
 
-    it('should contain $stylesheet', function () {
-
+    it('should contain $stylesheet', () => {
 
         const { fs, requireModule } = createMinimalFS({
             files: {
-                "/style.st.css": {
+                '/style.st.css': {
                     content: ''
                 }
             }
-        })
+        });
 
         const gen = createGenerator(fs, requireModule);
 
         const { runtime } = gen.fromFile('/style.st.css');
-
 
         expect(runtime.$stylesheet.root).to.equal('root');
 
     });
 
 });
-

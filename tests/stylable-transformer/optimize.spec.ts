@@ -1,13 +1,12 @@
-import { expect } from "chai";
-import * as postcss from "postcss";
-import { generateStylableRoot } from "../utils/generate-test-util";
+import { expect } from 'chai';
+import * as postcss from 'postcss';
+import { generateStylableRoot } from '../utils/generate-test-util';
 
-describe('Generator variables interpolation', function () {
+describe('Generator variables interpolation', () => {
 
+    it('should remove -st- declarations', () => {
 
-    it('should remove -st- declarations', function () {
-
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             optimize: true,
             entry: `/entry.st.css`,
             files: {
@@ -15,7 +14,7 @@ describe('Generator variables interpolation', function () {
                     namespace: 'entry',
                     content: `
                         .container {
-                            color: red; 
+                            color: red;
                             -st-a: red;
                             -st-remove: yes;
                         }
@@ -24,16 +23,16 @@ describe('Generator variables interpolation', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
 
-        expect((<postcss.Declaration>rule.nodes![0]).value).to.equal('red');
-        expect((<postcss.Declaration>rule.nodes![1])).to.be.undefined;
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
+        expect((rule.nodes![1] as postcss.Declaration)).to.equal(undefined);
 
     });
 
-    it('should remove empty rules', function () {
+    it('should remove empty rules', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             optimize: true,
             entry: `/entry.st.css`,
             files: {
@@ -46,16 +45,15 @@ describe('Generator variables interpolation', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
 
-        expect(rule).to.be.undefined;
+        expect(rule).to.equal(undefined);
 
     });
 
+    it('should remove empty rules and parent that remain empty', () => {
 
-    it('should remove empty rules and parent that remain empty', function () {
-
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             optimize: true,
             entry: `/entry.st.css`,
             files: {
@@ -70,15 +68,15 @@ describe('Generator variables interpolation', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
 
-        expect(rule).to.be.undefined;
+        expect(rule).to.equal(undefined);
 
     });
 
-    it('should remove rule if all declarations are removed', function () {
+    it('should remove rule if all declarations are removed', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             optimize: true,
             entry: `/entry.st.css`,
             files: {
@@ -94,16 +92,15 @@ describe('Generator variables interpolation', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
 
-        expect(rule).to.be.undefined;
+        expect(rule).to.equal(undefined);
 
     });
 
+    it('should remove rule if all declarations are removed and remove its parent when remain empty', () => {
 
-    it('should remove rule if all declarations are removed and remove its parent when remain empty', function () {
-
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             optimize: true,
             entry: `/entry.st.css`,
             files: {
@@ -121,9 +118,9 @@ describe('Generator variables interpolation', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
 
-        expect(rule).to.be.undefined;
+        expect(rule).to.equal(undefined);
 
     });
 
