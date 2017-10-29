@@ -4,17 +4,16 @@ title: React integration
 layout: docs
 ---
 
+## Manual integration 
 
+To integrate **Stylable** with your project, follow these four steps. Each enables a different feature as described.
 
-## Vanilla integration 
+1. Enable a component to inherit states at the [root](references/root) level by passing parent data-* to your root node.
+2. Enable style overrides by adding the parent className to your root node.
+3. Enable custom CSS states by generating data-* from your stylesheet.
+4. Enable scoped styling by putting the root class on your root node. 
 
-Stylable integration consist of 
-four simple steps that each supports different feature.
-
-1. Enable shared root by passing parent data-* to your root node.
-2. Enable overrides by putting the parent className on your root node.
-3. Enable custom css states by generating data-* from your stylesheet.
-4. Enable scoped styling by putting the root class on your root node. ( the result of step 2 + 4 is just className concatenation)
+The result of step 2 plus step 4 is `className` concatenation. To access the local class names, you must import the stylesheet into your component file and reference the `className` field.
 
 ```jsx
     ...
@@ -39,12 +38,10 @@ four simple steps that each supports different feature.
 ```
 
 
-## Auto integration
+## Automatic integration with Wix React Tools
 
-Use Stylable React integration from [wix-react-tools](https://github.com/wix/wix-react-tools) to set a **Stylable** stylesheet for a React component or stateless functional component (SFC).
+Use **Stylable** React integration from [wix-react-tools](https://github.com/wix/wix-react-tools) to set a **Stylable** stylesheet for a React component or stateless functional component (SFC).
 
-
-## Installation
 
 Install **wix-react-tools** as a dependency in your local project.
 

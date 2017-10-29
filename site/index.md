@@ -32,10 +32,6 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 Learn more about **Stylable** and how to get started [here](./docs/getting-started.md). Includes step by step instructions and code examples.
 
-## Components
-
-We recommend using our component library, [Stylable-components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library based on React.
-
 ## Project
 
 Access the **Stylable** GitHub project [here](https://github.com/wix/stylable){:target="_blank"}.

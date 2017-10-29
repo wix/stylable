@@ -4,6 +4,8 @@ title: Create a Stylable Component Library
 layout: docs
 ---
 
+We are now experimenting with a new [component library](https://github.com/wix/stylable-components) based on **Stylable** and React. It is in the early development stages and will be available soon. Here are some guidelines we gathered related to this project that you may be interested in following if you build your own library.
+
 **Stylable** enables you to author a component library, that can be themed, and easily consumed and styled, by other **Stylable** projects.  
 
 **Stylable** is the styling, CSS side of working with components. For the **Stylable** CSS to be fully useful, it must integrate with a component library from another source, for example React.
@@ -54,7 +56,7 @@ Your components should be as easy to style and theme as possible. We recommend f
 * Reusable [vars](../references/variables.md) should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.
 * Use [component variants](./component-variants.md) and [shared classes](./shared-classes.md) from the project file (`project.st.css`).
 
-More best practices for themable components can be found in the [stylable component best practices guide](./stylable-component-best-practices.md).
+More best practices for themable components can be found in the [**Stylable** component best practices guide](./stylable-component-best-practices.md).
 
 In the following code, you can see a component described with:
 * 2 colors used from project

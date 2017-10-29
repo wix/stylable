@@ -40,7 +40,7 @@ Any [shared classes](../guides/shared-classes.md) and [component variants](../gu
 }
 ```
 
-## Override theme variables
+## Override theme variables (experimental)
 
 Any variable defined in a theme file can be overridden. Every CSS declaration that uses that variable is overridden under our stylesheet.
 

@@ -4,23 +4,46 @@ title: Installation
 layout: docs
 ---
 
+There are currently two options for installing and working with **Stylable** as described in the following sections.
+
+## Write your own project based on a Stylable boilerplate
+
+To begin writing your own project, you can create a **Stylable** app from our boilerplate. To create the project, follow these instructions: 
+
+Using npm:
+```bash
+npm install -g create-react-app
+
+create-react-app my-app-name --scripts-version stylable-scripts
+```
+For the `my-app-name` value above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run `yarn start` or `yarn build` to create the project in a browser.
+
+The project includes several basic components and two **Stylable** stylesheets:
+* app.st.css
+* content.st.css
+
+You can begin writing in **Stylable**.
+
+## Install Stylable to work with an existing project
+
+To work with an existing project, you can install **stylable** and the **stylable-integration** packages from our GitHub [repository](https://github.com/wix/stylable). 
+
 Install **stylable** and **stylable-integration** as a dependency in your local project.
 
 Using npm:
 ```bash
 npm install stylable stylable-integration --save-dev
 ```
-Using yarn:
+Using Yarn:
 ```bash
 yarn add stylable stylable-integration
 ```
 
-## Build Config
+## Build configuration (experimental)
 
-* Right now we only support webpack as our build system. for library authoring we have a cli tool to build each css separately.
+Currently we support Webpack as our build system. To author a component library, use our CLI tool to build each CSS separately.
 
-Add stylable to your webpack config: 
-
+Add **Stylable** to your Webpack configuration as follows: 
 
 ```
 const StylablePlugin = require('stylable-integration/webpack-plugin');
@@ -50,5 +73,5 @@ const StylablePlugin = require('stylable-integration/webpack-plugin');
 }
 ```
 
-for production build you should not use injectBundleCss option. we create a bundle css asset in your output dir just load it in your html.
+For a production build, you should not use the `injectBundleCss` option. The project creates a bundle CSS asset in your output directory. Just load this into your html. You can set the file name. For details, see [**stylable-integration**](https://github.com/wix/stylable-integration).
 

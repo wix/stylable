@@ -4,7 +4,7 @@ title: Compose CSS Class
 layout: docs
 ---
 
-Use `-st-compose` to apply a CSS class to another CSS [class](./class-selectors.md) or to a [tag selector](./tag-selectors.md).
+Use `-st-compose` to influence the local export name of a class selector. It applies a CSS class to another CSS [class](./class-selectors.md). It does not affect the CSS output. It affects the JavaScript module output by concatenating the class mapping so multiple classes are output as one key. 
 
 ```css
 /* CSS */
@@ -18,10 +18,12 @@ Use `-st-compose` to apply a CSS class to another CSS [class](./class-selectors.
 }
 ```
 
-```css
-/* CSS output*/
-.Comp__item { color: red }
-.Comp__selected.Comp__item { color: green }
+```js
+/* JS */
+{
+    item: "Comp__item",
+    selected: "Comp__selected Comp__item"
+}
 ```
 
 ## Multiple classes
@@ -43,9 +45,11 @@ You can compose multiple classes or tag selectors by order.
 }
 ```
 
-```css
-/* CSS output*/
-.Comp__item { color: red }
-.Comp__round { border-radius: 10px }
-.Comp__selected.Comp__item.Comp__round { color: green }
+```js
+/* JS */
+{
+    item: "Comp__item",
+    round: "Comp__round",
+    selected: "Comp__selected Comp__item Comp__round"
+}
 ```

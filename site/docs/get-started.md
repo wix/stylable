@@ -7,21 +7,23 @@ layout: docs
 
 ## What is Stylable
 
-**Stylable** is a css preprocessor that enables you to write reusable, highly-performant styled components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
+**Stylable** is a CSS preprocessor that enables you to write reusable, highly-performant, styled components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
 * Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
 * Uses themes so you can apply different look and feel across your web application.
 
-At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
+At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
 ## How do I install
 
-1. Install **Stylable** from our GitHub [repository](https://github.com/wix/stylable).
+There are currently two options for installing and working with **Stylable**:
 
-2. Install the **Stylable** [integrations package](https://github.com/wix/stylable-integration).
+* To begin writing your own project, you can create a **Stylable** app from our boilerplate  - follow the instructions [here](). 
 
-3. While **Stylable** can work with any component framework, we offer a [React](https://facebook.github.io/react/docs/installation.html) [component integration](TODO: link to wix-react-tools). 
+* To work with an existing project, you can install **stylable** and the **stylable-integration** packages from our GitHub [repository](https://github.com/wix/stylable). 
+
+ While **Stylable** can work with any component framework, we offer a [React component integration](./getting-started/react-integration.md) that works with both installation options. 
 
 ## What can I do
 
@@ -31,10 +33,5 @@ At build time, the preprocessor converts the Stylable CSS into flat, static, val
 
 * **Create a library** - If you want guidance in creating a component library, read [Create a Stylable Component Library](../docs/guides/stylable-component-library.md). Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.
 
-* **Learn** - Take a look at our reference documents to get more acquanted with our code and for specific code examples.
+* **Learn** - Take a look at our [sepcification reference documents] (../docs/getting-started/cheatsheet.md) to get more acquanted with our code and for specific code examples. Use the overview as a cheatsheet to help you keep track of **Stylable** syntax.
 
-* **Remember** - Our [cheatsheet](../docs/getting-started/cheatsheet.md) helps you keep track of **Stylable** syntax.
-
-## Components
-
-We recommend using our component library, [**Stylable-Components**](https://github.com/wix/stylable-components) - a stylable, fully-tested & strictly-typed component library.

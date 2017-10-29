@@ -31,9 +31,6 @@ yarn add stylable
 While the **stylable** package includes a programmatic API and can be used directly, we strongly suggest using
 the **stylable-integration** package that powers and enables using the `.st.css` files in your project's build cycle: [stylable-integration package](https://github.com/wixplosives/stylable-integration)
 
-## Component Library
-
-**Stylable** includes a rich [component library](https://github.com/wix/stylable-components) for out-of-the-box use.
 
 ## Contributing
 
