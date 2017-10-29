@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/stylable.svg)](https://www.npmjs.com/package/stylable)
 [![Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
 
-**Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
+**Stylable** enables you to write reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
 * Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
@@ -17,19 +17,11 @@ Learn more in our [Documentation Center](https://wix.github.io/stylable/).
 
 ## Installation
 
-Install **Stylable** as a dependency in your local project.
+There are two options for installing **Stylable**:
+* Write your own project based on a **Stylable** boilerplate.
+* Install **Stylable** to work with an existing project.
 
-Using npm:
-```bash
-npm install stylable --save
-```
-Using yarn:
-```bash
-yarn add stylable
-```
-
-While the **stylable** package includes a programmatic API and can be used directly, we strongly suggest using
-the **stylable-integration** package that powers and enables using the `.st.css` files in your project's build cycle: [stylable-integration package](https://github.com/wixplosives/stylable-integration)
+For details, see [Install & Configure](http://stylable.io/docs/getting-started/install-configure).
 
 
 ## Contributing
