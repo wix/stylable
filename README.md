@@ -18,10 +18,20 @@ Learn more in our [Documentation Center](https://wix.github.io/stylable/).
 ## Installation
 
 There are two options for installing **Stylable**:
-* Write your own project based on a **Stylable** boilerplate.
-* Install **Stylable** to work with an existing project.
+* Write your own project based on a **Stylable** boilerplate 
+* Install **Stylable** to work with an existing project as follows:
 
-For details, see [Install & Configure](http://stylable.io/docs/getting-started/install-configure).
+Install **stylable** and **stylable-integration** as a dependency in your local project.
+
+Using npm:
+```bash
+npm install stylable stylable-integration --save-dev
+```
+Using Yarn:
+```bash
+yarn add stylable stylable-integration
+```
+For details on both options, see [Install & Configure](http://stylable.io/docs/getting-started/install-configure).
 
 
 ## Contributing
