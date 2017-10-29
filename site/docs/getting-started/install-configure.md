@@ -18,9 +18,7 @@ create-react-app my-app-name --scripts-version stylable-scripts
 ```
 For the `my-app-name` value above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run `yarn start` or `yarn build` to create the project in a browser.
 
-The project includes several basic components and two **Stylable** stylesheets:
-* app.st.css
-* content.st.css
+The project includes several basic components and **Stylable** stylesheets which have the suffix `.st.css`.
 
 You can begin writing in **Stylable**.
 
@@ -39,7 +37,7 @@ Using Yarn:
 yarn add stylable stylable-integration
 ```
 
-## Build configuration (experimental)
+## Build configuration
 
 Currently we support Webpack as our build system. To author a component library, use our CLI tool to build each CSS separately.
 
