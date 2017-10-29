@@ -24,16 +24,15 @@
   - id: guides/stylable-application
     title: Stylable Application
   - id: guides/stylable-component-library
-    subitems:
-    - id: guides/project-commons
-      title: Project Commons
-    - id: guides/shared-classes
-      title: Shared Classes
     title: Stylable Component Library
+  - id: guides/project-commons
+    title: Project Commons
+  - id: guides/shared-classes
+    title: Shared Classes
 - title: Specification Reference
   items:
   - id: getting-started/cheatsheet
-    title: Specification Overview & Cheatsheet
+    title: Specification Overview
   - id: references/imports
     title: Imports
   - id: references/root
