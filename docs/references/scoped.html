@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Getting Started</title>
+    <title>Scoped</title>
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/highlight.css">
@@ -43,7 +43,7 @@
         <div class="docs-nav-section-header">Discover</div>
         <ul>
             
-                <li class="active"><a href="/docs/get-started" class="active docs-nav-item">Getting Started</a></li>
+                <li class=""><a href="/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
             
                 <li class=""><a href="/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
             
@@ -115,55 +115,43 @@
 </nav>
 
 <section class="docs-content">
-    <h1>Getting Started</h1>
-    <h2 id="what-is-stylable">What is Stylable</h2>
+    <h1>Scoped</h1>
+    <p>The <strong>Stylable</strong> directive <code class="highlighter-rouge">-st-scoped</code> allows you to control the name of a specific class in the CSS output.</p>
 
-<p><strong>Stylable</strong> is a CSS preprocessor that enables you to write reusable, highly-performant, styled components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.</p>
+<p>Use the <code class="highlighter-rouge">-st-scoped</code> directive rule to describethe name of a specific class in the CSS output. This enables you to match the names of the class attribute assigned to HTML elements in your page.</p>
 
-<ul>
-  <li>Scopes styles to components so they don’t “leak” and clash with other styles.</li>
-  <li>Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.</li>
-  <li>Uses themes so you can apply different look and feel across your web application.</li>
-</ul>
+<p>So for example, if you have an HTML element like this:</p>
 
-<p>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid, vanilla CSS that works cross-browser.</p>
+<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"specialDropdown"</span><span class="err">/</span>
+</code></pre>
+</div>
 
-<h2 id="how-do-i-install">How do I install</h2>
+<p>And you want to make sure your class is applied to it, you can make this its name in the CSS output in this way:</p>
 
-<p>There are currently two options for installing and working with <strong>Stylable</strong>:</p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./dropdown.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">DropDown</span><span class="p">;</span>
+<span class="p">}</span>
 
-<ul>
-  <li>
-    <p>To begin writing your own project, you can create a <strong>Stylable</strong> app from our boilerplate  - follow the instructions <a href="./getting-started/install-configure">here</a>.</p>
-  </li>
-  <li>
-    <p>To work with an existing project, you can install <strong>stylable</strong> and the <strong>stylable-integration</strong> packages from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
-  </li>
-</ul>
+<span class="nc">.myDropDown</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">DropDown</span><span class="p">;</span>
+    <span class="py">-st-scoped</span><span class="p">:</span> <span class="n">specialDropdown</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
 
-<p>While <strong>Stylable</strong> can work with any component framework, we offer a <a href="./getting-started/react-integration">React component integration</a> that works with both installation options.</p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 
-<ol>
-  <li>Optionally you can install <a href="./getting-started/stylable-intelligence"><strong>Stylable Intelligence</strong></a>, an extension providing IDE support for code completion and diagnostics.</li>
-</ol>
+</code></pre>
+</div>
 
-<h2 id="what-can-i-do">What can I do</h2>
+<blockquote>
+  <p><strong>Note</strong><br />
+<code class="highlighter-rouge">-st-scoped</code> can be applied only to <a href="./class-selectors">class selectors</a> and <a href="./root">root</a>.</p>
+</blockquote>
 
-<ul>
-  <li>
-    <p><strong>Build a Stylable component</strong> - If you are looking to style a component, follow the steps in the <a href="../docs/guides/components-basics">Stylable Basics Guide</a> and <a href="../docs/guides/stylable-component-best-practices">Best Practices Guide</a></p>
-  </li>
-  <li>
-    <p><strong>Build an app</strong> - If you want to use <strong>Stylable</strong> while building a web application, go to <a href="../docs/guides/stylable-application">Build a Stylable Application</a>. Read the steps and recommendations for building a performant web application that doesn’t depend on other libraries for styling.</p>
-  </li>
-  <li>
-    <p><strong>Create a library</strong> - If you want guidance in creating a component library, read <a href="../docs/guides/stylable-component-library">Create a Stylable Component Library</a>. Here you can follow our recommendations for building a library that can be used cross-project and includes theming, external styling and reusable components.</p>
-  </li>
-  <li>
-    <p><strong>Learn</strong> - Take a look at our [sepcification reference documents] (../docs/getting-started/cheatsheet.md) to get more acquanted with our code and for specific code examples. Use the overview as a cheatsheet to help you keep track of <strong>Stylable</strong> syntax.</p>
-  </li>
-</ul>
-
+<p>In this example, the stylesheet is</p>
 
 </section>
 
