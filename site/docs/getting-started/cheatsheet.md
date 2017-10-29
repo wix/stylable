@@ -25,8 +25,8 @@ Syntax unique to Stylable - Click each to access code examples and descriptions
     * [**`-st-states`**](../references/pseudo-classes.md) Define custom pseudo-classes
     * [**`-st-mixin`**](../references/mixin-syntax.md) Apply mixins to CSS ruleset
 * **Selectors**
-    * [**.xX**](../references/class-selectors.md) Class selectors
-    * [**X**](../references/tag-selectors) Tag/component selectors
+    * [**`.xX`**](../references/class-selectors.md) Class selectors
+    * [**`X`**](../references/tag-selectors) Tag/component selectors
     * [**`::X`**](../references/pseudo-elements.md) Target internal part (pseudo-element) 
     * [**`:X`**](../references/pseudo-classes.md) Target states including native and custom (pseudo-classes)
     * [**`:--X`**](../references/custom-selectors.md) Selector alias (custom selector)
