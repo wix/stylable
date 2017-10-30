@@ -118,7 +118,7 @@ A custom pseudo-class can be used to reflect any logical state of your component
 render () {
     return (
         <button 
-            style-state={{on: this.state.on}} 
+            style-state={ {on: this.state.on} }
             onClick={()=>this.setState({on:!this.state.on})}
         >
             <div className="icon"/>
