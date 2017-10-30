@@ -1,81 +1,79 @@
 import * as postcss from 'postcss';
-import { cachedProcessFile } from '../src/cached-process-file';
-import { process, StylableMeta, processNamespace, ImportSymbol } from '../src/stylable-processor';
+import {cachedProcessFile} from '../src/cached-process-file';
+import {ImportSymbol, process, processNamespace, StylableMeta} from '../src/stylable-processor';
 
-import { flatMatch } from "./matchers/falt-match";
-import * as chai from "chai";
-import { VarSymbol } from "../src";
+import * as chai from 'chai';
+import {resolve} from 'path';
+import {VarSymbol} from '../src';
+import {flatMatch} from './matchers/falt-match';
 
 const expect = chai.expect;
 chai.use(flatMatch);
 
-
-
-export var loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-    return processSource(content, { from: path })
+export let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
+    return processSource(content, {from: path});
 },
     {
         readFileSync() {
             return '';
         },
         statSync() {
-            return { mtime: new Date };
+            return {mtime: new Date()};
         }
     }
-)
-
+);
 
 function processSource(source: string, options: postcss.ProcessOptions = {}) {
     return process(postcss.parse(source, options));
 }
 
-describe('Stylable postcss process', function () {
+describe('Stylable postcss process', () => {
 
-    it('report if missing filename', function () {
-        var { diagnostics, namespace } = processSource(``);
+    it('report if missing filename', () => {
+        const {diagnostics, namespace} = processSource(``);
         expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
             message: 'missing source filename'
-        })
+        });
     });
 
-    it('report on invalid namespace', function () {
+    it('report on invalid namespace', () => {
 
-        const { diagnostics } = processSource(
+        const {diagnostics} = processSource(
             `@namespace App;`,
-            { from: '/path/to/source' }
+            {from: '/path/to/source'}
         );
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
             message: 'invalid namespace'
-        })
+        });
     });
 
-    it('collect namespace', function () {
-        const from = "/path/to/style.css";
+    it('collect namespace', () => {
+        const from = resolve('/path/to/style.css');
         const result = processSource(`
             @namespace "name";
             @namespace 'anther-name';
-        `, { from });
+        `, {from});
 
         expect(result.namespace).to.equal(processNamespace('anther-name', from));
 
     });
 
-    it('use filename as default namespace prefix', function () {
-        const from = "/path/to/style.css";
+    it('use filename as default namespace prefix', () => {
+        const from = resolve('/path/to/style.css');
 
         const result = processSource(`
-            
-        `, { from });
+
+        `, {from});
 
         expect(result.namespace).to.eql(processNamespace('style', from));
 
     });
 
-    it('collect :import', function () {
+    it('collect :import', () => {
 
         const result = processSource(`
             :import {
@@ -89,7 +87,7 @@ describe('Stylable postcss process', function () {
                 -st-from: "../some/global/path";
                 -st-default: name;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.imports.length).to.eql(3);
 
@@ -108,21 +106,21 @@ describe('Stylable postcss process', function () {
             type: 'default'
         });
 
-        expect((<ImportSymbol>result.mappedSymbols.a).import).to.deep.include({
+        expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: {a: 'a', c: 'b'}
         });
 
-        expect((<ImportSymbol>result.mappedSymbols.c).import).to.deep.include({
+        expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: {a: 'a', c: 'b'}
         });
 
-        expect((<ImportSymbol>result.mappedSymbols.name).import).to.deep.include({
+        expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             fromRelative: '../some/global/path',
             defaultExport: 'name',
@@ -131,36 +129,36 @@ describe('Stylable postcss process', function () {
 
     });
 
-    xit('collect :import warnings', function () {
+    xit('collect :import warnings', () => {
 
         const result = processSource(`
             :import {}
             :import {
                 color: red;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.diagnostics.reports[0].message).to.eql('"-st-from" is missing in :import block');
-        expect(result.diagnostics.reports[1].message).to.eql('"color" css attribute cannot be used inside :import block');
+        expect(result.diagnostics.reports[1].message)
+            .to.eql('"color" css attribute cannot be used inside :import block');
 
     });
 
-    it('collect :import overrides', function () {
+    it('collect :import overrides', () => {
 
         const result = processSource(`
             :import {
                 color: red;
                 color2: blue;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.imports[0].overrides[0].toString()).to.equal('color: red');
         expect(result.imports[0].overrides[1].toString()).to.equal('color2: blue');
-        
 
     });
 
-    it('collect :vars', function () {
+    it('collect :vars', () => {
 
         const result = processSource(`
             :vars {
@@ -170,25 +168,25 @@ describe('Stylable postcss process', function () {
                 name: value;
                 name1: value1;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.vars.length).to.eql(3);
 
     });
 
-    it('resolve local :vars (by order of definition)', function () {
+    it('resolve local :vars (by order of definition)', () => {
         const result = processSource(`
             :vars {
                 name: value;
                 myname: value(name);
             }
-        `, { from: "path/to/style.css" });
-        
-        //should be refactored out of here.
-        for (let name in result.mappedSymbols){
-            delete (result.mappedSymbols[name] as VarSymbol).node
+        `, {from: 'path/to/style.css'});
+
+        // should be refactored out of here.
+        for (const name in result.mappedSymbols) {
+            delete (result.mappedSymbols[name] as VarSymbol).node;
         }
-        
+
         expect(result.mappedSymbols).to.deep.include({
             name: {
                 _kind: 'var',
@@ -208,7 +206,7 @@ describe('Stylable postcss process', function () {
 
     });
 
-    it('resolve local :vars (dont warn if name is imported)', function () {
+    it('resolve local :vars (dont warn if name is imported)', () => {
 
         const result = processSource(`
             :import {
@@ -218,30 +216,30 @@ describe('Stylable postcss process', function () {
             :vars {
                 myname: value(name);
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
     });
 
-    it('collect typed classes extends', function () {
+    it('collect typed classes extends', () => {
 
         const result = processSource(`
             :import {
-                -st-from: './file.css';   
-                -st-default: Style;   
+                -st-from: './file.css';
+                -st-default: Style;
             }
             .myclass {
-                -st-extends: Style; 
+                -st-extends: Style;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
         expect(result.classes).to.flatMatch({
             myclass: {
 
-                "-st-extends": {
+                '-st-extends': {
                     _kind: 'import',
                     type: 'default',
                     import: {
@@ -255,25 +253,24 @@ describe('Stylable postcss process', function () {
 
     });
 
-    
-    it('collect typed classes compose', function () {
+    it('collect typed classes compose', () => {
 
         const result = processSource(`
             :import {
-                -st-from: './file.css';   
-                -st-default: Style;   
+                -st-from: './file.css';
+                -st-default: Style;
             }
             .class {}
             .my-class {
-                -st-compose: Style, class; 
+                -st-compose: Style, class;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
         expect(result.classes).to.flatMatch({
-            "my-class": {
-                "-st-compose": [
+            'my-class': {
+                '-st-compose': [
                     {
                         _kind: 'import',
                         type: 'default',
@@ -293,80 +290,78 @@ describe('Stylable postcss process', function () {
 
     });
 
-
-    it('collect typed classes with auto states', function () {
+    it('collect typed classes with auto states', () => {
 
         const result = processSource(`
             .root {
-                -st-states: state1, state2; 
+                -st-states: state1, state2;
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
         expect(result.classes).to.flatMatch({
             root: {
-                "-st-states": {
-                    'state1': null, 
-                    'state2': null
-                }
-            }
-        });
-
-    });
-
-    it('collect typed classes with mapping states', function () {
-
-        const result = processSource(`
-            .root {
-                -st-states: state1, state2("[data-mapped]"); 
-            }
-        `, { from: "path/to/style.css" });
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.classes).to.flatMatch({
-            root: {
-                "-st-states": {
+                '-st-states': {
                     state1: null,
-                    state2: "[data-mapped]"
+                    state2: null
                 }
             }
         });
 
     });
 
-    it('collect typed elements', function () {
+    it('collect typed classes with mapping states', () => {
+
+        const result = processSource(`
+            .root {
+                -st-states: state1, state2("[data-mapped]");
+            }
+        `, {from: 'path/to/style.css'});
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+        expect(result.classes).to.flatMatch({
+            root: {
+                '-st-states': {
+                    state1: null,
+                    state2: '[data-mapped]'
+                }
+            }
+        });
+
+    });
+
+    it('collect typed elements', () => {
 
         const result = processSource(`
             Element {
 
             }
             div {
-                
+
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(Object.keys(result.elements).length).to.eql(1);
 
     });
 
-
-    it('always contain root class', function () {
+    it('always contain root class', () => {
 
         const result = processSource(`
 
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.classes).to.eql({
             root: {
-                _kind: 'class',
-                name: 'root',
-                "-st-root": true
+                '_kind': 'class',
+                'name': 'root',
+                '-st-root': true
             }
         });
 
     });
 
-    it('collect classes', function () {
+    it('collect classes', () => {
 
         const result = processSource(`
             .root{}
@@ -374,13 +369,13 @@ describe('Stylable postcss process', function () {
             .classB, .classC, .classA{}
             :not(.classD){}
             .classE:hover{}
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(Object.keys(result.classes).length).to.eql(6);
 
     });
 
-    it('collect classes in @media', function () {
+    it('collect classes in @media', () => {
 
         const result = processSource(`
             @media (max-width: 300px) {
@@ -390,14 +385,13 @@ describe('Stylable postcss process', function () {
                 :not(.classD){}
                 .classE:hover{}
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(Object.keys(result.classes).length).to.eql(6);
 
     });
 
-
-    it('collect @keyframes', function () {
+    it('collect @keyframes', () => {
 
         const result = processSource(`
             @keyframes name {
@@ -408,22 +402,20 @@ describe('Stylable postcss process', function () {
                 from{}
                 to{}
             }
-        `, { from: "path/to/style.css" });
+        `, {from: 'path/to/style.css'});
 
         expect(result.keyframes.length).to.eql(2);
 
     });
 
-
-    
     it('should annotate import with -st-theme', () => {
-        
-         const result = processSource(`
+
+        const result = processSource(`
             :import {
                 -st-theme: true;
                 -st-from: "./theme.st.css";
             }
-        `)
+        `);
 
         const importSymbol = result.imports[0];
 
@@ -432,4 +424,3 @@ describe('Stylable postcss process', function () {
     });
 
 });
-

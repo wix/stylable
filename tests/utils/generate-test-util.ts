@@ -1,42 +1,59 @@
-import { cachedProcessFile, FileProcessor } from "../../src/cached-process-file";
-import { StylableMeta, process } from "../../src/stylable-processor";
+import {isAbsolute} from 'path';
 import * as postcss from 'postcss';
-import { StylableTransformer, StylableResults } from "../../src/stylable-transformer";
-import { StylableResolver } from "../../src/postcss-resolver";
-import { Diagnostics } from "../../src/diagnostics";
-import { createMinimalFS } from "../../src/memory-minimal-fs";
-import { Bundler } from "../../src/bundle";
-import { isAbsolute } from "path";
-import { Stylable } from "../../src/stylable";
-import { Pojo } from "../../src/types";
+import {Bundler} from '../../src/bundle';
+import {cachedProcessFile, FileProcessor} from '../../src/cached-process-file';
+import {Diagnostics} from '../../src/diagnostics';
+import {createMinimalFS} from '../../src/memory-minimal-fs';
+import {StylableResolver} from '../../src/postcss-resolver';
+import {Stylable} from '../../src/stylable';
+import {process, StylableMeta} from '../../src/stylable-processor';
+import {StylableResults, StylableTransformer} from '../../src/stylable-transformer';
+import {Pojo} from '../../src/types';
 
-// const deindent = require('deindent');
-export interface File { content: string; mtime?: Date; namespace?: string }
-export interface InfraConfig { files: Pojo<File>, trimWS?: boolean }
-export interface Config { entry: string, files: Pojo<File>, usedFiles?: string[], trimWS?: boolean, optimize?: boolean }
+export interface File {
+    content: string;
+    mtime?: Date;
+    namespace?: string;
+}
+
+export interface InfraConfig {
+    files: Pojo<File>;
+    trimWS?: boolean;
+}
+
+export interface Config {
+    entry: string;
+    files: Pojo<File>;
+    usedFiles?: string[];
+    trimWS?: boolean;
+    optimize?: boolean;
+}
+
 export type RequireType = (path: string) => any;
 
-export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): { resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta> } {
-    const { fs, requireModule } = createMinimalFS(config);
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
+    resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
+} {
+    const {fs, requireModule} = createMinimalFS(config);
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
-        const meta = process(postcss.parse(content, { from }), diagnostics);
+        const meta = process(postcss.parse(content, {from}), diagnostics);
         meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
     }, fs);
 
     const resolver = new StylableResolver(fileProcessor, requireModule);
 
-    return { resolver, requireModule, fileProcessor };
+    return {resolver, requireModule, fileProcessor};
 }
 
-export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics): StylableResults {
+export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
     if (!isAbsolute(config.entry)) {
-        throw new Error('entry must be absolute path: ' + config.entry)
+        throw new Error('entry must be absolute path: ' + config.entry);
     }
     const entry = config.entry;
 
-    const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
+    const {requireModule, fileProcessor} = generateInfra(config, diagnostics);
 
     const t = new StylableTransformer({
         fileProcessor,
@@ -55,7 +72,8 @@ export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path
     return (path: string) => fileProcessor.process(path);
 }
 
-export function createTransform(fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
+export function createTransform(
+    fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
     return (meta: StylableMeta) => {
         return new StylableTransformer({
             fileProcessor,
@@ -75,12 +93,12 @@ export function generateStylableExports(config: Config) {
 }
 
 export function createTestBundler(config: Config) {
-    config.trimWS = true
+    config.trimWS = true;
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
 
-    const { fs, requireModule } = createMinimalFS(config);
+    const {fs, requireModule} = createMinimalFS(config);
 
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
@@ -91,7 +109,7 @@ export function createTestBundler(config: Config) {
 }
 
 export function generateStylableOutput(config: Config) {
-    config.trimWS = true
+    config.trimWS = true;
     if (!config.usedFiles) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
@@ -100,5 +118,6 @@ export function generateStylableOutput(config: Config) {
     config.usedFiles.forEach(path => bundler.addUsedFile(path));
 
     return bundler.generateCSS();
-    // return bundle(config.usedFiles, resolver, createProcess(fileProcessor), createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
+    // return bundle(config.usedFiles, resolver, createProcess(fileProcessor),
+    //               createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
 }

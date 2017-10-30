@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { generateStylableOutput, createTestBundler } from "../utils/generate-test-util";
+import {expect} from 'chai';
+import {createTestBundler, generateStylableOutput} from '../utils/generate-test-util';
 
 describe('bundle: base', () => {
 
@@ -10,10 +10,10 @@ describe('bundle: base', () => {
                 '/entry.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
-                        .b { color:green; } 
+                        .b { color:green; }
                     `
                 }
             }
@@ -23,24 +23,24 @@ describe('bundle: base', () => {
     });
 
     it('should support unresolveable vars', () => {
-        
+
         const output = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
                 '/entry.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
                         :import {
                             -st-from: "./theme.st.css";
                             -st-named: NAME;
                         }
-                        .b { color:green; } 
+                        .b { color:green; }
                     `
                 },
-                "/theme.st.css": {
+                '/theme.st.css': {
                     namespace: 'theme',
                     content: ``
                 }
@@ -59,16 +59,16 @@ describe('bundle: base', () => {
                 '/comp.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
-                        .a { color:red; } 
+                        .a { color:red; }
                     `
                 },
-                "/comp.st.css": {
+                '/comp.st.css': {
                     namespace: 'comp',
                     content: `
-                        .b { color:green; } 
+                        .b { color:green; }
                     `
                 }
             }
@@ -88,17 +88,17 @@ describe('bundle: base', () => {
                 '/entry.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
                         :import {
                             -st-from: './script';
                             -st-default: scriptExport;
                         }
-                        .b { color:green; } 
+                        .b { color:green; }
                     `
                 },
-                "/script.js": {
+                '/script.js': {
                     content: ``
                 }
             }
@@ -114,16 +114,16 @@ describe('bundle: base', () => {
                 '/entry.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
                         .a { color:gold; }
                     `
                 },
-                "/unused-comp.st.css": {
+                '/unused-comp.st.css': {
                     namespace: 'unusedComp',
                     content: `
-                        .c { color:red; } 
+                        .c { color:red; }
                     `
                 }
             }
@@ -143,7 +143,7 @@ describe('bundle: base', () => {
                 '/used-comp.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
                         :import {
@@ -151,18 +151,18 @@ describe('bundle: base', () => {
                             -st-default: UsedComp;
                         }
                         UsedComp { color: red; }
-                        .a { 
+                        .a {
                             -st-extends: UsedComp;
-                            color: green; 
+                            color: green;
                         }
                         .b.a { color: blue; }
                         .b UsedComp { color: black; }
                     `
                 },
-                "/used-comp.st.css": {
+                '/used-comp.st.css': {
                     namespace: 'usedComp',
                     content: `
-                        .root { color: red; } 
+                        .root { color: red; }
                     `
                 }
             }
@@ -173,7 +173,7 @@ describe('bundle: base', () => {
             `.usedComp--root { color: red; }`,
 
             `.entry--root .usedComp--root { color: red; }`,
-            `.entry--root .entry--a.usedComp--root { \n    -st-extends: UsedComp;\n    color: green; \n}`,
+            `.entry--root .entry--a.usedComp--root {\n    -st-extends: UsedComp;\n    color: green;\n}`,
             `.entry--root .entry--b.entry--a.usedComp--root { color: blue; }`,
             `.entry--root .entry--b .usedComp--root { color: black; }`
         ].join('\n'));
@@ -186,7 +186,7 @@ describe('bundle: base', () => {
                 '/entry.st.css'
             ],
             files: {
-                "/entry.st.css": {
+                '/entry.st.css': {
                     namespace: 'entry',
                     content: `
                         :import {
@@ -194,9 +194,9 @@ describe('bundle: base', () => {
                             -st-default: UnusedComp;
                         }
                         UnusedComp { color: red; }
-                        .a { 
+                        .a {
                             -st-extends: UnusedComp;
-                            color: green; 
+                            color: green;
                         }
                         .b.a { color: blue; }
                         .b UnusedComp { color: black; }
@@ -204,10 +204,10 @@ describe('bundle: base', () => {
                         .c { color:gold; }
                     `
                 },
-                "/unused-comp.st.css": {
+                '/unused-comp.st.css': {
                     namespace: 'unusedComp',
                     content: `
-                        .root { color:red; } 
+                        .root { color:red; }
                     `
                 }
             }
@@ -221,7 +221,7 @@ describe('bundle: base', () => {
 
     it('should handle circular dependencies', () => {
         let output = null;
-        
+
         expect(() => {
             output = generateStylableOutput({
                 entry: '/entry-a.st.css',
@@ -230,7 +230,7 @@ describe('bundle: base', () => {
                     '/entry-b.st.css'
                 ],
                 files: {
-                    "/entry-a.st.css": {
+                    '/entry-a.st.css': {
                         namespace: 'entryA',
                         content: `
                             :import {
@@ -240,7 +240,7 @@ describe('bundle: base', () => {
                             EntryB { color: red; }
                         `
                     },
-                    "/entry-b.st.css": {
+                    '/entry-b.st.css': {
                         namespace: 'entryB',
                         content: `
                             :import {
@@ -266,18 +266,18 @@ describe('bundle: base', () => {
         it('should be output from larger collection', () => {
             const bundler = createTestBundler({
                 entry: '',
-                usedFiles:[],
+                usedFiles: [],
                 files: {
-                    "/entry-a.st.css": {
+                    '/entry-a.st.css': {
                         namespace: 'entryA',
                         content: `
-                        .a { color:red; } 
+                        .a { color:red; }
                         `
                     },
-                    "/entry-b.st.css": {
+                    '/entry-b.st.css': {
                         namespace: 'entryB',
                         content: `
-                        .b { color:green; } 
+                        .b { color:green; }
                         `
                     }
                 }
@@ -300,23 +300,23 @@ describe('bundle: base', () => {
         it('should be output with relevent theme', () => {
             const bundler = createTestBundler({
                 entry: '',
-                usedFiles:[],
+                usedFiles: [],
                 files: {
-                    "/entry-a.st.css": {
+                    '/entry-a.st.css': {
                         namespace: 'entryA',
                         content: `
-                        .a { color:red; } 
+                        .a { color:red; }
                         `
                     },
-                    "/entry-b.st.css": {
+                    '/entry-b.st.css': {
                         namespace: 'entryB',
                         content: `
-                        .b { color:green; } 
+                        .b { color:green; }
                         `
                     }
                 }
             });
-          
+
             bundler.addUsedFile('/entry-a.st.css');
             bundler.addUsedFile('/entry-b.st.css');
 
@@ -333,4 +333,4 @@ describe('bundle: base', () => {
 
     });
 
-})
+});
