@@ -233,7 +233,7 @@ export const Panel: React.SFC = stylable(style)(properties(() =&gt; (
 render () {
     return (
         &lt;button 
-            style-state= 
+            style-state={ {on: this.state.on} }
             onClick={()=&gt;this.setState({on:!this.state.on})}
         &gt;
             &lt;div className="icon"/&gt;
