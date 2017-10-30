@@ -9,7 +9,7 @@ There are currently two options for installing and working with **Stylable** as 
 
 ## Write your own project based on a Stylable boilerplate
 
-To begin writing your own project, you can create a **Stylable** app from our boilerplate. To create the project, follow these instructions: 
+To begin writing your own project, you can create a **Stylable** app from our boilerplate. It is based on [create-react-app](https://github.com/facebookincubator/create-react-app). To create the project, follow these instructions: 
 
 Using npm:
 ```bash
@@ -19,7 +19,7 @@ create-react-app my-app-name --scripts-version stylable-scripts
 ```
 For the `my-app-name` value above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run `yarn start` or `yarn build` to create the project in a browser.
 
-The project includes several basic components and **Stylable** stylesheets which have the suffix `.st.css`.
+The project includes several basic components and **Stylable** stylesheets which have the suffix `.st.css`. 
 
 ## Install Stylable to work with an existing project
 
