@@ -1,12 +1,12 @@
-import { expect } from "chai";
-import * as postcss from "postcss";
-import { generateStylableRoot } from "../utils/generate-test-util";
+import { expect } from 'chai';
+import * as postcss from 'postcss';
+import { generateStylableRoot } from '../utils/generate-test-util';
 
-describe('Stylable postcss transform (General)', function () {
+describe('Stylable postcss transform (General)', () => {
 
     it('should output empty on empty input', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
@@ -21,7 +21,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :import', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -32,7 +32,7 @@ describe('Stylable postcss transform (General)', function () {
                         }
                     `
                 },
-                "/a/test.st.css": {
+                '/a/test.st.css': {
                     content: ''
                 }
             }
@@ -44,7 +44,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should not output :vars', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -63,7 +63,7 @@ describe('Stylable postcss transform (General)', function () {
 
     it('should support multiple selectors/properties with same name', () => {
 
-        var result = generateStylableRoot({
+        const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,
             files: {
                 '/a/b/style.st.css': {
@@ -81,17 +81,14 @@ describe('Stylable postcss transform (General)', function () {
             }
         });
 
-        const rule = <postcss.Rule>result.nodes![0];
+        const rule = result.nodes![0] as postcss.Rule;
         expect(rule.nodes![0].toString(), 'color1').to.equal('color: red');
         expect(rule.nodes![1].toString(), 'color1').to.equal('color: blue');
 
-        
-        const rule2 = <postcss.Rule>result.nodes![1];
+        const rule2 = result.nodes![1] as postcss.Rule;
         expect(rule2.nodes![0].toString(), 'color1').to.equal('color: red');
         expect(rule2.nodes![1].toString(), 'color1').to.equal('color: blue');
 
     });
 
-    
 });
-

@@ -10,7 +10,7 @@ You can apply default styling and behavior to the component on the root class it
 
 ## Examples
 
-The `root` class is added automatically to root in [react integration](react-integration.md). No need to write `className="root"`.
+The `root` class is added automatically to root in [React integration](../getting-started/react-integration.md). No need to write `className="root"`.
 
 ```css
 /* CSS */

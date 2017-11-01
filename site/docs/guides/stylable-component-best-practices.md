@@ -12,7 +12,7 @@ When building your components, we recommend following the guidelines below. We'v
 
 Try avoiding size declaration just because it offers an easier API. To override a component specifying size limitations, you would need to override multiple CSS declarations.
 
-If you do set a default size or size limitations, use `em` units to resize to the HTML context.
+If you do set a default size or size limitations, use `em/rem` units to resize to the HTML context.
 
 ## Give meaningful names
 
@@ -48,7 +48,6 @@ The component stylesheet should describe the bare minimum coloring to make its p
 The best practice is to use 2 colors across the project for contrasting text and background.
 
 ```css
-@namespace "dropdown";
 .options { 
     background: value(color1); 
     color: value(color2); 

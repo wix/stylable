@@ -4,29 +4,35 @@ title: Compose CSS Class
 layout: docs
 ---
 
-Use `-st-compose` to apply a CSS class to another CSS [class](./class-selectors.md) or to a [tag selector](./tag-selectors.md).
 
+Use `-st-compose` as a way to automatically connect between two or more style classes so that if one is used, the DOM element will receive the composed classes as well.
+
+For example:
 ```css
 /* CSS */
 @namespace "Comp";
 .item {
     color: red;
 }
-.selected {
+.special {
     -st-compose: item;
     color: green;
 }
 ```
+In the above stylesheet, anyone using `style.special` automatically gets both `special` and `item` classes applied.
 
-```css
-/* CSS output*/
-.Comp__item { color: red }
-.Comp__selected.Comp__item { color: green }
+The output JS mapping for the above is:
+```js
+/* JS */
+{
+    item: "Comp__item",
+    special: "Comp__special Comp__item"
+}
 ```
 
 ## Multiple classes
 
-You can compose multiple classes or tag selectors by order.
+You can compose multiple classes.
 
 ```css
 /* CSS */
@@ -37,15 +43,17 @@ You can compose multiple classes or tag selectors by order.
 .round {
     border-radius: 10px;
 }
-.selected {
+.special {
     -st-compose: item, round; /* pass multiple classes */
     color: green;
 }
 ```
 
-```css
-/* CSS output*/
-.Comp__item { color: red }
-.Comp__round { border-radius: 10px }
-.Comp__selected.Comp__item.Comp__round { color: green }
+```js
+/* JS */
+{
+    item: "Comp__item",
+    round: "Comp__round",
+    special: "Comp__special Comp__item Comp__round"
+}
 ```

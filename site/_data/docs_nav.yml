@@ -18,9 +18,9 @@
     - id: css-classes
       title: CSS Classes
     - id: custom-states
-      title: Custom states
-  - id: getting-started/cheatsheet
-    title: Cheatsheet
+      title: Custom States
+  - id: getting-started/stylable-intelligence
+    title: Stylable Intelligence
 - title: Guides
   items:
   - id: guides/components-basics
@@ -31,8 +31,16 @@
     title: Stylable Application
   - id: guides/stylable-component-library
     title: Stylable Component Library
-- title: Reference
+  - id: guides/project-commons
+    title: Project Commons
+  - id: guides/shared-classes
+    title: Shared Classes
+  - id: guides/component-variants
+    title: Component Variants
+- title: Specification Reference
   items:
+  - id: getting-started/cheatsheet
+    title: Specification Overview
   - id: references/imports
     title: Imports
   - id: references/root
@@ -40,7 +48,7 @@
   - id: references/class-selectors
     title: Class Selectors
   - id: references/tag-selectors
-    title: Tag Selectors
+    title: Tag/Component Selectors
   - id: references/extend-stylesheet
     title: Extend Stylesheet
   - id: references/pseudo-classes
@@ -61,7 +69,3 @@
     title: Theme
   - id: references/namespace
     title: Namespace
-  - id: guides/component-variants
-    title: Component Variants
-  - id: guides/shared-classes
-    title: Shared Classes 
