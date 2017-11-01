@@ -1,26 +1,25 @@
+import { expect } from 'chai';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
-import { expect } from "chai";
 
-describe('cachedProcessFile', function () {
+describe('cachedProcessFile', () => {
 
-     it('return process file content', function () {
+     it('return process file content', () => {
         const file = 'C:/file.txt';
         const fs: MinimalFS = {
             readFileSync(fullpath: string) {
                 if (fullpath === file) {
                     return 'content';
                 }
-                return ''
+                return '';
             },
             statSync() {
                 return {
                     mtime: new Date(0)
-                } as any
+                } as any;
             }
-        }
+        };
 
-        const p = cachedProcessFile((fullpath, content) => {
-            fullpath;
+        const p = cachedProcessFile((_fullpath, content) => {
             return content + '!';
         }, fs);
 
@@ -28,8 +27,7 @@ describe('cachedProcessFile', function () {
 
     });
 
-
-    it('not process file if not changed', function () {
+     it('not process file if not changed', () => {
         const file = 'C:/file.txt';
         let res: {};
         const fs: MinimalFS = {
@@ -42,12 +40,12 @@ describe('cachedProcessFile', function () {
             statSync() {
                 return {
                     mtime: new Date(0)
-                }
+                };
             }
-        }
+        };
 
         const p = cachedProcessFile((fullpath, content) => {
-            var processed = { content, fullpath };
+            const processed = { content, fullpath };
             res = res ? res : processed;
             return processed;
         }, fs);
@@ -56,9 +54,7 @@ describe('cachedProcessFile', function () {
 
     });
 
-
-
-    it('not read file if not changed', function () {
+     it('not read file if not changed', () => {
         const file = 'C:/file.txt';
 
         let count = 0;
@@ -71,11 +67,11 @@ describe('cachedProcessFile', function () {
             statSync() {
                 return {
                     mtime: new Date(0)
-                }
+                };
             }
-        }
+        };
 
-        const p = cachedProcessFile(() => { return null }, fs);
+        const p = cachedProcessFile(() => null, fs);
         p.process(file);
         p.process(file);
         p.process(file);
@@ -83,8 +79,7 @@ describe('cachedProcessFile', function () {
 
     });
 
-
-    it('read file if and reprocess if changed', function () {
+     it('read file if and reprocess if changed', () => {
         const file = 'C:/file.txt';
 
         let readCount = 0;
@@ -98,9 +93,9 @@ describe('cachedProcessFile', function () {
             statSync() {
                 return {
                     mtime: readCount === 0 ? new Date(0) : new Date(1)
-                }
+                };
             }
-        }
+        };
 
         const p = cachedProcessFile(() => {
             processCount++;
@@ -115,9 +110,7 @@ describe('cachedProcessFile', function () {
 
     });
 
-    
-
-    it('add stuff to ', function () {
+     it('add stuff to ', () => {
         const file = 'C:/file.txt';
 
         let readCount = 0;
@@ -131,9 +124,9 @@ describe('cachedProcessFile', function () {
             statSync() {
                 return {
                     mtime: readCount === 0 ? new Date(0) : new Date(1)
-                }
+                };
             }
-        }
+        };
 
         const p = cachedProcessFile(() => {
             processCount++;

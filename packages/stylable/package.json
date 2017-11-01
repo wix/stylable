@@ -1,17 +1,18 @@
 {
   "name": "stylable",
-  "version": "4.0.21",
+  "version": "4.0.26",
   "description": "CSS for Components",
   "license": "BSD-3-Clause",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "bundle": "webpack --config webpack.web.config.js",
     "start": "webpack-dev-server --hot --inline",
     "test": "npm run test:node",
-    "build": "tsc",
-    "build:web": "webpack --config webpack.web.config.js",
     "test:node": "ts-mocha \"./tests/**/*.spec.ts\"",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "lint": "tslint --project ./tsconfig.json"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",
@@ -29,22 +30,22 @@
   "devDependencies": {
     "@types/chai": "^4.0.4",
     "@types/enhanced-resolve": "^3.0.4",
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.44",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "8",
     "chai": "^4.1.2",
     "flat": "^4.0.0",
     "glob": "^7.1.2",
     "mocha": "^4.0.1",
     "mocha-loader": "^1.1.1",
     "ncp": "^2.0.0",
-    "ts-loader": "^3.0.3",
+    "ts-loader": "^3.1.0",
     "ts-mocha": "^1.0.3",
+    "tslint": "^5.8.0",
     "typescript": "^2.5.3",
-    "uglify-js": "^3.1.4",
-    "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
+    "uglifyjs-webpack-plugin": "^1.0.1",
     "webpack": "^3.8.1",
     "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.9.2"
+    "webpack-dev-server": "^2.9.3"
   },
   "files": [
     "dist",

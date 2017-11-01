@@ -1,14 +1,14 @@
-import { expect } from "chai";
-import * as postcss from "postcss";
-import { generateStylableRoot } from "../utils/generate-test-util";
+import {expect} from 'chai';
+import * as postcss from 'postcss';
+import {generateStylableRoot} from '../utils/generate-test-util';
 
-describe('Stylable postcss transform (Scoping)', function () {
+describe('Stylable postcss transform (Scoping)', () => {
 
-    describe('scoped elements', function () {
+    describe('scoped elements', () => {
 
         it('component/tag selector with first Capital letter automatically extend reference with identical name', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -29,14 +29,14 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root');
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns1--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .ns1--root');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns1--root');
 
         });
 
         it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -58,17 +58,17 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .inner--root .inner--part');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root .inner--root .inner--part');
 
         });
 
-    })
+    });
 
-    describe('scoped pseudo-elements', function () {
+    describe('scoped pseudo-elements', () => {
 
         it('component/tag selector that extends root with inner class targeting', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -77,7 +77,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Container;
-                            }                
+                            }
                             Container::inner {}
                             Container::inner::deep {}
                         `
@@ -88,7 +88,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./deep.st.css";
                                 -st-default: Deep;
-                            }     
+                            }
                             .inner {
                                 -st-extends: Deep;
                             }
@@ -103,13 +103,13 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root .ns1--inner');
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns1--root .ns1--inner .ns2--deep');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .ns1--root .ns1--inner');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns1--root .ns1--inner .ns2--deep');
         });
 
         it('component/tag selector with custom states', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -118,9 +118,9 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Container;
-                            }                
+                            }
                             Container:state {}
-                            
+
                         `
                     },
                     '/inner.st.css': {
@@ -134,13 +134,12 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root[data-ns1-state]');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .ns1--root[data-ns1-state]');
 
         });
 
-        it('class selector that extends root with inner class targeting (deep)', () => {
-
-            var result = generateStylableRoot({
+        it('component/tag selector with -st-global', () => {
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -149,10 +148,40 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Container;
-                            }   
+                            }
+                            Container {}
+
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .x');
+        });
+
+        it('class selector that extends root with inner class targeting (deep)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }
                             .app {
                                 -st-extends: Container;
-                            }             
+                            }
                             .app::inner {}
                             .app::inner::deep {}
                         `
@@ -178,15 +207,15 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--inner');
-            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--inner .ns2--deep');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--inner');
+            expect((result.nodes![2] as postcss.Rule).selector)
+                .to.equal('.ns--root .ns--app.ns1--root .ns1--inner .ns2--deep');
 
         });
 
         it('resolve and transform pseudo-element from deeply extended type', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -195,10 +224,10 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
-                            }   
+                            }
                             .app {
                                 -st-extends: Inner;
-                            }             
+                            }
                             .app::deep {}
                         `
                     },
@@ -223,14 +252,13 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--app.ns1--root .ns2--deep');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns--app.ns1--root .ns2--deep');
 
         });
 
         it('resolve and transform pseudo-element from deeply override rather then extended type', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -239,10 +267,10 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Container;
-                            }   
+                            }
                             .app {
                                 -st-extends: Container;
-                            }             
+                            }
                             .app::deep {}
                         `
                     },
@@ -268,14 +296,13 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--deep');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns--app.ns1--root .ns1--deep');
 
         });
 
         it('resolve and transform pseudo-element on root - prefer inherited element to override', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -284,8 +311,8 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
-                            }   
-                            .root { 
+                            }
+                            .root {
                                 -st-extends: Inner;
                             }
                             .root::inner, .inner { }
@@ -300,12 +327,43 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root.inner--root .inner--inner, .entry--root .entry--inner');
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root.inner--root .inner--inner, .entry--root .entry--inner');
+
+        });
+
+        it('resolve and transform pseudo-element with -st-global output', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            Inner {}
+                            Inner::a {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            .root { -st-global: ".x";}
+                            .a { -st-global: ".y";}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root .x');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry--root .x .y');
 
         });
 
         it('should work with nested pseudo selectors', () => {
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -327,9 +385,10 @@ describe('Stylable postcss transform (Scoping)', function () {
                     }
                 }
             });
-            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--container:not([data-entry-state])');
-        })
-        //TODO: IDO create a bug report.
+            expect((result.nodes![2] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--container:not([data-entry-state])');
+        });
+        // TODO: IDO create a bug report.
         // it('should work with nested pseudo selectors under pseudo element', () => {
         //     var result = generateStylableRoot({
         //         entry: '/entry.st.css',
@@ -354,12 +413,13 @@ describe('Stylable postcss transform (Scoping)', function () {
         //             }
         //         }
         //     });
-        //     expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--list .entry--list-item:not([data-entry-list-item-selected])');
+        //     expect((<postcss.Rule>result.nodes![2]).selector)
+        //          .to.equal('.entry--root .entry--list .entry--list-item:not([data-entry-list-item-selected])');
         // })
 
         it('using nested pseudo selectors for pseudo elements', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -388,13 +448,15 @@ describe('Stylable postcss transform (Scoping)', function () {
                     }
                 }
             });
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns1--root .ns1--item:not([data-ns1-selected])');
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns1--root .ns1--item[data-ns1-selected]');
-        })
+            expect((result.nodes![0] as postcss.Rule).selector)
+                .to.equal('.ns--root .ns1--root .ns1--item:not([data-ns1-selected])');
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.ns--root .ns1--root .ns1--item[data-ns1-selected]');
+        });
 
         it('resolve extend on extended alias', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -403,7 +465,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
-                            }   
+                            }
                             Inner::deep::up { }
                         `
                     },
@@ -413,8 +475,8 @@ describe('Stylable postcss transform (Scoping)', function () {
                             :import {
                                 -st-from: "./deep.st.css";
                                 -st-default: deep;
-                            }   
-                            .deep { 
+                            }
+                            .deep {
                                 -st-extends: deep;
                             }
                         `
@@ -429,17 +491,17 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .Inner--root .Inner--deep .Deep--up');
+            expect((result.nodes![0] as postcss.Rule).selector)
+                .to.equal('.entry--root .Inner--root .Inner--deep .Deep--up');
         });
 
-    })
+    });
 
-    describe('scoped classes', function () {
-
+    describe('scoped classes', () => {
 
         it('scope local classes', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -453,15 +515,16 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a');
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--b, .entry--root .entry--c');
-            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--d .entry--e');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root .entry--a');
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--b, .entry--root .entry--c');
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.entry--root .entry--d .entry--e');
 
         });
 
         it('scope local root class', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -475,15 +538,64 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root');
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--a');
-            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--b, .entry--root .entry--c');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry--root .entry--a');
+            expect((result.nodes![2] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--b, .entry--root .entry--c');
+
+        });
+
+        it('scope according to -st-global', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                            .a {
+                                -st-global: ".y";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.x .y');
+
+        });
+
+        it('scope according to -st-global complex chunk', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-global: ".x.y";
+                            }
+                            .a {
+                                -st-global: ".z";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x.y');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.x.y .z');
 
         });
 
         it('scope selector that extends local root', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -497,10 +609,9 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--a.entry--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a.entry--root');
 
         });
-
 
         it.skip('TODO: fix it. scope selector that extends local root', () => {
 
@@ -518,12 +629,11 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-
         });
 
         it('scope selector that extends anther style', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -540,19 +650,49 @@ describe('Stylable postcss transform (Scoping)', function () {
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: '',
+                        content: ''
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.entry--root .entry--a.imported--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root .entry--a.imported--root');
 
         });
 
+        it('scope selector that extends a style with -st-global root', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import{
+                                -st-from: "./imported.st.css";
+                                -st-default: Imported;
+                            }
+                            .a {
+                                -st-extends: Imported;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                -st-global: ".x";
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--root .entry--a.x');
+
+        });
 
         it('scope class alias', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -574,19 +714,20 @@ describe('Stylable postcss transform (Scoping)', function () {
                             .inner-class {
 
                             }
-                        `,
+                        `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector, 'root alias').to.equal('.entry--root .imported--root');
-            expect((<postcss.Rule>result.nodes![1]).selector, 'class alias').to.equal('.entry--root .imported--inner-class');
+            expect((result.nodes![0] as postcss.Rule).selector, 'root alias').to.equal('.entry--root .imported--root');
+            expect((result.nodes![1] as postcss.Rule).selector, 'class alias')
+                .to.equal('.entry--root .imported--inner-class');
 
         });
 
         it('scope class alias that also extends', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -608,18 +749,19 @@ describe('Stylable postcss transform (Scoping)', function () {
                             .inner-class {
 
                             }
-                        `,
+                        `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector, 'class alias').to.equal('.entry--root .entry--inner-class.imported--inner-class');
+            expect((result.nodes![0] as postcss.Rule).selector, 'class alias')
+                .to.equal('.entry--root .entry--inner-class.imported--inner-class');
 
         });
 
         it('scope class alias that extends and have pseudo elements ', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -631,7 +773,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             }
 
                             .inner-class::base {
-                                
+
                             }
                         `
                     },
@@ -645,7 +787,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             .inner-class {
                                 -st-extends: Base;
                             }
-                        `,
+                        `
                     },
                     '/base.st.css': {
                         namespace: 'base',
@@ -653,18 +795,19 @@ describe('Stylable postcss transform (Scoping)', function () {
                             .base {
 
                             }
-                        `,
+                        `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector, 'class alias').to.equal('.entry--root .imported--inner-class .base--base');
+            expect((result.nodes![0] as postcss.Rule).selector, 'class alias')
+                .to.equal('.entry--root .imported--inner-class .base--base');
 
         });
 
         it('scope selector that extends local class', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -681,13 +824,13 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.ns--root .ns--b.ns--a');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns--b.ns--a');
 
         });
 
         it('extends class form imported sheet', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -708,19 +851,18 @@ describe('Stylable postcss transform (Scoping)', function () {
                         .b {
 
                         }
-                    `,
+                    `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns--a.ns1--b');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .ns--a.ns1--b');
 
         });
 
-
         it('handle not existing imported class', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
@@ -736,29 +878,29 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/imported.st.css': {
                         namespace: 'ns1',
                         content: `
-                      
-                    `,
+
+                    `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![0]).selector).to.equal('.ns--root .ns--b');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root .ns--b');
 
         });
 
-    })
+    });
 
-    describe('scoped states', function () {
+    describe('scoped states', () => {
 
         it('custom states inline', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            .my-class { 
+                            .my-class {
                                 -st-states: my-state;
                             }
                             .my-class:my-state {}
@@ -767,36 +909,61 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class[data-entry-my-state]');
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class[data-entry-my-state]');
 
         });
 
         it('custom states with mapping', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                            .my-class { 
-                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\"value\"]  ");
+                            .my-class {
+                                -st-states: my-state('.x'), my-other-state("  .y[data-z=\\"value\\"]  ");
                             }
-                            .my-class:my-state {} 
+                            .my-class:my-state {}
                             .my-class:my-other-state {}
                         `
                     }
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.x');
-            expect((<postcss.Rule>result.nodes![2]).selector).to.equal('.entry--root .entry--my-class.y[data-z="value"]');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry--root .entry--my-class.x');
+            expect((result.nodes![2] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.y[data-z="value"]');
+
+        });
+
+        it('custom states with focus-within', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-states: open(":not(:focus-within):not(:hover)");
+                            }
+                            .root:open {
+
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry--root:not(:focus-within):not(:hover)');
 
         });
 
         it('custom states lookup order', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -806,7 +973,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }
-                            .my-class { 
+                            .my-class {
                                 -st-states: my-state;
                                 -st-extends: Inner;
                             }
@@ -816,7 +983,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
-                            .root { 
+                            .root {
                                 -st-states: my-state;
                             }
                         `
@@ -824,15 +991,14 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-entry-my-state]');
-
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.inner--root[data-entry-my-state]');
 
         });
 
-
         it('custom states from imported type', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -842,7 +1008,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }
-                            .my-class { 
+                            .my-class {
                                 -st-extends: Inner;
                             }
                             .my-class:my-state {}
@@ -851,7 +1017,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
-                            .root { 
+                            .root {
                                 -st-states: my-state;
                             }
                         `
@@ -859,14 +1025,14 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-inner-my-state]');
-
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.inner--root[data-inner-my-state]');
 
         });
 
         it('custom states from deep imported type', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -876,7 +1042,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }
-                            .my-class { 
+                            .my-class {
                                 -st-extends: Inner;
                             }
                             .my-class:my-state {}
@@ -889,7 +1055,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./deep.st.css";
                                 -st-default: Deep;
                             }
-                            .root { 
+                            .root {
                                 -st-extends: Deep;
                             }
                         `
@@ -897,7 +1063,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/deep.st.css': {
                         namespace: 'deep',
                         content: `
-                            .root { 
+                            .root {
                                 -st-states: my-state;
                             }
                         `
@@ -905,14 +1071,14 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root[data-deep-my-state]');
-
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.inner--root[data-deep-my-state]');
 
         });
 
         it('custom states form imported type on inner pseudo-class', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -922,7 +1088,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }
-                            .my-class { 
+                            .my-class {
                                 -st-extends: Inner;
                             }
                             .my-class::container:my-state {}
@@ -931,7 +1097,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
-                            .container { 
+                            .container {
                                 -st-states: my-state;
                             }
                         `
@@ -939,14 +1105,14 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-inner-my-state]');
-
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-inner-my-state]');
 
         });
 
-        it('custom states form imported type on inner pseudo-class deep', function () {
+        it('custom states form imported type on inner pseudo-class deep', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -956,7 +1122,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 -st-from: "./inner.st.css";
                                 -st-default: Inner;
                             }
-                            .my-class { 
+                            .my-class {
                                 -st-extends: Inner;
                             }
                             .my-class::container:my-state {}
@@ -972,7 +1138,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                             .root {
 
                             }
-                            .container { 
+                            .container {
                                 -st-extends: Deep;
                             }
                         `
@@ -980,7 +1146,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                     '/deep.st.css': {
                         namespace: 'deep',
                         content: `
-                            .root { 
+                            .root {
                                 -st-states: my-state;
                             }
                         `
@@ -988,26 +1154,25 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            expect((<postcss.Rule>result.nodes![1]).selector).to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-deep-my-state]');
-
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class.inner--root .inner--container[data-deep-my-state]');
 
         });
 
+    });
 
-    })
-
-    describe('@media scoping', function () {
+    describe('@media scoping', () => {
 
         it('handle scoping inside media queries', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
                             @media (max-width: 300px) {
-                                .my-class { 
+                                .my-class {
                                     -st-states: my-state;
                                 }
                                 .my-class:my-state {}
@@ -1017,20 +1182,21 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            const mediaNode = <postcss.AtRule>result.nodes![0];
+            const mediaNode = result.nodes![0] as postcss.AtRule;
 
-            expect((<postcss.Rule>mediaNode.nodes![0]).selector).to.equal('.entry--root .entry--my-class');
-            expect((<postcss.Rule>mediaNode.nodes![1]).selector).to.equal('.entry--root .entry--my-class[data-entry-my-state]');
+            expect((mediaNode.nodes![0] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class');
+            expect((mediaNode.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root .entry--my-class[data-entry-my-state]');
 
         });
 
-    })
+    });
 
-
-    describe('@keyframes scoping', function () {
+    describe('@keyframes scoping', () => {
         it('scope animation and animation name', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -1045,7 +1211,7 @@ describe('Stylable postcss transform (Scoping)', function () {
                                 from {}
                                 to {}
                             }
-                            
+
                             .selector {
                                 animation: 2s name infinite, 1s name2 infinite;
                                 animation-name: name;
@@ -1055,16 +1221,18 @@ describe('Stylable postcss transform (Scoping)', function () {
                     }
                 }
             });
-            expect((<postcss.AtRule>result.nodes![0]).params).to.equal('entry--name');
-            expect((<postcss.AtRule>result.nodes![1]).params).to.equal('entry--name2');
-            expect((<postcss.Rule>result.nodes![2]).nodes![0].toString()).to.equal('animation: 2s entry--name infinite, 1s entry--name2 infinite');
-            expect((<postcss.Rule>result.nodes![2]).nodes![1].toString()).to.equal('animation-name: entry--name');
+            expect((result.nodes![0] as postcss.AtRule).params).to.equal('entry--name');
+            expect((result.nodes![1] as postcss.AtRule).params).to.equal('entry--name2');
+            expect((result.nodes![2] as postcss.Rule).nodes![0].toString())
+                .to.equal('animation: 2s entry--name infinite, 1s entry--name2 infinite');
+            expect((result.nodes![2] as postcss.Rule).nodes![1].toString())
+                .to.equal('animation-name: entry--name');
 
         });
 
         it('not scope rules that are child of keyframe atRule', () => {
 
-            var result = generateStylableRoot({
+            const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -1083,18 +1251,16 @@ describe('Stylable postcss transform (Scoping)', function () {
                 }
             });
 
-            const at = <postcss.AtRule>result.nodes![0];
-            expect((<postcss.Rule>at.nodes![0]).selector).to.equal('from');
-            expect((<postcss.Rule>at.nodes![1]).selector).to.equal('to');
+            const at = result.nodes![0] as postcss.AtRule;
+            expect((at.nodes![0] as postcss.Rule).selector).to.equal('from');
+            expect((at.nodes![1] as postcss.Rule).selector).to.equal('to');
 
-            const at1 = <postcss.AtRule>result.nodes![1];
-            expect((<postcss.Rule>at1.nodes![0]).selector).to.equal('0%');
-            expect((<postcss.Rule>at1.nodes![1]).selector).to.equal('100%');
+            const at1 = result.nodes![1] as postcss.AtRule;
+            expect((at1.nodes![0] as postcss.Rule).selector).to.equal('0%');
+            expect((at1.nodes![1] as postcss.Rule).selector).to.equal('100%');
 
         });
 
-    })
-
+    });
 
 });
-

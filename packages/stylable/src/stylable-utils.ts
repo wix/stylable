@@ -1,31 +1,31 @@
 import * as postcss from 'postcss';
-import { SRule, StylableMeta, Imported } from "./stylable-processor";
-import { parseSelector, stringifySelector, traverseNode } from "./selector-utils";
-import { valueMapping } from "./stylable-value-parsers";
-import { Diagnostics } from "./diagnostics";
-const replaceRuleSelector = require("postcss-selector-matches/dist/replaceRuleSelector");
+import {Diagnostics} from './diagnostics';
+import {parseSelector, stringifySelector, traverseNode} from './selector-utils';
+import {Imported, SRule, StylableMeta} from './stylable-processor';
+import {valueMapping} from './stylable-value-parsers';
+const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 const cloneDeep = require('lodash.clonedeep');
 
-export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g; 
+export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
 }
 
 export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
-    return replaceRuleSelector(rule, { lineBreak });
+    return replaceRuleSelector(rule, {lineBreak});
 }
 
-export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Diagnostics) {
+export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics: Diagnostics) {
     mixinRoot.walkRules((mixinRule: SRule) => {
 
         const ruleSelectorAst = parseSelector(rule.selector);
         const mixinSelectorAst = parseSelector(mixinRule.selector);
 
-        var nodes: any[] = [];
-        mixinSelectorAst.nodes.forEach((mixinSelector) => {
+        const nodes: any[] = [];
+        mixinSelectorAst.nodes.forEach(mixinSelector => {
 
-            ruleSelectorAst.nodes.forEach((ruleSelector) => {
+            ruleSelectorAst.nodes.forEach(ruleSelector => {
                 const m: any[] = cloneDeep(mixinSelector.nodes);
                 const first = m[0];
 
@@ -35,13 +35,13 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
                     m.unshift({
                         type: 'spacing',
                         value: ' '
-                    })
+                    });
                 }
                 nodes.push({
                     type: 'selector',
                     before: ruleSelector.before || mixinSelector.before,
                     nodes: cloneDeep(ruleSelector.nodes, true).concat(m)
-                })
+                });
             });
 
         });
@@ -54,9 +54,9 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
 
     if (mixinRoot.nodes) {
         let nextRule = rule;
-        let mixinEntry:postcss.Declaration|null = null;
+        let mixinEntry: postcss.Declaration | null = null;
 
-        rule.walkDecls(valueMapping.mixin, (decl) => {
+        rule.walkDecls(valueMapping.mixin, decl => {
             mixinEntry = decl;
         });
         if (!mixinEntry) {
@@ -67,7 +67,11 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(mixinEntry!, node);
                 } else {
-                    diagnostics.warn(mixinEntry!, `not a valid mixin declaration ${mixinEntry!.value}`, {word:mixinEntry!.value})
+                    diagnostics.warn(
+                        mixinEntry!,
+                        `not a valid mixin declaration ${mixinEntry!.value}`,
+                        {word: mixinEntry!.value}
+                    );
                 }
             } else if (node.type === 'rule') {
                 if (rule.parent.last === nextRule) {
@@ -76,13 +80,17 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics:Dia
                     rule.parent.insertAfter(nextRule, node);
                 }
                 const toRemove: postcss.Declaration[] = [];
-                node.walkDecls((decl) => {
+                node.walkDecls(decl => {
                     if (!isValidDeclaration(decl)) {
                         toRemove.push(decl);
-                        diagnostics.warn(mixinEntry!,`not a valid mixin declaration ${decl.prop}, and was removed`, {word:mixinEntry!.value})
+                        diagnostics.warn(
+                            mixinEntry!,
+                            `not a valid mixin declaration '${decl.prop}', and was removed`,
+                            {word: mixinEntry!.value}
+                        );
                     }
-                })
-                toRemove.forEach((decl) => decl.remove());
+                });
+                toRemove.forEach(decl => decl.remove());
                 nextRule = node;
             } else if (node.type === 'atrule') {
                 throw new Error('mixins @ rules are not supported yet!');
@@ -97,19 +105,19 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
     const mixinRoot = postcss.root();
     let addRootDecls = true;
     root.nodes!.forEach((node: SRule) => {
-        if (node.type === "rule") {
+        if (node.type === 'rule') {
             if (node.selector.startsWith(selectorPrefix) && node.selector.indexOf(',') === -1) {
                 if (addRootDecls && node.selectorType === 'class') {
                     addRootDecls = false;
-                    node.walkDecls((decl) => {
+                    node.walkDecls(decl => {
                         mixinRoot.append(decl.clone());
                     });
                 } else {
-                    //TODO: handle complex selectors with , 
+                    // TODO: handle complex selectors with ,
                     const clone: SRule = node.clone({
                         selector: node.selector.replace(selectorPrefix, '&')
                     });
-                    //TODO: maybe delete clone.selectorAst
+                    // TODO: maybe delete clone.selectorAst
                     mixinRoot.append(clone);
                 }
             }
@@ -118,28 +126,34 @@ export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string
     return mixinRoot;
 }
 
-
-export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import: Imported, usedFiles: string[], resolvePath: (ctx: string, path:string)=>string) {
+export function removeUnusedRules(
+    ast: postcss.Root,
+    meta: StylableMeta,
+    _import: Imported,
+    usedFiles: string[],
+    resolvePath: (ctx: string, path: string) => string
+): void {
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
         const symbols = Object.keys(_import.named).concat(_import.defaultExport);
         ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
-            traverseNode(rule.selectorAst, (node) => {
+            traverseNode(rule.selectorAst, node => {
                 if (symbols.indexOf(node.name) !== -1) {
                     return shouldOutput = false;
                 }
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
                     const extend = symbol[valueMapping.extends];
-                    if (extend && extend._kind === 'import' && usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
+                    if (extend && extend._kind === 'import' &&
+                        usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
                         return shouldOutput = false;
                     }
                 }
                 return undefined;
             });
-            //TODO: optimize the multiple selectors
+            // TODO: optimize the multiple selectors
             if (!shouldOutput && rule.selectorAst.nodes.length <= 1) {
                 rule.remove();
             }
@@ -147,61 +161,53 @@ export function removeUnusedRules(ast:postcss.Root, meta: StylableMeta, _import:
     }
 }
 
-
-
-export function createImportString(importDef: Imported, path: string) {
-    var imports = importDef.defaultExport ? [`var ${importDef.defaultExport} = require("${(path)}");`] : [];
-    for (var k in importDef.named) {
-        imports.push(`var ${importDef.defaultExport} = require("${(path)}")[${JSON.stringify(importDef.named[k])}];`);
-    }
-    return imports.join('\n');
+export function findDeclaration(importNode: Imported, test: any) {
+    const fromIndex = importNode.rule.nodes!.findIndex(test);
+    return importNode.rule.nodes![fromIndex] as postcss.Declaration;
 }
 
-export function getCorrectNodeImport(importNode: Imported, test:any){
-    const fromIndex = importNode.rule.nodes!.findIndex(test)
-    return importNode.rule.nodes![fromIndex] as postcss.Declaration    
-}
-
-export function getRuleFromMeta(meta:StylableMeta, selector: string, test:any =(statment:any) => statment.prop === valueMapping.extends ) {
-    let found:any = null
-    meta.ast.walkRules(selector, function(rule:SRule) {
-        let declrationIndex = rule.nodes ? rule.nodes.findIndex(test): -1
-        if (rule.isSimpleSelector && !!~declrationIndex) {
-            found = rule.nodes![declrationIndex]
+export function findRule(
+    root: postcss.Root,
+    selector: string,
+    test: any = (statment: any) => statment.prop === valueMapping.extends
+) {
+    let found: any = null;
+    root.walkRules(selector, (rule: SRule) => {
+        const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
+        if (rule.isSimpleSelector && !!~declarationIndex) {
+            found = rule.nodes![declarationIndex];
         }
-    })
-    return found
+    });
+    return found;
 }
-
-
 
 export const reservedKeyFrames = [
-    "none",
-    "inherited",
-    "initial",
-    "unset",
+    'none',
+    'inherited',
+    'initial',
+    'unset',
     /* single-timing-function */
-    "linear",
-    "ease",
-    "ease-in",
-    "ease-in-out",
-    "ease-out",
-    "step-start",
-    "step-end",
-    "start",
-    "end",
+    'linear',
+    'ease',
+    'ease-in',
+    'ease-in-out',
+    'ease-out',
+    'step-start',
+    'step-end',
+    'start',
+    'end',
     /* single-animation-iteration-count */
-    "infinite",
+    'infinite',
     /* single-animation-direction */
-    "normal",
-    "reverse",
-    "alternate",
-    "alternate-reverse",
+    'normal',
+    'reverse',
+    'alternate',
+    'alternate-reverse',
     /* single-animation-fill-mode */
-    "forwards",
-    "backwards",
-    "both",
+    'forwards',
+    'backwards',
+    'both',
     /* single-animation-play-state */
-    "running",
-    "paused"
+    'running',
+    'paused'
 ];

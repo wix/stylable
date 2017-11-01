@@ -20,7 +20,7 @@ An application would define CSS with the final style definitions:
 
 ```css
 /* project.st.css */
-@namespace "Project";
+@namespace "project";
 :vars {
     color1: white;
     color2: red;

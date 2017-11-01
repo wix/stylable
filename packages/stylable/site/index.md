@@ -38,11 +38,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 ## Documentation
 
-Learn [more about **Stylable**](./docs/getting-started.md) and get started with step by step instructions and code examples.
-
-## Components
-
-We recommend using our component library, [Stylable-components](https://github.com/wix/stylable-components). **Stylable components** are a stylable, fully-tested & strictly-typed component library based on React.
+[Learn more about **Stylable**](./docs/get-started.md) and get started with step by step instructions and code examples.
 
 ## Project
 

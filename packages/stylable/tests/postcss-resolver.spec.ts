@@ -1,19 +1,25 @@
-import { StylableMeta } from '../src/stylable-processor';
-import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
-import { StylableResolver, process, safeParse, createMinimalFS } from '../src'
-import {expect} from 'chai'
+import {expect} from 'chai';
+import {resolve} from 'path';
+import {createMinimalFS, process, safeParse, StylableResolver} from '../src';
+import {cachedProcessFile, MinimalFS} from '../src/cached-process-file';
+import {StylableMeta} from '../src/stylable-processor';
 
-function createResolveExtendsResults (fs:MinimalFS, fileToProcess:string, classNameToLookup:string, isElement: boolean = false){ 
+function createResolveExtendsResults(
+    fs: MinimalFS,
+    fileToProcess: string,
+    classNameToLookup: string,
+    isElement: boolean = false
+) {
     const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(safeParse(content, {from: fullpath}))
+        return process(safeParse(content, {from: fullpath}));
     }, fs);
 
-    const resolver = new StylableResolver(processFile, (module:string)=> (module && ''))
-    return resolver.resolveExtends(processFile.process(fileToProcess), classNameToLookup, isElement)
+    const resolver = new StylableResolver(processFile, (module: string) => (module && ''));
+    return resolver.resolveExtends(processFile.process(fileToProcess), classNameToLookup, isElement);
 }
 
-describe('postcss-resolver', function() {
-    it('should resolve extend classes', function(){
+describe('postcss-resolver', () => {
+    it('should resolve extend classes', () => {
         const {fs} = createMinimalFS({
             files: {
                 '/button.st.css': {
@@ -37,16 +43,16 @@ describe('postcss-resolver', function() {
                     `
                 }
             }
-        })
-      
-        const results = createResolveExtendsResults(fs,'/extended-button.st.css', 'myClass' )
-        expect(results[0].symbol.name).to.equal('myClass')
-        expect(results[1].symbol.name).to.equal('root')
-        expect(results[1].meta.source).to.equal('/button.st.css')
-        
-    })
+        });
 
-    it('should resolve extend elements', function(){
+        const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
+        expect(results[0].symbol.name).to.equal('myClass');
+        expect(results[1].symbol.name).to.equal('root');
+        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
+
+    });
+
+    it('should resolve extend elements', () => {
         const {fs} = createMinimalFS({
             files: {
                 '/button.st.css': {
@@ -69,26 +75,26 @@ describe('postcss-resolver', function() {
                     `
                 }
             }
-        })
+        });
 
-        const results = createResolveExtendsResults(fs,'/extended-button.st.css', 'Button', true)
-        expect(results[0].symbol.name).to.equal('Button')
-        expect(results[1].symbol.name).to.equal('root')
-        expect(results[1].meta.source).to.equal('/button.st.css')
-        
-    })
+        const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
+        expect(results[0].symbol.name).to.equal('Button');
+        expect(results[1].symbol.name).to.equal('root');
+        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
 
-    it('should resolve extend classes', function(){
+    });
+
+    it('should resolve extend classes on broken css', () => {
         const {fs} = createMinimalFS({
             files: {
                 '/button.st.css': {
                     content: `
-                        .gaga 
+                        .gaga
                     `
-                },
+                }
             }
-        })
-        const results = createResolveExtendsResults(fs,'/button.st.css', 'gaga' )
-        expect(results).to.be.empty
-    })
-})
+        });
+        const results = createResolveExtendsResults(fs, resolve('/button.st.css'), 'gaga');
+        expect(results).to.eql([]);
+    });
+});

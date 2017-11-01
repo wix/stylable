@@ -1,6 +1,6 @@
 ---
 id: references/tag-selectors
-title: CSS Tag Selector
+title: CSS Tag/Component Selector
 layout: docs
 ---
 
