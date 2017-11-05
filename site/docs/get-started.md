@@ -21,7 +21,7 @@ There are currently two options for installing and working with **Stylable**:
 
 * To begin writing your own project, you can create a **Stylable** app from our boilerplate  - follow the instructions [here](./getting-started/install-configure.md). 
 
-* To work with an existing project, you can install **stylable** and the **stylable-integration** packages from our GitHub [repository](https://github.com/wix/stylable). 
+* To work with an existing project, you can install [stylable](https://github.com/wix/stylable) and the [stylable-integration](https://github.com/wix/stylable-integration) packages from GitHub. 
 
  While **Stylable** can work with any component framework, we offer a [React component integration](./getting-started/react-integration.md) that works with both installation options. 
 

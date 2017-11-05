@@ -11,7 +11,7 @@
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 
-Learn more in our [Documentation Center](https://wix.github.io/stylable/).
+Learn more in our [Documentation Center](https://stylable.io/).
 
 <!-- ## Code Example -->
 
@@ -31,7 +31,7 @@ Using Yarn:
 ```bash
 yarn add stylable stylable-integration
 ```
-For details on both options, see [Install & Configure](http://stylable.io/docs/getting-started/install-configure).
+For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 
 ## Contributing
