@@ -2,7 +2,7 @@
 
 This is the source of the Stylable site and documentation and is not intended to be directly read here. 
 
-The actual site and documentation center is published to [http://wix.github.com/stylable](http://wix.github.com/stylable).
+The actual site and documentation center is published to [https://wix.github.com/stylable](https://wix.github.com/stylable).
 
 ## Installation
 
