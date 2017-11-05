@@ -3,16 +3,10 @@ sudo: false
 language: node_js
 
 node_js:
+  - "9"
   - "8"
   - "6"
 
 os:
   - linux
   - osx
-
-install:
-  - npm install
-
-script:
-  - npm test
-  
