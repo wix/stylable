@@ -31,33 +31,36 @@ describe('runtime', () => {
     });
 
     describe('root apply', () => {
-
-        it('should add root className', () => {
+        it('should not add root className when props are not provided', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('')).to.eql({
+            expect(runtime('')).to.eql({});
+
+        });
+        it('should add root className only when props are provided', () => {
+
+            const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+
+            expect(runtime('', undefined, {})).to.eql({
                 className: 'namespace--root'
             });
 
         });
 
         it('should add additional className', () => {
-
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
-
             expect(runtime('additional-class')).to.eql({
-                className: 'namespace--root additional-class'
+                className: 'additional-class'
             });
-
         });
 
         it('should add states mapping', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('additional-class', {on: true})).to.eql({
-                className: 'namespace--root additional-class',
+            expect(runtime('additional-class', { on: true })).to.eql({
+                className: 'additional-class',
                 [`data-${runtime.$stylesheet.namespace}-${'on'}`]: true
             });
 
@@ -67,7 +70,7 @@ describe('runtime', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('', {}, {className: 'from-props'})).to.eql({
+            expect(runtime('', {}, { className: 'from-props' })).to.eql({
                 className: 'namespace--root from-props'
             });
 
@@ -77,7 +80,7 @@ describe('runtime', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('', {}, {'data-prop': true})).to.eql({
+            expect(runtime('', {}, { 'data-prop': true })).to.eql({
                 'className': 'namespace--root',
                 'data-prop': true
             });
