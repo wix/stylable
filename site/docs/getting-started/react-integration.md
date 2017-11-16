@@ -8,11 +8,49 @@ If you want to understand the workings of the integration, you can integrate **S
 
 ## Manual integration 
 
-To integrate **Stylable** with a React component, the imported stylesheet can be run as a function on the root node and it contains the local classes, variables and keyframes. The function receives the following optional arguments:
+To integrate **Stylable** with a React component, the imported stylesheet can be run as a function on the root node. It also contains the mapping of the local classes, variables and keyframes. 
 
-* `className` - string
+```jsx
+import style from "style.st.css";
+```
+
+The function receives the following optional arguments:
+
+* `className` - a string of class names (this will not be mapped to local class names)
 * `stateMap` - an object where every key is the state name and the value is boolean to turn the state on or off
 * `props` - original props that were provided to the component and these should be passed only to the root node
+
+You apply **Stylable** on the **root** of your component using this syntax:
+```jsx
+<div {...style('global-class', null, this.props)}></div> // {className: "global-class namespace--root"}
+```
+> **Note:**  
+> If you are applying the style function on the root node, it **must** have the third parameter (`this.props`). 
+
+The second argument is a **Stylable** `stateMap`, it is used to enable [custom pseudo-classes](../references/pseudo-classes.md):
+```jsx
+<div {...style('global-class', {on: this.state.on})></div> // {className: "global-class", "data-namespace-on": true}
+```
+
+To apply classes on any other node, you can use the mapping on the stylesheet, and pass it directly as the className value:
+```jsx
+<div className={style.item}></div>
+```
+
+If you want to use child pseudo-classes, you can use the style function as follows:
+```jsx
+<div {...style(style.item, {on: this.state.on})></div> // {className: "namespace--item", "data-namespace-on": true}
+```
+> **Note:** 
+> If you use one of the className helpers on the web, you can just pass it into the style as such:
+> ```jsx
+> ...
+> import cn from 'your-classnames-library';
+> ...
+> <div {...style(cn(style.item, 'global-class'))></div> 
+> ```
+
+### The full example
 
 ```jsx
     ...  
@@ -21,14 +59,14 @@ To integrate **Stylable** with a React component, the imported stylesheet can be
     class Comp extends React.Component {
         render() {
             return (
-                <div {...style('', {on: this.state.on}, this.props)}>                    
-                    <div {...style('item', {})}></div>
+                <div {...style('', {on: this.state.on}, this.props)}> // third parameter required
                     <div className={style.item}></div>
                 </div>
             );
         }
     }
 ```
+
 Once this is run, the following is enabled for your component:
 * Scoped styling by putting the root class on your root node. 
 * A component can inherit states at the [root](references/root) level by passing parent data-* to your root node.
