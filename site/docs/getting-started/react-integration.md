@@ -16,20 +16,20 @@ import style from "style.st.css";
 
 The function receives the following optional arguments:
 
-* `className` - a string of class names (this will not be mapped to local class names)
+* `className` - a string of class names, separated by space (this will be mapped to local class names)
 * `stateMap` - an object where every key is the state name and the value is boolean to turn the state on or off
 * `props` - original props that were provided to the component and these should be passed only to the root node
 
 You apply **Stylable** on the **root** of your component using this syntax:
 ```jsx
-<div {...style('global-class', null, this.props)}></div> // {className: "global-class namespace--root"}
+<div {...style('local-class', null, this.props)}></div> // {className: "namespace--local-class namespace--root"}
 ```
 > **Note:**  
 > If you are applying the style function on the root node, it **must** have the third parameter (`this.props`). 
 
 The second argument is a **Stylable** `stateMap`, it is used to enable [custom pseudo-classes](../references/pseudo-classes.md):
 ```jsx
-<div {...style('global-class', {on: this.state.on})></div> // {className: "global-class", "data-namespace-on": true}
+<div {...style('local-class', {on: this.state.on})></div> // {className: "namespace--local-class", "data-namespace-on": true}
 ```
 
 To apply classes on any other node, you can use the mapping on the stylesheet, and pass it directly as the className value:
@@ -39,16 +39,20 @@ To apply classes on any other node, you can use the mapping on the stylesheet, a
 
 If you want to use child pseudo-classes, you can use the style function as follows:
 ```jsx
-<div {...style(style.item, {on: this.state.on})></div> // {className: "namespace--item", "data-namespace-on": true}
+<div {...style('item global-class', {on: this.state.on})></div> // {className: "namespace--item global-class", "data-namespace-on": true}
 ```
+> **Note:**
+> Classes that are not found in the stylesheet are not mapped and are passed on as global classes.
+
 > **Note:** 
 > If you use one of the className helpers on the web, you can just pass it into the style as such:
 > ```jsx
 > ...
 > import cn from 'your-classnames-library';
 > ...
-> <div {...style(cn(style.item, 'global-class'))></div> 
+> <div {...style(cn('item', 'global-class'))></div> 
 > ```
+ 
 
 ### The full example
 
