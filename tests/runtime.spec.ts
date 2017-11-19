@@ -30,6 +30,14 @@ describe('runtime', () => {
 
     });
 
+    it('should map a className string to local classes', () => {
+
+        const runtime = create('root', 'namespace', { root: 'namespace--root', local: 'namespace--local' }, null, '0');
+
+        expect(runtime.$mapClasses('root local global')).to.equal('namespace--root namespace--local global');
+
+    });
+
     describe('root apply', () => {
         it('should not add root className when props are not provided', () => {
 
@@ -48,10 +56,10 @@ describe('runtime', () => {
 
         });
 
-        it('should add additional className', () => {
+        it('should add global className', () => {
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
-            expect(runtime('additional-class')).to.eql({
-                className: 'additional-class'
+            expect(runtime('global-class')).to.eql({
+                className: 'global-class'
             });
         });
 
@@ -59,9 +67,18 @@ describe('runtime', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('additional-class', { on: true })).to.eql({
-                className: 'additional-class',
+            expect(runtime('', { on: true })).to.eql({
                 [`data-${runtime.$stylesheet.namespace}-${'on'}`]: true
+            });
+
+        });
+
+        it('should auto add root when props are provided', () => {
+
+            const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+            const props = {};
+            expect(runtime('', null, props)).to.eql({
+                className: 'namespace--root'
             });
 
         });
@@ -70,8 +87,9 @@ describe('runtime', () => {
 
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
 
-            expect(runtime('', {}, { className: 'from-props' })).to.eql({
-                className: 'namespace--root from-props'
+            const props = { className: 'class-from-props' };
+            expect(runtime('', {}, props)).to.eql({
+                className: 'namespace--root class-from-props'
             });
 
         });
@@ -84,6 +102,19 @@ describe('runtime', () => {
                 'className': 'namespace--root',
                 'data-prop': true
             });
+
+        });
+
+        it('should map classes and add className from props ', () => {
+
+            const runtime = create('root', 'namespace', {
+                root: 'namespace--root',
+                local: 'namespace--local'
+            }, null, '0');
+
+            const props = runtime('local global', null, { className: 'class-from-props' });
+
+            expect(props.className).to.eql('namespace--root namespace--local global class-from-props');
 
         });
 

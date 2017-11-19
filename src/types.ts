@@ -11,14 +11,15 @@ export interface Stylesheet {
 
 export interface RuntimeHelpers {
     $get: (localName: string) => string;
-    $cssStates: (stateMapping: StateMap) => StateMap;
+    $cssStates: (stateMapping?: StateMap | null) => StateMap;
+    $mapClasses: (classNameString: string) => string;
 }
 
 export type StylesheetLocals = {[key: string]: string} & {$stylesheet: Stylesheet} & RuntimeHelpers;
 export type RuntimeStylesheet = StylesheetLocals & (
     (
         className: string,
-        states?: StateMap,
+        states?: StateMap | null,
         props?: {className?: string, [key: string]: any}
     ) => {[key: string]: string}
 );

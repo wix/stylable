@@ -32,6 +32,10 @@ export function create(
         return (locals as { [key: string]: string })[localName];
     }
 
+    function mapClasses(classNameString: string): string {
+        return classNameString.split(/\s+/g).map(className => get(className) || className).join(' ');
+    }
+
     const locals: StylesheetLocals = localMapping as any;
 
     locals.$stylesheet = {
@@ -43,13 +47,14 @@ export function create(
 
     locals.$get = get;
     locals.$cssStates = cssStates;
+    locals.$mapClasses = mapClasses;
 
     function apply(className: string, states?: StateMap | null, props?: { className?: string, [key: string]: any }) {
 
         if (props) {
-            className = className ? locals.root + ' ' + className : locals.root;
+            className = className ? locals.root + ' ' + mapClasses(className) : locals.root;
         } else {
-            className = className ? className : '';
+            className = className ? mapClasses(className) : '';
         }
 
         const base: any = cssStates(states);
