@@ -14,17 +14,17 @@ Before you begin, read the [Runtime guide](../guides/runtime.md) to understand t
 
 To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
 
-    ```jsx
-    import style from "style.st.css";
+```jsx
+import style from "style.st.css";
 
-    class Comp extends React.Component {
-        render() {
-            return (
-                <div { ...style('root', { stateA:true, stateB:false }, this.props) }></div>
-            );
-        }
+class Comp extends React.Component {
+    render() {
+        return (
+            <div { ...style('root', { stateA: true, stateB: false }, this.props) }></div>
+        );
     }
-    ```
+}
+```
 
 The result of the above generates and adds the props needed to define the root element for styling:
 * Marks component root by setting the root target `className`
@@ -37,19 +37,19 @@ The result of the above generates and adds the props needed to define the root e
 
 All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
 
-    ```jsx
-    import style from "style.st.css";
+```jsx
+import style from "style.st.css";
 
-    class Comp extends React.Component {
-        render() {
-            return (
-                <div { ...style('root', {}, this.props) }>
-                    <span className={style.label} { ...style.$cssStates({ stateA:true }) }></span>
-                </div>
-            );
-        }
+class Comp extends React.Component {
+    render() {
+        return (
+            <div { ...style('root', {}, this.props) }>
+                <span className={style.label} { ...style.$cssStates({ stateA: true ) }></span>
+            </div>
+        );
     }
-    ```
+}
+```
  
 ## Automatic integration with Wix React Tools
 
