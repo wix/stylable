@@ -14,17 +14,17 @@ If you don't use the custom integration, you can manually integrate **Stylable**
 
 2. To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
 
-```jsx
-import style from "style.st.css";
+    ```jsx
+    import style from "style.st.css";
 
-class Comp extends React.Component {
-    render() {
-        return (
-            <div { ...style('root', { stateA:true, stateB:false }, this.props) }></div>
-        );
+    class Comp extends React.Component {
+        render() {
+            return (
+                <div { ...style('root', { stateA:true, stateB:false }, this.props) }></div>
+            );
+        }
     }
-}
-```
+    ```
 
 3. Do the following to generate and add the props needed to define the root element for styling:
     * Mark component root by setting the root target `className`
@@ -32,10 +32,10 @@ class Comp extends React.Component {
     * Append `className` override from component props to the root `className`
     * Custom or overriden component states are added from external `data-*` props
 
-> **Note**:  
-> To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
+    > **Note**  
+    > To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
 
-4. All other nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
+4. All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
 
 ```jsx
 import style from "style.st.css";
