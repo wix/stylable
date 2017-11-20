@@ -37,19 +37,19 @@ If you don't use the custom integration, you can manually integrate **Stylable**
 
 4. All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
 
-```jsx
-import style from "style.st.css";
+    ```jsx
+    import style from "style.st.css";
 
-class Comp extends React.Component {
-    render() {
-        return (
-            <div { ...style('root', {}, this.props) }>
-                <span className={style.label} { ...style.$cssStates({ stateA:true }) }></span>
-            </div>
-        );
+    class Comp extends React.Component {
+        render() {
+            return (
+                <div { ...style('root', {}, this.props) }>
+                    <span className={style.label} { ...style.$cssStates({ stateA:true }) }></span>
+                </div>
+            );
+        }
     }
-}
-```
+    ```
  
 ## Automatic integration with Wix React Tools
 
