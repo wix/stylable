@@ -11,14 +11,10 @@
   - id: getting-started/react-integration
     title: React Integration
     subitems:
-    - id: installation
-      title: Installation
-    - id: use
-      title: Use
-    - id: css-classes
-      title: CSS Classes
-    - id: custom-states
-      title: Custom States
+    - id: manual-integration 
+      title: Manual Integration 
+    - id: automatic-integration-with-wix-react-tools
+      title: Automatic Integration
   - id: getting-started/stylable-intelligence
     title: Stylable Intelligence
 - title: Guides
@@ -27,6 +23,15 @@
     title: Component Basics
   - id: guides/stylable-component-best-practices
     title: Component Best Practices
+  - id: guides/runtime
+    title: Runtime
+    subitems:
+    - id: manual-mapping
+      title: Manual Mapping
+    - id: custom-state-mapping
+      title: Custom State Mapping
+    - id: generate-element-attributes
+      title: Generate Element Attributes
   - id: guides/stylable-application
     title: Stylable Application
   - id: guides/stylable-component-library

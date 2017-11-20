@@ -4,78 +4,54 @@ title: React Integration
 layout: docs
 ---
 
-If you want to understand the workings of the integration, you can integrate **Stylable** manually with a React component per the following example. You can also use our automatic integration using **wix-react-tools** as described below.
+**Stylable** is easily integrated with React components. 
 
-## Manual integration 
+We offer a [custom react integration](#automatic-integration-with-wix-react-tools) that adds typescript and runtime support helpers that make defining stylable-react components easy.  
 
-To integrate **Stylable** with a React component, the imported stylesheet can be run as a function on the root node. It also contains the mapping of the local classes, variables and keyframes. 
+However you are more then welcome to manually integrate it or build your own helpers.
+
+## Manual Integration 
+
+First read the [Runtime guide](../guides/runtime.md) to understand the stylable runtime API.
+
+To manualy integrate stylable to a React component, you first **must** mark the root element of the component:
 
 ```jsx
 import style from "style.st.css";
-```
 
-The function receives the following optional arguments:
-
-* `className` - a string of class names, separated by space (this will be mapped to local class names)
-* `stateMap` - an object where every key is the state name and the value is boolean to turn the state on or off
-* `props` - original props that were provided to the component and these should be passed only to the root node
-
-You apply **Stylable** on the **root** of your component using this syntax:
-```jsx
-<div {...style('local-class', null, this.props)}></div> // {className: "namespace--local-class namespace--root"}
-```
-> **Note:**  
-> If you are applying the style function on the root node, it **must** have the third parameter (`this.props`). 
-
-The second argument is a **Stylable** `stateMap`, it is used to enable [custom pseudo-classes](../references/pseudo-classes.md):
-```jsx
-<div {...style('local-class', {on: this.state.on})></div> // {className: "namespace--local-class", "data-namespace-on": true}
-```
-
-To apply classes on any other node, you can use the mapping on the stylesheet, and pass it directly as the className value:
-```jsx
-<div className={style.item}></div>
-```
-
-If you want to use child pseudo-classes, you can use the style function as follows:
-```jsx
-<div {...style('item global-class', {on: this.state.on})></div> // {className: "namespace--item global-class", "data-namespace-on": true}
-```
-> **Note:**
-> Classes that are not found in the stylesheet are not mapped and are passed on as global classes.
-
-> **Note:** 
-> If you use one of the className helpers on the web, you can just pass it into the style as such:
-> ```jsx
-> ...
-> import cn from 'your-classnames-library';
-> ...
-> <div {...style(cn('item', 'global-class'))></div> 
-> ```
- 
-
-### The full example
-
-```jsx
-    ...  
-    import style from "style.st.css";
-    
-    class Comp extends React.Component {
-        render() {
-            return (
-                <div {...style('', {on: this.state.on}, this.props)}> // third parameter required
-                    <div className={style.item}></div>
-                </div>
-            );
-        }
+class Comp extends React.Component {
+    render() {
+        return (
+            <div { ...style('root', { stateA:true, stateB:false }, this.props) }></div>
+        );
     }
+}
 ```
 
-Once this is run, the following is enabled for your component:
-* Scoped styling by putting the root class on your root node. 
-* A component can inherit states at the [root](references/root) level by passing parent data-* to your root node.
-* Parent className overrides by appending the `this.props.className` to your root node.
-* Custom CSS states by generating data-* from your stylesheet.
+This generates and add the props needed to define the root element for styling:
+* Mark component root by setting the root target `className` on the root element.
+* Set component states using `data-*` attributes 
+* Append `className` override from component props to the root `className`
+* Custom or overriden component states are added from external `data-*` props.
+
+> Note:  
+> We recommend passing the props `className` and `data-*` in order to enable external styling. To make the component more stylable, we believe it is best to also merge the `style` prop.
+
+Any other node can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
+
+```jsx
+import style from "style.st.css";
+
+class Comp extends React.Component {
+    render() {
+        return (
+            <div { ...style('root', {}, this.props) }>
+                <span className={style.label} { ...style.$cssStates({ stateA:true }) }></span>
+            </div>
+        );
+    }
+}
+```
  
 ## Automatic integration with Wix React Tools
 
@@ -94,9 +70,9 @@ Using yarn:
 yarn add wix-react-tools
 ```
 
-## Use
+### Use
 
-When applying **Stylable** to a React component, any className or `data-*` properties are copied to the resulting root element of the component. Further, the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
+When applying **Stylable** to a React component, any `className` or `data-*` properties are copied to the resulting root element of the component. Further, the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
 
 ```jsx 
 import {stylable} from 'wix-react-tools';
@@ -113,10 +89,7 @@ stylable(stylesheet)(class Comp extends React.Component {...});
 stylable(stylesheet)(props => {...});
 ```
 
-> **Note**  
-> There is a [bug](https://github.com/wix/wix-react-tools/issues/107) in `cloneElement`. It does not apply the same abilities as `createElement`.
-
-### CSS classes
+#### CSS classes
 
 All [CSS class selectors](../references/class-selectors.md) that are in the stylesheet can be applied to any element **in the render** through the `className` property.
 
@@ -133,7 +106,7 @@ class Comp extends React.Component {
 }
 ```
 
-### Custom states
+#### Custom states
 
 **Stylable** offers [custom states](../references/pseudo-classes.md) that can be defined on any CSS class selectors. Add a `style-state` property to any element to control whether to enable a custom state or not.  
 

@@ -10,7 +10,7 @@ layout: docs
 
 ## Installation
 
-You can install **Styllable Intelligence** from:
+You can install **Stylable Intelligence** from:
 * Visual Studio Code market:
     * In your VSC window, click the **Extentions** icon to open the market.
     * In the search field, enter **Stylable Intelligence**. 
