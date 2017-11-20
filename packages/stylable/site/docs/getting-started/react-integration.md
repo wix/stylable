@@ -4,36 +4,52 @@ title: React Integration
 layout: docs
 ---
 
-If you want to understand the workings of the integration, you can integrate **Stylable** manually with a React component per the following example. You can also use our automatic integration using **wix-react-tools** as described below.
+**Stylable** integrates with React components using our [custom React integration](#automatic-integration-with-wix-react-tools). The integration adds TypeScript and runtime support helpers so you can define your own stylable-react-components.  
 
-## Manual integration 
+If you don't use the custom integration, you can manually integrate **Stylable** with a React component as described below. You can also build your own helpers.
 
-To integrate **Stylable** with a React component, the imported stylesheet can be run as a function on the root node and it contains the local classes, variables and keyframes. The function receives the following optional arguments:
+## Manual Integration 
 
-* `className` - string
-* `stateMap` - an object where every key is the state name and the value is boolean to turn the state on or off
-* `props` - original props that were provided to the component and these should be passed only to the root node
+Before you begin, read the [Runtime guide](../guides/runtime.md) to understand the **Stylable** runtime API.
 
-```jsx
-    ...  
+To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
+
+    ```jsx
     import style from "style.st.css";
-    
+
     class Comp extends React.Component {
         render() {
             return (
-                <div {...style('', {on: this.state.on}, this.props)}>                    
-                    <div {...style('item', {})}></div>
-                    <div className={style.item}></div>
+                <div { ...style('root', { stateA:true, stateB:false }, this.props) }></div>
+            );
+        }
+    }
+    ```
+
+The result of the above generates and adds the props needed to define the root element for styling:
+* Marks component root by setting the root target `className`
+* Sets component states using `data-*` attributes 
+* Appends `className` override from component props to the root `className`
+* Custom or overriden component states are added from external `data-*` props
+
+> **Note**  
+> To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
+
+All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
+
+    ```jsx
+    import style from "style.st.css";
+
+    class Comp extends React.Component {
+        render() {
+            return (
+                <div { ...style('root', {}, this.props) }>
+                    <span className={style.label} { ...style.$cssStates({ stateA:true }) }></span>
                 </div>
             );
         }
     }
-```
-Once this is run, the following is enabled for your component:
-* Scoped styling by putting the root class on your root node. 
-* A component can inherit states at the [root](references/root) level by passing parent data-* to your root node.
-* Parent className overrides by appending the `this.props.className` to your root node.
-* Custom CSS states by generating data-* from your stylesheet.
+    ```
  
 ## Automatic integration with Wix React Tools
 
@@ -52,9 +68,9 @@ Using yarn:
 yarn add wix-react-tools
 ```
 
-## Use
+### Use
 
-When applying **Stylable** to a React component, any className or `data-*` properties are copied to the resulting root element of the component. Further, the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
+When applying **Stylable** to a React component, any `className` or `data-*` properties are copied to the resulting root element of the component. Further, the [root class](../references/root.md) of the stylesheet is added to the root element automatically.
 
 ```jsx 
 import {stylable} from 'wix-react-tools';
@@ -71,10 +87,7 @@ stylable(stylesheet)(class Comp extends React.Component {...});
 stylable(stylesheet)(props => {...});
 ```
 
-> **Note**  
-> There is a [bug](https://github.com/wix/wix-react-tools/issues/107) in `cloneElement`. It does not apply the same abilities as `createElement`.
-
-### CSS classes
+#### CSS classes
 
 All [CSS class selectors](../references/class-selectors.md) that are in the stylesheet can be applied to any element **in the render** through the `className` property.
 
@@ -91,7 +104,7 @@ class Comp extends React.Component {
 }
 ```
 
-### Custom states
+#### Custom states
 
 **Stylable** offers [custom states](../references/pseudo-classes.md) that can be defined on any CSS class selectors. Add a `style-state` property to any element to control whether to enable a custom state or not.  
 
