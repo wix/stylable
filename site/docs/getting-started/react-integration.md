@@ -26,10 +26,10 @@ If you don't use the custom integration, you can manually integrate **Stylable**
     }
     ```
 
-3. Do the following to generate and add the props needed to define the root element for styling:
-    * Mark component root by setting the root target `className`
-    * Set component states using `data-*` attributes 
-    * Append `className` override from component props to the root `className`
+ The result of the above generates and adds the props needed to define the root element for styling:
+    * Marks component root by setting the root target `className`
+    * Sets component states using `data-*` attributes 
+    * Appends `className` override from component props to the root `className`
     * Custom or overriden component states are added from external `data-*` props
 
     > **Note**  

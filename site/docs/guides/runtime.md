@@ -4,7 +4,7 @@ title: Runtime
 layout: docs
 ---
 
-Imported **Stylable** stylesheets contain some minimal runtime code to help define the structure and state of the component.
+Imported **Stylable** stylesheets contain minimal runtime code to help define the structure and state of the component.
 
 ```css
 /* style.st.css */
@@ -52,7 +52,7 @@ style.$cssStates({ a:true, b:true }) // multiple
 
 ## Generate element attributes
 
-The minimal runtime provides a function to enable component definition.  
+The minimal runtime provides a function to help with component definition.  
 Calling the function returns an object describing the attributes of a node in the component view.
 
 ### Element name
@@ -98,4 +98,4 @@ style('root', {}, { 'data-a':true })
 ```
 
 > **Note**  
-> Any `data-*` attribute passed in a base overrides its generated equivalent.
+> Any `data-*` attribute passed in the base overrides its generated equivalent.
