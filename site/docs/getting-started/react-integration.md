@@ -10,9 +10,9 @@ If you don't use the custom integration, you can manually integrate **Stylable**
 
 ## Manual Integration 
 
-1. Before you begin, read the [Runtime guide](../guides/runtime.md) to understand the **Stylable** runtime API.
+Before you begin, read the [Runtime guide](../guides/runtime.md) to understand the **Stylable** runtime API.
 
-2. To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
+To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
 
     ```jsx
     import style from "style.st.css";
@@ -26,16 +26,16 @@ If you don't use the custom integration, you can manually integrate **Stylable**
     }
     ```
 
- The result of the above generates and adds the props needed to define the root element for styling:
-    * Marks component root by setting the root target `className`
-    * Sets component states using `data-*` attributes 
-    * Appends `className` override from component props to the root `className`
-    * Custom or overriden component states are added from external `data-*` props
+The result of the above generates and adds the props needed to define the root element for styling:
+* Marks component root by setting the root target `className`
+* Sets component states using `data-*` attributes 
+* Appends `className` override from component props to the root `className`
+* Custom or overriden component states are added from external `data-*` props
 
-    > **Note**  
-    > To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
+> **Note**  
+> To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
 
-4. All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
+All nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
 
     ```jsx
     import style from "style.st.css";
