@@ -31,7 +31,7 @@ style.icon // "style__icon"
 ```
 
 > Note:  
-> [root class](../references/root.md) is available even when not defined in the stylesheet. 
+> The [root class](../references/root.md) is available even when not defined in the stylesheet. 
 
 ## Custom State Mapping
 
@@ -58,7 +58,7 @@ Calling the function returns an object describing the attributes of a node in th
 
 ### Element Name
 
-First argument represent the name of the element, and returns a `className` attribute to mark the element node
+The first argument represent the name of the element, and returns a `className` attribute to mark the element node
 
 ```javascript
 /* { className:'style__root' } */
@@ -75,7 +75,7 @@ style('label icon') // multiple markings
 
 ### Custom States
 
-Second argument represent the custom state, and returns a `data-*` attribute to represent the custom state on the element.
+The second argument represent the custom state, and returns a `data-*` attribute to represent the custom state on the element.
 
 ```javascript
 /* { className:'style__root', 'data-style-selected':true } */
@@ -86,7 +86,7 @@ style('label', { searched:true })
 
 ### Merge Props
 
-Third argument can be used as a base for the generated class name and states:
+The third argument can be used as a base for the generated class name and states:
 
 ```javascript
 /*  { className:'style__root class-a' } */

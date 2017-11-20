@@ -14,7 +14,7 @@ However you are more then welcome to manually integrate it or build your own hel
 
 First read the [Runtime guide](../guides/runtime.md) to understand the stylable runtime API.
 
-To manualy integrate stylable to a React component, you first **must** mark the root element of the component:
+To manualy integrate stylable to a React component, you **must** first mark the root element of the component:
 
 ```jsx
 import style from "style.st.css";
@@ -29,10 +29,10 @@ class Comp extends React.Component {
 ```
 
 This generates and add the props needed to define the root element for styling:
-* Mark component root by setting the root target `className` on the root element.
+* Mark component root by setting the root target `className`
 * Set component states using `data-*` attributes 
 * Append `className` override from component props to the root `className`
-* Custom or overriden component states are added from external `data-*` props.
+* Custom or overriden component states are added from external `data-*` props
 
 > Note:  
 > We recommend passing the props `className` and `data-*` in order to enable external styling. To make the component more stylable, we believe it is best to also merge the `style` prop.
