@@ -4,17 +4,15 @@ title: React Integration
 layout: docs
 ---
 
-**Stylable** is easily integrated with React components. 
+**Stylable** integrates with React components using our [custom React integration](#automatic-integration-with-wix-react-tools). The integration adds TypeScript and runtime support helpers so you can define your own stylable-react-components.  
 
-We offer a [custom react integration](#automatic-integration-with-wix-react-tools) that adds typescript and runtime support helpers that make defining stylable-react components easy.  
-
-However you are more then welcome to manually integrate it or build your own helpers.
+If you don't use the custom integration, you can manually integrate **Stylable** with a React component as described below. You can also build your own helpers.
 
 ## Manual Integration 
 
-First read the [Runtime guide](../guides/runtime.md) to understand the stylable runtime API.
+1. Before you begin, read the [Runtime guide](../guides/runtime.md) to understand the **Stylable** runtime API.
 
-To manualy integrate stylable to a React component, you **must** first mark the root element of the component:
+2. To manualy integrate **Stylable** to a React component, you **must** first mark the root element of the component:
 
 ```jsx
 import style from "style.st.css";
@@ -28,16 +26,16 @@ class Comp extends React.Component {
 }
 ```
 
-This generates and add the props needed to define the root element for styling:
-* Mark component root by setting the root target `className`
-* Set component states using `data-*` attributes 
-* Append `className` override from component props to the root `className`
-* Custom or overriden component states are added from external `data-*` props
+3. Do the following to generate and add the props needed to define the root element for styling:
+    * Mark component root by setting the root target `className`
+    * Set component states using `data-*` attributes 
+    * Append `className` override from component props to the root `className`
+    * Custom or overriden component states are added from external `data-*` props
 
-> Note:  
-> We recommend passing the props `className` and `data-*` in order to enable external styling. To make the component more stylable, we believe it is best to also merge the `style` prop.
+> **Note**:  
+> To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
 
-Any other node can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
+4. All other nodes, other than `root`, can be marked directly with the class mapping and the [$cssStates](../guides/runtime#custom-state-mapping) function:
 
 ```jsx
 import style from "style.st.css";
