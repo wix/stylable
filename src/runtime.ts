@@ -1,9 +1,9 @@
-import {RuntimeStylesheet, StateMap, StylesheetLocals} from './types';
+import { PartialProps, RuntimeStylesheet, StateMap, StylesheetLocals } from './types';
 
 export function create(
     root: string,
     namespace: string,
-    localMapping: {[key: string]: string},
+    localMapping: { [key: string]: string },
     css: string | null,
     moduleId: string
 ): RuntimeStylesheet {
@@ -19,7 +19,7 @@ export function create(
 
     const lo_ns = namespace.toLowerCase();
 
-    function cssStates(stateMapping?: StateMap) {
+    function cssStates(stateMapping?: StateMap | null) {
         return stateMapping ? Object.keys(stateMapping).reduce((states, key) => {
             if (stateMapping[key]) {
                 states['data-' + lo_ns + '-' + key.toLowerCase()] = true;
@@ -29,7 +29,11 @@ export function create(
     }
 
     function get(localName: string) {
-        return (locals as {[key: string]: string})[localName];
+        return (locals as { [key: string]: string })[localName];
+    }
+
+    function mapClasses(classNameString: string): string {
+        return classNameString.split(/\s+/g).map(className => get(className) || className).join(' ');
     }
 
     const locals: StylesheetLocals = localMapping as any;
@@ -44,10 +48,11 @@ export function create(
     locals.$get = get;
     locals.$cssStates = cssStates;
 
-    function apply(className: string, states?: StateMap, props?: {className?: string, [key: string]: any}) {
-        className = className ? locals.root + ' ' + className : locals.root;
+    function apply(className: string, states?: StateMap | null, props?: PartialProps) {
 
-        const base: any = cssStates(states);
+        className = className ? mapClasses(className) : '';
+
+        const base: PartialProps = cssStates(states);
 
         if (props) {
             for (const k in props) {
