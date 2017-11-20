@@ -1,4 +1,4 @@
-import { RuntimeStylesheet, StateMap, StylesheetLocals } from './types';
+import { PartialProps, RuntimeStylesheet, StateMap, StylesheetLocals } from './types';
 
 export function create(
     root: string,
@@ -47,17 +47,12 @@ export function create(
 
     locals.$get = get;
     locals.$cssStates = cssStates;
-    locals.$mapClasses = mapClasses;
 
-    function apply(className: string, states?: StateMap | null, props?: { className?: string, [key: string]: any }) {
+    function apply(className: string, states?: StateMap | null, props?: PartialProps) {
 
-        if (props) {
-            className = className ? locals.root + ' ' + mapClasses(className) : locals.root;
-        } else {
-            className = className ? mapClasses(className) : '';
-        }
+        className = className ? mapClasses(className) : '';
 
-        const base: any = cssStates(states);
+        const base: PartialProps = cssStates(states);
 
         if (props) {
             for (const k in props) {
