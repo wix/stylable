@@ -36,6 +36,9 @@ At build time, the preprocessor converts the **Stylable** CSS into flat, static,
 
 Viva CSS, and welcome **Stylable**. We hope you like it. 
 
+## Videos
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Cx-JyJ9eXks?rel=0" frameborder="0" allowfullscreen></iframe>
+
 ## Documentation
 
 [Learn more about **Stylable**](./docs/get-started.md) and get started with step by step instructions and code examples.
