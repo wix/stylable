@@ -1,0 +1,126 @@
+<p><strong>Stylable</strong> components should be easily stylable and themable from the outside. This means that the stylesheet describing the component CSS should be as <strong>simple</strong> and <strong>generic</strong> as possible, and should expose a clear and concise API for its internal parts.</p>
+
+<p>When building your components, we recommend following the guidelines below. We’ve accumulated these through our work with <strong>Stylable</strong>:</p>
+
+<h2 id="avoid-size-declarations">Avoid size declarations</h2>
+
+<p>Try avoiding size declaration just because it offers an easier API. To override a component specifying size limitations, you would need to override multiple CSS declarations.</p>
+
+<p>If you do set a default size or size limitations, use <code class="highlighter-rouge">em/rem</code> units to resize to the HTML context.</p>
+
+<h2 id="give-meaningful-names">Give meaningful names</h2>
+
+<p>Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a <a href="../references/pseudo-elements.md"><code class="highlighter-rouge">pseudo-element</code></a> and should be considered part of the component API.</p>
+
+<p>Use camelCase and avoid hyphens (-) and capital letters at the beginning.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* good */</span>
+<span class="nt">Gallery</span><span class="nd">::navBtn::label</span> <span class="p">{}</span> <span class="c">/* camelCase with clear pseudo-element names  */</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* bad */</span>
+<span class="nt">Gallery</span><span class="nd">::galleryNavBtn</span> <span class="p">{}</span> <span class="c">/* it is better to reuse the generic component id */</span>
+<span class="nt">Gallery</span><span class="nd">::nav-btn</span> <span class="p">{}</span> <span class="c">/* don't use kebab-case - stylable exports JS */</span>
+</code></pre></div></div>
+
+<h2 id="avoid-global-settings-in-your-stylesheet">Avoid global settings in your stylesheet</h2>
+
+<p>Try avoiding global-related selectors like <code class="highlighter-rouge">@media</code> or matching DOM outside of the component scope like <code class="highlighter-rouge">body</code>. These would potentially cause side-effects if others use them.</p>
+
+<p><a href="../references/tag-selectors.md">Tag selectors</a> should be avoided inside a component because they affect any nested component or element. The exception to this is when specifically targeting the tag with <strong>child selector</strong> (for example <code class="highlighter-rouge">.root &gt; p</code>) and not a <strong>descendent selector</strong> (for example <code class="highlighter-rouge">.root p</code>).</p>
+
+<h2 id="keep-your-layout-minimal">Keep your layout minimal</h2>
+
+<p>While internal structure does demand some CSS to work correctly, you should strive to find the minimal combination of CSS to make the component layout work as it should.</p>
+
+<h2 id="keep-coloring-to-a-minimum">Keep coloring to a minimum</h2>
+
+<p>The component stylesheet should describe the bare minimum coloring to make its parts visible. Colors should be used sparingly, and just to achieve visibility.</p>
+
+<p>The best practice is to use 2 colors across the project for contrasting text and background.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.options</span> <span class="p">{</span> 
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span> 
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Note</strong>:
+In the future, we may implement <strong>Stylable</strong> formatters to help minimize the amount of colors needed in a color scheme:</p>
+  <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.options</span> <span class="p">{</span> 
+   <span class="nl">background</span><span class="p">:</span> <span class="n">darker</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">),</span> <span class="m">0.5</span><span class="p">);</span> 
+   <span class="nl">color</span><span class="p">:</span> <span class="nb">lighter</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">),</span> <span class="m">0.3</span><span class="p">);</span> 
+<span class="p">}</span>
+</code></pre></div>  </div>
+</blockquote>
+
+<h2 id="keep-browser-defaults-intact">Keep browser defaults intact</h2>
+
+<p>Browsers add a default user agent stylesheet to provide the HTML with a default “style”.</p>
+
+<p>It is tempting to “clean up” a <code class="highlighter-rouge">button</code>’s default style in the component. But, we want our component to “blend in” in every context it’s used. A button tag in our component should look like other button tags in the context of the application where it is used.</p>
+
+<p>As such, when building a component, it is best to set CSS only for behaviors that <strong>must</strong> be overridden for the component to function.</p>
+
+<h2 id="keep-specificity-low">Keep specificity low</h2>
+
+<p>Write low specificity selectors that will be easy to override from a parent component.</p>
+
+<h2 id="keep-your-selectors-as-simple-as-possible">Keep your selectors as simple as possible</h2>
+
+<p>It takes a more complex selector to override a high specificity selector that was defined in a component stylesheet.</p>
+
+<p>Override CSS only for behaviors that <strong>must</strong> be overridden for the component to function and minimize the use of <code class="highlighter-rouge">tag selectors</code> and <code class="highlighter-rouge">pseudo-elements</code> of nested components.</p>
+
+<p>Styling pseudo-elements in a component creates a selector that takes more specificity to override</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
+<span class="c">/* 
+&gt; directly style navBtn - a type of button
+selector: .comp__root .comp__gallery.gallery__root .gallery__navBtn
+specificity: 0,0,4,0 
+*/</span>
+<span class="nc">.gallery</span><span class="nd">::navBtn</span> <span class="p">{}</span> 
+</code></pre></div></div>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"page"</span><span class="p">;</span>
+<span class="c">/* 
+&gt; less specific than component override 
+selector: .page__root button
+specificity: 0,0,1,1
+*/</span>
+<span class="nt">button</span> <span class="p">{}</span> 
+</code></pre></div></div>
+
+<h2 id="justify-your-css-declarations-in-comments">Justify your CSS declarations in comments</h2>
+
+<p>A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify each of them with a comment per this example.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.link</span> <span class="p">{</span>
+    <span class="c">/* override default anchor color */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">currentColor</span><span class="p">;</span>
+    <span class="c">/* cover entire line */</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">block</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This helps with maintenance and development since we don’t test CSS as thoroughly as other code.</p>
+
+<h2 id="use-consistent-variables-from-a-theme">Use consistent variables from a theme</h2>
+
+<p>Import theme variables from the <a href="../guides/project-commons.md">project commons stylesheet</a>.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./project.st.css"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.item</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="keep-svg-and-images-overridable">Keep SVG and images overridable</h2>
+
+<p>When using an image element source or svg directly in the DOM, it is not easy, and in some cases not possible, to modify the asset from outside the component using CSS.</p>
+
+<p>When an asset is part of the style API, it should be placed in the background of an element, allowing it to be overridden from a parent component.</p>

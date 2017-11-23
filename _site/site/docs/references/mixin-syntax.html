@@ -1,0 +1,94 @@
+<p>You can use <strong>Stylable</strong> to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets.</p>
+
+<p>Here are some use cases where you can use mixins with other <strong>Stylable</strong> features:</p>
+<ul>
+  <li>Layouts - easily describe complex layouts.</li>
+  <li>Helpers - use custom CSS shortcuts, like timers, effects and macros.</li>
+</ul>
+
+<h2 id="example">Example</h2>
+
+<p>The value <code class="highlighter-rouge">textTooltip</code> of the external file <code class="highlighter-rouge">my-mixins</code> is imported. The class selector <code class="highlighter-rouge">.submitButton</code> uses the mixin syntax and applies parameters. In this case, to wait <code class="highlighter-rouge">300</code> milliseconds to display the <code class="highlighter-rouge">dataTooltip</code> hover text on the button.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">textTooltip</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.submitButton</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">textTooltip</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="n">dataTooltip</span><span class="p">);</span> <span class="c">/* apply mixin */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="syntax">Syntax</h2>
+
+<p>You can use mixins with parameters, without parameters, and with multiple mixins.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nc">.a</span> <span class="p">{</span>
+    <span class="c">/* no parameters */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.b</span> <span class="p">{</span>
+    <span class="c">/* multiple parameters */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.c</span> <span class="p">{</span>
+    <span class="c">/* apply multiple mixins */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">,</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Any parameter you add to the mixin is considered a string.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nc">.a</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="n">xxx</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
+<span class="p">}</span>
+<span class="nc">.b</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xxx"</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
+<span class="p">}</span>
+<span class="nc">.c</span> <span class="p">{</span> <span class="c">/* use quotations to include comma */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xx,x"</span><span class="p">);</span> <span class="c">/* ["300", "xx,x"] */</span>
+<span class="p">}</span>
+<span class="nc">.d</span> <span class="p">{</span> <span class="c">/* escape slashes */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"\"xxx\""</span><span class="p">);</span> <span class="c">/* ["300", "\"xxx\""] */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="how-mixins-are-applied">How mixins are applied</h2>
+
+<p>Mixins can add CSS declarations to the CSS rule set to which they are applied:</p>
+
+<ul>
+  <li>Rules are added at the position in the CSS where the <code class="highlighter-rouge">-st-mixin</code> is declared.</li>
+  <li>Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.</li>
+  <li>Multiple mixins are applied according to the order that they are specified.</li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nc">.a</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">golden</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.a</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="c">/* added by golden */</span>
+<span class="p">}</span>
+<span class="nc">.a</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>

@@ -1,0 +1,48 @@
+<p>Use <code class="highlighter-rouge">-st-compose</code> as a way to automatically connect between two or more style classes so that if one is used, the DOM element will receive the composed classes as well.</p>
+
+<p>For example:</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="nc">.item</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.special</span> <span class="p">{</span>
+    <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>In the above stylesheet, anyone using <code class="highlighter-rouge">style.special</code> automatically gets both <code class="highlighter-rouge">special</code> and <code class="highlighter-rouge">item</code> classes applied.</p>
+
+<p>The output JS mapping for the above is:</p>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* JS */</span>
+<span class="p">{</span>
+    <span class="nl">item</span><span class="p">:</span> <span class="s2">"Comp__item"</span><span class="p">,</span>
+    <span class="nx">special</span><span class="p">:</span> <span class="s2">"Comp__special Comp__item"</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="multiple-classes">Multiple classes</h2>
+
+<p>You can compose multiple classes.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="nc">.item</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.round</span> <span class="p">{</span>
+    <span class="nl">border-radius</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.special</span> <span class="p">{</span>
+    <span class="py">-st-compose</span><span class="p">:</span> <span class="n">item</span><span class="p">,</span> <span class="n">round</span><span class="p">;</span> <span class="c">/* pass multiple classes */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* JS */</span>
+<span class="p">{</span>
+    <span class="nl">item</span><span class="p">:</span> <span class="s2">"Comp__item"</span><span class="p">,</span>
+    <span class="nx">round</span><span class="p">:</span> <span class="s2">"Comp__round"</span><span class="p">,</span>
+    <span class="nx">special</span><span class="p">:</span> <span class="s2">"Comp__special Comp__item Comp__round"</span>
+<span class="p">}</span>
+</code></pre></div></div>

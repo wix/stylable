@@ -1,0 +1,116 @@
+<p>We are now experimenting with a new <a href="https://github.com/wix/stylable-components">component library</a> based on <strong>Stylable</strong> and React. It is in the <strong>early development stages</strong> and will be available soon. Here are some guidelines we gathered related to this project that you may be interested in following if you build your own library.</p>
+
+<p><strong>Stylable</strong> enables you to author a component library, that can be themed, and easily consumed and styled, by other <strong>Stylable</strong> projects.</p>
+
+<p><strong>Stylable</strong> is the styling, CSS side of working with components. For the <strong>Stylable</strong> CSS to be fully useful, it must integrate with a component library from another source, for example React.</p>
+
+<h2 id="recommended-folder-structure">Recommended folder structure</h2>
+
+<p>As a best practice, we recommend following this folder structure:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
+    |
+    --- components/
+    |   |
+    |   --- my-component/
+    |   |   |
+    |   |   my-component.jsx
+    |   |   my-component.st.css
+    |   |
+    |   project.st.css
+    |
+    --- themes/
+    |   |
+    |   backoffice-theme.st.css
+    |   app-theme.st.css
+</code></pre></div></div>
+
+<ul>
+  <li>The <code class="highlighter-rouge">src/components</code> folder contains:
+    <ul>
+      <li>a project stylesheet describing the project CSS API</li>
+      <li>a folder for each component with its stylable stylesheet</li>
+    </ul>
+  </li>
+  <li>The <code class="highlighter-rouge">src/themes</code> folder contains the relevant theme files.</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note:</strong> Although you may think the project file should be at the <code class="highlighter-rouge">src</code> level, we recommend you to create the <code class="highlighter-rouge">project.st.css</code> file at the same level as your components because there are many links between this file and your component files.</p>
+</blockquote>
+
+<h2 id="the-projectstcss-file">The <code class="highlighter-rouge">project.st.css</code> file</h2>
+
+<p>As a first step, create a <a href="./project-commons.md">project commons stylesheet</a> named <code class="highlighter-rouge">project.st.css</code> in the <code class="highlighter-rouge">src/components</code> directory. This exposes the API for the project.</p>
+
+<blockquote>
+  <p><strong>Note</strong>:
+It is recommended to leave the project’s CSS rulesets empty with no declarations. These should be defined in a theme file.</p>
+</blockquote>
+
+<h2 id="themable-components">Themable components</h2>
+
+<p>Your components should be as easy to style and theme as possible. We recommend following these guidelines when planning:</p>
+
+<ul>
+  <li>Expose a good style API and its <a href="../references/pseudo-classes.md">custom states</a>.</li>
+  <li>The component API should contain the minimum styling required for the component to function. For example some components may require layout.</li>
+  <li>The effect of CSS combinations is not always easy to understood and styles are generally less tested, therefore, we recommend adding comments that explain the reason for unclear CSS.</li>
+  <li>Reusable <a href="../references/variables.md">vars</a> should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.</li>
+  <li>Use <a href="./component-variants.md">component variants</a> and <a href="./shared-classes.md">shared classes</a> from the project file (<code class="highlighter-rouge">project.st.css</code>).</li>
+</ul>
+
+<p>More best practices for themable components can be found in the <a href="./stylable-component-best-practices.md"><strong>Stylable</strong> component best practices guide</a>.</p>
+
+<p>In the following code, you can see a component described with:</p>
+<ul>
+  <li>2 colors used from project</li>
+  <li>1 shared class</li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* app.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"App"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'../project.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">,</span> <span class="n">emphasisBox</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.messageBox</span> <span class="p">{</span>
+    <span class="c">/* append emphasisBox CSS class to messageBox JS output */</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">emphasisBox</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="theme">Theme</h2>
+
+<p>The <strong>Stylable</strong> library can include multiple theme files that render a different look and feel per theme. A theme imports the <code class="highlighter-rouge">project.st.css</code> file as <a href="../references/theme.md">theme</a> to override variables, variants and classes from the library.</p>
+
+<p>In the following code, you can see a theme file customizing the library:</p>
+<ul>
+  <li>override <code class="highlighter-rouge">color1</code> and <code class="highlighter-rouge">color2</code></li>
+  <li>CSS for <code class="highlighter-rouge">cancelButton</code> variant component</li>
+  <li>CSS for <code class="highlighter-rouge">emphsisBox</code> shared class</li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* backoffice-theme.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"backofficeTheme"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'../project.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">,</span> <span class="n">cancelButton</span><span class="p">,</span> <span class="n">emphasisBox</span><span class="p">;</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancelButton</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.emphasisBox</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">3px</span> <span class="nb">solid</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Read more about using themes in <a href="./stylable-application#apply-component-library-theme">theme an application</a>.</p>
+

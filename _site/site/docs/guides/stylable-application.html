@@ -1,0 +1,88 @@
+<p>When building a <strong>Stylable</strong> application, you want to share definitions between parts of the application and consume 3rd party <strong>Stylable</strong> component libraries.</p>
+
+<h2 id="the-projectstcss-file">The <code class="highlighter-rouge">project.st.css</code> file</h2>
+
+<p>It is recommended to have a <a href="./project-commons.md">project commons stylesheet</a> that includes:</p>
+
+<ul>
+  <li><a href="../references/theme.md">Theme stylesheets</a> - to apply 3rd party component library themes</li>
+  <li>Shared common CSS definitions between parts of the project:
+    <ul>
+      <li><a href="../references/variables.md">variables</a> - values to reuse in declarations</li>
+      <li><a href="./shared-classes.md">shared classes</a> - classes that can be reused in components</li>
+      <li><a href="./component-variants.md">component variants</a> - semantic component classes</li>
+    </ul>
+  </li>
+</ul>
+
+<p>An application would define CSS with the final style definitions:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* project.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">fontBig</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="py">fontSmall</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button/button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancelButton</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="apply-component-library-theme">Apply component library theme</h2>
+
+<p>As a best practice, the project commons should use the <a href="../references/theme.md"><code class="highlighter-rouge">-st-theme</code></a> directive to apply 3rd party library themes. Each theme influences the components from its own library.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'form-comps/backoffice-theme.st.css'</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'panels-comps/dark-theme.st.css'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Note</strong>:
+Usually a theme is used only in a project commons file, but there are cases where you may want to show different styles between pages of your application, in which case a <a href="./stylable-component-library.md">multiple theme project structure</a> might work better.</p>
+</blockquote>
+
+<h2 id="stylable-component">Stylable component</h2>
+
+<p>The <a href="./stylable-component-best-practices.md">Stylable component best practices guide</a> describes ways to design a good component that can be styled and themed. However, when building your application, it is also common to define components with their final CSS. This makes them less “themable”, but is much simpler.</p>
+
+<p>In the following code you can see a component that is described with:</p>
+<ul>
+  <li>2 colors used from project</li>
+  <li>1 component variant</li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"dialog"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./project.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">color2</span><span class="p">,</span> <span class="n">cancelButton</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button/button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.ok</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancel</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">cancelButton</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>

@@ -1,0 +1,47 @@
+<p>You can use theming at the <a href="../guides/stylable-application.md#Apply component library theme">top level of an application</a> and to <a href="../guides/stylable-component-library.md#Theme">create a theme</a> for a component library.</p>
+
+<p>When <a href="./imports.md">importing</a> a stylesheet use<code class="highlighter-rouge">-st-theme</code> directive to add its look and feel to your stylesheet. Any CSS definitions written inside the imported stylesheet are output to the final CSS.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./theme.st.css'</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="override-classes">Override classes</h2>
+
+<p>Any <a href="../guides/shared-classes.md">shared classes</a> and <a href="../guides/component-variants.md">component variants</a> defined at the theme level can be overridden in our stylesheet by simply redefining them.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'comp-lib/backoffice-theme.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">emphasisBox</span><span class="p">,</span> <span class="n">mainGallery</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.mainGallery</span> <span class="p">{</span> <span class="c">/* component variant extends Gallery */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.mainGallery</span><span class="nd">::navButton</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.emphasisBox</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">dashed</span> <span class="no">black</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="override-theme-variables-experimental">Override theme variables (experimental)</h2>
+
+<p>Any variable defined in a theme file can be overridden. Every CSS declaration that uses that variable is overridden under our stylesheet.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-theme</span><span class="p">:</span> <span class="n">true</span><span class="p">;</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'comp-lib/backoffice-theme.st.css'</span><span class="p">;</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> <span class="c">/* override color1 with black */</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span> <span class="c">/* override color2 with purple */</span>
+<span class="p">}</span>
+</code></pre></div></div>

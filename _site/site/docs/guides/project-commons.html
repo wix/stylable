@@ -1,0 +1,31 @@
+<p>The goal of the project file is to contain the CSS commons for the project, including <a href="../references/variables.md">variables</a>, <a href="./component-variants.md">component variants</a> and <a href="./shared-classes.md">shared classes</a>.</p>
+
+<p>In the following code, you can see a project with:</p>
+<ul>
+  <li>2 color and 2 font size variables</li>
+  <li>1 <code class="highlighter-rouge">Button</code> component variant named <code class="highlighter-rouge">cancelButton</code></li>
+  <li>1 shared class for <code class="highlighter-rouge">emphasisBox</code></li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* project.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"Project"</span><span class="p">;</span>
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="m">#F012BE</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="m">#FF4136</span><span class="p">;</span>
+    <span class="py">fontBig</span><span class="p">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="py">fontSmall</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button/button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.cancelButton</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.emphasisBox</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Note</strong>:
+We recommend calling the project commons file <code class="highlighter-rouge">project.st.css</code>.</p>
+</blockquote>

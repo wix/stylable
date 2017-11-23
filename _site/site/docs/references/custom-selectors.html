@@ -1,0 +1,164 @@
+<p>You use <a href="https://drafts.csswg.org/css-extensions/#custom-selectors">custom selectors</a> to define an alias that can match complex selectors.</p>
+
+<p>For example, a specific type of button within a form that appears only when hovered can be defined as a custom selector. By defining the button as a custom selector with its own name, the button is exposed in the API and available for use by using just the custom selector name.</p>
+
+<p>You could also use custom selectors to define a group of selectors with one name. For example, you can access all the headings on a page as one custom selector. This could be useful if you want to style just their color the same.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>The following code maps the alias name <code class="highlighter-rouge">controlBtn</code> that matches any <code class="highlighter-rouge">.btn</code> CSS class nested under the <code class="highlighter-rouge">.controls</code> CSS class.</p>
+
+<hr />
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--controlBtn</span> <span class="p">.</span><span class="n">controls</span> <span class="p">.</span><span class="n">btn</span><span class="p">;</span>
+<span class="c">/* 
+selector: .Comp__root .Comp__controls .Comp__btn 
+*/</span>
+<span class="nd">:--controlBtn</span> <span class="p">{</span> <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="n">grey</span><span class="p">;</span> <span class="p">}</span>
+<span class="c">/* 
+selector: .Comp__root .Comp__controls .Comp__btn:hover 
+*/</span>
+<span class="nd">:--controlBtn:hover</span> <span class="p">{</span> <span class="nl">border-color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="expose-pseudo-element">Expose pseudo-element</h3>
+
+<p>Custom selectors generate a <a href="./pseudo-elements.md">pseudo-element</a>. So, for example, <a href="./imports.md">importing</a> a stylesheet into another stylesheet enables access to the <code class="highlighter-rouge">controlBtn</code> pseudo-element. In this example, the stylesheet <code class="highlighter-rouge">comp.st.css</code> from the previous example is imported into this stylesheet.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./comp.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Comp</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/*
+selector: .Page__root .Comp__root .Comp__controls .Comp__btn
+*/</span>
+<span class="nt">Comp</span><span class="nd">::controlBtn</span> <span class="p">{</span> 
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Note</strong>:  <br />
+If a <code class="highlighter-rouge">custom-selector</code> alias conflicts with a local CSS class name, the exposed <code class="highlighter-rouge">pseudo-element</code> targets the <code class="highlighter-rouge">custom-selector</code>. However, the exported CSS class is still exported to JavaScript.</p>
+</blockquote>
+
+<h2 id="use-cases">Use cases</h2>
+
+<p>The following examples demonstrate how to effectively use custom selectors in <strong>Stylable</strong>.</p>
+
+<h3 id="container-and-recursive-components">Container and recursive components</h3>
+
+<p>Some components might contain nested instances of themselves because they’re a container or a “recursive” component. For example, a tree component might render itself.</p>
+
+<p>If the component exposes any <code class="highlighter-rouge">pseudo-elements</code>, it is a good practice to define them as <code class="highlighter-rouge">custom selectors</code> with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors">child selectors</a> to avoid affecting the inner parts of internal instances.</p>
+
+<p>The following example shows how a tree component exposes an icon.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Tree"</span><span class="p">;</span>
+<span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--icon</span> <span class="p">.</span><span class="n">root</span> <span class="err">&gt;</span> <span class="p">.</span><span class="nb">icon</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Here you can use the icon <code class="highlighter-rouge">custom selector</code> from the outside just like you would use any other <code class="highlighter-rouge">pseudo-element</code>.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Panel"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./tree.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Tree</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/*
+selector: .Panel__root .Tree__root &gt; .Tree__icon
+*/</span>
+<span class="nt">Tree</span><span class="nd">::icon</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">yellow</span><span class="p">;</span>  <span class="c">/* paints the icons all the way down the tree */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="expose-inner-parts-that-are-deeply-defined">Expose inner parts that are deeply defined</h3>
+
+<p>When you want to make internal parts of your component API more accessible, you can describe <code class="highlighter-rouge">pseudo-elements</code> using <code class="highlighter-rouge">custom selectors</code>.</p>
+
+<p>For example, you can expose a <code class="highlighter-rouge">pseudo-element</code> named <code class="highlighter-rouge">navigationBtn</code> that enables you to style an internal gallery component’s <code class="highlighter-rouge">navBtn</code> element.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./gallery.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Gallery</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--navigationBtn</span> <span class="n">Gallery</span><span class="p">::</span><span class="n">navBtn</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="combination-selector">Combination selector</h3>
+
+<p>You may have a component with several basic CSS classes and with corresponding <code class="highlighter-rouge">pseudo-elements</code>. You could expose a combination <code class="highlighter-rouge">pseudo-element</code>.</p>
+
+<p>For example, a <code class="highlighter-rouge">pseudo-element</code> named <code class="highlighter-rouge">navBtn</code> matches any <code class="highlighter-rouge">btn</code> CSS class nested in a <code class="highlighter-rouge">nav</code> CSS class.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--navBtn</span> <span class="p">.</span><span class="n">nav</span> <span class="p">.</span><span class="n">btn</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./comp.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Comp</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/*
+selector: Page__root .Comp__root .Comp__nav .Comp__btn
+*/</span>
+<span class="nt">Comp</span><span class="nd">::navBtn</span> <span class="p">{</span> 
+    <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="n">grey</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="group-of-selectors">Group of selectors</h3>
+
+<p>You could also use custom selectors to gather a collection of selectors into a single selector. For example, you may want to access media that includes both images and videos.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
+<span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--media</span> <span class="p">.</span><span class="n">image</span><span class="p">,</span> <span class="p">.</span><span class="n">video</span><span class="p">;</span>
+<span class="c">/*
+selector: 
+.Comp__root .Comp__image, 
+.Comp__root .Comp__video 
+*/</span>
+<span class="nd">:--media</span> <span class="p">{</span> 
+    <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="n">grey</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="issues-to-consider">Issues to consider</h4>
+
+<p>Aliasing multiple selectors in a <code class="highlighter-rouge">custom selector</code> may generate lots of CSS that could affect performance.</p>
+
+<p>For example, when you import the <code class="highlighter-rouge">Comp</code> stylesheet (the selector described in the previous example) into another stylesheet, in the ouput the selector is split for each override.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./comp.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Comp</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nt">Comp</span><span class="nd">::media</span> <span class="p">{</span> 
+    <span class="nl">border-color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS Output */</span>
+<span class="nc">.Comp__root</span> <span class="nc">.Comp__image</span><span class="o">,</span> 
+<span class="nc">.Comp__root</span> <span class="nc">.Comp__video</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="n">grey</span><span class="p">;</span> 
+<span class="p">}</span>
+
+<span class="nc">.Page__root</span> <span class="nc">.Comp__root</span> <span class="nc">.Comp__image</span><span class="o">,</span> 
+<span class="nc">.Page__root</span> <span class="nc">.Comp__root</span> <span class="nc">.Comp__video</span> <span class="p">{</span>
+    <span class="nl">border-color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>

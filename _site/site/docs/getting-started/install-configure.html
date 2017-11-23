@@ -1,0 +1,69 @@
+<p>There are currently two options for installing and working with <strong>Stylable</strong> as described in the following sections.</p>
+
+<h2 id="write-your-own-project-based-on-a-stylable-boilerplate">Write your own project based on a Stylable boilerplate</h2>
+
+<p>To begin writing your own project, you can create a <strong>Stylable</strong> app from our boilerplate. It is based on <a href="https://github.com/facebookincubator/create-react-app">create-react-app</a>. To create the project, follow these instructions:</p>
+
+<p>Using npm:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install <span class="nt">-g</span> create-react-app
+
+create-react-app my-app-name <span class="nt">--scripts-version</span> stylable-scripts
+</code></pre></div></div>
+<p>For the <code class="highlighter-rouge">my-app-name</code> value above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run <code class="highlighter-rouge">yarn start</code> or <code class="highlighter-rouge">yarn build</code> to create the project in a browser.</p>
+
+<p>The project includes several basic components and <strong>Stylable</strong> stylesheets which have the suffix <code class="highlighter-rouge">.st.css</code>.</p>
+
+<h2 id="install-stylable-to-work-with-an-existing-project">Install Stylable to work with an existing project</h2>
+
+<p>To work with an existing project, you can install <strong>stylable</strong> and the <strong>stylable-integration</strong> packages from our GitHub <a href="https://github.com/wix/stylable">repository</a>.</p>
+
+<p>Install <strong>stylable</strong> and <strong>stylable-integration</strong> as a dependency in your local project.</p>
+
+<p>Using npm:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install stylable stylable-integration <span class="nt">--save-dev</span>
+</code></pre></div></div>
+<p>Using Yarn:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yarn add stylable stylable-integration
+</code></pre></div></div>
+
+<h2 id="write-in-stylable">Write in Stylable</h2>
+
+<p>Once you’ve installed either the boilerplate or the packages into your own project, you can begin writing in <strong>Stylable</strong>. Look through the <a href="./cheatsheet.md">Specifications Reference</a> for specs and code examples.</p>
+
+<p>To take advantage of code completion and diagnostics, install <a href="./stylable-intelligence.md"><strong>Stylable Intelligence</strong></a> currently supported for only Visual Studio Code (version 1.16 and later).</p>
+
+<h2 id="build-configuration">Build configuration</h2>
+
+<p>Currently we support Webpack as our build system. To author a component library, use our CLI tool to build each CSS separately.</p>
+
+<p>Add <strong>Stylable</strong> to your Webpack configuration as follows:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const StylablePlugin = require('stylable-integration/webpack-plugin');
+...
+{
+    module: {
+        rules: [
+            StylablePlugin.rule(),
+            // to load CSS assets from bundle we need the url loader configured.
+            // example configuration
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 8192
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new StylablePlugin({ injectBundleCss: true  /* dev mode */ })
+    ]
+}
+</code></pre></div></div>
+
+<p>For a production build, you should not use the <code class="highlighter-rouge">injectBundleCss</code> option. The project creates a bundle CSS asset in your output directory. Just load this into your html. You can set the file name. For details, see <a href="https://github.com/wix/stylable-integration"><strong>stylable-integration</strong></a>.</p>
+
