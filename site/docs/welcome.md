@@ -38,9 +38,7 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 
 ## Videos
-<p>
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Cx-JyJ9eXks?rel=0" frameborder="0" allowfullscreen></iframe>
-</p>
 
 ## Documentation
 
