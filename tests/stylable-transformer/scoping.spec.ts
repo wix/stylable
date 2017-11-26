@@ -801,7 +801,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector, 'class alias')
-                .to.equal('.entry--root .imported--inner-class .base--base');
+                .to.equal('.entry--root .imported--inner-class.base--root .base--base');
 
         });
 
