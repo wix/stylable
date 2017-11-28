@@ -92,3 +92,47 @@ You can set the value of a variable using another variable.
     border: 10px solid red; /* 10px solid {color1} */
 }
 ```
+
+
+## Override variables
+
+You can override variables using the ```-st-override:variableName(newValue)``` declaration.
+
+ overriding variables will cause stylable to print out all the rules effected by those variables under the ruleset requesting the override.
+
+ ```css
+
+/* File a.st.css */
+:vars{
+    mainColor:red;
+}
+
+.classWithVariable{
+    background-color:green;
+    color:value(mainColor)
+}
+
+/* File b.st.css */
+
+:import{
+    -st-from:'./a.st.css';
+    -st-named:mainColor;
+}
+.overridingClass{
+    -st-override:mainColor(blue);
+}
+
+ ```
+
+
+
+ ```css
+ .a__classWithVariable{
+     background-color:green;
+     color:red;
+ }
+
+.b__overridingClass .a__classWithVariable{
+     color:blue;
+ }
+```
