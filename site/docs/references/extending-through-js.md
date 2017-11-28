@@ -33,6 +33,13 @@ Available types and validations:
 |lineStyle| blackList |
 | display | blackList |
 | bezierCurves | blackList |
+|positionKeywords | blackList |
+|repeatStyleKeywords | blackList |
+|lineStyleKeywords | blackList |
+|boxKeywords | blackList |
+|geometryBoxKeywords | blackList |
+|transitionTimingFunctions (without cubic-bezzier variants) | blackList |
+
 
 
 Stylable uses Typescript or JSDocs to infer JS extension signatures
