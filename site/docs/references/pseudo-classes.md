@@ -8,7 +8,7 @@ In addition to CSS's native [pseudo-classes](https://developer.mozilla.org/en/do
 
 Let's say you want a component to have different styling applied to it when its content is loading. You can define `loading` as a custom pseudo-class and toggle it in your component.
 
-Native pseudo-classes like `:hover` and `:nth-child()` are valid and supported natively.
+Native pseudo-classes like `:hover` and `:nth-child()` are supported natively in **Stylable**.
 
 ## Define custom pseudo-classes
 
@@ -40,11 +40,11 @@ To define custom pseudo-classes, or states, for a simple selector, you tell **St
 
 
 
-## Future: custom pseudo-classes with parameters
+## Custom pseudo-classes with parameters
 
-in some use cases its useful to define custom states that a parameter to indicate which nodes to activate on. 
+in some use cases its useful to define custom states that use a parameter to indicate which nodes to activate on. 
 
-for example a cell in a grid can be marked using column and row pseudo classes
+for example a cell in a grid can be marked using column and row pseudo-classes
 
 ```css
 /* stateWithNumberParam.st.css */
@@ -57,7 +57,6 @@ for example a cell in a grid can be marked using column and row pseudo classes
     color:red;
 }
 
-
 ```
 
 ```css
@@ -68,17 +67,19 @@ for example a cell in a grid can be marked using column and row pseudo classes
 
 ### Types and allowed prefixes
 
-Stylable will support a number of parameter types for pseudo-classes:
+***Stylable*** supports a number of parameter types for pseudo-classes, these types allow us to provide better tooling when using the pseudo-class.
+
+in the future we intend to support extra functunality for the numeral types through build time tricks
 
 
 | Type | Allowed validations | Allowed prefixes |
-|----|----|----|----|----|
+|----|----|----|
 | string | minLength <br> maxLength | "~" - match whole words <br> "^" - match start <br> "$" - match end <br> "*" - match include |
 | number | minimum <br> maximum <br> multipleOf <br> | \> - greater then (future) <br> \< - lesser then (future) <br> n+1 - [nth child format](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child) (future)  |
 | boolean | - | - |
 | tag  | - | - |
 | enum | options | - |
-| percentage | - | \> - greater then - future <br> \< - lesser then - future |
+| percentage | - | \> - greater then - (future) <br> \< - lesser then - (future) |
 
 
 
@@ -245,7 +246,7 @@ Stylable will support a number of parameter types for pseudo-classes:
 
 ## Extend external stylesheet
 
-You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1`is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
+You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1` is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
 
 ```css
 /* example2.st.css */
