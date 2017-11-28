@@ -49,3 +49,4 @@ export type snumber<
     max extends number | null = null,
     mults extends number | null = null> = string;
 export type simage = string;
+export type scssfrag = string;
