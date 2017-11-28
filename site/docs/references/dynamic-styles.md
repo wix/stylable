@@ -11,7 +11,7 @@ if you MUST use dynamic CSS in your application you can import and use "writeCss
 
 a component that changes an internal parts background-color according to a component prop
 
-```ts
+```tsx
 import {writeCss,deleteCss} from "stylable/runtime";
 import {stylable} from "wix-react-tools";
 import styles from "./my-comp.st.css";
