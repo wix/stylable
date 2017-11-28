@@ -5,6 +5,7 @@ import {safeParse} from '../src/parser';
 import {process} from '../src/stylable-processor';
 import {reservedKeyFrames} from '../src/stylable-utils';
 import {Config, generateFromMock} from './utils/generate-test-util';
+import {nativePseudoClasses, nativePseudoElements} from '../src/native-pseudos';
 const deindent = require('deindent');
 const customButton = `
     .root{
@@ -266,21 +267,22 @@ describe('diagnostics: warnings and errors', () => {
                     }
                     expectWarningsFromTransform(config, [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]);
                 });
-                
-                it(`should not return a warning for native pseudo element`, () => {
-                    const config:Config = {
-                        entry: '/main.css',
-                        files: {
-                            '/main.css': {
-                                content: `
-                                |.root::$innerPart$|{
-                                    
-                                }`
+                nativePseudoElements.forEach(nativeElement => {
+                    it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
+                        const selector = `|.root::$${nativeElement}$|{`;
+                        const config:Config = {
+                            entry: '/main.css',
+                            files: {
+                                '/main.css': {
+                                    content: `
+                                    ${selector}
+                                        
+                                    }`
+                                }
                             }
-                        },
-                        overrideShouldWarn: (name:string) => name === 'innerPart' ? false : true
-                    }
-                    expectWarningsFromTransform(config, []);
+                        }
+                        expectWarningsFromTransform(config, []);
+                    });
                 });
             });
             
@@ -300,20 +302,22 @@ describe('diagnostics: warnings and errors', () => {
                     expectWarningsFromTransform(config, [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]);
                 });
                 
-                it(`should not return a warning for native pseudo class`, () => {
-                    const config:Config = {
-                        entry: '/main.css',
-                        files: {
-                            '/main.css': {
-                                content: `
-                                |.root:$selected$|{
-                                    
-                                }`
+                nativePseudoClasses.forEach(nativeClass => {
+                    it(`should not return a warning for native ${nativeClass} pseudo class`, () => {
+                        const selector = `|.root:$${nativeClass}$|{`
+                        const config:Config = {
+                            entry: '/main.css',
+                            files: {
+                                '/main.css': {
+                                    content: `
+                                    ${selector}
+                                        
+                                    }`
+                                }
                             }
-                        },
-                        overrideShouldWarn: (name:string) => name === 'selected' ? false : true
-                    }
-                    expectWarningsFromTransform(config, []);
+                        }
+                        expectWarningsFromTransform(config, []);
+                    });
                 });
             });
 

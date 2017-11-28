@@ -606,16 +606,6 @@ export class StylableTransformer {
 
         return {meta, symbol: tRule};
     }
-    public shouldWarn(name: string, type: string):boolean {
-        switch (type) {
-            case "element":
-                return (nativePseudoElements.indexOf(name) === -1);
-            case "class":
-                return (nativePseudoClasses.indexOf(name) === -1);
-            default: 
-                return true;
-        }   
-    }
     public handlePseudoElement(
         meta: StylableMeta,
         node: SelectorAstNode,
@@ -695,7 +685,7 @@ export class StylableTransformer {
                 }
             }
         } else if (rule){
-            if (this.shouldWarn(name, 'element')) {
+            if (nativePseudoElements.indexOf(name) === -1) {
                 this.diagnostics.warn(rule,
                     `unknown pseudo element "${name}"`,
                     {word: name});
@@ -754,7 +744,7 @@ export class StylableTransformer {
                         break;
                     }
                 } else if (rule) {
-                    if (this.shouldWarn(name, 'class')) {
+                    if (nativePseudoClasses.indexOf(name) === -1) {
                         this.diagnostics.warn(rule,
                             `unknown pseudo class "${name}"`,
                             {word: name});
