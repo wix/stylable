@@ -23,22 +23,27 @@ providing these types lets your plugin users get completions and validations whe
 Available types and validations:
 
 | Type | validations |
-|----|----|----|----|
+|----|----|
 |color| allow opacity | 
 |sizeUnit| allowedUnits <br> min <br> max <br> multiplesOf | 
 |percentage| min <br> max <br> multiplesOf | 
 |image| allowBase64 <br> allowUrl | 
 |number| min <br> max <br> multiplesOf | 
-|enum| allowedValues
+|enum| allowedValues |
+
+Native Enums
+
+| Type | validations |
+|----|----|
 |lineStyle| blackList |
 | display | blackList |
 | bezierCurves | blackList |
-|positionKeywords | blackList |
-|repeatStyleKeywords | blackList |
-|lineStyleKeywords | blackList |
-|boxKeywords | blackList |
-|geometryBoxKeywords | blackList |
-|transitionTimingFunctions (without cubic-bezzier variants) | blackList |
+| positionKeywords | blackList |
+| repeatStyleKeywords | blackList |
+| lineStyleKeywords | blackList |
+| boxKeywords | blackList |
+| geometryBoxKeywords | blackList |
+| transitionTimingFunctions (without cubic-bezzier variants) | blackList |
 
 
 
