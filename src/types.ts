@@ -48,5 +48,4 @@ export type snumber<
     min extends number | null = null,
     max extends number | null = null,
     mults extends number | null = null> = string;
-export type senum = string;
 export type simage = string;
