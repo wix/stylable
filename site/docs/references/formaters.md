@@ -101,4 +101,4 @@ you can use nested formaters:
 ## creating your own formaters
 
 you can easily create new formaters using javascript or typescript
-[read more in extending through js]('./extending-through-js.md)
+[read more in extending through js](./extending-through-js.md)
