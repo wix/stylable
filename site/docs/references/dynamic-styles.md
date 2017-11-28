@@ -13,6 +13,8 @@ render CSS uses a token to ensure dynamic CSS doesnt leak between instances, old
 
 this token is returned by renderCSS and should be passed to it in subsequent calls by the same component instance.
 
+this token should also be added to the overriding component root render node to allow scoping, this is done using ```data-style-token``` attribute.
+
 
 Params:
 
@@ -20,7 +22,7 @@ Params:
 |----|----|----|
 | styleSheet | StylableStylesheet | the overriding components stylesheet |
 | styles | StylableDynamicCSS | the CSS override to render |
-| token | string \| undefined | rerender-token 
+| token | string \| undefined | rerender-token |
 
 Returns: token
 
@@ -29,6 +31,13 @@ Returns: token
 clears CSS created by render CSS.
 
 if you have a lot of components using dynamic CSS, you should clear it when they are unmounted.
+
+Params:
+
+| name | type | description |
+|----|----|----|
+| token | string | token of the CSS to remove |
+
 
 ## Example usage
 
@@ -47,11 +56,11 @@ export default class MyComp extends React.Component<{itemColor:string},{}>{
     render(){
         this.dynamicCssToken = renderCss(styles,{
             ".gallery::item":{
-                backgroundColor:this.props.itemColor
+                'background-color':this.props.itemColor
             }
         }, this.dynamicCssToken);
 
-        return <div st-dynamic-style={this.dynamicCssToken}>
+        return <div data-style-token={this.dynamicCssToken}>
             <Gallery/>
         </div>
     }
@@ -60,5 +69,13 @@ export default class MyComp extends React.Component<{itemColor:string},{}>{
     }
 }
 
+```
+
+this call to renderCss will generate the following CSS for ```dynamicCssToken="x"``` and ```itemColor="green"``` .
+
+```css
+[data-style-token="x"] .example__gallery .gallery__item{
+    background-color:green;
+}
 
 ```
