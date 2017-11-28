@@ -94,9 +94,9 @@ You can set the value of a variable using another variable.
 ```
 
 
-## Override variables
+## Override variables - option 1
 
-You can override variables using the ```-st-override:variableName(newValue)``` declaration.
+You can override variables using the ```-st-$variableName:newValue``` declaration.
 
  overriding variables will cause stylable to print out all the rules effected by those variables under the ruleset requesting the override.
 
@@ -119,7 +119,7 @@ You can override variables using the ```-st-override:variableName(newValue)``` d
     -st-named:mainColor;
 }
 .overridingClass{
-    -st-override:mainColor(blue);
+    -st-$mainColor:blue;
 }
 
  ```
