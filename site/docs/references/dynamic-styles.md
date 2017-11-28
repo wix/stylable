@@ -28,6 +28,9 @@ export default class MyComp extends React.Component<{itemColor:string},{}>{
         }, this.dynamicCssToken);
         return <div data-dynamic-style={this.dynamicCssToken}></div>
     }
+    componentWillUnmount(){
+        deleteCss(this.dynamicCssToken);
+    }
 }
 
 
