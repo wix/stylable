@@ -27,6 +27,7 @@ export interface Config {
     usedFiles?: string[];
     trimWS?: boolean;
     optimize?: boolean;
+    overrideShouldWarn?: (name: string, type: string) => boolean;
 }
 
 export type RequireType = (path: string) => any;
@@ -62,6 +63,10 @@ export function generateFromMock(config: Config, diagnostics: Diagnostics = new 
         keepValues: false,
         optimize: config.optimize
     });
+
+    if (config.overrideShouldWarn) {
+        t.shouldWarn = config.overrideShouldWarn
+    }
 
     const result = t.transform(fileProcessor.process(entry));
 

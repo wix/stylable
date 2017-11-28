@@ -130,9 +130,9 @@ function expectWarningsFromTransform(config: Config, warnings: Warning[]) {
 
 describe('diagnostics: warnings and errors', () => {
     // TODO2: next phase
-    xdescribe('syntax', () => {
+    describe('syntax', () => {
 
-        describe('selectors', () => {
+        xdescribe('selectors', () => {
             it('should return warning for unidentified tag selector', () => {
                 expectWarnings(`
                     |Something| {
@@ -167,7 +167,7 @@ describe('diagnostics: warnings and errors', () => {
             });
 
         });
-        describe('ruleset', () => {
+        xdescribe('ruleset', () => {
             it('should return warning for unterminated ruleset', () => {
                 expectWarnings(`
                     .root{
@@ -178,7 +178,7 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{message: '; expected', file: 'main.css'}]);
             });
         });
-        describe('rules', () => {
+        xdescribe('rules', () => {
             it('should return warning for unterminated rule', () => {
                 expectWarnings(`
                     .root{
@@ -222,7 +222,7 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{message: 'unknown directive "-st-something"', file: 'main.css'}]);
             });
         });
-        describe('states', () => {
+        xdescribe('states', () => {
             it('should return warning for state without selector', () => {
                 expectWarnings(`
                     |:hover|{
@@ -240,7 +240,7 @@ describe('diagnostics: warnings and errors', () => {
             });
         });
         describe('pseudo selectors', () => {
-            it('should return warning for native pseudo elements without selector', () => {
+            xit('should return warning for native pseudo elements without selector', () => {
                 expectWarnings(`
                     |::before|{
 
@@ -251,21 +251,72 @@ describe('diagnostics: warnings and errors', () => {
                     }]);
             });
 
-            it('should return warning for unknown pseudo element', () => {
-                expectWarnings(`
-                    .root::|mybtn|{
-
+            describe('elements', () => {
+                it('should return a warning for an unknown pseudo element', () => {
+                    const config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                |.root::$myBtn$|{
+                                    
+                                }`
+                            }
+                        }
                     }
-                `, [{message: 'unknown pseudo element "mybtn"', file: 'main.css'}]);
+                    expectWarningsFromTransform(config, [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]);
+                });
+                
+                it(`should not return a warning for native pseudo element`, () => {
+                    const config:Config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                |.root::$innerPart$|{
+                                    
+                                }`
+                            }
+                        },
+                        overrideShouldWarn: (name:string) => name === 'innerPart' ? false : true
+                    }
+                    expectWarningsFromTransform(config, []);
+                });
+            });
+            
+            describe('classes', () => {
+                it('should return a warning for an unknown pseudo class', () => {
+                    const config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                |.root:$superSelected$|{
+                                    
+                                }`
+                            }
+                        }
+                    }
+                    expectWarningsFromTransform(config, [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]);
+                });
+                
+                it(`should not return a warning for native pseudo class`, () => {
+                    const config:Config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                |.root:$selected$|{
+                                    
+                                }`
+                            }
+                        },
+                        overrideShouldWarn: (name:string) => name === 'selected' ? false : true
+                    }
+                    expectWarningsFromTransform(config, []);
+                });
             });
 
-            it('should return warning for unknown pseudo element', () => {
-                expectWarnings(`
-                    .root::|mybtn|{
-
-                    }
-                `, [{message: 'unknown pseudo element "mybtn"', file: 'main.css'}]);
-            });
         });
 
     });
