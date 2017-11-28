@@ -33,20 +33,20 @@ export type Pojo<T = any> = { [key: string]: T } & object;
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;
 
-export type scolor<min extends number | null = null, max extends number | null = null> = string;
-export type ssize<
+export type stColor<min extends number | null = null, max extends number | null = null> = string;
+export type stSize<
     unit extends string,
     min extends number | null = null,
     max extends number | null = null,
     mults extends number | null = null> = string;
-export type spercent<
+export type stPercent<
     min extends number | null = null,
     max extends number | null = null,
     mults extends number | null = null> = string;
-export type sstring = string;
-export type snumber<
+export type stString = string;
+export type stNumber<
     min extends number | null = null,
     max extends number | null = null,
     mults extends number | null = null> = string;
-export type simage = string;
-export type scssfrag = string;
+export type stImage = string;
+export type stCssFrag = string;
