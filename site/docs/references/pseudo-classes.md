@@ -38,6 +38,208 @@ To define custom pseudo-classes, or states, for a simple selector, you tell **St
 .Example1__root[data-Example1-loading][data-Example1-toggled] { color: blue; }
 ```
 
+
+
+## Future: custom pseudo-classes with parameters
+
+in some use cases its useful to define custom states that a parameter to indicate which nodes to activate on. 
+
+for example a cell in a grid can be marked using column and row pseudo classes
+
+```css
+/* stateWithNumberParam.st.css */
+.cell{
+    -st-states: column(number), 
+                row(number) 
+}
+
+.cell:column(1):row(1){
+    color:red;
+}
+
+
+```
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-column="1"][data-Example1-row="1"] { color: red; }
+
+```
+
+### Types and allowed prefixes
+
+Stylable will support a number of parameter types for pseudo-classes:
+
+
+| Type | Allowed validations | Allowed prefixes |
+|----|----|----|----|----|
+| string | minLength <br> maxLength | "~" - match whole words <br> "^" - match start <br> "$" - match end <br> "*" - match include |
+| number | minimum <br> maximum <br> multipleOf <br> | \> - greater then (future) <br> \< - lesser then (future) <br> n+1 - [nth child format](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child) (future)  |
+| boolean | - | - |
+| tag  | - | - |
+| enum | options | - |
+| percentage | - | \> - greater then - future <br> \< - lesser then - future |
+
+
+
+
+
+#### String example
+
+```css
+/* defining state */
+.token{
+    -st-states: fieldName(string);
+}
+
+/* customize fields with fieldName email */
+.token:fieldName(email){
+    color:lightBlue;
+}
+
+/* customize fields with fieldName that starts with user_ */
+.token:fieldName(^user_){
+    color:blue;
+}
+
+/* customize fields with fieldName that ends with _id */
+.token:fieldName($_id){
+    color:gray;
+}
+
+/* customize fields with fieldName that includes error */
+.token:fieldName(*error){
+    color:red;
+}
+
+
+/* using includes with "not" operator */
+.token:fieldName(!*error){
+    border:1px solid green;
+}
+```
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-fieldName="email"] { color: lightBlue; }
+.Example1__root[data-Example1-fieldName^="user_"] { color: blue; }
+.Example1__root[data-Example1-fieldName$="_id"] { color: gray; }
+.Example1__root[data-Example1-fieldName*="error"] { color: red; }
+.Example1__root:not([data-Example1-fieldName*="error"]) { color: red; }
+
+```
+
+
+#### Number example
+
+```css
+/* stateWithNumberParam.st.css */
+.cell{
+    -st-states: column(number);
+}
+
+/* customize fields with at column 1 */
+.cell:column(1){
+    color:lightBlue;
+}
+
+/* customize column greater then 1 ( FUTURE ) */
+.cell:column(n+1){
+    color:blue;
+}
+
+
+/* customize column greater then 3 ( FUTURE ) */
+.cell:column(>3){
+    background:blue;
+}
+
+/* customize column lesser then 2 ( FUTURE ) */
+.cell:column(<2){
+    background:red;
+}
+
+```
+
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-column="1"] { color: lightBlue; }
+.Example1__root[data-Example1-column$time-line="^a"] { color: blue; }
+.Example1__root[data-Example1-column$time-line="^abc"] { background: blue; }
+.Example1__root[data-Example1-column$n+1="^abc"] { background: blue; }
+.Example1__root:not([data-Example1-column$time-line="*c"]) { background: red; }
+
+```
+
+
+#### Boolean example
+
+
+```css
+/* stateWithBooleanParam.st.css */
+.token{
+    -st-states: selected;
+}
+
+.token:selected{
+    color:red;
+}
+
+
+```
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-selected] { color: red; }
+
+```
+
+
+
+#### Tag example
+
+
+```css
+/* stateWithBooleanParam.st.css */
+.token{
+    -st-states: related(tags);
+}
+
+.token:related(flat-earth){
+    color:red;
+}
+
+
+```
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-related~="flat-earth"] { color: red; }
+
+```
+#### Enum example
+
+
+```css
+/* stateWithBooleanParam.st.css */
+.token{
+    -st-states: size(small | mid | large);
+}
+
+.token:size(large){
+    color:red;
+}
+
+
+```
+
+```css
+/* CSS output*/
+.Example1__root[data-Example1-size="large"] { color: red; }
+
+```
+
 > **Note**    
 > You can also override the behavior of native pseudo-classes. This can enable you to write [polyfills](https://remysharp.com/2010/10/08/what-is-a-polyfill) for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app's behavior does not change. We don't recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.
 
