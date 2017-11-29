@@ -144,11 +144,15 @@ in the future we intend to support extra functunality for the numeral types thro
     color:lightBlue;
 }
 
-/* customize column greater then 1 ( FUTURE ) */
-.cell:column(n+1){
-    color:blue;
+/* customize using css number matching ( FUTURE ) */
+.cell:column(2n+1){
+    color:green;
 }
 
+/* customize using css odd/even keywords ( FUTURE ) */
+.cell:column(even){
+    color:grey;
+}
 
 /* customize column greater then 3 ( FUTURE ) */
 .cell:column(>3){
@@ -166,6 +170,8 @@ in the future we intend to support extra functunality for the numeral types thro
 ```css
 /* CSS output*/
 .Example1__root[data-Example1-column="1"] { color: lightBlue; }
+.Example1__root[data-Example1-column$modula="2|1"] { color: green; }
+.Example1__root[data-Example1-column$modula="2|0"] { color: grey; }
 .Example1__root[data-Example1-column$time-line="^a"] { color: blue; }
 .Example1__root[data-Example1-column$time-line="^abc"] { background: blue; }
 .Example1__root[data-Example1-column$n+1="^abc"] { background: blue; }
@@ -173,6 +179,33 @@ in the future we intend to support extra functunality for the numeral types thro
 
 ```
 
+*all the future features described above are implemented using static processing.*
+
+*because of that you will have to declare them at build time in order to use them with dynamic css*
+
+```css
+.cell{
+    -st-states: column(number);
+    -st-states: done(number<0,100>);
+}
+
+
+.cell:column(2n+x):column(3n+x):column(4n+x){
+    /*will let stylable know you're using the css modula syntax at runtime with: 
+    2n+x,3n+x or 4n+x, stylable runtime will now know to add the right data attributes*/
+}
+
+.cell:column(x){
+    /* will let stylable know your gonna use the number current limits, assumes a stepValue of 1, minValue of 0, maxValue of 10 if not specified*/
+}
+
+
+.cell:column(5x){
+    /* will let stylable know your gonna use the number current limits, with step value 5,
+    minValue of 0, maxValue of 10*/
+}
+
+```
 
 #### Boolean example
 
