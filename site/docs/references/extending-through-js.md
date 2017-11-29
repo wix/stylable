@@ -25,10 +25,10 @@ Available types and validations:
 | Type | validations |
 |----|----|
 |color| allow opacity | 
-|sizeUnit| allowedUnits <br> min <br> max <br> multiplesOf | 
-|percentage| min <br> max <br> multiplesOf | 
-|image| allowBase64 <br> allowUrl | 
-|number| min <br> max <br> multiplesOf | 
+|sizeUnit| allowedUnits, min, max, multiplesOf | 
+|percentage| min, max, multiplesOf | 
+|image| allowBase64, allowUrl | 
+|number| min, max, multiplesOf | 
 |enum| allowedValues |
 
 Native Enums
