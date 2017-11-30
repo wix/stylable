@@ -29,6 +29,8 @@ We also &hearts; TypeScript. TypeScript helps us manage these large projects, te
 
 So we created **Stylable** — a CSS preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
 
+![Stylable Intelligence](./images/intelligence.gif)
+
 # How does Stylable perform this voodoo?
 
 * It scopes styles to components so they don’t “leak” and clash with other styles.
@@ -36,7 +38,6 @@ So we created **Stylable** — a CSS preprocessor that allows you to write style
 * It sets themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 * At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
-![Stylable Intelligence](./images/intelligence.gif)
 
 # Shut up and take my money!
 
