@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { createTransformer } from '../utils/generate-test-util';
 
-describe('Stylable selector meta data', () => {
+describe('Stylable intellisense selector meta data', () => {
 
     it('resolve single class element', () => {
 
@@ -116,6 +116,7 @@ describe('Stylable selector meta data', () => {
                 '/other.st.css': {
                     content: `
                         .c {
+                            -st-states: b;
                         }
                     `
                 }

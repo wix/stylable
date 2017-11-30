@@ -742,13 +742,14 @@ export class StylableTransformer {
                 return current;
             }
         }
-
+        let found = false;
         while (current && currentSymbol) {
             if (currentSymbol && currentSymbol._kind === 'class') {
                 const states = currentSymbol[valueMapping.states];
                 const extend = currentSymbol[valueMapping.extends];
 
                 if (states && states.hasOwnProperty(name)) {
+                    found = true;
                     if (states[name] === null) {
                         node.type = 'attribute';
                         node.content = this.autoStateAttrName(name, current.namespace);
@@ -766,16 +767,17 @@ export class StylableTransformer {
                     } else {
                         break;
                     }
-                } else if (rule) {
-                    if (nativePseudoClasses.indexOf(name) === -1) {
-                        this.diagnostics.warn(rule,
-                            `unknown pseudo class "${name}"`,
-                            { word: name });
-                    }
+                } else {
                     break;
                 }
             } else {
                 break;
+            }
+        }
+
+        if (!found && rule) {
+            if (nativePseudoClasses.indexOf(name) === -1) {
+                this.diagnostics.warn(rule, `unknown pseudo class "${name}"`, { word: name });
             }
         }
 
