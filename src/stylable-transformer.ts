@@ -1,19 +1,18 @@
 import * as postcss from 'postcss';
-import { FileProcessor } from './cached-process-file';
-import { Diagnostics } from './diagnostics';
-import { cssObjectToAst } from './parser';
-import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
-import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
-import { removeSTDirective } from './stylable-optimizer';
+import {FileProcessor} from './cached-process-file';
+import {Diagnostics} from './diagnostics';
+import {nativePseudoClasses, nativePseudoElements} from './native-pseudos';
+import {cssObjectToAst} from './parser';
+import {CSSResolve, JSResolve, StylableResolver} from './postcss-resolver';
+import {parseSelector, SelectorAstNode, stringifySelector, traverseNode} from './selector-utils';
+import {removeSTDirective} from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-
-import { nativePseudoClasses, nativePseudoElements } from './native-pseudos';
-import { createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames } from './stylable-utils';
-import { valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
-import { valueReplacer } from './value-template';
+import {createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
+import {valueMapping} from './stylable-value-parsers';
+import {Pojo} from './types';
+import {valueReplacer} from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -568,10 +567,10 @@ export class StylableTransformer {
         const next = this.resolver.resolve(extend);
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
             node.before = globalScopedSelector || '.' + scopedName;
-            const globalMappedNodes = next.symbol[valueMapping.global];
-            if (globalMappedNodes) {
+            const mappedClassNodes = next.symbol[valueMapping.global];
+            if (mappedClassNodes) {
                 node.type = 'selector';
-                node.nodes = globalMappedNodes;
+                node.nodes = mappedClassNodes;
             } else {
                 node.name = this.scope(next.symbol.name, next.meta.namespace);
             }
@@ -711,7 +710,7 @@ export class StylableTransformer {
             if (nativePseudoElements.indexOf(name) === -1) {
                 this.diagnostics.warn(rule,
                     `unknown pseudo element "${name}"`,
-                    { word: name });
+                    {word: name});
             }
         }
 

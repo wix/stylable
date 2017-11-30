@@ -6,7 +6,8 @@ describe('Stylable postcss transform (Scoping)', () => {
 
     describe('scoped elements', () => {
 
-        it('component/tag selector with first Capital letter automatically extend reference with identical name', () => {
+        // tslint:disable-next-line:max-line-length
+        it('component/tag selector with first Capital letter automatically extends reference with identical name', () => {
 
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -34,6 +35,7 @@ describe('Stylable postcss transform (Scoping)', () => {
 
         });
 
+        // tslint:disable-next-line:max-line-length
         it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
 
             const result = generateStylableRoot({
