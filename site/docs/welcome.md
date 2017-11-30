@@ -36,6 +36,8 @@ So we created **Stylable** — a CSS preprocessor that allows you to write style
 * It sets themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 * At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
+![Stylable Intelligence](./images/intelligence.gif)
+
 # Shut up and take my money!
 
 No need! It's BSD-licensed. Take it, use it, make your development easier and your apps faster.
