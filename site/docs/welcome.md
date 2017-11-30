@@ -23,7 +23,7 @@ At Wix, we agree. We &hearts; CSS. Its simple, declarative syntax that is native
 We also &hearts; TypeScript. TypeScript helps us manage these large projects, telling us at build-time what once we could only see at run-time. We want to give CSS a type system - doing for CSS what TypeScript does for JavaScript.
 
 * We want to **extend** CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. 
-* We want to extend CSS with JavaScript **mixins**.
+* We want to create **CSS macros with JavaScript** and use them at build time.
 * We want language services like **code completion** and **validation**. Each component exposes a style API that maps its internal parts and states so you can reuse components across teams without sacrificing stylability or scalability.
 * We want to see our errors at build time or even while [working in our IDE](https://marketplace.visualstudio.com/search?term=stylable-intelligence&target=VSCode&category=All%20categories&sortBy=Relevance). Wave goodbye to silent run-time breakage misery!
 
