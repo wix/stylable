@@ -8,6 +8,8 @@ import { removeSTDirective } from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
+
+import { nativePseudoClasses, nativePseudoElements } from './native-pseudos';
 import { createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
@@ -406,7 +408,8 @@ export class StylableTransformer {
         selector: string,
         metaExports: Pojo<string>,
         scopeRoot = true,
-        calcPaths = false
+        calcPaths = false,
+        rule?: postcss.Rule
     ): ScopedSelectorResults {
         let current = meta;
         let symbol: StylableSymbol | null = null;
@@ -446,11 +449,11 @@ export class StylableTransformer {
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-element') {
-                    const next = this.handlePseudoElement(current, node, name, selectorNode, addedSelectors);
+                    const next = this.handlePseudoElement(current, node, name, selectorNode, addedSelectors, rule);
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-class') {
-                    current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol);
+                    current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol, rule);
                 } else if (type === 'nested-pseudo-class') {
                     if (name === 'global') {
                         node.type = 'selector';
@@ -518,7 +521,7 @@ export class StylableTransformer {
         });
     }
     public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports).selector;
+        return this.scopeSelector(meta, rule.selector, metaExports, true, false, rule).selector;
     }
 
     public handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
@@ -631,7 +634,8 @@ export class StylableTransformer {
         node: SelectorAstNode,
         name: string,
         selectorNode: SelectorAstNode,
-        addedSelectors: AdditionalSelector[]
+        addedSelectors: AdditionalSelector[],
+        rule?: postcss.Rule
     ): CSSResolve {
         let next: JSResolve | CSSResolve | null;
 
@@ -703,6 +707,12 @@ export class StylableTransformer {
                     return next;
                 }
             }
+        } else if (rule) {
+            if (nativePseudoElements.indexOf(name) === -1) {
+                this.diagnostics.warn(rule,
+                    `unknown pseudo element "${name}"`,
+                    { word: name });
+            }
         }
 
         return { _kind: 'css', meta: current, symbol };
@@ -713,7 +723,8 @@ export class StylableTransformer {
         name: string,
         symbol: StylableSymbol | null,
         origin: StylableMeta,
-        originSymbol: ClassSymbol | ElementSymbol
+        originSymbol: ClassSymbol | ElementSymbol,
+        rule?: postcss.Rule
     ) {
         let current = meta;
         let currentSymbol = symbol;
@@ -755,7 +766,12 @@ export class StylableTransformer {
                     } else {
                         break;
                     }
-                } else {
+                } else if (rule) {
+                    if (nativePseudoClasses.indexOf(name) === -1) {
+                        this.diagnostics.warn(rule,
+                            `unknown pseudo class "${name}"`,
+                            { word: name });
+                    }
                     break;
                 }
             } else {
