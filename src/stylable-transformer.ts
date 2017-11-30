@@ -1,21 +1,28 @@
 import * as postcss from 'postcss';
-import {FileProcessor} from './cached-process-file';
-import {Diagnostics} from './diagnostics';
-import {cssObjectToAst} from './parser';
-import {CSSResolve, JSResolve, StylableResolver} from './postcss-resolver';
-import {parseSelector, SelectorAstNode, stringifySelector, traverseNode} from './selector-utils';
-import {removeSTDirective} from './stylable-optimizer';
+import { FileProcessor } from './cached-process-file';
+import { Diagnostics } from './diagnostics';
+import { cssObjectToAst } from './parser';
+import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import { removeSTDirective } from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-import {createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
-import {valueMapping} from './stylable-value-parsers';
-import {Pojo} from './types';
-import {valueReplacer} from './value-template';
-import {nativePseudoClasses, nativePseudoElements} from './native-pseudos';
+
+import { nativePseudoClasses, nativePseudoElements } from './native-pseudos';
+import { createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames } from './stylable-utils';
+import { valueMapping } from './stylable-value-parsers';
+import { Pojo } from './types';
+import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
+
+export interface ResolvedElement {
+    name: string;
+    type: string;
+    resolved: CSSResolve[];
+}
 
 export interface KeyFrameWithNode {
     value: string;
@@ -32,6 +39,7 @@ export interface ScopedSelectorResults {
     symbol: StylableSymbol | null;
     selectorAst: SelectorAstNode;
     selector: string;
+    elements: ResolvedElement[][];
 }
 
 export interface Options {
@@ -61,6 +69,7 @@ export class StylableTransformer {
         this.delimiter = options.delimiter || '--';
         this.keepValues = options.keepValues || false;
         this.optimize = options.optimize || false;
+        this.fileProcessor = options.fileProcessor;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -118,7 +127,7 @@ export class StylableTransformer {
                 this.diagnostics.warn(
                     varSymbol.node,
                     `symbol '${varSymbol.name}' is already in use`,
-                    {word: varSymbol.name}
+                    { word: varSymbol.name }
                 );
             } else {
                 const value = this.resolver.resolveVarValue(meta, varSymbol.name);
@@ -129,7 +138,7 @@ export class StylableTransformer {
     public exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach(name => {
             if (metaExports[name] === keyframeMapping[name].value) {
-                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, {word: name});
+                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, { word: name });
             } else {
                 metaExports[name] = keyframeMapping[name].value;
             }
@@ -162,7 +171,7 @@ export class StylableTransformer {
                     scopedName += ' ' + clsExports[resolved.symbol.name];
                 } else {
                     const node = findDeclaration(_import, (n: any) => n.prop === valueMapping.from);
-                    this.diagnostics.error(node, 'Trying to import unknown file', {word: node.value});
+                    this.diagnostics.error(node, 'Trying to import unknown file', { word: node.value });
                 }
             }
         });
@@ -194,7 +203,7 @@ export class StylableTransformer {
                         } else {
                             const found = findRule(meta.ast, '.' + classSymbol.name);
                             if (!!found) {
-                                this.diagnostics.error(found, 'import is not extendable', {word: found.value});
+                                this.diagnostics.error(found, 'import is not extendable', { word: found.value });
                             }
                         }
                     } else {
@@ -207,10 +216,10 @@ export class StylableTransformer {
                                 this.diagnostics.error(
                                     importNode,
                                     `Could not resolve '${found.value}'`,
-                                    {word: found.value}
+                                    { word: found.value }
                                 );
                             } else {
-                                this.diagnostics.error(found, 'JS import is not extendable', {word: found.value});
+                                this.diagnostics.error(found, 'JS import is not extendable', { word: found.value });
                             }
                         } else {
                             const importNode = findDeclaration(
@@ -219,7 +228,7 @@ export class StylableTransformer {
                             this.diagnostics.error(
                                 importNode,
                                 `Imported file '${extend.import.from}' not found`,
-                                {word: importNode.value}
+                                { word: importNode.value }
                             );
                         }
                     }
@@ -227,7 +236,7 @@ export class StylableTransformer {
 
                 if (finalSymbol && finalName && finalMeta && !finalSymbol[valueMapping.root]) {
                     const classExports: Pojo<string> = {};
-                    this.handleClass(finalMeta, {type: 'class', name: finalName, nodes: []}, finalName, classExports);
+                    this.handleClass(finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports);
                     if (classExports[finalName]) {
                         exportedClasses += ' ' + classExports[finalName];
                     } else {
@@ -265,7 +274,7 @@ export class StylableTransformer {
                     if (finalName && finalMeta) {
                         const classExports: Pojo<string> = {};
                         this.handleClass(
-                            finalMeta, {type: 'class', name: finalName, nodes: []}, finalName, classExports
+                            finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports
                         );
                         if (classExports[finalName]) {
                             exportedClasses += ' ' + classExports[finalName];
@@ -295,12 +304,12 @@ export class StylableTransformer {
                             const res = resolvedMixin.symbol(mix.mixin.options.map(v => v.value));
                             mixinRoot = cssObjectToAst(res).root;
                         } catch (e) {
-                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, {word: mix.mixin.type});
+                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, { word: mix.mixin.type });
                             return;
                         }
                         mergeRules(mixinRoot, rule, this.diagnostics);
                     } else {
-                        this.diagnostics.error(rule, 'js mixin must be a function', {word: mix.mixin.type});
+                        this.diagnostics.error(rule, 'js mixin must be a function', { word: mix.mixin.type });
                     }
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
@@ -312,7 +321,7 @@ export class StylableTransformer {
                             this.diagnostics.error(
                                 importNode,
                                 `'${importNode.value}' is a stylesheet and cannot be used as a mixin`,
-                                {word: importNode.value}
+                                { word: importNode.value }
                             );
                         }
                         mergeRules(
@@ -323,7 +332,7 @@ export class StylableTransformer {
                     } else {
                         const importNode = findDeclaration(
                             (mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named);
-                        this.diagnostics.error(importNode, 'import mixin does not exist', {word: importNode.value});
+                        this.diagnostics.error(importNode, 'import mixin does not exist', { word: importNode.value });
                     }
                 }
             } else if (mix.ref._kind === 'class') {
@@ -335,11 +344,11 @@ export class StylableTransformer {
 
     public replaceValueFunction(node: postcss.Node, value: string, meta: StylableMeta) {
         return valueReplacer(value, {}, (_value, name, match) => {
-            const {value: resolvedValue, next} = this.resolver.resolveVarValueDeep(meta, name);
+            const { value: resolvedValue, next } = this.resolver.resolveVarValueDeep(meta, name);
             if (next && next._kind === 'js') {
-                this.diagnostics.error(node, `"${name}" is a mixin and cannot be used as a var`, {word: name});
+                this.diagnostics.error(node, `"${name}" is a mixin and cannot be used as a var`, { word: name });
             } else if (next && next.symbol && next.symbol._kind === 'class') {
-                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, {word: name});
+                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, { word: name });
             } else if (!resolvedValue) {
                 const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
                 if (importIndex !== -1) {
@@ -349,7 +358,7 @@ export class StylableTransformer {
                         this.diagnostics.error(
                             correctNode,
                             `cannot find export '${name}' in '${meta.imports[importIndex].fromRelative}'`,
-                            {word: name}
+                            { word: name }
                         );
                     } else {
                         // catched in the process step.
@@ -367,7 +376,7 @@ export class StylableTransformer {
         root.walkAtRules(/keyframes$/, atRule => {
             const name = atRule.params;
             if (!!~reservedKeyFrames.indexOf(name)) {
-                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, {word: name});
+                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, { word: name });
             }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
@@ -391,11 +400,15 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
+    public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
+        return this.scopeSelector(meta, selector, {}, true, true).elements;
+    }
     public scopeSelector(
         meta: StylableMeta,
         selector: string,
         metaExports: Pojo<string>,
         scopeRoot = true,
+        calcPaths = false,
         rule?: postcss.Rule
     ): ScopedSelectorResults {
         let current = meta;
@@ -405,9 +418,17 @@ export class StylableTransformer {
         const selectorAst = parseSelector(selector);
         const addedSelectors: AdditionalSelector[] = [];
 
-        selectorAst.nodes.forEach(selectorNode => {
+        const elements = selectorAst.nodes.map(selectorNode => {
+            const selectorElements: ResolvedElement[] = [];
             traverseNode(selectorNode, node => {
-                const {name, type} = node;
+                const { name, type } = node;
+                if (calcPaths && type === 'class' || type === 'element' || type === 'pseudo-element') {
+                    selectorElements.push({
+                        name,
+                        type,
+                        resolved: this.resolver.resolveExtends(current, name)
+                    });
+                }
                 if (type === 'selector' || type === 'spacing' || type === 'operator') {
                     if (nestedSymbol) {
                         symbol = nestedSymbol;
@@ -443,6 +464,7 @@ export class StylableTransformer {
                 /* do nothing */
                 return undefined;
             });
+            return selectorElements;
         });
 
         this.addAdditionalSelectors(addedSelectors, selectorAst);
@@ -455,6 +477,7 @@ export class StylableTransformer {
             current,
             symbol,
             selectorAst,
+            elements,
             selector: stringifySelector(selectorAst)
         };
 
@@ -489,16 +512,16 @@ export class StylableTransformer {
             if (!first || (first.name !== scopedRoot)) {
                 selector.nodes = [
                     typeof scopedRoot !== 'string' ?
-                        {type: 'selector', nodes: scopedRoot, name: 'global'} :
-                        {type: 'class', name: scopedRoot, nodes: []},
-                    {type: 'spacing', value: ' ', name: '', nodes: []},
+                        { type: 'selector', nodes: scopedRoot, name: 'global' } :
+                        { type: 'class', name: scopedRoot, nodes: [] },
+                    { type: 'spacing', value: ' ', name: '', nodes: [] },
                     ...selector.nodes
                 ];
             }
         });
     }
     public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports, true, rule).selector;
+        return this.scopeSelector(meta, rule.selector, metaExports, true, false, rule).selector;
     }
 
     public handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
@@ -528,7 +551,7 @@ export class StylableTransformer {
                 this.diagnostics.error(
                     symbol.alias.import.rule,
                     'Trying to import unknown alias',
-                    {word: symbol.alias.name}
+                    { word: symbol.alias.name }
                 );
             }
         }
@@ -537,7 +560,7 @@ export class StylableTransformer {
         let globalScopedSelector = '';
         const globalMappedNodes = symbol && symbol[valueMapping.global];
         if (globalMappedNodes) {
-            globalScopedSelector = stringifySelector({type: 'selector', name: '', nodes: globalMappedNodes});
+            globalScopedSelector = stringifySelector({ type: 'selector', name: '', nodes: globalMappedNodes });
         } else {
             scopedName = this.exportClass(meta, name, symbol, metaExports);
         }
@@ -584,7 +607,7 @@ export class StylableTransformer {
                 node.name = scopedName;
             }
         }
-        return {_kind: 'css', meta, symbol};
+        return { _kind: 'css', meta, symbol };
     }
     public handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
         const tRule = meta.elements[name] as StylableSymbol;
@@ -604,7 +627,7 @@ export class StylableTransformer {
             return next;
         }
 
-        return {meta, symbol: tRule};
+        return { meta, symbol: tRule };
     }
     public handlePseudoElement(
         meta: StylableMeta,
@@ -640,11 +663,11 @@ export class StylableTransformer {
             }
 
             if (res.selectorAst.nodes.length === 1 && res.symbol) {
-                return {_kind: 'css', meta: res.current, symbol: res.symbol};
+                return { _kind: 'css', meta: res.current, symbol: res.symbol };
             }
 
             // this is an error mode fallback
-            return {_kind: 'css', meta, symbol: {_kind: 'element', name: '*'}};
+            return { _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } };
 
         }
 
@@ -684,15 +707,15 @@ export class StylableTransformer {
                     return next;
                 }
             }
-        } else if (rule){
+        } else if (rule) {
             if (nativePseudoElements.indexOf(name) === -1) {
                 this.diagnostics.warn(rule,
                     `unknown pseudo element "${name}"`,
-                    {word: name});
-            }                
+                    { word: name });
+            }
         }
 
-        return {_kind: 'css', meta: current, symbol};
+        return { _kind: 'css', meta: current, symbol };
     }
     public handlePseudoClass(
         meta: StylableMeta,
@@ -701,7 +724,7 @@ export class StylableTransformer {
         symbol: StylableSymbol | null,
         origin: StylableMeta,
         originSymbol: ClassSymbol | ElementSymbol,
-        rule?: postcss.Rule        
+        rule?: postcss.Rule
     ) {
         let current = meta;
         let currentSymbol = symbol;
@@ -719,13 +742,14 @@ export class StylableTransformer {
                 return current;
             }
         }
-
+        let found = false;
         while (current && currentSymbol) {
             if (currentSymbol && currentSymbol._kind === 'class') {
                 const states = currentSymbol[valueMapping.states];
                 const extend = currentSymbol[valueMapping.extends];
 
                 if (states && states.hasOwnProperty(name)) {
+                    found = true;
                     if (states[name] === null) {
                         node.type = 'attribute';
                         node.content = this.autoStateAttrName(name, current.namespace);
@@ -743,16 +767,17 @@ export class StylableTransformer {
                     } else {
                         break;
                     }
-                } else if (rule) {
-                    if (nativePseudoClasses.indexOf(name) === -1) {
-                        this.diagnostics.warn(rule,
-                            `unknown pseudo class "${name}"`,
-                            {word: name});
-                    }
+                } else {
                     break;
                 }
             } else {
                 break;
+            }
+        }
+
+        if (!found && rule) {
+            if (nativePseudoClasses.indexOf(name) === -1) {
+                this.diagnostics.warn(rule, `unknown pseudo class "${name}"`, { word: name });
             }
         }
 

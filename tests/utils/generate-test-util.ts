@@ -1,14 +1,14 @@
-import {isAbsolute} from 'path';
+import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
-import {Bundler} from '../../src/bundle';
-import {cachedProcessFile, FileProcessor} from '../../src/cached-process-file';
-import {Diagnostics} from '../../src/diagnostics';
-import {createMinimalFS} from '../../src/memory-minimal-fs';
-import {StylableResolver} from '../../src/postcss-resolver';
-import {Stylable} from '../../src/stylable';
-import {process, StylableMeta} from '../../src/stylable-processor';
-import {StylableResults, StylableTransformer} from '../../src/stylable-transformer';
-import {Pojo} from '../../src/types';
+import { Bundler } from '../../src/bundle';
+import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
+import { Diagnostics } from '../../src/diagnostics';
+import { createMinimalFS } from '../../src/memory-minimal-fs';
+import { StylableResolver } from '../../src/postcss-resolver';
+import { Stylable } from '../../src/stylable';
+import { process, StylableMeta } from '../../src/stylable-processor';
+import { StylableResults, StylableTransformer } from '../../src/stylable-transformer';
+import { Pojo } from '../../src/types';
 
 export interface File {
     content: string;
@@ -22,7 +22,7 @@ export interface InfraConfig {
 }
 
 export interface Config {
-    entry: string;
+    entry?: string;
     files: Pojo<File>;
     usedFiles?: string[];
     trimWS?: boolean;
@@ -34,36 +34,41 @@ export type RequireType = (path: string) => any;
 export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
     resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
 } {
-    const {fs, requireModule} = createMinimalFS(config);
+    const { fs, requireModule } = createMinimalFS(config);
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
-        const meta = process(postcss.parse(content, {from}), diagnostics);
+        const meta = process(postcss.parse(content, { from }), diagnostics);
         meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
     }, fs);
 
     const resolver = new StylableResolver(fileProcessor, requireModule);
 
-    return {resolver, requireModule, fileProcessor};
+    return { resolver, requireModule, fileProcessor };
 }
 
-export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
-    if (!isAbsolute(config.entry)) {
-        throw new Error('entry must be absolute path: ' + config.entry);
-    }
-    const entry = config.entry;
+export function createTransformer(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableTransformer {
 
-    const {requireModule, fileProcessor} = generateInfra(config, diagnostics);
+    const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
 
-    const t = new StylableTransformer({
+    return new StylableTransformer({
         fileProcessor,
         requireModule,
         diagnostics,
         keepValues: false,
         optimize: config.optimize
     });
+}
 
-    const result = t.transform(fileProcessor.process(entry));
+export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
+    if (!isAbsolute(config.entry || '')) {
+        throw new Error('entry must be absolute path: ' + config.entry);
+    }
+    const entry = config.entry;
+
+    const t = createTransformer(config, diagnostics);
+
+    const result = t.transform(t.fileProcessor.process(entry || ''));
 
     return result;
 }
@@ -98,7 +103,7 @@ export function createTestBundler(config: Config) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
 
-    const {fs, requireModule} = createMinimalFS(config);
+    const { fs, requireModule } = createMinimalFS(config);
 
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;

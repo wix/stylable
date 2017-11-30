@@ -1,11 +1,11 @@
-import {expect} from 'chai';
-import {resolve} from 'path';
-import {Diagnostics} from '../src';
-import {safeParse} from '../src/parser';
-import {process} from '../src/stylable-processor';
-import {reservedKeyFrames} from '../src/stylable-utils';
-import {Config, generateFromMock} from './utils/generate-test-util';
-import {nativePseudoClasses, nativePseudoElements} from '../src/native-pseudos';
+import { expect } from 'chai';
+import { resolve } from 'path';
+import { Diagnostics } from '../src';
+import { nativePseudoClasses, nativePseudoElements } from '../src/native-pseudos';
+import { safeParse } from '../src/parser';
+import { process } from '../src/stylable-processor';
+import { reservedKeyFrames } from '../src/stylable-utils';
+import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 const customButton = `
     .root{
@@ -41,9 +41,9 @@ function findTestLocations(css: string) {
             column = 1;
         } else if (ch === '|') {
             if (!start) {
-                start = {line, column};
+                start = { line, column };
             } else {
-                end = {line, column};
+                end = { line, column };
             }
         } else if (ch === '$') {
             inWord = !inWord;
@@ -56,28 +56,28 @@ function findTestLocations(css: string) {
             column++;
         }
     }
-    return {start, end, word, css: css.replace(/[|$]/gm, '')};
+    return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
 describe('findTestLocations', () => {
 
     it('find single location 1', () => {
         const l = findTestLocations('\n  |a|');
-        expect(l.start, 'start').to.eql({line: 2, column: 3});
-        expect(l.end, 'end').to.eql({line: 2, column: 4});
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 2, column: 4 });
 
     });
 
     it('find single location 2', () => {
         const l = findTestLocations('\n  |a\n  |');
-        expect(l.start, 'start').to.eql({line: 2, column: 3});
-        expect(l.end, 'end').to.eql({line: 3, column: 3});
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
     });
 
     it('find single location with word', () => {
         const l = findTestLocations('\n  |$a$\n  |');
-        expect(l.start, 'start').to.eql({line: 2, column: 3});
-        expect(l.end, 'end').to.eql({line: 3, column: 3});
+        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
         expect(l.word, 'end').to.eql('a');
     });
 
@@ -117,7 +117,9 @@ function expectWarningsFromTransform(config: Config, warnings: Warning[]) {
     }
     const diagnostics = new Diagnostics();
     generateFromMock(config, diagnostics);
-
+    if (warnings.length === 0 && diagnostics.reports.length !== 0) {
+        expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
+    }
     diagnostics.reports.forEach((report, i) => {
         const path = warnings[i].file;
         expect(report.message).to.equal(warnings[i].message);
@@ -126,7 +128,7 @@ function expectWarningsFromTransform(config: Config, warnings: Warning[]) {
             expect(report.options.word).to.eql(locations[path].word);
         }
     });
-    expect(diagnostics.reports.length, 'diagnostics reports match').to.equal(warnings.length);
+    expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
 }
 
 describe('diagnostics: warnings and errors', () => {
@@ -139,7 +141,7 @@ describe('diagnostics: warnings and errors', () => {
                     |Something| {
 
                     }
-                `, [{message: '"Something" component is not imported', file: 'main.css'}]);
+                `, [{ message: '"Something" component is not imported', file: 'main.css' }]);
             });
 
             it('should return warning for unterminated "."', () => {
@@ -148,7 +150,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     }
                     .|
-                `, [{message: 'identifier expected', file: 'main.css'}]);
+                `, [{ message: 'identifier expected', file: 'main.css' }]);
             });
             it('should return warning for unterminated ":"', () => {
                 expectWarnings(`
@@ -156,7 +158,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     }
                     :|
-                `, [{message: 'identifier expected', file: 'main.css'}]);
+                `, [{ message: 'identifier expected', file: 'main.css' }]);
             });
             it('should return warning for className without rule area', () => {
                 expectWarnings(`
@@ -164,7 +166,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     }
                     .gaga|
-                `, [{message: '{ expected', file: 'main.css'}]);
+                `, [{ message: '{ expected', file: 'main.css' }]);
             });
 
         });
@@ -176,7 +178,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                     .gaga{
                         color:red|
-                `, [{message: '; expected', file: 'main.css'}]);
+                `, [{ message: '; expected', file: 'main.css' }]);
             });
         });
         xdescribe('rules', () => {
@@ -188,7 +190,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         color|
                     }
-                `, [{message: ': expected', file: 'main.css'}]);
+                `, [{ message: ': expected', file: 'main.css' }]);
                 expectWarnings(`
                     .root{
 
@@ -196,7 +198,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         color:|
                     }
-                `, [{message: 'property value expected', file: 'main.css'}]);
+                `, [{ message: 'property value expected', file: 'main.css' }]);
                 // todo: add cases for any unterminated selectors (direct descendant, etc...)
             });
             it('should return warning for unknown rule', () => {
@@ -204,7 +206,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root{
                         |hello|:yossi;
                     }
-                `, [{message: 'unknown rule "hello"', file: 'main.css'}]);
+                `, [{ message: 'unknown rule "hello"', file: 'main.css' }]);
             });
 
             it('should warn when using illegal characters', () => {
@@ -212,7 +214,7 @@ describe('diagnostics: warnings and errors', () => {
                     <|{
 
                     }
-                `, [{message: 'illegal character <', file: 'main.css'}]);
+                `, [{ message: 'illegal character <', file: 'main.css' }]);
             });
 
             it('should return warning for unknown directive', () => {
@@ -220,7 +222,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         |-st-something|:true;
                     }
-                `, [{message: 'unknown directive "-st-something"', file: 'main.css'}]);
+                `, [{ message: 'unknown directive "-st-something"', file: 'main.css' }]);
             });
         });
         xdescribe('states', () => {
@@ -229,7 +231,7 @@ describe('diagnostics: warnings and errors', () => {
                     |:hover|{
 
                     }
-                `, [{message: 'global states are not supported, use .root:hover instead', file: 'main.css'}]);
+                `, [{ message: 'global states are not supported, use .root:hover instead', file: 'main.css' }]);
             });
 
             it('should return warning for unknown state', () => {
@@ -237,7 +239,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root:|shmover|{
 
                     }
-                `, [{message: 'unknown state "shmover"', file: 'main.css'}]);
+                `, [{ message: 'unknown state "shmover"', file: 'main.css' }]);
             });
         });
         describe('pseudo selectors', () => {
@@ -260,23 +262,22 @@ describe('diagnostics: warnings and errors', () => {
                             '/main.css': {
                                 content: `
                                 |.root::$myBtn$|{
-                                    
+
                                 }`
                             }
                         }
                     }
-                    expectWarningsFromTransform(config, [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]);
+                    expectWarningsFromTransform(config, [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]);
                 });
                 nativePseudoElements.forEach(nativeElement => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
                         const selector = `|.root::$${nativeElement}$|{`;
-                        const config:Config = {
+                        const config: Config = {
                             entry: '/main.css',
                             files: {
                                 '/main.css': {
                                     content: `
                                     ${selector}
-                                        
                                     }`
                                 }
                             }
@@ -285,7 +286,7 @@ describe('diagnostics: warnings and errors', () => {
                     });
                 });
             });
-            
+
             describe('classes', () => {
                 it('should return a warning for an unknown pseudo class', () => {
                     const config = {
@@ -299,13 +300,13 @@ describe('diagnostics: warnings and errors', () => {
                             }
                         }
                     }
-                    expectWarningsFromTransform(config, [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]);
+                    expectWarningsFromTransform(config, [{ message: 'unknown pseudo class "superSelected"', file: '/main.css' }]);
                 });
-                
+
                 nativePseudoClasses.forEach(nativeClass => {
                     it(`should not return a warning for native ${nativeClass} pseudo class`, () => {
                         const selector = `|.root:$${nativeClass}$|{`
-                        const config:Config = {
+                        const config: Config = {
                             entry: '/main.css',
                             files: {
                                 '/main.css': {
@@ -319,6 +320,37 @@ describe('diagnostics: warnings and errors', () => {
                         expectWarningsFromTransform(config, []);
                     });
                 });
+
+                it(`should not report a warning when the custom state is declared in an imported stylesheet`, () => {
+                    const config: Config = {
+                        entry: '/main.st.css',
+                        files: {
+                            '/main.st.css': {
+                                content: `
+                                    :import {
+                                        -st-from: "./comp.st.css";
+                                        -st-default: Comp;
+                                    }
+                                    .root {
+                                       -st-extends: Comp;
+                                    }
+                                    .root:loading {}
+                                `
+                            },
+                            '/comp.st.css': {
+                                content: `
+                                    .root {
+                                        -st-states: loading;
+                                    }
+                                `
+                            }
+                        }
+                    };
+
+                    expectWarningsFromTransform(config, []);
+                });
+
+
             });
 
         });
@@ -331,7 +363,7 @@ describe('diagnostics: warnings and errors', () => {
             it('should return warning for ".root" after selector', () => {
                 expectWarnings(`
                     |.gaga .root|{}
-                `, [{message: '.root class cannot be used after spacing', file: 'main.css'}]);
+                `, [{ message: '.root class cannot be used after spacing', file: 'main.css' }]);
             });
         });
 
@@ -341,7 +373,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga:hover{
                         |-st-states|:shmover;
                     }
-                `, [{message: 'cannot define pseudo states inside complex selectors', file: 'main.css'}]);
+                `, [{ message: 'cannot define pseudo states inside complex selectors', file: 'main.css' }]);
             });
             it('should warn when defining states on element selector', () => {
                 const config = {
@@ -356,7 +388,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(
-                    config, [{message: 'cannot define pseudo states inside element selectors', file: '/main.css'}]);
+                    config, [{ message: 'cannot define pseudo states inside element selectors', file: '/main.css' }]);
             });
         });
 
@@ -366,7 +398,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         |-st-mixin: $myMixin$|;
                     }
-                `, [{message: 'unknown mixin: "myMixin"', file: 'main.css'}]);
+                `, [{ message: 'unknown mixin: "myMixin"', file: 'main.css' }]);
             });
 
             it('should add error when can not append css mixins', () => {
@@ -389,7 +421,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: 'import mixin does not exist', file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: 'import mixin does not exist', file: '/main.css' }]);
             });
             it('should add diagnostics when there is a bug in mixin', () => {
                 const config = {
@@ -416,7 +448,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: 'could not apply mixin: bug in mixin', file: '/main.css'}]);
+                    [{ message: 'could not apply mixin: bug in mixin', file: '/main.css' }]);
             });
 
             it('js mixin must be a function', () => {
@@ -441,7 +473,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: 'js mixin must be a function', file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }]);
             });
             it('should add diagnostics when declartion is invalid', () => {
                 const config = {
@@ -470,7 +502,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: 'not a valid mixin declaration myMixin', file: '/main.css'}]);
+                    [{ message: 'not a valid mixin declaration myMixin', file: '/main.css' }]);
             });
 
             it('should add diagnostics when declartion is invalid (rule)', () => {
@@ -502,7 +534,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `not a valid mixin declaration 'color', and was removed`, file: '/main.css'}]);
+                    [{ message: `not a valid mixin declaration 'color', and was removed`, file: '/main.css' }]);
             });
             it('should not add warning when mixin value is a string', () => {
                 const config = {
@@ -525,7 +557,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: 'value can not be a string (remove quotes?)', file: '/main.css'}]);
+                    [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }]);
             });
         });
 
@@ -535,7 +567,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         |color:value($myColor$)|;
                     }
-                `, [{message: 'unknown var "myColor"', file: 'main.css'}]);
+                `, [{ message: 'unknown var "myColor"', file: 'main.css' }]);
             });
 
             it('should return warning for unknown var on transform', () => {
@@ -550,7 +582,7 @@ describe('diagnostics: warnings and errors', () => {
                         `
                         }
                     }
-                }, [{message: 'unknown var "myColor"', file: '/style.st.css'}]);
+                }, [{ message: 'unknown var "myColor"', file: '/style.st.css' }]);
             });
 
             it('should return warning for unresolvable var', () => {
@@ -558,7 +590,7 @@ describe('diagnostics: warnings and errors', () => {
                     :vars{
                         |myvar: $value(myvar)$|;
                     }
-                `, [{message: 'cannot resolve variable value for "myvar"', file: 'main.css'}]);
+                `, [{ message: 'cannot resolve variable value for "myvar"', file: 'main.css' }]);
             });
 
             it('should return warning when defined in a complex selector', () => {
@@ -567,7 +599,7 @@ describe('diagnostics: warnings and errors', () => {
                         myColor:red;
                     }
 
-                `, [{message: 'cannot define ":vars" inside a complex selector', file: 'main.css'}]);
+                `, [{ message: 'cannot define ":vars" inside a complex selector', file: 'main.css' }]);
             });
         });
 
@@ -577,7 +609,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga:hover{
                         |-st-variant|:true;
                     }
-                `, [{message: 'cannot define "-st-variant" inside complex selector', file: 'main.css'}]);
+                `, [{ message: 'cannot define "-st-variant" inside complex selector', file: 'main.css' }]);
             });
 
             it('should return warning when -st-variant value is not true or false', () => {
@@ -585,7 +617,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga {
                         -st-variant:|red|;
                     }
-                `, [{message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css'}]);
+                `, [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
             });
         });
 
@@ -596,7 +628,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-from:"./file";
                         -st-default:Theme;
                     }
-                `, [{message: 'cannot define ":import" inside a complex selector', file: 'main.css'}]);
+                `, [{ message: 'cannot define ":import" inside a complex selector', file: 'main.css' }]);
             });
             it('should return warning for non import rules inside imports', () => {
                 const config = {
@@ -617,7 +649,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `'color' css attribute cannot be used inside :import block`, file: '/main.css'}]);
+                    [{ message: `'color' css attribute cannot be used inside :import block`, file: '/main.css' }]);
             });
 
             it('should return warning for import with missing "from"', () => {
@@ -626,7 +658,7 @@ describe('diagnostics: warnings and errors', () => {
                     |:import{
                         -st-default:Comp;
                     }
-                `, [{message: `'-st-from' is missing in :import block`, file: 'main.css'}]
+                `, [{ message: `'-st-from' is missing in :import block`, file: 'main.css' }]
                 );
 
             });
@@ -643,7 +675,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root:hover{
                         |-st-extends|:Comp;
                     }
-                `, [{message: 'cannot define "-st-extends" inside a complex selector', file: 'main.css'}]
+                `, [{ message: 'cannot define "-st-extends" inside a complex selector', file: 'main.css' }]
                 );
 
             });
@@ -672,7 +704,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: 'import is not extendable', file: '/main.st.css'}]);
+                expectWarningsFromTransform(config, [{ message: 'import is not extendable', file: '/main.st.css' }]);
             });
             it('should warn if extends by js import', () => {
                 const config = {
@@ -694,7 +726,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: 'JS import is not extendable', file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: 'JS import is not extendable', file: '/main.css' }]);
             });
             it('should warn if named extends does not exist', () => {
                 const config = {
@@ -720,7 +752,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: `Could not resolve 'special'`, file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: `Could not resolve 'special'`, file: '/main.css' }]);
             });
             it('should warn if file not found', () => {
                 const config = {
@@ -740,7 +772,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `Imported file '${resolve('/file.css')}' not found`, file: '/main.css'}]);
+                    [{ message: `Imported file '${resolve('/file.css')}' not found`, file: '/main.css' }]);
             });
         });
 
@@ -758,7 +790,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root {
                         |-st-extends: Comp;|
                     }
-                `, [{message: 'override "-st-extends" on typed rule "root"', file: 'main.css'}]);
+                `, [{ message: 'override "-st-extends" on typed rule "root"', file: 'main.css' }]);
             });
 
             it('should warn on typed class states override', () => {
@@ -770,7 +802,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root {
                         |-st-states: mystate2;|
                     }
-                `, [{message: 'override "-st-states" on typed rule "root"', file: 'main.css'}]);
+                `, [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]);
             });
 
         });
@@ -796,7 +828,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{message: 'override mixin on same rule', file: '/main.css'}]);
+            expectWarningsFromTransform(config, [{ message: 'override mixin on same rule', file: '/main.css' }]);
         });
 
         describe('from import', () => {
@@ -827,7 +859,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: `Could not resolve 'momo'`, file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: `Could not resolve 'momo'`, file: '/main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
@@ -837,7 +869,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-default: name;
                         -st-named: $name$;
                     }
-                `, [{message: 'redeclare symbol "name"', file: 'main.css'}]);
+                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block)', () => {
@@ -850,7 +882,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-from: './file.css';
                         -st-default: $name$;
                     }
-                `, [{message: 'redeclare symbol "name"', file: 'main.css'}]);
+                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block types)', () => {
@@ -862,7 +894,7 @@ describe('diagnostics: warnings and errors', () => {
                     :vars {
                         |$name$: red;
                     }
-                `, [{message: 'redeclare symbol "name"', file: 'main.css'}]);
+                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
             });
 
         });
@@ -892,7 +924,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `cannot find export 'variant' in './file.css'`, file: '/main.css'}]);
+                    [{ message: `cannot find export 'variant' in './file.css'`, file: '/main.css' }]);
 
             });
 
@@ -909,7 +941,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root{
                         color:|value(my-variant)|;
                     }
-                `, [{message: '"my-variant" is a variant and cannot be used as a var', file: 'main.css'}]
+                `, [{ message: '"my-variant" is a variant and cannot be used as a var', file: 'main.css' }]
                 );
 
             });
@@ -935,7 +967,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: '"my-mixin" is a mixin and cannot be used as a var', file: '/main.css'}]);
+                    [{ message: '"my-mixin" is a mixin and cannot be used as a var', file: '/main.css' }]);
             });
 
             it('stylesheet cannot be used as var', () => {
@@ -959,7 +991,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: '"Comp" is a stylesheet and cannot be used as a var', file: '/main.css'}]);
+                    [{ message: '"Comp" is a stylesheet and cannot be used as a var', file: '/main.css' }]);
             });
 
             it('stylesheet cannot be used as mixin', () => {
@@ -983,7 +1015,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{message: `'Comp' is a stylesheet and cannot be used as a mixin`, file: '/main.css'}]);
+                    [{ message: `'Comp' is a stylesheet and cannot be used as a mixin`, file: '/main.css' }]);
             });
 
             xit('component variant cannot be used for native node', () => {
@@ -1070,9 +1102,9 @@ describe('diagnostics: warnings and errors', () => {
                 SheetA.my-b {}
                 SheetB.my-a {}
             `, [
-                    {message: 'conflicting extends matching same target [.my-a.my-b]', file: 'main.css'},
-                    {message: 'conflicting extends matching same target [SheetA.my-b]', file: 'main.css'},
-                    {message: 'conflicting extends matching same target [SheetB.my-a]', file: 'main.css'}
+                    { message: 'conflicting extends matching same target [.my-a.my-b]', file: 'main.css' },
+                    { message: 'conflicting extends matching same target [SheetA.my-b]', file: 'main.css' },
+                    { message: 'conflicting extends matching same target [SheetB.my-a]', file: 'main.css' }
                 ]
             );
         });
@@ -1094,7 +1126,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{message: 'symbol name is already in use', file: '/main.css'}]);
+            expectWarningsFromTransform(config, [{ message: 'symbol name is already in use', file: '/main.css' }]);
         });
 
         it('should not allow @keyframe of reserved words', () => {
@@ -1111,7 +1143,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{message: `keyframes ${key} is reserved`, file: '/main.css'}]);
+                expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }]);
             });
 
         });
@@ -1132,7 +1164,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{message: 'Trying to import unknown file', file: '/main.css'}]);
+            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown file', file: '/main.css' }]);
         });
 
         it('should error on unresolved alias', () => {
@@ -1158,7 +1190,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{message: 'Trying to import unknown alias', file: '/main.st.css'}]);
+            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }]);
         });
         it('should not add warning when compose value is a string', () => {
             const config = {
@@ -1181,7 +1213,7 @@ describe('diagnostics: warnings and errors', () => {
                 }
             };
             expectWarningsFromTransform(config,
-                [{message: 'value can not be a string (remove quotes?)', file: '/main.css'}]);
+                [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }]);
         });
 
     });
