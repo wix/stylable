@@ -49,7 +49,7 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 |string| wrapped by quatation marks |
 
 
-Native Enums Types are infered for values in commononly used enums 
+Native Enums Types are infered for values in commononly used enums, e.g: display-enum is infered for block
 
 * lineStyle
 * display
@@ -65,16 +65,11 @@ Native Enums Types are infered for values in commononly used enums
 *stylable treats strings in much the same way as Typescript treats any, allowing string where any-type is expected, allowing any-type where string is expected*
 
 
-**Wrapping any variable with quetation marks makes its type a string. e.g."
-```css
-
-```
-
 using these types stylable can give you better tooling.
 
 ### Variable validation 
 
-
+**Wrapping any variable with quetation marks makes its type a string
 ```css
     :vars{
         a:5; /*infered as number*/
