@@ -34,6 +34,50 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 }
 ```
 
+## Variables and infered types
+
+**Stylable** infers the following variable types from your variable declaration:
+
+
+| Type | infered by |
+|----|----|
+|color| recognized color name / color hexa format / rgba format | 
+|sizeUnit| number + recognized unit | 
+|percentage| number+% | 
+|image| base64 image / image url | 
+|number| a number | 
+|string| wrapped by quatation marks |
+
+
+Native Enums Types are infered for values in commononly used enums 
+
+* lineStyle
+* display
+* bezierCurves
+* positionKeywords
+* repeatStyleKeywords
+* lineStyleKeywords
+* boxKeywords
+* geometryBoxKeywords
+* transitionTimingFunctions
+
+*Variable types default to string if no better match is found.*
+
+using these types stylable can give you better tooling.
+
+### Variable validation
+
+
+```css
+    :vars{
+        size:10px;
+    }
+    .myComp{
+        color:value(size);
+    }
+```
+*stylable* warns of wrong value for color
+
 ## Import variables
 
 Any var defined in a stylesheet is exported as a named export and can be [imported](./imports.md) by other stylesheets.
