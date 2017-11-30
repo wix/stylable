@@ -42,7 +42,7 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 | Type | infered by |
 |----|----|
 |color| recognized color name / color hexa format / rgba format | 
-|sizeUnit| number + recognized unit | 
+|cssUnit| number + recognized unit | 
 |percentage| number+% | 
 |image| base64 image / image url | 
 |number| a number | 
@@ -62,21 +62,49 @@ Native Enums Types are infered for values in commononly used enums
 * transitionTimingFunctions
 
 *Variable types default to string if no better match is found.*
+*stylable treats strings in much the same way as Typescript treats any, allowing string where any-type is expected, allowing any-type where string is expected*
+
+
+**Wrapping any variable with quetation marks makes its type a string. e.g."
+```css
+
+```
 
 using these types stylable can give you better tooling.
 
-### Variable validation
+### Variable validation 
 
 
 ```css
     :vars{
-        size:10px;
+        a:5; /*infered as number*/
+        b:"5"; /*infered as string*/
+        c:block; /*infered as display-enum*/
+        d:"block"; /*infered as string*/
+        e:10px; /* infered as cssUnit */
+        f:"10px"; /* infered as string */
     }
     .myComp{
-        color:value(size);
+        font-weight: value(a) /* no error number is allowed for font-weight */
+        font-weight: value(b) /* no error string is allowed everywhere */
+        
+        
+        display: value(c); /* no error display-enum is allowed for display */
+        display: value(d); /* no error string is allowed for everywhere */
+
+        width: value(e); /* no error cssUnit is allowed in width*/
+        width: value(f); /* no error string is allowed for everywhere */
+
+
+        width: value(c) /* error display enum is not allowed in width */
+        width: value(d) /* no error string is allowed for everywhere */
+        
+        content: value(a) /* no error, content allows string, that means everytype is allowed */
+        border: solid 1px value(a) /* no error, shorthand values are not currently checked */
     }
 ```
-*stylable* warns of wrong value for color
+
+variable types are also checked when overriding variables and passing variables to formaters/mixins.
 
 ## Import variables
 
