@@ -1,11 +1,11 @@
-import { expect } from 'chai';
-import { resolve } from 'path';
-import { Diagnostics } from '../src';
-import { nativePseudoClasses, nativePseudoElements } from '../src/native-pseudos';
-import { safeParse } from '../src/parser';
-import { process } from '../src/stylable-processor';
-import { reservedKeyFrames } from '../src/stylable-utils';
-import { Config, generateFromMock } from './utils/generate-test-util';
+import {expect} from 'chai';
+import {resolve} from 'path';
+import {Diagnostics} from '../src';
+import {nativePseudoClasses, nativePseudoElements} from '../src/native-pseudos';
+import {safeParse} from '../src/parser';
+import {process} from '../src/stylable-processor';
+import {reservedKeyFrames} from '../src/stylable-utils';
+import {Config, generateFromMock} from './utils/generate-test-util';
 const deindent = require('deindent');
 const customButton = `
     .root{
@@ -20,7 +20,6 @@ const customButton = `
     }
 
 `;
-// const mixins = ``;
 
 interface Warning {
     message: string;
@@ -266,8 +265,11 @@ describe('diagnostics: warnings and errors', () => {
                                 }`
                             }
                         }
-                    }
-                    expectWarningsFromTransform(config, [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]);
+                    };
+                    expectWarningsFromTransform(
+                        config,
+                        [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]
+                    );
                 });
                 nativePseudoElements.forEach(nativeElement => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
@@ -281,7 +283,7 @@ describe('diagnostics: warnings and errors', () => {
                                     }`
                                 }
                             }
-                        }
+                        };
                         expectWarningsFromTransform(config, []);
                     });
                 });
@@ -295,28 +297,31 @@ describe('diagnostics: warnings and errors', () => {
                             '/main.css': {
                                 content: `
                                 |.root:$superSelected$|{
-                                    
+
                                 }`
                             }
                         }
-                    }
-                    expectWarningsFromTransform(config, [{ message: 'unknown pseudo class "superSelected"', file: '/main.css' }]);
+                    };
+                    expectWarningsFromTransform(
+                        config,
+                        [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]
+                    );
                 });
 
                 nativePseudoClasses.forEach(nativeClass => {
                     it(`should not return a warning for native ${nativeClass} pseudo class`, () => {
-                        const selector = `|.root:$${nativeClass}$|{`
+                        const selector = `|.root:$${nativeClass}$|{`;
                         const config: Config = {
                             entry: '/main.css',
                             files: {
                                 '/main.css': {
                                     content: `
                                     ${selector}
-                                        
+
                                     }`
                                 }
                             }
-                        }
+                        };
                         expectWarningsFromTransform(config, []);
                     });
                 });
@@ -349,7 +354,6 @@ describe('diagnostics: warnings and errors', () => {
 
                     expectWarningsFromTransform(config, []);
                 });
-
 
             });
 
@@ -617,7 +621,8 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga {
                         -st-variant:|red|;
                     }
-                `, [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
+                `,
+                [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
             });
         });
 
@@ -1030,6 +1035,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-mixin:|my-variant|;
                     }
                 `, [{
+                        // tslint:disable-next-line:max-line-length
                         message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "$namespace of comp"',
                         file: 'main.css'
                     }]
@@ -1054,6 +1060,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-apply:|my-variant2|;
                     }
                 `, [{
+                        // tslint:disable-next-line:max-line-length
                         message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "$namespace of comp" and "my-variant" can only be spplied to "$namespace of Comp2"',
                         file: 'main.css'
                     }]
