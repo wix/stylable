@@ -34,12 +34,12 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 }
 ```
 
-## Variables and infered types
+## Variables and inferred types
 
-**Stylable** infers the following variable types from your variable declaration:
+**Stylable** inferrs the following variable types from your variable declaration:
 
 
-| Type | infered by |
+| Type | inferred by |
 |----|----|
 |color| recognized color name / color hexa format / rgba format | 
 |cssUnit| number + recognized unit | 
@@ -49,7 +49,7 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 |string| wrapped by quatation marks |
 
 
-Native Enums Types are infered for values in commononly used enums, e.g: display-enum is infered for block
+Native Enums Types are inferred for values in commononly used enums, e.g: display-enum is inferred for block
 
 * lineStyle
 * display
@@ -72,12 +72,12 @@ using these types stylable can give you better tooling.
 **Wrapping any variable with quetation marks makes its type a string
 ```css
     :vars{
-        a:5; /*infered as number*/
-        b:"5"; /*infered as string*/
-        c:block; /*infered as display-enum*/
-        d:"block"; /*infered as string*/
-        e:10px; /* infered as cssUnit */
-        f:"10px"; /* infered as string */
+        a:5; /*inferred as number*/
+        b:"5"; /*inferred as string*/
+        c:block; /*inferred as display-enum*/
+        d:"block"; /*inferred as string*/
+        e:10px; /* inferred as cssUnit */
+        f:"10px"; /* inferred as string */
     }
     .myComp{
         font-weight: value(a) /* no error number is allowed for font-weight */
