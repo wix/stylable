@@ -12,7 +12,6 @@ export interface Stylesheet {
 export interface RuntimeHelpers {
     $get: (localName: string) => string;
     $cssStates: (stateMapping?: StateMap | null) => StateMap;
-    $mapClasses: (classNameString: string) => string;
 }
 
 export type StylesheetLocals = { [key: string]: string } & { $stylesheet: Stylesheet } & RuntimeHelpers;
