@@ -4595,7 +4595,7 @@ tar@^2.2.1:
     fstream "^1.0.2"
     inherits "2"
 
-test-drive-react@0.8.1:
+test-drive-react@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/test-drive-react/-/test-drive-react-0.8.1.tgz#961a45f6e1138819afc9f74d8c761feab03a9995"
   dependencies:
