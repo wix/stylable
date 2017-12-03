@@ -12,7 +12,6 @@ export interface Stylesheet {
 export interface RuntimeHelpers {
     $get: (localName: string) => string;
     $cssStates: (stateMapping?: StateMap | null) => StateMap;
-    $mapClasses: (classNameString: string) => string;
 }
 
 export type StylesheetLocals = { [key: string]: string } & { $stylesheet: Stylesheet } & RuntimeHelpers;
@@ -32,3 +31,21 @@ export interface PartialProps {
 export type Pojo<T = any> = { [key: string]: T } & object;
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;
+
+export type stColor<min extends number | null = null, max extends number | null = null> = string;
+export type stSize<
+    unit extends string,
+    min extends number | null = null,
+    max extends number | null = null,
+    mults extends number | null = null> = string;
+export type stPercent<
+    min extends number | null = null,
+    max extends number | null = null,
+    mults extends number | null = null> = string;
+export type stString = string;
+export type stNumber<
+    min extends number | null = null,
+    max extends number | null = null,
+    mults extends number | null = null> = string;
+export type stImage = string;
+export type stCssFrag = string;
