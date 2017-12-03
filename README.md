@@ -34,6 +34,10 @@ yarn add stylable stylable-integration
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 
+## Roadmap
+
+Come see [what we're working on](./site/docs/roadmap.md) for the near and far future. Give us feedback.
+
 ## Contributing
 
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
