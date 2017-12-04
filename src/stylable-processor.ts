@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as postcss from 'postcss';
 import {Diagnostics} from './diagnostics';
+import {processFormatters} from './formatters';
 import {
     createRootAfterSpaceChecker,
     createSimpleSelectorChecker,
@@ -291,7 +292,7 @@ export class StylableProcessor {
     }
 
     protected handleDeclarations(rule: SRule) {
-        rule.walkDecls(decl => {
+        rule.walkDecls((decl: SDecl) => {
 
             decl.value.replace(matchValue, (match, varName) => {
                 if (match && !this.meta.mappedSymbols[varName]) {
@@ -299,6 +300,8 @@ export class StylableProcessor {
                 }
                 return match;
             });
+
+            processFormatters(decl as SDecl);
 
             if (stValues.indexOf(decl.prop) !== -1) {
                 this.handleDirectives(rule, decl);
@@ -568,6 +571,11 @@ export interface SAtRule extends postcss.AtRule {
 }
 
 // TODO: maybe put under stylable namespace object in v2
-export interface SDecl extends postcss.Declaration {
+export interface DeclStylableProps {
     sourceValue: string;
+    formatters: string[];
+}
+
+export interface SDecl extends postcss.Declaration {
+    stylable: DeclStylableProps;
 }

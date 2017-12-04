@@ -8,7 +8,7 @@ import {removeSTDirective} from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-import {createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
+import {createClassSubsetRoot, findDeclaration, getDeclStylable, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
 import {valueMapping} from './stylable-value-parsers';
 import {Pojo} from './types';
 import {valueReplacer} from './value-template';
@@ -84,12 +84,14 @@ export class StylableTransformer {
                 rule.selector = this.scopeRule(meta, rule, metaExports);
             }
 
-            if (!this.keepValues) {
-                rule.walkDecls((decl: SDecl) => {
-                    decl.sourceValue = decl.value;
+            rule.walkDecls((decl: SDecl) => {
+                const declStylable = getDeclStylable(decl);
+                declStylable.sourceValue = decl.value;
+
+                if (!this.keepValues) {
                     decl.value = this.replaceValueFunction(decl, decl.value, meta);
-                });
-            }
+                }
+            });
         });
 
         this.exportRootClass(meta, metaExports);

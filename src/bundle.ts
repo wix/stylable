@@ -220,7 +220,7 @@ export class Bundler {
                 const ruleOverride = postcss.rule({selector: overrideSelector});
                 srcRule.walkDecls((decl: SDecl) => {
                     const overriddenValue = valueReplacer(
-                        decl.sourceValue, entryMeta.mappedSymbols, (_value, name, _match) => {
+                        decl.stylable.sourceValue, entryMeta.mappedSymbols, (_value, name, _match) => {
                             if (overrideVars[name]) {
                                 return overrideVars[name];
                             }
