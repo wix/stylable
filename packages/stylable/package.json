@@ -12,7 +12,8 @@
     "test": "npm run test:node",
     "test:node": "ts-mocha \"./tests/**/*.spec.ts\"",
     "prepublish": "npm run build",
-    "lint": "tslint --project ./tsconfig.json"
+    "lint": "tslint --project ./tsconfig.json",
+    "deploy:site": "jekyll build -s ./site -d ./site/_site && gh-pages -d ./site/_site"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",
@@ -34,6 +35,7 @@
     "@types/node": "8",
     "chai": "^4.1.2",
     "flat": "^4.0.0",
+    "gh-pages": "^1.1.0",
     "glob": "^7.1.2",
     "mocha": "^4.0.1",
     "mocha-loader": "^1.1.1",
