@@ -4,9 +4,7 @@
 
 
 ## How to Update
-
-> **Overview:**
-> All changes to documentation are merged to master, the website rebuilt and deployed to the target branch (`gh-pages`).
+All changes to documentation are merged to master, the website rebuilt and deployed to the target branch (`gh-pages`).
 
 To make your life easier, we've added a simple script to automate this process. 
 
