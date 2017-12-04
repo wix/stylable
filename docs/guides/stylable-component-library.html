@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -134,7 +132,7 @@
 
 <p>As a best practice, we recommend following this folder structure:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>src/
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
     |
     --- components/
     |   |
@@ -149,8 +147,7 @@
     |   |
     |   backoffice-theme.st.css
     |   app-theme.st.css
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <ul>
   <li>The <code class="highlighter-rouge">src/components</code> folder contains:
@@ -195,7 +192,7 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
   <li>1 shared class</li>
 </ul>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* app.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* app.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"App"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'../project.st.css'</span><span class="p">;</span>
@@ -209,8 +206,7 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
     <span class="c">/* append emphasisBox CSS class to messageBox JS output */</span>
     <span class="py">-st-extends</span><span class="p">:</span> <span class="n">emphasisBox</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="theme">Theme</h2>
 
@@ -223,7 +219,7 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
   <li>CSS for <code class="highlighter-rouge">emphsisBox</code> shared class</li>
 </ul>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* backoffice-theme.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* backoffice-theme.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"backofficeTheme"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'../project.st.css'</span><span class="p">;</span>
@@ -238,8 +234,7 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
 <span class="nc">.emphasisBox</span> <span class="p">{</span>
     <span class="nl">border</span><span class="p">:</span> <span class="m">3px</span> <span class="nb">solid</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Read more about using themes in <a href="./stylable-application#apply-component-library-theme">theme an application</a>.</p>
 

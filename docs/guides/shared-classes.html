@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -130,19 +128,18 @@
 
 <p>In the <a href="./project-commons">commons stylable stylesheet</a> of your project (usually named <code class="highlighter-rouge">project.st.css</code>), you define a CSS class with a descriptive name like <code class="highlighter-rouge">emphasisBox</code>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
 <span class="nc">.emphasisBox</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">pink</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="use-shared-classes-in-components">Use shared classes in components</h2>
 
 <p>A component’s <strong>Stylable</strong> stylesheet can use and extend shared classes:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./project.st.css'</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">emphasisBox</span><span class="p">;</span>
@@ -159,8 +156,7 @@ js value: "comp__messageBox project__emphasisBox"
 <span class="nc">.messageBox</span> <span class="p">{</span>
     <span class="py">-st-extends</span><span class="p">:</span> <span class="n">emphasisBox</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </section>
 

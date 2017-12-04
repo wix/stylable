@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -131,11 +129,10 @@
 <p>To begin writing your own project, you can create a <strong>Stylable</strong> app from our boilerplate. It is based on <a href="https://github.com/facebookincubator/create-react-app">create-react-app</a>. To create the project, follow these instructions:</p>
 
 <p>Using npm:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install -g create-react-app
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install <span class="nt">-g</span> create-react-app
 
-create-react-app my-app-name --scripts-version stylable-scripts
-</code></pre>
-</div>
+create-react-app my-app-name <span class="nt">--scripts-version</span> stylable-scripts
+</code></pre></div></div>
 <p>For the <code class="highlighter-rouge">my-app-name</code> value above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run <code class="highlighter-rouge">yarn start</code> or <code class="highlighter-rouge">yarn build</code> to create the project in a browser.</p>
 
 <p>The project includes several basic components and <strong>Stylable</strong> stylesheets which have the suffix <code class="highlighter-rouge">.st.css</code>.</p>
@@ -147,13 +144,11 @@ create-react-app my-app-name --scripts-version stylable-scripts
 <p>Install <strong>stylable</strong> and <strong>stylable-integration</strong> as a dependency in your local project.</p>
 
 <p>Using npm:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install stylable stylable-integration --save-dev
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install stylable stylable-integration <span class="nt">--save-dev</span>
+</code></pre></div></div>
 <p>Using Yarn:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>yarn add stylable stylable-integration
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yarn add stylable stylable-integration
+</code></pre></div></div>
 
 <h2 id="write-in-stylable">Write in Stylable</h2>
 
@@ -167,7 +162,7 @@ create-react-app my-app-name --scripts-version stylable-scripts
 
 <p>Add <strong>Stylable</strong> to your Webpack configuration as follows:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>const StylablePlugin = require('stylable-integration/webpack-plugin');
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const StylablePlugin = require('stylable-integration/webpack-plugin');
 ...
 {
     module: {
@@ -192,8 +187,7 @@ create-react-app my-app-name --scripts-version stylable-scripts
         new StylablePlugin({ injectBundleCss: true  /* dev mode */ })
     ]
 }
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>For a production build, you should not use the <code class="highlighter-rouge">injectBundleCss</code> option. The project creates a bundle CSS asset in your output directory. Just load this into your html. You can set the file name. For details, see <a href="https://github.com/wix/stylable-integration"><strong>stylable-integration</strong></a>.</p>
 

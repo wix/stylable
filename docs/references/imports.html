@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -156,18 +154,16 @@
 Generally when importing a <strong>default</strong> value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet.</p>
 </blockquote>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./toggle-button.css'</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="kr">import</span> <span class="nx">ToggleButton</span> <span class="nx">from</span> <span class="s1">'./toggle-button.css'</span><span class="p">;</span>
-</code></pre>
-</div>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
+<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button.css'</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h3 id="import-named-exports-from-a-local-js-module">Import named exports from a local JS module</h3>
 
@@ -178,35 +174,31 @@ Generally when importing a <strong>default</strong> value from a css file, you c
 When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.</p>
 </blockquote>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="kr">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
-</code></pre>
-</div>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h3 id="import-named-exports-from-a-local-js-module-and-locally-refer-to-one-of-the-export-values-as-a-different-name">Import named exports from a local JS module and locally refer to one of the export values as a different name</h3>
 
 <p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. The value <code class="highlighter-rouge">gridMixin</code> is used as is and <code class="highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltip</code> in this stylesheet.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span> <span class="n">as</span> <span class="n">tooltip</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="kr">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="nx">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
-</code></pre>
-</div>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="k">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h2 id="import-stylesheet">Import stylesheet</h2>
 

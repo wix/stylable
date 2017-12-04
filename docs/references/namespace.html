@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -130,16 +128,14 @@
 
 <p>When you develop your application in <strong>Stylable</strong>, you can manually namespace classes so you can more easily identify them when they are displayed in the CSS output. You do this in your <strong>Stylable</strong> stylesheet by adding the syntax <code class="highlighter-rouge">@namespace</code> to provide better display names to your classes.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"my-gallery"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.my-gallery__root</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />

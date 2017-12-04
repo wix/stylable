@@ -40,8 +40,6 @@
         <div class="docs-nav-section-header"></div>
         <ul>
             
-                <li class=""><a href="/docs/welcome" class=" docs-nav-item">Welcome to Stylable</a></li>
-            
         </ul>
     </div>
     
@@ -143,6 +141,20 @@
   </li>
   <li><a href="https://github.com/wix/stylable-intelligence">GitHub</a> from the <code class="highlighter-rouge">.vsix</code> file.</li>
 </ul>
+
+<h2 id="ide-extensions">IDE extensions</h2>
+
+<p>Because stylable-intelligence registers <code class="highlighter-rouge">.st.css</code> files as Stylable and not CSS, certain CSS extensions may not work until they explicitly add Stylable support. The stylable-intelligence extension for VSCode is compatible with the following CSS extensions:</p>
+
+<ol>
+  <li><a href="https://github.com/kisstkondoros/csstriggers">CssTriggers</a>(^0.4.0) - A VSCode extension which adds inline decoration to css properties to indicate their costs.</li>
+</ol>
+
+<p>If you are using an extension that you would like to add to this list, let us know and we’re happy to help.</p>
+
+<h2 id="css-functionality">CSS functionality</h2>
+
+<p>Because Stylable files are not recognized as CSS, we proxy the CSS Language Server through stylable-intelligence. Most basic features are already supported, but if you notice anything strange, let us know.</p>
 
 <blockquote>
   <p><strong>Note:</strong><br />
