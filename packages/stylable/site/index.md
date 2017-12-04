@@ -54,4 +54,4 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 ## Project
 
-Access the BSD-licensed [**Stylable** GitHub project](https://github.com/wix/stylable {:target="_blank"}).
+Access the BSD-licensed [**Stylable** GitHub project](https://github.com/wix/stylable).
