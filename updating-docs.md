@@ -8,7 +8,7 @@ All changes to documentation are merged to master, the website rebuilt and deplo
 
 To make your life easier, we've added a simple script to automate this process. 
 
-In the root of your Stylable run the following command:
+In the root directory of your Stylable repo run the following command:
 ```bash
 yarn deploy:site
 ```
