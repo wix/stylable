@@ -18,21 +18,30 @@ layout: docs
 
 
 
-At Wix, we agree. We &hearts; CSS. It's simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.
+At Wix, we agree. We &hearts; CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.
 
-We want to extend CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. So we created **Stylable**.
+We also &hearts; TypeScript. TypeScript helps us manage these large projects, telling us at build-time what once we could only see at run-time. We want to give CSS a type system - doing for CSS what TypeScript does for JavaScript.
 
-**Stylable** is a preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
+* We want to **extend** CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. 
+* We want to create CSS macros with JavaScript and use them at build time.
+* We want language services like **code completion** and **validation**. Each component exposes a style API that maps its internal parts and states so you can reuse components across teams without sacrificing stylability or scalability.
+* We want to see our errors at build time or even while [working in our IDE](https://marketplace.visualstudio.com/search?term=stylable-intelligence&target=VSCode&category=All%20categories&sortBy=Relevance). Wave goodbye to silent run-time breakage misery!
 
-So what does **Stylable** do?
+So we created **Stylable** — a CSS preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
 
-**Stylable** enables you to build reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
+![Stylable Intelligence](./images/intelligence.gif)
 
-* Scopes styles to components so they don't "leak" and clash with other styles.
-* Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
-* Uses themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
+# How does Stylable perform this voodoo?
 
-At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid, vanilla CSS that works cross-browser.
+* It scopes styles to components so they don’t “leak” and clash with other styles.
+* It enables custom pseudo-classes and pseudo-elements that abstract the internal state and structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
+* It sets themes so you can apply different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
+* At build time, the preprocessor converts the Stylable CSS into flat, static, valid, vanilla CSS that works cross-browser.
+
+
+# Shut up and take my money!
+
+No need! It's BSD-licensed. Take it, use it, make your development easier and your apps faster.
 
 Viva CSS, and welcome **Stylable**. We hope you like it. 
 
@@ -45,4 +54,4 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 
 ## Project
 
-Access the BSD-licensed [**Stylable** GitHub project](https://github.com/wix/stylable {:target="_blank"}).
+Access the BSD-licensed [**Stylable** GitHub project](https://github.com/wix/stylable).

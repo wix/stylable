@@ -1,3 +1,4 @@
+import { stColor, stString } from './';
 export {safeParse} from './parser';
 export {cachedProcessFile, FileProcessor, MinimalFS, CacheItem} from './cached-process-file';
 export {
@@ -25,3 +26,4 @@ export {Stylable} from './stylable';
 export {createInfrastructure, StylableInfrastructure} from './create-infra-structure';
 export {create} from './runtime';
 export * from './types';
+export {stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag} from './types';
