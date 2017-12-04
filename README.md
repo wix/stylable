@@ -38,8 +38,8 @@ For details on both options, see [Install & Configure](https://stylable.io/docs/
 
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
-## Documentation
-To update the documentation, follow the instructions [here](./updating-docs.md).
+## Updating Documentation
+To update the documentation on [Stylable.io](http://www.stylable.io), follow the instructions [here](./updating-docs.md).
 
 ## License
 
