@@ -126,27 +126,30 @@
 
 <p>In this example <code class="highlighter-rouge">.classB</code> and <code class="highlighter-rouge">.classC</code> are not scoped to <code class="highlighter-rouge">Comp</code> but are part of the selector query.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
 <span class="nc">.classA</span> <span class="nd">:global</span><span class="o">(</span><span class="nc">.classB</span> <span class="o">&gt;</span> <span class="nc">.classC</span><span class="o">)</span> <span class="nc">.classD</span><span class="nd">:hover</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.Comp__root</span> <span class="nc">.Comp__classA</span> <span class="nc">.classB</span> <span class="o">&gt;</span> <span class="nc">.classC</span> <span class="nc">.Comp__classD</span><span class="nd">:hover</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <blockquote>
   <p><strong>Note</strong> <br />
 You can also use global to keep pseudo-classes native. You can describe them using the syntax below where <code class="highlighter-rouge">classA</code> is scoped and <code class="highlighter-rouge">:selected</code> is native.</p>
 
-  <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.classA</span><span class="nd">:global</span><span class="o">(</span><span class="nd">:selected</span><span class="o">)</span> <span class="p">{</span>
+  <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.classA</span><span class="nd">:global</span><span class="o">(</span><span class="nd">:selected</span><span class="o">)</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>  </div>
+</code></pre>
+  </div>
 </blockquote>
 
 </section>

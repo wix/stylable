@@ -135,36 +135,38 @@ As part of the <strong>Stylable</strong> roadmap, we may add scoped tag selector
 
 <p>Targeting a native element matches any element with the same tag name that is found in a prefix selector. The prefix selector could be a class selector or the root.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output - form is not namespaced - affects any nested form */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output - form is not namespaced - affects any nested form */</span>
 <span class="nc">.Page__root</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span> 
 <span class="nc">.Page__root.sideBar</span><span class="nd">:hover</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
 The value <code class="highlighter-rouge">form</code> is not namespaced.</p>
 </blockquote>
 
-<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* React - inside a Stylable component render */</span>
-<span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"gallery"</span><span class="o">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className=</span><span class="s2">"sideBar"</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">form</span><span class="p">&gt;&lt;/</span><span class="nt">form</span><span class="p">&gt;</span> /* green background and red while hovering parent */
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">form</span><span class="p">&gt;&lt;/</span><span class="nt">form</span><span class="p">&gt;</span> <span class="cm">/* green background */</span>
-<span class="p">&lt;</span><span class="err">/</span><span class="nt">div</span><span class="p">&gt;</span>
-</code></pre></div></div>
+<pre><code class="language-jsx">/* React - inside a Stylable component render */
+&lt;div className="gallery"&gt;
+    &lt;div className="sideBar"&gt;
+        &lt;form&gt;&lt;/form&gt; /* green background and red while hovering parent */
+    &lt;/div&gt;
+    &lt;form&gt;&lt;/form&gt; /* green background */
+&lt;/div&gt;
+</code></pre>
 
 <h2 id="component-element">Component element</h2>
 
 <p>When the value of a stylesheet is <a href="./imports">imported</a> with a <strong>capital first letter</strong>, it can be used as a component tag selector.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nd">:import</span><span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./toggle-button.st.css"</span><span class="p">;</span>
@@ -172,23 +174,25 @@ The value <code class="highlighter-rouge">form</code> is not namespaced.</p>
 <span class="p">}</span>
 <span class="nt">ToggleButton</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nt">ToggleButton</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */</span>
 <span class="nc">.Page__root</span> <span class="nc">.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Page__root</span> <span class="nc">.Page__root.sideBar</span><span class="nd">:hover</span> <span class="nc">.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* React implementation - button component implements toggle-button.css */</span>
-<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
-<span class="cm">/* inside a stylable render */</span>
-<span class="p">&lt;</span><span class="nt">div</span> <span class="na">className=</span><span class="s2">"gallery"</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className=</span><span class="s2">"sideBar"</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nc">ToggleButton</span><span class="p">&gt;&lt;/</span><span class="nc">ToggleButton</span><span class="p">&gt;</span> /* green background and red while hovering parent */
-    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nc">ToggleButton</span><span class="p">&gt;&lt;/</span><span class="nc">ToggleButton</span><span class="p">&gt;</span> /* green background */
-<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-</code></pre></div></div>
+<pre><code class="language-jsx">/* React implementation - button component implements toggle-button.css */
+import ToggleButton from './toggle-button';
+/* inside a stylable render */
+&lt;div className="gallery"&gt;
+    &lt;div className="sideBar"&gt;
+        &lt;ToggleButton&gt;&lt;/ToggleButton&gt; /* green background and red while hovering parent */
+    &lt;/div&gt;
+    &lt;ToggleButton&gt;&lt;/ToggleButton&gt; /* green background */
+&lt;/div&gt;
+</code></pre>
 
 </section>
 

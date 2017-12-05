@@ -130,14 +130,15 @@
 
 <p>When you define a CSS class inside a component, in this case a <code class="highlighter-rouge">playButton</code> in a <code class="highlighter-rouge">VideoPlayer</code>, that class may be targeted as a pseudo-element of any class that extends the component <code class="highlighter-rouge">videoPlayer</code>.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* video-player.st.css */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* video-player.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"VideoPlayer"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="p">{}</span>
 <span class="nc">.playButton</span> <span class="p">{</span> 
     <span class="nl">background</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span> 
     <span class="nl">color</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h2 id="style-custom-pseudo-elements">Style custom pseudo-elements</h2>
 
@@ -145,7 +146,7 @@
 
 <p>In this example, you <a href="./imports">import</a> a <code class="highlighter-rouge">VideoPlayer</code> component into your stylesheet, and style an internal part called <code class="highlighter-rouge">playButton</code> overriding its original styling.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./video-player.st.css'</span><span class="p">;</span>
@@ -158,14 +159,16 @@
     <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.Page__root</span> <span class="nc">.Page__mainVideo.VideoPlayer__root</span> <span class="nc">.VideoPlayer__playButton</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
@@ -180,7 +183,7 @@ Custom pseudo-elements are not limited to the end of a selector like native pseu
 
 <p>The <code class="highlighter-rouge">page.css</code> stylesheet can then extend <code class="highlighter-rouge">super-video-player.css</code> and on the <code class="highlighter-rouge">.mainPlayer</code> class, style <code class="highlighter-rouge">playButton</code> differently.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* super-video-player.st.css */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* super-video-player.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./video-player.st.css'</span><span class="p">;</span>
@@ -192,9 +195,10 @@ Custom pseudo-elements are not limited to the end of a selector like native pseu
 <span class="nc">.root</span><span class="nd">::playButton</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* page.st.css */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* page.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./super-video-player.st.css'</span><span class="p">;</span>
@@ -206,12 +210,14 @@ Custom pseudo-elements are not limited to the end of a selector like native pseu
 <span class="nc">.mainPlayer</span><span class="nd">::playButton</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.SuperVideoPlayer__root.VideoPlayer__root</span> <span class="nc">.VideoPlayer__playButton</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Page__root</span> <span class="nc">.Page__mainPlayer.SuperVideoPlayer__root</span> <span class="nc">.VideoPlayer__playButton</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <h2 id="override-custom-pseudo-elements">Override custom pseudo-elements</h2>
 
@@ -224,7 +230,7 @@ You can also override native pseudo-elements using <strong>Stylable’s</strong>
 
 <p>In this example, <code class="highlighter-rouge">root</code> extends <code class="highlighter-rouge">VideoPlayer</code> and so any class placed on the <code class="highlighter-rouge">root</code> overrides the pseudo-element.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./video-player.css'</span><span class="p">;</span>
@@ -236,11 +242,13 @@ You can also override native pseudo-elements using <strong>Stylable’s</strong>
 <span class="nc">.playButton</span> <span class="p">{</span> <span class="c">/* override VideoPlayer playButton */</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.SuperVideoPlayer__root.VideoPlayer__root</span> <span class="nc">.SuperVideoPlayer__playButton</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="p">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
