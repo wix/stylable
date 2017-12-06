@@ -25,7 +25,7 @@ We also &hearts; TypeScript. TypeScript helps us manage these large projects, te
 * We want to **extend** CSS so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast. 
 * We want to create CSS macros with JavaScript and use them at build time.
 * We want language services like **code completion** and **validation**. Each component exposes a style API that maps its internal parts and states so you can reuse components across teams without sacrificing stylability or scalability.
-* We want to see our errors at build time or even while [working in our IDE](https://marketplace.visualstudio.com/search?term=stylable-intelligence&target=VSCode&category=All%20categories&sortBy=Relevance). Wave goodbye to silent run-time breakage misery!
+* We want to see our errors at build time or even while [working in our IDE](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence). Wave goodbye to silent run-time breakage misery!
 
 So we created **Stylable** — a CSS preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
 
