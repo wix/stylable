@@ -1,5 +1,5 @@
 // import * as postcss from 'postcss';
-import { SDecl } from '../src/stylable-processor';
+import { Argument, SDecl } from '../src/stylable-processor';
 import { getDeclStylable } from '../src/stylable-utils';
 
 const valueParser = require('postcss-value-parser');
@@ -16,14 +16,27 @@ export function processFormatters(decl: SDecl) {
 function recursivelyResolveFormatters(parsed: any, decl: SDecl) {
     if (parsed.nodes) {
         parsed.nodes.forEach((node: any) => {
-            if (node.nodes) {
+            if (node.nodes && node.nodes.length > 0) {
                 recursivelyResolveFormatters(node, decl);
             }
-        });
-    }
 
-    if (parsed.type === 'function') {
-        const declStylable = getDeclStylable(decl);
-        declStylable.formatters.push(parsed.value);
+            if (node.type === 'function') {
+                const formatterArguments: Argument[] = [];
+
+                if (node.nodes && node.nodes.length > 0) {
+                    node.nodes.forEach((n: any) => {
+                        if (n.type === 'word') {
+                            formatterArguments.push({value: n.value});
+                        }
+                    });
+                }
+
+                const declStylable = getDeclStylable(decl);
+                declStylable.formatters.push({
+                    name: node.value,
+                    arguments: formatterArguments
+                });
+            }
+        });
     }
 }

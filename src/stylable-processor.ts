@@ -301,10 +301,10 @@ export class StylableProcessor {
                 return match;
             });
 
-            processFormatters(decl as SDecl);
-
             if (stValues.indexOf(decl.prop) !== -1) {
                 this.handleDirectives(rule, decl);
+            } else {
+                processFormatters(decl as SDecl);
             }
 
         });
@@ -570,10 +570,19 @@ export interface SAtRule extends postcss.AtRule {
     sourceParams: string;
 }
 
+export interface Argument {
+    value: string;
+}
+
+export interface Formatter {
+    name: string;
+    arguments: Argument[];
+}
+
 // TODO: maybe put under stylable namespace object in v2
 export interface DeclStylableProps {
     sourceValue: string;
-    formatters: string[];
+    formatters: Formatter[];
 }
 
 export interface SDecl extends postcss.Declaration {

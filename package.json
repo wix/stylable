@@ -13,7 +13,7 @@
     "test:node": "ts-mocha \"./tests/**/*.spec.ts\"",
     "prepublish": "npm run build",
     "lint": "tslint --project ./tsconfig.json",
-    "deploy:site": "jekyll build -s ./site -d ./site/_site && gh-pages -d ./site/_site"
+    "deploy:site": "cd site && bundle install && bundle exec jekyll build -s ./ -d ./_site && cd .. && gh-pages -d ./site/_site"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.0",

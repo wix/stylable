@@ -9,7 +9,14 @@ import {removeSTDirective} from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-import {createClassSubsetRoot, findDeclaration, getDeclStylable, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
+import {
+    createClassSubsetRoot,
+    findDeclaration,
+    findRule,
+    getDeclStylable,
+    mergeRules,
+    reservedKeyFrames
+} from './stylable-utils';
 import {valueMapping} from './stylable-value-parsers';
 import {Pojo} from './types';
 import {valueReplacer} from './value-template';
@@ -99,7 +106,12 @@ export class StylableTransformer {
 
                 if (!this.keepValues) {
                     decl.value = this.replaceValueFunction(decl, decl.value, meta);
+
+                    if (decl.stylable.formatters.length > 0) {
+                        decl.value = this.evaluateValueWithFormatters(decl, meta);
+                    }
                 }
+
             });
         });
 
@@ -118,6 +130,29 @@ export class StylableTransformer {
             exports: metaExports
         };
 
+    }
+    public evaluateValueWithFormatters(decl: SDecl, meta: StylableMeta) {
+        // collect formatters and their import refs
+        const formatters = decl.stylable.formatters;
+
+        const formattersRefs = formatters.map(formatter => meta.mappedSymbols[formatter.name]);
+
+        // resolve import refs
+        const resolvedFormatters = formattersRefs.map(formatterRef => {
+            return this.resolver.deepResolve(formatterRef);
+        });
+
+        // generate new value for declaration
+        if (resolvedFormatters.length > 0) {
+            resolvedFormatters.forEach((formatter: any, i: number) => {
+                if (formatter.symbol) {
+                    const argumentsArray = formatters[i].arguments.map((f: any) => f.value);
+                    decl.value = formatter.symbol.apply(null, argumentsArray);
+                }
+            });
+        }
+
+        return decl.value;
     }
     public isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
         return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
