@@ -226,7 +226,7 @@ pre {
  * Address odd `em`-unit font size rendering in all browsers.
  */
 
-code,
+code:not(language-jsx):not(language-css),
 kbd,
 pre,
 samp {
