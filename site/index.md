@@ -4,7 +4,7 @@
 # See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 id: welcome
-title: Stylable - CSS for Components
+title: Welcome to Stylable - CSS for Components
 redirect_from: "docs/index.html"
 layout: docs
 ---
