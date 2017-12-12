@@ -1,6 +1,6 @@
 # Contributing to Stylable
 
-There are many ways you can contribute to our efforts. We are happy to accept PR's and issues, and hope to have a fruitful discussion.
+There are many ways you can contribute to our efforts. We are happy to accept pull requests and issues, and hope to have a fruitful discussion. We ask all participants to adhere to the [Contributor Covenant](https://www.contributor-covenant.org/version/1/4/code-of-conduct.html). Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting our Product Manager [Arnon Kehat](mailto:arnonk@wix.com). 
 
 ## Use Stylable
 
