@@ -570,13 +570,8 @@ export interface SAtRule extends postcss.AtRule {
     sourceParams: string;
 }
 
-export interface Argument {
-    value: string;
-}
-
 export interface Formatter {
     name: string;
-    arguments: Argument[];
 }
 
 // TODO: maybe put under stylable namespace object in v2

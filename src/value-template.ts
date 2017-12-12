@@ -22,7 +22,7 @@ function replaceValue(
     const result = value.replace(matchValue, (match: string, name: string) => {
         const visitedIndex = visited.indexOf(name);
         if (visitedIndex !== -1) {
-            return 'cyclic value' + (debug ? `(${visited.slice(visitedIndex).join('>') + '>' + name})` : '');
+            return 'cyclic-value' + (debug ? `(${visited.slice(visitedIndex).join('>') + '>' + name})` : '');
         }
         let translatedValue = onMatch(data[name], name, match) || match;
         translatedValue = replaceValue(translatedValue, data, onMatch, debug, visited.concat(name));

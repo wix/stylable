@@ -101,7 +101,7 @@ describe('Generator variables interpolation', () => {
 
         const rule = result.nodes![0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('cyclic value');
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('cyclic-value');
 
     });
 

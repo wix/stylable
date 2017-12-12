@@ -49,3 +49,63 @@ export type stNumber<
     mults extends number | null = null> = string;
 export type stImage = string;
 export type stCssFrag = string;
+
+export const cssNativeFunctionsDic = {
+    'attr': true,
+    'blur': true,
+    'brightness': true,
+    'calc': true,
+    'circle': true,
+    'contrast': true,
+    'counter': true,
+    'counters': true,
+    'cubic-bezier': true,
+    'drop-shadow': true,
+    'ellipse': true,
+    'grayscale': true,
+    'hsl': true,
+    'hsla': true,
+    'hue-rotate': true,
+    'hwb': true,
+    'image': true,
+    'inset': true,
+    'invert': true,
+    'linear-gradient': true,
+    'matrix': true,
+    'matrix3d': true,
+    'opacity': true,
+    'perspective': true,
+    'polygon': true,
+    'radial-gradient': true,
+    'repeating-linear-gradient': true,
+    'repeating-radial-gradient': true,
+    'rgb': true,
+    'rgba': true,
+    'rotate': true,
+    'rotate3d': true,
+    'rotateX': true,
+    'rotateY': true,
+    'rotateZ': true,
+    'saturate': true,
+    'sepia': true,
+    'scale': true,
+    'scale3d': true,
+    'scaleX': true,
+    'scaleY': true,
+    'scaleZ': true,
+    'skew': true,
+    'skewX': true,
+    'skewY': true,
+    'symbols': true,
+    'translate': true,
+    'translate3d': true,
+    'translateX': true,
+    'translateY': true,
+    'translateZ': true,
+    'url': true
+};
+
+export type cssNativeFunctions = keyof typeof cssNativeFunctionsDic;
+export function isCssNativeFunction(name: string): name is cssNativeFunctions {
+    return cssNativeFunctionsDic[name as cssNativeFunctions];
+}

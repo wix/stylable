@@ -180,7 +180,7 @@ describe('Stylable formatters', () => {
             expect(rule.nodes![0].toString()).to.equal('border: 2px solid green');
         });
 
-        xit('apply simple js formatter with a nested formatter', () => {
+        it('apply simple js formatter with a nested formatter', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -188,18 +188,18 @@ describe('Stylable formatters', () => {
                         content: `
                             :import {
                                 -st-from: "./formatter";
-                                -st-default: bigger;
+                                -st-default: addSomePx;
                                 -st-named: border;
                             }
                             .container {
-                                border: border(bigger(1) solid green);
+                                border: border(addSomePx(1, 5) solid green);
                             }
                         `
                     },
                     '/formatter.js': {
                         content: `
-                            module.exports = function(size) {
-                                return size+5+'px';
+                            module.exports = function(size, toAdd) {
+                                return Number(size) + Number(toAdd) + 'px';
                             }
                             module.exports.border = function(size, style, color) {
                                 return size + " " + style + " " + color;
@@ -210,8 +210,40 @@ describe('Stylable formatters', () => {
             });
 
             const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 5px solid green');
+            expect(rule.nodes![0].toString()).to.equal('border: 6px solid green');
+        });
+
+        it('passes through cyclic vars', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        content: `
+                            :import {
+                                -st-from: "./formatter";
+                                -st-default: print;
+                            }
+                            :vars {
+                                a: value(b);
+                                b: value(a);
+                            }
+                            .container {
+                                border: print(print(value(a)));
+                            }
+                        `
+                    },
+                    '/formatter.js': {
+                        content: `
+                            module.exports = function(result) {
+                                return result;
+                            }
+                        `
+                    }
+                }
+            });
+
+            const rule = result.nodes![0] as postcss.Rule;
+            expect(rule.nodes![0].toString()).to.equal('border: cyclic-value');
         });
     });
-
 });

@@ -1225,4 +1225,25 @@ describe('diagnostics: warnings and errors', () => {
 
     });
 
+    describe('formatters', () => {
+        it('should warn when trying to use a missing formatter', () => {
+            const key = 'print';
+            const config = {
+                entry: `/main.st.css`,
+                files: {
+                    '/main.st.css': {
+                        content: `
+                        .container {
+                            |border: $print$|();
+                        }
+                        `
+                    }
+                }
+            };
+
+            expectWarningsFromTransform(config,
+                [{ message: `cannot find formatter: ${key}`, file: '/main.st.css' }]);
+        });
+    });
+
 });

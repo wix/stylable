@@ -1,6 +1,7 @@
 import * as postcss from 'postcss';
 import {FileProcessor} from './cached-process-file';
 import {Diagnostics} from './diagnostics';
+import {ParsedValue, ResolvedFormatter, resolveFormattersForValue} from './formatters';
 import {nativePseudoClasses, nativePseudoElements} from './native-pseudos';
 import {cssObjectToAst} from './parser';
 import {CSSResolve, JSResolve, StylableResolver} from './postcss-resolver';
@@ -18,7 +19,7 @@ import {
     reservedKeyFrames
 } from './stylable-utils';
 import {valueMapping} from './stylable-value-parsers';
-import {Pojo} from './types';
+import {isCssNativeFunction, Pojo} from './types';
 import {valueReplacer} from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
@@ -133,26 +134,30 @@ export class StylableTransformer {
     }
     public evaluateValueWithFormatters(decl: SDecl, meta: StylableMeta) {
         // collect formatters and their import refs
-        const formatters = decl.stylable.formatters;
+        const formattersInfo = decl.stylable.formatters;
+        const formatterFns: Pojo<JSResolve|CSSResolve|null> = {};
+        for (const formatterInfo of formattersInfo) {
+            const formatterName = formatterInfo.name;
+            const formatterRef = meta.mappedSymbols[formatterName];
+            formatterFns[formatterName] = this.resolver.deepResolve(formatterRef);
 
-        const formattersRefs = formatters.map(formatter => meta.mappedSymbols[formatter.name]);
-
-        // resolve import refs
-        const resolvedFormatters = formattersRefs.map(formatterRef => {
-            return this.resolver.deepResolve(formatterRef);
-        });
-
-        // generate new value for declaration
-        if (resolvedFormatters.length > 0) {
-            resolvedFormatters.forEach((formatter: any, i: number) => {
-                if (formatter.symbol) {
-                    const argumentsArray = formatters[i].arguments.map((f: any) => f.value);
-                    decl.value = formatter.symbol.apply(null, argumentsArray);
-                }
-            });
+            // warn if formatter is not a variable (value), doesn't exists and is not a native function
+            if (formatterName !== 'value' && !formatterFns[formatterName] && !isCssNativeFunction(formatterName)) {
+                this.diagnostics.warn(
+                    decl,
+                    `cannot find formatter: ${formatterName}`,
+                    { word: formatterName }
+                );
+            }
         }
 
-        return decl.value;
+        if (decl.value === 'cyclic-value') {
+            return decl.value;
+        }
+
+        // order of execution determines that formatters will be resolved in their dependecy order
+        const parsedValue = valueParser(decl.value);
+        return valueParser.stringify(parsedValue, resolveFormattersForValue.bind(null, formatterFns));
     }
     public isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
         return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
