@@ -1,41 +1,37 @@
 # Extending through JS
 
-At stylable we love CSS and we love JS, we'd like them to get a room, on our build servers.
+Here at **Stylable** we love CSS and we love JS, we'd like them to get a room together, on our build servers.
 
-we also care about dev experience, so we everyone to be able to extend stylable while keeping completions and type checks.
-
+We also care about dev experience and so we want everyone to be able to extend Stylable while maintaining completions and type checking.
 
 ## Plugin types:
 
-stylable supports 2 types of plugins
-* [formaters - methods for manipulating css values]('./formaters.md)
-* [mixins - methods for generating css fragment for a selector]('./mixin-syntax.md)
-
-
-
+Stylable supports 2 types of plugins
+* [Formatters - methods for manipulating css declaration values]('./formatters.md)
+* [Mixins - methods for generating a css fragment]('./mixin-syntax.md)
 
 ## Stylable Types
 
-Stylable types represent the available primitive types in CSS. They try to follow the spirit of the Houdini future spec. 
+Stylable types represent the available primitive types in CSS. They try to follow the spirit of the [Houdini](https://github.com/w3c/css-houdini-drafts/wiki) future spec. 
 
-providing these types lets your plugin users get completions and validations when using them
+Utilizing these types enables the consumers of the plugin to receive completions and validations in their consumption.
 
-Available types and validations:
+### Available types and validations:
 
 | Type | validations |
 |----|----|
-|color| allow opacity | 
-|sizeUnit| allowedUnits, min, max, multiplesOf | 
-|percentage| min, max, multiplesOf | 
-|image| allowBase64, allowUrl | 
-|number| min, max, multiplesOf | 
-|enum| allowedValues |
+| color | allow opacity | 
+| sizeUnit | allowedUnits, min, max, multiplesOf | 
+| percentage | min, max, multiplesOf | 
+| image | allowBase64, allowUrl | 
+| number | min, max, multiplesOf | 
+| enum | allowedValues |
 
 Native Enums
 
 | Type | validations |
 |----|----|
-|lineStyle| blackList |
+| lineStyle | blackList |
 | display | blackList |
 | bezierCurves | blackList |
 | positionKeywords | blackList |
@@ -47,57 +43,49 @@ Native Enums
 
 
 
-Stylable uses Typescript or JSDocs to infer JS extension signatures
+> Note: Stylable uses Typescript or JSDocs to infer JS extension signatures
 
 ## Extending through formatters:
 
-Formatters are JS methods manipulating parameters to produce a string value.
+Formatters are methods that manipulate parameters in order to produce a string that will be returned to a declaration value.
 
 
-For example the following CSS code :
+For example the following CSS code:
 
 ```css
 
-:import{
-    -st-from:"../my-formatter.js";
-    -st-named:lighten;
-    -st-default:fmt;
+:import {
+    -st-from: "../my-formatter.js";
+    -st-named: lighten;
+    -st-default: frmt;
 }
 
-.myClass{
-    color: lighten(30,#ff0000);
-    background-color: fmt(80,#ff0000);
+.myClass {
+    color: lighten(30, #ff0000);
 }
 
 ```
 
-uses the following JS code:
+Uses the following TypeScript code:
 
 ```ts
-/*my-formatter.js*/
-import {darken  as polishedDarken, lighten as polishedLighten} from 'polished';
+/*my-formatter.ts*/
+
+import {darken as polishedDarken, lighten as polishedLighten} from 'polished';
 import {stNumber, stColor} from "stylable";
-/**
-* Lighten - lightens a color by a percentage.
-*/
-export function lighten(amount:stNumber,color:stColor):stColor{
-    return polishedLighten(amount,color);
-}
+
 
 /**
-* Darken - darkens a color by a percentage.
+ * Lighten - lightens a color by a percentage.
 */
-export default function darken(amount:stNumber,color:stColor):stColor{
-    return darken(amount,color);
+export function lighten(amount: stNumber, color: stColor): stColor {
+    return polishedLighten(amount, color);
 }
-
 ```
-
 
 ## Extending through mixins:
 
 In many cases its useful to generate bigger chunks of css through js.
-
 Here's an example creating and using an expandOnHover mixin:
 
 ```css
@@ -136,12 +124,24 @@ export function expandOnHover( durationMS:stNumber<0,1000> = 200,
 
 ## Declaring types through JS docs
 
-you can also declare your parameters using JS docs.
-
-here is the same mixin from above, written in js with js docs
+You can also declare your parameters using JS docs.
+Here is a the same formatter and mixin from above, written in js with JS docs.
 
 
 ```jsx
+
+/**
+ * Lighten - lightens a color by a percentage.
+*/
+/**
+ * Lightens a color by an amount.
+ * @constructor
+ * @param {string} amount - Amount to lighten
+ * @param {string} color - Color to be lightened
+ */
+export function lighten(amount: stNumber, color: stColor): stColor {
+    return polishedLighten(amount, color);
+}
 
 /**
 * Expand
