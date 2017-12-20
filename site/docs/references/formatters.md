@@ -1,4 +1,8 @@
-# Formatters
+---
+id: references/formatters
+title: Formatters
+layout: docs
+---
 
 Formatters are methods for tranforming variables and returning a css value for a declaration.
 

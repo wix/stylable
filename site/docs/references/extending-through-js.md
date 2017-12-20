@@ -1,35 +1,50 @@
-# Extending through JS
+---
+id: references/extending-through-js
+title: Extend Through JavaScript
+layout: docs
+---
 
-Here at **Stylable** we love CSS and we love JS, we'd like them to get a room together, on our build servers.
+While **Stylable** is a CSS pre-processor, developers can extend their **Stylable** definitions utlizing CSS, JavaScript or both while maintaining code hinting and type checking for validations.
 
-We also care about dev experience and so we want everyone to be able to extend Stylable while maintaining completions and type checking.
+/* why? */
+Enables developers greater freedom in generating CSS from code to provide ease of use, consistency and efficient management of complex CSS-based patterns. 
 
-## Plugin types:
+## Plugin types
 
-Stylable supports 2 types of plugins
-* [Formatters - methods for manipulating css declaration values]('./formatters.md)
-* [Mixins - methods for generating a css fragment]('./mixin-syntax.md)
+ **Stylable** supports the following types of plugins:
+* [Formatters]('./formatters.md) - functions for manipulating single CSS declaration values.
+* [Mixins]('./mixin-syntax.md) - functions for generating a CSS fragment that can include single or multiple rulesets and declarations. 
 
-## Stylable Types
+**Stylable** offers the types described here as the provided arguments for the plugins. For example: 
 
-Stylable types represent the available primitive types in CSS. They try to follow the spirit of the [Houdini](https://github.com/w3c/css-houdini-drafts/wiki) future spec. 
+```ts
+function lighten(amount: number, color: color) {
+    ...
+}
+```
 
-Utilizing these types enables the consumers of the plugin to receive completions and validations in their consumption.
+## Stylable types
 
-### Available types and validations:
+**Stylable** types represent the available primitive types in CSS. They follow the spirit of the [Houdini](https://github.com/w3c/css-houdini-drafts/wiki) future spec. 
 
-| Type | validations |
-|----|----|
-| color | allow opacity | 
-| sizeUnit | allowedUnits, min, max, multiplesOf | 
-| percentage | min, max, multiplesOf | 
-| image | allowBase64, allowUrl | 
-| number | min, max, multiplesOf | 
-| enum | allowedValues |
+Using these types enables the consumers of the plugin to receive code hinting and type checking for validations.
 
-Native Enums
+**Stylable** uses TypeScript or JSDocs to infer JS extension signatures.
 
-| Type | validations |
+### Available types and validations
+
+| Type | Validations | Validation Type |
+|----|----|----|
+| color | allowOpacity: boolean  | 
+| sizeUnit | allowedUnits, min, max, multiplesOf | string[], number, number, number  | 
+| percentage | min, max, multiplesOf | number, number, number | 
+| image | allowBase64, allowUrl | boolean |
+| number | min, max, multiplesOf | numbers |
+| enum | allowedValues | string[] |
+
+The following types are native enums that can appear in native CSS. **Stylable** enables you to create custom black lists for the enum value. 
+
+| Type | Validations |
 |----|----|
 | lineStyle | blackList |
 | display | blackList |
@@ -41,13 +56,12 @@ Native Enums
 | geometryBoxKeywords | blackList |
 | transitionTimingFunctions (without cubic-bezzier variants) | blackList |
 
+/* remove table - keep list & add code sample w/ "blackList" */
 
 
-> Note: Stylable uses Typescript or JSDocs to infer JS extension signatures
+## Extending through formatters
 
-## Extending through formatters:
-
-Formatters are methods that manipulate parameters in order to produce a string that will be returned to a declaration value.
+Formatters are methods that manipulate parameters to produce a string that is returned as a single declaration value.
 
 
 For example the following CSS code:
@@ -83,7 +97,7 @@ export function lighten(amount: stNumber, color: stColor): stColor {
 }
 ```
 
-## Extending through mixins:
+## Extending through mixins
 
 In many cases its useful to generate bigger chunks of css through js.
 Here's an example creating and using an expandOnHover mixin:
@@ -138,8 +152,8 @@ Here is a the same formatter and mixin from above, written in js with JS docs.
  * @constructor
  * @param {string} amount - Amount to lighten
  * @param {string} color - Color to be lightened
- */
-export function lighten(amount: stNumber, color: stColor): stColor {
+*/
+export function lighten(amount, color) {
     return polishedLighten(amount, color);
 }
 
