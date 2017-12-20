@@ -22,6 +22,7 @@ export {
     postProcessor,
     replaceValueHook
 } from './stylable-transformer';
+export { scopeSelector } from './stylable-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createGenerator } from './generator';
