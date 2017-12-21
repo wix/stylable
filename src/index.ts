@@ -1,6 +1,6 @@
 import { stColor, stString } from './';
-export {safeParse} from './parser';
-export {cachedProcessFile, FileProcessor, MinimalFS, CacheItem} from './cached-process-file';
+export { safeParse } from './parser';
+export { cachedProcessFile, FileProcessor, MinimalFS, CacheItem } from './cached-process-file';
 export {
     createEmptyMeta,
     StylableMeta,
@@ -15,15 +15,23 @@ export {
     ImportSymbol,
     VarSymbol
 } from './stylable-processor';
-export {StylableTransformer, StylableResults, Options as TransformerOptions} from './stylable-transformer';
-export {CSSResolve, JSResolve, StylableResolver} from './postcss-resolver';
-export {Diagnostics, Diagnostic, DiagnosticType} from './diagnostics';
-export {createGenerator} from './generator';
-export {createMinimalFS, File, MinimalFSSetup} from './memory-minimal-fs';
-export {valueMapping, SBTypesParsers, stKeys} from './stylable-value-parsers';
-export {Bundler} from './bundle';
-export {Stylable} from './stylable';
-export {createInfrastructure, StylableInfrastructure} from './create-infra-structure';
-export {create} from './runtime';
+export {
+    StylableTransformer,
+    StylableResults,
+    Options as TransformerOptions,
+    postProcessor,
+    replaceValueHook,
+    TransformHooks
+} from './stylable-transformer';
+export { scopeSelector } from './stylable-utils';
+export { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
+export { createGenerator } from './generator';
+export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';
+export { valueMapping, SBTypesParsers, stKeys } from './stylable-value-parsers';
+export { Bundler } from './bundle';
+export { Stylable } from './stylable';
+export { createInfrastructure, StylableInfrastructure } from './create-infra-structure';
+export { create } from './runtime';
 export * from './types';
-export {stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag} from './types';
+export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } from './types';

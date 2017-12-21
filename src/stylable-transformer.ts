@@ -1,18 +1,18 @@
 import * as postcss from 'postcss';
-import {FileProcessor} from './cached-process-file';
-import {Diagnostics} from './diagnostics';
-import {nativePseudoClasses, nativePseudoElements} from './native-pseudos';
-import {cssObjectToAst} from './parser';
-import {CSSResolve, JSResolve, StylableResolver} from './postcss-resolver';
-import {parseSelector, SelectorAstNode, stringifySelector, traverseNode} from './selector-utils';
-import {removeSTDirective} from './stylable-optimizer';
+import { FileProcessor } from './cached-process-file';
+import { Diagnostics } from './diagnostics';
+import { nativePseudoClasses, nativePseudoElements } from './native-pseudos';
+import { cssObjectToAst } from './parser';
+import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import { removeSTDirective } from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-import {createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames} from './stylable-utils';
-import {valueMapping} from './stylable-value-parsers';
-import {Pojo} from './types';
-import {valueReplacer} from './value-template';
+import { createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames } from './stylable-utils';
+import { valueMapping } from './stylable-value-parsers';
+import { Pojo } from './types';
+import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -41,6 +41,17 @@ export interface ScopedSelectorResults {
     elements: ResolvedElement[][];
 }
 
+export type replaceValueHook = (value: string, name: string, isLocal: boolean) => string;
+export type postProcessor<T = {}> = (
+    stylableResults: StylableResults,
+    transformer: StylableTransformer
+) => StylableResults & T;
+
+export interface TransformHooks {
+    postProcessor?: postProcessor;
+    replaceValueHook?: replaceValueHook;
+}
+
 export interface Options {
     fileProcessor: FileProcessor<StylableMeta>;
     requireModule: (modulePath: string) => any;
@@ -48,6 +59,9 @@ export interface Options {
     delimiter?: string;
     keepValues?: boolean;
     optimize?: boolean;
+    replaceValueHook?: replaceValueHook;
+    postProcessor?: postProcessor;
+    scopeRoot?: boolean;
 }
 
 export interface AdditionalSelector {
@@ -63,12 +77,18 @@ export class StylableTransformer {
     public delimiter: string;
     public keepValues: boolean;
     public optimize: boolean;
+    public scopeRoot: boolean;
+    public replaceValueHook: replaceValueHook | undefined;
+    public postProcessor: postProcessor | undefined;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
         this.keepValues = options.keepValues || false;
         this.optimize = options.optimize || false;
         this.fileProcessor = options.fileProcessor;
+        this.replaceValueHook = options.replaceValueHook;
+        this.postProcessor = options.postProcessor;
+        this.scopeRoot = options.scopeRoot === undefined ? true : options.scopeRoot;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -111,10 +131,12 @@ export class StylableTransformer {
             removeSTDirective(ast);
         }
 
-        return {
+        const result = {
             meta,
             exports: metaExports
         };
+
+        return this.postProcessor ? this.postProcessor(result, this) : result;
 
     }
     public isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
@@ -364,7 +386,23 @@ export class StylableTransformer {
                     }
                 }
             }
-            return typeof resolvedValue === 'string' ? resolvedValue : match;
+
+            if (typeof resolvedValue === 'string') {
+                if (this.replaceValueHook) {
+                    const symb = meta.mappedSymbols[name];
+                    const isLocalVar = symb._kind === 'var' && !symb.import;
+                    return this.replaceValueHook(resolvedValue, name, isLocalVar);
+                } else {
+                    // return isLocalVar ?
+                    //     `/*<local-var ${name}>*/${resolvedValue}/*</local-var>*/`
+                    //     :
+                    //     `/*<imported-var ${name}>*/${resolvedValue}/*</imported-var>*/`;
+                    return resolvedValue;
+                }
+            } else {
+                return match;
+            }
+
         });
     }
 
@@ -400,13 +438,13 @@ export class StylableTransformer {
         return keyframesExports;
     }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
-        return this.scopeSelector(meta, selector, {}, true, true).elements;
+        return this.scopeSelector(meta, selector, {}, false, true).elements;
     }
     public scopeSelector(
         meta: StylableMeta,
         selector: string,
         metaExports: Pojo<string>,
-        scopeRoot = true,
+        scopeRoot = false,
         calcPaths = false,
         rule?: postcss.Rule
     ): ScopedSelectorResults {
@@ -520,7 +558,7 @@ export class StylableTransformer {
         });
     }
     public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports, true, false, rule).selector;
+        return this.scopeSelector(meta, rule.selector, metaExports, this.scopeRoot, false, rule).selector;
     }
 
     public handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
@@ -710,7 +748,7 @@ export class StylableTransformer {
             if (nativePseudoElements.indexOf(name) === -1) {
                 this.diagnostics.warn(rule,
                     `unknown pseudo element "${name}"`,
-                    {word: name});
+                    { word: name });
             }
         }
 
