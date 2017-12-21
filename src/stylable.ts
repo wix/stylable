@@ -19,7 +19,8 @@ export class Stylable {
         public delimiter: string = '--',
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
         protected diagnostics = new Diagnostics(),
-        protected hooks: TransformHooks = {}
+        protected hooks: TransformHooks = {},
+        protected scopeRoot: boolean = true
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
         this.resolvePath = resolvePath;
@@ -43,7 +44,8 @@ export class Stylable {
             fileProcessor: this.fileProcessor,
             requireModule: this.requireModule,
             postProcessor: this.hooks.postProcessor,
-            replaceValueHook: this.hooks.replaceValueHook
+            replaceValueHook: this.hooks.replaceValueHook,
+            scopeRoot: this.scopeRoot
         });
 
         this.fileProcessor.add(meta.source, meta);

@@ -24,6 +24,7 @@ export interface InfraConfig {
 
 export interface Config {
     entry?: string;
+    scopeRoot?: boolean;
     files: Pojo<File>;
     usedFiles?: string[];
     trimWS?: boolean;
@@ -62,7 +63,8 @@ export function createTransformer(
         keepValues: false,
         optimize: config.optimize,
         replaceValueHook,
-        postProcessor
+        postProcessor,
+        scopeRoot: !!config.scopeRoot
     });
 }
 
@@ -90,7 +92,8 @@ export function createTransform(
             fileProcessor,
             requireModule,
             diagnostics: new Diagnostics(),
-            keepValues: false
+            keepValues: false,
+            scopeRoot: false
         }).transform(meta).meta;
     };
 }
@@ -114,7 +117,7 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    });
+    }, undefined, undefined, false);
 
     return new Bundler(stylable);
 }

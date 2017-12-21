@@ -61,6 +61,7 @@ export interface Options {
     optimize?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
+    scopeRoot?: boolean;
 }
 
 export interface AdditionalSelector {
@@ -76,6 +77,7 @@ export class StylableTransformer {
     public delimiter: string;
     public keepValues: boolean;
     public optimize: boolean;
+    public scopeRoot: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     constructor(options: Options) {
@@ -86,6 +88,7 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
+        this.scopeRoot = options.scopeRoot === undefined ? true : options.scopeRoot;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -555,7 +558,7 @@ export class StylableTransformer {
         });
     }
     public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports, false, false, rule).selector;
+        return this.scopeSelector(meta, rule.selector, metaExports, this.scopeRoot, false, rule).selector;
     }
 
     public handleClass(meta: StylableMeta, node: SelectorAstNode, name: string, metaExports: Pojo<string>): CSSResolve {
