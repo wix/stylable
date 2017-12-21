@@ -7,7 +7,8 @@ import { createMinimalFS } from '../../src/memory-minimal-fs';
 import { StylableResolver } from '../../src/postcss-resolver';
 import { Stylable } from '../../src/stylable';
 import { process, StylableMeta } from '../../src/stylable-processor';
-import { StylableResults, StylableTransformer } from '../../src/stylable-transformer';
+import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
+
 import { Pojo } from '../../src/types';
 
 export interface File {
@@ -23,6 +24,7 @@ export interface InfraConfig {
 
 export interface Config {
     entry?: string;
+    scopeRoot?: boolean;
     files: Pojo<File>;
     usedFiles?: string[];
     trimWS?: boolean;
@@ -47,7 +49,10 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
     return { resolver, requireModule, fileProcessor };
 }
 
-export function createTransformer(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableTransformer {
+export function createTransformer(
+    config: Config,
+    diagnostics: Diagnostics = new Diagnostics(),
+    replaceValueHook?: replaceValueHook, postProcessor?: postProcessor): StylableTransformer {
 
     const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
 
@@ -56,7 +61,10 @@ export function createTransformer(config: Config, diagnostics: Diagnostics = new
         requireModule,
         diagnostics,
         keepValues: false,
-        optimize: config.optimize
+        optimize: config.optimize,
+        replaceValueHook,
+        postProcessor,
+        scopeRoot: !!config.scopeRoot
     });
 }
 
@@ -77,6 +85,7 @@ export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path
     return (path: string) => fileProcessor.process(path);
 }
 
+/* LEGACY */
 export function createTransform(
     fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
     return (meta: StylableMeta) => {
@@ -84,7 +93,8 @@ export function createTransform(
             fileProcessor,
             requireModule,
             diagnostics: new Diagnostics(),
-            keepValues: false
+            keepValues: false,
+            scopeRoot: false
         }).transform(meta).meta;
     };
 }
@@ -108,7 +118,7 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    });
+    }, undefined, undefined, !!config.scopeRoot);
 
     return new Bundler(stylable);
 }

@@ -19,7 +19,7 @@ describe('bundle: base', () => {
             }
         });
 
-        expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
+        expect(output).to.eql(`.entry--b { color:green; }`);
     });
 
     it('should support unresolveable vars', () => {
@@ -47,7 +47,7 @@ describe('bundle: base', () => {
             }
         });
 
-        expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
+        expect(output).to.eql(`.entry--b { color:green; }`);
 
     });
 
@@ -75,9 +75,9 @@ describe('bundle: base', () => {
         });
 
         expect(output).to.eql([
-            `.comp--root .comp--b { color:green; }`,
+            `.comp--b { color:green; }`,
 
-            `.entry--root .entry--a { color:red; }`
+            `.entry--a { color:red; }`
         ].join('\n'));
     });
 
@@ -104,7 +104,7 @@ describe('bundle: base', () => {
             }
         });
 
-        expect(output).to.eql(`.entry--root .entry--b { color:green; }`);
+        expect(output).to.eql(`.entry--b { color:green; }`);
     });
 
     it('should not output unused file', () => {
@@ -131,7 +131,7 @@ describe('bundle: base', () => {
         });
 
         expect(output).to.eql([
-            `.entry--root .entry--a { color:gold; }`
+            `.entry--a { color:gold; }`
         ].join('\n'));
     });
 
@@ -172,10 +172,10 @@ describe('bundle: base', () => {
         expect(output).to.eql([
             `.usedComp--root { color: red; }`,
 
-            `.entry--root .usedComp--root { color: red; }`,
-            `.entry--root .entry--a.usedComp--root {\n    -st-extends: UsedComp;\n    color: green;\n}`,
-            `.entry--root .entry--b.entry--a.usedComp--root { color: blue; }`,
-            `.entry--root .entry--b .usedComp--root { color: black; }`
+            `.usedComp--root { color: red; }`,
+            `.entry--a.usedComp--root {\n    -st-extends: UsedComp;\n    color: green;\n}`,
+            `.entry--b.entry--a.usedComp--root { color: blue; }`,
+            `.entry--b .usedComp--root { color: black; }`
         ].join('\n'));
     });
 
@@ -215,7 +215,7 @@ describe('bundle: base', () => {
         });
 
         expect(output).to.eql([
-            `.entry--root .entry--c { color:gold; }`
+            `.entry--c { color:gold; }`
         ].join('\n'));
     });
 
@@ -255,9 +255,9 @@ describe('bundle: base', () => {
         }).not.to.throw();
 
         expect(output).to.eql([
-            `.entryB--root .entryA--root { color: green; }`,
+            `.entryA--root { color: green; }`,
 
-            `.entryA--root .entryB--root { color: red; }`
+            `.entryB--root { color: red; }`
         ].join('\n'));
     });
 
@@ -290,10 +290,10 @@ describe('bundle: base', () => {
             const entryB_output = bundler.generateCSS(['/entry-b.st.css']);
 
             expect(entryA_output).to.eql([
-                `.entryA--root .entryA--a { color:red; }`
+                `.entryA--a { color:red; }`
             ].join('\n'));
             expect(entryB_output).to.eql([
-                `.entryB--root .entryB--b { color:green; }`
+                `.entryB--b { color:green; }`
             ].join('\n'));
         });
 
@@ -324,10 +324,10 @@ describe('bundle: base', () => {
             const entryB_output = bundler.generateCSS(['/entry-b.st.css']);
 
             expect(entryA_output).to.eql([
-                `.entryA--root .entryA--a { color:red; }`
+                `.entryA--a { color:red; }`
             ].join('\n'));
             expect(entryB_output).to.eql([
-                `.entryB--root .entryB--b { color:green; }`
+                `.entryB--b { color:green; }`
             ].join('\n'));
         });
 

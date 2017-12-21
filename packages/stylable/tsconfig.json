@@ -5,6 +5,7 @@
     "node_modules",
     "dist",
     "runtime.d.ts",
+    "test-utils.d.ts",
     "modules",
     "**/*~~.ts"
   ],
