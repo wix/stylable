@@ -85,6 +85,7 @@ export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path
     return (path: string) => fileProcessor.process(path);
 }
 
+/* LEGACY */
 export function createTransform(
     fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
     return (meta: StylableMeta) => {
@@ -117,7 +118,7 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    }, undefined, undefined, false);
+    }, undefined, undefined, !!config.scopeRoot);
 
     return new Bundler(stylable);
 }
