@@ -1,7 +1,6 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { parseSelector } from './selector-utils';
-import { StylableMeta } from './stylable-processor';
 
 const valueParser = require('postcss-value-parser');
 
