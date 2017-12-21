@@ -4,10 +4,9 @@ title: Extend Through JavaScript
 layout: docs
 ---
 
-While **Stylable** is a CSS pre-processor, developers can extend their **Stylable** definitions utlizing CSS, JavaScript or both while maintaining code hinting and type checking for validations.
+**Stylable** is a CSS pre-processor, but developers can extend their **Stylable** definitions utlizing CSS, JavaScript or both while maintaining code hinting and type checking for validations.
 
-/* why? */
-Enables developers greater freedom in generating CSS from code to provide ease of use, consistency and efficient management of complex CSS-based patterns. 
+This enables developers greater freedom in generating CSS from code to provide ease of use, consistency and efficient management of complex CSS-based patterns. 
 
 ## Plugin types
 
@@ -15,10 +14,10 @@ Enables developers greater freedom in generating CSS from code to provide ease o
 * [Formatters]('./formatters.md) - functions for manipulating single CSS declaration values.
 * [Mixins]('./mixin-syntax.md) - functions for generating a CSS fragment that can include single or multiple rulesets and declarations. 
 
-**Stylable** offers the types described here as the provided arguments for the plugins. For example: 
+The types described below are the provided arguments **Stylable** provides for the plugins. For example: 
 
 ```ts
-function lighten(amount: number, color: color) {
+function lighten(amount: stNumber, color: stColor) {
     ...
 }
 ```
@@ -33,30 +32,39 @@ Using these types enables the consumers of the plugin to receive code hinting an
 
 ### Available types and validations
 
+
+
 | Type | Validations | Validation Type |
 |----|----|----|
-| color | allowOpacity: boolean  | 
-| sizeUnit | allowedUnits, min, max, multiplesOf | string[], number, number, number  | 
-| percentage | min, max, multiplesOf | number, number, number | 
-| image | allowBase64, allowUrl | boolean |
-| number | min, max, multiplesOf | numbers |
-| enum | allowedValues | string[] |
+| stColor | allowOpacity | boolean  | 
+| stSizeUnit | allowedUnits | string[] |
+| &nbsp; | min | number |
+| &nbsp; | max | number |
+| &nbsp; | multiplesOf | number  | 
+| stPercentage | min | number |
+| &nbsp; | max | number |
+| &nbsp; | multiplesOf | number | 
+| stImage | allowBase64 | boolean |
+| &nbsp; | allowUrl | boolean |
+| stNumber | min | number |
+| &nbsp; | max | number |
+| &nbsp; | multiplesOf | number |
+| stEnum | allowedValues | string[] |
 
-The following types are native enums that can appear in native CSS. **Stylable** enables you to create custom black lists for the enum value. 
+The following types are native enums that can appear in native CSS. **Stylable** enables you to create custom white lists or black lists to indicate which of the enum values can or cannot be called/changed/used as a parameter (in a formatter/mixin). 
 
-| Type | Validations |
-|----|----|
-| lineStyle | blackList |
-| display | blackList |
-| bezierCurves | blackList |
-| positionKeywords | blackList |
-| repeatStyleKeywords | blackList |
-| lineStyleKeywords | blackList |
-| boxKeywords | blackList |
-| geometryBoxKeywords | blackList |
-| transitionTimingFunctions (without cubic-bezzier variants) | blackList |
+* [lineStyle]()
+* [display](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
+* bezierCurves
+* [position](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
+* repeatStyle
+* lineStyle
+* box
+* geometryBox
+* transitionTimingFunctions (without cubic-bezzier variants)
 
-/* remove table - keep list & add code sample w/ "blackList" */
+
+/* add code sample w/ "blackList" & "whiteList" */
 
 
 ## Extending through formatters
