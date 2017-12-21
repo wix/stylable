@@ -47,6 +47,11 @@ export type postProcessor<T = {}> = (
     transformer: StylableTransformer
 ) => StylableResults & T;
 
+export interface TransformHooks {
+    postProcessor?: postProcessor;
+    replaceValueHook?: replaceValueHook;
+}
+
 export interface Options {
     fileProcessor: FileProcessor<StylableMeta>;
     requireModule: (modulePath: string) => any;

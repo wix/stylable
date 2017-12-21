@@ -20,7 +20,8 @@ export {
     StylableResults,
     Options as TransformerOptions,
     postProcessor,
-    replaceValueHook
+    replaceValueHook,
+    TransformHooks
 } from './stylable-transformer';
 export { scopeSelector } from './stylable-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';

@@ -1,11 +1,12 @@
-import {Bundler} from './bundle';
-import {FileProcessor, MinimalFS} from './cached-process-file';
-import {createInfrastructure} from './create-infra-structure';
-import {Diagnostics} from './diagnostics';
-import {safeParse} from './parser';
-import {StylableResolver} from './postcss-resolver';
-import {process, StylableMeta} from './stylable-processor';
-import {StylableResults, StylableTransformer} from './stylable-transformer';
+import { Bundler } from './bundle';
+import { FileProcessor, MinimalFS } from './cached-process-file';
+import { createInfrastructure } from './create-infra-structure';
+import { Diagnostics } from './diagnostics';
+import { safeParse } from './parser';
+import { StylableResolver } from './postcss-resolver';
+import { process, StylableMeta } from './stylable-processor';
+import { StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
+
 
 export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -17,8 +18,10 @@ export class Stylable {
         protected requireModule: (path: string) => any,
         public delimiter: string = '--',
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
-        protected diagnostics = new Diagnostics()) {
-        const {fileProcessor, resolvePath} = createInfrastructure(projectRoot, fileSystem, onProcess);
+        protected diagnostics = new Diagnostics(),
+        protected hooks: TransformHooks = {}
+    ) {
+        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
@@ -30,7 +33,7 @@ export class Stylable {
     public transform(source: string, resourcePath: string): StylableResults;
     public transform(meta: string | StylableMeta, resourcePath?: string): StylableResults {
         if (typeof meta === 'string') {
-            const root = safeParse(meta, {from: resourcePath});
+            const root = safeParse(meta, { from: resourcePath });
             meta = process(root, new Diagnostics());
         }
 
@@ -38,7 +41,9 @@ export class Stylable {
             delimiter: this.delimiter,
             diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,
-            requireModule: this.requireModule
+            requireModule: this.requireModule,
+            postProcessor: this.hooks.postProcessor,
+            replaceValueHook: this.hooks.replaceValueHook
         });
 
         this.fileProcessor.add(meta.source, meta);
