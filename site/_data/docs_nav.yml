@@ -33,6 +33,8 @@
     title: Stylable Application
   - id: guides/stylable-component-library
     title: Stylable Component Library
+  - id: references/extending-through-js
+    title: Extending Through JS
   - id: guides/project-commons
     title: Project Commons
   - id: guides/shared-classes
@@ -67,6 +69,8 @@
     title: Mixins
   - id: references/variables
     title: Variables
+  - id: references/formatters
+    title: Formatters
   - id: references/theme
     title: Theme
   - id: references/namespace

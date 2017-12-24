@@ -4,11 +4,13 @@ title: Formatters
 layout: docs
 ---
 
-Formatters are methods for tranforming variables and returning a css value for a declaration.
+Formatters are functions/methods for tranforming variables and returning a single CSS declaration value.
 
-For example a "lighten" methods that turns colors to a lighter color.
+/*if below we're describing using formatters with variables as "advanced usage", maybe shouldn't be described in first paragraph for whole topic */
 
-Stylable supports all the formatters in [polished](https://polished.js.org/docs/) and you can import them from stylable-polished. 
+For example a `lighten` method that can turn any color to a lighter color.
+
+**Stylable** supports all the formatters in [polished](https://polished.js.org/docs/). You will be able to import them from the `stylable-polished` repository (coming soon!). 
 
 ```css
     :import{
@@ -96,5 +98,5 @@ You can use nested formatters:
 
 ## Creating your own formatters
 
-You can easily create new formatters using javascript or typescript.
-Further information available in [Extending through JS](./extending-through-js.md)
+You can easily create new formatters using JavaScript or TypeScript.
+For details, see [Extending through JS](./extending-through-js.md)

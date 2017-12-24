@@ -6,7 +6,7 @@ layout: docs
 
 **Stylable** is a CSS pre-processor, but developers can extend their **Stylable** definitions utlizing CSS, JavaScript or both while maintaining code hinting and type checking for validations.
 
-This enables developers greater freedom in generating CSS from code to provide ease of use, consistency and efficient management of complex CSS-based patterns. 
+This enables developers greater freedom in generating CSS from code to provide consistency and efficient management of complex CSS-based patterns. 
 
 ## Plugin types
 
@@ -32,24 +32,24 @@ Using these types enables the consumers of the plugin to receive code hinting an
 
 ### Available types and validations
 
-
-
 | Type | Validations | Validation Type |
 |----|----|----|
-| stColor | allowOpacity | boolean  | 
-| stSizeUnit | allowedUnits | string[] |
-| &nbsp; | min | number |
-| &nbsp; | max | number |
-| &nbsp; | multiplesOf | number  | 
-| stPercentage | min | number |
-| &nbsp; | max | number |
-| &nbsp; | multiplesOf | number | 
-| stImage | allowBase64 | boolean |
-| &nbsp; | allowUrl | boolean |
-| stNumber | min | number |
-| &nbsp; | max | number |
-| &nbsp; | multiplesOf | number |
-| stEnum | allowedValues | string[] |
+| stColor&nbsp;&nbsp; | allowOpacity&nbsp;&nbsp; | boolean  | 
+| stSizeUnit&nbsp;&nbsp; | allowedUnits&nbsp;&nbsp; | string[] |
+| &nbsp;&nbsp;&nbsp; | min&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | max&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | multiplesOf&nbsp;&nbsp; | number  | 
+| stPercentage&nbsp;&nbsp; | min&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | max&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | multiplesOf&nbsp;&nbsp; | number | 
+| stImage&nbsp;&nbsp; | allowBase64&nbsp;&nbsp; | boolean |
+| &nbsp;&nbsp;&nbsp; | allowUrl&nbsp;&nbsp; | boolean |
+| stNumber&nbsp;&nbsp; | min&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | max&nbsp;&nbsp; | number |
+| &nbsp;&nbsp;&nbsp; | multiplesOf&nbsp;&nbsp; | number |
+| stEnum&nbsp;&nbsp; | allowedValues&nbsp;&nbsp; | string[] |
+
+### Types that can be added to white and black lists
 
 The following types are native enums that can appear in native CSS. **Stylable** enables you to create custom white lists or black lists to indicate which of the enum values can or cannot be called/changed/used as a parameter (in a formatter/mixin). 
 
