@@ -55,7 +55,7 @@
     "runtime.js",
     "runtime.d.ts",
     "test-utils.js",
-    "test-utils.d.js"
+    "test-utils.d.ts"
   ],
   "repository": {
     "type": "git",
