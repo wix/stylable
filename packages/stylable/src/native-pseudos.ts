@@ -1,5 +1,5 @@
 // MDN reference: https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
-export const nativePseudoElements = [
+export const nativePseudoClasses = [
     'active',
     'any',
     'any-link',
@@ -43,7 +43,7 @@ export const nativePseudoElements = [
     'visited'
 ];
 
-export const nativePseudoClasses = [
+export const nativePseudoElements = [
     'after',
     'before',
     'cue',
