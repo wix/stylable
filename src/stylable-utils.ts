@@ -187,7 +187,7 @@ export function getDeclStylable(decl: SDecl): DeclStylableProps {
     } else {
         decl.stylable = decl.stylable ?
             decl.stylable :
-            { sourceValue: '', formatters: [] };
+            { sourceValue: '' };
         return decl.stylable;
     }
 }

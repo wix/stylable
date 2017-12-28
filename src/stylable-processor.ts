@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as postcss from 'postcss';
 import {Diagnostics} from './diagnostics';
-import {processFormatters} from './formatters';
 import {
     createRootAfterSpaceChecker,
     createSimpleSelectorChecker,
@@ -269,7 +268,6 @@ export class StylableProcessor {
             const value = valueReplacer(decl.value, {}, (_value, name, match) => {
                 const symbol = this.meta.mappedSymbols[name];
                 if (!symbol) {
-                    this.diagnostics.warn(decl, `cannot resolve variable value for "${name}"`, {word: match});
                     return match;
                 } else if (symbol._kind === 'import') {
                     importSymbol = symbol;
@@ -280,7 +278,7 @@ export class StylableProcessor {
             const varSymbol: VarSymbol = {
                 _kind: 'var',
                 name: decl.prop,
-                value,
+                value: '',
                 text: decl.value,
                 import: importSymbol,
                 node: decl
@@ -293,22 +291,10 @@ export class StylableProcessor {
 
     protected handleDeclarations(rule: SRule) {
         rule.walkDecls((decl: SDecl) => {
-
-            decl.value.replace(matchValue, (match, varName) => {
-                if (match && !this.meta.mappedSymbols[varName]) {
-                    this.diagnostics.warn(decl, `unknown var "${varName}"`, {word: varName});
-                }
-                return match;
-            });
-
             if (stValues.indexOf(decl.prop) !== -1) {
                 this.handleDirectives(rule, decl);
-            } else {
-                processFormatters(decl as SDecl);
             }
-
         });
-
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -570,14 +556,9 @@ export interface SAtRule extends postcss.AtRule {
     sourceParams: string;
 }
 
-export interface Formatter {
-    name: string;
-}
-
 // TODO: maybe put under stylable namespace object in v2
 export interface DeclStylableProps {
     sourceValue: string;
-    formatters: Formatter[];
 }
 
 export interface SDecl extends postcss.Declaration {

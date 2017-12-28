@@ -88,11 +88,12 @@ describe('Generator variables interpolation', () => {
                     namespace: 'entry',
                     content: `
                         :vars {
-                            param2: value(param1);
-                            param: value(param2);
+                            param1: value(param2);
+                            param2: value(param3);
+                            param3: value(param1);
                         }
                         .container {
-                            color: value(param);
+                            color: value(param1);
                         }
                     `
                 }
@@ -101,7 +102,7 @@ describe('Generator variables interpolation', () => {
 
         const rule = result.nodes![0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('cyclic-value');
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('value(param1)');
 
     });
 

@@ -2,6 +2,7 @@ import {Pojo} from './types';
 
 export const matchValue = /value\((.*?)\)/g;
 
+// TODO: move this functionality (hook while resolving a var) to the functions mechanism
 export function valueReplacer(
     value: string,
     data: Pojo,

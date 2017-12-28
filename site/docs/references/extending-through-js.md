@@ -57,15 +57,13 @@ The following types are native enums that can appear in native CSS. **Stylable**
 * [display](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
 * bezierCurves
 * [position](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
-* repeatStyle
+* backgroundRepeat
 * lineStyle
 * box
 * geometryBox
 * transitionTimingFunctions (without cubic-bezzier variants)
 
-
 /* add code sample w/ "blackList" & "whiteList" */
-
 
 ## Extending through formatters
 

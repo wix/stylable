@@ -1,4 +1,5 @@
 import * as postcss from 'postcss';
+import {evalValue} from './functions';
 import {Stylable} from './stylable';
 import {Imported, SDecl, StylableMeta} from './stylable-processor';
 import {removeUnusedRules} from './stylable-utils';
@@ -228,7 +229,17 @@ export class Bundler {
                             if (symbol._kind === 'var') {
                                 return symbol.text;
                             } else if (symbol._kind === 'import') {
-                                const resolvedValue = this.stylable.resolver.resolveVarValue(entryMeta, name);
+                                const resolved = this.stylable.resolver.deepResolve(symbol);
+                                let resolvedValue;
+                                if (resolved && resolved._kind === 'css' && resolved.symbol._kind === 'var') {
+                                    const {symbol, meta} = resolved;
+                                    resolvedValue = evalValue(
+                                        this.stylable.resolver,
+                                        symbol.text,
+                                        meta,
+                                        symbol.node
+                                    );
+                                }
                                 if (resolvedValue) {
                                     return resolvedValue;
                                 } else {
