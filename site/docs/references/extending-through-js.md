@@ -33,7 +33,7 @@ Using these types enables the consumers of the plugin to receive code hinting an
 ### Available types and validations
 
 | Type | Validations | Validation Type |
-|----|----|----|
+|----|----|----------------------------------------|
 | stColor&nbsp;&nbsp; | allowOpacity&nbsp;&nbsp; | boolean  | 
 | stSizeUnit&nbsp;&nbsp; | allowedUnits&nbsp;&nbsp; | string[] |
 | &nbsp;&nbsp;&nbsp; | min&nbsp;&nbsp; | number |
