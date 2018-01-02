@@ -1,4 +1,5 @@
 import * as postcss from 'postcss';
+import {evalValue} from './functions';
 import {Stylable} from './stylable';
 import {Imported, SDecl, StylableMeta} from './stylable-processor';
 import {removeUnusedRules} from './stylable-utils';
@@ -220,7 +221,7 @@ export class Bundler {
                 const ruleOverride = postcss.rule({selector: overrideSelector});
                 srcRule.walkDecls((decl: SDecl) => {
                     const overriddenValue = valueReplacer(
-                        decl.sourceValue, entryMeta.mappedSymbols, (_value, name, _match) => {
+                        decl.stylable.sourceValue, entryMeta.mappedSymbols, (_value, name, _match) => {
                             if (overrideVars[name]) {
                                 return overrideVars[name];
                             }
@@ -228,7 +229,17 @@ export class Bundler {
                             if (symbol._kind === 'var') {
                                 return symbol.text;
                             } else if (symbol._kind === 'import') {
-                                const resolvedValue = this.stylable.resolver.resolveVarValue(entryMeta, name);
+                                const resolved = this.stylable.resolver.deepResolve(symbol);
+                                let resolvedValue;
+                                if (resolved && resolved._kind === 'css' && resolved.symbol._kind === 'var') {
+                                    const {symbol, meta} = resolved;
+                                    resolvedValue = evalValue(
+                                        this.stylable.resolver,
+                                        symbol.text,
+                                        meta,
+                                        symbol.node
+                                    );
+                                }
                                 if (resolvedValue) {
                                     return resolvedValue;
                                 } else {

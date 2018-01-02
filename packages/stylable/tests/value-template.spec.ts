@@ -25,7 +25,7 @@ describe('value-template', () => {
 
     it('should handle cyclic "value()"', () => {
         const result = valueReplacer('value(A)', {A: 'value(B)', B: 'value(A)'}, value => value);
-        expect(result).to.equal('cyclic value');
+        expect(result).to.equal('cyclic-value');
     });
 
     describe('debug', () => {
@@ -42,7 +42,7 @@ describe('value-template', () => {
 
         it('should add cyclic path comment', () => {
             const result = valueReplacer('value(A)', {A: 'value(B)', B: 'value(A)'}, value => value, true);
-            expect(result).to.equal('cyclic value(A>B>A) /* value(A) */');
+            expect(result).to.equal('cyclic-value(A>B>A) /* value(A) */');
         });
 
     });
