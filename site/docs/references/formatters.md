@@ -4,13 +4,10 @@ title: Formatters
 layout: docs
 ---
 
-Formatters are functions/methods for tranforming variables and returning a single CSS declaration value.
+Formatters are functions that return a single CSS declaration value. They can receive arguments, process them and return the value.
 
-/*if below we're describing using formatters with variables as "advanced usage", maybe shouldn't be described in first paragraph for whole topic */
+For example a `font-size` formatter can return a different value for the font size depending on the location.
 
-For example a `lighten` method that can turn any color to a lighter color.
-
-**Stylable** supports all the formatters in [polished](https://polished.js.org/docs/). You will be able to import them from the `stylable-polished` repository (coming soon!). 
 
 ```js
 /* ./calc-font-size.js */
@@ -52,7 +49,11 @@ For example a `lighten` method that can turn any color to a lighter color.
     }
 ```
 
-## Advanced usage
+>**Note**  
+>Currently you cannot use formatters inside a native URL function. As a suggested workaround, you can return a URL function from a formattter.
+
+
+## Formatters with variables
 
 You can use formatters with variables:
 
@@ -85,8 +86,9 @@ You can use formatters with variables:
     }
 ```
 
-You can use nested formatters:
+## Nested formatters
 
+You can use nested formatters:
 
 ```css
     :import {
@@ -126,7 +128,7 @@ You can use nested formatters:
 ```
 
 
-## Creating your own formatters
+## Create your own formatters
 
-You can easily create new formatters using JavaScript or TypeScript.
+You can create formatters using JavaScript or TypeScript.
 For details, see [Extending through JS](./extending-through-js.md)
