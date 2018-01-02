@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "5.0.1",
+  "version": "5.0.5",
   "description": "CSS for Components",
   "license": "BSD-3-Clause",
   "main": "./dist/src/index.js",
@@ -53,7 +53,9 @@
     "dist",
     "src",
     "runtime.js",
-    "runtime.d.ts"
+    "runtime.d.ts",
+    "test-utils.js",
+    "test-utils.d.ts"
   ],
   "repository": {
     "type": "git",

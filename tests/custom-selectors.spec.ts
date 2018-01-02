@@ -90,7 +90,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon');
+        expect(r.selector).to.equal('.comp--root > .comp--icon');
 
     });
 
@@ -141,7 +141,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon.child--root .child--top');
+        expect(r.selector).to.equal('.comp--root > .comp--icon.child--root .child--top');
 
     });
 
@@ -173,7 +173,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root .comp--icon,.entry--root .comp--root .comp--class');
+        expect(r.selector).to.equal('.comp--root .comp--icon,.comp--root .comp--class');
 
     });
 
@@ -218,7 +218,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .xxx .controls--root');
+        expect(r.selector).to.equal('.xxx .controls--root');
 
     });
 

@@ -1254,7 +1254,7 @@ describe('diagnostics: warnings and errors', () => {
                             :vars {
                                 a: value(b);
                                 b: value(c);
-                                |c: value($a$)|;
+                                |c: value(a)|;
                             }
                             .root{
                                 color: value(a);
@@ -1263,8 +1263,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
+
                 expectWarningsFromTransform(config,
-                    [{ message: 'Cyclic value definition detected: "a => b => c => a"', file: '/main.st.css' }]);
+                    [{ message: 'Cyclic value definition detected: "→ /main.st.css: a\n↪ /main.st.css: b\n↪ /main.st.css: c\n↻ /main.st.css: a"', file: '/main.st.css' }]); // tslint:disable-line:max-line-length
             });
         });
 

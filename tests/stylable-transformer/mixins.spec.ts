@@ -116,19 +116,19 @@ describe('Stylable mixins', () => {
         });
 
         const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.selector, 'rule 1 selector').to.equal('.entry--root .entry--container');
+        expect(rule.selector, 'rule 1 selector').to.equal('.entry--container');
         expect(rule.nodes![0].toString(), 'rule 1 decl').to.equal('color: red');
 
         const rule2 = result.nodes![1] as postcss.Rule;
-        expect(rule2.selector, 'rule 2 selector').to.equal('.entry--root .entry--container .entry--my-selector');
+        expect(rule2.selector, 'rule 2 selector').to.equal('.entry--container .entry--my-selector');
         expect(rule2.nodes![0].toString(), 'rule 2 decl').to.equal('color: green');
 
         const rule3 = result.nodes![2] as postcss.Rule;
-        expect(rule3.selector, 'rule 3 selector').to.equal('.entry--root .entry--container .entry--my-selector:hover');
+        expect(rule3.selector, 'rule 3 selector').to.equal('.entry--container .entry--my-selector:hover');
         expect(rule3.nodes![0].toString(), 'rule 3 decl').to.equal('background: yellow');
 
         const rule4 = result.nodes![3] as postcss.Rule;
-        expect(rule4.selector, 'rule 4 selector').to.equal('.entry--root .entry--container:hover');
+        expect(rule4.selector, 'rule 4 selector').to.equal('.entry--container:hover');
         expect(rule4.nodes![0].toString(), 'rule 4 decl').to.equal('color: gold');
 
     });
@@ -168,12 +168,12 @@ describe('Stylable mixins', () => {
 
         const rule = result.nodes![0] as postcss.Rule;
         expect(rule.selector, 'rule 1 selector')
-            .to.equal('.entry--root .entry--containerA, .entry--root .entry--containerB');
+            .to.equal('.entry--containerA, .entry--containerB');
         expect(rule.nodes![0].toString(), 'rule 1').to.equal('color: red');
 
         const rule1 = result.nodes![1] as postcss.Rule;
         expect(rule1.selector, 'rule 2 selector')
-            .to.equal('.entry--root .entry--containerA:hover, .entry--root .entry--containerB:hover');
+            .to.equal('.entry--containerA:hover, .entry--containerB:hover');
         expect(rule1.nodes![0].toString(), 'rule 2').to.equal('color: green');
 
     });
@@ -211,7 +211,7 @@ describe('Stylable mixins', () => {
 
         const rule1 = result.nodes![1] as postcss.Rule;
         expect(rule1.selector, 'rule 2 selector')
-            .to.equal('.entry--root .entry--containerA:hover, .entry--root .entry--containerA .entry--class');
+            .to.equal('.entry--containerA:hover, .entry--containerA .entry--class');
         expect(rule1.nodes![0].toString(), 'rule 2').to.equal('color: green');
 
     });
@@ -251,7 +251,7 @@ describe('Stylable mixins', () => {
         });
 
         const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.selector, 'rule 1 selector').to.equal('.entry--root .entry--container');
+        expect(rule.selector, 'rule 1 selector').to.equal('.entry--container');
         expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
         expect(rule.nodes![1].toString(), 'decl 2').to.equal('background: blue');
 
@@ -300,7 +300,7 @@ describe('Stylable mixins', () => {
         });
 
         const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.selector, 'rule 1 selector').to.equal('.entry--root .entry--container');
+        expect(rule.selector, 'rule 1 selector').to.equal('.entry--container');
         expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
         expect(rule.nodes![1].toString(), 'decl 2').to.equal('background: blue');
 
@@ -328,7 +328,7 @@ describe('Stylable mixins', () => {
             });
 
             const rule = result.nodes![1] as postcss.Rule;
-            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container');
+            expect(rule.selector, 'selector').to.equal('.entry--container');
             expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
 
         });
@@ -359,11 +359,11 @@ describe('Stylable mixins', () => {
             });
 
             const rule = result.nodes![4] as postcss.Rule;
-            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container:hover');
+            expect(rule.selector, 'selector').to.equal('.entry--container:hover');
             expect(rule.nodes![0].toString(), 'selector decl').to.equal('color: blue');
 
             const rule2 = result.nodes![5] as postcss.Rule;
-            expect(rule2.selector, 'selector 2').to.equal('.entry--root .entry--container .entry--my-other-class');
+            expect(rule2.selector, 'selector 2').to.equal('.entry--container .entry--my-other-class');
             expect(rule2.nodes![0].toString(), 'selector 2 decl').to.equal('color: green');
 
         });
@@ -397,7 +397,7 @@ describe('Stylable mixins', () => {
             });
 
             const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.selector, 'selector').to.equal('.entry--root .entry--container');
+            expect(rule.selector, 'selector').to.equal('.entry--container');
             expect(rule.nodes![0].toString(), 'decl 1').to.equal('color: red');
 
         });

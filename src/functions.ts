@@ -3,10 +3,10 @@ import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-types';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { StylableMeta } from './stylable-processor';
+import { replaceValueHook } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { stripQuotation } from './utils';
-
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
@@ -21,7 +21,7 @@ export interface ParsedValue {
 /* tslint:disable:max-line-length */
 const errors = {
     FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) => `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
-    CYCLIC_VALUE: (cyclicChain: string[]) => `Cyclic value definition detected: "${cyclicChain.join(' => ')}"`,
+    CYCLIC_VALUE: (cyclicChain: string[]) => `Cyclic value definition detected: "${cyclicChain.map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s).join('\n')}"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`,
     CANNOT_USE_JS_AS_VALUE: (varName: string) => `JavaScript import "${varName}" cannot be used as a variable`,
     CANNOT_FIND_IMPORTED_VAR: (varName: string, path: string) => `cannot find export '${varName}' in '${path}'`,
@@ -31,8 +31,14 @@ const errors = {
 };
 /* tslint:enable:max-line-length */
 
-export function evalValue(resolver: StylableResolver, value: string, meta: StylableMeta,
-                          node: postcss.Node, diagnostics?: Diagnostics, passedThrough: string[] = []) {
+export function evalValue(
+    resolver: StylableResolver,
+    value: string,
+    meta: StylableMeta,
+    node: postcss.Node,
+    valueHook?: replaceValueHook,
+    diagnostics?: Diagnostics,
+    passedThrough: string[] = []) {
     const parsedValue = valueParser(value);
 
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -43,28 +49,34 @@ export function evalValue(resolver: StylableResolver, value: string, meta: Styla
                     const args = parsedNode.nodes.map((n: ParsedValue) => valueParser.stringify(n));
                     if (args.length === 1) {
                         const varName = args[0];
-                        const refUniqID = `${meta.source}:${varName}`;
+                        const refUniqID = createUniqID(meta.source, varName);
                         if (passedThrough.indexOf(refUniqID) !== -1) {
                             // TODO: move diagnostic to original value usage instead of the end of the cyclic chain
-                            const cyclicChain = passedThrough.map(variable => variable.split(':').pop() || '');
-                            cyclicChain.push(varName);
+                            const cyclicChain = passedThrough.map(variable => variable || '');
+                            cyclicChain.push(refUniqID);
                             if (diagnostics) {
                                 diagnostics.warn(node,
                                     errors.CYCLIC_VALUE(cyclicChain),
-                                    { word: varName });
+                                    { word: refUniqID });
                             }
                             return stringifyFunction(value, parsedNode);
                         }
                         const varSymbol = meta.mappedSymbols[varName];
+
                         if (varSymbol && varSymbol._kind === 'var') {
-                            parsedNode.resolvedValue = evalValue(
+                            const resolvedValue = evalValue(
                                 resolver,
                                 stripQuotation(varSymbol.text),
                                 meta,
                                 varSymbol.node,
+                                valueHook,
                                 diagnostics,
-                                passedThrough.concat(`${meta.source}:${varName}`)
+                                passedThrough.concat(createUniqID(meta.source, varName))
                             );
+
+                            parsedNode.resolvedValue = valueHook ?
+                                valueHook(resolvedValue, varName, true, passedThrough) :
+                                resolvedValue;
                         } else if (varSymbol && varSymbol._kind === 'import') {
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
@@ -72,13 +84,18 @@ export function evalValue(resolver: StylableResolver, value: string, meta: Styla
 
                                 if (resolvedVar._kind === 'css') {
                                     if (varSymbol._kind === 'var') {
-                                        parsedNode.resolvedValue = evalValue(
+                                        const resolvedValue = evalValue(
                                             resolver,
                                             stripQuotation(varSymbol.text),
                                             resolvedVar.meta,
                                             varSymbol.node,
-                                            diagnostics
+                                            valueHook,
+                                            diagnostics,
+                                            passedThrough.concat(createUniqID(meta.source, varName))
                                         );
+                                        parsedNode.resolvedValue = valueHook ?
+                                            valueHook(resolvedValue, varName, false, passedThrough) :
+                                            resolvedValue;
                                     } else {
                                         const errorKind = varSymbol._kind === 'class' && varSymbol[valueMapping.root] ?
                                             'stylesheet' :
@@ -109,14 +126,14 @@ export function evalValue(resolver: StylableResolver, value: string, meta: Styla
                                 }
                             }
                         } else if (diagnostics) {
-                            diagnostics.warn(node, errors.UNKNOWN_VAR(varName), {word: varName});
+                            diagnostics.warn(node, errors.UNKNOWN_VAR(varName), { word: varName });
                         }
                     } else if (diagnostics) {
                         const argsAsString = args.filter((arg: string) => arg !== ', ').join(', ');
                         diagnostics.warn(
                             node,
                             errors.MULTI_ARGS_IN_VALUE(argsAsString),
-                            {word: argsAsString});
+                            { word: argsAsString });
                     }
                 } else if (value === 'url') {
                     // postcss-value-parser treats url differently:
@@ -140,7 +157,7 @@ export function evalValue(resolver: StylableResolver, value: string, meta: Styla
                                     { word: (node as postcss.Declaration).value });
                             }
                         }
-                    } else  if (isCssNativeFunction(value)) {
+                    } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     } else if (diagnostics) {
                         diagnostics.warn(node, errors.UNKNOWN_FORMATTER(value), { word: value });
@@ -188,4 +205,8 @@ function getFormatterArgs(node: ParsedValue) {
 
 function stringifyFunction(name: string, parsedNode: ParsedValue) {
     return `${name}(${getFormatterArgs(parsedNode).join(', ')})`;
+}
+
+function createUniqID(source: string, varName: string) {
+    return `${source}: ${varName}`;
 }

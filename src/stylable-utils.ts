@@ -1,8 +1,8 @@
 import * as postcss from 'postcss';
-import {Diagnostics} from './diagnostics';
-import {parseSelector, stringifySelector, traverseNode} from './selector-utils';
-import {DeclStylableProps, Imported, SDecl, SRule, StylableMeta} from './stylable-processor';
-import {valueMapping} from './stylable-value-parsers';
+import { Diagnostics } from './diagnostics';
+import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import { DeclStylableProps, Imported, SDecl, SRule, StylableMeta } from './stylable-processor';
+import { valueMapping } from './stylable-value-parsers';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 const cloneDeep = require('lodash.clonedeep');
 
@@ -13,43 +13,52 @@ export function isValidDeclaration(decl: postcss.Declaration) {
 }
 
 export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
-    return replaceRuleSelector(rule, {lineBreak});
+    return replaceRuleSelector(rule, { lineBreak });
 }
 
-export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics: Diagnostics) {
-    mixinRoot.walkRules((mixinRule: SRule) => {
+export function scopeSelector(scopeSelector: string, targetSelector: string)
+: { selector: string, selectorAst: SelectorAstNode } {
 
-        const ruleSelectorAst = parseSelector(rule.selector);
-        const mixinSelectorAst = parseSelector(mixinRule.selector);
+    const ruleSelectorAst = parseSelector(scopeSelector);
+    const mixinSelectorAst = parseSelector(targetSelector);
 
-        const nodes: any[] = [];
-        mixinSelectorAst.nodes.forEach(mixinSelector => {
+    const nodes: any[] = [];
+    mixinSelectorAst.nodes.forEach(mixinSelector => {
 
-            ruleSelectorAst.nodes.forEach(ruleSelector => {
-                const m: any[] = cloneDeep(mixinSelector.nodes);
-                const first = m[0];
+        ruleSelectorAst.nodes.forEach(ruleSelector => {
+            const m: any[] = cloneDeep(mixinSelector.nodes);
+            const first = m[0];
 
-                if (first && first.type === 'invalid' && first.value === '&') {
-                    m.splice(0, 1);
-                } else if (first && first.type !== 'spacing') {
-                    m.unshift({
-                        type: 'spacing',
-                        value: ' '
-                    });
-                }
-                nodes.push({
-                    type: 'selector',
-                    before: ruleSelector.before || mixinSelector.before,
-                    nodes: cloneDeep(ruleSelector.nodes, true).concat(m)
+            if (first && first.type === 'invalid' && first.value === '&') {
+                m.splice(0, 1);
+            } else if (first && first.type !== 'spacing') {
+                m.unshift({
+                    type: 'spacing',
+                    value: ' '
                 });
+            }
+            nodes.push({
+                type: 'selector',
+                before: ruleSelector.before || mixinSelector.before,
+                nodes: cloneDeep(ruleSelector.nodes, true).concat(m)
             });
-
         });
 
-        ruleSelectorAst.nodes = nodes;
+    });
 
-        mixinRule.selector = stringifySelector(ruleSelectorAst);
-        mixinRule.selectorAst = ruleSelectorAst;
+    ruleSelectorAst.nodes = nodes;
+
+    return {
+        selector: stringifySelector(ruleSelectorAst),
+        selectorAst: ruleSelectorAst
+    };
+}
+
+export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics?: Diagnostics) {
+    mixinRoot.walkRules((mixinRule: SRule) => {
+        const out = scopeSelector(rule.selector, mixinRule.selector);
+        mixinRule.selector = out.selector;
+        mixinRule.selectorAst = out.selectorAst;
     });
 
     if (mixinRoot.nodes) {
@@ -66,11 +75,11 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics: Di
             if (node.type === 'decl') {
                 if (isValidDeclaration(node)) {
                     rule.insertBefore(mixinEntry!, node);
-                } else {
+                } else if (diagnostics) {
                     diagnostics.warn(
                         mixinEntry!,
                         `not a valid mixin declaration ${mixinEntry!.value}`,
-                        {word: mixinEntry!.value}
+                        { word: mixinEntry!.value }
                     );
                 }
             } else if (node.type === 'rule') {
@@ -83,11 +92,13 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics: Di
                 node.walkDecls(decl => {
                     if (!isValidDeclaration(decl)) {
                         toRemove.push(decl);
-                        diagnostics.warn(
-                            mixinEntry!,
-                            `not a valid mixin declaration '${decl.prop}', and was removed`,
-                            {word: mixinEntry!.value}
-                        );
+                        if (diagnostics) {
+                            diagnostics.warn(
+                                mixinEntry!,
+                                `not a valid mixin declaration '${decl.prop}', and was removed`,
+                                { word: mixinEntry!.value }
+                            );
+                        }
                     }
                 });
                 toRemove.forEach(decl => decl.remove());

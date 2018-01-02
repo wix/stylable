@@ -318,6 +318,42 @@ describe('Stylable functions (native, formatter and variable)', () => {
             expect(rule.nodes![0].toString()).to.equal('border: value(a)');
         });
 
+        it('passes through cyclic vars through multiple files', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        content: `
+                        :import {
+                            -st-from: "./style1.st.css";
+                            -st-named: color2;
+                        }
+                        :vars {
+                            color1: 1px value(color2);
+                        }
+                        .container {
+                            background: value(color2);
+                        }
+                    `
+                    },
+                    '/style1.st.css': {
+                        content: `
+                            :import {
+                                -st-from: "./style.st.css";
+                                -st-named: color1
+                            }
+                            :vars {
+                                color2: value(color1)
+                            }
+                        `
+                    }
+                }
+            });
+
+            const rule = result.nodes![0] as postcss.Rule;
+            expect(rule.nodes![0].toString()).to.equal('background: 1px value(color2)');
+        });
+
         it('should support using formatters in variable declarations', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,

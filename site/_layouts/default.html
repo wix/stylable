@@ -1,8 +1,24 @@
 <!DOCTYPE html>
-<html>
-<head lang="en">
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <title>{{ page.title }}</title>
+
+	<!-— facebook open graph tags -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://stylable.io/">
+	<meta property="og:title" content="Stylable - scoped CSS for components">
+	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	 
+	<!-— twitter card tags additive with the og: tags -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:domain" content="stylable.io">
+	<meta name="twitter:title" content="Stylable - scoped CSS for components">
+	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	<meta name="twitter:url" content="https://stylable.io/">
+
     <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css">
     <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
     <link rel="stylesheet" href="{{ site.baseurl }}/css/highlight.css">
