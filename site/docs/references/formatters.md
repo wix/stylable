@@ -12,22 +12,43 @@ For example a `lighten` method that can turn any color to a lighter color.
 
 **Stylable** supports all the formatters in [polished](https://polished.js.org/docs/). You will be able to import them from the `stylable-polished` repository (coming soon!). 
 
+```js
+/* ./calc-font-size.js */
+    module.exports = function(baseSize, modifier) {
+        switch (modifier) {
+            case 'header':
+                return `${Number(baseSize) * 2}px`;
+            case 'aside':
+                return `${Number(baseSize) * 0.75}px`; 
+            default: 
+                return baseSize + 'px';
+        }
+    };
+```
+
 ```css
-    :import{
-        -st-from: "stylable-polished";
-        -st-named: lighten;
+    :import {
+        -st-from: "./calc-font-size";
+        -st-default: calcFontSize;
     }
 
-    .myBtn{
-        color: lighten(#cc0000, 0.5);
+    .header {
+        font-size: calcFontSize(16, case1);
+    }
+
+    .form {
+        font-size: calcFontSize(16, case2);
     }
 ```
 
 ```css
     /* CSS output*/
-    .myBtn{
-        /* color after formatter change */
-        color: #ee9999;
+    .header {
+        font-size: 32px;
+    }
+
+    .form {
+        font-size: 16px;
     }
 ```
 
@@ -36,48 +57,31 @@ For example a `lighten` method that can turn any color to a lighter color.
 You can use formatters with variables:
 
 ```css
-
-    :import{
-        -st-from: "stylable-polished";
-        -st-named: lighten;
-    }
-    :vars{
-        btnColor: #cc0000;
-    }
-    .myBtn{
-        color: value(btnColor);
-    }
-    .myBtn:hover{
-        color: lighten(value(btnColor), 0.5)
+    :import {
+        -st-from: "./calc-font-size";
+        -st-default: calcFontSize;
     }
 
+    :vars {
+        baseFontSize: 12px;
+    }
+
+    .header {
+        font-size: calcFontSize(value(baseFontSize), header);
+    }
+
+    .form {
+        font-size: calcFontSize(value(baseFontSize), body);
+    }
 ```
+
 ```css
     /* CSS output*/
-    .Page__myBtn{
-        color: #cc0000;
+    .header {
+        font-size: 24px;
     }
-    .Page__myBtn:hover{
-        color: #ee9999;
-    }
-
-```
-
-You can define variables using formatters and use them in other formatters:
-
-```css
-    :import{
-        -st-from: "stylable-polished";
-        -st-named: lighten,darken;
-    }
-    :vars{
-        btnColor: lighten(#ff0000, 0.5);
-    }
-    .myBtn{
-        color: value(btnColor);
-    }
-    .myBtn:hover{
-        color: darken(value(btnColor), 0.5)
+    .form {
+        font-size: 12px;
     }
 ```
 
@@ -85,14 +89,40 @@ You can use nested formatters:
 
 
 ```css
-    :import{
-        -st-from:"stylable-polished";
-        -st-named:lighten,darken;
+    :import {
+        -st-from: "./calc-font-size";
+        -st-default: calcFontSize;
     }
-   
-    .myBtn{
-        color: lighten(darken(#ff0000,0.5), 0.5);
+
+    :import {
+        -st-from: "./get-pi";
+        -st-default: getPi;
     }
+
+    .header {
+        font-size: calcFontSize(getPi(10), header);
+    }
+
+    .form {
+        font-size: calcFontSize(getPi(), body);
+    }
+```
+
+```css
+    /* CSS output*/
+    .header {
+        font-size: 31.41592653589793px;
+    }
+    .form {
+        font-size: 3.141592653589793px;
+    }
+```
+
+```js
+/* ./get-pi.js */
+    module.exports = function(multiplyBy = 1) {
+        return Math.PI * multiplyBy;
+    };
 ```
 
 
