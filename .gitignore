@@ -4,6 +4,8 @@ dist
 .idea
 .history
 .DS_Store
+_site
+.sass-cache
 
 # Logs
 logs

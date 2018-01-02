@@ -189,40 +189,6 @@ describe('Stylable postcss process', () => {
 
     });
 
-    it('resolve local :vars (by order of definition)', () => {
-        const result = processSource(`
-            :vars {
-                name: value;
-                myname: value(name);
-            }
-        `, { from: 'path/to/style.css' });
-
-        // should be refactored out of here.
-        for (const name in result.mappedSymbols) {
-            delete (result.mappedSymbols[name] as VarSymbol).node;
-        }
-
-        expect(result.mappedSymbols).to.deep.include({
-            name: {
-                _kind: 'var',
-                name: 'name',
-                value: 'value',
-                text: 'value',
-                import: null,
-                valueType: null
-            },
-            myname: {
-                _kind: 'var',
-                name: 'myname',
-                value: 'value',
-                text: 'value(name)',
-                import: null,
-                valueType: null
-            }
-        });
-
-    });
-
     it('resolve local :vars (dont warn if name is imported)', () => {
 
         const result = processSource(`
