@@ -6,7 +6,7 @@ layout: docs
 
 Formatters are functions that return a single CSS declaration value. They can receive arguments, process them and return the value.
 
-For example a `font-size` formatter can return a different value for the font size depending on the location.
+For example a `font-size` formatter can return a different value for the font size depending on the tag applied.
 
 
 ```js
