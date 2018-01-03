@@ -182,7 +182,7 @@ describe('Stylable intellisense selector meta data', () => {
             meta,
             expandCustomSelectors(postcss.rule({ selector: ':--pongo' }), meta.customSelectors)
         );
-        debugger;
+
         expect(elements[0]).to.eql([
             {
                 type: 'class',
