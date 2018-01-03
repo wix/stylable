@@ -26,10 +26,10 @@ body, html {
     background: white;
     width: 100%;
     height: 100%;
+    line-height: 24px;
     font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 16px;
     font-weight: normal;
-    line-height: 26px;
     text-align: left;
     -webkit-font-smoothing: antialiased;
 }
@@ -253,6 +253,45 @@ header .logo-git {
 
 
 /**************/
+
+
+.site-header {
+    text-align: center;
+    display: block;
+}
+
+.site-logo {
+    text-align: center;
+    display: block;
+}
+.site-title {
+    text-align: center;
+    text-transform: uppercase;
+    font-family: "Helvetica", sans-serif;
+    font-size: 27px;
+    letter-spacing: 7px;
+    font-weight: 500;
+    color: #32536a;
+}
+.site-description {
+    text-align: center;
+    font-family: Menlo, Consolas, 'Andale Mono', monospace;
+    color: #8596a1;
+    display: block;
+    font-weight: 600;
+    margin-bottom: 80px;
+}
+.site-description::before,
+.site-description::after {
+    margin: 0 10px;
+    font-weight: 600;
+}
+.site-description::before {
+    content: "/*";
+}
+.site-description::after {
+    content: "*/";
+}
 
 .docs-content {
     margin-left: 260px;
@@ -490,4 +529,285 @@ li.active > .docs-nav-item {
         left: 0px;
         transition: all 0.3s ease-out;
     }
+}
+
+/* custom syntax highlighter */
+
+@-webkit-keyframes colorchange1 {
+    0% {
+      color: blue;
+    }
+    10% {
+      color: #8e44ad;
+    }
+    20% {
+      color: #1abc9c;
+    }
+    30% {
+      color: #d35400;
+    }
+    40% {
+      color: blue;
+    }
+    50% {
+      color: #34495e;
+    }
+    60% {
+      color: blue;
+    }
+    70% {
+      color: #2980b9;
+    }
+    80% {
+      color: #f1c40f;
+    }
+    90% {
+      color: #2980b9;
+    }
+    100% {
+      color: inherit;
+    }
+  }
+  @-webkit-keyframes colorchange2 {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      /* color: #34495e; */
+      opacity: .5;
+      
+    }
+    100% {
+      color: inherit;
+      opacity: 1;
+    }
+  }
+  @-webkit-keyframes colorchange3 {
+    0% {
+      opacity: 0;
+      left: -100px;
+    }
+    50% {
+      opacity: 1;
+      left: -50px;
+      
+    }
+    100% {
+      color: inherit;
+    }
+  }
+
+  @-webkit-keyframes colorchange5 {
+    0% {
+      color: blue;
+    }
+    10% {
+      color: #8e44ad;
+    }
+    20% {
+      color: #1abc9c;
+    }
+    30% {
+      color: #d35400;
+    }
+    40% {
+      color: blue;
+    }
+    50% {
+      color: #34495e;
+    }
+    60% {
+      color: blue;
+    }
+    70% {
+      color: #2980b9;
+    }
+    80% {
+      color: #f1c40f;
+    }
+    90% {
+      color: #2980b9;
+    }
+    100% {
+      color: inherit;
+    }
+  }
+  @-webkit-keyframes colorchange4 {
+    0% {
+      color: blue;
+    }
+    10% {
+      color: #8e44ad;
+    }
+    20% {
+      color: #1abc9c;
+    }
+    30% {
+      color: #d35400;
+    }
+    40% {
+      color: blue;
+    }
+    50% {
+      color: #34495e;
+    }
+    60% {
+      color: blue;
+    }
+    70% {
+      color: #2980b9;
+    }
+    80% {
+      color: #f1c40f;
+    }
+    90% {
+      color: #2980b9;
+    }
+    100% {
+      color: inherit;
+    }
+  }
+
+.hello-world {
+    margin-bottom: 60px;
+    overflow: hidden;
+}
+.code {
+    min-height: 300px;
+    font-family: Menlo, Consolas, 'Andale Mono', monospace;
+    font-size: 11px;
+    line-height: 16px;
+    background-color: #272c35;
+    position: relative;
+    border: 5px double #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    width: 50%;
+    float: left;
+}
+.code > span {
+    transition: all 125ms ease-in;
+    line-height: 17px;
+    text-shadow: #171c25 1px 1px 1px;
+}
+.code .caption {
+    /* box-shadow: 0 0 50px #070c15; */
+    /* border-left: 4px groove #272c35; */
+    text-shadow: 0 0 0 transparent;
+    transition: none;
+    color: #808080;
+    background: #fff;
+    display: block;
+    font-size: 11px;
+    padding: 4px 4px 4px 12px;
+    font-weight: 500;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    position: absolute;
+    right: 0;
+    bottom: 20px;
+
+    -webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+.code:hover .caption {
+    color: #202020;
+}
+
+.code .inner {
+    padding: 20px;
+    display: block;
+}
+.code .class {
+    display: block;
+    margin-bottom: 10px;
+}
+.code .break,
+.code .rule {
+    display: block;
+}
+.code .rule {
+    text-indent: 10px;
+    /* animation: colorchange3 500ms; */
+}
+.code .prop {
+    display: inline-block;
+    /* animation: colorchange3 500ms; */
+}
+.code .class-name {
+    font-weight: 900;
+    /* animation: colorchange3 175ms ease-in; */
+    position: relative;
+}
+.child::before {
+    font-weight: 100;
+}
+.open-bracket {
+    margin: 0 4px;
+}
+
+.code [title] {
+    border-bottom: 1px dotted rgba(243, 243, 202, 0.39);
+    cursor: help;
+}
+.code [title]:hover {
+    border-bottom: 1px dotted rgba(243, 243, 202, 0.5);
+}
+.class b,
+.child b,
+.prop b {
+    font-weight: 100;
+    text-shadow: 0 0 0 transparent;
+}
+
+.code .prop b,
+.code .prop::after,
+.code .st-modifier::before,
+.code .class {
+    color: #84d37f;
+}
+.code .value {
+    color: #73b9b1;
+}
+.code .prop {
+    color: #ec8092;
+}
+
+.code .st-state::before,
+.code .prop::after,
+.st-modifier::before,
+.code .class-name::before,
+.code .child::before,
+.code .st-state::before,
+.code .pseudo::before {
+    color: lightblue;
+    font-weight: 100;
+}
+
+.code .comment {
+    display: block;
+    color: #bababa;
+    margin-bottom: 20px;
+}
+.code .comment b {
+    color: #808080;
+}
+.code .comment b:first-child {
+    margin-right: 10px;
+}
+.code .comment b:last-child {
+    margin-left: 10px;
+}
+.code .comment i {
+    font-weight: 900;
+    font-style: normal;
+}
+
+.code .endrule,
+.open-bracket,
+.close-brakcet {
+    text-shadow: 0 0 0 transparent;
 }
