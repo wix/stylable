@@ -8,7 +8,7 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { expandCustomSelectors } from './stylable-utils';
+import { expandCustomSelectors, CUSTOM_SELECTOR_RE } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
