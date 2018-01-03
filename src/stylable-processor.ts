@@ -8,7 +8,7 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { CUSTOM_SELECTOR_RE, transformMatchesOnRule } from './stylable-utils';
+import { expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
@@ -107,22 +107,7 @@ export class StylableProcessor {
     }
 
     public handleCustomSelectors(rule: postcss.Rule) {
-        const customSelectors = this.meta.customSelectors;
-        if (rule.selector.indexOf(':--') > -1) {
-            rule.selector = rule.selector.replace(
-                CUSTOM_SELECTOR_RE,
-                (extensionName, _matches, selector) => {
-                    if (!customSelectors[extensionName]) {
-                        this.meta.diagnostics.warn(rule,
-                            `The selector '${rule.selector}' is undefined`, { word: rule.selector });
-                        return selector;
-                    }
-                    return ':matches(' + customSelectors[extensionName] + ')';
-                }
-            );
-
-            rule.selector = transformMatchesOnRule(rule, false);
-        }
+        expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
     }
 
     protected handleAtRules(root: postcss.Root) {

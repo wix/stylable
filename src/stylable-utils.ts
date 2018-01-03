@@ -3,6 +3,7 @@ import { Diagnostics } from './diagnostics';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { Imported, SRule, StylableMeta } from './stylable-processor';
 import { valueMapping } from './stylable-value-parsers';
+import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 const cloneDeep = require('lodash.clonedeep');
 
@@ -10,6 +11,28 @@ export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
 export function isValidDeclaration(decl: postcss.Declaration) {
     return typeof decl.value === 'string';
+}
+
+export function expandCustomSelectors(
+    rule: postcss.Rule, customSelectors: Pojo<string>, diagnostics?: Diagnostics): string {
+
+    if (rule.selector.indexOf(':--') > -1) {
+        rule.selector = rule.selector.replace(
+            CUSTOM_SELECTOR_RE,
+            (extensionName, _matches, selector) => {
+                if (!customSelectors[extensionName] && diagnostics) {
+                    diagnostics.warn(rule,
+                        `The selector '${rule.selector}' is undefined`, { word: rule.selector });
+                    return selector;
+                }
+                // TODO: support nested CustomSelectors
+                return ':matches(' + customSelectors[extensionName] + ')';
+            }
+        );
+
+        return transformMatchesOnRule(rule, false) as string;
+    }
+    return rule.selector;
 }
 
 export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
