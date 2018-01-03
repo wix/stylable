@@ -30,7 +30,7 @@ export function expandCustomSelectors(
             }
         );
 
-        return transformMatchesOnRule(rule, false) as string;
+        return rule.selector = transformMatchesOnRule(rule, false) as string;
     }
     return rule.selector;
 }
