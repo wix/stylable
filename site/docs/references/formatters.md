@@ -55,7 +55,9 @@ For example a `font-size` formatter can return a different value for the font si
 
 ## Formatters with variables
 
-You can use formatters with variables:
+You can use formatters with variables. 
+
+In this example the CSS imports the same formatter as the previous example, `cal-font-size`, but the variable `baseFontSize` is added to the calculation.  
 
 ```css
     :import {
@@ -88,7 +90,9 @@ You can use formatters with variables:
 
 ## Nested formatters
 
-You can use nested formatters:
+You can use nested formatters. 
+
+In this example the formatter `get-pi` is nested in the `cal-font-size` formatter described above. Both are imported into the CSS file and the output values are calculated from both.
 
 ```css
     :import {
@@ -126,9 +130,3 @@ You can use nested formatters:
         return Math.PI * multiplyBy;
     };
 ```
-
-
-## Create your own formatters
-
-You can create formatters using JavaScript or TypeScript.
-For details, see [Extending through JS](./extending-through-js.md)
