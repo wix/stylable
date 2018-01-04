@@ -66,6 +66,8 @@
   - id: references/mixin-syntax
     title: Mixins
   - id: references/variables
+    title: Formatters
+  - id: references/formatters
     title: Variables
   - id: references/theme
     title: Theme
