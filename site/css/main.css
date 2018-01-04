@@ -550,6 +550,7 @@ li.active > .docs-nav-item {
     margin-bottom: 60px;
     overflow: hidden;
 }
+
 .code {
     font-family: Menlo, Consolas, 'Andale Mono', monospace;
     font-size: 11px;
@@ -689,4 +690,9 @@ li.active > .docs-nav-item {
 }
 .code [title]:hover {
     text-shadow: 0 0 10px rgb(0, 255, 106);
+}
+
+
+iframe {
+    width: 100%;
 }
