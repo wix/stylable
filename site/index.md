@@ -18,11 +18,11 @@ layout: docs
     <span class="inner">
       <span class="class">
         <span class="comment"><b>/*</b>Some Component Stylesheet<b>*/</b></span>
-        <span class="class-name"><b>.</b><span title="For Stylable, .root is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
+        <span class="class-name"><b>.</b><span title="For Stylable, `.root` is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
           <span class="prop prop-border"><span title="We can target logical states of the component by declaring them on the root of the component.">-st-states</span><b>:</b></span>
-          <span class="value" title="'loading' is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
+          <span class="value" title="`loading` is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
         </span>
         <span class="rule">
           <span class="prop prop-border">border<b>:</b></span>
