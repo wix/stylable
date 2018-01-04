@@ -219,28 +219,17 @@ describe('Stylable intellisense selector meta data', () => {
                 },
                 '/comp.st.css': {
                     content: `
-                    :import {
-                        -st-from: './top-comp.st.css';
-                        -st-default: Comp;
-                    }
-
                     .lala {
-                        -st-extends: Comp;
+                        -st-states: hello;
                     }
 
                     @custom-selector :--pongo .lala ;
 
                     `
-                },
-                '/top-comp.st.css': {
-                    content: `
-                    .root {
-                        -st-states : state,otherState;
-                    }
-                    `
                 }
             }
         });
+
         const meta = t.fileProcessor.process('/entry.st.css');
         const otherMeta = t.fileProcessor.process('/comp.st.css');
         const elements = t.resolveSelectorElements(
