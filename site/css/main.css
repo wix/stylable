@@ -21,6 +21,10 @@ body {
     overflow-y: scroll;
 }
 
+iframe {
+    width: 100%;
+}
+
 body, html {
     color: #162d3d;
     background: white;
@@ -622,13 +626,6 @@ li.active > .docs-nav-item {
     margin: 0 4px;
 }
 
-.code [title] {
-    border-bottom: 1px dotted rgba(243, 243, 202, 0.39);
-    cursor: help;
-}
-.code [title]:hover {
-    border-bottom: 1px dotted rgba(243, 243, 202, 0.5);
-}
 .class b,
 .child b,
 .prop b {
@@ -685,14 +682,28 @@ li.active > .docs-nav-item {
     text-shadow: 0 0 0 transparent;
 }
 
+[data-tippy],
+.code [title] {
+    border-bottom: 1px dotted rgba(243, 243, 202, 0.39);
+    cursor: help;
+}
+[data-tippy],
+.code [title]:hover {
+    border-bottom: 1px dotted rgba(243, 243, 202, 0.5);
+}
+[data-tippy]:hover,
 .code:hover [title] {
     animation: animateHelpLinks 1500ms;
 }
+[data-tippy]:hover,
 .code [title]:hover {
     text-shadow: 0 0 10px rgb(0, 255, 106);
 }
-
-
-iframe {
-    width: 100%;
+.tippy-tooltip {
+    font-size: 11px;
+    text-align: left;
+    line-height: 17px;
+}
+.tippy-tooltip.stylable .tippy-content {
+    background: #ad0;
 }
