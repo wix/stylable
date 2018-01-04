@@ -230,6 +230,8 @@ header .logo-git {
 }
 
 
+
+
 /**************/
 
 
@@ -300,6 +302,11 @@ header .logo-git {
 }
 
 @media (min-width: 980px) {
+    .code {
+        min-height: 300px;
+        width: 50%;
+        float: left;
+    }
     .docs-content {
         width: 800px;
     }
@@ -533,147 +540,17 @@ li.active > .docs-nav-item {
 
 /* custom syntax highlighter */
 
-@-webkit-keyframes colorchange1 {
+@-webkit-keyframes animateHelpLinks {
     0% {
-      color: blue;
+        text-shadow: 0 0 10px rgb(0, 255, 106);
     }
-    10% {
-      color: #8e44ad;
-    }
-    20% {
-      color: #1abc9c;
-    }
-    30% {
-      color: #d35400;
-    }
-    40% {
-      color: blue;
-    }
-    50% {
-      color: #34495e;
-    }
-    60% {
-      color: blue;
-    }
-    70% {
-      color: #2980b9;
-    }
-    80% {
-      color: #f1c40f;
-    }
-    90% {
-      color: #2980b9;
-    }
-    100% {
-      color: inherit;
-    }
-  }
-  @-webkit-keyframes colorchange2 {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      /* color: #34495e; */
-      opacity: .5;
-      
-    }
-    100% {
-      color: inherit;
-      opacity: 1;
-    }
-  }
-  @-webkit-keyframes colorchange3 {
-    0% {
-      opacity: 0;
-      left: -100px;
-    }
-    50% {
-      opacity: 1;
-      left: -50px;
-      
-    }
-    100% {
-      color: inherit;
-    }
-  }
-
-  @-webkit-keyframes colorchange5 {
-    0% {
-      color: blue;
-    }
-    10% {
-      color: #8e44ad;
-    }
-    20% {
-      color: #1abc9c;
-    }
-    30% {
-      color: #d35400;
-    }
-    40% {
-      color: blue;
-    }
-    50% {
-      color: #34495e;
-    }
-    60% {
-      color: blue;
-    }
-    70% {
-      color: #2980b9;
-    }
-    80% {
-      color: #f1c40f;
-    }
-    90% {
-      color: #2980b9;
-    }
-    100% {
-      color: inherit;
-    }
-  }
-  @-webkit-keyframes colorchange4 {
-    0% {
-      color: blue;
-    }
-    10% {
-      color: #8e44ad;
-    }
-    20% {
-      color: #1abc9c;
-    }
-    30% {
-      color: #d35400;
-    }
-    40% {
-      color: blue;
-    }
-    50% {
-      color: #34495e;
-    }
-    60% {
-      color: blue;
-    }
-    70% {
-      color: #2980b9;
-    }
-    80% {
-      color: #f1c40f;
-    }
-    90% {
-      color: #2980b9;
-    }
-    100% {
-      color: inherit;
-    }
-  }
+}
 
 .hello-world {
     margin-bottom: 60px;
     overflow: hidden;
 }
 .code {
-    min-height: 300px;
     font-family: Menlo, Consolas, 'Andale Mono', monospace;
     font-size: 11px;
     line-height: 16px;
@@ -682,8 +559,6 @@ li.active > .docs-nav-item {
     border: 5px double #fff;
     border-radius: 15px;
     overflow: hidden;
-    width: 50%;
-    float: left;
 }
 .code > span {
     transition: all 125ms ease-in;
@@ -696,10 +571,10 @@ li.active > .docs-nav-item {
     text-shadow: 0 0 0 transparent;
     transition: none;
     color: #808080;
-    background: #fff;
+    background: #171c25;
     display: block;
     font-size: 11px;
-    padding: 4px 4px 4px 12px;
+    padding: 4px 12px;
     font-weight: 500;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
@@ -712,9 +587,6 @@ li.active > .docs-nav-item {
 	-moz-user-select: none;
 	-o-user-select: none;
 	user-select: none;
-}
-.code:hover .caption {
-    color: #202020;
 }
 
 .code .inner {
@@ -810,4 +682,11 @@ li.active > .docs-nav-item {
 .open-bracket,
 .close-brakcet {
     text-shadow: 0 0 0 transparent;
+}
+
+.code:hover [title] {
+    animation: animateHelpLinks 1500ms;
+}
+.code [title]:hover {
+    text-shadow: 0 0 10px rgb(0, 255, 106);
 }

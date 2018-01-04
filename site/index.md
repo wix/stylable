@@ -14,74 +14,74 @@ layout: docs
 <span class="site-description">is CSS for components</span>
 
 <div class="hello-world">
-<div class="code">
-  <span class="inner">
-    <span class="class">
-      <span class="comment"><b>/*</b><i>Stylable</i> Stylesheet<b>*/</b></span>
-      <span class="class-name"><b>.</b><span title="For Stylable, .root is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
-      <span class="break"></span>
-      <span class="rule">
-        <span class="prop prop-border"><span title="Stylable provides a simple way to manage states between Javascript and CSS">-st-states</span><b>:</b></span>
-        <span class="value" title="'loading' is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
+  <div class="code">
+    <span class="inner">
+      <span class="class">
+        <span class="comment"><b>/*</b>Some Component Stylesheet<b>*/</b></span>
+        <span class="class-name"><b>.</b><span title="For Stylable, .root is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-border"><span title="Stylable provides a simple way to manage states between Javascript and CSS">-st-states</span><b>:</b></span>
+          <span class="value" title="'loading' is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
+        </span>
+        <span class="rule">
+          <span class="prop prop-border">border<b>:</b></span>
+          <span class="value px">1px</span>
+          <span class="value border-type">solid</span>
+          <span class="value color border-color color-preview color-pink">pink</span><span class="endrule">;</span>
+        </span>
+        <span class="break"></span><span class="close-bracket">}</span>
       </span>
-      <span class="rule">
-        <span class="prop prop-border">border<b>:</b></span>
-        <span class="value px">1px</span>
-        <span class="value border-type">solid</span>
-        <span class="value color border-color color-preview color-pink">pink</span><span class="endrule">;</span>
-      </span>
-      <span class="break"></span><span class="close-bracket">}</span>
-    </span>
-    <span class="class">
-      <span class="class-name"><b>.</b>item</span><span class="open-bracket">{</span>
-      <span class="break"></span>
-      <span class="rule">
-        <span class="prop prop-color">color<b>:</b></span>
-        <span class="value color-preview color-gold">gold</span><span class="endrule">;</span>
-      </span>
-      <span class="break"></span><span class="close-bracket">}</span>
-    </span>
-  </span>
-  <span class="caption">any-stylesheet.st.css</span>
-</div>
-
-<div class="code">
-  <span class="inner">
-    <span class="class">
-      <span class="comment"><b>/*</b><i>Stylable</i> Theme<b>*/</b></span>
-      <span class="class-name st-modifier"><b>.</b><span title="Stylable allows you to import your stylesheets and use them as type">import</span></span><span class="open-bracket">{</span>
-      <span class="break"></span>
-      <span class="rule">
-        <span class="prop prop-border">-st-from<b>:</b></span>
-        <span class="value file-path type-string"><b>"</b>./any-stylesheet.st.css<b>"</b></span><span class="endrule">;</span>
-      </span>
-      <span class="rule">
-        <span class="prop prop-border">-st-default<b>:</b></span>
-        <span class="value" title="SomeComponent is now a CSS Type based on your component API">SomeComponent</span><span class="endrule">;</span>
-      </span>
-      <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
-    </span>
-    <span class="class">
-      <span class="class-name"><span title="You can access inner component parts with a safe, clean API with Code Completion tools"><span class="parent">SomeComponent</span><span class="child"><b>::</b>item</span></span></span><span class="open-bracket">{</span>
-      <span class="break"></span>
-      <span class="rule">
-        <span class="prop prop-color">color<b>:</b></span>
-        <span class="value color-preview color-blue">blue</span><span class="endrule">;</span>
+      <span class="class">
+        <span class="class-name"><b>.</b>item</span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-color">color<b>:</b></span>
+          <span class="value color-preview color-gold">gold</span><span class="endrule">;</span>
+        </span>
         <span class="break"></span><span class="close-bracket">}</span>
       </span>
     </span>
-    <span class="class">
-      <span class="class-name"><span title="In this complex example you can easily manipulate a pseudo element ('before') in a specific custom state ('loading')"><span class="parent">SomeComponent</span><span class="st-state"><b>:</b>loading</span><span class="child"><b>::</b>item</span><span class="pseudo"><b>::</b>before</span></span></span><span class="open-bracket">{</span>
-      <span class="break"></span>
-      <span class="rule">
-        <span class="prop prop-content">content<b>:</b></span>
-        <span class="value type-string"><b>"</b>*<b>"</b></span><span class="endrule">;</span>
+    <span class="caption">some-component.st.css</span>
+  </div>
+
+  <div class="code">
+    <span class="inner">
+      <span class="class">
+        <span class="comment"><b>/*</b>Application Stylesheet<b>*/</b></span>
+        <span class="class-name st-modifier"><b>.</b><span title="Stylable allows you to import your stylesheets and use them as type">import</span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-border">-st-from<b>:</b></span>
+          <span class="value file-path type-string"><b>"</b>./some-component.st.css<b>"</b></span><span class="endrule">;</span>
+        </span>
+        <span class="rule">
+          <span class="prop prop-border">-st-default<b>:</b></span>
+          <span class="value" title="SomeComponent is now a CSS Type based on your component API">SomeComponent</span><span class="endrule">;</span>
+        </span>
         <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
       </span>
-    </span>    
-  </span>
-  <span class="caption">theme.st.css</span>
-</div>
+      <span class="class">
+        <span class="class-name"><span title="You can access inner component parts with a safe, clean API with Code Completion tools"><span class="parent">SomeComponent</span><span class="child"><b>::</b>item</span></span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-color">color<b>:</b></span>
+          <span class="value color-preview color-blue">blue</span><span class="endrule">;</span>
+          <span class="break"></span><span class="close-bracket">}</span>
+        </span>
+      </span>
+      <span class="class">
+        <span class="class-name"><span title="In this complex example you can easily manipulate a pseudo element ('before') in a specific custom state ('loading')"><span class="parent">SomeComponent</span><span class="st-state"><b>:</b>loading</span><span class="child"><b>::</b>item</span><span class="pseudo"><b>::</b>before</span></span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-content">content<b>:</b></span>
+          <span class="value type-string"><b>"</b>*<b>"</b></span><span class="endrule">;</span>
+          <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
+        </span>
+      </span>    
+    </span>
+    <span class="caption">app.st.css</span>
+  </div>
 </div>
 
 We &hearts; CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.
@@ -97,16 +97,18 @@ We want to give CSS a _type system_ &mdash; to do for CSS what TypeScript does f
 
 So we created **Stylable** &mdash; a CSS preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.
 
-## What is this voodoo?
-
-![Stylable Intelligence](./images/intelligence.gif)
-
-No voodoo! This is what Stylable will do for your CSS:
+## What Does Stylable Do?
 
 * **Stylable** scopes styles to components so they don’t "leak" and clash with other styles.
 * **Stylable** enables custom pseudo-classes and pseudo-elements that abstract the internal state and structure of a component. These can then be styled externally. For example, you can style the label inside a button, or style the play button of a video player from outside these components.
 * **Stylable** sets themes so you can apply a different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 * At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid, vanilla CSS that works cross-browser.
+
+## CSS Code Completion
+
+
+![Stylable Intelligence](./images/intelligence.gif)
+We're working on tools to enhance your styling development process. To get the full Stylable experience, please install our [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence) which suggests Stylable syntax, types and more.
 
 ## Shut up and take my money!
 
@@ -125,8 +127,6 @@ Viva CSS, and welcome **Stylable**. We hope you like it.
 ## Project
 
 Access the BSD-licensed [**Stylable** GitHub project](https://github.com/wix/stylable).
-
-## Current Moto
 
 <blockquote class="quote">
 <p>New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.</p>
