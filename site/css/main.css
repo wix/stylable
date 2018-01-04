@@ -691,8 +691,10 @@ li.active > .docs-nav-item {
 .code [title]:hover {
     border-bottom: 1px dotted rgba(243, 243, 202, 0.5);
 }
-[data-tippy]:hover,
-.code:hover [title] {
+.code [data-tippy] {
+    transition: 150ms all ease-in;
+}
+.code:hover [data-tippy] {
     animation: animateHelpLinks 1500ms;
 }
 [data-tippy]:hover,
