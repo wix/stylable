@@ -695,7 +695,7 @@ li.active > .docs-nav-item {
     transition: 150ms all ease-in;
 }
 .code:hover [data-tippy] {
-    animation: animateHelpLinks 1500ms;
+    animation: animateHelpLinks 1000ms;
 }
 [data-tippy]:hover,
 .code [title]:hover {

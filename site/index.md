@@ -21,7 +21,7 @@ layout: docs
         <span class="class-name"><b>.</b><span title="For Stylable, .root is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
-          <span class="prop prop-border"><span title="Stylable provides a simple way to manage states between Javascript and CSS">-st-states</span><b>:</b></span>
+          <span class="prop prop-border"><span title="We can target logical states of the component by declaring them on the root of the component.">-st-states</span><b>:</b></span>
           <span class="value" title="'loading' is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
         </span>
         <span class="rule">
@@ -49,7 +49,7 @@ layout: docs
     <span class="inner">
       <span class="class">
         <span class="comment"><b>/*</b>Application Stylesheet<b>*/</b></span>
-        <span class="class-name st-modifier"><b>:</b><span title="Stylable allows you to import your stylesheets and use them as type">import</span></span><span class="open-bracket">{</span>
+        <span class="class-name st-modifier"><b>:</b><span title="Stylable allows you to import component interfaces and match their inner parts and states.">import</span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
           <span class="prop prop-border">-st-from<b>:</b></span>
@@ -57,12 +57,12 @@ layout: docs
         </span>
         <span class="rule">
           <span class="prop prop-border">-st-default<b>:</b></span>
-          <span class="value" title="SomeComponent is now a CSS Type based on your component API">SomeComponent</span><span class="endrule">;</span>
+          <span class="value" title="`SomeComponent` becomes a type with a declared API">SomeComponent</span><span class="endrule">;</span>
         </span>
         <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
       </span>
       <span class="class">
-        <span class="class-name"><span title="You can access inner component parts with a safe, clean API with Code Completion tools"><span class="parent">SomeComponent</span><span class="child"><b>::</b>item</span></span></span><span class="open-bracket">{</span>
+        <span class="class-name"><span title="Stylable allows you access to the internals of the component with a clean, safe API and possible code-completions."><span class="parent">SomeComponent</span><span class="child"><b>::</b>item</span></span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
           <span class="prop prop-color">color<b>:</b></span>
@@ -71,7 +71,7 @@ layout: docs
         </span>
       </span>
       <span class="class">
-        <span class="class-name"><span title="In this complex example you can easily manipulate a pseudo element ('before') in a specific custom state ('loading')"><span class="parent">SomeComponent</span><span class="st-state"><b>:</b>loading</span><span class="child"><b>::</b>item</span><span class="pseudo"><b>::</b>before</span></span></span><span class="open-bracket">{</span>
+        <span class="class-name"><span title="Stylable allows chaining selectors, so you can access the `::before` of an item, while the parent component is loading."><span class="parent">SomeComponent</span><span class="st-state"><b>:</b>loading</span><span class="child"><b>::</b>item</span><span class="pseudo"><b>::</b>before</span></span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
           <span class="prop prop-content">content<b>:</b></span>
