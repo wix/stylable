@@ -49,7 +49,7 @@ layout: docs
     <span class="inner">
       <span class="class">
         <span class="comment"><b>/*</b>Application Stylesheet<b>*/</b></span>
-        <span class="class-name st-modifier"><b>.</b><span title="Stylable allows you to import your stylesheets and use them as type">import</span></span><span class="open-bracket">{</span>
+        <span class="class-name st-modifier"><b>:</b><span title="Stylable allows you to import your stylesheets and use them as type">import</span></span><span class="open-bracket">{</span>
         <span class="break"></span>
         <span class="rule">
           <span class="prop prop-border">-st-from<b>:</b></span>
