@@ -104,11 +104,13 @@ So we created **Stylable** &mdash; a CSS preprocessor that allows you to write s
 * **Stylable** sets themes so you can apply a different look and feel across your web application, for example, the same component can use a Wix theme or a Bootstrap theme depending on the page.
 * At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid, vanilla CSS that works cross-browser.
 
-## CSS Code Completion
-
+## Tooling
 
 ![Stylable Intelligence](./images/intelligence.gif)
-We're working on tools to enhance your styling development process. To get the full Stylable experience, please install our [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence) which suggests Stylable syntax, types and more.
+
+Treating CSS as a type system opens up a whole new world of tooling. We can get code completion that hints at the internal structure of components, we can get types for our parameters, and more. Our aim is to use Stylable to enhance to enhance the styling development process.
+
+To get the full Stylable experience, please install our [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence) which suggests Stylable syntax, types and more.
 
 ## Shut up and take my money!
 
