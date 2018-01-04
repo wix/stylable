@@ -182,7 +182,7 @@ describe('Stylable intellisense selector meta data', () => {
             meta,
             expandCustomSelectors(postcss.rule({ selector: ':--pongo' }), meta.customSelectors)
         );
-        debugger;
+
         expect(elements[0]).to.eql([
             {
                 type: 'class',
@@ -191,6 +191,87 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.lala,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+
+    });
+
+    it('resolves psuedo custom selector', () => {
+
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./comp.st.css";
+                        -st-default: Comp;
+                     }
+                    .x {
+                        -st-extends: Comp;
+                    }
+                    .x::pongo {
+
+                    }
+                    `
+                },
+                '/comp.st.css': {
+                    content: `
+                    :import {
+                        -st-from: './top-comp.st.css';
+                        -st-default: Comp;
+                    }
+
+                    .lala {
+                        -st-extends: Comp;
+                    }
+
+                    @custom-selector :--pongo .lala ;
+
+                    `
+                },
+                '/top-comp.st.css': {
+                    content: `
+                    .root {
+                        -st-states : state,otherState;
+                    }
+                    `
+                }
+            }
+        });
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const otherMeta = t.fileProcessor.process('/comp.st.css');
+        const elements = t.resolveSelectorElements(
+            meta,
+            '.x::pongo'
+        );
+
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'x',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.x,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: otherMeta,
+                        symbol: otherMeta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'pongo',
+                resolved: [
+                    {
+                        meta: otherMeta,
+                        symbol: otherMeta.classes.lala,
                         _kind: 'css'
                     }
                 ]

@@ -463,7 +463,7 @@ export class StylableTransformer {
                     selectorElements.push({
                         name,
                         type,
-                        resolved: this.resolver.resolveExtends(current, name, type === 'element')
+                        resolved: this.resolver.resolveExtends(current, name, type === 'element', this)
                     });
                 }
                 if (type === 'selector' || type === 'spacing' || type === 'operator') {
