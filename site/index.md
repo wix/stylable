@@ -57,7 +57,7 @@ layout: docs
         </span>
         <span class="rule">
           <span class="prop prop-border">-st-default<b>:</b></span>
-          <span class="value" title="we import `someComponent` to be used locally as a style type with a declared API.">SomeComponent</span><span class="endrule">;</span>
+          <span class="value" title="Import `someComponent` to be used locally as a style type with a declared API.">SomeComponent</span><span class="endrule">;</span>
         </span>
         <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
       </span>
