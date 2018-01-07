@@ -21,6 +21,10 @@ body {
     overflow-y: scroll;
 }
 
+img {
+    width: 100%;
+}
+
 iframe {
     width: 100%;
 }
