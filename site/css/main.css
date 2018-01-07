@@ -22,7 +22,7 @@ body {
 }
 
 img {
-    width: 100%;
+    max-width: 100%;
 }
 
 iframe {
@@ -289,6 +289,7 @@ header .logo-git {
     color: #8596a1;
     display: block;
     font-weight: 600;
+    font-size: .75rem;
     margin-bottom: 80px;
 }
 .site-description::before,
