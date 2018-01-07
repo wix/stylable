@@ -1,4 +1,3 @@
-import { stColor, stString } from './';
 export { safeParse } from './parser';
 export { cachedProcessFile, FileProcessor, MinimalFS, CacheItem } from './cached-process-file';
 export {

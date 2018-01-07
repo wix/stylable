@@ -8,11 +8,11 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { expandCustomSelectors, CUSTOM_SELECTOR_RE } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
-import { matchValue, valueReplacer } from './value-template';
+import { valueReplacer } from './value-template';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -254,7 +254,6 @@ export class StylableProcessor {
             const value = valueReplacer(decl.value, {}, (_value, name, match) => {
                 const symbol = this.meta.mappedSymbols[name];
                 if (!symbol) {
-                    this.diagnostics.warn(decl, `cannot resolve variable value for "${name}"`, { word: match });
                     return match;
                 } else if (symbol._kind === 'import') {
                     importSymbol = symbol;
@@ -273,7 +272,7 @@ export class StylableProcessor {
             const varSymbol: VarSymbol = {
                 _kind: 'var',
                 name: decl.prop,
-                value,
+                value: '',
                 text: decl.value,
                 import: importSymbol,
                 node: decl,
@@ -286,21 +285,11 @@ export class StylableProcessor {
     }
 
     protected handleDeclarations(rule: SRule) {
-        rule.walkDecls(decl => {
-
-            decl.value.replace(matchValue, (match, varName) => {
-                if (match && !this.meta.mappedSymbols[varName]) {
-                    this.diagnostics.warn(decl, `unknown var "${varName}"`, { word: varName });
-                }
-                return match;
-            });
-
+        rule.walkDecls((decl: SDecl) => {
             if (stValues.indexOf(decl.prop) !== -1) {
                 this.handleDirectives(rule, decl);
             }
-
         });
-
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -567,6 +556,10 @@ export interface SAtRule extends postcss.AtRule {
 }
 
 // TODO: maybe put under stylable namespace object in v2
-export interface SDecl extends postcss.Declaration {
+export interface DeclStylableProps {
     sourceValue: string;
+}
+
+export interface SDecl extends postcss.Declaration {
+    stylable: DeclStylableProps;
 }

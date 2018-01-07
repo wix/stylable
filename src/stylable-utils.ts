@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
-import { Imported, SRule, StylableMeta } from './stylable-processor';
+import { DeclStylableProps, Imported, SDecl, SRule, StylableMeta } from './stylable-processor';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
@@ -213,6 +213,17 @@ export function findRule(
         }
     });
     return found;
+}
+
+export function getDeclStylable(decl: SDecl): DeclStylableProps {
+    if (decl.stylable) {
+        return decl.stylable;
+    } else {
+        decl.stylable = decl.stylable ?
+            decl.stylable :
+            { sourceValue: '' };
+        return decl.stylable;
+    }
 }
 
 export const reservedKeyFrames = [

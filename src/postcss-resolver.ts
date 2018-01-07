@@ -2,11 +2,9 @@
 // import * as path from 'path';
 import { FileProcessor } from './cached-process-file';
 import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { stripQuotation } from './utils';
-import { parseSelector } from './selector-utils';
-import { Stringifier } from 'postcss';
-import { StylableTransformer } from './stylable-transformer';
 
 export interface CSSResolve {
     _kind: 'css';
@@ -24,41 +22,7 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
-    ) { }
-
-    public resolveVarValue(meta: StylableMeta, name: string) {
-        return this.resolveVarValueDeep(meta, name).value;
-    }
-    public resolveVarValueDeep(meta: StylableMeta, name: string) {
-        let value;
-        let symbol = meta.mappedSymbols[name];
-        let next;
-
-        while (symbol) {
-            if (symbol._kind === 'var' && symbol.import) {
-                next = this.resolve(symbol.import);
-            } else if (symbol._kind === 'import') {
-                next = this.resolve(symbol);
-            } else {
-                break;
-            }
-
-            if (next) {
-                symbol = next.symbol;
-            } else {
-                break;
-            }
-        }
-        if (symbol && symbol._kind === 'var') {
-            value = stripQuotation(symbol.value);
-        } else if (typeof symbol === 'string' /* only from js */) {
-            value = symbol;
-        } else {
-            value = null;
-        }
-
-        return { value, next };
-    }
+    ) {}
     public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, false);
     }
@@ -157,7 +121,7 @@ export class StylableResolver {
         if (!bucket[className] && !customSelector) {
             return [];
         }
-debugger;
+
         if (customSelector && transformer) {
             const parsed = transformer.resolveSelectorElements(meta, customSelector);
             if (parsed.length === 1) {

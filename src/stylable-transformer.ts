@@ -1,18 +1,20 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { nativePseudoClasses, nativePseudoElements } from './native-pseudos';
+import { evalValue } from './functions';
+import { nativePseudoClasses, nativePseudoElements } from './native-types';
 import { cssObjectToAst } from './parser';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
-import { createClassSubsetRoot, findDeclaration, findRule, mergeRules, reservedKeyFrames } from './stylable-utils';
+import {
+    createClassSubsetRoot, findDeclaration, findRule, getDeclStylable, mergeRules, reservedKeyFrames
+} from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
-import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -41,7 +43,7 @@ export interface ScopedSelectorResults {
     elements: ResolvedElement[][];
 }
 
-export type replaceValueHook = (value: string, name: string, isLocal: boolean) => string;
+export type replaceValueHook = (value: string, name: string, isLocal: boolean, passedThrough: string[]) => string;
 export type postProcessor<T = {}> = (
     stylableResults: StylableResults,
     transformer: StylableTransformer
@@ -101,7 +103,14 @@ export class StylableTransformer {
         if (!this.keepValues) {
             ast.walkAtRules(/media$/, (atRule: SAtRule) => {
                 atRule.sourceParams = atRule.params;
-                atRule.params = this.replaceValueFunction(atRule, atRule.params, meta);
+                atRule.params = evalValue(
+                    this.resolver,
+                    atRule.params,
+                    meta,
+                    atRule,
+                    this.replaceValueHook,
+                    this.diagnostics
+                );
             });
         }
 
@@ -113,12 +122,15 @@ export class StylableTransformer {
                 rule.selector = this.scopeRule(meta, rule, metaExports);
             }
 
-            if (!this.keepValues) {
-                rule.walkDecls((decl: SDecl) => {
-                    decl.sourceValue = decl.value;
-                    decl.value = this.replaceValueFunction(decl, decl.value, meta);
-                });
-            }
+            rule.walkDecls((decl: SDecl) => {
+                const declStylable = getDeclStylable(decl);
+                declStylable.sourceValue = decl.value;
+
+                if (!this.keepValues) {
+                    decl.value = this.evaluateValues(decl, meta);
+                }
+
+            });
         });
 
         this.exportRootClass(meta, metaExports);
@@ -139,6 +151,9 @@ export class StylableTransformer {
         return this.postProcessor ? this.postProcessor(result, this) : result;
 
     }
+    public evaluateValues(decl: SDecl, meta: StylableMeta) {
+        return evalValue(this.resolver, decl.value, meta, decl, this.replaceValueHook, this.diagnostics);
+    }
     public isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
         return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
     }
@@ -151,8 +166,7 @@ export class StylableTransformer {
                     { word: varSymbol.name }
                 );
             } else {
-                const value = this.resolver.resolveVarValue(meta, varSymbol.name);
-                metaExports[varSymbol.name] = typeof value === 'string' ? value : varSymbol.value;
+                metaExports[varSymbol.name] = evalValue(this.resolver, varSymbol.text, meta, varSymbol.node);
             }
         });
     }
@@ -361,49 +375,6 @@ export class StylableTransformer {
             }
         });
         rule.walkDecls(valueMapping.mixin, node => node.remove());
-    }
-
-    public replaceValueFunction(node: postcss.Node, value: string, meta: StylableMeta) {
-        return valueReplacer(value, {}, (_value, name, match) => {
-            const { value: resolvedValue, next } = this.resolver.resolveVarValueDeep(meta, name);
-            if (next && next._kind === 'js') {
-                this.diagnostics.error(node, `"${name}" is a mixin and cannot be used as a var`, { word: name });
-            } else if (next && next.symbol && next.symbol._kind === 'class') {
-                this.diagnostics.error(node, `"${name}" is a stylesheet and cannot be used as a var`, { word: name });
-            } else if (!resolvedValue) {
-                const importIndex = meta.imports.findIndex((imprt: Imported) => !!imprt.named[name]);
-                if (importIndex !== -1) {
-                    const correctNode = findDeclaration(
-                        meta.imports[importIndex], (n: any) => n.prop === valueMapping.named);
-                    if (correctNode) {
-                        this.diagnostics.error(
-                            correctNode,
-                            `cannot find export '${name}' in '${meta.imports[importIndex].fromRelative}'`,
-                            { word: name }
-                        );
-                    } else {
-                        // catched in the process step.
-                    }
-                }
-            }
-
-            if (typeof resolvedValue === 'string') {
-                if (this.replaceValueHook) {
-                    const symb = meta.mappedSymbols[name];
-                    const isLocalVar = symb._kind === 'var' && !symb.import;
-                    return this.replaceValueHook(resolvedValue, name, isLocalVar);
-                } else {
-                    // return isLocalVar ?
-                    //     `/*<local-var ${name}>*/${resolvedValue}/*</local-var>*/`
-                    //     :
-                    //     `/*<imported-var ${name}>*/${resolvedValue}/*</imported-var>*/`;
-                    return resolvedValue;
-                }
-            } else {
-                return match;
-            }
-
-        });
     }
 
     public scopeKeyframes(meta: StylableMeta) {

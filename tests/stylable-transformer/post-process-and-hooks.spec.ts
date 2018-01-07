@@ -50,15 +50,15 @@ describe('post-process-and-hooks', () => {
                         `
                 }
             }
-        }, undefined, () => {
-            return '__VALUE__' + valueCallCount++;
+        }, undefined, (resolved, name, isLocal) => {
+            return `__VALUE__${valueCallCount++} ${resolved}-${name}-${isLocal}`;
         });
 
         const res = t.transform(t.fileProcessor.process('/entry.st.css'));
         const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('__VALUE__0');
-        expect((rule.nodes![1] as postcss.Declaration).value).to.equal('__VALUE__1');
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('__VALUE__0 red-param-true');
+        expect((rule.nodes![1] as postcss.Declaration).value).to.equal('__VALUE__1 green-param1-true');
 
     });
 

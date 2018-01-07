@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {resolve} from 'path';
 import {Diagnostics} from '../src';
-import {nativePseudoClasses, nativePseudoElements} from '../src/native-pseudos';
+import {nativeFunctionsDic, nativePseudoClasses, nativePseudoElements} from '../src/native-types';
 import {safeParse} from '../src/parser';
 import {process} from '../src/stylable-processor';
 import {reservedKeyFrames} from '../src/stylable-utils';
@@ -566,42 +566,11 @@ describe('diagnostics: warnings and errors', () => {
         });
 
         describe(':vars', () => {
-            it('should return warning for unknown var', () => {
-                expectWarnings(`
-                    .gaga{
-                        |color:value($myColor$)|;
-                    }
-                `, [{ message: 'unknown var "myColor"', file: 'main.css' }]);
-            });
-
-            it('should return warning for unknown var on transform', () => {
-                expectWarningsFromTransform({
-                    entry: '/style.st.css',
-                    files: {
-                        '/style.st.css': {
-                            content: `
-                            .gaga{
-                                |color:value($myColor$)|;
-                            }
-                        `
-                        }
-                    }
-                }, [{ message: 'unknown var "myColor"', file: '/style.st.css' }]);
-            });
-
-            it('should return warning for unresolvable var', () => {
-                expectWarnings(`
-                    :vars{
-                        |myvar: $value(myvar)$|;
-                    }
-                `, [{ message: 'cannot resolve variable value for "myvar"', file: 'main.css' }]);
-            });
-
             it('should return warning when defined in a complex selector', () => {
                 expectWarnings(`
-                    |.gaga:vars|{
-                        myColor:red;
-                    }
+                |.gaga:vars|{
+                    myColor:red;
+                }
 
                 `, [{ message: 'cannot define ":vars" inside a complex selector', file: 'main.css' }]);
             });
@@ -917,10 +886,10 @@ describe('diagnostics: warnings and errors', () => {
                             :import{
                                 -st-from:"./file.css";
                                 -st-default:Comp;
-                                |-st-named:$variant$|;
+                                |-st-named:$myVar$|;
                             }
                             .root {
-                                color:value(variant)
+                                color:value(myVar);
                             }`
                         },
                         '/file.css': {
@@ -929,75 +898,12 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: `cannot find export 'variant' in './file.css'`, file: '/main.css' }]);
+                    [{ message: `cannot find export 'myVar' in './file.css'`, file: '/main.css' }]);
 
             });
 
         });
         describe('cross variance', () => {
-
-            xit('variant cannot be used as var', () => {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-                    .root{
-                        color:|value(my-variant)|;
-                    }
-                `, [{ message: '"my-variant" is a variant and cannot be used as a var', file: 'main.css' }]
-                );
-
-            });
-
-            it('mixin cannot be used as var', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import{
-                                -st-from:"./mixins";
-                                -st-named:my-mixin;
-                            }
-                            .root{
-                                |color:value($my-mixin$)|;
-                            }
-                          `
-                        },
-                        '/mixins.js': {
-                            content: ``
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: '"my-mixin" is a mixin and cannot be used as a var', file: '/main.css' }]);
-            });
-
-            it('stylesheet cannot be used as var', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import{
-                                -st-from:"./file.css";
-                                -st-default:Comp;
-                            }
-                            .root{
-                                |color:value($Comp$)|;
-                            }
-                          `
-                        },
-                        '/file.css': {
-                            content: customButton
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: '"Comp" is a stylesheet and cannot be used as a var', file: '/main.css' }]);
-            });
 
             it('stylesheet cannot be used as mixin', () => {
                 const config = {
@@ -1223,6 +1129,218 @@ describe('diagnostics: warnings and errors', () => {
                 [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }]);
         });
 
+    });
+
+    describe('functions', () => {
+        describe('value()', () => {
+            // TODO: Is there a difference in issuing warnings from process vs. transform?
+            it('should return warning when passing more than one argument to a value() function', () => {
+                expectWarningsFromTransform({
+                    entry: '/style.st.css',
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                            :vars {
+                                color1: red;
+                                color2: gold;
+                            }
+                            .my-class {
+                                |color:value($color1, color2$)|;
+                            }
+                            `
+                        }
+                    }
+                }, [{
+                    message: 'value function accepts only a single argument: "value(color1, color2)"',
+                    file: '/style.st.css'
+                }]);
+            });
+
+            it('should return warning for unknown var on transform', () => {
+                expectWarningsFromTransform({
+                    entry: '/style.st.css',
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                            .gaga{
+                                |color:value($myColor$)|;
+                            }
+                            `
+                        }
+                    }
+                }, [{ message: 'unknown var "myColor"', file: '/style.st.css' }]);
+            });
+
+            it('class cannot be used as var', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            :import{
+                                -st-from:"./style.st.css";
+                                -st-named:my-class;
+                            }
+                            .root{
+                                |color:value($my-class$)|;
+                            }
+                          `
+                        },
+                        '/style.st.css': {
+                            content: `
+                                .my-class {}
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: 'class "my-class" cannot be used as a variable', file: '/main.st.css' }]);
+            });
+
+            it('stylesheet cannot be used as var', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            :import{
+                                -st-from:"./file.st.css";
+                                -st-default:Comp;
+                            }
+                            .root{
+                                |color:value($Comp$)|;
+                            }
+                          `
+                        },
+                        '/file.st.css': {
+                            content: ''
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: 'stylesheet "Comp" cannot be used as a variable', file: '/main.st.css' }]);
+            });
+
+            it('JS imports cannot be used as vars', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            :import{
+                                -st-from:"./mixins";
+                                -st-default:my-mixin;
+                            }
+                            .root{
+                                |color:value($my-mixin$)|;
+                            }
+                          `
+                        },
+                        '/mixins.js': {
+                            content: `module.exports = function myMixin() {};`
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: 'JavaScript import "my-mixin" cannot be used as a variable', file: '/main.st.css' }]);
+            });
+
+            it('should warn when encountering a cyclic dependecy in a var definition', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            :vars {
+                                a: value(b);
+                                b: value(c);
+                                |c: value(a)|;
+                            }
+                            .root{
+                                color: value(a);
+                            }
+                          `
+                        }
+                    }
+                };
+
+                expectWarningsFromTransform(config,
+                    [{ message: 'Cyclic value definition detected: "→ /main.st.css: a\n↪ /main.st.css: b\n↪ /main.st.css: c\n↻ /main.st.css: a"', file: '/main.st.css' }]); // tslint:disable-line:max-line-length
+            });
+        });
+
+        describe('formatters', () => {
+            it('should warn when trying to use a missing formatter', () => {
+                const key = 'print';
+                const config = {
+                    entry: `/main.st.css`,
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            .container {
+                                |border: $print$|();
+                            }
+                            `
+                        }
+                    }
+                };
+
+                expectWarningsFromTransform(config,
+                    [{ message: `cannot find formatter: ${key}`, file: '/main.st.css' }]);
+            });
+
+            it('should warn a formatter throws an error', () => {
+                const config = {
+                    entry: `/main.st.css`,
+                    files: {
+                        '/main.st.css': {
+                            content: `
+                            :import {
+                                -st-from: "./formatter";
+                                -st-default: fail;
+                            }
+                            :vars {
+                                param1: red;
+                            }
+                            .some-class {
+                                |color: $fail(a, value(param1), c)$|;
+                            }
+                            `
+                        },
+                        '/formatter.js': {
+                            content: `
+                                module.exports = function fail() {
+                                    throw new Error("FAIL FAIL FAIL");
+                                }
+                            `
+                        }
+                    }
+                };
+
+                expectWarningsFromTransform(config,
+                    [{ message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
+                        file: '/main.st.css' }]);
+            });
+        });
+
+        describe('native', () => {
+            Object.keys(nativeFunctionsDic).forEach(cssFunc => {
+                it(`should not return a warning for native ${cssFunc} pseudo class`, () => {
+                    const config: Config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                .myClass {
+                                    background: ${cssFunc}(a, b, c);
+                                }`
+                            }
+                        }
+                    };
+                    expectWarningsFromTransform(config, []);
+                });
+            });
+        });
     });
 
 });

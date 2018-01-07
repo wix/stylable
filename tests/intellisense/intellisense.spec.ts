@@ -199,7 +199,7 @@ describe('Stylable intellisense selector meta data', () => {
 
     });
 
-    it('resolves psuedo custom selector', () => {
+    it('resolves pseudo custom selector', () => {
 
         const t = createTransformer({
             files: {
