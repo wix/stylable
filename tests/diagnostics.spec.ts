@@ -8,6 +8,7 @@ import {
     expectWarningsFromTransform,
     findTestLocations
 } from './utils/diagnostics';
+import {Config, generateFromMock} from './utils/generate-test-util';
 
 const customButton = `
     .root{
