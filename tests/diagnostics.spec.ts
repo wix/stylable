@@ -1,11 +1,15 @@
-import {expect} from 'chai';
-import {resolve} from 'path';
-import {Diagnostics} from '../src';
-import {nativeFunctionsDic, nativePseudoClasses, nativePseudoElements} from '../src/native-types';
-import {safeParse} from '../src/parser';
-import {process} from '../src/stylable-processor';
-import {reservedKeyFrames} from '../src/stylable-utils';
-import {Config, generateFromMock} from './utils/generate-test-util';
+import { expect } from 'chai';
+import { resolve } from 'path';
+import { Diagnostics } from '../src';
+import {
+    nativeFunctionsDic,
+    nativePseudoClasses,
+    nativePseudoElements,
+    reservedKeyFrames
+} from '../src/native-reserved-lists';
+import { safeParse } from '../src/parser';
+import { process } from '../src/stylable-processor';
+import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 const customButton = `
     .root{
@@ -268,7 +272,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]
+                        [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]
                     );
                 });
                 nativePseudoElements.forEach(nativeElement => {
@@ -304,7 +308,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]
+                        [{ message: 'unknown pseudo class "superSelected"', file: '/main.css' }]
                     );
                 });
 
@@ -479,67 +483,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }]);
             });
-            it('should add diagnostics when declartion is invalid', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: "./imported.js";
-                                -st-default: myMixin;
-                            }
-                            .container {
-                                |-st-mixin: $myMixin$|;
-                            }
-                            `
-                        },
-                        '/imported.js': {
-                            content: `
-                                module.exports = function(){
-                                    return {
-                                        color: true
-                                    }
-                                }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: 'not a valid mixin declaration myMixin', file: '/main.css' }]);
-            });
 
-            it('should add diagnostics when declartion is invalid (rule)', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: "./imported.js";
-                                -st-default: myMixin;
-                            }
-                            .container {
-                                |-st-mixin: $myMixin$|;
-                            }
-                            `
-                        },
-                        '/imported.js': {
-                            content: `
-                                module.exports = function(){
-                                    return {
-                                        '.x':{
-                                            color:true
-                                        }
-                                    }
-                                }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: `not a valid mixin declaration 'color', and was removed`, file: '/main.css' }]);
-            });
             it('should not add warning when mixin value is a string', () => {
                 const config = {
                     entry: '/main.css',
@@ -1319,8 +1263,10 @@ describe('diagnostics: warnings and errors', () => {
                 };
 
                 expectWarningsFromTransform(config,
-                    [{ message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
-                        file: '/main.st.css' }]);
+                    [{
+                        message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
+                        file: '/main.st.css'
+                    }]);
             });
         });
 

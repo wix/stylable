@@ -1,9 +1,9 @@
 // import * as postcss from 'postcss';
 // import * as path from 'path';
-import {FileProcessor} from './cached-process-file';
-import {ImportSymbol, StylableMeta, StylableSymbol} from './stylable-processor';
-import {valueMapping} from './stylable-value-parsers';
-import {stripQuotation} from './utils';
+import { FileProcessor } from './cached-process-file';
+import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import { valueMapping } from './stylable-value-parsers';
+import { stripQuotation } from './utils';
 
 export interface CSSResolve {
     _kind: 'css';
@@ -67,7 +67,7 @@ export class StylableResolver {
         }
         const importSymbol: ImportSymbol = maybeImport;
 
-        const {from} = importSymbol.import;
+        const { from } = importSymbol.import;
 
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
@@ -81,10 +81,10 @@ export class StylableResolver {
             if (importSymbol.type === 'default') {
                 symbol = meta.mappedSymbols[meta.root];
             } else {
-                symbol = meta.mappedSymbols[importSymbol.name];
+                symbol = meta.mappedSymbols[importSymbol.name] || meta.elements[importSymbol.name];
             }
 
-            return {_kind: 'css', symbol, meta} as CSSResolve;
+            return { _kind: 'css', symbol, meta } as CSSResolve;
 
         } else {
 
@@ -96,13 +96,22 @@ export class StylableResolver {
                 symbol = _module[importSymbol.name];
             }
 
-            return {_kind: 'js', symbol, meta: null} as JSResolve;
+            return { _kind: 'js', symbol, meta: null } as JSResolve;
         }
     }
     public deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         let resolved = this.resolve(maybeImport);
         while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
             resolved = this.resolve(resolved.symbol);
+        }
+        if (
+            resolved
+            && resolved.symbol
+            && resolved.symbol._kind === 'class'
+            && resolved.symbol.alias
+            && !resolved.symbol[valueMapping.extends]
+        ) {
+            return this.deepResolve(resolved.symbol.alias);
         }
         return resolved;
     }

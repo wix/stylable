@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { nativeFunctionsDic } from '../src/native-types';
+import { nativeFunctionsDic } from '../src/native-reserved-lists';
 import { generateStylableRoot } from './utils/generate-test-util';
 
 describe('Stylable functions (native, formatter and variable)', () => {

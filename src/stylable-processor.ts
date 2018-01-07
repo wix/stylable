@@ -86,7 +86,13 @@ export class StylableProcessor {
         root.walkRules((rule: SRule) => {
             this.handleCustomSelectors(rule);
             this.handleRule(rule);
-            this.handleDeclarations(rule);
+        });
+
+        root.walkDecls((decl: SDecl) => {
+            // TODO: optimize
+            if (stValues.indexOf(decl.prop) !== -1) {
+                this.handleDirectives(decl.parent as SRule, decl);
+            }
         });
 
         stubs.forEach(s => s && s.remove());
@@ -299,14 +305,6 @@ export class StylableProcessor {
         rule.remove();
     }
 
-    protected handleDeclarations(rule: SRule) {
-        rule.walkDecls((decl: SDecl) => {
-            if (stValues.indexOf(decl.prop) !== -1) {
-                this.handleDirectives(rule, decl);
-            }
-        });
-    }
-
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
         if (decl.prop === valueMapping.states) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
@@ -353,7 +351,14 @@ export class StylableProcessor {
 
         } else if (decl.prop === valueMapping.mixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(decl, this.diagnostics).forEach(mixin => {
+            parseMixin(decl, type => {
+                const mixinRefSymbol = this.meta.mappedSymbols[type];
+                if (mixinRefSymbol && mixinRefSymbol._kind === 'import' && !mixinRefSymbol.import.from.match(/.css$/)) {
+                    return 'args';
+                }
+                return 'named';
+
+            }, this.diagnostics).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
                     mixins.push({

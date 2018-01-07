@@ -1,6 +1,6 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import { isCssNativeFunction } from './native-types';
+import { isCssNativeFunction } from './native-reserved-lists';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { StylableMeta } from './stylable-processor';
 import { replaceValueHook } from './stylable-transformer';
@@ -36,6 +36,7 @@ export function evalValue(
     value: string,
     meta: StylableMeta,
     node: postcss.Node,
+    variableOverride?: Pojo<string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = []) {
@@ -49,6 +50,9 @@ export function evalValue(
                     const args = parsedNode.nodes.map((n: ParsedValue) => valueParser.stringify(n));
                     if (args.length === 1) {
                         const varName = args[0];
+                        if (variableOverride && variableOverride[varName]) {
+                            return parsedNode.resolvedValue = variableOverride[varName];
+                        }
                         const refUniqID = createUniqID(meta.source, varName);
                         if (passedThrough.indexOf(refUniqID) !== -1) {
                             // TODO: move diagnostic to original value usage instead of the end of the cyclic chain
@@ -69,6 +73,7 @@ export function evalValue(
                                 stripQuotation(varSymbol.text),
                                 meta,
                                 varSymbol.node,
+                                variableOverride,
                                 valueHook,
                                 diagnostics,
                                 passedThrough.concat(createUniqID(meta.source, varName))
@@ -89,6 +94,7 @@ export function evalValue(
                                             stripQuotation(varSymbol.text),
                                             resolvedVar.meta,
                                             varSymbol.node,
+                                            variableOverride,
                                             valueHook,
                                             diagnostics,
                                             passedThrough.concat(createUniqID(meta.source, varName))
