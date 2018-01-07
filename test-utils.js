@@ -1,1 +1,1 @@
-module.exports = require('./dist/test/utils/generate-test-util');
+module.exports = require('./dist/tests/utils/generate-test-util');
