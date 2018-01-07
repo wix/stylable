@@ -1,4 +1,6 @@
 import { expect } from 'chai';
+import * as postcss from 'postcss';
+import { expandCustomSelectors } from '../../src/stylable-utils';
 import { createTransformer } from '../utils/generate-test-util';
 
 describe('Stylable intellisense selector meta data', () => {
@@ -98,7 +100,7 @@ describe('Stylable intellisense selector meta data', () => {
 
     });
 
-    it('resolve extedns of named class', () => {
+    it('resolves extends of named class', () => {
 
         const t = createTransformer({
             files: {
@@ -151,6 +153,94 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.c,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+
+    });
+
+    it('resolves local custom selector', () => {
+
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                    .lala {
+                        -st-states: hello;
+                    }
+
+                    @custom-selector :--pongo .lala ;
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(
+            meta,
+            expandCustomSelectors(postcss.rule({ selector: ':--pongo' }), meta.customSelectors)
+        );
+
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'lala',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.lala,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+
+    });
+
+    it('resolve stylesheet root from default import', () => {
+
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./import.st.css";
+                        -st-default: Comp;
+                        -st-named: shlomo;
+                     }
+
+                     Comp {}
+                    `
+                },
+                '/import.st.css': {
+                    content: `
+                    .shlomo {
+                        color: black;
+                    }
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const otherMeta = t.fileProcessor.process('/import.st.css');
+        const elements = t.resolveSelectorElements(meta, 'Comp');
+
+        expect(elements[0]).to.eql([
+            {
+                type: 'element',
+                name: 'Comp',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.elements.Comp,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: otherMeta,
+                        symbol: otherMeta.classes.root,
                         _kind: 'css'
                     }
                 ]
