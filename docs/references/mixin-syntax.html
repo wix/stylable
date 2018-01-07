@@ -31,8 +31,7 @@
     <div class="header-content">
         <label class="menu-icon" for="menu">
     </label>
-        <a href="/"><div class="logo"></div>
-            </a>
+        <a href="/"><span class="logo"></span></a>
 
         <ul class="main-nav">
             <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
@@ -138,15 +137,17 @@
 
 <section class="docs-content">
     <h1>Mixins</h1>
-    <p>You can use <strong>Stylable</strong> to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets.</p>
+    <p><strong>Stylable</strong> mixins allow you to reuse complex styles and CSS behaviors, and apply them to any rule-set.</p>
 
-<p>Here are some use cases where you can use mixins with other <strong>Stylable</strong> features:</p>
+<p>Some use cases where you can use mixins:</p>
 <ul>
+  <li>Presets/Variants - create reusable pieces of styling CSS</li>
   <li>Layouts - easily describe complex layouts.</li>
-  <li>Helpers - use custom CSS shortcuts, like timers, effects and macros.</li>
+  <li>Effects - easily describe complex effects</li>
+  <li>macros - use JS to define the CSS macros you need</li>
 </ul>
 
-<h2 id="example">Example</h2>
+<h2 id="example-usage">Example usage</h2>
 
 <p>The value <code class="highlighter-rouge">textTooltip</code> of the external file <code class="highlighter-rouge">my-mixins</code> is imported. The class selector <code class="highlighter-rouge">.submitButton</code> uses the mixin syntax and applies parameters. In this case, to wait <code class="highlighter-rouge">300</code> milliseconds to display the <code class="highlighter-rouge">dataTooltip</code> hover text on the button.</p>
 
@@ -161,35 +162,55 @@
 </code></pre>
 </div>
 
-<h2 id="syntax">Syntax</h2>
+<h2 id="defining-mixins-in-css">Defining mixins in CSS</h2>
 
-<p>You can use mixins with parameters, without parameters, and with multiple mixins.</p>
+<p>every CSS class defined in a <strong>stylable</strong> CSS file can be used as a mixin.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nc">.a</span> <span class="p">{</span>
-    <span class="c">/* no parameters */</span>
-    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code>
+<span class="c">/* file a.st.css */</span>
+<span class="nc">.a</span><span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span><span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.b</span> <span class="p">{</span>
-    <span class="c">/* multiple parameters */</span>
-    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+
+<span class="c">/* file b.st.css */</span>
+<span class="nd">:import</span><span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span><span class="s2">'./a.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span><span class="n">a</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="nc">.c</span> <span class="p">{</span>
-    <span class="c">/* apply multiple mixins */</span>
-    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">,</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
+<span class="nc">.b</span><span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span><span class="n">a</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 </div>
 
-<p>Any parameter you add to the mixin is considered a string.</p>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* Output CSS */</span>
+<span class="nc">.b</span><span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span><span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="defining-mixins-in-javascript-or-typescript">Defining mixins in Javascript or Typescript</h2>
+
+<p>you can easily create new mixins using javascript or typescript
+<a href="./extending-through-js">read more in extending through js</a></p>
+
+<h2 id="applying-multiple-mixins">Applying multiple mixins</h2>
+
+<p>You can apply multiple mixins in the same line.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nc">.a</span> <span class="p">{</span>
-    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="n">xxx</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
+<span class="nc">.c</span> <span class="p">{</span>
+    <span class="c">/* apply multiple mixins */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">noParams</span><span class="p">,</span> <span class="n">multiParams</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="p">);</span>
 <span class="p">}</span>
-<span class="nc">.b</span> <span class="p">{</span>
-    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xxx"</span><span class="p">);</span> <span class="c">/* ["300", "xxx"] */</span>
-<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<h2 id="usage-with-special-characters">Usage with special characters</h2>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nc">.c</span> <span class="p">{</span> <span class="c">/* use quotations to include comma */</span>
     <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xx,x"</span><span class="p">);</span> <span class="c">/* ["300", "xx,x"] */</span>
 <span class="p">}</span>
@@ -201,7 +222,7 @@
 
 <h2 id="how-mixins-are-applied">How mixins are applied</h2>
 
-<p>Mixins can add CSS declarations to the CSS rule set to which they are applied:</p>
+<p>Mixins can add CSS declarations to the CSS rule-set to which they are applied:</p>
 
 <ul>
   <li>Rules are added at the position in the CSS where the <code class="highlighter-rouge">-st-mixin</code> is declared.</li>
@@ -245,5 +266,11 @@
 
 <footer></footer>
 <script src="/js/prism.js"></script>
+<script src="/js/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
 </body>
 </html>

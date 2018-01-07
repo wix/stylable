@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extend Through JavaScript</title>
+
+	<!-— facebook open graph tags -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://stylable.io/">
+	<meta property="og:title" content="Stylable - scoped CSS for components">
+	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	 
+	<!-— twitter card tags additive with the og: tags -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:domain" content="stylable.io">
+	<meta name="twitter:title" content="Stylable - scoped CSS for components">
+	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	<meta name="twitter:url" content="https://stylable.io/">
+
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="/"><span class="logo"></span></a>
+
+        <ul class="main-nav">
+            <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
+        </ul>
+    </div>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+       gtag('config', 'UA-109043375-1');
+    </script>
+</header>
+
+
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
+        <ul>
+            
+                <li class=""><a href="/docs/get-started" class=" docs-nav-item">Getting Started</a></li>
+            
+                <li class=""><a href="/docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="/docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="/docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="/docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="/docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="/docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+                <li class=""><a href="/docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="/docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="/docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Specification Reference</div>
+        <ul>
+            
+                <li class=""><a href="/docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
+            
+                <li class=""><a href="/docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="/docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="/docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="/docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="/docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/compose-css-class" class=" docs-nav-item">Compose CSS Class</a></li>
+            
+                <li class=""><a href="/docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
+            
+                <li class=""><a href="/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="/docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="/docs/references/theme" class=" docs-nav-item">Theme</a></li>
+            
+                <li class=""><a href="/docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>Extend Through JavaScript</h1>
+    <p><strong>Stylable</strong> is a CSS pre-processor, but developers can extend their <strong>Stylable</strong> definitions utlizing CSS, JavaScript or both while maintaining code hinting and type checking for validations.</p>
+
+<p>This enables developers greater freedom in generating CSS from code to provide consistency and efficient management of complex CSS-based patterns.</p>
+
+<h2 id="plugin-types">Plugin types</h2>
+
+<p><strong>Stylable</strong> supports the following types of plugins:</p>
+<ul>
+  <li><a href="'./formatters">Formatters</a> - functions for manipulating single CSS declaration values.</li>
+  <li><a href="'./mixin-syntax">Mixins</a> - functions for generating a CSS fragment that can include single or multiple rulesets and declarations.</li>
+</ul>
+
+<p>The types described below are the provided arguments <strong>Stylable</strong> provides for the plugins. For example:</p>
+
+<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="err">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="err">:</span> <span class="nx">stColor</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="stylable-types">Stylable types</h2>
+
+<p><strong>Stylable</strong> types represent the available primitive types in CSS. They follow the spirit of the <a href="https://github.com/w3c/css-houdini-drafts/wiki">Houdini</a> future spec.</p>
+
+<p>Using these types enables the consumers of the plugin to receive code hinting and type checking for validations.</p>
+
+<p><strong>Stylable</strong> uses TypeScript or JSDocs to infer JS extension signatures.</p>
+
+<h3 id="available-types-and-validations">Available types and validations</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Validations</th>
+      <th>Validation Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>stColor  </td>
+      <td>allowOpacity  </td>
+      <td>boolean</td>
+    </tr>
+    <tr>
+      <td>stSizeUnit  </td>
+      <td>allowedUnits  </td>
+      <td>string[]</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>min  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>max  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>multiplesOf  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>stPercentage  </td>
+      <td>min  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>max  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>multiplesOf  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>stImage  </td>
+      <td>allowBase64  </td>
+      <td>boolean</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>allowUrl  </td>
+      <td>boolean</td>
+    </tr>
+    <tr>
+      <td>stNumber  </td>
+      <td>min  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>max  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>   </td>
+      <td>multiplesOf  </td>
+      <td>number</td>
+    </tr>
+    <tr>
+      <td>stEnum  </td>
+      <td>allowedValues  </td>
+      <td>string[]</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="types-that-can-be-added-to-white-and-black-lists">Types that can be added to white and black lists</h3>
+
+<p>The following types are native enums that can appear in native CSS. <strong>Stylable</strong> enables you to create custom white lists or black lists to indicate which of the enum values can or cannot be called/changed/used as a parameter (in a formatter/mixin).</p>
+
+<ul>
+  <li><a href="">lineStyle</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/display">display</a></li>
+  <li>bezierCurves</li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/position">position</a></li>
+  <li>backgroundRepeat</li>
+  <li>lineStyle</li>
+  <li>box</li>
+  <li>geometryBox</li>
+  <li>transitionTimingFunctions (without cubic-bezzier variants)</li>
+</ul>
+
+<p>/* add code sample w/ “blackList” &amp; “whiteList” */</p>
+
+<h2 id="extending-through-formatters">Extending through formatters</h2>
+
+<p>Formatters are methods that manipulate parameters to produce a string that is returned as a single declaration value.</p>
+
+<p>For example the following CSS code:</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"../my-formatter.js"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">lighten</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">frmt</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.myClass</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">lighten</span><span class="p">(</span><span class="m">30</span><span class="p">,</span> <span class="m">#ff0000</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<p>Uses the following TypeScript code:</p>
+
+<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="cm">/*my-formatter.ts*/</span>
+
+<span class="k">import</span> <span class="p">{</span><span class="nx">darken</span> <span class="k">as</span> <span class="nx">polishedDarken</span><span class="p">,</span> <span class="nx">lighten</span> <span class="k">as</span> <span class="nx">polishedLighten</span><span class="p">}</span> <span class="k">from</span> <span class="s1">'polished'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
+
+
+<span class="cm">/**
+ * Lighten - lightens a color by a percentage.
+*/</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="err">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="err">:</span> <span class="nx">stColor</span><span class="p">)</span><span class="err">:</span> <span class="nx">stColor</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">polishedLighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">,</span> <span class="nx">color</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2 id="extending-through-mixins">Extending through mixins</h2>
+
+<p>In many cases its useful to generate bigger chunks of css through js.
+Here’s an example creating and using an expandOnHover mixin:</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code>
+<span class="nd">:import</span><span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span><span class="s1">"../my-mixins.js"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span><span class="n">expandOnHover</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.myClass</span><span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span><span class="n">expandOnHover</span><span class="p">(</span><span class="m">200</span><span class="p">,</span><span class="m">2</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">,</span> <span class="nx">stCurves</span><span class="p">,</span> <span class="nx">stCssFragment</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
+
+<span class="cm">/**
+* Expand
+*/</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span> <span class="nx">durationMS</span><span class="err">:</span><span class="nx">stNumber</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+                               <span class="nx">increaseBy</span><span class="err">:</span><span class="nx">stNumber</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+                               <span class="nx">animationCurve</span><span class="err">:</span><span class="nx">stCurves</span> <span class="o">=</span> <span class="s1">'easeIn'</span><span class="p">)</span><span class="err">:</span><span class="nx">stCssFragment</span><span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="na">transition</span><span class="p">:</span><span class="s2">"all "</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="s2">"ms "</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
+        <span class="s2">":hover"</span><span class="p">:{</span>
+            <span class="na">transform</span><span class="p">:</span><span class="nx">scale</span><span class="p">(</span><span class="nx">increaseBy</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre>
+</div>
+
+<h2 id="declaring-types-through-js-docs">Declaring types through JS docs</h2>
+
+<p>You can also declare your parameters using JS docs.
+Here is a the same formatter and mixin from above, written in js with JS docs.</p>
+
+<pre><code class="language-jsx">
+/**
+ * Lighten - lightens a color by a percentage.
+*/
+/**
+ * Lightens a color by an amount.
+ * @constructor
+ * @param {string} amount - Amount to lighten
+ * @param {string} color - Color to be lightened
+*/
+export function lighten(amount, color) {
+    return polishedLighten(amount, color);
+}
+
+/**
+* Expand
+* @param {stNumber&lt;0,1000&gt;} [durationMS=200] - total animation time MS
+* @param {stPercentage} [increaseBy=1.5] - how much to increase size;
+* @param {stCurves} [animationCurve=cubicEaseIn] - animation change over time curve
+* @returns {stCssFragment}
+*/
+export function expandOnHover(durationMS,increaseBy,animationCurve){
+    return {
+        transition:"all "+duration+"ms "+animationCurve;,
+        ":hover":{
+            transform:scale(increaseBy)
+        }
+    }
+}
+
+</code></pre>
+
+
+</section>
+
+
+</div>
+
+<footer></footer>
+<script src="/js/prism.js"></script>
+<script src="/js/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
+</body>
+</html>

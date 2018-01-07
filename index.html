@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to Stylable - CSS for Components</title>
+    <title></title>
 
 	<!-— facebook open graph tags -->
 	<meta property="og:type" content="website">
@@ -31,8 +31,7 @@
     <div class="header-content">
         <label class="menu-icon" for="menu">
     </label>
-        <a href="/"><div class="logo"></div>
-            </a>
+        <a href="/"><span class="logo"></span></a>
 
         <ul class="main-nav">
             <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
@@ -137,31 +136,98 @@
 </nav>
 
 <section class="docs-content">
-    <h1>Welcome to Stylable - CSS for Components</h1>
-    <p><img class="home-logo" src="/images/96-logo-vertical.svg" alt="Stylable - CSS for Components" /></p>
+    <h1></h1>
+    <p><span class="site-logo"><img src="./branding/logo/PNG/96-logo-OnlySymbol.png" alt="Stylable Intelligence" /></span></p>
+<h1 class="site-title">Stylable</h1>
+<p><span class="site-description">is CSS for components</span></p>
 
-<p class="quote">New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.<br />
-– <a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS.
-</p>
+<div class="hello-world">
+  <div class="code">
+    <span class="inner">
+      <span class="class">
+        <span class="comment"><b>/*</b>Some Component Stylesheet<b>*/</b></span>
+        <span class="class-name"><b>.</b><span title="For Stylable, `.root` is the top layer of the component.">root</span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-border"><span title="We can target logical states of the component by declaring them on the component's stylesheet.">-st-states</span><b>:</b></span>
+          <span class="value" title="`loading` is just a state we're declaring. Just like that.">loading</span><span class="endrule">;</span>
+        </span>
+        <span class="rule">
+          <span class="prop prop-border">border<b>:</b></span>
+          <span class="value px">1px</span>
+          <span class="value border-type">solid</span>
+          <span class="value color border-color color-preview color-pink">pink</span><span class="endrule">;</span>
+        </span>
+        <span class="break"></span><span class="close-bracket">}</span>
+      </span>
+      <span class="class">
+        <span class="class-name"><b>.</b>item</span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-color">color<b>:</b></span>
+          <span class="value color-preview color-gold">gold</span><span class="endrule">;</span>
+        </span>
+        <span class="break"></span><span class="close-bracket">}</span>
+      </span>
+    </span>
+    <span class="caption">some-component.st.css</span>
+  </div>
 
-<p>At Wix, we agree. We ♥ CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.</p>
+  <div class="code">
+    <span class="inner">
+      <span class="class">
+        <span class="comment"><b>/*</b>Application Stylesheet<b>*/</b></span>
+        <span class="class-name st-modifier"><b>:</b><span title="Stylable allows you to import component interfaces and match their inner parts, states and shared definitions like classes, variables, JS/CSS mixins and JS formatters.">import</span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-border">-st-from<b>:</b></span>
+          <span class="value file-path type-string"><b>"</b>./some-component.st.css<b>"</b></span><span class="endrule">;</span>
+        </span>
+        <span class="rule">
+          <span class="prop prop-border">-st-default<b>:</b></span>
+          <span class="value" title="Import `someComponent` to be used locally as a style type with a declared API.">SomeComponent</span><span class="endrule">;</span>
+        </span>
+        <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
+      </span>
+      <span class="class">
+        <span class="class-name"><span title="Stylable exposes a clean, safe style API with code completions and validations."><span class="parent">SomeComponent</span><span class="child"><b>::</b>item</span></span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-color">color<b>:</b></span>
+          <span class="value color-preview color-blue">blue</span><span class="endrule">;</span>
+          <span class="break"></span><span class="close-bracket">}</span>
+        </span>
+      </span>
+      <span class="class">
+        <span class="class-name"><span title="Stylable allows chaining selectors, so you can access the `::before` of the `::item` element, while the parent component is loading."><span class="parent">SomeComponent</span><span class="st-state"><b>:</b>loading</span><span class="child"><b>::</b>item</span><span class="pseudo"><b>::</b>before</span></span></span><span class="open-bracket">{</span>
+        <span class="break"></span>
+        <span class="rule">
+          <span class="prop prop-content">content<b>:</b></span>
+          <span class="value type-string"><b>"</b>*<b>"</b></span><span class="endrule">;</span>
+          <span class="break"></span><span class="close-bracket">}</span><span class="endrule"></span>
+        </span>
+      </span>    
+    </span>
+    <span class="caption">app.st.css</span>
+  </div>
+</div>
+
+<p>We ♥ CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.</p>
 
 <p>We also ♥ TypeScript. TypeScript helps us manage these large projects, exposing at build-time what we could once only see at run-time.</p>
 
-<p>We want to give CSS a type system - to do for CSS what TypeScript does for JavaScript. We want to:</p>
+<p>We want to give CSS a <em>type system</em> — to do for CSS what TypeScript does for JavaScript. We would like to be able to:</p>
 
 <ul>
-  <li><strong>Extend CSS</strong> so that it is easier to use in a component ecosystem, but without losing the aspects of CSS that make it great: declarative, familiar, static and fast.</li>
-  <li>Create <strong>CSS macros</strong> with JavaScript and use them at build time.</li>
-  <li>Use language services like <strong>code completion</strong> and <strong>validation</strong>. Each component exposes a style API that maps its internal parts and states so you can reuse components across teams without sacrificing stylability or scalability.</li>
+  <li><strong>Extend CSS</strong> so that it is easier to use in a component ecosystem, but without losing any of the declarative, familiar, static and fast aspects of CSS.</li>
+  <li>Create <strong>CSS Macros</strong> with JavaScript and use them at build time.</li>
+  <li>Use language services like <strong>Code Completion</strong> and <strong>Validation</strong>. Each component exposes a Style API that maps its internal parts and states so you can reuse components across teams without sacrificing stylability or scalability.</li>
   <li>Provide the ability to see our <strong>errors at build</strong> time or even while <a href="https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence">working in our IDE</a>. Wave goodbye to silent run-time breakage misery!</li>
 </ul>
 
 <p>So we created <strong>Stylable</strong> — a CSS preprocessor that allows you to write style rules in CSS syntax, with some extensions that we believe adhere to the spirit of CSS.</p>
 
-<p><img src="./images/intelligence.gif" alt="Stylable Intelligence" /></p>
-
-<h2 id="how-does-stylable-perform-this-voodoo">How does Stylable perform this voodoo?</h2>
+<h2 id="what-does-stylable-do">What Does Stylable Do?</h2>
 
 <ul>
   <li><strong>Stylable</strong> scopes styles to components so they don’t “leak” and clash with other styles.</li>
@@ -170,6 +236,14 @@
   <li>At build time, the preprocessor converts the <strong>Stylable</strong> CSS into flat, static, valid, vanilla CSS that works cross-browser.</li>
 </ul>
 
+<h2 id="tooling">Tooling</h2>
+
+<p><img src="./images/intelligence.gif" alt="Stylable Intelligence" /></p>
+
+<p>Treating CSS as a type system opens up a whole new world of tooling. We can get code completion that hints at the internal structure of components, we can get types for our parameters, and more. Our aim is to use Stylable to enhance to enhance the styling development process.</p>
+
+<p>To get the full Stylable experience, please install our <a href="https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence">VSCode Code Completion Plugin</a> which suggests Stylable syntax, types and more.</p>
+
 <h2 id="shut-up-and-take-my-money">Shut up and take my money!</h2>
 
 <p>No need! <strong>Stylable</strong> is BSD-licensed. Take it, use it, make your development easier and your apps faster.</p>
@@ -177,6 +251,7 @@
 <p>Viva CSS, and welcome <strong>Stylable</strong>. We hope you like it.</p>
 
 <h2 id="videos">Videos</h2>
+
 <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/Cx-JyJ9eXks?rel=0" frameborder="0" allowfullscreen=""></iframe>
 
 <h2 id="documentation">Documentation</h2>
@@ -187,6 +262,11 @@
 
 <p>Access the BSD-licensed <a href="https://github.com/wix/stylable"><strong>Stylable</strong> GitHub project</a>.</p>
 
+<blockquote class="quote">
+<p>New ideas will come along, but they will extend CSS rather than replace it. I believe that the CSS code we write today will be readable by computers 500 years from now.</p>
+<small>&mdash; <a href="https://dev.opera.com/articles/css-twenty-years-hakon/">Håkon Wium Lie</a>, co-creator of CSS.</small>
+</blockquote>
+
 </section>
 
 
@@ -194,5 +274,11 @@
 
 <footer></footer>
 <script src="/js/prism.js"></script>
+<script src="/js/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
 </body>
 </html>

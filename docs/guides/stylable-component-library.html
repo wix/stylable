@@ -31,8 +31,7 @@
     <div class="header-content">
         <label class="menu-icon" for="menu">
     </label>
-        <a href="/"><div class="logo"></div>
-            </a>
+        <a href="/"><span class="logo"></span></a>
 
         <ul class="main-nav">
             <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
@@ -265,5 +264,11 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
 
 <footer></footer>
 <script src="/js/prism.js"></script>
+<script src="/js/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
 </body>
 </html>
