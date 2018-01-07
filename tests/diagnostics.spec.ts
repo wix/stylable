@@ -2,11 +2,13 @@ import {expect} from 'chai';
 import {resolve} from 'path';
 import {Diagnostics} from '../src';
 import {nativeFunctionsDic, nativePseudoClasses, nativePseudoElements} from '../src/native-types';
-import {safeParse} from '../src/parser';
-import {process} from '../src/stylable-processor';
 import {reservedKeyFrames} from '../src/stylable-utils';
-import {Config, generateFromMock} from './utils/generate-test-util';
-const deindent = require('deindent');
+import {
+    expectWarnings,
+    expectWarningsFromTransform,
+    findTestLocations
+} from './utils/diagnostics';
+
 const customButton = `
     .root{
         -st-states:shmover;
@@ -20,43 +22,6 @@ const customButton = `
     }
 
 `;
-
-interface Warning {
-    message: string;
-    file: string;
-}
-
-function findTestLocations(css: string) {
-    let line = 1;
-    let column = 1;
-    let inWord = false;
-    let start;
-    let end;
-    let word = null;
-    for (let i = 0; i < css.length; i++) {
-        const ch = css.charAt(i);
-        if (ch === '\n') {
-            line += 1;
-            column = 1;
-        } else if (ch === '|') {
-            if (!start) {
-                start = { line, column };
-            } else {
-                end = { line, column };
-            }
-        } else if (ch === '$') {
-            inWord = !inWord;
-            if (inWord) {
-                word = '';
-            }
-        } else if (inWord) {
-            word += ch;
-        } else {
-            column++;
-        }
-    }
-    return { start, end, word, css: css.replace(/[|$]/gm, '') };
-}
 
 describe('findTestLocations', () => {
 
@@ -87,48 +52,6 @@ describe('findTestLocations', () => {
     });
 
 });
-
-function expectWarnings(css: string, warnings: Warning[]) {
-    const source = findTestLocations(css);
-    const root = safeParse(source.css);
-    const res = process(root);
-
-    res.diagnostics.reports.forEach((report, i) => {
-        expect(report.message).to.equal(warnings[i].message);
-        expect(report.node.source.start, 'start').to.eql(source.start);
-        if (source.word !== null) {
-            expect(report.options.word).to.eql(source.word);
-        }
-    });
-
-    expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(warnings.length);
-}
-
-function expectWarningsFromTransform(config: Config, warnings: Warning[]) {
-
-    config.trimWS = false;
-
-    const locations: any = {};
-    for (const path in config.files) {
-        const source = findTestLocations(deindent(config.files[path].content).trim());
-        config.files[path].content = source.css;
-        locations[path] = source;
-    }
-    const diagnostics = new Diagnostics();
-    generateFromMock(config, diagnostics);
-    if (warnings.length === 0 && diagnostics.reports.length !== 0) {
-        expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
-    }
-    diagnostics.reports.forEach((report, i) => {
-        const path = warnings[i].file;
-        expect(report.message).to.equal(warnings[i].message);
-        expect(report.node.source.start).to.eql(locations[path].start);
-        if (locations[path].word !== null) {
-            expect(report.options.word).to.eql(locations[path].word);
-        }
-    });
-    expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
-}
 
 describe('diagnostics: warnings and errors', () => {
     // TODO2: next phase
@@ -274,7 +197,7 @@ describe('diagnostics: warnings and errors', () => {
                 nativePseudoElements.forEach(nativeElement => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
                         const selector = `|.root::$${nativeElement}$|{`;
-                        const config: Config = {
+                        const config = {
                             entry: '/main.css',
                             files: {
                                 '/main.css': {
@@ -311,7 +234,7 @@ describe('diagnostics: warnings and errors', () => {
                 nativePseudoClasses.forEach(nativeClass => {
                     it(`should not return a warning for native ${nativeClass} pseudo class`, () => {
                         const selector = `|.root:$${nativeClass}$|{`;
-                        const config: Config = {
+                        const config = {
                             entry: '/main.css',
                             files: {
                                 '/main.css': {
@@ -327,7 +250,7 @@ describe('diagnostics: warnings and errors', () => {
                 });
 
                 it(`should not report a warning when the custom state is declared in an imported stylesheet`, () => {
-                    const config: Config = {
+                    const config = {
                         entry: '/main.st.css',
                         files: {
                             '/main.st.css': {
@@ -1058,8 +981,8 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }]);
             });
-
         });
+
         it('should return error when trying to import theme from js', () => {
             const config = {
                 entry: '/main.css',
@@ -1105,6 +1028,7 @@ describe('diagnostics: warnings and errors', () => {
             };
             expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }]);
         });
+
         it('should not add warning when compose value is a string', () => {
             const config = {
                 entry: '/main.css',
@@ -1342,5 +1266,4 @@ describe('diagnostics: warnings and errors', () => {
             });
         });
     });
-
 });
