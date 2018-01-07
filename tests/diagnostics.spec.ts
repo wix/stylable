@@ -849,30 +849,6 @@ describe('diagnostics: warnings and errors', () => {
         });
         describe('cross variance', () => {
 
-            it('stylesheet cannot be used as mixin', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import{
-                                -st-from:"./file.css";
-                                |-st-default:$Comp$|;
-                            }
-                            .root{
-                                -st-mixin:Comp;
-                            }
-                          `
-                        },
-                        '/file.css': {
-                            content: customButton
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: `'Comp' is a stylesheet and cannot be used as a mixin`, file: '/main.css' }]);
-            });
-
             xit('component variant cannot be used for native node', () => {
                 expectWarnings(`
                     :import{
@@ -915,24 +891,6 @@ describe('diagnostics: warnings and errors', () => {
                         file: 'main.css'
                     }]
                 );
-
-            });
-
-            xit('variant cannot be used with params', () => {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-                    .root{
-                        -st-extend:Comp;
-                        -st-mixin:|my-variant(param)|;
-                    }
-                `, [{
-                        message: 'invalid mixin arguments: "my-variant" is a variant and does not accept arguments',
-                        file: 'main.css'
-                    }]);
 
             });
 

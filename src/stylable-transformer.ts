@@ -378,16 +378,6 @@ export class StylableTransformer {
                 } else {
                     const resolvedClass = this.resolver.deepResolve(mix.ref);
                     if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
-                        if ((resolvedClass.symbol as ClassSymbol | ElementSymbol)[valueMapping.root]) {
-                            const importNode = findDeclaration(
-                                (mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.default
-                            );
-                            this.diagnostics.error(
-                                importNode,
-                                `'${importNode.value}' is a stylesheet and cannot be used as a mixin`,
-                                { word: importNode.value }
-                            );
-                        }
 
                         const mixinRoot = createClassSubsetRoot<postcss.Root>(
                             resolvedClass.meta.ast,
