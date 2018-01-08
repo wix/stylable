@@ -4,7 +4,6 @@ import { ImportSymbol, process, processNamespace, StylableMeta } from '../src/st
 
 import * as chai from 'chai';
 import { resolve } from 'path';
-import { VarSymbol } from '../src';
 import { flatMatch } from './matchers/falt-match';
 
 const expect = chai.expect;
