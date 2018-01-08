@@ -1,9 +1,10 @@
 // import * as postcss from 'postcss';
 // import * as path from 'path';
-import {FileProcessor} from './cached-process-file';
-import {ImportSymbol, StylableMeta, StylableSymbol} from './stylable-processor';
-import {valueMapping} from './stylable-value-parsers';
-import {stripQuotation} from './utils';
+import { FileProcessor } from './cached-process-file';
+import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import { StylableTransformer } from './stylable-transformer';
+import { valueMapping } from './stylable-value-parsers';
+import { stripQuotation } from './utils';
 
 export interface CSSResolve {
     _kind: 'css';
@@ -67,7 +68,7 @@ export class StylableResolver {
         }
         const importSymbol: ImportSymbol = maybeImport;
 
-        const {from} = importSymbol.import;
+        const { from } = importSymbol.import;
 
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
@@ -84,7 +85,7 @@ export class StylableResolver {
                 symbol = meta.mappedSymbols[importSymbol.name];
             }
 
-            return {_kind: 'css', symbol, meta} as CSSResolve;
+            return { _kind: 'css', symbol, meta } as CSSResolve;
 
         } else {
 
@@ -96,7 +97,7 @@ export class StylableResolver {
                 symbol = _module[importSymbol.name];
             }
 
-            return {_kind: 'js', symbol, meta: null} as JSResolve;
+            return { _kind: 'js', symbol, meta: null } as JSResolve;
         }
     }
     public deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
@@ -106,12 +107,29 @@ export class StylableResolver {
         }
         return resolved;
     }
-    public resolveExtends(meta: StylableMeta, className: string, isElement: boolean = false): CSSResolve[] {
+    public resolveExtends(
+        meta: StylableMeta,
+        className: string,
+        isElement: boolean = false,
+        transformer?: StylableTransformer
+    ): CSSResolve[] {
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 
-        if (!bucket[className]) {
+        const customSelector = meta.customSelectors[':--' + className];
+
+        if (!bucket[className] && !customSelector) {
             return [];
+        }
+
+        if (customSelector && transformer) {
+            const parsed = transformer.resolveSelectorElements(meta, customSelector);
+            if (parsed.length === 1) {
+                return parsed[0][parsed[0].length - 1].resolved;
+            } else {
+                return [];
+            }
+
         }
 
         const extendPath = [];
