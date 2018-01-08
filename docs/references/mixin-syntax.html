@@ -137,14 +137,14 @@
 
 <section class="docs-content">
     <h1>Mixins</h1>
-    <p><strong>Stylable</strong> mixins allow you to reuse complex styles and CSS behaviors, and apply them to any rule-set.</p>
+    <p><strong>Stylable</strong> mixins allow you to reuse complex styles and CSS behaviors, and apply them to any ruleset.</p>
 
 <p>Some use cases where you can use mixins:</p>
 <ul>
   <li>Presets/Variants - create reusable pieces of styling CSS</li>
-  <li>Layouts - easily describe complex layouts.</li>
+  <li>Layouts - easily describe complex layouts</li>
   <li>Effects - easily describe complex effects</li>
-  <li>macros - use JS to define the CSS macros you need</li>
+  <li>Macros - use JS to define the CSS macros you need</li>
 </ul>
 
 <h2 id="example-usage">Example usage</h2>
@@ -164,7 +164,7 @@
 
 <h2 id="defining-mixins-in-css">Defining mixins in CSS</h2>
 
-<p>every CSS class defined in a <strong>stylable</strong> CSS file can be used as a mixin.</p>
+<p>Every CSS class defined in a <strong>stylable</strong> CSS file can be used as a mixin.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code>
 <span class="c">/* file a.st.css */</span>
@@ -183,17 +183,16 @@
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* Output CSS */</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output */</span>
 <span class="nc">.b</span><span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span><span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
 </div>
 
-<h2 id="defining-mixins-in-javascript-or-typescript">Defining mixins in Javascript or Typescript</h2>
+<h2 id="defining-mixins-in-javascript-or-typescript">Defining mixins in JavaScript or TypeScript</h2>
 
-<p>you can easily create new mixins using javascript or typescript
-<a href="./extending-through-js">read more in extending through js</a></p>
+<p>You can easily create new mixins using JavaScript or TypeScript.</p>
 
 <h2 id="applying-multiple-mixins">Applying multiple mixins</h2>
 
@@ -222,11 +221,11 @@
 
 <h2 id="how-mixins-are-applied">How mixins are applied</h2>
 
-<p>Mixins can add CSS declarations to the CSS rule-set to which they are applied:</p>
+<p>Mixins can add CSS declarations to the CSS ruleset to which they are applied:</p>
 
 <ul>
   <li>Rules are added at the position in the CSS where the <code class="highlighter-rouge">-st-mixin</code> is declared.</li>
-  <li>Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.</li>
+  <li>Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.</li>
   <li>Multiple mixins are applied according to the order that they are specified.</li>
 </ul>
 
