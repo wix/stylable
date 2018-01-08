@@ -1,21 +1,20 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalValue, ParsedValue, ResolvedFormatter } from './functions';
-import { isCssNativeFunction, nativePseudoClasses, nativePseudoElements } from './native-types';
+import { evalValue } from './functions';
+import { nativePseudoClasses, nativePseudoElements } from './native-types';
 import { cssObjectToAst } from './parser';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
 import {
     createClassSubsetRoot, findDeclaration, findRule, getDeclStylable, mergeRules, reservedKeyFrames
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
-import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -435,7 +434,7 @@ export class StylableTransformer {
                     selectorElements.push({
                         name,
                         type,
-                        resolved: this.resolver.resolveExtends(current, name, type === 'element')
+                        resolved: this.resolver.resolveExtends(current, name, type === 'element', this)
                     });
                 }
                 if (type === 'selector' || type === 'spacing' || type === 'operator') {
