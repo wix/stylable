@@ -8,11 +8,11 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { expandCustomSelectors, CUSTOM_SELECTOR_RE } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
-import { matchValue, valueReplacer } from './value-template';
+import { valueReplacer } from './value-template';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];

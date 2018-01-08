@@ -13,7 +13,7 @@ import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, Imported, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
 import {
     createClassSubsetRoot,
@@ -25,7 +25,6 @@ import {
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
-import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -487,7 +486,7 @@ export class StylableTransformer {
                     selectorElements.push({
                         name,
                         type,
-                        resolved: this.resolver.resolveExtends(current, name, type === 'element')
+                        resolved: this.resolver.resolveExtends(current, name, type === 'element', this)
                     });
                 }
                 if (type === 'selector' || type === 'spacing' || type === 'operator') {
