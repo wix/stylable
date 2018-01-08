@@ -4,13 +4,13 @@ title: Mixins
 layout: docs
 ---
 
-**Stylable** mixins allow you to reuse complex styles and CSS behaviors, and apply them to any rule-set. 
+**Stylable** mixins allow you to reuse complex styles and CSS behaviors, and apply them to any ruleset. 
 
 Some use cases where you can use mixins:
 * Presets/Variants - create reusable pieces of styling CSS
-* Layouts - easily describe complex layouts.
+* Layouts - easily describe complex layouts
 * Effects - easily describe complex effects
-* macros - use JS to define the CSS macros you need
+* Macros - use JS to define the CSS macros you need
 
 ## Example usage
 
@@ -29,7 +29,7 @@ The value `textTooltip` of the external file `my-mixins` is imported. The class 
 
 ## Defining mixins in CSS
 
-every CSS class defined in a **stylable** CSS file can be used as a mixin.
+Every CSS class defined in a **stylable** CSS file can be used as a mixin.
 
 ``` css
 
@@ -49,16 +49,15 @@ every CSS class defined in a **stylable** CSS file can be used as a mixin.
 ```
 
 ``` css
-/* Output CSS */
+/* CSS output */
 .b{
     color:red;
 }
 ```
 
-## Defining mixins in Javascript or Typescript
+## Defining mixins in JavaScript or TypeScript
 
-you can easily create new mixins using javascript or typescript
-[read more in extending through js](./extending-through-js.md)
+You can easily create new mixins using JavaScript or TypeScript.
 
 ## Applying multiple mixins
 
@@ -88,10 +87,10 @@ You can apply multiple mixins in the same line.
 
 ## How mixins are applied
 
-Mixins can add CSS declarations to the CSS rule-set to which they are applied:
+Mixins can add CSS declarations to the CSS ruleset to which they are applied:
 
 * Rules are added at the position in the CSS where the `-st-mixin` is declared.
-* Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.
+* Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 * Multiple mixins are applied according to the order that they are specified.
 
 
