@@ -373,6 +373,116 @@ describe('Mixins', () => {
 
         });
 
+        it('apply simple class mixin that uses mixin itself', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    .x {
+                        color: red;
+                    }
+                    .y {
+                        -st-mixin: x;
+                    }
+                    .container {
+                        -st-mixin: y;
+                    }
+                `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                2,
+                '.entry--container',
+                'color: red'
+            );
+
+        });
+
+
+        it('apply simple class mixin with circular refs to the same selector', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    .x {
+                        color: red;
+                        -st-mixin: y;
+                    }
+                    .y {
+                        -st-mixin: x;
+                    }
+                `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--x',
+                'color: red;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--y',
+                'color: red'
+            );
+
+        });
+
+        it('apply simple class mixin with circular refs from multiple files', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./style1.st.css";
+                                -st-named: y;
+                            }
+                            .x {
+                                color: red;
+                                -st-mixin: y;
+                            }
+                        `
+                    },
+                    '/style1.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./entry.st.css";
+                                -st-named: x;
+                            }
+                            .y {
+                                -st-mixin: x;
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--x',
+                'color: red;color: red'
+            );
+
+        });
+
         it('append complex selector that starts with the mixin name', () => {
 
             const result = generateStylableRoot({

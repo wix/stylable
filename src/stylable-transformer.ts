@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalValue, ParsedValue, ResolvedFormatter } from './functions';
+import { evalValue, ParsedValue, resolveArgumentsValue, ResolvedFormatter } from './functions';
 import {
     isCssNativeFunction,
     nativePseudoClasses,
@@ -116,7 +116,12 @@ export class StylableTransformer {
         return this.postProcessor ? this.postProcessor(result, this) : result;
     }
     public transformAst(
-        ast: postcss.Root, meta: StylableMeta, metaExports?: Pojo<string>, variableOverride?: Pojo<string>) {
+        ast: postcss.Root,
+        meta: StylableMeta,
+        metaExports?: Pojo<string>,
+        variableOverride?: Pojo<string>,
+        path: string[] = []
+    ) {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
 
@@ -151,13 +156,7 @@ export class StylableTransformer {
             );
         });
 
-        // ast.nodes.forEach((n) => {
-        //     if (n.type === 'decl' && n.prop === valueMapping.mixin) {
-        //         this.appendMixins(ast, meta, variableOverride)
-        //     }
-        // });
-
-        ast.walkRules((rule: SRule) => this.appendMixins(rule, meta, variableOverride));
+        ast.walkRules((rule: SRule) => this.appendMixins(rule, meta, variableOverride, path));
 
         if (metaExports) {
             this.exportRootClass(meta, metaExports);
@@ -343,11 +342,20 @@ export class StylableTransformer {
 
         return scopedName;
     }
-    public appendMixins(rule: SRule, meta: StylableMeta, variableOverride?: Pojo<string>) {
+    public appendMixins(rule: SRule, meta: StylableMeta, variableOverride?: Pojo<string>, path: string[] = []) {
         if (!rule.mixins || rule.mixins.length === 0) {
             return;
         }
         rule.mixins.forEach(mix => {
+
+            const isRecursive = path.indexOf(mix.ref.name + ' from ' + meta.source) !== -1;
+
+            if (isRecursive) {
+                this.diagnostics.warn(rule, `circular mixin found: ${path.join(' --> ')}`, {word: mix.ref.name});
+                // TODO: add warn
+                return;
+            }
+
             const resolvedMixin = this.resolver.deepResolve(mix.ref);
             if (resolvedMixin) {
                 if (resolvedMixin._kind === 'js') {
@@ -384,19 +392,16 @@ export class StylableTransformer {
                             undefined,
                             resolvedClass.symbol.name === resolvedClass.meta.root
                         );
-                        const namedArgs = mix.mixin.options as Pojo<string>;
-                        const resolvedArgs = {} as Pojo<string>;
-                        for (const k in namedArgs) {
-                            resolvedArgs[k] = evalValue(
-                                this.resolver,
-                                namedArgs[k],
-                                meta,
-                                postcss.decl(),
-                                variableOverride
-                            );
-                        }
 
-                        this.transformAst(mixinRoot, resolvedClass.meta, undefined, resolvedArgs);
+                        const namedArgs = mix.mixin.options as Pojo<string>;
+                        const resolvedArgs = resolveArgumentsValue(namedArgs, this.resolver, meta, variableOverride);
+
+                        this.transformAst(
+                            mixinRoot,
+                            resolvedClass.meta,
+                            undefined, resolvedArgs,
+                            path.concat(mix.ref.name + ' from ' + meta.source)
+                        );
 
                         mergeRules(
                             mixinRoot,
@@ -411,19 +416,11 @@ export class StylableTransformer {
                 }
             } else if (mix.ref._kind === 'class') {
                 const namedArgs = mix.mixin.options as Pojo<string>;
-                const resolvedArgs = {} as Pojo<string>;
-                for (const k in namedArgs) {
-                    resolvedArgs[k] = evalValue(
-                        this.resolver,
-                        namedArgs[k],
-                        meta,
-                        postcss.decl(),
-                        variableOverride
-                    );
-                }
+                const resolvedArgs = resolveArgumentsValue(namedArgs, this.resolver, meta, variableOverride);
 
-                const mixinRoot = createClassSubsetRoot<postcss.Root>(meta.rawAst, '.' + mix.ref.name);
-                this.transformAst(mixinRoot, meta, undefined, resolvedArgs);
+                const mixinRoot = createClassSubsetRoot<postcss.Root>(meta.ast, '.' + mix.ref.name);
+                this.transformAst(
+                    mixinRoot, meta, undefined, resolvedArgs, path.concat(mix.ref.name + ' from ' + meta.source));
                 mergeRules(mixinRoot, rule);
             }
         });

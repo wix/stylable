@@ -31,6 +31,21 @@ const errors = {
 };
 /* tslint:enable:max-line-length */
 
+export function resolveArgumentsValue(
+    options: Pojo<string>, resolver: StylableResolver, meta: StylableMeta, variableOverride?: Pojo<string>) {
+    const resolvedArgs = {} as Pojo<string>;
+    for (const k in options) {
+        resolvedArgs[k] = evalValue(
+            resolver,
+            options[k],
+            meta,
+            postcss.decl(),
+            variableOverride
+        );
+    }
+    return resolvedArgs;
+}
+
 export function evalValue(
     resolver: StylableResolver,
     value: string,

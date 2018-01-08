@@ -358,6 +358,31 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: 'import mixin does not exist', file: '/main.css' }]);
             });
+
+            it('should add error on circular mixins', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            .x {
+                                -st-mixin: y;
+                            }
+                            .y {
+                                -st-mixin: x;
+                            }
+                            `
+                        }
+                    }
+                };
+                const xPath = 'y from /main.css --> x from /main.css';
+                const yPath = 'x from /main.css --> y from /main.css';
+                expectWarningsFromTransform(config, [
+                    { message: `circular mixin found: ${xPath}`, file: '/main.css', skipLocationCheck: true },
+                    { message: `circular mixin found: ${yPath}`, file: '/main.css', skipLocationCheck: true }
+                ]);
+            });
+
             it('should add diagnostics when there is a bug in mixin', () => {
                 const config = {
                     entry: '/main.css',
@@ -462,7 +487,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-variant:|red|;
                     }
                 `,
-                [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
+                    [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
             });
         });
 
