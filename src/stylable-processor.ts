@@ -12,7 +12,6 @@ import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
-import { valueReplacer } from './value-template';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -255,17 +254,7 @@ export class StylableProcessor {
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls(decl => {
             this.checkRedeclareSymbol(decl.prop, decl);
-            let importSymbol = null;
             let type = null;
-            const value = valueReplacer(decl.value, {}, (_value, name, match) => {
-                const symbol = this.meta.mappedSymbols[name];
-                if (!symbol) {
-                    return match;
-                } else if (symbol._kind === 'import') {
-                    importSymbol = symbol;
-                }
-                return symbol._kind === 'var' ? symbol.value : match;
-            });
 
             const prev = decl.prev();
             if (prev && prev.type === 'comment') {
@@ -280,7 +269,6 @@ export class StylableProcessor {
                 name: decl.prop,
                 value: '',
                 text: decl.value,
-                import: importSymbol,
                 node: decl,
                 valueType: type
             };
@@ -518,7 +506,6 @@ export interface VarSymbol {
     value: string;
     text: string;
     valueType: string | null;
-    import: ImportSymbol | null;
     node: postcss.Node;
 }
 

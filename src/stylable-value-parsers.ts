@@ -146,7 +146,6 @@ export const SBTypesParsers = {
             // const symbol = m[node.value];
             // if (symbol.)
 
-
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,

@@ -100,15 +100,15 @@ export function evalValue(
                         } else if (varSymbol && varSymbol._kind === 'import') {
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
-                                const varSymbol = resolvedVar.symbol;
+                                const resolvedVarSymbol = resolvedVar.symbol;
 
                                 if (resolvedVar._kind === 'css') {
-                                    if (varSymbol._kind === 'var') {
+                                    if (resolvedVarSymbol._kind === 'var') {
                                         const resolvedValue = evalValue(
                                             resolver,
-                                            stripQuotation(varSymbol.text),
+                                            stripQuotation(resolvedVarSymbol.text),
                                             resolvedVar.meta,
-                                            varSymbol.node,
+                                            resolvedVarSymbol.node,
                                             variableOverride,
                                             valueHook,
                                             diagnostics,
@@ -118,9 +118,13 @@ export function evalValue(
                                             valueHook(resolvedValue, varName, false, passedThrough) :
                                             resolvedValue;
                                     } else {
-                                        const errorKind = varSymbol._kind === 'class' && varSymbol[valueMapping.root] ?
-                                            'stylesheet' :
-                                            varSymbol._kind;
+                                        const errorKind =
+                                            (
+                                                resolvedVarSymbol._kind === 'class'
+                                                &&
+                                                resolvedVarSymbol[valueMapping.root]
+                                            ) ?
+                                                'stylesheet' : resolvedVarSymbol._kind;
 
                                         if (diagnostics) {
                                             diagnostics.warn(node,
