@@ -241,7 +241,9 @@ export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
                     params: node.params,
                     name: node.name
                 }), isRoot);
-                mixinRoot.append(mediaSubset);
+                if (mediaSubset.nodes) {
+                    mixinRoot.append(mediaSubset);
+                }
             } else if (isRoot) {
                 mixinRoot.append(node.clone());
             }

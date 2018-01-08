@@ -175,4 +175,21 @@ describe('createClassSubsetRoot', () => {
         testMatcher(expected, res.nodes!);
 
     });
+
+    it('should not append empty media', () => {
+
+        const res = createClassSubsetRoot(safeParse(`
+            .i {}
+            @media (max-width: 300px) {
+                .x {}
+            }
+        `), '.i');
+
+        const expected = [
+            { selector: '&' }
+        ];
+
+        testMatcher(expected, res.nodes!);
+
+    });
 });
