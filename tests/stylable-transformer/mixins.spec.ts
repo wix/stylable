@@ -341,6 +341,54 @@ describe('Mixins', () => {
             );
 
         });
+
+        it('apply js multiple same mixin', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./mixin1";
+                            -st-default: mixin1;
+                        }
+                        .container-a {
+                            -st-mixin: mixin1(red);
+                        }
+                        .container-b {
+                            -st-mixin: mixin1(blue);
+                        }
+                    `
+                    },
+                    '/mixin1.js': {
+                        content: `
+                        module.exports = function(options) {
+                            return {
+                                color: options[0]
+                            }
+                        }
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container-a',
+                'color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container-b',
+                'color: blue'
+            );
+
+        });
     });
 
     describe('from css', () => {
