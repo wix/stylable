@@ -19,8 +19,8 @@ export class Stylable {
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
-        protected scopeRoot: boolean = true
-    ) {
+        protected scopeRoot: boolean = true) {
+
         const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
