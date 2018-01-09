@@ -158,8 +158,6 @@ export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
     const containsPrefix = containsMatchInFistChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
 
-    let addRootDecls = false; // mixinRoot.type === 'root';
-
     root.nodes!.forEach(node => {
         if (node.type === 'rule') {
             const ast = isRoot ?
@@ -169,38 +167,23 @@ export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
 
             if (matchesSelectors.length) {
 
-                const isFirstSimpleMatchRule =
-                    addRootDecls &&
-                    ast.nodes.length === 1 &&
-                    ast.nodes[0].nodes.length === 1 &&
-                    isNodeMatch(ast.nodes[0].nodes[0], prefixType);
+                const selector = stringifySelector({
+                    ...ast,
+                    nodes: matchesSelectors.map(selectorNode => {
 
-                if (isFirstSimpleMatchRule) {
-                    addRootDecls = false;
-                    node.walkDecls(decl => {
-                        mixinRoot.append(decl.clone());
-                    });
-                } else {
-                    const selector = stringifySelector({
-                        ...ast,
-                        nodes: matchesSelectors.map(selectorNode => {
-                            // maybe this clone is not needed.
-                            selectorNode = cloneDeep(selectorNode);
+                        if (!isRoot) {
+                            fixChunkOrdering(selectorNode, prefixType);
+                        }
 
-                            if (!isRoot) {
-                                fixChunkOrdering(selectorNode, prefixType);
-                            }
+                        return destructiveReplaceNode(
+                            selectorNode,
+                            prefixType,
+                            { type: 'invalid', value: '&' } as SelectorAstNode
+                        );
+                    })
+                });
 
-                            return destructiveReplaceNode(
-                                selectorNode,
-                                prefixType,
-                                { type: 'invalid', value: '&' } as SelectorAstNode
-                            );
-                        })
-                    });
-
-                    mixinRoot.append(node.clone({ selector }));
-                }
+                mixinRoot.append(node.clone({ selector }));
             }
         } else if (node.type === 'atrule') {
             if (node.name === 'media') {
