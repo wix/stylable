@@ -82,7 +82,7 @@ export class StylableResolver {
             if (importSymbol.type === 'default') {
                 symbol = meta.mappedSymbols[meta.root];
             } else {
-                symbol = meta.mappedSymbols[importSymbol.name] || meta.elements[importSymbol.name];
+                symbol = meta.mappedSymbols[importSymbol.name]; /*|| meta.elements[importSymbol.name];*/
             }
 
             return { _kind: 'css', symbol, meta } as CSSResolve;

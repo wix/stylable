@@ -373,6 +373,40 @@ describe('Mixins', () => {
 
         });
 
+        it.skip('mixin with multiple rules in keyframes', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .x {
+                                color: red;
+                            }
+                            .x:hover {
+                                color: green;
+                            }
+
+                            @keyframes my-name {
+
+                                0% {
+                                    -st-mixin: x;
+                                }
+                                100% {
+
+                                }
+
+                            }
+                        `
+                    }
+                }
+            });
+
+            throw new Error('Test me');
+
+        });
+
         it('apply simple class mixin that uses mixin itself', () => {
 
             const result = generateStylableRoot({
@@ -403,7 +437,6 @@ describe('Mixins', () => {
             );
 
         });
-
 
         it('apply simple class mixin with circular refs to the same selector', () => {
 
@@ -771,7 +804,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply mixin from imported element', () => {
+        it.skip('apply mixin from imported element', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
