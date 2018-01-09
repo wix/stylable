@@ -33,11 +33,11 @@ module.exports = function(baseSize, modifier) {
 }
 
 .header {
-    font-size: calcFontSize(16, case1);
+    font-size: calcFontSize(16, header);
 }
 
 .form {
-    font-size: calcFontSize(16, case2);
+    font-size: calcFontSize(16, body);
 }
 ```
 
