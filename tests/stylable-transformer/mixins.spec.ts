@@ -389,6 +389,7 @@ describe('Mixins', () => {
             );
 
         });
+
     });
 
     describe('from css', () => {
