@@ -5,8 +5,7 @@ import { Diagnostics } from './diagnostics';
 import { safeParse } from './parser';
 import { StylableResolver } from './postcss-resolver';
 import { process, StylableMeta } from './stylable-processor';
-import { StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
-
+import { Options, StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
 
 export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -30,23 +29,31 @@ export class Stylable {
     public createBundler(): Bundler {
         return new Bundler(this);
     }
-    public transform(meta: StylableMeta): StylableResults;
-    public transform(source: string, resourcePath: string): StylableResults;
-    public transform(meta: string | StylableMeta, resourcePath?: string): StylableResults {
-        if (typeof meta === 'string') {
-            const root = safeParse(meta, { from: resourcePath });
-            meta = process(root, new Diagnostics());
-        }
-
-        const transformer = new StylableTransformer({
+    public createTransformer(options: Partial<Options> = {}) {
+        return new StylableTransformer({
             delimiter: this.delimiter,
             diagnostics: new Diagnostics(),
             fileProcessor: this.fileProcessor,
             requireModule: this.requireModule,
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
-            scopeRoot: this.scopeRoot
+            scopeRoot: this.scopeRoot,
+            ...options
         });
+    }
+    public transform(meta: StylableMeta): StylableResults;
+    public transform(source: string, resourcePath: string): StylableResults;
+    public transform(
+        meta: string | StylableMeta,
+        resourcePath?: string,
+        options: Partial<Options> = {}): StylableResults {
+
+        if (typeof meta === 'string') {
+            const root = safeParse(meta, { from: resourcePath });
+            meta = process(root, new Diagnostics());
+        }
+
+        const transformer = this.createTransformer(options);
 
         this.fileProcessor.add(meta.source, meta);
 
