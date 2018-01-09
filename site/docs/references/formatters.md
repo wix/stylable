@@ -92,45 +92,41 @@ In this example the CSS imports the same formatter as the previous example, `cal
 ```
 
 ## Nested formatters
-
-You can also nest formatters to provide functions that are both more accurate and reusable. 
+You can also nest formatters to provide functions that are modular, composable and reusable. 
 
 In this example the formatter `sin` is nested in the `abs` formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.
 
 ```js
-/* ./sin.js */
-module.exports = function(degree) {
-    return Math.sin(Number(degree));
-};
-```
-
-```js
-/* ./abs.js */
-module.exports = function(num) {
-    return Math.abs(Number(num));
-};
+/* ./math.js */
+module.export = {
+    divBy2: function(num) {
+        return Number(Number(num) / 2);
+    },
+    round: function(num) {
+        return Math.round(Number(num));
+    }
+}
 ```
 
 ```css
 :import {
-    -st-from: "./abs";
-    -st-default: abs;
+    -st-from: "./math";
+    -st-named: divBy2, round;
 }
 
-:import {
-    -st-from: "./sin";
-    -st-default: sin;
+:vars {
+    baseSize: 17px;
 }
 
 .header {
-    font-size: abs(sin(30))px;
+    font-size: round(divBy2(value(baseSize)))px;
 }
 ```
 
 ```css
 /* CSS output*/
 .header {
-    font-size: 9.88px;
+    font-size: 9px;
 }
 ```
 
