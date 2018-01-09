@@ -9,7 +9,7 @@ Formatters are functions that return a single CSS declaration value. They can re
 >**Note**  
 >Currently, any argument passed through to a formatter is of type `string`. We are in the process of adding support for more complex types.
 
-For example a `calc-font-size` formatter can return a different value for the font size depending on the modifier/argument applied.
+For example a `calc-font-size` formatter can return a different value for the font size depending on the provided argument.
 
 
 ```js
