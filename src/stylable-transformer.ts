@@ -121,8 +121,7 @@ export class StylableTransformer {
         meta: StylableMeta,
         metaExports?: Pojo<string>,
         variableOverride?: Pojo<string>,
-        path: string[] = []
-    ) {
+        path: string[] = []) {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
 
@@ -383,8 +382,8 @@ export class StylableTransformer {
         metaExports?: Pojo<string>,
         scopeRoot = false,
         calcPaths = false,
-        rule?: postcss.Rule
-    ): ScopedSelectorResults {
+        rule?: postcss.Rule): ScopedSelectorResults {
+
         let current = meta;
         let symbol: StylableSymbol | null = null;
         let nestedSymbol: StylableSymbol | null;
@@ -497,13 +496,12 @@ export class StylableTransformer {
     public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports?: Pojo<string>): string {
         return this.scopeSelector(meta, rule.selector, metaExports, this.scopeRoot, false, rule).selector;
     }
-
     public handleClass(
         meta: StylableMeta,
         node: SelectorAstNode,
         name: string,
-        metaExports?: Pojo<string>
-    ): CSSResolve {
+        metaExports?: Pojo<string>): CSSResolve {
+
         const symbol = meta.classes[name];
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
         if (!extend && symbol && symbol.alias) {
@@ -614,8 +612,8 @@ export class StylableTransformer {
         name: string,
         selectorNode: SelectorAstNode,
         addedSelectors: AdditionalSelector[],
-        rule?: postcss.Rule
-    ): CSSResolve {
+        rule?: postcss.Rule): CSSResolve {
+
         let next: JSResolve | CSSResolve | null;
 
         const customSelector = meta.customSelectors[':--' + name];
@@ -703,8 +701,8 @@ export class StylableTransformer {
         symbol: StylableSymbol | null,
         origin: StylableMeta,
         originSymbol: ClassSymbol | ElementSymbol,
-        rule?: postcss.Rule
-    ) {
+        rule?: postcss.Rule) {
+
         let current = meta;
         let currentSymbol = symbol;
 
@@ -762,12 +760,10 @@ export class StylableTransformer {
 
         return current;
     }
-
     // TODO: Extract to scoping utils
     public autoStateAttrName(stateName: string, namespace: string) {
         return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}`;
     }
-
     public cssStates(stateMapping: Pojo<boolean> | null | undefined, namespace: string) {
         return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
             if (stateMapping[key]) {
@@ -776,7 +772,6 @@ export class StylableTransformer {
             return states;
         }, {}) : {};
     }
-
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
     }
