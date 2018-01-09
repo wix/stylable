@@ -28,8 +28,8 @@ export function traverseNode(
     node: SelectorAstNode,
     visitor: Visitor,
     index: number = 0,
-    nodes: SelectorAstNode[] = [node]
-): boolean | void {
+    nodes: SelectorAstNode[] = [node]): boolean | void {
+
     if (!node) {
         return;
     }
@@ -106,3 +106,27 @@ export function matchAtKeyframes(selector: string) {
 export function matchAtMedia(selector: string) {
     return selector.match(/^@media\s*(.*)/);
 }
+
+export function isNodeMatch(nodeA: SelectorAstNode, nodeB: SelectorAstNode) {
+    return nodeA.type === nodeB.type && nodeA.name === nodeB.name;
+}
+
+export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {
+    let startChunkIndex = 0;
+    let moved = false;
+    traverseNode(selectorNode, (node, index, nodes) => {
+        if (node.type === 'operator' || node.type === 'spacing') {
+            startChunkIndex = index + 1;
+            moved = false;
+        } else if (isNodeMatch(node, prefixType)) {
+            if (index > 0 && !moved) {
+                moved = true;
+                nodes.splice(index, 1);
+                nodes.splice(startChunkIndex, 0, node);
+            }
+            // return false;
+        }
+        return undefined;
+    });
+}
+

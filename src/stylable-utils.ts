@@ -4,6 +4,8 @@ import { DeclStylableProps, Imported, SDecl, SRule, StylableMeta } from './styla
 
 import {
     createSimpleSelectorChecker,
+    fixChunkOrdering,
+    isNodeMatch,
     parseSelector,
     SelectorAstNode,
     stringifySelector,
@@ -145,46 +147,11 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
     return rule;
 }
 
-export function isNodeMatch(nodeA: SelectorAstNode, nodeB: SelectorAstNode) {
-    return nodeA.type === nodeB.type && nodeA.name === nodeB.name;
-}
-
-function destructiveReplaceNode(
-    ast: SelectorAstNode,
-    matchNode: SelectorAstNode,
-    replacementNode: SelectorAstNode
-) {
-    traverseNode(ast, node => {
-        if (isNodeMatch(node, matchNode)) {
-            node.type = 'selector';
-            node.nodes = [replacementNode];
-        }
-    });
-    return ast;
-}
-
-const containsMatchInFistChunk = (prefixType: SelectorAstNode, selectorNode: SelectorAstNode) => {
-    let isMatch = false;
-    traverseNode(selectorNode, node => {
-        if (node.type === 'operator' || node.type === 'spacing') {
-            return false;
-        } else if (node.type === 'nested-pseudo-class') {
-            return true;
-        } else if (isNodeMatch(node, prefixType)) {
-            isMatch = true;
-            return false;
-        }
-        return undefined;
-    });
-    return isMatch;
-};
-
 export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
     root: postcss.Root | postcss.AtRule,
     selectorPrefix: string,
     mixinTarget?: T,
-    isRoot = false
-): T {
+    isRoot = false): T {
     // keyframes on class mixin?
 
     const prefixType = parseSelector(selectorPrefix).nodes[0].nodes[0];
@@ -255,32 +222,13 @@ export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {
-    let startChunkIndex = 0;
-    let moved = false;
-    traverseNode(selectorNode, (node, index, nodes) => {
-        if (node.type === 'operator' || node.type === 'spacing') {
-            startChunkIndex = index + 1;
-            moved = false;
-        } else if (isNodeMatch(node, prefixType)) {
-            if (index > 0 && !moved) {
-                moved = true;
-                nodes.splice(index, 1);
-                nodes.splice(startChunkIndex, 0, node);
-            }
-            // return false;
-        }
-        return undefined;
-    });
-}
-
 export function removeUnusedRules(
     ast: postcss.Root,
     meta: StylableMeta,
     _import: Imported,
     usedFiles: string[],
-    resolvePath: (ctx: string, path: string) => string
-): void {
+    resolvePath: (ctx: string, path: string) => string): void {
+
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
@@ -317,8 +265,8 @@ export function findDeclaration(importNode: Imported, test: any) {
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statment: any) => statment.prop === valueMapping.extends
-) {
+    test: any = (statment: any) => statment.prop === valueMapping.extends) {
+
     let found: any = null;
     root.walkRules(selector, (rule: SRule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
@@ -338,4 +286,34 @@ export function getDeclStylable(decl: SDecl): DeclStylableProps {
             { sourceValue: '' };
         return decl.stylable;
     }
+}
+
+function destructiveReplaceNode(
+    ast: SelectorAstNode,
+    matchNode: SelectorAstNode,
+    replacementNode: SelectorAstNode) {
+
+    traverseNode(ast, node => {
+        if (isNodeMatch(node, matchNode)) {
+            node.type = 'selector';
+            node.nodes = [replacementNode];
+        }
+    });
+    return ast;
+}
+
+function containsMatchInFistChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
+    let isMatch = false;
+    traverseNode(selectorNode, node => {
+        if (node.type === 'operator' || node.type === 'spacing') {
+            return false;
+        } else if (node.type === 'nested-pseudo-class') {
+            return true;
+        } else if (isNodeMatch(node, prefixType)) {
+            isMatch = true;
+            return false;
+        }
+        return undefined;
+    });
+    return isMatch;
 }
