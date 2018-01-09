@@ -30,7 +30,7 @@ describe('Mixins', () => {
 
     describe('from js', () => {
 
-        it('apply simple js mixin', () => {
+        it('simple mixin', () => {
 
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -64,7 +64,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply simple js mixin and remove all -st-mixins', () => {
+        it('simple mixin and remove all -st-mixins', () => {
 
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -98,7 +98,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply complex js mixin', () => {
+        it('complex mixin', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -159,7 +159,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply js mixin on multiple selectors', () => {
+        it('mixin on multiple selectors', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -208,7 +208,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply js mixin with multiple selectors', () => {
+        it('mixin with multiple selectors', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -248,7 +248,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply js mixin with multiple var values', () => {
+        it('mixin with multiple var values', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -291,7 +291,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply js multiple mixins', () => {
+        it('multiple mixins', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -342,7 +342,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply js multiple same mixin', () => {
+        it('multiple same mixin', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
