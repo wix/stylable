@@ -11,6 +11,7 @@ import {
 import { cssObjectToAst } from './parser';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
@@ -156,7 +157,7 @@ export class StylableTransformer {
             );
         });
 
-        ast.walkRules((rule: SRule) => this.appendMixins(rule, meta, variableOverride, path));
+        ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride, path));
 
         if (metaExports) {
             this.exportRootClass(meta, metaExports);
@@ -341,90 +342,6 @@ export class StylableTransformer {
         }
 
         return scopedName;
-    }
-    public appendMixins(rule: SRule, meta: StylableMeta, variableOverride?: Pojo<string>, path: string[] = []) {
-        if (!rule.mixins || rule.mixins.length === 0) {
-            return;
-        }
-        rule.mixins.forEach(mix => {
-
-            const isRecursive = path.indexOf(mix.ref.name + ' from ' + meta.source) !== -1;
-
-            if (isRecursive) {
-                this.diagnostics.warn(rule, `circular mixin found: ${path.join(' --> ')}`, {word: mix.ref.name});
-                // TODO: add warn
-                return;
-            }
-
-            const resolvedMixin = this.resolver.deepResolve(mix.ref);
-            if (resolvedMixin) {
-                if (resolvedMixin._kind === 'js') {
-                    if (typeof resolvedMixin.symbol === 'function') {
-                        let mixinRoot = null;
-
-                        try {
-                            const res = resolvedMixin.symbol((mix.mixin.options as any[]).map(v => v.value));
-                            mixinRoot = cssObjectToAst(res).root;
-                        } catch (e) {
-                            this.diagnostics.error(rule, 'could not apply mixin: ' + e, { word: mix.mixin.type });
-                            return;
-                        }
-
-                        mixinRoot.walkDecls(decl => {
-                            if (!isValidDeclaration(decl)) {
-                                decl.value = String(decl);
-                            }
-                        });
-
-                        this.transformAst(mixinRoot, meta, undefined, variableOverride);
-
-                        mergeRules(mixinRoot, rule);
-                    } else {
-                        this.diagnostics.error(rule, 'js mixin must be a function', { word: mix.mixin.type });
-                    }
-                } else {
-                    const resolvedClass = this.resolver.deepResolve(mix.ref);
-                    if (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
-
-                        const mixinRoot = createClassSubsetRoot<postcss.Root>(
-                            resolvedClass.meta.ast,
-                            (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
-                            undefined,
-                            resolvedClass.symbol.name === resolvedClass.meta.root
-                        );
-
-                        const namedArgs = mix.mixin.options as Pojo<string>;
-                        const resolvedArgs = resolveArgumentsValue(namedArgs, this.resolver, meta, variableOverride);
-
-                        this.transformAst(
-                            mixinRoot,
-                            resolvedClass.meta,
-                            undefined, resolvedArgs,
-                            path.concat(mix.ref.name + ' from ' + meta.source)
-                        );
-
-                        mergeRules(
-                            mixinRoot,
-                            rule
-                        );
-
-                    } else {
-                        const importNode = findDeclaration(
-                            (mix.ref as ImportSymbol).import, (node: any) => node.prop === valueMapping.named);
-                        this.diagnostics.error(importNode, 'import mixin does not exist', { word: importNode.value });
-                    }
-                }
-            } else if (mix.ref._kind === 'class') {
-                const namedArgs = mix.mixin.options as Pojo<string>;
-                const resolvedArgs = resolveArgumentsValue(namedArgs, this.resolver, meta, variableOverride);
-
-                const mixinRoot = createClassSubsetRoot<postcss.Root>(meta.ast, '.' + mix.ref.name);
-                this.transformAst(
-                    mixinRoot, meta, undefined, resolvedArgs, path.concat(mix.ref.name + ' from ' + meta.source));
-                mergeRules(mixinRoot, rule);
-            }
-        });
-        rule.walkDecls(valueMapping.mixin, node => node.remove());
     }
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
 

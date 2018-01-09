@@ -34,3 +34,4 @@ export { createInfrastructure, StylableInfrastructure } from './create-infra-str
 export { create } from './runtime';
 export * from './types';
 export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } from './types';
+export * from './stylable-mixins';
