@@ -482,6 +482,9 @@ export class StylableTransformer {
             if (first && first.before && first.before === '.' + scopedRoot) {
                 return;
             }
+            if (first && first.type === 'invalid' && first.value === '&') {
+                return;
+            }
             if (!first || (first.name !== scopedRoot)) {
                 selector.nodes = [
                     typeof scopedRoot !== 'string' ?

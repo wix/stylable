@@ -853,6 +853,62 @@ describe('Mixins', () => {
 
         });
 
+        it('apply mixin when rootScoping enabled', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                scopeRoot: true,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./look1.st.css";
+                                -st-default: Look1;
+                            }
+                            .root {
+                                -st-mixin: Look1(c1 yellow);
+                            }
+                        `
+                    },
+                    '/look1.st.css': {
+                        namespace: 'look1',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            :vars {
+                                c1: red;
+                            }
+                            .root {
+                                -st-extends:Base;
+                                color:value(c1);
+                            }
+                            .panel {
+                                color:gold;
+                            }
+                            .root::label {
+                                color:green;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {}
+                            .label {}
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(result, 0, '.entry--root', '-st-extends:Base;color:yellow');
+            matchRuleAndDeclaration(result, 1, '.entry--root .look1--panel', 'color:gold');
+            matchRuleAndDeclaration(result, 2, '.entry--root .base--label', 'color:green');
+
+        });
+
         it.skip('apply mixin from imported element', () => {
 
             const result = generateStylableRoot({
