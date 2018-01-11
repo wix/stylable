@@ -1,8 +1,8 @@
 import * as  postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
-import { CSSResolve, JSResolve } from './stylable-resolver';
 import { ClassSymbol, ImportSymbol, RefedMixin, SRule, StylableMeta } from './stylable-processor';
+import { CSSResolve, JSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
 import { createClassSubsetRoot, findDeclaration, isValidDeclaration, mergeRules } from './stylable-utils';
 import { MixinValue, valueMapping } from './stylable-value-parsers';

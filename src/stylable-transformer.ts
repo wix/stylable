@@ -9,13 +9,13 @@ import {
     reservedKeyFrames
 } from './native-reserved-lists';
 import { cssObjectToAst } from './parser';
-import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';
 import {
     ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
+import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
     createClassSubsetRoot,
     findDeclaration,

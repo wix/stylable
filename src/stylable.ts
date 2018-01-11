@@ -3,8 +3,8 @@ import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { safeParse } from './parser';
-import { StylableResolver } from './stylable-resolver';
 import { process, StylableMeta } from './stylable-processor';
+import { StylableResolver } from './stylable-resolver';
 import { Options, StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
 
 export class Stylable {
