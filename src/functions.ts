@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
-import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { StylableMeta } from './stylable-processor';
 import { replaceValueHook } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';

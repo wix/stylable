@@ -9,7 +9,7 @@ import {
     reservedKeyFrames
 } from './native-reserved-lists';
 import { cssObjectToAst } from './parser';
-import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';

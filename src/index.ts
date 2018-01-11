@@ -23,7 +23,7 @@ export {
     TransformHooks
 } from './stylable-transformer';
 export { scopeSelector, expandCustomSelectors } from './stylable-utils';
-export { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createGenerator } from './generator';
 export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';

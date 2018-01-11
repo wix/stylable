@@ -4,7 +4,7 @@ import { Bundler } from '../../src/bundle';
 import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
 import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
-import { StylableResolver } from '../../src/postcss-resolver';
+import { StylableResolver } from '../../src/stylable-resolver';
 import { Stylable } from '../../src/stylable';
 import { process, StylableMeta } from '../../src/stylable-processor';
 import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';

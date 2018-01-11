@@ -18,7 +18,7 @@ function createResolveExtendsResults(
     return resolver.resolveExtends(processFile.process(fileToProcess), classNameToLookup, isElement);
 }
 
-describe('postcss-resolver', () => {
+describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {
         const {fs} = createMinimalFS({
             files: {

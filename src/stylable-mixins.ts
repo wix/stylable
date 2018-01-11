@@ -1,7 +1,7 @@
 import * as  postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
-import { CSSResolve, JSResolve } from './postcss-resolver';
+import { CSSResolve, JSResolve } from './stylable-resolver';
 import { ClassSymbol, ImportSymbol, RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';
 import { createClassSubsetRoot, findDeclaration, isValidDeclaration, mergeRules } from './stylable-utils';
