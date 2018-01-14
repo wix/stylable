@@ -98,6 +98,16 @@ inquirer
     files.forEach(verifyAbsent);
 
     console.log();
+    console.log(cyan(`Copying base tsconfig into ${appPath}, and adjusting tsconfig.json`));
+
+    fs.copyFileSync(path.join(ownPath, 'tsconfig.json'), path.join(appPath, 'tsconfig.base.json'))
+    const userTsConfig = path.join(appPath, 'tsconfig.json');
+    if (fs.existsSync(userTsConfig)) {
+      const configContent = fs.readFileSync(userTsConfig, 'utf8');
+      fs.writeFileSync(userTsConfig, configContent.replace('./node_modules/stylable-scripts/tsconfig.json', './tsconfig.base.json'));
+    }
+    
+    console.log();
     console.log(cyan(`Copying files into ${appPath}`));
 
     folders.forEach(folder => {
