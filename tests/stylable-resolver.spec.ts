@@ -1,8 +1,9 @@
-import {expect} from 'chai';
-import {resolve} from 'path';
-import {createMinimalFS, process, safeParse, StylableResolver} from '../src';
-import {cachedProcessFile, MinimalFS} from '../src/cached-process-file';
-import {StylableMeta} from '../src/stylable-processor';
+import { expect } from 'chai';
+import { resolve } from 'path';
+import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
+import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
+import { StylableMeta } from '../src/stylable-processor';
+import { generateInfra } from './utils/generate-test-util';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -11,7 +12,7 @@ function createResolveExtendsResults(
     isElement: boolean = false
 ) {
     const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(safeParse(content, {from: fullpath}));
+        return process(safeParse(content, { from: fullpath }));
     }, fs);
 
     const resolver = new StylableResolver(processFile, (module: string) => (module && ''));
@@ -20,7 +21,7 @@ function createResolveExtendsResults(
 
 describe('stylable-resolver', () => {
     it('should resolve extend classes', () => {
-        const {fs} = createMinimalFS({
+        const { fs } = createMinimalFS({
             files: {
                 '/button.st.css': {
                     content: `
@@ -53,7 +54,7 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve extend elements', () => {
-        const {fs} = createMinimalFS({
+        const { fs } = createMinimalFS({
             files: {
                 '/button.st.css': {
                     content: `
@@ -85,7 +86,7 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve extend classes on broken css', () => {
-        const {fs} = createMinimalFS({
+        const { fs } = createMinimalFS({
             files: {
                 '/button.st.css': {
                     content: `
@@ -97,4 +98,81 @@ describe('stylable-resolver', () => {
         const results = createResolveExtendsResults(fs, resolve('/button.st.css'), 'gaga');
         expect(results).to.eql([]);
     });
+
+    it('should resolve elements', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./button.st.css";
+                            -st-default: Button;
+                            -st-named: ButtonX;
+                        }
+                        Button {}
+                        ButtonX {}
+                    `
+                },
+                '/button.st.css': {
+                    content: `
+                        .root{}
+                        .label{}
+                        ButtonX{}
+                    `
+                }
+            }
+        });
+
+        const btnMeta = fileProcessor.process('/button.st.css');
+        const entryMeta = fileProcessor.process('/entry.st.css');
+        const btn = entryMeta.elements.Button;
+        const res = resolver.resolve(btn);
+
+        const btn1 = entryMeta.elements.ButtonX;
+        const res1 = resolver.resolve(btn1);
+
+        expect(res!.symbol).to.eql(btnMeta.classes.root);
+        expect(res1!.symbol).to.eql(btnMeta.elements.ButtonX);
+    });
+
+    it('should resolve elements deep', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./button.st.css";
+                            -st-named: ButtonX;
+                        }
+                        ButtonX {}
+                    `
+                },
+                '/button.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./button-x.st.css";
+                            -st-default: ButtonX;
+                        }
+                        ButtonX{}
+                    `
+                },
+                '/button-x.st.css': {
+                    content: `
+                        .x-label{}
+                    `
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+        const btnXMeta = fileProcessor.process('/button-x.st.css');
+
+        const btn1 = entryMeta.elements.ButtonX;
+        const res1 = resolver.deepResolve(btn1);
+
+        expect(res1!.symbol).to.eql(btnXMeta.classes.root);
+    });
+
 });

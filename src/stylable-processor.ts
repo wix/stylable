@@ -214,7 +214,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.elements[name] = { _kind: 'element', name, alias };
+            this.meta.elements[name] = this.meta.mappedSymbols[name] = { _kind: 'element', name, alias };
         }
     }
 
@@ -302,7 +302,11 @@ export class StylableProcessor {
                 const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
                 if (
                     extendsRefSymbol &&
-                    (extendsRefSymbol._kind === 'import' || extendsRefSymbol._kind === 'class') ||
+                    (
+                        extendsRefSymbol._kind === 'import' ||
+                        extendsRefSymbol._kind === 'class' ||
+                        extendsRefSymbol._kind === 'element'
+                    ) ||
                     decl.value === this.meta.root
                 ) {
                     this.extendTypedRule(
@@ -475,7 +479,7 @@ export interface StylableDirectives {
     '-st-root'?: boolean;
     '-st-compose'?: Array<ImportSymbol | ClassSymbol>;
     '-st-states'?: any;
-    '-st-extends'?: ImportSymbol | ClassSymbol;
+    '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-theme'?: boolean;
     '-st-global'?: SelectorAstNode[];
 }

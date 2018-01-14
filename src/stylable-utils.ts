@@ -224,7 +224,9 @@ export function removeUnusedRules(
                 }
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    const extend = symbol[valueMapping.extends];
+                    let extend = symbol[valueMapping.extends];
+                    extend = extend && extend._kind !== 'import' ? (extend.alias || extend) : extend;
+
                     if (extend && extend._kind === 'import' &&
                         usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
                         return shouldOutput = false;

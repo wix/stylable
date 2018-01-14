@@ -545,7 +545,7 @@ export class StylableTransformer {
             scopedName = this.exportClass(meta, name, symbol, metaExports);
         }
 
-        const next = this.resolver.resolve(extend);
+        const next = this.resolver.deepResolve(extend);
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
             node.before = globalScopedSelector || '.' + scopedName;
             const mappedClassNodes = next.symbol[valueMapping.global];

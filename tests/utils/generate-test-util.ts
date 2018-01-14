@@ -33,7 +33,7 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
-export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()): {
     resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
 } {
     const { fs, requireModule } = createMinimalFS(config);
