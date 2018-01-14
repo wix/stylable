@@ -16,6 +16,7 @@ import {
     expectWarningsFromTransform,
     findTestLocations
 } from './utils/diagnostics';
+const path = require('path');
 
 const customButton = `
     .root{
@@ -375,8 +376,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                const xPath = 'y from /main.css --> x from /main.css';
-                const yPath = 'x from /main.css --> y from /main.css';
+                const mainPath = path.resolve('/main.css');
+                const xPath = `y from ${mainPath} --> x from ${mainPath}`;
+                const yPath = `x from ${mainPath} --> y from ${mainPath}`;
                 expectWarningsFromTransform(config, [
                     { message: `circular mixin found: ${xPath}`, file: '/main.css', skipLocationCheck: true },
                     { message: `circular mixin found: ${yPath}`, file: '/main.css', skipLocationCheck: true }
@@ -487,7 +489,10 @@ describe('diagnostics: warnings and errors', () => {
                         -st-variant:|red|;
                     }
                 `,
-                    [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
+                    [{
+                        message: '-st-variant can only be true or false, the value "red" is illegal',
+                        file: 'main.css'
+                    }]);
             });
         });
 
@@ -1118,9 +1123,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-
+                const mainPath = path.resolve('/main.st.css');
                 expectWarningsFromTransform(config,
-                    [{ message: 'Cyclic value definition detected: "→ /main.st.css: a\n↪ /main.st.css: b\n↪ /main.st.css: c\n↻ /main.st.css: a"', file: '/main.st.css' }]); // tslint:disable-line:max-line-length
+                    [{ message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, file: '/main.st.css' }]); // tslint:disable-line:max-line-length
             });
         });
 
