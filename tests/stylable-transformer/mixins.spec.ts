@@ -969,6 +969,32 @@ describe('Mixins', () => {
 
             });
 
+            it('apply mixin with :vars override with space in value', () => {
+
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :vars {
+                                    border1: red;
+                                }
+
+                                .x {
+                                    -st-mixin: y(border1 1px solid red);
+                                }
+
+                                .y {border:value(border1);}
+
+                            `
+                        }
+                    }
+                });
+
+                matchRuleAndDeclaration(result, 0, '.entry--x', 'border:1px solid red');
+
+            });
             it('apply mixin with :vars override', () => {
 
                 const result = generateStylableRoot({

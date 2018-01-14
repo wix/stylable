@@ -138,25 +138,25 @@ export const SBTypesParsers = {
         return namedMap;
     },
     '-st-mixin'(
-        mixinNode: postcss.Declaration, strategy: (type: string) => 'named' | 'args', diagnostics: Diagnostics) {
+        mixinNode: postcss.Declaration, strategy: (type: string) => 'named' | 'args', diagnostics?: Diagnostics) {
         const ast = valueParser(mixinNode.value);
         const mixins: Array<{ type: string, options: Array<{ value: string }> | Pojo<string> }> = [];
 
         ast.nodes.forEach((node: any) => {
             // const symbol = m[node.value];
             // if (symbol.)
-
+            const strat = strategy(node.value);
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: strategies[strategy(node.value)](node)
+                    options: strategies[strat](node)
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: []
+                    options: strat === 'named' ? {} : []
                 });
-            } else if (node.type === 'string') {
+            } else if (node.type === 'string' && diagnostics) {
                 diagnostics.error(
                     mixinNode,
                     `value can not be a string (remove quotes?)`,
@@ -196,7 +196,7 @@ function getNamedArgs(node: any) {
             if (node.type === 'div') {
                 args.push([]);
             } else {
-                const {sourceIndex, ...clone} = node;
+                const { sourceIndex, ...clone } = node;
                 args[args.length - 1].push(clone);
             }
         });
@@ -229,8 +229,10 @@ const strategies = {
     named: (node: any) => {
         const named: Pojo<string> = {};
         getNamedArgs(node).forEach(_ => {
-            const g = groupValues(_, 'space');
-            named[g[0][0].value] = stringifyParam(g[1]);
+            if (_[1].type !== 'space') {
+                // TODO: maybe warn
+            }
+            named[_[0].value] = stringifyParam(_.slice(2));
         });
         return named;
     },
