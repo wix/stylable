@@ -1,7 +1,7 @@
 /* tslint:disable:max-line-length */
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { generateStylableRoot } from '../utils/generate-test-util';
+import { generateFromMock, generateStylableRoot } from '../utils/generate-test-util';
 
 function matchRuleAndDeclaration(
     parent: postcss.Container,
@@ -909,7 +909,7 @@ describe('Mixins', () => {
 
         });
 
-        it.skip('apply mixin from imported element', () => {
+        it('apply mixin from imported element', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -1107,6 +1107,150 @@ describe('Mixins', () => {
                 matchRuleAndDeclaration(result, 0, '.entry--x', 'border: 1px solid green;background: yellow');
 
             });
+
+        });
+
+        describe('Mixins with named parameters', () => {
+
+            it('apply mixin with :vars override (local scope)', () => {
+
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :vars {
+                                    color1: red;
+                                }
+
+                                .x {
+                                    -st-mixin: y(color1 green);
+                                }
+
+                                .y {color:value(color1);}
+
+                            `
+                        }
+                    }
+                });
+
+                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
+
+            });
+
+            it('apply mixin with :vars override with space in value', () => {
+
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :vars {
+                                    border1: red;
+                                }
+
+                                .x {
+                                    -st-mixin: y(border1 1px solid red);
+                                }
+
+                                .y {border:value(border1);}
+
+                            `
+                        }
+                    }
+                });
+
+                matchRuleAndDeclaration(result, 0, '.entry--x', 'border:1px solid red');
+
+            });
+            it('apply mixin with :vars override', () => {
+
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import {
+                                    -st-from: "./imported.st.css";
+                                    -st-named: y;
+                                }
+
+                                .x {
+                                    -st-mixin: y(color1 green);
+                                }
+                            `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'imported',
+                            content: `
+                            :vars {
+                                color1: red;
+                            }
+                            .y {color:value(color1);}
+                        `
+                        }
+                    }
+                });
+
+                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
+
+            });
+
+            it('apply mixin with :vars multiple override', () => {
+
+                const result = generateStylableRoot({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                .x {
+                                    -st-mixin: y(color1 green, color2 yellow);
+                                }
+
+                                .y {
+                                    color:value(color1);
+                                    background:value(color2);
+                                }
+                            `
+                        }
+                    }
+                });
+
+                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green;background:yellow');
+
+            });
+
+
+        });
+    });
+    describe('mixin diagnostics', () => {
+
+        it('should not report missing function on -st-mixin directive', () => {
+
+            const result = generateFromMock({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: y;
+                            }
+
+                            .x {
+                                -st-mixin: y(color1 green, color2 yellow);
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect(result.meta.transformDiagnostics!.reports.length).to.equal(0);
 
         });
     });
