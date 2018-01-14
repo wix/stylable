@@ -75,7 +75,7 @@ export function expectWarningsFromTransform(config: Config, warnings: Warning[])
     diagnostics.reports.forEach((report, i) => {
         const path = warnings[i].file;
         expect(report.message).to.equal(warnings[i].message);
-        if(!warnings[i].skipLocationCheck){
+        if (!warnings[i].skipLocationCheck) {
             expect(report.node.source.start).to.eql(locations[path].start);
         }
         if (locations[path].word !== null) {
