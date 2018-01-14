@@ -140,7 +140,7 @@ export class StylableResolver {
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 
-        const customSelector = meta.customSelectors[':--' + className];
+        const customSelector = isElement ? null : meta.customSelectors[':--' + className];
 
         if (!bucket[className] && !customSelector) {
             return [];

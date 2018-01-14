@@ -395,7 +395,7 @@ export class StylableTransformer {
             const selectorElements: ResolvedElement[] = [];
             traverseNode(selectorNode, node => {
                 const { name, type } = node;
-                if (calcPaths && type === 'class' || type === 'element' || type === 'pseudo-element') {
+                if (calcPaths && (type === 'class' || type === 'element' || type === 'pseudo-element')) {
                     selectorElements.push({
                         name,
                         type,
