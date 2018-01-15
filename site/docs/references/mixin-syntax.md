@@ -14,11 +14,35 @@ Here are some examples of when you can use mixins:
 - Effects - easily describe complex effects
 - Macros - use code to define the CSS macros you need
 
-Mixins can be applied using either CSS or JavaScript/TypeScript. 
+Mixins can be applied using either CSS or JavaScript/TypeScript. Mixins can recive parameters and those paramaters can be either CSS values or variables. 
+
 
 ## CSS mixins
 
-Any CSS class rule, including the root class, that is defined in a **Stylable** CSS file can be used as a mixin source. You can use either a local class, or import one from a different stylesheet.
+Any CSS class or element that is defined in a **Stylable** CSS file can be used as a mixin source; this includes the stylesheet's root. You can use either a local class or element, or import one from a different stylesheet.
+
+In the following example, a locally defined mixin is used in a local class.
+
+```css
+/* CSS */
+    .style-mixin {
+        color: green;
+        background: yellow;
+    }
+    .someClass {
+        -st-mixin: style-mixin; /* local class mixin */    
+    }  
+```
+```css
+/* CSS output */
+    ...
+    .someClass {
+        color: green;
+        background: yellow;
+    }  
+```
+
+In the following example the mixin from the mixin file written in **Stylable** CSS is imported into the stylesheet.
 
 ```css
 /* CSS mixin file - mixins.st.css */
@@ -32,7 +56,7 @@ Any CSS class rule, including the root class, that is defined in a **Stylable** 
 ```
 
 ``` css
-/* CSS file importing the above mixin - example.st.css */
+/* CSS file - example.st.css - imports the above mixin */
 :import {
     -st-from: './mixins.st.css';
     -st-default: MyComp;
@@ -48,19 +72,29 @@ Any CSS class rule, including the root class, that is defined in a **Stylable** 
 }
 ```
 
-```
-/* css output */
-/* TODO: FILL ME */
+```css
+/* CSS output */
+.rootMixedIn {
+    color: purple;
+}
 
+.rootMixedIn .someClass {
+    color: green;
+}
+
+.classMixedIn {
+    color: green;
+}
 ```
 
 ### CSS mixin with parameters and variables
 
-CSS mixins can accept parameters in the form of values and also named variables. Using variables in a mixin enables you to override specific variables inside of a mixin before they are applied. Anywhere within the scope of the class using the mxin, the named variable is replaced by the value that overrides it.
+CSS mixins can accept named parameters in the following format: `mixin(variableName valueOverride)`. Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
 
-Here is an example of using a variable in a CSS mixin:
+Here is an example of using a variable in a CSS mixin and how it can be overriden by the mixin's parameter value.
 
 ```css
+/* CSS */
 :vars {
     color1: green;
 }
@@ -74,46 +108,59 @@ Here is an example of using a variable in a CSS mixin:
 }
 ```
 
+```css
+/* CSS output */
+.classToMixin {
+    background: green;
+}
+
+.targetClass {
+    background: orange;
+}
 ```
-/* css output */
-/* TODO - FILL ME */
 
+## JavaScript mixins
+
+JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin and the mixin logic. 
+
+A JS mixin returns a CSS fragment which can be multiple rulesets or multiple declarations within a given ruleset. Whereas [formatters](./) return a single declaration value.
+
+Arguments are passed to the mixin as a string argument and it's the mixin's responsibility to parse them.
+
+```js
+/* file my-mixin.js */
+module.exports = function MyMixin(args){
+    return {
+        color: arguments[0]
+    }
+};
 ```
-
-
-
-
-## JavaScript/TypeScript mixins
-/*Need some explanation how these are different than CSS mixins and if any difference in how they are used. Does CSS not "allow you to create complex structures"?*/
-JavaScript/TypeScript mixins allow you to create complex structures in CSS according to the arguments you passed. 
-
-Any argument applied to a mixin is passed on to the mixin function as a string argument /* should we add:  whereas a CSS mixin...fill in*/.
 
 ``` css
 /* file example.st.css */
 :import {
     -st-from: './my-mixin';
-    -st-default: TSMixin;
+    -st-default: Mixin;
 }
 
 .codeMixedIn {
-    -st-mixin: TSMixin(42); /* JS/TS mixin */
+    -st-mixin: Mixin(green); /* JS mixin */
 }
 ```
-```
-/* css output */
-/* TODO - fill in */
+```css
+/* CSS output */
+.codeMixedIn {
+    color: green; 
+}
 ```
 
-### JS/TS mixins with parameters and variables
-
-You can pass **Stylable** variables as parameters to a mixin by calling the value function on the variable name.
+### JS mixins with parameters and variables
 
 ``` css
 /* file example.st.css */
 :import {
     -st-from: './my-mixin';
-    -st-default: TSMixin;
+    -st-default: Mixin;
 }
 
 :vars {
@@ -121,7 +168,7 @@ You can pass **Stylable** variables as parameters to a mixin by calling the valu
 }
 
 .codeMixedIn {
-    -st-mixin: TSMixin(value(mySize)); /* JS/TS mixin */
+    -st-mixin: Mixin(value(mySize)); /* JS mixin */
 }
 ```
 ```
@@ -129,76 +176,36 @@ You can pass **Stylable** variables as parameters to a mixin by calling the valu
 /* TODO - fill in */
 ```
 
-
-### JS/TS mixin usage with special characters
-You can also escape special characters by wrapping them with quotes or using a backslash (`\`). 
- /*any issue w/ CSS mixin and special characters?*/
-
-Example:
-```css
-.c { /* use quotations to include comma */
-    -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
-}
-.d { /* escape slashes */
-    -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
-}
-```
-```ts
-<!-- Needs a TS mixin example -->
-```
-
-### Mixin with parameters
-Mixins, both CSS and JS/TS, can accept parameters. However, the usage and meaning differs between the two, learn more about the difference below. If no params are passed to the mixin, the parentheses can be omitted. 
-
-### Circular references /*This should be a note. Add an example?*/
-Note: It is possible to reach a state where you have circular references between mixins. In such a state they cannot be resolved, and a diagnostics warning will be issued in your code intelligence.
-
-
+## Typescript mixins
+TODO
 
 ## How mixins are applied
+
 Mixins can add CSS declarations to the CSS ruleset to which they are applied.
 
 Rules are added at the position in the CSS where the `-st-mixin` is declared.
 Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 
-Multiple mixins are applied according to the order that they are specified /*applied?*/.
+You can apply multiple mixins in either CSS or JavaScript/TypeScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
+Multiple mixins are applied according to the order that they are declared left to right.
 
+## Considerations when using mixins
+
+
+### Mixin usage with special characters
+You can escape special characters by wrapping them with quotes or using a backslash (`\`). 
+
+Example:
 ```css
-/* CSS */
-.a {
-    color: red;
-    -st-mixin: golden;
-    background: white;
+.x { /* use quotations to include comma */
+    -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
-.a:hover {
-    background: white;
+.y { /* escape slashes */
+    -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
 }
 ```
 
-```css
-/* CSS output*/
-.a {
-    color: red;
-    color: gold; /* added by golden */
-    background: black; /* added by golden */
-    background: white;
-}
-.a:hover {
-    color: black; /* added by golden */
-    background: gold; /* added by golden */
-}
-.a:hover {
-    background: white;
-}
-```
+### Circular references 
+It is possible to reach a state where you have circular references between mixins. These cannot be resolved, and a diagnostics warning is issued in your **Stylable** code intelligence.
 
 
-## Apply a mixin
-You can apply multiple mixins in either CSS or JavaScript/TypeScript, or both.
-
-```css
-.c {
-    /* apply multiple mixins */
-    -st-mixin: someMixin, anotherMixin;
-}
-```
