@@ -108,7 +108,7 @@ So we created **Stylable** &mdash; a CSS preprocessor that allows you to write s
 
 ![Stylable Intelligence](./images/intelligence.gif)
 
-Treating CSS as a type system opens up a whole new world of tooling. We can get code completion that hints at the internal structure of components, we can get types for our parameters, and more. Our aim is to use Stylable to enhance to enhance the styling development process.
+Treating CSS as a type system opens up a whole new world of tooling. We can get code completion that hints at the internal structure of components, we can get types for our parameters, and more. Our aim is to use Stylable to enhance the styling development process.
 
 To get the full Stylable experience, please install our [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence) which suggests Stylable syntax, types and more.
 
