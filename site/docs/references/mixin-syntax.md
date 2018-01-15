@@ -14,7 +14,7 @@ Here are some examples of when you can use mixins:
 - Effects - easily describe complex effects
 - Macros - use code to define the CSS macros you need
 
-Mixins can be applied using either CSS or JavaScript/TypeScript. Mixins can recive parameters and those paramaters can be either CSS values or variables. 
+Mixins can be applied using either CSS or JavaScript. Mixins can recive parameters and those paramaters can be either CSS values or variables. 
 
 
 ## CSS mixins
@@ -42,7 +42,7 @@ In the following example, a locally defined mixin is used in a local class.
     }  
 ```
 
-In the following example the mixin from the mixin file written in **Stylable** CSS is imported into the stylesheet.
+Here is an example of a mixin file written in **Stylable** CSS that is imported into a stylesheet.
 
 ```css
 /* CSS mixin file - mixins.st.css */
@@ -89,7 +89,10 @@ In the following example the mixin from the mixin file written in **Stylable** C
 
 ### CSS mixin with parameters and variables
 
-CSS mixins can accept named parameters in the following format: `mixin(variableName valueOverride)`. Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
+CSS mixins can accept named parameters in the following format:
+ `mixin(variableName valueOverride)`. 
+ 
+ Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
 
 Here is an example of using a variable in a CSS mixin and how it can be overriden by the mixin's parameter value.
 
@@ -123,15 +126,20 @@ Here is an example of using a variable in a CSS mixin and how it can be override
 
 JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin and the mixin logic. 
 
-A JS mixin returns a CSS fragment which can be multiple rulesets or multiple declarations within a given ruleset. Whereas [formatters](./) return a single declaration value.
+A JS mixin returns a CSS fragment which can be multiple rulesets or multiple declarations within a given ruleset. **Stylable** [formatters](./) can return a single declaration value.
 
 Arguments are passed to the mixin as a string argument and it's the mixin's responsibility to parse them.
 
+Here is an example of a mixin receiving multiple arguments and returning multiple declarations into the ruleset into which it's being mixed in.
+
 ```js
 /* file my-mixin.js */
-module.exports = function MyMixin(args){
+module.exports = function colorAndBg([color, bgColor]){ 
+    /* arguments: array of string types */
+
     return {
-        color: arguments[0]
+        color: color,
+        background: bgColor
     }
 };
 ```
@@ -140,44 +148,75 @@ module.exports = function MyMixin(args){
 /* file example.st.css */
 :import {
     -st-from: './my-mixin';
-    -st-default: Mixin;
+    -st-default: colorAndBg;
 }
 
 .codeMixedIn {
-    -st-mixin: Mixin(green); /* JS mixin */
+    -st-mixin: colorAndBg(green, orange); 
+    font-family: monospace;
 }
 ```
 ```css
 /* CSS output */
 .codeMixedIn {
     color: green; 
+    background: orange;
+    font-family: monospace;
 }
 ```
 
-### JS mixins with parameters and variables
+### JavaScript mixins returning multiple rulesets
+
+Mixins can return multiple rulesets by returning selectors that are mixed in to the target stylesheet. These selectors can appear with the following syntax options:
+* `&selector` - resulting selector is appended to the selector it was mixed into (in below example `&:hover`)
+* `selector` - resulting selector is appended as a descendent selector to its mixed in target (in below example `.otherClass`) 
+
+```js
+/* file my-mixin.js */
+module.exports = function complexMixin([color, bgColor]){ 
+    /* arguments: array of string types */
+
+    return {
+        color: color,
+        background: bgColor,
+        "&:hover": {
+            color: "gold"
+        },
+        ".otherClass": {
+            color: "purple"
+        }
+    }
+};
+```
 
 ``` css
 /* file example.st.css */
 :import {
     -st-from: './my-mixin';
-    -st-default: Mixin;
-}
-
-:vars {
-    mySize: 42;
+    -st-default: complexMixin;
 }
 
 .codeMixedIn {
-    -st-mixin: Mixin(value(mySize)); /* JS mixin */
+    -st-mixin: complexMixin(green, orange); 
+    font-family: monospace;
 }
 ```
-```
-/* css output */
-/* TODO - fill in */
-```
+```css
+/* CSS output */
+.codeMixedIn {
+    color: green; 
+    background: orange;
+    font-family: monospace;
+}
 
-## Typescript mixins
-TODO
+.codeMixedIn:hover {
+    color: gold; 
+}
+
+.codeMixedIn .otherClass {
+    color: purple; 
+}
+```
 
 ## How mixins are applied
 
@@ -186,7 +225,7 @@ Mixins can add CSS declarations to the CSS ruleset to which they are applied.
 Rules are added at the position in the CSS where the `-st-mixin` is declared.
 Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 
-You can apply multiple mixins in either CSS or JavaScript/TypeScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
+You can apply multiple mixins in either CSS or JavaScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
 Multiple mixins are applied according to the order that they are declared left to right.
 
 ## Considerations when using mixins
