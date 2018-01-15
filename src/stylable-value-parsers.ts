@@ -1,11 +1,14 @@
 import * as postcss from 'postcss';
-import {Diagnostics} from './diagnostics';
-import {parseSelector} from './selector-utils';
+import { Diagnostics } from './diagnostics';
+import { processPseudoStates } from './pseudo-states';
+import { parseSelector } from './selector-utils';
+import { SRule } from './stylable-processor';
+import { Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
 export interface MappedStates {
-    [s: string]: string | null;
+    [s: string]: StateParsedValue | string | null;
 }
 
 // TODO: remove
@@ -18,7 +21,16 @@ export interface TypedClass {
 
 export interface MixinValue {
     type: string;
-    options: Array<{value: string}>;
+    options: Array<{ value: string }> | Pojo<string>;
+}
+
+export interface ArgValue {
+    type: string;
+    value: string;
+}
+export interface ExtendsValue {
+    symbolName: string;
+    args: ArgValue[][] | null;
 }
 
 export const valueMapping = {
@@ -57,37 +69,46 @@ export const SBTypesParsers = {
         const selector: any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
         return selector.nodes[0].nodes;
     },
-    '-st-states'(value: string, _diagnostics: Diagnostics) {
+    '-st-states'(value: string, rule: SRule, _diagnostics: Diagnostics) {
         if (!value) {
             return {};
         }
 
-        const ast = valueParser(value);
         const mappedStates: MappedStates = {};
-
-        ast.nodes.forEach((node: any) => {
-
-            if (node.type === 'function') {
-                if (node.nodes.length === 1) {
-                    mappedStates[node.value] = node.nodes[0].value.trim().replace(/\\["']/g, '"');
-                } else {
-                    // TODO: error
-                }
-
-            } else if (node.type === 'word') {
-                mappedStates[node.value] = null;
-            } else if (node.type === 'string') {
-                // TODO: error
-            }
-        });
-
-        return mappedStates;
+        return processPseudoStates(value, rule, _diagnostics);
     },
     '-st-extends'(value: string) {
-        return value ? value.trim() : '';
+        const ast = valueParser(value);
+        const types: ExtendsValue[] = [];
+
+        ast.walk((node: any) => {
+
+            if (node.type === 'function') {
+                const args = getNamedArgs(node);
+
+                types.push({
+                    symbolName: node.value,
+                    args
+                });
+
+                return false;
+
+            } else if (node.type === 'word') {
+                types.push({
+                    symbolName: node.value,
+                    args: null
+                });
+            }
+            return undefined;
+        }, false);
+
+        return {
+            ast,
+            types
+        };
     },
     '-st-named'(value: string) {
-        const namedMap: {[key: string]: string} = {};
+        const namedMap: { [key: string]: string } = {};
         if (value) {
             value.split(',').forEach(name => {
                 const parts = name.trim().split(/\s+as\s+/);
@@ -100,23 +121,31 @@ export const SBTypesParsers = {
         }
         return namedMap;
     },
-    '-st-mixin'(mixinNode: postcss.Declaration, diagnostics: Diagnostics) {
+    '-st-mixin'(
+        mixinNode: postcss.Declaration, strategy: (type: string) => 'named' | 'args', diagnostics?: Diagnostics) {
         const ast = valueParser(mixinNode.value);
-        const mixins: Array<{type: string, options: Array<{value: string}>}> = [];
-        ast.nodes.forEach((node: any) => {
+        const mixins: Array<{ type: string, options: Array<{ value: string }> | Pojo<string> }> = [];
 
+        ast.nodes.forEach((node: any) => {
+            // const symbol = m[node.value];
+            // if (symbol.)
+            const strat = strategy(node.value);
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: createOptions(node)
+                    options: strategies[strat](node)
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: []
+                    options: strat === 'named' ? {} : []
                 });
-            } else if (node.type === 'string') {
-                diagnostics.error(mixinNode, `value can not be a string (remove quotes?)`, {word: mixinNode.value});
+            } else if (node.type === 'string' && diagnostics) {
+                diagnostics.error(
+                    mixinNode,
+                    `value can not be a string (remove quotes?)`,
+                    { word: mixinNode.value }
+                );
             }
         });
 
@@ -132,19 +161,39 @@ export const SBTypesParsers = {
             } else if (node.type === 'word') {
                 composes.push(node.value);
             } else if (node.type === 'string') {
-                diagnostics.error(composeNode, `value can not be a string (remove quotes?)`, {word: composeNode.value});
+                diagnostics.error(
+                    composeNode,
+                    `value can not be a string (remove quotes?)`,
+                    { word: composeNode.value }
+                );
             }
         });
         return composes;
     }
 };
 
-function groupValues(node: any) {
+function getNamedArgs(node: any) {
+    const args: ArgValue[][] = [];
+    if (node.nodes.length) {
+        args.push([]);
+        node.nodes.forEach((node: any) => {
+            if (node.type === 'div') {
+                args.push([]);
+            } else {
+                const { sourceIndex, ...clone } = node;
+                args[args.length - 1].push(clone);
+            }
+        });
+    }
+    return args;
+}
+
+export function groupValues(nodes: any[], divType = 'div') {
     const grouped: any[] = [];
     let current: any[] = [];
 
-    node.nodes.forEach((n: any) => {
-        if (n.type === 'div') {
+    nodes.forEach((n: any) => {
+        if (n.type === divType) {
             grouped.push(current);
             current = [];
         } else {
@@ -160,8 +209,32 @@ function groupValues(node: any) {
     return grouped;
 }
 
-function createOptions(node: any) {
-    return groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
+const strategies = {
+    named: (node: any) => {
+        const named: Pojo<string> = {};
+        getNamedArgs(node).forEach(_ => {
+            if (_[1].type !== 'space') {
+                // TODO: maybe warn
+            }
+            named[_[0].value] = stringifyParam(_.slice(2));
+        });
+        return named;
+    },
+    args: (node: any) => {
+        return groupValues(node.nodes, 'div').map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
+            if (n.type === 'div') {
+                return null;
+            } else if (n.type === 'string') {
+                return n.value;
+            } else {
+                return undefined;
+            }
+        })).filter((x: string) => typeof x === 'string').map(value => ({ value }));
+    }
+};
+
+function stringifyParam(nodes: any) {
+    return valueParser.stringify(nodes, (n: any) => {
         if (n.type === 'div') {
             return null;
         } else if (n.type === 'string') {
@@ -169,5 +242,17 @@ function createOptions(node: any) {
         } else {
             return undefined;
         }
-    })).filter((x: string) => typeof x === 'string').map(value => ({value}));
+    });
+}
+
+export function listOptions(node: any) {
+    return groupValues(node.nodes).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
+        if (n.type === 'div') {
+            return null;
+        } else if (n.type === 'string') {
+            return n.value;
+        } else {
+            return undefined;
+        }
+    })).filter((x: string) => typeof x === 'string');
 }

@@ -38,3 +38,4 @@ Syntax unique to Stylable - Click each to access code examples and descriptions
     * [**`-st-theme`**](../references/theme.md) Use stylesheet import as theme of stylesheet
 * [**`@namespace "readable name";`**](../references/namespace.md) Development display name for debugging
 * [**`:vars{}`**](../references/variables.md) Define common values to be used across the stylesheet or project
+* [**formatters**](../references/formatters.md) Custom TypeScript/JavaScript functions for generating declaration values

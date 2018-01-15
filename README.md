@@ -38,6 +38,9 @@ For details on both options, see [Install & Configure](https://stylable.io/docs/
 
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
+## Updating Documentation
+To update the documentation on [Stylable.io](http://www.stylable.io), follow the instructions [here](./updating-docs.md).
+
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE.md).

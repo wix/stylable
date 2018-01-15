@@ -90,7 +90,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon');
+        expect(r.selector).to.equal('.comp--root > .comp--icon');
 
     });
 
@@ -141,7 +141,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root > .comp--icon.child--root .child--top');
+        expect(r.selector).to.equal('.comp--root > .comp--icon.child--root .child--top');
 
     });
 
@@ -173,7 +173,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .comp--root .comp--icon,.entry--root .comp--root .comp--class');
+        expect(r.selector).to.equal('.comp--root .comp--icon,.comp--root .comp--class');
 
     });
 
@@ -218,8 +218,54 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.entry--root .xxx .controls--root');
+        expect(r.selector).to.equal('.xxx .controls--root');
 
     });
 
+    it('expand custom-selector that uses element in the same name', () => {
+
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./interface.st.css";
+                            -st-default: Interface;
+                        }
+                        Interface::cc{
+                            color: blue;
+                        }
+                    `
+                },
+                '/interface.st.css': {
+                    namespace: 'interface',
+                    content: `
+                        :import{
+                            -st-from: "./controls.st.css";
+                            -st-default: Controls;
+                        }
+
+                        @custom-selector :--cc .root Controls::cc;
+
+                        .root {
+                            -st-extends: Controls
+                        }
+
+                    `
+                },
+                '/controls.st.css': {
+                    namespace: 'controls',
+                    content: `
+                        @custom-selector :--cc .root cc;
+                    `
+                }
+            }
+        });
+
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.interface--root .controls--root cc');
+
+    });
 });

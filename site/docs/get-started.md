@@ -19,7 +19,7 @@ At build time, the preprocessor converts the **Stylable** CSS into flat, static,
 
 There are currently two options for installing and working with **Stylable**:
 
-* To begin writing your own project, you can create a **Stylable** app from our boilerplate  - follow the instructions [here](./getting-started/install-configure.md). 
+* To begin writing your own project, you can [create a **Stylable** app](./getting-started/install-configure.md) from our boilerplate. 
 
 * To work with an existing project, you can install [stylable](https://github.com/wix/stylable) and the [stylable-integration](https://github.com/wix/stylable-integration) packages from GitHub. 
 

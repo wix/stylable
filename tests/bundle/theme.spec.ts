@@ -9,6 +9,7 @@ describe('bundle: theme', () => {
 
         it('should be above used file that import it as theme', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -42,6 +43,7 @@ describe('bundle: theme', () => {
 
         it('should be once for multiple theme imports', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -88,6 +90,7 @@ describe('bundle: theme', () => {
 
         it('should be above file importing it with no theme flag', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -146,6 +149,7 @@ describe('bundle: theme', () => {
 
         it('should add override classes scoped to overriding file', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -187,6 +191,7 @@ describe('bundle: theme', () => {
 
         it('should add only effected CSS', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -227,6 +232,7 @@ describe('bundle: theme', () => {
 
         it('should position override CSS after original CSS', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -277,6 +283,7 @@ describe('bundle: theme', () => {
 
         it('should effect nested themes (override all the way to var source)', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -329,6 +336,7 @@ describe('bundle: theme', () => {
 
         it('should override import as vars', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -381,6 +389,7 @@ describe('bundle: theme', () => {
 
         it('should override value(var)', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -421,6 +430,7 @@ describe('bundle: theme', () => {
              * just because there is an override. need to see that normal imported vars are resolved correctly.
              */
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -466,6 +476,7 @@ describe('bundle: theme', () => {
 
         it('should add override CSS to none theme stylesheets using the overridden vars', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -521,6 +532,7 @@ describe('bundle: theme', () => {
 
         it('should add override CSS overridden in a nested theme', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -583,6 +595,7 @@ describe('bundle: theme', () => {
 
         it('should add override to CSS effected from the override itself', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -623,6 +636,7 @@ describe('bundle: theme', () => {
 
         it('should add override multiple theme using sheets', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/a.st.css',
@@ -679,6 +693,7 @@ describe('bundle: theme', () => {
 
         it('should add override entry to global classes (naive)', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'
@@ -714,6 +729,7 @@ describe('bundle: theme', () => {
 
         it('should output entry point override before sub entry override', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css',
@@ -771,6 +787,7 @@ describe('bundle: theme', () => {
 
         it('should not remove ruleset imported from theme', () => {
             const cssOutput = generateStylableOutput({
+                scopeRoot: true,
                 entry: '/entry.st.css',
                 usedFiles: [
                     '/entry.st.css'

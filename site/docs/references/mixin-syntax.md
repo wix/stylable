@@ -4,13 +4,15 @@ title: Mixins
 layout: docs
 ---
 
-You can use **Stylable** to apply complex styles and behaviors to a CSS rule set. Mixins enable you to define patterns of properties, which can then be reused in other rule sets. 
+**Stylable** mixins allow you to reuse complex styles and CSS behaviors, and apply them to any ruleset. 
 
-Here are some use cases where you can use mixins with other **Stylable** features:
-* Layouts - easily describe complex layouts.
-* Helpers - use custom CSS shortcuts, like timers, effects and macros.
+Some use cases where you can use mixins:
+* Presets/Variants - create reusable pieces of styling CSS
+* Layouts - easily describe complex layouts
+* Effects - easily describe complex effects
+* Macros - use JS to define the CSS macros you need
 
-## Example
+## Example usage
 
 The value `textTooltip` of the external file `my-mixins` is imported. The class selector `.submitButton` uses the mixin syntax and applies parameters. In this case, to wait `300` milliseconds to display the `dataTooltip` hover text on the button. 
 
@@ -25,38 +27,56 @@ The value `textTooltip` of the external file `my-mixins` is imported. The class 
 }
 ```
 
-## Syntax
+## Defining mixins in CSS
 
-You can use mixins with parameters, without parameters, and with multiple mixins.
+Every CSS class defined in a **stylable** CSS file can be used as a mixin.
+
+``` css
+
+/* file a.st.css */
+.a{
+    color:red;
+}
+
+/* file b.st.css */
+:import{
+    -st-from:'./a.st.css';
+    -st-named:a;
+}
+.b{
+    -st-mixin:a;
+}
+```
+
+``` css
+/* CSS output */
+.b{
+    color:red;
+}
+```
+
+## Defining mixins in JavaScript or TypeScript
+
+You can easily create new mixins using JavaScript or TypeScript.
+
+## Applying multiple mixins
+
+You can apply multiple mixins in the same line.
 
 
 ```css
 /* CSS */
-.a {
-    /* no parameters */
-    -st-mixin: noParams;
-}
-.b {
-    /* multiple parameters */
-    -st-mixin: multiParams(param1, param2);
-}
 .c {
     /* apply multiple mixins */
     -st-mixin: noParams, multiParams(param1, param2);
 }
+
 ```
 
-Any parameter you add to the mixin is considered a string.
-
+## Usage with special characters
 
 ```css
 /* CSS */
-.a {
-    -st-mixin: mix(300, xxx); /* ["300", "xxx"] */
-}
-.b {
-    -st-mixin: mix(300, "xxx"); /* ["300", "xxx"] */
-}
 .c { /* use quotations to include comma */
     -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
@@ -67,10 +87,10 @@ Any parameter you add to the mixin is considered a string.
 
 ## How mixins are applied
 
-Mixins can add CSS declarations to the CSS rule set to which they are applied:
+Mixins can add CSS declarations to the CSS ruleset to which they are applied:
 
 * Rules are added at the position in the CSS where the `-st-mixin` is declared.
-* Any selectors that are appended as a result of the mixin are added directly after the rule set that the mixin was applied to.
+* Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 * Multiple mixins are applied according to the order that they are specified.
 
 

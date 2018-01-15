@@ -4,10 +4,11 @@ import { Bundler } from '../../src/bundle';
 import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
 import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
-import { StylableResolver } from '../../src/postcss-resolver';
 import { Stylable } from '../../src/stylable';
 import { process, StylableMeta } from '../../src/stylable-processor';
-import { StylableResults, StylableTransformer } from '../../src/stylable-transformer';
+import { StylableResolver } from '../../src/stylable-resolver';
+import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
+
 import { Pojo } from '../../src/types';
 
 export interface File {
@@ -23,6 +24,7 @@ export interface InfraConfig {
 
 export interface Config {
     entry?: string;
+    scopeRoot?: boolean;
     files: Pojo<File>;
     usedFiles?: string[];
     trimWS?: boolean;
@@ -31,7 +33,7 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
-export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()): {
     resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
 } {
     const { fs, requireModule } = createMinimalFS(config);
@@ -47,7 +49,10 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
     return { resolver, requireModule, fileProcessor };
 }
 
-export function createTransformer(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableTransformer {
+export function createTransformer(
+    config: Config,
+    diagnostics: Diagnostics = new Diagnostics(),
+    replaceValueHook?: replaceValueHook, postProcessor?: postProcessor): StylableTransformer {
 
     const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
 
@@ -56,8 +61,28 @@ export function createTransformer(config: Config, diagnostics: Diagnostics = new
         requireModule,
         diagnostics,
         keepValues: false,
-        optimize: config.optimize
+        optimize: config.optimize,
+        replaceValueHook,
+        postProcessor,
+        scopeRoot: !!config.scopeRoot
     });
+}
+
+// let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
+//     return processSource(content, { from: path });
+// },
+//     {
+//         readFileSync() {
+//             return '';
+//         },
+//         statSync() {
+//             return { mtime: new Date() };
+//         }
+//     }
+// );
+
+export function processSource(source: string, options: postcss.ProcessOptions = {}) {
+    return process(postcss.parse(source, options));
 }
 
 export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
@@ -77,6 +102,7 @@ export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path
     return (path: string) => fileProcessor.process(path);
 }
 
+/* LEGACY */
 export function createTransform(
     fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
     return (meta: StylableMeta) => {
@@ -84,9 +110,14 @@ export function createTransform(
             fileProcessor,
             requireModule,
             diagnostics: new Diagnostics(),
-            keepValues: false
+            keepValues: false,
+            scopeRoot: false
         }).transform(meta).meta;
     };
+}
+
+export function generateStylableResult(config: Config) {
+    return generateFromMock(config);
 }
 
 export function generateStylableRoot(config: Config) {
@@ -108,7 +139,7 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    });
+    }, undefined, undefined, !!config.scopeRoot);
 
     return new Bundler(stylable);
 }
