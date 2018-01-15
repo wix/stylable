@@ -1,1 +1,1 @@
-export * from './dist/tests/utils/generate-test-util';
+export * from './dist/tests/utils/test-utils';

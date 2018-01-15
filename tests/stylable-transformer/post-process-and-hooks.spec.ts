@@ -71,6 +71,8 @@ describe('post-process-and-hooks', () => {
                     content: `
                         .container {
                         }
+                        & .container {
+                        }
                         `
                 }
             }
@@ -78,8 +80,10 @@ describe('post-process-and-hooks', () => {
 
         const res = t.transform(t.fileProcessor.process('/entry.st.css'));
         const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
-
         expect(rule.selector).to.equal('.entry--root .entry--container');
+
+        const rule1 = res.meta.outputAst!.nodes![1] as postcss.Rule;
+        expect(rule1.selector).to.equal('& .entry--container');
     });
 
     it('should enable/disable root scoping by flag (disable)', () => {

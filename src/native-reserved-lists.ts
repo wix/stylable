@@ -1,5 +1,5 @@
 // MDN reference: https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
-export const nativePseudoElements = [
+export const nativePseudoClasses = [
     'active',
     'any',
     'any-link',
@@ -43,7 +43,7 @@ export const nativePseudoElements = [
     'visited'
 ];
 
-export const nativePseudoClasses = [
+export const nativePseudoElements = [
     'after',
     'before',
     'cue',
@@ -55,6 +55,37 @@ export const nativePseudoClasses = [
     'marker',
     'spelling-error',
     'grammar-error'
+];
+
+export const reservedKeyFrames = [
+    'none',
+    'inherited',
+    'initial',
+    'unset',
+    /* single-timing-function */
+    'linear',
+    'ease',
+    'ease-in',
+    'ease-in-out',
+    'ease-out',
+    'step-start',
+    'step-end',
+    'start',
+    'end',
+    /* single-animation-iteration-count */
+    'infinite',
+    /* single-animation-direction */
+    'normal',
+    'reverse',
+    'alternate',
+    'alternate-reverse',
+    /* single-animation-fill-mode */
+    'forwards',
+    'backwards',
+    'both',
+    /* single-animation-play-state */
+    'running',
+    'paused'
 ];
 
 export const nativeFunctionsDic = {
