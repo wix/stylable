@@ -1,6 +1,7 @@
 import { expect } from 'chai';
+import * as path from 'path';
 import * as postcss from 'postcss';
-import { nativeFunctionsDic } from '../src/native-types';
+import { nativeFunctionsDic } from '../src/native-reserved-lists';
 import { expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableRoot } from './utils/generate-test-util';
 
@@ -683,9 +684,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-
+                const mainPath = path.resolve('/main.st.css');
                 expectWarningsFromTransform(config,
-                    [{ message: 'Cyclic value definition detected: "→ /main.st.css: a\n↪ /main.st.css: b\n↪ /main.st.css: c\n↻ /main.st.css: a"', file: '/main.st.css' }]); // tslint:disable-line:max-line-length
+                    [{ message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, file: '/main.st.css' }]); // tslint:disable-line:max-line-length
             });
         });
 
@@ -739,8 +740,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
 
                 expectWarningsFromTransform(config,
-                    [{ message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
-                        file: '/main.st.css' }]);
+                    [{
+                        message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
+                        file: '/main.st.css'
+                    }]);
             });
         });
 

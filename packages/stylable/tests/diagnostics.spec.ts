@@ -1,14 +1,22 @@
-import {expect} from 'chai';
-import {resolve} from 'path';
-import {Diagnostics} from '../src';
-import {nativeFunctionsDic, nativePseudoClasses, nativePseudoElements} from '../src/native-types';
-import {reservedKeyFrames} from '../src/stylable-utils';
+import { expect } from 'chai';
+import { resolve } from 'path';
+import { Diagnostics } from '../src';
+import {
+    nativeFunctionsDic,
+    nativePseudoClasses,
+    nativePseudoElements,
+    reservedKeyFrames
+} from '../src/native-reserved-lists';
+import { safeParse } from '../src/parser';
+import { process } from '../src/stylable-processor';
+import { Config, generateFromMock } from './utils/generate-test-util';
+const deindent = require('deindent');
 import {
     expectWarnings,
     expectWarningsFromTransform,
     findTestLocations
 } from './utils/diagnostics';
-import {Config, generateFromMock} from './utils/generate-test-util';
+const path = require('path');
 
 const customButton = `
     .root{
@@ -192,7 +200,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{message: 'unknown pseudo element "myBtn"', file: '/main.css'}]
+                        [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]
                     );
                 });
                 nativePseudoElements.forEach(nativeElement => {
@@ -228,7 +236,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{message: 'unknown pseudo class "superSelected"', file: '/main.css'}]
+                        [{ message: 'unknown pseudo class "superSelected"', file: '/main.css' }]
                     );
                 });
 
@@ -351,6 +359,32 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: 'import mixin does not exist', file: '/main.css' }]);
             });
+
+            it('should add error on circular mixins', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            .x {
+                                -st-mixin: y;
+                            }
+                            .y {
+                                -st-mixin: x;
+                            }
+                            `
+                        }
+                    }
+                };
+                const mainPath = path.resolve('/main.css');
+                const xPath = `y from ${mainPath} --> x from ${mainPath}`;
+                const yPath = `x from ${mainPath} --> y from ${mainPath}`;
+                expectWarningsFromTransform(config, [
+                    { message: `circular mixin found: ${xPath}`, file: '/main.css', skipLocationCheck: true },
+                    { message: `circular mixin found: ${yPath}`, file: '/main.css', skipLocationCheck: true }
+                ]);
+            });
+
             it('should add diagnostics when there is a bug in mixin', () => {
                 const config = {
                     entry: '/main.css',
@@ -403,67 +437,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }]);
             });
-            it('should add diagnostics when declartion is invalid', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: "./imported.js";
-                                -st-default: myMixin;
-                            }
-                            .container {
-                                |-st-mixin: $myMixin$|;
-                            }
-                            `
-                        },
-                        '/imported.js': {
-                            content: `
-                                module.exports = function(){
-                                    return {
-                                        color: true
-                                    }
-                                }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: 'not a valid mixin declaration myMixin', file: '/main.css' }]);
-            });
 
-            it('should add diagnostics when declartion is invalid (rule)', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                -st-from: "./imported.js";
-                                -st-default: myMixin;
-                            }
-                            .container {
-                                |-st-mixin: $myMixin$|;
-                            }
-                            `
-                        },
-                        '/imported.js': {
-                            content: `
-                                module.exports = function(){
-                                    return {
-                                        '.x':{
-                                            color:true
-                                        }
-                                    }
-                                }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: `not a valid mixin declaration 'color', and was removed`, file: '/main.css' }]);
-            });
             it('should not add warning when mixin value is a string', () => {
                 const config = {
                     entry: '/main.css',
@@ -515,7 +489,10 @@ describe('diagnostics: warnings and errors', () => {
                         -st-variant:|red|;
                     }
                 `,
-                [{ message: '-st-variant can only be true or false, the value "red" is illegal', file: 'main.css' }]);
+                    [{
+                        message: '-st-variant can only be true or false, the value "red" is illegal',
+                        file: 'main.css'
+                    }]);
             });
         });
 
@@ -829,30 +806,6 @@ describe('diagnostics: warnings and errors', () => {
         });
         describe('cross variance', () => {
 
-            it('stylesheet cannot be used as mixin', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import{
-                                -st-from:"./file.css";
-                                |-st-default:$Comp$|;
-                            }
-                            .root{
-                                -st-mixin:Comp;
-                            }
-                          `
-                        },
-                        '/file.css': {
-                            content: customButton
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: `'Comp' is a stylesheet and cannot be used as a mixin`, file: '/main.css' }]);
-            });
-
             xit('component variant cannot be used for native node', () => {
                 expectWarnings(`
                     :import{
@@ -895,24 +848,6 @@ describe('diagnostics: warnings and errors', () => {
                         file: 'main.css'
                     }]
                 );
-
-            });
-
-            xit('variant cannot be used with params', () => {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-                    .root{
-                        -st-extend:Comp;
-                        -st-mixin:|my-variant(param)|;
-                    }
-                `, [{
-                        message: 'invalid mixin arguments: "my-variant" is a variant and does not accept arguments',
-                        file: 'main.css'
-                    }]);
 
             });
 
@@ -1188,9 +1123,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-
+                const mainPath = path.resolve('/main.st.css');
                 expectWarningsFromTransform(config,
-                    [{ message: 'Cyclic value definition detected: "→ /main.st.css: a\n↪ /main.st.css: b\n↪ /main.st.css: c\n↻ /main.st.css: a"', file: '/main.st.css' }]); // tslint:disable-line:max-line-length
+                    [{ message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, file: '/main.st.css' }]); // tslint:disable-line:max-line-length
             });
         });
 
@@ -1243,8 +1178,10 @@ describe('diagnostics: warnings and errors', () => {
                 };
 
                 expectWarningsFromTransform(config,
-                    [{ message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
-                        file: '/main.st.css' }]);
+                    [{
+                        message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
+                        file: '/main.st.css'
+                    }]);
             });
         });
 
