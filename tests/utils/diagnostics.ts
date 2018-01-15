@@ -8,6 +8,7 @@ export interface Diagnostic {
     severity?: 'warn'|'error';
     message: string;
     file: string;
+    skipLocationCheck?: boolean;
 }
 
 export function findTestLocations(css: string) {
@@ -75,7 +76,9 @@ export function expectWarningsFromTransform(config: Config, warnings: Diagnostic
     diagnostics.reports.forEach((report, i) => {
         const path = warnings[i].file;
         expect(report.message).to.equal(warnings[i].message);
-        expect(report.node.source.start).to.eql(locations[path].start);
+        if (!warnings[i].skipLocationCheck) {
+            expect(report.node.source.start).to.eql(locations[path].start);
+        }
         if (locations[path].word !== null) {
             expect(report.options.word).to.eql(locations[path].word);
         }

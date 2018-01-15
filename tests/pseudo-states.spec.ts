@@ -2,7 +2,7 @@ import { expect, use } from 'chai';
 import chaiSubset = require('chai-subset');
 import * as postcss from 'postcss';
 import { valueMapping } from '../src/index';
-import { nativeFunctionsDic, nativePseudoClasses } from '../src/native-types';
+import { nativeFunctionsDic, nativePseudoClasses } from '../src/native-reserved-lists';
 import { mediaQuery, styleRules } from './matchers/results';
 import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
@@ -205,7 +205,7 @@ describe('pseudo-classes', () => {
 
         describe('native', () => {
 
-            nativePseudoClasses.forEach(nativeClass => {
+            nativePseudoClasses.forEach((nativeClass: string) => {
                 it(`should keep native ${nativeClass} pseudo-class`, () => {
                     const res = generateStylableResult({
                         entry: '/entry.css',
@@ -423,6 +423,7 @@ describe('pseudo-classes', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--my-class.inner--root[data-inner-my-state] {}'
                 });
@@ -629,7 +630,7 @@ describe('pseudo-classes', () => {
             `, [{ message: 'cannot define pseudo states inside complex selectors', file: 'main.css' }]);
         });
 
-        it('should warn when defining states in element selector', () => {
+        it('should warn when defining a state inside an element selector', () => {
             expectWarnings(`
                 MyElement {
                     |-st-states|:shmover;
@@ -653,8 +654,7 @@ describe('pseudo-classes', () => {
         // it('should check for type collision in states with the same name', () => {});
 
         // describe('native', () => {
-
-        // it('should warn when overriding native states', () => {});
+        //     it('should warn when overriding native states', () => {});
         // });
 
         // describe('boolean', () => {});

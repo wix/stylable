@@ -3,7 +3,7 @@ import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { SRule } from './stylable-processor';
-import { StateParsedValue } from './types';
+import { Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
@@ -21,7 +21,7 @@ export interface TypedClass {
 
 export interface MixinValue {
     type: string;
-    options: Array<{ value: string }>;
+    options: Array<{ value: string }> | Pojo<string>;
 }
 
 export interface ArgValue {
@@ -84,21 +84,7 @@ export const SBTypesParsers = {
         ast.walk((node: any) => {
 
             if (node.type === 'function') {
-                const args: ArgValue[][] = [];
-
-                if (node.nodes.length) {
-                    args.push([]);
-                    node.nodes.forEach((node: any) => {
-                        if (node.type === 'div') {
-                            args.push([]);
-                        } else {
-                            args[args.length - 1].push({
-                                type: node.type,
-                                value: node.value
-                            });
-                        }
-                    });
-                }
+                const args = getNamedArgs(node);
 
                 types.push({
                     symbolName: node.value,
@@ -135,23 +121,31 @@ export const SBTypesParsers = {
         }
         return namedMap;
     },
-    '-st-mixin'(mixinNode: postcss.Declaration, diagnostics: Diagnostics) {
+    '-st-mixin'(
+        mixinNode: postcss.Declaration, strategy: (type: string) => 'named' | 'args', diagnostics?: Diagnostics) {
         const ast = valueParser(mixinNode.value);
-        const mixins: Array<{ type: string, options: Array<{ value: string }> }> = [];
-        ast.nodes.forEach((node: any) => {
+        const mixins: Array<{ type: string, options: Array<{ value: string }> | Pojo<string> }> = [];
 
+        ast.nodes.forEach((node: any) => {
+            // const symbol = m[node.value];
+            // if (symbol.)
+            const strat = strategy(node.value);
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: createOptions(node)
+                    options: strategies[strat](node)
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: []
+                    options: strat === 'named' ? {} : []
                 });
-            } else if (node.type === 'string') {
-                diagnostics.error(mixinNode, `value can not be a string (remove quotes?)`, { word: mixinNode.value });
+            } else if (node.type === 'string' && diagnostics) {
+                diagnostics.error(
+                    mixinNode,
+                    `value can not be a string (remove quotes?)`,
+                    { word: mixinNode.value }
+                );
             }
         });
 
@@ -178,12 +172,28 @@ export const SBTypesParsers = {
     }
 };
 
-export function groupValues(node: any) {
+function getNamedArgs(node: any) {
+    const args: ArgValue[][] = [];
+    if (node.nodes.length) {
+        args.push([]);
+        node.nodes.forEach((node: any) => {
+            if (node.type === 'div') {
+                args.push([]);
+            } else {
+                const { sourceIndex, ...clone } = node;
+                args[args.length - 1].push(clone);
+            }
+        });
+    }
+    return args;
+}
+
+export function groupValues(nodes: any[], divType = 'div') {
     const grouped: any[] = [];
     let current: any[] = [];
 
-    node.nodes.forEach((n: any) => {
-        if (n.type === 'div') {
+    nodes.forEach((n: any) => {
+        if (n.type === divType) {
             grouped.push(current);
             current = [];
         } else {
@@ -199,8 +209,44 @@ export function groupValues(node: any) {
     return grouped;
 }
 
+const strategies = {
+    named: (node: any) => {
+        const named: Pojo<string> = {};
+        getNamedArgs(node).forEach(_ => {
+            if (_[1].type !== 'space') {
+                // TODO: maybe warn
+            }
+            named[_[0].value] = stringifyParam(_.slice(2));
+        });
+        return named;
+    },
+    args: (node: any) => {
+        return groupValues(node.nodes, 'div').map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
+            if (n.type === 'div') {
+                return null;
+            } else if (n.type === 'string') {
+                return n.value;
+            } else {
+                return undefined;
+            }
+        })).filter((x: string) => typeof x === 'string').map(value => ({ value }));
+    }
+};
+
+function stringifyParam(nodes: any) {
+    return valueParser.stringify(nodes, (n: any) => {
+        if (n.type === 'div') {
+            return null;
+        } else if (n.type === 'string') {
+            return n.value;
+        } else {
+            return undefined;
+        }
+    });
+}
+
 export function listOptions(node: any) {
-    return groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
+    return groupValues(node.nodes).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
         if (n.type === 'div') {
             return null;
         } else if (n.type === 'string') {
@@ -209,8 +255,4 @@ export function listOptions(node: any) {
             return undefined;
         }
     })).filter((x: string) => typeof x === 'string');
-}
-
-export function createOptions(node: any) {
-    return listOptions(node).map(value => ({ value }));
 }

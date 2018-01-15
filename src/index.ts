@@ -1,4 +1,3 @@
-import { stColor, stString } from './';
 export { safeParse } from './parser';
 export { cachedProcessFile, FileProcessor, MinimalFS, CacheItem } from './cached-process-file';
 export {
@@ -24,7 +23,7 @@ export {
     TransformHooks
 } from './stylable-transformer';
 export { scopeSelector, expandCustomSelectors } from './stylable-utils';
-export { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createGenerator } from './generator';
 export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';
@@ -35,3 +34,6 @@ export { createInfrastructure, StylableInfrastructure } from './create-infra-str
 export { create } from './runtime';
 export * from './types';
 export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } from './types';
+export * from './stylable-mixins';
+export * from './stylable-optimizer';
+export * from './functions';

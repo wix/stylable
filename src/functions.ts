@@ -1,8 +1,8 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import { isCssNativeFunction } from './native-types';
-import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
+import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';
+import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo } from './types';
@@ -25,16 +25,34 @@ const errors = {
 };
 /* tslint:enable:max-line-length */
 
+export function resolveArgumentsValue(
+    options: Pojo<string>, resolver: StylableResolver, meta: StylableMeta, variableOverride?: Pojo<string>) {
+    const resolvedArgs = {} as Pojo<string>;
+    for (const k in options) {
+        resolvedArgs[k] = evalValue(
+            resolver,
+            options[k],
+            meta,
+            postcss.decl(),
+            variableOverride
+        );
+    }
+    return resolvedArgs;
+}
+
 export function evalValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
     node: postcss.Node,
+    variableOverride?: Pojo<string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = []) {
     const parsedValue = valueParser(value);
-
+    if ((node as postcss.Declaration).prop === valueMapping.mixin) {
+        return (node as postcss.Declaration).value;
+    }
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
         switch (type) {
@@ -43,6 +61,9 @@ export function evalValue(
                     const args = parsedNode.nodes.map((n: ParsedValue) => valueParser.stringify(n));
                     if (args.length === 1) {
                         const varName = args[0];
+                        if (variableOverride && variableOverride[varName]) {
+                            return parsedNode.resolvedValue = variableOverride[varName];
+                        }
                         const refUniqID = createUniqID(meta.source, varName);
                         if (passedThrough.indexOf(refUniqID) !== -1) {
                             // TODO: move diagnostic to original value usage instead of the end of the cyclic chain
@@ -63,6 +84,7 @@ export function evalValue(
                                 stripQuotation(varSymbol.text),
                                 meta,
                                 varSymbol.node,
+                                variableOverride,
                                 valueHook,
                                 diagnostics,
                                 passedThrough.concat(createUniqID(meta.source, varName))
@@ -74,15 +96,16 @@ export function evalValue(
                         } else if (varSymbol && varSymbol._kind === 'import') {
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
-                                const varSymbol = resolvedVar.symbol;
+                                const resolvedVarSymbol = resolvedVar.symbol;
 
                                 if (resolvedVar._kind === 'css') {
-                                    if (varSymbol._kind === 'var') {
+                                    if (resolvedVarSymbol._kind === 'var') {
                                         const resolvedValue = evalValue(
                                             resolver,
-                                            stripQuotation(varSymbol.text),
+                                            stripQuotation(resolvedVarSymbol.text),
                                             resolvedVar.meta,
-                                            varSymbol.node,
+                                            resolvedVarSymbol.node,
+                                            variableOverride,
                                             valueHook,
                                             diagnostics,
                                             passedThrough.concat(createUniqID(meta.source, varName))
@@ -91,9 +114,13 @@ export function evalValue(
                                             valueHook(resolvedValue, varName, false, passedThrough) :
                                             resolvedValue;
                                     } else {
-                                        const errorKind = varSymbol._kind === 'class' && varSymbol[valueMapping.root] ?
-                                            'stylesheet' :
-                                            varSymbol._kind;
+                                        const errorKind =
+                                            (
+                                                resolvedVarSymbol._kind === 'class'
+                                                &&
+                                                resolvedVarSymbol[valueMapping.root]
+                                            ) ?
+                                                'stylesheet' : resolvedVarSymbol._kind;
 
                                         if (diagnostics) {
                                             diagnostics.warn(node,

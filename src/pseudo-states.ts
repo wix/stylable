@@ -27,7 +27,7 @@ export function processPseudoStates(value: string, _rule: SRule, _diagnostics: D
 
     const mappedStates: MappedStates = {};
     const ast = valueParser(value);
-    const statesSplitByComma = groupValues(ast);
+    const statesSplitByComma = groupValues(ast.nodes);
 
     statesSplitByComma.forEach((workingState: StateParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
@@ -73,7 +73,7 @@ function resolveStateType(stateDefinition: StateParsedValue,
 }
 
 function resolveArguments(stateType: StateParsedValue) {
-    const seperetedByComma = groupValues(stateType);
+    const seperetedByComma = groupValues(stateType.nodes);
 
     seperetedByComma.forEach(group => {
         if (group.length > 1 || group.length === 0) {

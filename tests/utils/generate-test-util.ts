@@ -4,9 +4,9 @@ import { Bundler } from '../../src/bundle';
 import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
 import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
-import { StylableResolver } from '../../src/postcss-resolver';
 import { Stylable } from '../../src/stylable';
 import { process, StylableMeta } from '../../src/stylable-processor';
+import { StylableResolver } from '../../src/stylable-resolver';
 import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
 
 import { Pojo } from '../../src/types';
@@ -33,7 +33,7 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
-export function generateInfra(config: InfraConfig, diagnostics: Diagnostics): {
+export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()): {
     resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
 } {
     const { fs, requireModule } = createMinimalFS(config);
