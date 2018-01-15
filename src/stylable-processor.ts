@@ -8,7 +8,7 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { expandCustomSelectors, CUSTOM_SELECTOR_RE } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
@@ -299,7 +299,7 @@ export class StylableProcessor {
                     decl,
                     rule.selector,
                     valueMapping.states,
-                    parseStates(decl.value, this.diagnostics)
+                    parseStates(decl.value, rule, this.diagnostics)
                 );
             } else {
                 if (rule.selectorType === 'element') {

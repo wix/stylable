@@ -1,10 +1,11 @@
 import { expect } from 'chai';
-import { Diagnostics, safeParse } from '../../src/index';
+import { Diagnostics, safeParse, StylableResults } from '../../src/index';
 import { process } from '../../src/stylable-processor';
 import { Config, generateFromMock } from './generate-test-util';
 const deindent = require('deindent');
 
-export interface Warning {
+export interface Diagnostic {
+    severity?: 'warn'|'error';
     message: string;
     file: string;
 }
@@ -41,7 +42,7 @@ export function findTestLocations(css: string) {
     return { start, end, word, css: css.replace(/[|$]/gm, '') };
 }
 
-export function expectWarnings(css: string, warnings: Warning[]) {
+export function expectWarnings(css: string, warnings: Diagnostic[]) {
     const source = findTestLocations(css);
     const root = safeParse(source.css);
     const res = process(root);
@@ -57,7 +58,7 @@ export function expectWarnings(css: string, warnings: Warning[]) {
     expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(warnings.length);
 }
 
-export function expectWarningsFromTransform(config: Config, warnings: Warning[]) {
+export function expectWarningsFromTransform(config: Config, warnings: Diagnostic[]): StylableResults {
     config.trimWS = false;
 
     const locations: any = {};
@@ -67,7 +68,7 @@ export function expectWarningsFromTransform(config: Config, warnings: Warning[])
         locations[path] = source;
     }
     const diagnostics = new Diagnostics();
-    generateFromMock(config, diagnostics);
+    const result = generateFromMock(config, diagnostics);
     if (warnings.length === 0 && diagnostics.reports.length !== 0) {
         expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
     }
@@ -80,4 +81,6 @@ export function expectWarningsFromTransform(config: Config, warnings: Warning[])
         }
     });
     expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
+
+    return result;
 }

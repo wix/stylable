@@ -1,11 +1,14 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
+import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
+import { SRule } from './stylable-processor';
+import { StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
 export interface MappedStates {
-    [s: string]: string | null;
+    [s: string]: StateParsedValue | string | null;
 }
 
 // TODO: remove
@@ -66,31 +69,13 @@ export const SBTypesParsers = {
         const selector: any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
         return selector.nodes[0].nodes;
     },
-    '-st-states'(value: string, _diagnostics: Diagnostics) {
+    '-st-states'(value: string, rule: SRule, _diagnostics: Diagnostics) {
         if (!value) {
             return {};
         }
 
-        const ast = valueParser(value);
         const mappedStates: MappedStates = {};
-
-        ast.nodes.forEach((node: any) => {
-
-            if (node.type === 'function') {
-                if (node.nodes.length === 1) {
-                    mappedStates[node.value] = node.nodes[0].value.trim().replace(/\\["']/g, '"');
-                } else {
-                    // TODO: error
-                }
-
-            } else if (node.type === 'word') {
-                mappedStates[node.value] = null;
-            } else if (node.type === 'string') {
-                // TODO: error
-            }
-        });
-
-        return mappedStates;
+        return processPseudoStates(value, rule, _diagnostics);
     },
     '-st-extends'(value: string) {
         const ast = valueParser(value);
@@ -193,7 +178,7 @@ export const SBTypesParsers = {
     }
 };
 
-function groupValues(node: any) {
+export function groupValues(node: any) {
     const grouped: any[] = [];
     let current: any[] = [];
 
@@ -214,7 +199,7 @@ function groupValues(node: any) {
     return grouped;
 }
 
-function createOptions(node: any) {
+export function listOptions(node: any) {
     return groupValues(node).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
         if (n.type === 'div') {
             return null;
@@ -223,5 +208,9 @@ function createOptions(node: any) {
         } else {
             return undefined;
         }
-    })).filter((x: string) => typeof x === 'string').map(value => ({ value }));
+    })).filter((x: string) => typeof x === 'string');
+}
+
+export function createOptions(node: any) {
+    return listOptions(node).map(value => ({ value }));
 }

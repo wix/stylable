@@ -1,8 +1,8 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalValue, ParsedValue, ResolvedFormatter } from './functions';
-import { isCssNativeFunction, nativePseudoClasses, nativePseudoElements } from './native-types';
+import { evalValue } from './functions';
+import { nativePseudoClasses, nativePseudoElements } from './native-types';
 import { cssObjectToAst } from './parser';
 import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
@@ -15,7 +15,6 @@ import {
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
-import { valueReplacer } from './value-template';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');

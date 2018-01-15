@@ -5,18 +5,12 @@ import { CSSResolve, JSResolve, StylableResolver } from './postcss-resolver';
 import { StylableMeta } from './stylable-processor';
 import { replaceValueHook } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
+import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Pojo<JSResolve | CSSResolve | ValueFormatter | null>;
-export interface ParsedValue {
-    type: string;
-    value: string;
-    nodes?: any;
-    resolvedValue?: string;
-}
 
 /* tslint:disable:max-line-length */
 const errors = {
