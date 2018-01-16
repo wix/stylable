@@ -124,6 +124,8 @@
             
                 <li class=""><a href="/docs/references/mixin-syntax" class=" docs-nav-item">Mixins</a></li>
             
+                <li class="active"><a href="/docs/references/formatters" class="active docs-nav-item">Formatters</a></li>
+            
                 <li class=""><a href="/docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
                 <li class=""><a href="/docs/references/theme" class=" docs-nav-item">Theme</a></li>
@@ -139,131 +141,132 @@
     <h1>Formatters</h1>
     <p>Formatters are functions that return a single CSS declaration value. They can receive arguments, process them and return the value.</p>
 
-<p>For example a <code class="highlighter-rouge">font-size</code> formatter can return a different value for the font size depending on the location.</p>
+<blockquote>
+  <p><strong>Note</strong><br />
+Currently, any argument passed through to a formatter is of type <code class="highlighter-rouge">string</code>. We are in the process of adding support for more complex types.</p>
+</blockquote>
+
+<p>For example a <code class="highlighter-rouge">calc-font-size</code> formatter can return a different value for the font size depending on the provided argument.</p>
 
 <div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ./calc-font-size.js */</span>
-    <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">,</span> <span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">switch</span> <span class="p">(</span><span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">case</span> <span class="s1">'header'</span><span class="err">:</span>
-                <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span>
-            <span class="k">case</span> <span class="s1">'aside'</span><span class="err">:</span>
-                <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span> 
-            <span class="nl">default</span><span class="p">:</span> 
-                <span class="k">return</span> <span class="nx">baseSize</span> <span class="o">+</span> <span class="s1">'px'</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">};</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">,</span> <span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">switch</span> <span class="p">(</span><span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="s1">'header'</span><span class="err">:</span>
+            <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span>
+        <span class="k">case</span> <span class="s1">'aside'</span><span class="err">:</span>
+            <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span> 
+        <span class="nl">default</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="nx">baseSize</span> <span class="o">+</span> <span class="s1">'px'</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="nd">:import</span> <span class="p">{</span>
-        <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
-        <span class="py">-st-default</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="m">16</span><span class="p">,</span> <span class="n">case1</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="m">16</span><span class="p">,</span> <span class="n">header</span><span class="p">);</span>
+<span class="p">}</span>
 
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="m">16</span><span class="p">,</span> <span class="n">case2</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="nc">.form</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="m">16</span><span class="p">,</span> <span class="n">body</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="c">/* CSS output*/</span>
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">32px</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">32px</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">16px</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="nc">.form</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">16px</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
 <blockquote>
-  <p><strong>Note</strong><br />
+  <p><strong>Note about native URL functions</strong><br />
 Currently you cannot use formatters inside a native URL function. As a suggested workaround, you can return a URL function from a formattter.</p>
 </blockquote>
 
 <h2 id="formatters-with-variables">Formatters with variables</h2>
 
-<p>You can use formatters with variables:</p>
+<p>When the formatter is imported into the CSS, it can also be used with a <a href="./variables">variable</a>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="nd">:import</span> <span class="p">{</span>
-        <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
-        <span class="py">-st-default</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">;</span>
-    <span class="p">}</span>
+<p>In this example the CSS imports the same formatter as the previous example, <code class="highlighter-rouge">cal-font-size</code>, but the variable <code class="highlighter-rouge">baseFontSize</code> is added to the calculation.</p>
 
-    <span class="nd">:vars</span> <span class="p">{</span>
-        <span class="py">baseFontSize</span><span class="p">:</span> <span class="m">12px</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">baseFontSize</span><span class="p">),</span> <span class="n">header</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">baseFontSize</span><span class="p">:</span> <span class="m">12</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">baseFontSize</span><span class="p">),</span> <span class="n">body</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">baseFontSize</span><span class="p">),</span> <span class="n">header</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.form</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">baseFontSize</span><span class="p">),</span> <span class="n">body</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="c">/* CSS output*/</span>
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">12px</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">24px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.form</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">12px</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
 <h2 id="nested-formatters">Nested formatters</h2>
+<p>You can also nest formatters to provide functions that are modular, composable and reusable.</p>
 
-<p>You can use nested formatters:</p>
+<p>In this example the formatter <code class="highlighter-rouge">sin</code> is nested in the <code class="highlighter-rouge">abs</code> formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="nd">:import</span> <span class="p">{</span>
-        <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
-        <span class="py">-st-default</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ./math.js */</span>
+<span class="nx">module</span><span class="p">.</span><span class="kr">export</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">divBy2</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">Number</span><span class="p">(</span><span class="nb">Number</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="p">},</span>
+    <span class="na">round</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nb">Number</span><span class="p">(</span><span class="nx">num</span><span class="p">));</span>
     <span class="p">}</span>
-
-    <span class="nd">:import</span> <span class="p">{</span>
-        <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./get-pi"</span><span class="p">;</span>
-        <span class="py">-st-default</span><span class="p">:</span> <span class="n">getPi</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">getPi</span><span class="p">(</span><span class="m">10</span><span class="p">),</span> <span class="n">header</span><span class="p">);</span>
-    <span class="p">}</span>
-
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="n">calcFontSize</span><span class="p">(</span><span class="n">getPi</span><span class="p">(),</span> <span class="n">body</span><span class="p">);</span>
-    <span class="p">}</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="c">/* CSS output*/</span>
-    <span class="nc">.header</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">31.41592653589793px</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="nc">.form</span> <span class="p">{</span>
-        <span class="nl">font-size</span><span class="p">:</span> <span class="m">3.141592653589793px</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./math"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">divBy2</span><span class="p">,</span> <span class="n">round</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">baseSize</span><span class="p">:</span> <span class="m">17px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">round</span><span class="p">(</span><span class="n">divBy2</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="n">baseSize</span><span class="p">)))</span><span class="nb">px</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ./get-pi.js */</span>
-    <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">multiplyBy</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">*</span> <span class="nx">multiplyBy</span><span class="p">;</span>
-    <span class="p">};</span>
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.header</span> <span class="p">{</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">9px</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre>
 </div>
 
-<h2 id="create-your-own-formatters">Create your own formatters</h2>
-
-<p>You can create formatters using JavaScript or TypeScript.
-For details, see <a href="./extending-through-js">Extending through JS</a></p>
 
 </section>
 
