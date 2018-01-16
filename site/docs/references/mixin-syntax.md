@@ -9,40 +9,42 @@ layout: docs
 
 Here are some examples of when you can use mixins:
 
-- Presets/Variants - create reusable pieces of styling CSS
-- Layouts - easily describe complex layouts
-- Effects - easily describe complex effects
-- Macros - use code to define the CSS macros you need
+* Presets/Variants - create reusable pieces of styling CSS
+* Layouts - easily describe complex layouts
+* Effects - easily describe complex effects
+* Macros - use code to define the CSS macros you need
 
-Mixins can be applied using either CSS or JavaScript. Mixins can recive parameters and those paramaters can be either CSS values or variables. 
+Mixins can be applied using either CSS or JavaScript, and can recive parameters.
 
+>**Note**  
+> If you need to return only a single declaration value using code, we recommend **Stylable** [formatters](./formatters.md). 
 
 ## CSS mixins
 
-Any CSS class or element that is defined in a **Stylable** CSS file can be used as a mixin source; this includes the stylesheet's root. You can use either a local class or element, or import one from a different stylesheet.
+Any CSS stylesheet, class or element that is defined in a **Stylable** CSS file can be used as a mixin source. You can use either a local class or element, or import the mixin from a different stylesheet.
 
-In the following example, a locally defined mixin is used in a local class.
+In the following example, a locally defined class is used as a mixin in the same stylesheet.
 
 ```css
 /* CSS */
-    .style-mixin {
-        color: green;
-        background: yellow;
-    }
-    .someClass {
-        -st-mixin: style-mixin; /* local class mixin */    
-    }  
+.style-mixin {
+    color: green;
+    background: yellow;
+}
+.someClass {
+    -st-mixin: style-mixin;     
+}  
 ```
 ```css
 /* CSS output */
-    ...
-    .someClass {
-        color: green;
-        background: yellow;
-    }  
+...
+.someClass {
+    color: green; /* from local mixin */
+    background: yellow; /* from local mixin */
+}  
 ```
 
-Here is an example of a mixin file written in **Stylable** CSS that is imported into a stylesheet.
+Here is an example of a **Stylable** CSS file that is imported and mixed into the  classes of a different stylesheet. The `.rootMixedIn` class as a stylesheet and `classMixedIn` as a class.
 
 ```css
 /* CSS mixin file - mixins.st.css */
@@ -64,7 +66,7 @@ Here is an example of a mixin file written in **Stylable** CSS that is imported 
 }
 
 .rootMixedIn {
-    -st-mixin: MyComp; /* root mixin */
+    -st-mixin: MyComp; /* stylesheet mixin */
 }
 
 .classMixedIn {
@@ -75,15 +77,15 @@ Here is an example of a mixin file written in **Stylable** CSS that is imported 
 ```css
 /* CSS output */
 .rootMixedIn {
-    color: purple;
+    color: purple; /* from stylesheet mixin */
 }
 
-.rootMixedIn .someClass {
+.rootMixedIn .someClass { /* ruleset added as a result of the stylesheet mixin */
     color: green;
 }
 
 .classMixedIn {
-    color: green;
+    color: green; /* from class mixin */
 }
 ```
 
@@ -114,11 +116,11 @@ Here is an example of using a variable in a CSS mixin and how it can be override
 ```css
 /* CSS output */
 .classToMixin {
-    background: green;
+    background: green; /* from local class */
 }
 
 .targetClass {
-    background: orange;
+    background: orange; /* from mixin with override */
 }
 ```
 
@@ -126,11 +128,11 @@ Here is an example of using a variable in a CSS mixin and how it can be override
 
 JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin and the mixin logic. 
 
-A JS mixin returns a CSS fragment which can be multiple rulesets or multiple declarations within a given ruleset. **Stylable** [formatters](./) can return a single declaration value.
+A JS mixin returns a CSS fragment which can be a single declaration and its value, multiple declarations, multiple rulesets, or any combination of these.
 
 Arguments are passed to the mixin as a string argument and it's the mixin's responsibility to parse them.
 
-Here is an example of a mixin receiving multiple arguments and returning multiple declarations into the ruleset into which it's being mixed in.
+Here is an example of a mixin receiving multiple arguments and returning multiple declarations into the target ruleset.
 
 ```js
 /* file my-mixin.js */
@@ -159,17 +161,18 @@ module.exports = function colorAndBg([color, bgColor]){
 ```css
 /* CSS output */
 .codeMixedIn {
-    color: green; 
-    background: orange;
-    font-family: monospace;
+    color: green; /* from JS mixin */
+    background: orange; /* from JS mixin */
+    font-family: monospace; /* from local class */
 }
 ```
 
 ### JavaScript mixins returning multiple rulesets
 
-Mixins can return multiple rulesets by returning selectors that are mixed in to the target stylesheet. These selectors can appear with the following syntax options:
-* `&selector` - resulting selector is appended to the selector it was mixed into (in below example `&:hover`)
-* `selector` - resulting selector is appended as a descendent selector to its mixed in target (in below example `.otherClass`) 
+Mixins can return multiple rulesets that are mixed into the target stylesheet. These rulesets can be written with the following syntax options:
+* `selector` - resulting ruleset is appended as a descendent selector to its mixed in target (in below example `.otherClass`) 
+* `&selector` - resulting ruleset references the parent selector into which it was mixed in (in below example `&:hover`, the parent selector is `.codeMixedIn`)
+
 
 ```js
 /* file my-mixin.js */
@@ -204,16 +207,16 @@ module.exports = function complexMixin([color, bgColor]){
 ```css
 /* CSS output */
 .codeMixedIn {
-    color: green; 
-    background: orange;
-    font-family: monospace;
+    color: green; /* from JS mixin */
+    background: orange; /* from JS mixin */
+    font-family: monospace; /* from local class */
 }
 
-.codeMixedIn:hover {
+.codeMixedIn:hover { /* from JS mixin with & */
     color: gold; 
 }
 
-.codeMixedIn .otherClass {
+.codeMixedIn .otherClass { /* from JS mixin with appended selector */
     color: purple; 
 }
 ```
@@ -230,6 +233,7 @@ Multiple mixins are applied according to the order that they are declared left t
 
 ## Considerations when using mixins
 
+Take a look at these considerations before working with **Stylable** mixins.
 
 ### Mixin usage with special characters
 You can escape special characters by wrapping them with quotes or using a backslash (`\`). 
@@ -243,7 +247,6 @@ Example:
     -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
 }
 ```
-
 ### Circular references 
 It is possible to reach a state where you have circular references between mixins. These cannot be resolved, and a diagnostics warning is issued in your **Stylable** code intelligence.
 

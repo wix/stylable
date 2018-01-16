@@ -8,6 +8,9 @@ Formatters are functions that return a single CSS declaration value. They can re
 
 For example a `font-size` formatter can return a different value for the font size depending on the location.
 
+>**Note**  
+> If you need to return multiple declaration values, we recommend using **Stylable** [mixins](./mixin-syntax.md). 
+
 
 ```js
 /* ./calc-font-size.js */
