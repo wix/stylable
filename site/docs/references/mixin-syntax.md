@@ -5,7 +5,7 @@ layout: docs
 ---
 
 
-**Stylable** mixins enable you to reuse complex styles and CSS behaviors, and apply them to any ruleset during build time. 
+**Stylable** mixins enable you to reuse complex styles and CSS behaviors, defined in CSS or Javascript, and apply them to any style-rule during build time. 
 
 Here are some examples of when you can use mixins:
 
@@ -13,8 +13,6 @@ Here are some examples of when you can use mixins:
 * Layouts - easily describe complex layouts
 * Effects - easily describe complex effects
 * Macros - use code to define the CSS macros you need
-
-Mixins can be applied using either CSS or JavaScript, and can recive parameters.
 
 >**Note**  
 > If you need to return only a single declaration value using code, we recommend **Stylable** [formatters](./formatters.md). 
@@ -44,7 +42,7 @@ In the following example, a locally defined class is used as a mixin in the same
 }  
 ```
 
-Here is an example of a **Stylable** CSS file that is imported and mixed into the  classes of a different stylesheet. The `.rootMixedIn` class as a stylesheet and `classMixedIn` as a class.
+Here is an example of a **Stylable** CSS file that is imported and mixed into the classes of a different stylesheet. The `.rootMixedIn` class as a stylesheet and `classMixedIn` as a class.
 
 ```css
 /* CSS mixin file - mixins.st.css */
@@ -61,12 +59,12 @@ Here is an example of a **Stylable** CSS file that is imported and mixed into th
 /* CSS file - example.st.css - imports the above mixin */
 :import {
     -st-from: './mixins.st.css';
-    -st-default: MyComp;
+    -st-default: MixRoot;
     -st-named: someClass;
 }
 
 .rootMixedIn {
-    -st-mixin: MyComp; /* stylesheet mixin */
+    -st-mixin: MixRoot; /* stylesheet mixin */
 }
 
 .classMixedIn {
@@ -92,7 +90,12 @@ Here is an example of a **Stylable** CSS file that is imported and mixed into th
 ### CSS mixin with parameters and variables
 
 CSS mixins can accept named parameters in the following format:
- `mixin(variableName valueOverride)`. 
+ `mixin(variableName valueOverride, variableName2 valueOverride2)`. 
+Multiple variables can be comma separated or written on multiple lines:
+ `mixin (
+     variableName valueOverride,
+     variableName2 valueOverride2
+ )`
  
  Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
 
@@ -126,9 +129,9 @@ Here is an example of using a variable in a CSS mixin and how it can be override
 
 ## JavaScript mixins
 
-JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin and the mixin logic. 
+JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin. 
 
-A JS mixin returns a CSS fragment which can be a single declaration and its value, multiple declarations, multiple rulesets, or any combination of these.
+A JS mixin returns a CSS fragment which can contain multiple declarations with optional sub style-rules.
 
 Arguments are passed to the mixin as a string argument and it's the mixin's responsibility to parse them.
 
@@ -167,9 +170,9 @@ module.exports = function colorAndBg([color, bgColor]){
 }
 ```
 
-### JavaScript mixins returning multiple rulesets
+### JavaScript mixins returning multiple style-rules
 
-Mixins can return multiple rulesets that are mixed into the target stylesheet. These rulesets can be written with the following syntax options:
+Mixins can return multiple style-rules that are mixed into the target stylesheet. These style-rules can be written with the following syntax options:
 * `selector` - resulting ruleset is appended as a descendent selector to its mixed in target (in below example `.otherClass`) 
 * `&selector` - resulting ruleset references the parent selector into which it was mixed in (in below example `&:hover`, the parent selector is `.codeMixedIn`)
 
@@ -228,7 +231,7 @@ Mixins can add CSS declarations to the CSS ruleset to which they are applied.
 Rules are added at the position in the CSS where the `-st-mixin` is declared.
 Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 
-You can apply multiple mixins in either CSS or JavaScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
+You can apply multiple mixins from either CSS or JavaScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
 Multiple mixins are applied according to the order that they are declared left to right.
 
 ## Considerations when using mixins
@@ -243,6 +246,9 @@ Example:
 .x { /* use quotations to include comma */
     -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
+```
+They can also be used to include quotes or backslashes as part of the paramater.
+```css
 .y { /* escape slashes */
     -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
 }

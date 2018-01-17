@@ -12,7 +12,7 @@ For example a `font-size` formatter can return a different value for the font si
 > If you need to return multiple declaration values, we recommend using **Stylable** [mixins](./mixin-syntax.md). 
 
 
-```js
+```jsx
 /* ./calc-font-size.js */
     module.exports = function(baseSize, modifier) {
         switch (modifier) {
@@ -42,7 +42,7 @@ For example a `font-size` formatter can return a different value for the font si
 ```
 
 ```css
-    /* CSS output*/
+    /* CSS output */
     .header {
         font-size: 32px;
     }
