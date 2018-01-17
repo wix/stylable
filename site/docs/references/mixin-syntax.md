@@ -137,7 +137,7 @@ Arguments are passed to the mixin as a string argument and it's the mixin's resp
 
 Here is an example of a mixin receiving multiple arguments and returning multiple declarations into the target ruleset.
 
-```js
+```jsx
 /* file my-mixin.js */
 module.exports = function colorAndBg([color, bgColor]){ 
     /* arguments: array of string types */
@@ -177,7 +177,7 @@ Mixins can return multiple style-rules that are mixed into the target stylesheet
 * `&selector` - resulting ruleset references the parent selector into which it was mixed in (in below example `&:hover`, the parent selector is `.codeMixedIn`)
 
 
-```js
+```jsx
 /* file my-mixin.js */
 module.exports = function complexMixin([color, bgColor]){ 
     /* arguments: array of string types */

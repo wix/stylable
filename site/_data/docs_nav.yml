@@ -65,7 +65,7 @@
     title: Custom Selectors
   - id: references/mixin-syntax
     title: Mixins
-  - id: references/formattters
+  - id: references/formatters
     title: Formatters
   - id: references/variables
     title: Variables
