@@ -35,7 +35,6 @@ In the following example, a locally defined class is used as a mixin in the same
 ```
 ```css
 /* CSS output */
-...
 .someClass {
     color: green; /* from local mixin */
     background: yellow; /* from local mixin */
