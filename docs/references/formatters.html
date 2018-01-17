@@ -148,19 +148,23 @@ Currently, any argument passed through to a formatter is of type <code class="hi
 
 <p>For example a <code class="highlighter-rouge">calc-font-size</code> formatter can return a different value for the font size depending on the provided argument.</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ./calc-font-size.js */</span>
-<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">,</span> <span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">switch</span> <span class="p">(</span><span class="nx">modifier</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">case</span> <span class="s1">'header'</span><span class="err">:</span>
-            <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span>
-        <span class="k">case</span> <span class="s1">'aside'</span><span class="err">:</span>
-            <span class="k">return</span> <span class="err">`</span><span class="nx">$</span><span class="p">{</span><span class="nb">Number</span><span class="p">(</span><span class="nx">baseSize</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">}</span><span class="nx">px</span><span class="err">`</span><span class="p">;</span> 
-        <span class="nl">default</span><span class="p">:</span> 
-            <span class="k">return</span> <span class="nx">baseSize</span> <span class="o">+</span> <span class="s1">'px'</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">};</span>
+<blockquote>
+  <p><strong>Note</strong><br />
+If you need to return multiple declaration values, we recommend using <strong>Stylable</strong> <a href="./mixin-syntax">mixins</a>.</p>
+</blockquote>
+
+<pre><code class="language-jsx">/* ./calc-font-size.js */
+module.exports = function(baseSize, modifier) {
+    switch (modifier) {
+        case 'header':
+            return `${Number(baseSize) * 2}px`;
+        case 'aside':
+            return `${Number(baseSize) * 0.75}px`; 
+        default: 
+            return baseSize + 'px';
+    }
+};
 </code></pre>
-</div>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./calc-font-size"</span><span class="p">;</span>
@@ -177,6 +181,16 @@ Currently, any argument passed through to a formatter is of type <code class="hi
 </code></pre>
 </div>
 
+<div class="language-css highlighter-rouge"><pre class="highlight"><code>    <span class="c">/* CSS output */</span>
+    <span class="nc">.header</span> <span class="p">{</span>
+        <span class="nl">font-size</span><span class="p">:</span> <span class="m">32px</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nc">.form</span> <span class="p">{</span>
+        <span class="nl">font-size</span><span class="p">:</span> <span class="m">16px</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre>
+</div>
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.header</span> <span class="p">{</span>
     <span class="nl">font-size</span><span class="p">:</span> <span class="m">32px</span><span class="p">;</span>
@@ -233,17 +247,16 @@ Currently you cannot use formatters inside a native URL function. As a suggested
 
 <p>In this example the formatter <code class="highlighter-rouge">sin</code> is nested in the <code class="highlighter-rouge">abs</code> formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* ./math.js */</span>
-<span class="nx">module</span><span class="p">.</span><span class="kr">export</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="na">divBy2</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nb">Number</span><span class="p">(</span><span class="nb">Number</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
-    <span class="p">},</span>
-    <span class="na">round</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">num</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nb">Number</span><span class="p">(</span><span class="nx">num</span><span class="p">));</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<pre><code class="language-jsx">/* ./math.js */
+module.export = {
+    divBy2: function(num) {
+        return Number(Number(num) / 2);
+    },
+    round: function(num) {
+        return Math.round(Number(num));
+    }
+}
 </code></pre>
-</div>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./math"</span><span class="p">;</span>
