@@ -3,7 +3,7 @@ import * as postcss from 'postcss';
 import { safeParse } from '../src/parser';
 import { StylableMeta } from '../src/stylable-processor';
 import { StylableTransformer } from '../src/stylable-transformer';
-import { createClassSubsetRoot, scopeSelector } from '../src/stylable-utils';
+import { createSubsetAst, scopeSelector } from '../src/stylable-utils';
 import { valueMapping } from '../src/stylable-value-parsers';
 import { createTransformer } from './utils/generate-test-util';
 
@@ -81,7 +81,7 @@ describe('scopeSelector', () => {
 
 });
 
-describe('createClassSubsetRoot', () => {
+describe('createSubsetAst', () => {
 
     function testMatcher(expected: any[], actualNodes: any[]) {
         expected.forEach((expectedMatch, i) => {
@@ -97,7 +97,7 @@ describe('createClassSubsetRoot', () => {
 
     it('should extract all selectors that has given prefix in the first chunk', () => {
 
-        const res = createClassSubsetRoot(safeParse(`
+        const res = createSubsetAst(safeParse(`
             .i .x{}
             .i::x{}
             .i[data]{}
@@ -150,7 +150,7 @@ describe('createClassSubsetRoot', () => {
 
     it('should parts under @media', () => {
 
-        const res = createClassSubsetRoot(safeParse(`
+        const res = createSubsetAst(safeParse(`
             .i {color: red}
             .i:hover {}
             @media (max-width: 300px) {
@@ -178,7 +178,7 @@ describe('createClassSubsetRoot', () => {
 
     it('should not append empty media', () => {
 
-        const res = createClassSubsetRoot(safeParse(`
+        const res = createSubsetAst(safeParse(`
             .i {}
             @media (max-width: 300px) {
                 .x {}
