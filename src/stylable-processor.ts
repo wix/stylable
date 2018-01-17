@@ -12,7 +12,6 @@ import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
 import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
-import { valueReplacer } from './value-template';
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -86,7 +85,13 @@ export class StylableProcessor {
         root.walkRules((rule: SRule) => {
             this.handleCustomSelectors(rule);
             this.handleRule(rule);
-            this.handleDeclarations(rule);
+        });
+
+        root.walkDecls((decl: SDecl) => {
+            // TODO: optimize
+            if (stValues.indexOf(decl.prop) !== -1) {
+                this.handleDirectives(decl.parent as SRule, decl);
+            }
         });
 
         stubs.forEach(s => s && s.remove());
@@ -209,7 +214,7 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.elements[name] = { _kind: 'element', name, alias };
+            this.meta.elements[name] = this.meta.mappedSymbols[name] = { _kind: 'element', name, alias };
         }
     }
 
@@ -249,17 +254,7 @@ export class StylableProcessor {
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls(decl => {
             this.checkRedeclareSymbol(decl.prop, decl);
-            let importSymbol = null;
             let type = null;
-            const value = valueReplacer(decl.value, {}, (_value, name, match) => {
-                const symbol = this.meta.mappedSymbols[name];
-                if (!symbol) {
-                    return match;
-                } else if (symbol._kind === 'import') {
-                    importSymbol = symbol;
-                }
-                return symbol._kind === 'var' ? symbol.value : match;
-            });
 
             const prev = decl.prev();
             if (prev && prev.type === 'comment') {
@@ -274,7 +269,6 @@ export class StylableProcessor {
                 name: decl.prop,
                 value: '',
                 text: decl.value,
-                import: importSymbol,
                 node: decl,
                 valueType: type
             };
@@ -282,14 +276,6 @@ export class StylableProcessor {
             this.meta.mappedSymbols[decl.prop] = varSymbol;
         });
         rule.remove();
-    }
-
-    protected handleDeclarations(rule: SRule) {
-        rule.walkDecls((decl: SDecl) => {
-            if (stValues.indexOf(decl.prop) !== -1) {
-                this.handleDirectives(rule, decl);
-            }
-        });
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -316,7 +302,11 @@ export class StylableProcessor {
                 const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
                 if (
                     extendsRefSymbol &&
-                    (extendsRefSymbol._kind === 'import' || extendsRefSymbol._kind === 'class') ||
+                    (
+                        extendsRefSymbol._kind === 'import' ||
+                        extendsRefSymbol._kind === 'class' ||
+                        extendsRefSymbol._kind === 'element'
+                    ) ||
                     decl.value === this.meta.root
                 ) {
                     this.extendTypedRule(
@@ -338,7 +328,14 @@ export class StylableProcessor {
 
         } else if (decl.prop === valueMapping.mixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(decl, this.diagnostics).forEach(mixin => {
+            parseMixin(decl, type => {
+                const mixinRefSymbol = this.meta.mappedSymbols[type];
+                if (mixinRefSymbol && mixinRefSymbol._kind === 'import' && !mixinRefSymbol.import.from.match(/.css$/)) {
+                    return 'args';
+                }
+                return 'named';
+
+            }, this.diagnostics).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
                 if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
                     mixins.push({
@@ -482,7 +479,7 @@ export interface StylableDirectives {
     '-st-root'?: boolean;
     '-st-compose'?: Array<ImportSymbol | ClassSymbol>;
     '-st-states'?: any;
-    '-st-extends'?: ImportSymbol | ClassSymbol;
+    '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-theme'?: boolean;
     '-st-global'?: SelectorAstNode[];
 }
@@ -513,7 +510,6 @@ export interface VarSymbol {
     value: string;
     text: string;
     valueType: string | null;
-    import: ImportSymbol | null;
     node: postcss.Node;
 }
 

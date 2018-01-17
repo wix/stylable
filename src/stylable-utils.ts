@@ -1,7 +1,16 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { DeclStylableProps, Imported, SDecl, SRule, StylableMeta } from './stylable-processor';
+
+import {
+    createSimpleSelectorChecker,
+    fixChunkOrdering,
+    isNodeMatch,
+    parseSelector,
+    SelectorAstNode,
+    stringifySelector,
+    traverseNode
+} from './selector-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
@@ -39,53 +48,75 @@ export function transformMatchesOnRule(rule: postcss.Rule, lineBreak: boolean) {
     return replaceRuleSelector(rule, { lineBreak });
 }
 
-export function scopeSelector(scopeSelector: string, targetSelector: string)
-: { selector: string, selectorAst: SelectorAstNode } {
+export function scopeSelector(scopeSelectorRule: string, targetSelectorRule: string, rootScopeLevel = false)
+    : { selector: string, selectorAst: SelectorAstNode } {
 
-    const ruleSelectorAst = parseSelector(scopeSelector);
-    const mixinSelectorAst = parseSelector(targetSelector);
+    const scopingSelectorAst = parseSelector(scopeSelectorRule);
+    const targetSelectorAst = parseSelector(targetSelectorRule);
 
     const nodes: any[] = [];
-    mixinSelectorAst.nodes.forEach(mixinSelector => {
+    targetSelectorAst.nodes.forEach(targetSelector => {
 
-        ruleSelectorAst.nodes.forEach(ruleSelector => {
-            const m: any[] = cloneDeep(mixinSelector.nodes);
-            const first = m[0];
+        scopingSelectorAst.nodes.forEach(scopingSelector => {
 
-            if (first && first.type === 'invalid' && first.value === '&') {
-                m.splice(0, 1);
-            } else if (first && first.type !== 'spacing') {
-                m.unshift({
+            const outputSelector = cloneDeep(targetSelector);
+
+            outputSelector.before = scopingSelector.before || outputSelector.before;
+
+            const first = outputSelector.nodes[0];
+            const parentRef = first.type === 'invalid' && first.value === '&';
+
+            const startsWithScoping = rootScopeLevel ? scopingSelector.nodes.every((node: any, i) => {
+                const o = outputSelector.nodes[i];
+                for (const k in node) {
+                    if (node[k] !== o[k]) {
+                        return false;
+                    }
+                }
+                return true;
+            }) : false;
+
+            if (first && first.type !== 'spacing' && !parentRef && !startsWithScoping) {
+                outputSelector.nodes.unshift(...cloneDeep(scopingSelector.nodes, true), {
                     type: 'spacing',
                     value: ' '
                 });
             }
-            nodes.push({
-                type: 'selector',
-                before: ruleSelector.before || mixinSelector.before,
-                nodes: cloneDeep(ruleSelector.nodes, true).concat(m)
+
+            traverseNode(outputSelector, (node, i, nodes) => {
+                if (node.type === 'invalid' && node.value === '&') {
+                    nodes.splice(i, 1, ...cloneDeep(scopingSelector.nodes, true));
+                }
             });
+
+            nodes.push(outputSelector);
+
         });
 
     });
 
-    ruleSelectorAst.nodes = nodes;
+    scopingSelectorAst.nodes = nodes;
 
     return {
-        selector: stringifySelector(ruleSelectorAst),
-        selectorAst: ruleSelectorAst
+        selector: stringifySelector(scopingSelectorAst),
+        selectorAst: scopingSelectorAst
     };
 }
 
-export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics?: Diagnostics) {
-    mixinRoot.walkRules((mixinRule: SRule) => {
-        const out = scopeSelector(rule.selector, mixinRule.selector);
-        mixinRule.selector = out.selector;
-        mixinRule.selectorAst = out.selectorAst;
+export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
+    let mixinRoot: postcss.Rule | null = null;
+    mixinAst.walkRules((mixinRule: postcss.Rule) => {
+        if (mixinRule.selector === '&' && !mixinRoot) {
+            mixinRoot = mixinRule;
+        } else {
+            const out = scopeSelector(rule.selector, mixinRule.selector);
+            mixinRule.selector = out.selector;
+            // mixinRule.selectorAst = out.selectorAst;
+        }
     });
 
-    if (mixinRoot.nodes) {
-        let nextRule = rule;
+    if (mixinAst.nodes) {
+        let nextRule: postcss.Rule | postcss.AtRule = rule;
         let mixinEntry: postcss.Declaration | null = null;
 
         rule.walkDecls(valueMapping.mixin, decl => {
@@ -94,40 +125,21 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics?: D
         if (!mixinEntry) {
             throw rule.error('missing mixin entry');
         }
-        mixinRoot.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
-            if (node.type === 'decl') {
-                if (isValidDeclaration(node)) {
+        // TODO: handle rules before and after decl on entry
+        mixinAst.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
+            if (node === mixinRoot) {
+                node.walkDecls(node => {
                     rule.insertBefore(mixinEntry!, node);
-                } else if (diagnostics) {
-                    diagnostics.warn(
-                        mixinEntry!,
-                        `not a valid mixin declaration ${mixinEntry!.value}`,
-                        { word: mixinEntry!.value }
-                    );
-                }
-            } else if (node.type === 'rule') {
+                });
+            } else if (node.type === 'decl') {
+                rule.insertBefore(mixinEntry!, node);
+            } else if (node.type === 'rule' || node.type === 'atrule') {
                 if (rule.parent.last === nextRule) {
                     rule.parent.append(node);
                 } else {
                     rule.parent.insertAfter(nextRule, node);
                 }
-                const toRemove: postcss.Declaration[] = [];
-                node.walkDecls(decl => {
-                    if (!isValidDeclaration(decl)) {
-                        toRemove.push(decl);
-                        if (diagnostics) {
-                            diagnostics.warn(
-                                mixinEntry!,
-                                `not a valid mixin declaration '${decl.prop}', and was removed`,
-                                { word: mixinEntry!.value }
-                            );
-                        }
-                    }
-                });
-                toRemove.forEach(decl => decl.remove());
                 nextRule = node;
-            } else if (node.type === 'atrule') {
-                throw new Error('mixins @ rules are not supported yet!');
             }
         });
     }
@@ -135,29 +147,62 @@ export function mergeRules(mixinRoot: postcss.Root, rule: SRule, diagnostics?: D
     return rule;
 }
 
-export function createClassSubsetRoot(root: postcss.Root, selectorPrefix: string) {
-    const mixinRoot = postcss.root();
-    let addRootDecls = true;
-    root.nodes!.forEach((node: SRule) => {
+export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
+    root: postcss.Root | postcss.AtRule,
+    selectorPrefix: string,
+    mixinTarget?: T,
+    isRoot = false): T {
+    // keyframes on class mixin?
+
+    const prefixType = parseSelector(selectorPrefix).nodes[0].nodes[0];
+    const containsPrefix = containsMatchInFistChunk.bind(null, prefixType);
+    const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
+
+    root.nodes!.forEach(node => {
         if (node.type === 'rule') {
-            if (node.selector.startsWith(selectorPrefix) && node.selector.indexOf(',') === -1) {
-                if (addRootDecls && node.selectorType === 'class') {
-                    addRootDecls = false;
-                    node.walkDecls(decl => {
-                        mixinRoot.append(decl.clone());
-                    });
-                } else {
-                    // TODO: handle complex selectors with ,
-                    const clone: SRule = node.clone({
-                        selector: node.selector.replace(selectorPrefix, '&')
-                    });
-                    // TODO: maybe delete clone.selectorAst
-                    mixinRoot.append(clone);
-                }
+            const ast = isRoot ?
+                scopeSelector(selectorPrefix, node.selector, true).selectorAst : parseSelector(node.selector);
+
+            const matchesSelectors = isRoot ? ast.nodes : ast.nodes.filter(containsPrefix);
+
+            if (matchesSelectors.length) {
+
+                const selector = stringifySelector({
+                    ...ast,
+                    nodes: matchesSelectors.map(selectorNode => {
+
+                        if (!isRoot) {
+                            fixChunkOrdering(selectorNode, prefixType);
+                        }
+
+                        return destructiveReplaceNode(
+                            selectorNode,
+                            prefixType,
+                            { type: 'invalid', value: '&' } as SelectorAstNode
+                        );
+                    })
+                });
+
+                mixinRoot.append(node.clone({ selector }));
             }
+        } else if (node.type === 'atrule') {
+            if (node.name === 'media') {
+                const mediaSubset = createSubsetAst(node, selectorPrefix, postcss.atRule({
+                    params: node.params,
+                    name: node.name
+                }), isRoot);
+                if (mediaSubset.nodes) {
+                    mixinRoot.append(mediaSubset);
+                }
+            } else if (isRoot) {
+                mixinRoot.append(node.clone());
+            }
+        } else {
+            // TODO: add warn?
         }
     });
-    return mixinRoot;
+
+    return mixinRoot as T;
 }
 
 export function removeUnusedRules(
@@ -165,8 +210,8 @@ export function removeUnusedRules(
     meta: StylableMeta,
     _import: Imported,
     usedFiles: string[],
-    resolvePath: (ctx: string, path: string) => string
-): void {
+    resolvePath: (ctx: string, path: string) => string): void {
+
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
@@ -179,7 +224,9 @@ export function removeUnusedRules(
                 }
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    const extend = symbol[valueMapping.extends];
+                    let extend = symbol[valueMapping.extends];
+                    extend = extend && extend._kind !== 'import' ? (extend.alias || extend) : extend;
+
                     if (extend && extend._kind === 'import' &&
                         usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1) {
                         return shouldOutput = false;
@@ -203,8 +250,8 @@ export function findDeclaration(importNode: Imported, test: any) {
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statment: any) => statment.prop === valueMapping.extends
-) {
+    test: any = (statment: any) => statment.prop === valueMapping.extends) {
+
     let found: any = null;
     root.walkRules(selector, (rule: SRule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
@@ -226,33 +273,32 @@ export function getDeclStylable(decl: SDecl): DeclStylableProps {
     }
 }
 
-export const reservedKeyFrames = [
-    'none',
-    'inherited',
-    'initial',
-    'unset',
-    /* single-timing-function */
-    'linear',
-    'ease',
-    'ease-in',
-    'ease-in-out',
-    'ease-out',
-    'step-start',
-    'step-end',
-    'start',
-    'end',
-    /* single-animation-iteration-count */
-    'infinite',
-    /* single-animation-direction */
-    'normal',
-    'reverse',
-    'alternate',
-    'alternate-reverse',
-    /* single-animation-fill-mode */
-    'forwards',
-    'backwards',
-    'both',
-    /* single-animation-play-state */
-    'running',
-    'paused'
-];
+function destructiveReplaceNode(
+    ast: SelectorAstNode,
+    matchNode: SelectorAstNode,
+    replacementNode: SelectorAstNode) {
+
+    traverseNode(ast, node => {
+        if (isNodeMatch(node, matchNode)) {
+            node.type = 'selector';
+            node.nodes = [replacementNode];
+        }
+    });
+    return ast;
+}
+
+function containsMatchInFistChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
+    let isMatch = false;
+    traverseNode(selectorNode, node => {
+        if (node.type === 'operator' || node.type === 'spacing') {
+            return false;
+        } else if (node.type === 'nested-pseudo-class') {
+            return true;
+        } else if (isNodeMatch(node, prefixType)) {
+            isMatch = true;
+            return false;
+        }
+        return undefined;
+    });
+    return isMatch;
+}

@@ -22,50 +22,25 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
-    ) {}
-    public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, false);
-    }
-    public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
-        return this.resolveName(meta, symbol, true);
-    }
-    public resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
-        const type = isElement ? 'element' : 'class';
-        let finalSymbol;
-        let finalMeta;
-        if (symbol._kind === type) {
-            finalSymbol = symbol;
-            finalMeta = meta;
-        } else if (symbol._kind === 'import') {
-            const resolved = this.deepResolve(symbol);
-            if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                if (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') {
-                    finalSymbol = resolved.symbol;
-                    finalMeta = resolved.meta;
+    ) { }
+    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+        if (!maybeImport || maybeImport._kind !== 'import') {
+            if (maybeImport && maybeImport._kind !== 'var') {
+                if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
+                    maybeImport = maybeImport.alias;
+                } else if (maybeImport[valueMapping.extends]) {
+                    maybeImport = maybeImport[valueMapping.extends];
                 } else {
-                    // TODO: warn
+                    return null;
                 }
             } else {
-                // TODO: warn
+                return null;
             }
-        } else {
-            // TODO: warn
         }
-
-        if (finalMeta && finalSymbol) {
-            return {
-                _kind: 'css',
-                symbol: finalSymbol,
-                meta: finalMeta
-            };
-        } else {
-            return null;
-        }
-    }
-    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
             return null;
         }
+
         const importSymbol: ImportSymbol = maybeImport;
 
         const { from } = importSymbol.import;
@@ -105,7 +80,56 @@ export class StylableResolver {
         while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
             resolved = this.resolve(resolved.symbol);
         }
+        if (
+            resolved
+            && resolved.symbol
+            && (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element')
+            && resolved.symbol.alias
+            && !resolved.symbol[valueMapping.extends]
+        ) {
+            return this.deepResolve(resolved.symbol.alias);
+        }
         return resolved;
+    }
+    public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
+        return this.resolveName(meta, symbol, false);
+    }
+
+    public resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
+        const type = isElement ? 'element' : 'class';
+        let finalSymbol;
+        let finalMeta;
+        if (symbol._kind === type) {
+            finalSymbol = symbol;
+            finalMeta = meta;
+        } else if (symbol._kind === 'import') {
+            const resolved = this.deepResolve(symbol);
+            if (resolved && resolved._kind === 'css' && resolved.symbol) {
+                if (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') {
+                    finalSymbol = resolved.symbol;
+                    finalMeta = resolved.meta;
+                } else {
+                    // TODO: warn
+                }
+            } else {
+                // TODO: warn
+            }
+        } else {
+            // TODO: warn
+        }
+
+        if (finalMeta && finalSymbol) {
+            return {
+                _kind: 'css',
+                symbol: finalSymbol,
+                meta: finalMeta
+            };
+        } else {
+            return null;
+        }
+    }
+    public resolveElement(meta: StylableMeta, symbol: StylableSymbol) {
+        return this.resolveName(meta, symbol, true);
     }
     public resolveExtends(
         meta: StylableMeta,
@@ -116,7 +140,7 @@ export class StylableResolver {
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 
-        const customSelector = meta.customSelectors[':--' + className];
+        const customSelector = isElement ? null : meta.customSelectors[':--' + className];
 
         if (!bucket[className] && !customSelector) {
             return [];

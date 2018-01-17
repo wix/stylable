@@ -222,4 +222,50 @@ describe('@custom-selector', () => {
 
     });
 
+    it('expand custom-selector that uses element in the same name', () => {
+
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./interface.st.css";
+                            -st-default: Interface;
+                        }
+                        Interface::cc{
+                            color: blue;
+                        }
+                    `
+                },
+                '/interface.st.css': {
+                    namespace: 'interface',
+                    content: `
+                        :import{
+                            -st-from: "./controls.st.css";
+                            -st-default: Controls;
+                        }
+
+                        @custom-selector :--cc .root Controls::cc;
+
+                        .root {
+                            -st-extends: Controls
+                        }
+
+                    `
+                },
+                '/controls.st.css': {
+                    namespace: 'controls',
+                    content: `
+                        @custom-selector :--cc .root cc;
+                    `
+                }
+            }
+        });
+
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.interface--root .controls--root cc');
+
+    });
 });

@@ -4,68 +4,6 @@ import {generateStylableRoot} from '../utils/generate-test-util';
 
 describe('Stylable postcss transform (Scoping)', () => {
 
-    describe('scoped elements', () => {
-
-        // tslint:disable-next-line:max-line-length
-        it('component/tag selector with first Capital letter automatically extends reference with identical name', () => {
-
-            const result = generateStylableRoot({
-                entry: `/style.st.css`,
-                files: {
-                    '/style.st.css': {
-                        namespace: 'ns',
-                        content: `
-                            :import {
-                                -st-from: "./imported.st.css";
-                                -st-default: Element;
-                            }
-                            Element {}
-                            .root Element {}
-                        `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'ns1',
-                        content: ``
-                    }
-                }
-            });
-
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1--root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns1--root');
-
-        });
-
-        // tslint:disable-next-line:max-line-length
-        it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
-
-            const result = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            :import {
-                                -st-from: "./inner.st.css";
-                                -st-default: Element;
-                            }
-                            Element::part {}
-                        `
-                    },
-                    '/inner.st.css': {
-                        namespace: 'inner',
-                        content: `
-                            .part {}
-                        `
-                    }
-                }
-            });
-
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.inner--root .inner--part');
-
-        });
-
-    });
-
     describe('scoped pseudo-elements', () => {
 
         it('component/tag selector that extends root with inner class targeting', () => {

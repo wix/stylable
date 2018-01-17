@@ -277,4 +277,46 @@ describe('Exports', () => {
 
     });
 
+    it('export alias imported from more then one level', () => {
+
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./index.st.css";
+                            -st-named: my-class;
+                        }
+                        .my-class {}
+
+                    `
+                },
+                '/index.st.css': {
+                    namespace: 'index',
+                    content: `
+                        :import {
+                            -st-from: "./project.st.css";
+                            -st-named: my-class;
+                        }
+                        .my-class {}
+
+                    `
+                },
+                '/project.st.css': {
+                    namespace: 'project',
+                    content: `
+                        .my-class {}
+
+                    `
+                }
+            }
+        });
+
+        expect(cssExports['my-class']).to.equal('project--my-class');
+
+    });
+
+
 });
