@@ -147,7 +147,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
     return rule;
 }
 
-export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
+export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     root: postcss.Root | postcss.AtRule,
     selectorPrefix: string,
     mixinTarget?: T,
@@ -187,7 +187,7 @@ export function createClassSubsetRoot<T extends postcss.Root | postcss.AtRule>(
             }
         } else if (node.type === 'atrule') {
             if (node.name === 'media') {
-                const mediaSubset = createClassSubsetRoot(node, selectorPrefix, postcss.atRule({
+                const mediaSubset = createSubsetAst(node, selectorPrefix, postcss.atRule({
                     params: node.params,
                     name: node.name
                 }), isRoot);
