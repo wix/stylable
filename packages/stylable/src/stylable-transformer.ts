@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalValue, ParsedValue, resolveArgumentsValue, ResolvedFormatter } from './functions';
+import { evalDeclarationValue, ParsedValue, resolveArgumentsValue, ResolvedFormatter } from './functions';
 import {
     isCssNativeFunction,
     nativePseudoClasses,
@@ -17,7 +17,7 @@ import {
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
-    createClassSubsetRoot,
+    createSubsetAst,
     findDeclaration,
     findRule,
     getDeclStylable,
@@ -132,7 +132,7 @@ export class StylableTransformer {
 
         ast.walkAtRules(/media$/, (atRule: SAtRule) => {
             atRule.sourceParams = atRule.params;
-            atRule.params = evalValue(
+            atRule.params = evalDeclarationValue(
                 this.resolver,
                 atRule.params,
                 meta,
@@ -145,7 +145,7 @@ export class StylableTransformer {
 
         ast.walkDecls((decl: SDecl) => {
             getDeclStylable(decl).sourceValue = decl.value;
-            decl.value = evalValue(
+            decl.value = evalDeclarationValue(
                 this.resolver,
                 decl.value,
                 meta,
@@ -177,7 +177,7 @@ export class StylableTransformer {
                     { word: varSymbol.name }
                 );
             } else {
-                metaExports[varSymbol.name] = evalValue(
+                metaExports[varSymbol.name] = evalDeclarationValue(
                     this.resolver,
                     varSymbol.text,
                     meta,
