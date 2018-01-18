@@ -1,5 +1,5 @@
 import * as postcss from 'postcss';
-import { evalValue } from './functions';
+import { evalDeclarationValue } from './functions';
 import { Stylable } from './stylable';
 import { Imported, SDecl, StylableMeta } from './stylable-processor';
 import { removeUnusedRules } from './stylable-utils';
@@ -221,7 +221,7 @@ export class Bundler {
                 const ruleOverride = postcss.rule({ selector: overrideSelector });
                 srcRule.walkDecls((decl: SDecl) => {
 
-                    const overriddenValue = evalValue(
+                    const overriddenValue = evalDeclarationValue(
                         this.stylable.resolver,
                         decl.stylable.sourceValue,
                         entryMeta,

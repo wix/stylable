@@ -99,6 +99,34 @@ describe('stylable-resolver', () => {
         expect(results).to.eql([]);
     });
 
+    it('should resolve classes', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./button.st.css";
+                            -st-default: Button;
+                        }
+                        .x {-st-extends: Button}
+                    `
+                },
+                '/button.st.css': {
+                    content: `
+                        .root{}
+                    `
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+        const btnMeta = fileProcessor.process('/button.st.css');
+        const res = resolver.resolve(entryMeta.mappedSymbols.x);
+
+        expect(res!.symbol).to.eql(btnMeta.classes.root);
+    });
+
     it('should resolve elements', () => {
 
         const { resolver, fileProcessor } = generateInfra({
@@ -126,10 +154,10 @@ describe('stylable-resolver', () => {
 
         const btnMeta = fileProcessor.process('/button.st.css');
         const entryMeta = fileProcessor.process('/entry.st.css');
-        const btn = entryMeta.elements.Button;
+        const btn = entryMeta.mappedSymbols.Button;
         const res = resolver.resolve(btn);
 
-        const btn1 = entryMeta.elements.ButtonX;
+        const btn1 = entryMeta.mappedSymbols.ButtonX;
         const res1 = resolver.resolve(btn1);
 
         expect(res!.symbol).to.eql(btnMeta.classes.root);
@@ -169,7 +197,7 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const btnXMeta = fileProcessor.process('/button-x.st.css');
 
-        const btn1 = entryMeta.elements.ButtonX;
+        const btn1 = entryMeta.mappedSymbols.ButtonX;
         const res1 = resolver.deepResolve(btn1);
 
         expect(res1!.symbol).to.eql(btnXMeta.classes.root);

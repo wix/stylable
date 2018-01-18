@@ -11,8 +11,11 @@ Formatters are functions that return a single CSS declaration value. They can re
 
 For example a `calc-font-size` formatter can return a different value for the font size depending on the provided argument.
 
+>**Note**  
+> If you need to return multiple declaration values, we recommend using **Stylable** [mixins](./mixins.md). 
 
-```js
+
+```jsx
 /* ./calc-font-size.js */
 module.exports = function(baseSize, modifier) {
     switch (modifier) {
@@ -41,6 +44,16 @@ module.exports = function(baseSize, modifier) {
 }
 ```
 
+```css
+    /* CSS output */
+    .header {
+        font-size: 32px;
+    }
+
+    .form {
+        font-size: 16px;
+    }
+```
 ```css
 /* CSS output*/
 .header {
@@ -96,7 +109,7 @@ You can also nest formatters to provide functions that are modular, composable a
 
 In this example the formatter `sin` is nested in the `abs` formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.
 
-```js
+```jsx
 /* ./math.js */
 module.export = {
     divBy2: function(num) {

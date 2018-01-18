@@ -940,6 +940,55 @@ describe('Mixins', () => {
 
         });
 
+        it('apply nested mixins', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./r.st.css";
+                            -st-default: R;
+                        }
+                        .x {
+                            -st-mixin: R;
+                        }
+                    `
+                    },
+                    '/r.st.css': {
+                        namespace: 'r',
+                        content: `
+                        :import {
+                            -st-from: "./y.st.css";
+                            -st-default: Y;
+                        }
+                        .r{
+                            -st-mixin: Y;
+                        }
+                    `
+                    },
+                    '/y.st.css': {
+                        namespace: 'y',
+                        content: `
+                        .y {
+
+                        }
+                    `
+                    }
+                }
+            });
+
+            matchAllRulesAndDeclarations(result, [
+                ['.entry--x', ''],
+                ['.entry--x .r--r', ''],
+                ['.entry--x .r--r .y--y', '']
+            ], '');
+
+        });
+
+
         describe('Mixins with named parameters', () => {
 
             it('apply mixin with :vars override (local scope)', () => {
@@ -1227,6 +1276,7 @@ describe('Mixins', () => {
 
         });
     });
+    
     describe('mixin diagnostics', () => {
 
         it('should not report missing function on -st-mixin directive', () => {

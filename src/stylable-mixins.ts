@@ -4,7 +4,7 @@ import { cssObjectToAst } from './parser';
 import { ClassSymbol, ImportSymbol, RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
-import { createClassSubsetRoot, findDeclaration, isValidDeclaration, mergeRules } from './stylable-utils';
+import { createSubsetAst, findDeclaration, isValidDeclaration, mergeRules } from './stylable-utils';
 import { MixinValue, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 
@@ -19,6 +19,7 @@ export function appendMixins(
     rule.mixins.forEach(mix => {
         appendMixin(mix, transformer, rule, meta, variableOverride, path);
     });
+    rule.mixins.length = 0;
     rule.walkDecls(valueMapping.mixin, node => node.remove());
 }
 
@@ -118,7 +119,7 @@ function handleImportedCSSMixin(
     path: string[],
     variableOverride?: Pojo<string>) {
 
-    const mixinRoot = createClassSubsetRoot<postcss.Root>(
+    const mixinRoot = createSubsetAst<postcss.Root>(
         resolvedClass.meta.ast,
         (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
         undefined,
@@ -152,7 +153,7 @@ function handleLocalClassMixin(
 
     const namedArgs = mix.mixin.options as Pojo<string>;
     const resolvedArgs = resolveArgumentsValue(namedArgs, transformer.resolver, meta, variableOverride);
-    const mixinRoot = createClassSubsetRoot<postcss.Root>(meta.ast, '.' + mix.ref.name);
+    const mixinRoot = createSubsetAst<postcss.Root>(meta.ast, '.' + mix.ref.name);
     transformer.transformAst(mixinRoot,
         meta,
         undefined,

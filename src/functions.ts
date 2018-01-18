@@ -29,7 +29,7 @@ export function resolveArgumentsValue(
     options: Pojo<string>, resolver: StylableResolver, meta: StylableMeta, variableOverride?: Pojo<string>) {
     const resolvedArgs = {} as Pojo<string>;
     for (const k in options) {
-        resolvedArgs[k] = evalValue(
+        resolvedArgs[k] = evalDeclarationValue(
             resolver,
             options[k],
             meta,
@@ -40,7 +40,7 @@ export function resolveArgumentsValue(
     return resolvedArgs;
 }
 
-export function evalValue(
+export function evalDeclarationValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
@@ -79,7 +79,7 @@ export function evalValue(
                         const varSymbol = meta.mappedSymbols[varName];
 
                         if (varSymbol && varSymbol._kind === 'var') {
-                            const resolvedValue = evalValue(
+                            const resolvedValue = evalDeclarationValue(
                                 resolver,
                                 stripQuotation(varSymbol.text),
                                 meta,
@@ -100,7 +100,7 @@ export function evalValue(
 
                                 if (resolvedVar._kind === 'css') {
                                     if (resolvedVarSymbol._kind === 'var') {
-                                        const resolvedValue = evalValue(
+                                        const resolvedValue = evalDeclarationValue(
                                             resolver,
                                             stripQuotation(resolvedVarSymbol.text),
                                             resolvedVar.meta,
