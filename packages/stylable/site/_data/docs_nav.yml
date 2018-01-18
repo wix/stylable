@@ -63,7 +63,7 @@
     title: Compose CSS Class
   - id: references/custom-selectors
     title: Custom Selectors
-  - id: references/mixin-syntax
+  - id: references/mixins
     title: Mixins
   - id: references/formatters
     title: Formatters
