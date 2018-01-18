@@ -88,5 +88,5 @@ When importing another stylesheet, the default import represents the root of the
 * [Extend a stylesheet](./extend-stylesheet.md)
 * [Import variables](./variables.md#import-variables)
 * [Import classes](./class-selectors.md#import-classes)
-* [Mixins](./mixin-syntax.md)
+* [Mixins](./mixins.md)
 * [Component variants](../guides/component-variants.md) and [Shared classes](../guides/shared-classes.md)

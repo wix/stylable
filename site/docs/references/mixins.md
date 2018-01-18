@@ -1,5 +1,5 @@
 ---
-id: references/mixins-syntax
+id: references/mixins
 title: Mixins
 layout: docs
 ---
