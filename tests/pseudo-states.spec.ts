@@ -390,6 +390,32 @@ describe('pseudo-states', () => {
                     });
                 });
 
+                it('should transform string using a contains validator with a variable', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    validPrefix: user;
+                                }
+
+                                .my-class {
+                                    -st-states: state1(string(contains(value(validPrefix))));
+                                }
+                                .my-class:state1(userName) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="userName"] {}'
+                    });
+                });
+
                 it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
                     const config = {
                         entry: `/entry.st.css`,

@@ -1,5 +1,6 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
+import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
 import { StringValidatorFunctions, validators } from './state-validators';
@@ -112,7 +113,6 @@ export function resolvePseudoState(
     symbol: StylableSymbol | null,
     origin: StylableMeta,
     originSymbol: ClassSymbol | ElementSymbol,
-    autoStateAttrName: AutoStateAttrName,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule?: postcss.Rule) {
@@ -123,7 +123,9 @@ export function resolvePseudoState(
     if (symbol !== originSymbol) {
         const states = originSymbol[valueMapping.states];
         if (states && states.hasOwnProperty(name)) {
-            setStateToNode(states, name, node, origin.namespace, autoStateAttrName, diagnostics, rule);
+            setStateToNode(
+                states, meta, name, node, origin.namespace, resolver, diagnostics, rule
+            );
             return current;
         }
     }
@@ -135,7 +137,9 @@ export function resolvePseudoState(
 
             if (states && states.hasOwnProperty(name)) {
                 found = true;
-                setStateToNode(states, name, node, current.namespace, autoStateAttrName, diagnostics, rule);
+                setStateToNode(
+                    states, meta, name, node, current.namespace, resolver, diagnostics, rule
+                );
                 break;
             } else if (extend) {
                 const next = resolver.resolve(extend);
@@ -164,10 +168,11 @@ export function resolvePseudoState(
 
 export function setStateToNode(
     states: Pojo<StateParsedValue>,
+    meta: StylableMeta,
     name: string,
     node: SelectorAstNode,
     namespace: string,
-    autoStateAttrName: AutoStateAttrName,
+    resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule?: postcss.Rule) {
 
@@ -182,25 +187,53 @@ export function setStateToNode(
     } else if (typeof stateDef === 'object') {
         switch (stateDef.type) {
             case 'string':
-                const defaultStringValue = '';
-                const actualParam = node.content || stateDef.defaultValue || defaultStringValue;
-
-                if (rule) {
-                    stateDef.validators.forEach((validator: StateTypeValidator) => {
-                        const currentValidator = getStringValidatorFunc(validator.name);
-                        if (!currentValidator(actualParam, validator.args[0])) {
-                            // tslint:disable-next-line:max-line-length
-                            diagnostics.warn(rule, `pseudo-state ${stateDef.type} validator "${validator.name}(${validator.args.join(', ')})" failed on: "${actualParam}"`, { word: actualParam });
-                        }
-                    });
-                }
-                node.type = 'attribute';
-                node.content = `${autoStateAttrName(name, namespace)}="${actualParam}"`;
+                handleStringState(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
                 break;
             default:
                 throw new Error('unhandled validator type'); // TODO: handle with proper diagnostics
         }
     }
+}
+
+function handleStringState(
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule: postcss.Rule | undefined,
+    node: SelectorAstNode,
+    stateDef: StateParsedValue,
+    name: string,
+    namespace: string) {
+    const actualParam = resolveStringParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
+    if (rule) {
+        stateDef.validators.forEach((validator: StateTypeValidator) => {
+            const currentValidator = getStringValidatorFunc(validator.name);
+            const validatorArg = resolveStringParam(
+                meta, resolver, diagnostics, rule, validator.args[0], stateDef.defaultValue
+            );
+
+            if (!currentValidator(actualParam, validatorArg)) {
+                // tslint:disable-next-line:max-line-length
+                diagnostics.warn(rule, `pseudo-state ${stateDef.type} validator "${validator.name}(${validator.args.join(', ')})" failed on: "${actualParam}"`, { word: actualParam });
+            }
+        });
+    }
+    node.type = 'attribute';
+    node.content = `${autoStateAttrName(name, namespace)}="${actualParam}"`;
+}
+
+function resolveStringParam(
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule?: postcss.Rule,
+    nodeContent?: string,
+    defaultValue?: string) {
+
+    const defaultStringValue = '';
+    const param = nodeContent || defaultValue || defaultStringValue;
+
+    return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }
 
 function getStringValidatorFunc(name: keyof StringValidatorFunctions) {

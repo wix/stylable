@@ -435,7 +435,7 @@ export class StylableTransformer {
 
                     current = resolvePseudoState(
                         current, node, name, symbol, meta, originSymbol,
-                        autoStateAttrName, this.resolver, this.diagnostics, rule
+                        this.resolver, this.diagnostics, rule
                     );
                 } else if (type === 'nested-pseudo-class') {
                     if (name === 'global') {
