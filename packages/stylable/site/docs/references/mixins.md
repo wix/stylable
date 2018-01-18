@@ -2,6 +2,7 @@
 id: references/mixins
 title: Mixins
 layout: docs
+redirect_from: "docs/references/mixin-syntax"
 ---
 
 
