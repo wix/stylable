@@ -17,7 +17,7 @@ use(mediaQuery);
 // - states belonging to an extended class (multi level)
 // - lookup order
 
-describe('pseudo-classes', () => {
+describe('pseudo-states', () => {
 
     describe('process', () => {
         // What does it do?
@@ -62,8 +62,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'word',
-                                    value: 'string'
+                                    type: 'string'
                                 }
 
                             }
@@ -84,8 +83,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string'
+                                    type: 'string'
                                 }
                             }
                         }
@@ -105,8 +103,7 @@ describe('pseudo-classes', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     defaultValue: 'someDefaultString',
-                                    type: 'word',
-                                    value: 'string'
+                                    type: 'string'
                                 }
                             }
                         }
@@ -126,8 +123,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string',
+                                    type: 'string',
                                     validators: [
                                         {
                                             name: 'minLength',
@@ -154,8 +150,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string',
+                                    type: 'string',
                                     validators: [
                                         {
                                             name: 'minLength',
@@ -302,7 +297,9 @@ describe('pseudo-classes', () => {
 
             describe('string', () => {
 
-                it('should transform using stylables default string validator', () => {
+                // TODO: add test for two states in the same stylesheet with the same name and different types
+
+                it('should transform string validator', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -323,7 +320,7 @@ describe('pseudo-classes', () => {
                     });
                 });
 
-                it('should support default values for stylables default string validator', () => {
+                it('should support default values for string validator', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -331,7 +328,7 @@ describe('pseudo-classes', () => {
                                 namespace: 'entry',
                                 content: `
                                 .my-class {
-                                    -st-states: stateWithDefault(string) myDefaultString;
+                                    -st-states: stateWithDefault(string) myDefault String;
                                 }
                                 .my-class:stateWithDefault {}
                                 `
@@ -340,7 +337,81 @@ describe('pseudo-classes', () => {
                     });
 
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="myDefaultString"] {}'
+                        1: '.entry--my-class[data-entry-statewithdefault="myDefault String"] {}'
+                    });
+                });
+
+                it('should supprt default values through a variable', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    myID: user;
+                                }
+
+                                .my-class {
+                                    -st-states: stateWithDefault(string) value(myID)name;
+                                }
+                                .my-class:stateWithDefault {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-statewithdefault="username"] {}'
+                    });
+                });
+
+                // TODO: test for case insensitivity in validators
+
+                it('should transform string using a valid contains validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(contains(user)));
+                                }
+                                .my-class:state1(userName) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="userName"] {}'
+                    });
+                });
+
+                it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(contains(user)));
+                                }
+                                |.my-class:state1($wrongState$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "contains(user)" failed on: "wrongState"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="wrongState"] {}'
                     });
                 });
             });
