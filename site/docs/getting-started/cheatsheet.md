@@ -23,7 +23,7 @@ Syntax unique to Stylable - Click each to access code examples and descriptions
     * [**`-st-extends`**](../references/extend-stylesheet.md) Simple selector base class
     * [**`-st-compose`**](../references/compose-css-class.md) Append class selector
     * [**`-st-states`**](../references/pseudo-classes.md) Define custom pseudo-classes
-    * [**`-st-mixin`**](../references/mixin-syntax.md) Apply mixins to CSS ruleset
+    * [**`-st-mixin`**](../references/mixins.md) Apply mixins to CSS ruleset
 * **Selectors**
     * [**`.xX`**](../references/class-selectors.md) Class selectors
     * [**`X`**](../references/tag-selectors) Tag/component selectors
