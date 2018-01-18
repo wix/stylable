@@ -46,6 +46,8 @@ export interface StateTypeValidator {
 
 export interface StringValidators {
     contains: string;
+    minLength: string;
+    maxLength: string;
 }
 
 export interface StateTypes {

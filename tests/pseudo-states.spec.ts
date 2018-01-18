@@ -416,6 +416,7 @@ describe('pseudo-states', () => {
                     });
                 });
 
+                // tslint:disable-next-line:max-line-length
                 it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
                     const config = {
                         entry: `/entry.st.css`,
@@ -438,6 +439,103 @@ describe('pseudo-states', () => {
                     ]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="wrongState"] {}'
+                    });
+                });
+
+                it('should transform using multiple validators (minLength, maxLength)', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(minLength(3), maxLength(5)));
+                                }
+                                .my-class:state1(user) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should transform and warn when passing an invalid value to a minLength validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(minLength(7)));
+                                }
+                                |.my-class:state1($user$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "minLength(7)" failed on: "user"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should transform and warn when passing an invalid value to a maxLength validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(maxLength(3)));
+                                }
+                                |.my-class:state1($user$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "maxLength(3)" failed on: "user"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should warn when trying to use an unknown string validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(missing(someValue)));
+                                }
+                                |.my-class:state1($passedValue$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state invoked unknown string validator "missing(someValue)" with "passedValue"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="passedValue"] {}'
                     });
                 });
             });

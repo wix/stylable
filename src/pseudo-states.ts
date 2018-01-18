@@ -12,9 +12,19 @@ import { ParsedValue, Pojo, StateParsedValue, StateTypes, StateTypeValidator, St
 
 const valueParser = require('postcss-value-parser');
 
+/* tslint:disable:max-line-length */
+const errors = {
+    UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo class "${name}"`,
+    VALIDATION_FAILED: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state ${type} validator "${name}(${args.join(', ')})" failed on: "${actualParam}"`,
+    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`
+};
+/* tslint:enable:max-line-length */
+
 export const stateTypesDic: StateTypes = {
     string: {
-        contains: 'string'
+        contains: 'string',
+        minLength: 'string',
+        maxLength: 'string'
     }
 };
 export type stateTypes = keyof StateTypes;
@@ -159,7 +169,7 @@ export function resolvePseudoState(
 
     if (!found && rule) {
         if (nativePseudoClasses.indexOf(name) === -1) {
-            diagnostics.warn(rule, `unknown pseudo class "${name}"`, { word: name });
+            diagnostics.warn(rule, errors.UNKNOWN_STATE_TYPE(name), { word: name });
         }
     }
 
@@ -212,9 +222,14 @@ function handleStringState(
                 meta, resolver, diagnostics, rule, validator.args[0], stateDef.defaultValue
             );
 
-            if (!currentValidator(actualParam, validatorArg)) {
-                // tslint:disable-next-line:max-line-length
-                diagnostics.warn(rule, `pseudo-state ${stateDef.type} validator "${validator.name}(${validator.args.join(', ')})" failed on: "${actualParam}"`, { word: actualParam });
+            if (currentValidator && !currentValidator(actualParam, validatorArg)) {
+                diagnostics.warn(rule, errors.VALIDATION_FAILED(
+                    stateDef.type, validator.name, validator.args, actualParam), { word: actualParam }
+                );
+            } else if (!currentValidator) {
+                diagnostics.warn(rule, errors.UKNOWN_VALIDATOR(
+                    stateDef.type, validator.name, validator.args, actualParam), { word: actualParam }
+                );
             }
         });
     }
