@@ -127,7 +127,7 @@ function handleImportedCSSMixin(
     );
 
     const namedArgs = mix.mixin.options as Pojo<string>;
-    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer.resolver, meta, variableOverride);
+    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer, meta, variableOverride, path);
 
     transformer.transformAst(
         mixinRoot,
@@ -152,7 +152,7 @@ function handleLocalClassMixin(
     rule: SRule) {
 
     const namedArgs = mix.mixin.options as Pojo<string>;
-    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer.resolver, meta, variableOverride);
+    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer, meta, variableOverride, path);
     const mixinRoot = createSubsetAst<postcss.Root>(meta.ast, '.' + mix.ref.name);
     transformer.transformAst(mixinRoot,
         meta,
