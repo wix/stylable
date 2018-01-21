@@ -594,7 +594,7 @@ export class StylableTransformer {
     public handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
         const tRule = meta.elements[name] as StylableSymbol;
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
-        const next = this.resolver.resolve(extend);
+        const next = this.resolver.deepResolve(extend);
         if (next && next._kind === 'css') {
             if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                 node.before = '';
