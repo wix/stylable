@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as path from 'path';
 import * as postcss from 'postcss';
 import { createTransformer } from '../utils/generate-test-util';
 
@@ -128,8 +129,8 @@ describe('post-process-and-hooks', () => {
         const expected = [
             ['red', 'myColor', true, []],
             ['green', 'myBG', true, []],
-            ['Ariel', 'param2', true, ['default from /entry.st.css']],
-            ['Ariel', 'param2', true, ['default from /entry.st.css']]
+            ['Ariel', 'param2', true, [`default from ${path.resolve('/entry.st.css')}`]],
+            ['Ariel', 'param2', true, [`default from ${path.resolve('/entry.st.css')}`]]
         ];
 
         const res = t.transform(t.fileProcessor.process('/entry.st.css'));
