@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, ParsedValue, resolveArgumentsValue, ResolvedFormatter } from './functions';
+import { evalDeclarationValue, ParsedValue, ResolvedFormatter } from './functions';
 import {
     isCssNativeFunction,
     nativePseudoClasses,
@@ -139,7 +139,8 @@ export class StylableTransformer {
                 atRule,
                 variableOverride,
                 this.replaceValueHook,
-                this.diagnostics
+                this.diagnostics,
+                path.slice()
             );
         });
 
@@ -152,7 +153,8 @@ export class StylableTransformer {
                 decl,
                 variableOverride,
                 this.replaceValueHook,
-                this.diagnostics
+                this.diagnostics,
+                path.slice()
             );
         });
 
@@ -761,7 +763,7 @@ export class StylableTransformer {
             }
         }
 
-        return current;
+        return meta;
     }
     // TODO: Extract to scoping utils
     public autoStateAttrName(stateName: string, namespace: string) {

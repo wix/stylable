@@ -1,6 +1,6 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import * as postcss from 'postcss';
-import {generateStylableRoot} from '../utils/generate-test-util';
+import { generateStylableRoot } from '../utils/generate-test-util';
 
 describe('Stylable postcss transform (Scoping)', () => {
 
@@ -150,6 +150,57 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root .ns1--inner');
             expect((result.nodes![2] as postcss.Rule).selector)
                 .to.equal('.ns--app.ns1--root .ns1--inner .ns2--deep');
+
+        });
+
+        it('class selector that extends root uses pseudo-element after pseudo-class', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Container;
+                            }
+                            .app {
+                                -st-extends: Container;
+                            }
+                            .app:hover::inner {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .root {
+                                -st-extends: Base
+                            }
+                            .inner {
+
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+
+                            }
+                            .deep {
+
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root:hover .ns1--inner');
 
         });
 
