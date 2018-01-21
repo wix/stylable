@@ -763,7 +763,7 @@ export class StylableTransformer {
             }
         }
 
-        return current;
+        return meta;
     }
     // TODO: Extract to scoping utils
     public autoStateAttrName(stateName: string, namespace: string) {
