@@ -93,7 +93,7 @@ describe('pseudo-states', () => {
                 it('including a default value', () => {
                     const res = processSource(`
                         .root {
-                            -st-states: state1(string) someDefaultString;
+                            -st-states: state1(string) some Default String;
                         }
                     `, { from: 'path/to/style.css' });
 
@@ -102,7 +102,7 @@ describe('pseudo-states', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    defaultValue: 'someDefaultString',
+                                    defaultValue: 'some Default String',
                                     type: 'string'
                                 }
                             }
@@ -161,6 +161,51 @@ describe('pseudo-states', () => {
                                             args: ['7']
                                         }
                                     ]
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            describe('number', () => {
+                it('as a simple validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(number), state2(number());
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    type: 'number'
+                                },
+                                state2: {
+                                    type: 'number'
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('including a default value', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(number) 7;
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    defaultValue: '7',
+                                    type: 'number'
                                 }
                             }
                         }
@@ -293,11 +338,9 @@ describe('pseudo-states', () => {
 
         });
 
-        describe('custom type / validation', () => {
+        describe('advanced type / validation', () => {
 
             describe('string', () => {
-
-                // TODO: add test for two states in the same stylesheet with the same name and different types
 
                 it('should transform string validator', () => {
                     const res = generateStylableResult({
@@ -536,6 +579,79 @@ describe('pseudo-states', () => {
                     ]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="passedValue"] {}'
+                    });
+                });
+            });
+
+            describe('number', () => {
+                it('should transform number validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(number);
+                                }
+                                .my-class:state1(42) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="42"] {}'
+                    });
+                });
+
+                it('should warn when a non-number default value is invoked', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number) defaultBlah;
+                                }
+                                |.my-class:$state1$()| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: 'pseudo-state value "defaultBlah" does not match type "number" of "state1"',
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="defaultBlah"] {}'
+                    });
+                });
+
+                it('should warn on an non-number value passed', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number);
+                                }
+                                |.my-class:state1(blah)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: 'pseudo-state value "blah" does not match type "number" of "state1"',
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="blah"] {}'
                     });
                 });
             });

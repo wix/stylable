@@ -16,7 +16,8 @@ const valueParser = require('postcss-value-parser');
 const errors = {
     UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo class "${name}"`,
     VALIDATION_FAILED: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state ${type} validator "${name}(${args.join(', ')})" failed on: "${actualParam}"`,
-    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`
+    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`,
+    VALUE_TYPE_MISMATCH: (type: string, name: string, actualParam: string) => `pseudo-state value "${actualParam}" does not match type "${type}" of "${name}"`
 };
 /* tslint:enable:max-line-length */
 
@@ -25,7 +26,8 @@ export const stateTypesDic: StateTypes = {
         contains: 'string',
         minLength: 'string',
         maxLength: 'string'
-    }
+    },
+    number: {}
 };
 export type stateTypes = keyof StateTypes;
 export type validatorTypes = keyof StateTypes['string'];
@@ -61,7 +63,7 @@ function resolveStateType(
     //     throw new Error('Emtpry State Function');
     // }
     if (stateDefinition.nodes.length > 1) {
-        throw new Error('Too many Stuff');
+        throw new Error('Too many types provided');
     }
     const paramType = stateDefinition.nodes[0];
     const stateType: StateParsedValue = {
@@ -73,7 +75,6 @@ function resolveStateType(
     if (isCustomMapping(stateDefinition)) {
         mappedStates[stateDefinition.value] = stateType.type.trim().replace(/\\["']/g, '"');
     } else if (paramType.type === 'function') {
-        // handle types with arguments
         if (paramType.nodes.length > 0) {
             resolveArguments(paramType, stateType);
         }
@@ -196,8 +197,9 @@ export function setStateToNode(
         node.value = stateDef;
     } else if (typeof stateDef === 'object') {
         switch (stateDef.type) {
+            case 'number':
             case 'string':
-                handleStringState(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
+                resolveState(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
                 break;
             default:
                 throw new Error('unhandled validator type'); // TODO: handle with proper diagnostics
@@ -205,7 +207,7 @@ export function setStateToNode(
     }
 }
 
-function handleStringState(
+function resolveState(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -214,11 +216,16 @@ function handleStringState(
     stateDef: StateParsedValue,
     name: string,
     namespace: string) {
-    const actualParam = resolveStringParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
+    const actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
+
     if (rule) {
+        if (actualParam) {
+            validateType(stateDef, actualParam, name, rule, diagnostics);
+        }
+
         stateDef.validators.forEach((validator: StateTypeValidator) => {
             const currentValidator = getStringValidatorFunc(validator.name);
-            const validatorArg = resolveStringParam(
+            const validatorArg = resolveParam(
                 meta, resolver, diagnostics, rule, validator.args[0], stateDef.defaultValue
             );
 
@@ -237,7 +244,7 @@ function handleStringState(
     node.content = `${autoStateAttrName(name, namespace)}="${actualParam}"`;
 }
 
-function resolveStringParam(
+function resolveParam(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -249,6 +256,21 @@ function resolveStringParam(
     const param = nodeContent || defaultValue || defaultStringValue;
 
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
+}
+
+function validateType(
+    stateDef: StateParsedValue,
+    value: string,
+    stateName: string,
+    rule: postcss.Rule,
+    diagnostics: Diagnostics) {
+    if (stateDef.type === 'number') {
+        if (value && isNaN(Number(value))) {
+            diagnostics.warn(rule, errors.VALUE_TYPE_MISMATCH(
+                stateDef.type, stateName, value), { word: stateName }
+            );
+        }
+    }
 }
 
 function getStringValidatorFunc(name: keyof StringValidatorFunctions) {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Diagnostics, safeParse, StylableResults } from '../../src/index';
+import { Diagnostics, safeParse, StylableMeta, StylableResults } from '../../src/index';
 import { process } from '../../src/stylable-processor';
 import { Config, generateFromMock } from './generate-test-util';
 const deindent = require('deindent');

@@ -50,8 +50,11 @@ export interface StringValidators {
     maxLength: string;
 }
 
+export interface NumberValidators {}
+
 export interface StateTypes {
     string: StringValidators;
+    number: NumberValidators;
 }
 
 export interface StateParsedValue {
