@@ -654,6 +654,106 @@ describe('pseudo-states', () => {
                         1: '.entry--my-class[data-entry-state1="blah"] {}'
                     });
                 });
+
+                it('should warn on invalid min validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number(min(3)));
+                                }
+                                |.my-class:state1(1)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "min(3)" failed on: "1"',
+                            file: '/entry.st.css'
+                        }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="1"] {}'
+                    });
+                });
+
+                it('should warn on invalid max validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number(max(5)));
+                                }
+                                |.my-class:state1(42)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "max(5)" failed on: "42"',
+                            file: '/entry.st.css'
+                        }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="42"] {}'
+                    });
+                });
+
+                it('should warn on invalid multipleOf validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number(multipleOf(5)));
+                                }
+                                |.my-class:state1(42)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "multipleOf(5)" failed on: "42"',
+                            file: '/entry.st.css'
+                        }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="42"] {}'
+                    });
+                });
+
+                it('should not warn on valid min/max/multipleOf validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number(min(3), max(100), multipleOf(5)));
+                                }
+                                |.my-class:state1(40)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, []);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="40"] {}'
+                    });
+                });
             });
         });
 

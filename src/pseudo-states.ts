@@ -3,7 +3,7 @@ import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
-import { StringValidatorFunctions, validators } from './state-validators';
+import { NumberValidatorFunctions, StringValidatorFunctions, validators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
@@ -27,7 +27,11 @@ export const stateTypesDic: StateTypes = {
         minLength: 'string',
         maxLength: 'string'
     },
-    number: {}
+    number: {
+        min: 'string',
+        max: 'string',
+        multipleOf: 'string'
+    }
 };
 export type stateTypes = keyof StateTypes;
 export type validatorTypes = keyof StateTypes['string'];
@@ -224,7 +228,13 @@ function resolveState(
         }
 
         stateDef.validators.forEach((validator: StateTypeValidator) => {
-            const currentValidator = getStringValidatorFunc(validator.name);
+            let currentValidator;
+            if (stateDef.type === 'string') {
+                currentValidator = getStringValidatorFunc((validator.name as keyof StringValidatorFunctions));
+            } else if (stateDef.type === 'number') {
+                currentValidator = getNumberValidatorFunc((validator.name as keyof NumberValidatorFunctions));
+            }
+
             const validatorArg = resolveParam(
                 meta, resolver, diagnostics, rule, validator.args[0], stateDef.defaultValue
             );
@@ -275,6 +285,10 @@ function validateType(
 
 function getStringValidatorFunc(name: keyof StringValidatorFunctions) {
     return validators.string[name];
+}
+
+function getNumberValidatorFunc(name: keyof NumberValidatorFunctions) {
+    return validators.number[name];
 }
 
 export function autoStateAttrName(stateName: string, namespace: string) {

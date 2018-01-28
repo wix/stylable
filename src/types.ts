@@ -40,7 +40,7 @@ export interface ParsedValue {
 }
 
 export interface StateTypeValidator {
-    name: keyof StringValidators;
+    name: keyof StringValidators | keyof NumberValidators;
     args: string[];
 }
 
@@ -50,7 +50,11 @@ export interface StringValidators {
     maxLength: string;
 }
 
-export interface NumberValidators {}
+export interface NumberValidators {
+    min: string;
+    max: string;
+    multipleOf: string;
+}
 
 export interface StateTypes {
     string: StringValidators;
