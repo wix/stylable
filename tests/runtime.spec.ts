@@ -40,13 +40,6 @@ describe('runtime', () => {
             });
         });
 
-        it('should add states mapping', () => {
-            const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
-            expect(runtime('', { on: true, off: false })).to.eql({
-                [`data-${runtime.$stylesheet.namespace}-${'on'}`]: true
-            });
-        });
-
         it('should append className from props', () => {
             const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
             const props = { className: 'class-from-props' };
@@ -55,24 +48,46 @@ describe('runtime', () => {
             });
         });
 
-        it('should copy data- props ', () => {
-            const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
-            expect(runtime('root', {}, { 'data-prop': true })).to.eql({
-                'className': 'namespace--root',
-                'data-prop': true
+        describe('states', () => {
+            it('should add states mapping', () => {
+                const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+                expect(runtime('', { on: true, off: false })).to.eql({
+                    [`data-${runtime.$stylesheet.namespace}-${'on'}`]: true
+                });
             });
-        });
 
-        it('should override states with data- props ', () => {
+            it('should add states mapping with a string value', () => {
+                const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+                expect(runtime('', { column: 'username' })).to.eql({
+                    [`data-${runtime.$stylesheet.namespace}-${'column'}`]: 'username'
+                });
+            });
 
-            const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
-            const nsStateName = `data-${runtime.$stylesheet.namespace}-${'on'}`;
+            it('should add states mapping with a number value', () => {
+                const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+                expect(runtime('', { selectedindex: 7 })).to.eql({
+                    [`data-${runtime.$stylesheet.namespace}-${'selectedindex'}`]: 7
+                });
+            });
 
-            expect(runtime('root', { a: false }, { [nsStateName]: true })).to.eql({
-                className: 'namespace--root',
-                [nsStateName]: true
+            it('should copy data- props ', () => {
+                const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+                expect(runtime('root', {}, { 'data-prop': true })).to.eql({
+                    'className': 'namespace--root',
+                    'data-prop': true
+                });
+            });
+
+            it('should override states with data- props ', () => {
+
+                const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
+                const nsStateName = `data-${runtime.$stylesheet.namespace}-${'on'}`;
+
+                expect(runtime('root', { a: false }, { [nsStateName]: true })).to.eql({
+                    className: 'namespace--root',
+                    [nsStateName]: true
+                });
             });
         });
     });
-
 });

@@ -1,5 +1,5 @@
 export interface StateMap {
-    [key: string]: boolean;
+    [key: string]: string | number | boolean;
 }
 
 export interface Stylesheet {
