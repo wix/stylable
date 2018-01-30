@@ -1,5 +1,5 @@
 export interface StateMap {
-    [key: string]: boolean;
+    [key: string]: string | number | boolean;
 }
 
 export interface Stylesheet {
@@ -46,8 +46,6 @@ export interface StateTypeValidator {
 
 export interface StateParsedValue {
     type: string;
-    value: string;
-    nodes?: any;
     defaultValue?: string;
     validators: StateTypeValidator[];
 }

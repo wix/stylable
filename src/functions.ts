@@ -3,7 +3,7 @@ import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
-import { replaceValueHook } from './stylable-transformer';
+import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
@@ -26,21 +26,29 @@ const errors = {
 /* tslint:enable:max-line-length */
 
 export function resolveArgumentsValue(
-    options: Pojo<string>, resolver: StylableResolver, meta: StylableMeta, variableOverride?: Pojo<string>) {
+    options: Pojo<string>,
+    transformer: StylableTransformer,
+    meta: StylableMeta,
+    variableOverride?: Pojo<string>,
+    path?: string[]) {
+
     const resolvedArgs = {} as Pojo<string>;
     for (const k in options) {
-        resolvedArgs[k] = evalValue(
-            resolver,
+        resolvedArgs[k] = evalDeclarationValue(
+            transformer.resolver,
             options[k],
             meta,
             postcss.decl(),
-            variableOverride
+            variableOverride,
+            transformer.replaceValueHook,
+            undefined,
+            path
         );
     }
     return resolvedArgs;
 }
 
-export function evalValue(
+export function evalDeclarationValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
@@ -79,7 +87,7 @@ export function evalValue(
                         const varSymbol = meta.mappedSymbols[varName];
 
                         if (varSymbol && varSymbol._kind === 'var') {
-                            const resolvedValue = evalValue(
+                            const resolvedValue = evalDeclarationValue(
                                 resolver,
                                 stripQuotation(varSymbol.text),
                                 meta,
@@ -100,7 +108,7 @@ export function evalValue(
 
                                 if (resolvedVar._kind === 'css') {
                                     if (resolvedVarSymbol._kind === 'var') {
-                                        const resolvedValue = evalValue(
+                                        const resolvedValue = evalDeclarationValue(
                                             resolver,
                                             stripQuotation(resolvedVarSymbol.text),
                                             resolvedVar.meta,

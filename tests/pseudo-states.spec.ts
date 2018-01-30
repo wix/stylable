@@ -17,7 +17,7 @@ use(mediaQuery);
 // - states belonging to an extended class (multi level)
 // - lookup order
 
-describe('pseudo-classes', () => {
+describe('pseudo-states', () => {
 
     describe('process', () => {
         // What does it do?
@@ -62,8 +62,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'word',
-                                    value: 'string'
+                                    type: 'string'
                                 }
 
                             }
@@ -84,8 +83,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string'
+                                    type: 'string'
                                 }
                             }
                         }
@@ -95,7 +93,7 @@ describe('pseudo-classes', () => {
                 it('including a default value', () => {
                     const res = processSource(`
                         .root {
-                            -st-states: state1(string) someDefaultString;
+                            -st-states: state1(string) some Default String;
                         }
                     `, { from: 'path/to/style.css' });
 
@@ -104,9 +102,8 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    defaultValue: 'someDefaultString',
-                                    type: 'word',
-                                    value: 'string'
+                                    defaultValue: 'some Default String',
+                                    type: 'string'
                                 }
                             }
                         }
@@ -126,8 +123,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string',
+                                    type: 'string',
                                     validators: [
                                         {
                                             name: 'minLength',
@@ -154,8 +150,7 @@ describe('pseudo-classes', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'function',
-                                    value: 'string',
+                                    type: 'string',
                                     validators: [
                                         {
                                             name: 'minLength',
@@ -166,6 +161,51 @@ describe('pseudo-classes', () => {
                                             args: ['7']
                                         }
                                     ]
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            describe('number', () => {
+                it('as a simple validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(number), state2(number());
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    type: 'number'
+                                },
+                                state2: {
+                                    type: 'number'
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('including a default value', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(number) 7;
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    defaultValue: '7',
+                                    type: 'number'
                                 }
                             }
                         }
@@ -298,11 +338,11 @@ describe('pseudo-classes', () => {
 
         });
 
-        describe('custom type / validation', () => {
+        describe('advanced type / validation', () => {
 
             describe('string', () => {
 
-                it('should transform using stylables default string validator', () => {
+                it('should transform string validator', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -323,7 +363,7 @@ describe('pseudo-classes', () => {
                     });
                 });
 
-                it('should support default values for stylables default string validator', () => {
+                it('should support default values for string validator', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -331,7 +371,7 @@ describe('pseudo-classes', () => {
                                 namespace: 'entry',
                                 content: `
                                 .my-class {
-                                    -st-states: stateWithDefault(string) myDefaultString;
+                                    -st-states: stateWithDefault(string) myDefault String;
                                 }
                                 .my-class:stateWithDefault {}
                                 `
@@ -340,7 +380,380 @@ describe('pseudo-classes', () => {
                     });
 
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="myDefaultString"] {}'
+                        1: '.entry--my-class[data-entry-statewithdefault="myDefault String"] {}'
+                    });
+                });
+
+                it('should supprt default values through a variable', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    myID: user;
+                                }
+
+                                .my-class {
+                                    -st-states: stateWithDefault(string) value(myID)name;
+                                }
+                                .my-class:stateWithDefault {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-statewithdefault="username"] {}'
+                    });
+                });
+
+                // TODO: test for case insensitivity in validators
+
+                it('should transform string using a valid contains validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(contains(user)));
+                                }
+                                .my-class:state1(userName) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="userName"] {}'
+                    });
+                });
+
+                it('should transform string using a contains validator with a variable', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    validPrefix: user;
+                                }
+
+                                .my-class {
+                                    -st-states: state1(string(contains(value(validPrefix))));
+                                }
+                                .my-class:state1(userName) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="userName"] {}'
+                    });
+                });
+
+                // tslint:disable-next-line:max-line-length
+                it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(contains(user)));
+                                }
+                                |.my-class:state1($wrongState$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "contains(user)" failed on: "wrongState"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="wrongState"] {}'
+                    });
+                });
+
+                it('should transform using multiple validators (minLength, maxLength)', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(minLength(3), maxLength(5)));
+                                }
+                                .my-class:state1(user) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should transform and warn when passing an invalid value to a minLength validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(minLength(7)));
+                                }
+                                |.my-class:state1($user$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "minLength(7)" failed on: "user"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should transform and warn when passing an invalid value to a maxLength validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(maxLength(3)));
+                                }
+                                |.my-class:state1($user$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state string validator "maxLength(3)" failed on: "user"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                    });
+                });
+
+                it('should warn when trying to use an unknown string validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(string(missing(someValue)));
+                                }
+                                |.my-class:state1($passedValue$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [
+                        // tslint:disable-next-line:max-line-length
+                        { message: 'pseudo-state invoked unknown string validator "missing(someValue)" with "passedValue"', file: '/entry.st.css' }
+                    ]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="passedValue"] {}'
+                    });
+                });
+            });
+
+            describe('number', () => {
+                it('should transform number validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: state1(number);
+                                }
+                                .my-class:state1(42) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="42"] {}'
+                    });
+                });
+
+                it('should warn when a non-number default value is invoked', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number) defaultBlah;
+                                }
+                                |.my-class:$state1$| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: 'pseudo-state value "defaultBlah" does not match type "number" of "state1"',
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="defaultBlah"] {}'
+                    });
+                });
+
+                it('should warn on an non-number value passed', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class{
+                                    -st-states: state1(number);
+                                }
+                                |.my-class:state1(blah)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: 'pseudo-state value "blah" does not match type "number" of "state1"',
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-state1="blah"] {}'
+                    });
+                });
+
+                describe('specific validators', () => {
+                    it('should warn on invalid min validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(min(3)));
+                                    }
+                                    |.my-class:state1(1)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "min(3)" failed on: "1"',
+                            file: '/entry.st.css'
+                        }
+                        ]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="1"] {}'
+                        });
+                    });
+
+                    it('should warn on invalid max validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(max(5)));
+                                    }
+                                    |.my-class:state1(42)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "max(5)" failed on: "42"',
+                            file: '/entry.st.css'
+                        }
+                        ]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="42"] {}'
+                        });
+                    });
+
+                    it('should warn on invalid multipleOf validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(multipleOf(5)));
+                                    }
+                                    |.my-class:state1(42)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            message: 'pseudo-state number validator "multipleOf(5)" failed on: "42"',
+                            file: '/entry.st.css'
+                        }
+                        ]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="42"] {}'
+                        });
+                    });
+
+                    it('should not warn on valid min/max/multipleOf validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(min(3), max(100), multipleOf(5)));
+                                    }
+                                    |.my-class:state1(40)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, []);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="40"] {}'
+                        });
                     });
                 });
             });
