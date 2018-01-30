@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, resolveArgumentsValue, ResolvedFormatter } from './functions';
+import { evalDeclarationValue, ResolvedFormatter } from './functions';
 import {
     isCssNativeFunction,
     nativePseudoClasses,
@@ -140,7 +140,8 @@ export class StylableTransformer {
                 atRule,
                 variableOverride,
                 this.replaceValueHook,
-                this.diagnostics
+                this.diagnostics,
+                path.slice()
             );
         });
 
@@ -156,7 +157,8 @@ export class StylableTransformer {
                     decl,
                     variableOverride,
                     this.replaceValueHook,
-                    this.diagnostics
+                    this.diagnostics,
+                    path.slice()
                 );
             }
         });
@@ -602,7 +604,7 @@ export class StylableTransformer {
     public handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
         const tRule = meta.elements[name] as StylableSymbol;
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
-        const next = this.resolver.resolve(extend);
+        const next = this.resolver.deepResolve(extend);
         if (next && next._kind === 'css') {
             if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                 node.before = '';

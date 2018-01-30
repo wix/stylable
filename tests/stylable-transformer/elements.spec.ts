@@ -102,6 +102,43 @@ describe('Stylable transform elements', () => {
 
         });
 
+        it('should resolve imported named element type when used as element', () => {
+            const res = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-named: Element;
+                            }
+
+                            Element {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Element;
+                            }
+                            Element {}
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {}
+                        `
+                    }
+                }
+            });
+
+            expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base--root');
+
+        });
     });
 
 });

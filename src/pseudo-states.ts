@@ -3,7 +3,7 @@ import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
-import { systemValidators, StateParamType } from './state-validators';
+import { StateParamType, systemValidators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
@@ -126,7 +126,7 @@ export function resolvePseudoState(
             setStateToNode(
                 states, meta, name, node, origin.namespace, resolver, diagnostics, rule
             );
-            return current;
+            return meta;
         }
     }
     let found = false;
@@ -163,7 +163,7 @@ export function resolvePseudoState(
         }
     }
 
-    return current;
+    return meta;
 }
 
 export function setStateToNode(
