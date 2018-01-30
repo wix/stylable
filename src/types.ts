@@ -40,29 +40,12 @@ export interface ParsedValue {
 }
 
 export interface StateTypeValidator {
-    name: keyof StringValidators | keyof NumberValidators;
+    name: string;
     args: string[];
 }
 
-export interface StringValidators {
-    contains: string;
-    minLength: string;
-    maxLength: string;
-}
-
-export interface NumberValidators {
-    min: string;
-    max: string;
-    multipleOf: string;
-}
-
-export interface StateTypes {
-    string: StringValidators;
-    number: NumberValidators;
-}
-
 export interface StateParsedValue {
-    type: keyof StateTypes;
+    type: string;
     defaultValue?: string;
     validators: StateTypeValidator[];
 }

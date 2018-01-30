@@ -49,7 +49,8 @@ describe('runtime', () => {
         });
 
         describe('states', () => {
-            it('should add states mapping', () => {
+
+            it('should add boolean states mapping', () => {
                 const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
                 expect(runtime('', { on: true, off: false })).to.eql({
                     [`data-${runtime.$stylesheet.namespace}-${'on'}`]: true
@@ -70,7 +71,7 @@ describe('runtime', () => {
                 });
             });
 
-            it('should copy data- props ', () => {
+            it('should copy "data-" props ', () => {
                 const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
                 expect(runtime('root', {}, { 'data-prop': true })).to.eql({
                     'className': 'namespace--root',
@@ -78,8 +79,7 @@ describe('runtime', () => {
                 });
             });
 
-            it('should override states with data- props ', () => {
-
+            it('should override states with "data-" props ', () => {
                 const runtime = create('root', 'namespace', { root: 'namespace--root' }, null, '0');
                 const nsStateName = `data-${runtime.$stylesheet.namespace}-${'on'}`;
 
