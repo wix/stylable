@@ -39,6 +39,11 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
+    public elementHasStyleState(element: Element, stateName: string): boolean {
+        const stateMap = this.style.$stylesheet.cssStates({[stateName]: true});
+        const attributeName = Object.keys(stateMap)[0];
+        return element.hasAttribute(attributeName);
+    }
     private getStateDataAttr(state: string, param = true): string {
         const r = this.style.$cssStates({ [state]: param });
         const stateKey = Object.keys(r)[0];

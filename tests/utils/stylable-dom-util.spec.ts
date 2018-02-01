@@ -38,4 +38,8 @@ describe('stylable-dom-utils', () => {
         ).to.equal(`.ns--x[data-ns-loading="true"][data-ns-thinking="true"]`);
     });
 
+    describe('elementHasStyleState', () => {
+
+    });
+
 });
