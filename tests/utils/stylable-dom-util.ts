@@ -39,9 +39,14 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
-    public elementHasStyleState(element: {hasAttribute: typeof Element.prototype.hasAttribute }, stateName: string): boolean {
+    public hasStyleState(element: { getAttribute: typeof Element.prototype.getAttribute }, stateName: string, param = true): boolean {
+        const { stateKey, styleState } = this.getStateDataAttrKey(stateName, param);
+        const actual = element.getAttribute(stateKey);
+        return styleState[stateKey].toString() === actual;
+    }
+    public getStyleState(element: { getAttribute: typeof Element.prototype.getAttribute }, stateName: string): string | null {
         const { stateKey } = this.getStateDataAttrKey(stateName);
-        return element.hasAttribute(stateKey);
+        return element.getAttribute(stateKey);
     }
     private getStateDataAttrKey(state: string, param = true) {
         const styleState = this.style.$cssStates({ [state]: param });
