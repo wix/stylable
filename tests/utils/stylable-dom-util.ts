@@ -6,6 +6,8 @@ export interface QueryElement {
     querySelectorAll: typeof Element.prototype.querySelectorAll;
 }
 
+export type Param = boolean | number | string;
+
 export class StylableDOMUtil {
     constructor(private style: RuntimeStylesheet, private root?: QueryElement) { }
     public select(selector?: string, element?: QueryElement): Element | null {
@@ -39,20 +41,20 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
-    public hasStyleState(element: { getAttribute: typeof Element.prototype.getAttribute }, stateName: string, param = true): boolean {
+    public hasStyleState(element: { getAttribute: typeof Element.prototype.getAttribute }, stateName: string, param: Param = true): boolean {
         const { stateKey, styleState } = this.getStateDataAttrKey(stateName, param);
         const actual = element.getAttribute(stateKey);
-        return styleState[stateKey].toString() === actual;
+        return String(styleState[stateKey]) === actual;
     }
     public getStyleState(element: { getAttribute: typeof Element.prototype.getAttribute }, stateName: string): string | null {
         const { stateKey } = this.getStateDataAttrKey(stateName);
         return element.getAttribute(stateKey);
     }
-    private getStateDataAttrKey(state: string, param = true) {
+    private getStateDataAttrKey(state: string, param: Param = true) {
         const styleState = this.style.$cssStates({ [state]: param });
         return { stateKey: Object.keys(styleState)[0], styleState };
     }
-    private getStateDataAttr(state: string, param = true): string {
+    private getStateDataAttr(state: string, param: Param = true): string {
         const { stateKey, styleState } = this.getStateDataAttrKey(state, param);
         return `${stateKey}="${styleState[stateKey]}"`;
     }

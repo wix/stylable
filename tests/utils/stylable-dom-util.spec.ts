@@ -38,7 +38,7 @@ describe('stylable-dom-utils', () => {
         ).to.equal(`.ns--x[data-ns-loading="true"][data-ns-thinking="true"]`);
     });
 
-    describe.only('Style state', () => {
+    describe('Style state', () => {
         it('hasStyleState properly calls getAttribute with the requested style state', () => {
             let state: string = '';
             const getAttribute = (styleState: string) => {

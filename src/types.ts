@@ -1,5 +1,7 @@
+import {Param} from '../tests/utils/stylable-dom-util';
+
 export interface StateMap {
-    [key: string]: boolean;
+    [key: string]: Param;
 }
 
 export interface Stylesheet {
