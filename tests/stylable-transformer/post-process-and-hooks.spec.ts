@@ -33,6 +33,43 @@ describe('post-process-and-hooks', () => {
 
     });
 
+    it('should call replaceValueHook on js function', () => {
+
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: './function.js';
+                            -st-named: fn1, fn2;
+                        }
+                        .container {
+                            color: fn1(fn2(1));
+                        }
+                        `
+                },
+                '/function.js': {
+                    content: `
+                        module.exports.fn1 = function(x){return 'fn1'}
+                        module.exports.fn2 = function(x){return 'fn2'}
+                    `
+                }
+            }
+        }, undefined, (_resolved, fn) => {
+            if (typeof fn !== 'string') {
+                return `hooked_${fn.name}(${fn.args})`;
+            }
+            return '';
+        });
+
+        const res = t.transform(t.fileProcessor.process('/entry.st.css'));
+        const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
+
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('hooked_fn1(hooked_fn2(1))');
+
+    });
+
     it('should call replaceValueHook and use it\'s return value', () => {
         let valueCallCount = 0;
         const t = createTransformer({
