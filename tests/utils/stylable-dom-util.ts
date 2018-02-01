@@ -39,14 +39,16 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
-    public elementHasStyleState(element: Element, stateName: string): boolean {
-        const stateMap = this.style.$stylesheet.cssStates({[stateName]: true});
-        const attributeName = Object.keys(stateMap)[0];
-        return element.hasAttribute(attributeName);
+    public elementHasStyleState(element: {hasAttribute: typeof Element.prototype.hasAttribute }, stateName: string): boolean {
+        const { stateKey } = this.getStateDataAttrKey(stateName);
+        return element.hasAttribute(stateKey);
+    }
+    private getStateDataAttrKey(state: string, param = true) {
+        const styleState = this.style.$cssStates({ [state]: param });
+        return { stateKey: Object.keys(styleState)[0], styleState };
     }
     private getStateDataAttr(state: string, param = true): string {
-        const r = this.style.$cssStates({ [state]: param });
-        const stateKey = Object.keys(r)[0];
-        return `${stateKey}="${r[stateKey]}"`;
+        const { stateKey, styleState } = this.getStateDataAttrKey(state, param);
+        return `${stateKey}="${styleState[stateKey]}"`;
     }
 }

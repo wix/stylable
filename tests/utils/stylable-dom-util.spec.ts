@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { create } from '../../src/runtime';
 import { StylableDOMUtil } from './stylable-dom-util';
 
-describe('stylable-dom-utils', () => {
+describe.only('stylable-dom-utils', () => {
 
     const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, null, '0');
 
@@ -39,7 +39,15 @@ describe('stylable-dom-utils', () => {
     });
 
     describe('elementHasStyleState', () => {
-
+        it('properly calls hasAttribute with the requested style state', () => {
+            let state: string = '';
+            const hasAttribute = (styleState: string) => {
+                state = styleState;
+                return true;
+            };
+            util.elementHasStyleState({ hasAttribute }, 'loading');
+            expect(state).to.equal('data-ns-loading');
+        });
     });
 
 });
