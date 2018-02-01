@@ -1,12 +1,10 @@
 import { parseSelector, stringifySelector, traverseNode } from '../../src/selector-utils';
-import { RuntimeStylesheet } from '../../src/types';
+import { RuntimeStylesheet, Param } from '../../src/types';
 
 export interface QueryElement {
     querySelector: typeof Element.prototype.querySelector;
     querySelectorAll: typeof Element.prototype.querySelectorAll;
 }
-
-export type Param = boolean | number | string;
 
 export class StylableDOMUtil {
     constructor(private style: RuntimeStylesheet, private root?: QueryElement) { }

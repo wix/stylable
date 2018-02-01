@@ -1,4 +1,4 @@
-import {Param} from '../tests/utils/stylable-dom-util';
+export type Param = boolean | number | string;
 
 export interface StateMap {
     [key: string]: Param;
