@@ -38,4 +38,26 @@ describe('stylable-dom-utils', () => {
         ).to.equal(`.ns--x[data-ns-loading="true"][data-ns-thinking="true"]`);
     });
 
+    describe('Style state', () => {
+        it('hasStyleState properly calls getAttribute with the requested style state', () => {
+            let state: string = '';
+            const getAttribute = (styleState: string) => {
+                state = styleState;
+                return 'true';
+            };
+            expect(util.hasStyleState({ getAttribute }, 'loading')).to.equal(true);
+            expect(state).to.equal('data-ns-loading');
+        });
+
+        it('getStyleState properly calls getAttribute with the requested style state', () => {
+            let state: string = '';
+            const getAttribute = (styleState: string) => {
+                state = styleState;
+                return 'true';
+            };
+            expect(util.getStyleState({ getAttribute }, 'loading')).to.equal('true');
+            expect(state).to.equal('data-ns-loading');
+        });
+    });
+
 });
