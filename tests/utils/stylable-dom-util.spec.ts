@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { create } from '../../src/runtime';
 import { StylableDOMUtil } from './stylable-dom-util';
 
-describe.only('stylable-dom-utils', () => {
+describe('stylable-dom-utils', () => {
 
     const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, null, '0');
 
