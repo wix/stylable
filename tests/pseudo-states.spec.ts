@@ -379,6 +379,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--my-class[data-entry-state1] {}',
                     2: '.entry--my-class[data-entry-state2] {}'
@@ -402,6 +403,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--my-class[data-entry-state1] {}',
                     2: '.entry--my-class[data-entry-state2] {}'
@@ -427,6 +429,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--root:not([data-entry-state1]) {}'
                 });
@@ -454,6 +457,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="someString"] {}'
                     });
@@ -475,6 +479,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-statewithdefault="myDefault String"] {}'
                     });
@@ -500,6 +505,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-statewithdefault="username"] {}'
                     });
@@ -776,6 +782,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="42"] {}'
                     });
@@ -1015,6 +1022,33 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="small"] {}'
+                    });
+                });
+
+                it('should transform enum validator with variables in definition and usage', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    small: small;
+                                    large: large;
+                                }
+                                .my-class {
+                                    -st-states: size( enum( value(small), value(large) ) );
+                                }
+                                .my-class:size(value(small)) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-size="small"] {}'
                     });

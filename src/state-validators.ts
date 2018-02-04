@@ -185,7 +185,7 @@ export const systemValidators: Pojo<StateParamType> = {
             };
             const errors: string[] = [];
 
-            if (!options.some(option => option === value)) {
+            if (!options.some(option => resolveParam(option as string) === value)) {
                 errors.push(`pseudo-state value should equal one of the options: "${options.join(', ')}"`);
             }
 
