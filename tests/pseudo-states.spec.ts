@@ -260,6 +260,54 @@ describe('pseudo-states', () => {
                     });
                 });
             });
+
+            describe('enum', () => {
+                it('as a simple validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: size(enum(small, medium, large)), color(enum(red, green, blue));
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                size: {
+                                    type: 'enum',
+                                    arguments: ['small', 'medium', 'large']
+                                },
+                                color: {
+                                    type: 'enum',
+                                    arguments: ['red', 'green', 'blue']
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('including a default value', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: size(enum(small, large)) small;
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                size: {
+                                    defaultValue: 'small',
+                                    type: 'enum',
+                                    arguments: ['small', 'large']
+                                }
+                            }
+                        }
+                    });
+                });
+            });
         });
 
         describe('custom mapping', () => {
@@ -886,6 +934,118 @@ describe('pseudo-states', () => {
                         expect(res).to.have.styleRules({
                             1: '.entry--my-class[data-entry-state1="40"] {}'
                         });
+                    });
+                });
+            });
+
+            describe('enum', () => {
+                describe('definition', () => {
+                    it('should warn when an enum is defined with no options', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        |-st-states: size( enum() )|;
+                                    }
+                                    .my-class:size(huge) {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: [
+                                'pseudo-state "size" with parameter "huge" failed validation:',
+                                'pseudo-state definition must include at least one option'
+                            ].join('\n'),
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-size="huge"] {}'
+                        });
+                    });
+
+                    it('should warn when a default value does not equal one of the options provided', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: size( enum(small, large)) |huge|;
+                                    }
+                                    .my-class:size(huge) {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: [
+                                'pseudo-state "size" with parameter "huge" failed validation:',
+                                'pseudo-state default value must equal one of the options provided'
+                            ].join('\n'),
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-size="huge"] {}'
+                        });
+                    });
+                });
+
+                it('should transform enum validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: size( enum(small, large) );
+                                }
+                                .my-class:size(small) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="small"] {}'
+                    });
+                });
+
+                it('should warn when a value does not match any of the enum options', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: size( enum(small, large) );
+                                }
+                                |.my-class:size(huge)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        // tslint:disable-next-line:max-line-length
+                        message: [
+                            'pseudo-state "size" with parameter "huge" failed validation:',
+                            'pseudo-state value should equal one of the options: "small, large"'
+                        ].join('\n'),
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="huge"] {}'
                     });
                 });
             });

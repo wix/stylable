@@ -1,4 +1,4 @@
-import { Pojo, StateArguments } from './types';
+import { Pojo, StateArguments, StateTypeValidator } from './types';
 
 export interface StateResult {
     res: string;
@@ -23,8 +23,10 @@ const validationErrors = {
 };
 /* tslint:enable:max-line-length */
 
+export type SubValidator = (value: string, ...rest: string[]) => StateResult;
+
 export interface StateParamType {
-    subValidators: Pojo<(value: string, ...rest: string[]) => StateResult>;
+    subValidators?: Pojo<SubValidator>;
     validate(value: any, args: StateArguments, resolveParam: any): StateResult;
 }
 
@@ -55,14 +57,14 @@ export const systemValidators: Pojo<StateParamType> = {
                             errors.push(validationErrors.string.REGEX_VALIDATION_FAILED(validatorMeta, value));
                         }
                     } else if (typeof validatorMeta === 'object') {
-                        const subValidator = this.subValidators[validatorMeta.name];
-                        if (subValidator) {
-                            const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
-                            if (validationRes.error) {
-                                errors.push(validationRes.error);
-                            }
-                        } else {
-                            // push missing sub validator
+                        if (this.subValidators && this.subValidators[validatorMeta.name]) {
+                            resolveSubValidator(
+                                this.subValidators[validatorMeta.name],
+                                validatorMeta,
+                                value,
+                                resolveParam,
+                                errors
+                            );
                         }
                     }
                 });
@@ -122,17 +124,15 @@ export const systemValidators: Pojo<StateParamType> = {
 
             if (validators.length > 0) {
                 validators.map(validatorMeta => {
-                    const firstArg = validators[0];
-
                     if (typeof validatorMeta === 'object') {
-                        const subValidator = this.subValidators[validatorMeta.name];
-                        if (subValidator) {
-                            const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
-                            if (validationRes.error) {
-                                errors.push(validationRes.error);
-                            }
-                        } else {
-                            // push missing sub validator
+                        if (this.subValidators) {
+                            resolveSubValidator(
+                                this.subValidators[validatorMeta.name],
+                                validatorMeta,
+                                value,
+                                resolveParam,
+                                errors
+                            );
                         }
                     }
                 });
@@ -176,5 +176,32 @@ export const systemValidators: Pojo<StateParamType> = {
                 };
             }
         }
+    },
+    enum: {
+        validate(value: any, options: StateArguments, resolveParam: (s: string) => string) {
+            const res: StateResult = {
+                res: value,
+                error: null
+            };
+            const errors: string[] = [];
+
+            if (!options.some(option => option === value)) {
+                errors.push(`pseudo-state value should equal one of the options: "${options.join(', ')}"`);
+            }
+
+            if (errors.length > 0) {
+                res.error = createError(errors);
+            }
+
+            return res;
+        }
     }
 };
+
+// tslint:disable-next-line:max-line-length
+function resolveSubValidator(subValidator: SubValidator, validatorMeta: StateTypeValidator, value: any, resolveParam: (s: string) => string, errors: string[]) {
+    const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
+    if (validationRes.error) {
+        errors.push(validationRes.error);
+    }
+}

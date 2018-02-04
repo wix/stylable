@@ -15,9 +15,7 @@ const valueParser = require('postcss-value-parser');
 /* tslint:disable:max-line-length */
 const errors = {
     UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo class "${name}"`,
-    VALIDATION_FAILED: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state ${type} validator "${name}(${args.join(', ')})" failed on: "${actualParam}"`,
-    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`,
-    VALUE_TYPE_MISMATCH: (type: string, name: string, actualParam: string) => `pseudo-state value "${actualParam}" does not match type "${type}" of "${name}"`
+    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`
 };
 /* tslint:enable:max-line-length */
 
@@ -85,7 +83,7 @@ function resolveArguments(stateDefinition: ParsedValue, stateType: StateParsedVa
                 name: validator.value,
                 args: listOptions(validator)
             });
-        } else if (validator.type === 'string') {
+        } else if (validator.type === 'string' || validator.type === 'word') {
             stateType.arguments.push(validator.value);
         }
     });
