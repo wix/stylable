@@ -649,7 +649,33 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, [{
                             // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed min length (3) validation',
+                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                        });
+                    });
+
+                    it('should transform and warn when passing an invalid value to a multiple validators', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(maxLength(3), "^case"));
+                                    }
+                                    |.my-class:state1($user$)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation\n - string type failed regex "^case" validation with: "user"',
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({

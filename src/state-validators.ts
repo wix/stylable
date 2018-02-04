@@ -48,13 +48,11 @@ export const systemValidators: Pojo<StateParamType> = {
 
             if (validators.length > 0) {
                 validators.map(validatorMeta => {
-                    const firstArg = validators[0];
-
-                    if (typeof firstArg === 'string') {
-                        const r = new RegExp(firstArg);
+                    if (typeof validatorMeta === 'string') {
+                        const r = new RegExp(validatorMeta);
 
                         if (!r.test(value)) {
-                            errors.push(validationErrors.string.REGEX_VALIDATION_FAILED(firstArg, value));
+                            errors.push(validationErrors.string.REGEX_VALIDATION_FAILED(validatorMeta, value));
                         }
                     } else if (typeof validatorMeta === 'object') {
                         const subValidator = this.subValidators[validatorMeta.name];
@@ -104,7 +102,7 @@ export const systemValidators: Pojo<StateParamType> = {
                     res: value,
                     error: valid ?
                         null :
-                        validationErrors.string.MIN_LENGTH_VALIDATION_FAILED(length, value)
+                        validationErrors.string.MAX_LENGTH_VALIDATION_FAILED(length, value)
                 };
             }
         }
