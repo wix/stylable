@@ -213,7 +213,7 @@ You can use several sub validators that the number type provides:
 
 ## Future Intent
 
-* [custom user types and validations](ToDo: link to github).
-* [custom state number "nth-"](ToDo: link to github).
-* [multiple named parameters](ToDo: link to github).
-* [lang type](ToDo: link to github).
+* [custom user types and validations](https://github.com/wix/stylable/issues/268).
+* [Custom pseudo state type "nth"](https://github.com/wix/stylable/issues/270).
+* [multiple named parameters](https://github.com/wix/stylable/issues/269).
+* lang type - take advantage of attribute selector `[state|="en"]` to support language code.
