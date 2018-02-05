@@ -15,9 +15,7 @@ const valueParser = require('postcss-value-parser');
 /* tslint:disable:max-line-length */
 const errors = {
     UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo class "${name}"`,
-    VALIDATION_FAILED: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state ${type} validator "${name}(${args.join(', ')})" failed on: "${actualParam}"`,
-    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`,
-    VALUE_TYPE_MISMATCH: (type: string, name: string, actualParam: string) => `pseudo-state value "${actualParam}" does not match type "${type}" of "${name}"`
+    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`
 };
 /* tslint:enable:max-line-length */
 
@@ -57,7 +55,7 @@ function resolveStateType(
     const paramType = stateDefinition.nodes[0];
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
-        validators: [],
+        arguments: [],
         defaultValue: valueParser.stringify(stateDefault).trim()
     };
 
@@ -77,14 +75,16 @@ function resolveArguments(stateDefinition: ParsedValue, stateType: StateParsedVa
     const seperetedByComma = groupValues(stateDefinition.nodes);
 
     seperetedByComma.forEach(group => {
+        const validator = group[0];
         if (group.length > 1 || group.length === 0) {
-            // TODO: error too many values
-        } else {
-            const validator = group[0];
-            stateType.validators.push({
+            // TODO: error too many state types
+        } else if (validator.type === 'function') {
+            stateType.arguments.push({
                 name: validator.value,
                 args: listOptions(validator)
             });
+        } else if (validator.type === 'string' || validator.type === 'word') {
+            stateType.arguments.push(validator.value);
         }
     });
 }
@@ -199,43 +199,33 @@ function resolveState(
     name: string,
     namespace: string) {
 
-    const actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
-    const {type: paramType, validators: paramValidators} = stateDef;
+    let actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
+
+    const { type: paramType, arguments: paramValidators } = stateDef;
     const validator = systemValidators[stateDef.type];
 
-    if (rule) {
+    let stateParamOutput;
+    try {
+        stateParamOutput = validator.validate(actualParam,
+            stateDef.arguments,
+            resolveParam.bind(null, meta, resolver, diagnostics, rule, stateDef.defaultValue)
+        );
+    } catch (e) {
+        // TODO: report unexpected crash
+    }
 
-        if (!validator) {
-            throw new Error('unhandled validator type'); // TODO: handle with proper diagnostics
-        } else if (actualParam) {
-            if (!validator.validate(actualParam)) {
-                diagnostics.warn(rule, errors.VALUE_TYPE_MISMATCH(
-                    stateDef.type, name, actualParam), { word: name }
-                );
-            }
+    if (stateParamOutput !== undefined) {
+        if (stateParamOutput.res !== actualParam) {
+            actualParam = stateParamOutput.res;
+        }
 
-            for (const subValidator of paramValidators) {
-                const currentValidator = validator.subValidators[subValidator.name];
-
-                if (!currentValidator) {
-                    diagnostics.warn(rule, errors.UKNOWN_VALIDATOR(
-                        stateDef.type, subValidator.name, subValidator.args, actualParam), { word: actualParam }
-                    );
-                    continue;
-                }
-
-                const validatorArg = resolveParam(
-                    meta, resolver, diagnostics, rule, subValidator.args[0], stateDef.defaultValue
-                );
-
-                if (!currentValidator(actualParam, validatorArg)) {
-                    diagnostics.warn(rule, errors.VALIDATION_FAILED(
-                        stateDef.type, subValidator.name, subValidator.args, actualParam), { word: actualParam }
-                    );
-                }
-            }
+        if (rule && stateParamOutput.error) {
+            diagnostics.warn(rule,
+                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:\n${stateParamOutput.error}`,
+                {word: actualParam});
         }
     }
+
     node.type = 'attribute';
     node.content = `${autoStateAttrName(name, namespace)}="${actualParam}"`;
 }
@@ -245,8 +235,8 @@ function resolveParam(
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
-    nodeContent?: string,
-    defaultValue?: string) {
+    defaultValue?: string,
+    nodeContent?: string) {
 
     const defaultStringValue = '';
     const param = nodeContent || defaultValue || defaultStringValue;

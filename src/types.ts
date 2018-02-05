@@ -44,10 +44,12 @@ export interface StateTypeValidator {
     args: string[];
 }
 
+export type StateArguments = Array<StateTypeValidator | string>;
+
 export interface StateParsedValue {
     type: string;
     defaultValue?: string;
-    validators: StateTypeValidator[];
+    arguments: StateArguments;
 }
 
 export type stColor<min extends number | null = null, max extends number | null = null> = string;

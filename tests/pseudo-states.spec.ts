@@ -110,7 +110,28 @@ describe('pseudo-states', () => {
                     });
                 });
 
-                it('with a single nested validation', () => {
+                it('with a regex validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(string("^user"));
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    type: 'string',
+                                    arguments: ['^user']
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('with a single nested validator', () => {
                     const res = processSource(`
                         .root {
                             -st-states: state1(string(minLength(2)));
@@ -124,7 +145,7 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     type: 'string',
-                                    validators: [
+                                    arguments: [
                                         {
                                             name: 'minLength',
                                             args: ['2']
@@ -151,7 +172,7 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     type: 'string',
-                                    validators: [
+                                    arguments: [
                                         {
                                             name: 'minLength',
                                             args: ['2']
@@ -159,6 +180,33 @@ describe('pseudo-states', () => {
                                         {
                                             name: 'maxLength',
                                             args: ['7']
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('with a nested validator and a regex validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: state1(string("^user", contains(user)));
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                state1: {
+                                    type: 'string',
+                                    arguments: [
+                                        '^user',
+                                        {
+                                            name: 'contains',
+                                            args: ['user']
                                         }
                                     ]
                                 }
@@ -206,6 +254,54 @@ describe('pseudo-states', () => {
                                 state1: {
                                     defaultValue: '7',
                                     type: 'number'
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            describe('enum', () => {
+                it('as a simple validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: size(enum(small, medium, large)), color(enum(red, green, blue));
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                size: {
+                                    type: 'enum',
+                                    arguments: ['small', 'medium', 'large']
+                                },
+                                color: {
+                                    type: 'enum',
+                                    arguments: ['red', 'green', 'blue']
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('including a default value', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: size(enum(small, large)) small;
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                size: {
+                                    defaultValue: 'small',
+                                    type: 'enum',
+                                    arguments: ['small', 'large']
                                 }
                             }
                         }
@@ -283,6 +379,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--my-class[data-entry-state1] {}',
                     2: '.entry--my-class[data-entry-state2] {}'
@@ -306,6 +403,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--my-class[data-entry-state1] {}',
                     2: '.entry--my-class[data-entry-state2] {}'
@@ -331,6 +429,7 @@ describe('pseudo-states', () => {
                     }
                 });
 
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
                     1: '.entry--root:not([data-entry-state1]) {}'
                 });
@@ -358,6 +457,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="someString"] {}'
                     });
@@ -379,6 +479,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-statewithdefault="myDefault String"] {}'
                     });
@@ -404,6 +505,7 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-statewithdefault="username"] {}'
                     });
@@ -411,174 +513,254 @@ describe('pseudo-states', () => {
 
                 // TODO: test for case insensitivity in validators
 
-                it('should transform string using a valid contains validator', () => {
-                    const res = generateStylableResult({
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(contains(user)));
+                describe('specific validators', () => {
+                    it('should transform string using a valid regex validation', () => {
+                        const res = generateStylableResult({
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1( string("^user") );
+                                    }
+                                    .my-class:state1(userName) {}
+                                    `
                                 }
-                                .my-class:state1(userName) {}
-                                `
                             }
-                        }
+                        });
+
+                        expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                        });
                     });
 
-                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="userName"] {}'
-                    });
-                });
-
-                it('should transform string using a contains validator with a variable', () => {
-                    const res = generateStylableResult({
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                :vars {
-                                    validPrefix: user;
+                    it('should warn when using an invalid regex validation', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1( string("^user") );
+                                    }
+                                    |.my-class:state1(failingParameter)| {}
+                                    `
                                 }
-
-                                .my-class {
-                                    -st-states: state1(string(contains(value(validPrefix))));
-                                }
-                                .my-class:state1(userName) {}
-                                `
                             }
-                        }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "failingParameter" failed validation:\n - string type failed regex "^user" validation with: "failingParameter"',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="failingParameter"] {}'
+                        });
                     });
 
-                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="userName"] {}'
-                    });
-                });
-
-                // tslint:disable-next-line:max-line-length
-                it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
-                    const config = {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(contains(user)));
+                    it('should transform string using a valid contains validator', () => {
+                        const res = generateStylableResult({
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(contains(user)));
+                                    }
+                                    .my-class:state1(userName) {}
+                                    `
                                 }
-                                |.my-class:state1($wrongState$)| {}
-                                `
                             }
-                        }
-                    };
+                        });
 
-                    const res = expectWarningsFromTransform(config, [
-                        // tslint:disable-next-line:max-line-length
-                        { message: 'pseudo-state string validator "contains(user)" failed on: "wrongState"', file: '/entry.st.css' }
-                    ]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="wrongState"] {}'
+                        expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                        });
                     });
-                });
 
-                it('should transform using multiple validators (minLength, maxLength)', () => {
-                    const res = generateStylableResult({
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(minLength(3), maxLength(5)));
+                    it('should transform string using a contains validator with a variable', () => {
+                        const res = generateStylableResult({
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    :vars {
+                                        validPrefix: user;
+                                    }
+
+                                    .my-class {
+                                        -st-states: state1(string(contains(value(validPrefix))));
+                                    }
+                                    .my-class:state1(userName) {}
+                                    `
                                 }
-                                .my-class:state1(user) {}
-                                `
                             }
-                        }
+                        });
+
+                        expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                        });
                     });
 
-                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="user"] {}'
-                    });
-                });
-
-                it('should transform and warn when passing an invalid value to a minLength validator', () => {
-                    const config = {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(minLength(7)));
+                    // tslint:disable-next-line:max-line-length
+                    it('should transform string using an invalid contains validator (mainintaing passed values)', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(contains(user)));
+                                    }
+                                    |.my-class:state1($wrongState$)| {}
+                                    `
                                 }
-                                |.my-class:state1($user$)| {}
-                                `
                             }
-                        }
-                    };
+                        };
 
-                    const res = expectWarningsFromTransform(config, [
-                        // tslint:disable-next-line:max-line-length
-                        { message: 'pseudo-state string validator "minLength(7)" failed on: "user"', file: '/entry.st.css' }
-                    ]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "wrongState" failed validation:\n - parameter "wrongState" of type string should contain string: "user"',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="wrongState"] {}'
+                        });
                     });
-                });
 
-                it('should transform and warn when passing an invalid value to a maxLength validator', () => {
-                    const config = {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(maxLength(3)));
+                    it('should transform using multiple validators (regex, minLength, maxLength)', () => {
+                        const res = generateStylableResult({
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string("^user", minLength(3), maxLength(5)));
+                                    }
+                                    .my-class:state1(user) {}
+                                    `
                                 }
-                                |.my-class:state1($user$)| {}
-                                `
                             }
-                        }
-                    };
+                        });
 
-                    const res = expectWarningsFromTransform(config, [
-                        // tslint:disable-next-line:max-line-length
-                        { message: 'pseudo-state string validator "maxLength(3)" failed on: "user"', file: '/entry.st.css' }
-                    ]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="user"] {}'
+                        expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                        });
                     });
-                });
 
-                it('should warn when trying to use an unknown string validator', () => {
-                    const config = {
-                        entry: `/entry.st.css`,
-                        files: {
-                            '/entry.st.css': {
-                                namespace: 'entry',
-                                content: `
-                                .my-class {
-                                    -st-states: state1(string(missing(someValue)));
+                    it('should transform and warn when passing an invalid value to a minLength validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(minLength(7)));
+                                    }
+                                    |.my-class:state1($user$)| {}
+                                    `
                                 }
-                                |.my-class:state1($passedValue$)| {}
-                                `
                             }
-                        }
-                    };
+                        };
 
-                    const res = expectWarningsFromTransform(config, [
-                        // tslint:disable-next-line:max-line-length
-                        { message: 'pseudo-state invoked unknown string validator "missing(someValue)" with "passedValue"', file: '/entry.st.css' }
-                    ]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="passedValue"] {}'
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed min length (7) validation',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                        });
+                    });
+
+                    it('should transform and warn when passing an invalid value to a maxLength validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(maxLength(3)));
+                                    }
+                                    |.my-class:state1($user$)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                        });
+                    });
+
+                    it('should transform and warn when passing an invalid value to a multiple validators', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(maxLength(3), "^case"));
+                                    }
+                                    |.my-class:state1($user$)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation\n - string type failed regex "^case" validation with: "user"',
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                        });
+                    });
+
+                    it('should warn when trying to use an unknown string validator', () => {
+                        // TODO: test -st-states and not usage
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(missing(someValue)));
+                                    }
+                                    |.my-class:state1($passedValue$)| {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [
+                            // tslint:disable-next-line:max-line-length
+                            { message: 'pseudo-state invoked unknown string validator "missing(someValue)" with "passedValue"', file: '/entry.st.css' }
+                        ]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-state1="passedValue"] {}'
+                        });
                     });
                 });
             });
@@ -600,13 +782,14 @@ describe('pseudo-states', () => {
                         }
                     });
 
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="42"] {}'
                     });
                 });
 
                 it('should warn when a non-number default value is invoked', () => {
-                    const config = {
+                    const config = { // TODO: change testing flow to test during definition not usage
                         entry: `/entry.st.css`,
                         files: {
                             '/entry.st.css': {
@@ -647,7 +830,8 @@ describe('pseudo-states', () => {
                     };
 
                     const res = expectWarningsFromTransform(config, [{
-                        message: 'pseudo-state value "blah" does not match type "number" of "state1"',
+                        // tslint:disable-next-line:max-line-length
+                        message: 'pseudo-state "state1" with parameter "blah" failed validation:\n - "blah" should be of type number but failed validation',
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
@@ -673,7 +857,8 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            message: 'pseudo-state number validator "min(3)" failed on: "1"',
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "1" failed validation:\n - parameter "1" failed min(3) validation',
                             file: '/entry.st.css'
                         }
                         ]);
@@ -699,7 +884,8 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            message: 'pseudo-state number validator "max(5)" failed on: "42"',
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "42" failed validation:\n - parameter "42" failed max(5) validation',
                             file: '/entry.st.css'
                         }
                         ]);
@@ -725,7 +911,8 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            message: 'pseudo-state number validator "multipleOf(5)" failed on: "42"',
+                            // tslint:disable-next-line:max-line-length
+                            message: 'pseudo-state "state1" with parameter "42" failed validation:\n - parameter "42" should be a multiple of 5',
                             file: '/entry.st.css'
                         }
                         ]);
@@ -754,6 +941,145 @@ describe('pseudo-states', () => {
                         expect(res).to.have.styleRules({
                             1: '.entry--my-class[data-entry-state1="40"] {}'
                         });
+                    });
+                });
+            });
+
+            describe('enum', () => {
+                describe('definition', () => {
+                    it('should warn when an enum is defined with no options', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        |-st-states: size( enum() )|;
+                                    }
+                                    .my-class:size(huge) {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: [
+                                'pseudo-state "size" with parameter "huge" failed validation:',
+                                'pseudo-state definition must include at least one option'
+                            ].join('\n'),
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-size="huge"] {}'
+                        });
+                    });
+
+                    it('should warn when a default value does not equal one of the options provided', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: size( enum(small, large)) |huge|;
+                                    }
+                                    .my-class:size(huge) {}
+                                    `
+                                }
+                            }
+                        };
+
+                        const res = expectWarningsFromTransform(config, [{
+                            // tslint:disable-next-line:max-line-length
+                            message: [
+                                'pseudo-state "size" with parameter "huge" failed validation:',
+                                'pseudo-state default value must equal one of the options provided'
+                            ].join('\n'),
+                            file: '/entry.st.css'
+                        }]);
+                        expect(res).to.have.styleRules({
+                            1: '.entry--my-class[data-entry-size="huge"] {}'
+                        });
+                    });
+                });
+
+                it('should transform enum validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: size( enum(small, large) );
+                                }
+                                .my-class:size(small) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="small"] {}'
+                    });
+                });
+
+                it('should transform enum validator with variables in definition and usage', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    small: small;
+                                    large: large;
+                                }
+                                .my-class {
+                                    -st-states: size( enum( value(small), value(large) ) );
+                                }
+                                .my-class:size(value(small)) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="small"] {}'
+                    });
+                });
+
+                it('should warn when a value does not match any of the enum options', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: size( enum(small, large) );
+                                }
+                                |.my-class:size(huge)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        // tslint:disable-next-line:max-line-length
+                        message: [
+                            'pseudo-state "size" with parameter "huge" failed validation:',
+                            'pseudo-state value should equal one of the options: "small, large"'
+                        ].join('\n'),
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-size="huge"] {}'
                     });
                 });
             });
