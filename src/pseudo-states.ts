@@ -62,12 +62,8 @@ function resolveStateType(
     }
 
     if (stateDefinition.nodes.length > 1) {
-        const types = stateDefinition.nodes.map(
-            (def: ParsedValue) => (def.type === 'word' || def.type === 'function') ? def.value : null)
-            .filter((def?: string) => def);
-
         diagnostics.warn(decl,
-            errors.TOO_MANY_STATE_TYPES(stateDefinition.value, types),
+            errors.TOO_MANY_STATE_TYPES(stateDefinition.value, listOptions(stateDefinition)),
             {word: decl.value});
     }
 
@@ -198,7 +194,7 @@ export function validateStateArgument(
     validateDefinition?: boolean,
     validateValue: boolean = true) {
 
-    const res: StateResult = {
+    const resolvedValidations: StateResult = {
         res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
         errors: null
     };
@@ -207,20 +203,20 @@ export function validateStateArgument(
     const validator = systemValidators[stateAst.type];
 
     try {
-        if (res.res || validateDefinition) {
-            const { errors } = validator.validate(res.res,
+        if (resolvedValidations.res || validateDefinition) {
+            const { errors } = validator.validate(resolvedValidations.res,
                 stateAst.arguments,
                 resolveParam.bind(null, meta, resolver, diagnostics, rule),
                 !!validateDefinition,
                 validateValue
             );
-            res.errors = errors;
+            resolvedValidations.errors = errors;
         }
     } catch (error) {
         // TODO: warn about validation throwing exception
     }
 
-    return res;
+    return resolvedValidations;
 }
 
 export function transformPseudoStateSelector(
@@ -330,7 +326,7 @@ function resolveStateValue(
             true
         );
     } catch (e) {
-        // TODO: report unexpected crash
+        // TODO: warn about validation throwing exception
     }
 
     if (stateParamOutput !== undefined) {

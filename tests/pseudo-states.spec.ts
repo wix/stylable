@@ -50,10 +50,10 @@ describe('pseudo-states', () => {
             it('should warn when a state receieves more than a single state type', () => {
                 expectWarnings(`
                     .root{
-                        |-st-states: $state1(string, number())$|;
+                        |-st-states: $state1(string, number(x))$|;
                     }
                 `, [{
-                    message: 'pseudo-state "state1(string, number)" definition must be of a single type',
+                    message: 'pseudo-state "state1(string, number(x))" definition must be of a single type',
                     file: 'main.css'
                 }]);
             });

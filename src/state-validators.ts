@@ -58,7 +58,7 @@ export const systemValidators: Pojo<StateParamType> = {
             }
 
             if (validators.length > 0) {
-                validators.map(validatorMeta => {
+                validators.forEach(validatorMeta => {
                     if (typeof validatorMeta === 'string') {
                         const r = new RegExp(validatorMeta);
 
@@ -129,13 +129,12 @@ export const systemValidators: Pojo<StateParamType> = {
             const res = value;
             const errors: string[] = [];
 
-            const isNumber = !isNaN(value);
-            if (value !== 0 && !isNumber) {
+            if (isNaN(value)) {
                 if (validateValue) {
                     errors.push(validationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(value));
                 }
             } else if (validators.length > 0) {
-                validators.map(validatorMeta => {
+                validators.forEach(validatorMeta => {
                     if (typeof validatorMeta === 'object') {
                         if (this.subValidators) {
                             resolveSubValidator(
@@ -206,7 +205,7 @@ export const systemValidators: Pojo<StateParamType> = {
                         stringOptions.push(option);
                         return resolveParam(option) === value;
                     }
-                    return true; // ignore functions // ToDo: should be checked as part of type.validateDefinition()
+                    return true;
                 });
                 if (validateValue && !isOneOf) {
                     errors.push(validationErrors.enum.ENUM_TYPE_VALIDATION_FAILED(value, stringOptions));
