@@ -29,10 +29,6 @@ All custom states with a parameter must define the parameter type. It is also po
 
 Allows defining a custom state with a **tags value** (seperated by whitespace). and then targeting it using a pseudo-class selector with a matching **tag argument**:
 
-```html
-<span data-cart="shirt pants" />
-```
-
 ```css
 .root {
     /* define the cart custom state */
@@ -46,12 +42,14 @@ Allows defining a custom state with a **tags value** (seperated by whitespace). 
 }
 ```
 
+Setting the state **tags value** in the view `<span {...style("root", {cart: "shirt pants"})}>` will resolve to `<span data-cart="shirt pants" />`.
+
 ## Enum
 
-Allows defining a custom state with possible **string value** options. and then targeting one of the options using a pseudo-class selector with a matching **string argument**:
+Allows defining a custom state with possible **enum value** options. and then targeting one of the options using a pseudo-class selector with a matching **string argument**:
 
 ```html
-<span data-selected-name="medium" />
+
 ```
 
 ```css
@@ -69,12 +67,14 @@ Allows defining a custom state with possible **string value** options. and then 
 }
 ```
 
+Setting the state **enum value** in the view `<span {...style("root", {size: "medium"})}>` will resolve to `<span data-size="medium" />`.
+
 ## String
 
 Allows defining a custom state with a **string value**. and then targeting it using a pseudo-class selector with a matching **string argument**:
 
 ```html
-<span data-selected-name="index" />
+<span data-selected="username" />
 ```
 
 ```css
@@ -84,11 +84,13 @@ Allows defining a custom state with a **string value**. and then targeting it us
     -st-states: selected( string );
 }
 
-.root:selected(index) {
+.root:selected(username) {
     /* target an element with a state value that 
-    is exactly the string argument "index" */
+    is exactly the string argument "username" */
 }
 ```
+
+Setting the state **string value** in the view `<span {...style("root", {selected: "username"})}>` will resolve to `<span data-selected="username" />`.
 
 ### Validation [optional]
 
@@ -182,6 +184,8 @@ Allows defining a custom state with a **number value**. and then targeting it us
     is exactly the number argument "5" */
 }
 ```
+
+Setting the state **number value** in the view `<span {...style("root", {column: 5})}>` will resolve to `<span data-column="5" />`.
 
 ### Validation [optional]
 
