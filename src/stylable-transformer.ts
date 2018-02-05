@@ -437,8 +437,6 @@ export class StylableTransformer {
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-class') {
-                    // current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol, rule);
-
                     current = transformPseudoStateSelector(
                         current, node, name, symbol, meta, originSymbol,
                         this.resolver, this.diagnostics, rule

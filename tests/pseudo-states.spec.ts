@@ -574,8 +574,6 @@ describe('pseudo-states', () => {
                     });
                 });
 
-                // TODO: test for case insensitivity in validators
-
                 describe('specific validators', () => {
                     it('should transform string using a valid regex validation', () => {
                         const res = generateStylableResult({
@@ -812,7 +810,6 @@ describe('pseudo-states', () => {
                     });
 
                     it('should warn when trying to use an unknown string validator', () => {
-                        // TODO: test -st-states and not usage
                         const config = {
                             entry: `/entry.st.css`,
                             files: {
@@ -865,7 +862,7 @@ describe('pseudo-states', () => {
                 });
 
                 it('should warn when a non-number default value is invoked', () => {
-                    const config = { // TODO: change testing flow to test during definition not usage
+                    const config = {
                         entry: `/entry.st.css`,
                         files: {
                             '/entry.st.css': {
@@ -1459,20 +1456,10 @@ describe('pseudo-states', () => {
             `, [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]);
         });
 
+        // TODO: test for case insensitivity in validators
+
         // it('should check for state name collision in the same definition', () => {});
 
         // it('should check for type collision in states with the same name', () => {});
-
-        // describe('native', () => {
-        //     it('should warn when overriding native states', () => {});
-        // });
-
-        // describe('boolean', () => {});
-
-        // describe('custom validation', () => {});
-
-        // describe('custom mapping', () => {});
-
     });
-
 });

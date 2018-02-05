@@ -37,7 +37,7 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
         } else if (stateDefinition.type === 'word') {
             resolveBooleanState(mappedStates, stateDefinition);
         } else {
-            // TODO: error weird state
+            // TODO: Invalid state, edge case needs warning
         }
     });
 
@@ -104,7 +104,6 @@ function resolveArguments(
         if (validator.type === 'function') {
             const args = listOptions(validator);
             if (args.length > 1) {
-                // TODO: error too many state types
                 diagnostics.warn(
                     decl,
                     errors.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
@@ -207,14 +206,18 @@ export function validateStateArgument(
     const { type: paramType, arguments: paramValidators } = stateAst;
     const validator = systemValidators[stateAst.type];
 
-    if (res.res || validateDefinition) {
-        const { errors } = validator.validate(res.res,
-            stateAst.arguments,
-            resolveParam.bind(null, meta, resolver, diagnostics, rule),
-            !!validateDefinition,
-            validateValue
-        );
-        res.errors = errors;
+    try {
+        if (res.res || validateDefinition) {
+            const { errors } = validator.validate(res.res,
+                stateAst.arguments,
+                resolveParam.bind(null, meta, resolver, diagnostics, rule),
+                !!validateDefinition,
+                validateValue
+            );
+            res.errors = errors;
+        }
+    } catch (error) {
+        // TODO: warn about validation throwing exception
     }
 
     return res;
