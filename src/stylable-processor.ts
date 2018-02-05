@@ -285,7 +285,7 @@ export class StylableProcessor {
                     decl,
                     rule.selector,
                     valueMapping.states,
-                    parseStates(decl.value, rule, this.diagnostics)
+                    parseStates(decl.value, decl, this.diagnostics)
                 );
             } else {
                 if (rule.selectorType === 'element') {

@@ -1,32 +1,30 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, ResolvedFormatter } from './functions';
+import { evalDeclarationValue } from './functions';
 import {
-    isCssNativeFunction,
-    nativePseudoClasses,
     nativePseudoElements,
     reservedKeyFrames
 } from './native-reserved-lists';
-import { cssObjectToAst } from './parser';
-import { autoStateAttrName, resolvePseudoState, setStateToNode } from './pseudo-states';
+import {
+    autoStateAttrName,
+    transformPseudoStateSelector,
+    validateStateDefinition
+} from './pseudo-states';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
-    createSubsetAst,
     findDeclaration,
     findRule,
-    getDeclStylable,
-    isValidDeclaration,
-    mergeRules
+    getDeclStylable
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo } from './types';
+import { Pojo } from './types';
 
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
@@ -149,17 +147,23 @@ export class StylableTransformer {
             getDeclStylable(decl).sourceValue = decl.value;
 
             // TODO: filter out all irrelevant directives
-            if (decl.prop !== valueMapping.states) {
-                decl.value = evalDeclarationValue(
-                    this.resolver,
-                    decl.value,
-                    meta,
-                    decl,
-                    variableOverride,
-                    this.replaceValueHook,
-                    this.diagnostics,
-                    path.slice()
-                );
+            switch (decl.prop) {
+                case valueMapping.mixin:
+                    break;
+                case valueMapping.states:
+                    validateStateDefinition(decl, meta, this.resolver, this.diagnostics);
+                    break;
+                default:
+                    decl.value = evalDeclarationValue(
+                        this.resolver,
+                        decl.value,
+                        meta,
+                        decl,
+                        variableOverride,
+                        this.replaceValueHook,
+                        this.diagnostics,
+                        path.slice()
+                    );
             }
         });
 
@@ -435,7 +439,7 @@ export class StylableTransformer {
                 } else if (type === 'pseudo-class') {
                     // current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol, rule);
 
-                    current = resolvePseudoState(
+                    current = transformPseudoStateSelector(
                         current, node, name, symbol, meta, originSymbol,
                         this.resolver, this.diagnostics, rule
                     );

@@ -3,25 +3,27 @@ import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
-import { StateParamType, systemValidators } from './state-validators';
-import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
+import { StateResult, systemValidators } from './state-validators';
+import { ClassSymbol, ElementSymbol, SDecl, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo, StateParsedValue, StateTypeValidator } from './types';
+import { ParsedValue, Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
 /* tslint:disable:max-line-length */
 const errors = {
-    UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo class "${name}"`,
-    UKNOWN_VALIDATOR: (type: string, name: string, args: string[], actualParam: string) => `pseudo-state invoked unknown ${type} validator "${name}(${args.join(', ')})" with "${actualParam}"`
+    UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo-state "${name}"`,
+    TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
+    NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
+    TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`
 };
 /* tslint:enable:max-line-length */
 
 // PROCESS
 
-export function processPseudoStates(value: string, _rule: SRule, _diagnostics: Diagnostics) {
+export function processPseudoStates(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
 
     const mappedStates: MappedStates = {};
     const ast = valueParser(value);
@@ -29,9 +31,9 @@ export function processPseudoStates(value: string, _rule: SRule, _diagnostics: D
 
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
-        // handle state declaration
+
         if (stateDefinition.type === 'function') {
-            resolveStateType(stateDefinition, mappedStates, stateDefault);
+            resolveStateType(stateDefinition, mappedStates, stateDefault, diagnostics, decl);
         } else if (stateDefinition.type === 'word') {
             resolveBooleanState(mappedStates, stateDefinition);
         } else {
@@ -45,13 +47,30 @@ export function processPseudoStates(value: string, _rule: SRule, _diagnostics: D
 function resolveStateType(
     stateDefinition: ParsedValue,
     mappedStates: MappedStates,
-    stateDefault: ParsedValue[]) {
-    // if (!stateType) {
-    //     throw new Error('Emtpry State Function');
-    // }
-    if (stateDefinition.nodes.length > 1) {
-        throw new Error('Too many types provided');
+    stateDefault: ParsedValue[],
+    diagnostics: Diagnostics,
+    decl: postcss.Declaration) {
+
+    if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
+        resolveBooleanState(mappedStates, stateDefinition);
+
+        diagnostics.warn(decl,
+            errors.NO_STATE_TYPE_GIVEN(stateDefinition.value),
+            {word: decl.value});
+
+        return;
     }
+
+    if (stateDefinition.nodes.length > 1) {
+        const types = stateDefinition.nodes.map(
+            (def: ParsedValue) => (def.type === 'word' || def.type === 'function') ? def.value : null)
+            .filter((def?: string) => def);
+
+        diagnostics.warn(decl,
+            errors.TOO_MANY_STATE_TYPES(stateDefinition.value, types),
+            {word: decl.value});
+    }
+
     const paramType = stateDefinition.nodes[0];
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
@@ -63,7 +82,7 @@ function resolveStateType(
         mappedStates[stateDefinition.value] = stateType.type.trim().replace(/\\["']/g, '"');
     } else if (paramType.type === 'function') {
         if (paramType.nodes.length > 0) {
-            resolveArguments(paramType, stateType);
+            resolveArguments(paramType, stateType, stateDefinition.value, diagnostics, decl);
         }
         mappedStates[stateDefinition.value] = stateType;
     } else if (stateType.type in systemValidators) {
@@ -71,18 +90,32 @@ function resolveStateType(
     }
 }
 
-function resolveArguments(stateDefinition: ParsedValue, stateType: StateParsedValue) {
-    const seperetedByComma = groupValues(stateDefinition.nodes);
+function resolveArguments(
+    paramType: ParsedValue,
+    stateType: StateParsedValue,
+    name: string,
+    diagnostics: Diagnostics,
+    decl: postcss.Declaration) {
+
+    const seperetedByComma = groupValues(paramType.nodes);
 
     seperetedByComma.forEach(group => {
         const validator = group[0];
-        if (group.length > 1 || group.length === 0) {
-            // TODO: error too many state types
-        } else if (validator.type === 'function') {
-            stateType.arguments.push({
-                name: validator.value,
-                args: listOptions(validator)
-            });
+        if (validator.type === 'function') {
+            const args = listOptions(validator);
+            if (args.length > 1) {
+                // TODO: error too many state types
+                diagnostics.warn(
+                    decl,
+                    errors.TOO_MANY_ARGS_IN_VALIDATOR(name, validator.value, args),
+                    { word: decl.value }
+                );
+            } else {
+                stateType.arguments.push({
+                    name: validator.value,
+                    args
+                });
+            }
         } else if (validator.type === 'string' || validator.type === 'word') {
             stateType.arguments.push(validator.value);
         }
@@ -104,9 +137,90 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 
 // TRANSFORM
 
-export type AutoStateAttrName = (stateName: string, namespace: string) => string;
+export function validateStateDefinition(
+    decl: SDecl,
+    meta: StylableMeta,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics) {
 
-export function resolvePseudoState(
+    if (decl.parent && decl.parent.type !== 'root') {
+        const container = decl.parent;
+        if (container.type !== 'atrule') {
+            const sRule: SRule = container as SRule;
+            if (sRule.selectorAst.nodes && sRule.selectorAst.nodes.length === 1) {
+                const singleSelectorAst = sRule.selectorAst.nodes[0];
+                const selectorChunk = singleSelectorAst.nodes;
+
+                if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
+                    const className = selectorChunk[0].name;
+                    const classMeta = meta.classes[className];
+
+                    if (classMeta && classMeta._kind === 'class') {
+                        for (const stateName in classMeta[valueMapping.states]) {
+                            const state = classMeta[valueMapping.states][stateName];
+                            if (state && typeof state === 'object') {
+                                const res = validateStateArgument(
+                                    state,
+                                    meta,
+                                    state.defaultValue || '',
+                                    resolver,
+                                    diagnostics,
+                                    sRule,
+                                    true,
+                                    !!state.defaultValue
+                                );
+
+                                if (res.errors) {
+                                    // tslint:disable-next-line:max-line-length
+                                    res.errors.unshift(`pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`);
+                                    diagnostics.warn(decl,
+                                        res.errors.join('\n'),
+                                        {word: decl.value});
+                                }
+                            }
+
+                        }
+                    } else {
+                        // TODO: error state on non-class
+                    }
+                }
+            }
+        }
+    }
+}
+
+export function validateStateArgument(
+    stateAst: StateParsedValue,
+    meta: StylableMeta,
+    value: string,
+    resolver: StylableResolver,
+    diagnostics: Diagnostics,
+    rule?: postcss.Rule,
+    validateDefinition?: boolean,
+    validateValue: boolean = true) {
+
+    const res: StateResult = {
+        res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
+        errors: null
+    };
+
+    const { type: paramType, arguments: paramValidators } = stateAst;
+    const validator = systemValidators[stateAst.type];
+
+    if (res.res || validateDefinition) {
+        const { errors } = validator.validate(res.res,
+            stateAst.arguments,
+            resolveParam.bind(null, meta, resolver, diagnostics, rule),
+            !!validateDefinition,
+            validateValue
+        );
+        res.errors = errors;
+    }
+
+    return res;
+}
+
+export function transformPseudoStateSelector(
     meta: StylableMeta,
     node: SelectorAstNode,
     name: string,
@@ -185,11 +299,11 @@ export function setStateToNode(
         node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
         node.value = stateDef;
     } else if (typeof stateDef === 'object') {
-        resolveState(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
+        resolveStateValue(meta, resolver, diagnostics, rule, node, stateDef, name, namespace);
     }
 }
 
-function resolveState(
+function resolveStateValue(
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
@@ -199,7 +313,7 @@ function resolveState(
     name: string,
     namespace: string) {
 
-    let actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content, stateDef.defaultValue);
+    let actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content || stateDef.defaultValue);
 
     const { type: paramType, arguments: paramValidators } = stateDef;
     const validator = systemValidators[stateDef.type];
@@ -208,7 +322,9 @@ function resolveState(
     try {
         stateParamOutput = validator.validate(actualParam,
             stateDef.arguments,
-            resolveParam.bind(null, meta, resolver, diagnostics, rule, stateDef.defaultValue)
+            resolveParam.bind(null, meta, resolver, diagnostics, rule),
+            false,
+            true
         );
     } catch (e) {
         // TODO: report unexpected crash
@@ -219,9 +335,13 @@ function resolveState(
             actualParam = stateParamOutput.res;
         }
 
-        if (rule && stateParamOutput.error) {
+        if (rule && stateParamOutput.errors) {
+            stateParamOutput.errors.unshift(
+                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`
+            );
+
             diagnostics.warn(rule,
-                `pseudo-state "${name}" with parameter "${actualParam}" failed validation:\n${stateParamOutput.error}`,
+                stateParamOutput.errors.join('\n'),
                 {word: actualParam});
         }
     }
@@ -235,11 +355,10 @@ function resolveParam(
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
-    defaultValue?: string,
     nodeContent?: string) {
 
     const defaultStringValue = '';
-    const param = nodeContent || defaultValue || defaultStringValue;
+    const param = nodeContent || defaultStringValue;
 
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }

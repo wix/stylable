@@ -47,6 +47,40 @@ describe('pseudo-states', () => {
 
         describe('advanced type', () => {
 
+            it('should warn when a state receieves more than a single state type', () => {
+                expectWarnings(`
+                    .root{
+                        |-st-states: $state1(string, number())$|;
+                    }
+                `, [{
+                    message: 'pseudo-state "state1(string, number)" definition must be of a single type',
+                    file: 'main.css'
+                }]);
+            });
+
+            it('should warn when a state function receives no arguments', () => {
+                expectWarnings(`
+                    .root{
+                        |-st-states: $state1()$|;
+                    }
+                `, [{
+                    message: 'pseudo-state "state1" expected a definition of a single type, but received none',
+                    file: 'main.css'
+                }]);
+            });
+
+            it('should warn when a validator function receives more than a single argument', () => {
+                expectWarnings(`
+                    .my-class {
+                        |-st-states: $state1( string( contains(one, two) ) )$|;
+                    }
+                `, [{
+                    // tslint:disable-next-line:max-line-length
+                    message: 'pseudo-state "state1" expected "contains" validator to receive a single argument, but it received "one, two"',
+                    file: 'main.css'
+                }]);
+            });
+
             describe('string', () => {
 
                 it('as a simple validator', () => {
@@ -439,6 +473,35 @@ describe('pseudo-states', () => {
 
         describe('advanced type / validation', () => {
 
+            xit('should default to a boolean state when state is a function but receives no type', () => {
+                // TODO: Make this pass?
+
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class| {
+                                -st-states: |state1|();
+                            }
+                            .my-class:state1 {}
+                            `
+                        }
+                    }
+                });
+
+                // const res = expectWarningsFromTransform(config, [{
+                //     message: [
+                //         'pseudo-state "state1" expected a definition of a single type, but received none'
+                //     ].join('\n'),
+                //     file: '/entry.st.css'
+                // }]);
+                expect(res).to.have.styleRules({
+                    1: '.entry--my-class[data-entry-state1] {}'
+                });
+            });
+
             describe('string', () => {
 
                 it('should transform string validator', () => {
@@ -553,8 +616,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "failingParameter" failed validation:\n - string type failed regex "^user" validation with: "failingParameter"',
+                            message: [
+                                'pseudo-state "state1" with parameter "failingParameter" failed validation:',
+                                'expected "failingParameter" to match regex "^user"'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
@@ -628,8 +693,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "wrongState" failed validation:\n - parameter "wrongState" of type string should contain string: "user"',
+                            message: [
+                                'pseudo-state "state1" with parameter "wrongState" failed validation:',
+                                'expected "wrongState" to contain string "user"'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
@@ -676,8 +743,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed min length (7) validation',
+                            message: [
+                                'pseudo-state "state1" with parameter "user" failed validation:',
+                                'expected "user" to be of length longer than or equal to 7'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
@@ -702,8 +771,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation',
+                            message: [
+                                'pseudo-state "state1" with parameter "user" failed validation:',
+                                'expected "user" to be of length shorter than or equal to 3'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
@@ -728,8 +799,11 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "user" failed validation:\n - parameter "user" failed max length (3) validation\n - string type failed regex "^case" validation with: "user"',
+                            message: [
+                                'pseudo-state "state1" with parameter "user" failed validation:',
+                                'expected "user" to be of length shorter than or equal to 3',
+                                'expected "user" to match regex "^case"'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
@@ -746,21 +820,23 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: state1(string(missing(someValue)));
+                                        |-st-states: $state1(string(missing()))$|;
                                     }
-                                    |.my-class:state1($passedValue$)| {}
                                     `
                                 }
                             }
                         };
 
-                        const res = expectWarningsFromTransform(config, [
-                            // tslint:disable-next-line:max-line-length
-                            { message: 'pseudo-state invoked unknown string validator "missing(someValue)" with "passedValue"', file: '/entry.st.css' }
-                        ]);
-                        expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="passedValue"] {}'
-                        });
+                        const res = expectWarningsFromTransform(config, [{
+                            message: [
+                                'pseudo-state "state1" default value "" failed validation:',
+                                'encountered unknown string validator "missing"'
+                            ].join('\n'),
+                            file: '/entry.st.css'
+                        }]);
+                        // expect(res).to.have.styleRules({
+                        //     0: '.entry--my-class[data-entry-state1="passedValue"] {}'
+                        // });
                     });
                 });
             });
@@ -796,21 +872,20 @@ describe('pseudo-states', () => {
                                 namespace: 'entry',
                                 content: `
                                 .my-class{
-                                    -st-states: state1(number) defaultBlah;
+                                    |-st-states: $state1(number) defaultBlah$|;
                                 }
-                                |.my-class:$state1$| {}
                                 `
                             }
                         }
                     };
 
                     const res = expectWarningsFromTransform(config, [{
-                        message: 'pseudo-state value "defaultBlah" does not match type "number" of "state1"',
+                        message: [
+                            'pseudo-state "state1" default value "defaultBlah" failed validation:',
+                            'expected "defaultBlah" to be of type number'
+                        ].join('\n'),
                         file: '/entry.st.css'
                     }]);
-                    expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="defaultBlah"] {}'
-                    });
                 });
 
                 it('should warn on an non-number value passed', () => {
@@ -830,8 +905,10 @@ describe('pseudo-states', () => {
                     };
 
                     const res = expectWarningsFromTransform(config, [{
-                        // tslint:disable-next-line:max-line-length
-                        message: 'pseudo-state "state1" with parameter "blah" failed validation:\n - "blah" should be of type number but failed validation',
+                        message: [
+                            'pseudo-state "state1" with parameter "blah" failed validation:',
+                            'expected "blah" to be of type number'
+                        ].join('\n'),
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
@@ -857,8 +934,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "1" failed validation:\n - parameter "1" failed min(3) validation',
+                            message: [
+                                'pseudo-state "state1" with parameter "1" failed validation:',
+                                'expected "1" to be larger than or equal to 3'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }
                         ]);
@@ -884,8 +963,10 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "42" failed validation:\n - parameter "42" failed max(5) validation',
+                            message: [
+                                'pseudo-state "state1" with parameter "42" failed validation:',
+                                'expected "42" to be lesser then or equal to 5'
+                            ].join('\n'),
                             file: '/entry.st.css'
                         }
                         ]);
@@ -911,11 +992,12 @@ describe('pseudo-states', () => {
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
-                            message: 'pseudo-state "state1" with parameter "42" failed validation:\n - parameter "42" should be a multiple of 5',
+                            message: [
+                                'pseudo-state "state1" with parameter "42" failed validation:',
+                                'expected "42" to be a multiple of 5'
+                            ].join('\n'),
                             file: '/entry.st.css'
-                        }
-                        ]);
+                        }]);
                         expect(res).to.have.styleRules({
                             1: '.entry--my-class[data-entry-state1="42"] {}'
                         });
@@ -957,23 +1039,18 @@ describe('pseudo-states', () => {
                                     .my-class {
                                         |-st-states: size( enum() )|;
                                     }
-                                    .my-class:size(huge) {}
                                     `
                                 }
                             }
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
                             message: [
-                                'pseudo-state "size" with parameter "huge" failed validation:',
-                                'pseudo-state definition must include at least one option'
+                                'pseudo-state "size" default value "" failed validation:',
+                                'expected enum to be defined with one option or more'
                             ].join('\n'),
                             file: '/entry.st.css'
                         }]);
-                        expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-size="huge"] {}'
-                        });
                     });
 
                     it('should warn when a default value does not equal one of the options provided', () => {
@@ -984,25 +1061,20 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: size( enum(small, large)) |huge|;
+                                        |-st-states: $size( enum(small, large)) huge$|;
                                     }
-                                    .my-class:size(huge) {}
                                     `
                                 }
                             }
                         };
 
                         const res = expectWarningsFromTransform(config, [{
-                            // tslint:disable-next-line:max-line-length
                             message: [
-                                'pseudo-state "size" with parameter "huge" failed validation:',
-                                'pseudo-state default value must equal one of the options provided'
+                                'pseudo-state "size" default value "huge" failed validation:',
+                                'expected "huge" to be one of the options: "small, large"'
                             ].join('\n'),
                             file: '/entry.st.css'
                         }]);
-                        expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-size="huge"] {}'
-                        });
                     });
                 });
 
@@ -1071,10 +1143,9 @@ describe('pseudo-states', () => {
                     };
 
                     const res = expectWarningsFromTransform(config, [{
-                        // tslint:disable-next-line:max-line-length
                         message: [
                             'pseudo-state "size" with parameter "huge" failed validation:',
-                            'pseudo-state value should equal one of the options: "small, large"'
+                            'expected "huge" to be one of the options: "small, large"'
                         ].join('\n'),
                         file: '/entry.st.css'
                     }]);
@@ -1356,7 +1427,7 @@ describe('pseudo-states', () => {
             };
 
             const res = expectWarningsFromTransform(config, [
-                { message: 'unknown pseudo class "unknownState"', file: '/entry.st.css' }
+                { message: 'unknown pseudo-state "unknownState"', file: '/entry.st.css' }
             ]);
             expect(res, 'keep unknown state').to.have.styleRules([`.entry--root:unknownState{}`]);
         });
