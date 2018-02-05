@@ -48,10 +48,6 @@ Setting the state **tags value** in the view `<span {...style("root", {cart: "sh
 
 Allows defining a custom state with possible **enum value** options. and then targeting one of the options using a pseudo-class selector with a matching **string argument**:
 
-```html
-
-```
-
 ```css
 .root {
     /* define the size custom state */
@@ -72,10 +68,6 @@ Setting the state **enum value** in the view `<span {...style("root", {size: "me
 ## String
 
 Allows defining a custom state with a **string value**. and then targeting it using a pseudo-class selector with a matching **string argument**:
-
-```html
-<span data-selected="username" />
-```
 
 ```css
 .root {
@@ -132,39 +124,6 @@ String type can also accept several other validations, including `minLength(numb
 .root:selected(x) {}
 ```
 
-### Prefixes
-
-String type accepts special prefixes (corresponding to CSS [attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)) that allow for custom matching of the state string value:
-
-```css
-.root:selected(~user) {
-    /* targets an element with a state value that
-    is a whitespace-separated list of words, 
-    one of which is exactly the string argument */
-}
-
-.root:selected(^user) {
-    /* targets an element with a state value that
-    is prefixed (preceded) by the string argument */
-}
-
-.root:selected($user) {
-    /* targets an element with a state value that
-    is suffix (followed) by the string argument */
-}
-
-.root:selected(*user) {
-    /* targets an element with a state value that 
-    contains at least one occurrence of the string argument */
-}
-
-.root:selected(|user) {
-    /* targets an element with a state value that
-    can be exactly the string argument or 
-    can begin with the string argument immediately followed by a hyphen, "-" */
-}
-```
-
 ## Number
 
 Allows defining a custom state with a **number value**. and then targeting it using a pseudo-class selector with a matching **number argument**:
@@ -213,7 +172,8 @@ You can use several sub validators that the number type provides:
 
 ## Future Intent
 
-* [custom user types and validations](https://github.com/wix/stylable/issues/268).
+* [Custom user types and validations](https://github.com/wix/stylable/issues/268).
 * [Custom pseudo state type "nth"](https://github.com/wix/stylable/issues/270).
-* [multiple named parameters](https://github.com/wix/stylable/issues/269).
-* lang type - take advantage of attribute selector `[state|="en"]` to support language code.
+* [Multiple named parameters](https://github.com/wix/stylable/issues/269).
+* [Custom pseudo state string prefixes](https://github.com/wix/stylable/issues/271).
+* Lang type - take advantage of attribute selector `[state|="en"]` to support language code.
