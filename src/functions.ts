@@ -57,10 +57,8 @@ export function evalDeclarationValue(
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = []) {
+
     const parsedValue = valueParser(value);
-    if ((node as postcss.Declaration).prop === valueMapping.mixin) {
-        return (node as postcss.Declaration).value;
-    }
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
         switch (type) {

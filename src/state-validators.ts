@@ -2,23 +2,29 @@ import { Pojo, StateArguments, StateTypeValidator } from './types';
 
 export interface StateResult {
     res: string;
-    error: string | null;
+    errors: string[] | null;
 }
 
 /* tslint:disable:max-line-length */
 const validationErrors = {
     string: {
-        STRING_TYPE_VALIDATION_FAILED: (actualParam: string) => ` - "${actualParam}" should be of type string but failed validation`,
-        REGEX_VALIDATION_FAILED: (regex: string, actualParam: string) => ` - string type failed regex "${regex}" validation with: "${actualParam}"`,
-        CONTAINS_VALIDATION_FAILED: (shouldContain: string, actualParam: string) => ` - parameter "${actualParam}" of type string should contain string: "${shouldContain}"`,
-        MIN_LENGTH_VALIDATION_FAILED: (length: string, actualParam: string) => ` - parameter "${actualParam}" failed min length (${length}) validation`,
-        MAX_LENGTH_VALIDATION_FAILED: (length: string, actualParam: string) => ` - parameter "${actualParam}" failed max length (${length}) validation`
+        STRING_TYPE_VALIDATION_FAILED: (actualParam: string) => `"${actualParam}" should be of type string`,
+        REGEX_VALIDATION_FAILED: (regex: string, actualParam: string) => `expected "${actualParam}" to match regex "${regex}"`,
+        CONTAINS_VALIDATION_FAILED: (shouldContain: string, actualParam: string) => `expected "${actualParam}" to contain string "${shouldContain}"`,
+        MIN_LENGTH_VALIDATION_FAILED: (length: string, actualParam: string) => `expected "${actualParam}" to be of length longer than or equal to ${length}`,
+        MAX_LENGTH_VALIDATION_FAILED: (length: string, actualParam: string) => `expected "${actualParam}" to be of length shorter than or equal to ${length}`,
+        UKNOWN_VALIDATOR: (name: string) => `encountered unknown string validator "${name}"`
     },
     number: {
-        NUMBER_TYPE_VALIDATION_FAILED: (actualParam: string) => ` - "${actualParam}" should be of type number but failed validation`,
-        MIN_VALIDATION_FAILED: (actualParam: string, min: string) => ` - parameter "${actualParam}" failed min(${min}) validation`,
-        MAX_VALIDATION_FAILED: (actualParam: string, max: string) => ` - parameter "${actualParam}" failed max(${max}) validation`,
-        MULTIPLE_OF_VALIDATION_FAILED: (actualParam: string, multipleOf: string) => ` - parameter "${actualParam}" should be a multiple of ${multipleOf}`
+        NUMBER_TYPE_VALIDATION_FAILED: (actualParam: string) => `expected "${actualParam}" to be of type number`,
+        MIN_VALIDATION_FAILED: (actualParam: string, min: string) => `expected "${actualParam}" to be larger than or equal to ${min}`,
+        MAX_VALIDATION_FAILED: (actualParam: string, max: string) => `expected "${actualParam}" to be lesser then or equal to ${max}`,
+        MULTIPLE_OF_VALIDATION_FAILED: (actualParam: string, multipleOf: string) => `expected "${actualParam}" to be a multiple of ${multipleOf}`,
+        UKNOWN_VALIDATOR: (name: string) => `encountered unknown number validator "${name}"`
+    },
+    enum: {
+        ENUM_TYPE_VALIDATION_FAILED: (actualParam: string, options: string[]) => `expected "${actualParam}" to be one of the options: "${options.join(', ')}"`,
+        NO_OPTIONS_DEFINED: () => `expected enum to be defined with one option or more`
     }
 };
 /* tslint:enable:max-line-length */
@@ -27,24 +33,27 @@ export type SubValidator = (value: string, ...rest: string[]) => StateResult;
 
 export interface StateParamType {
     subValidators?: Pojo<SubValidator>;
-    validate(value: any, args: StateArguments, resolveParam: any): StateResult;
-}
-
-function createError(errors: string[]) {
-    // TODO: wrap errors nicely
-    return errors.join('\n');
+    validate(
+        value: any,
+        args: StateArguments,
+        resolveParam: any,
+        validateDefinition: boolean,
+        validateValue: boolean): StateResult;
 }
 
 export const systemValidators: Pojo<StateParamType> = {
     string: {
-        validate(value: any, validators: StateArguments, resolveParam: (s: string) => string) {
-            const res: StateResult = {
-                res: value,
-                error: null
-            };
+        validate(
+            value: any,
+            validators: StateArguments,
+            resolveParam: (s: string) => string,
+            validateDefinition,
+            validateValue) {
+
+            const res = value;
             const errors: string[] = [];
 
-            if (typeof value !== 'string') {
+            if (validateValue && typeof value !== 'string') {
                 errors.push(validationErrors.string.STRING_TYPE_VALIDATION_FAILED(value));
             }
 
@@ -53,7 +62,7 @@ export const systemValidators: Pojo<StateParamType> = {
                     if (typeof validatorMeta === 'string') {
                         const r = new RegExp(validatorMeta);
 
-                        if (!r.test(value)) {
+                        if (validateValue && !r.test(value)) {
                             errors.push(validationErrors.string.REGEX_VALIDATION_FAILED(validatorMeta, value));
                         }
                     } else if (typeof validatorMeta === 'object') {
@@ -63,18 +72,18 @@ export const systemValidators: Pojo<StateParamType> = {
                                 validatorMeta,
                                 value,
                                 resolveParam,
-                                errors
+                                errors,
+                                validateDefinition,
+                                validateValue
                             );
+                        } else if (validateDefinition) {
+                            errors.push(validationErrors.string.UKNOWN_VALIDATOR(validatorMeta.name));
                         }
                     }
                 });
             }
 
-            if (errors.length > 0) {
-                res.error = createError(errors);
-            }
-
-            return res;
+            return {res, errors: errors.length ? errors : null};
         },
         subValidators: {
             contains: (value: string, checkedValue: string) => {
@@ -82,9 +91,9 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.string.CONTAINS_VALIDATION_FAILED(checkedValue, value)
+                        [validationErrors.string.CONTAINS_VALIDATION_FAILED(checkedValue, value)]
                 };
             },
             minLength: (value: string, length: string) => {
@@ -92,9 +101,9 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.string.MIN_LENGTH_VALIDATION_FAILED(length, value)
+                        [validationErrors.string.MIN_LENGTH_VALIDATION_FAILED(length, value)]
                 };
             },
             maxLength: (value: string, length: string) => {
@@ -102,27 +111,30 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.string.MAX_LENGTH_VALIDATION_FAILED(length, value)
+                        [validationErrors.string.MAX_LENGTH_VALIDATION_FAILED(length, value)]
                 };
             }
         }
     },
     number: {
-        validate(value: any, validators: StateArguments, resolveParam: (s: string) => string) {
-            const res: StateResult = {
-                res: value,
-                error: null
-            };
+        validate(
+            value: any,
+            validators: StateArguments,
+            resolveParam: (s: string) => string,
+            validateDefinition,
+            validateValue) {
+
+            const res = value;
             const errors: string[] = [];
 
             const isNumber = !isNaN(value);
             if (value !== 0 && !isNumber) {
-                errors.push(validationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(value));
-            }
-
-            if (validators.length > 0) {
+                if (validateValue) {
+                    errors.push(validationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(value));
+                }
+            } else if (validators.length > 0) {
                 validators.map(validatorMeta => {
                     if (typeof validatorMeta === 'object') {
                         if (this.subValidators) {
@@ -131,18 +143,16 @@ export const systemValidators: Pojo<StateParamType> = {
                                 validatorMeta,
                                 value,
                                 resolveParam,
-                                errors
+                                errors,
+                                validateDefinition,
+                                validateValue
                             );
                         }
                     }
                 });
             }
 
-            if (errors.length > 0) {
-                res.error = createError(errors);
-            }
-
-            return res;
+            return {res, errors: errors.length ? errors : null};
         },
         subValidators: {
             min: (value: string, minValue: string) => {
@@ -150,9 +160,9 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.number.MIN_VALIDATION_FAILED(value, minValue)
+                        [validationErrors.number.MIN_VALIDATION_FAILED(value, minValue)]
                 };
             },
             max: (value: string, maxValue: string) => {
@@ -160,9 +170,9 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.number.MAX_VALIDATION_FAILED(value, maxValue)
+                        [validationErrors.number.MAX_VALIDATION_FAILED(value, maxValue)]
                 };
             },
             multipleOf: (value: string, multipleOf: string) => {
@@ -170,38 +180,58 @@ export const systemValidators: Pojo<StateParamType> = {
 
                 return {
                     res: value,
-                    error: valid ?
+                    errors: valid ?
                         null :
-                        validationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(value, multipleOf)
+                        [validationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(value, multipleOf)]
                 };
             }
         }
     },
     enum: {
-        validate(value: any, options: StateArguments, resolveParam: (s: string) => string) {
-            const res: StateResult = {
-                res: value,
-                error: null
-            };
+        validate(
+            value: any,
+            options: StateArguments,
+            resolveParam: (s: string) => string,
+            validateDefinition,
+            validateValue) {
+
+            const res = value;
             const errors: string[] = [];
 
-            if (!options.some(option => resolveParam(option as string) === value)) {
-                errors.push(`pseudo-state value should equal one of the options: "${options.join(', ')}"`);
+            const stringOptions: string[] = [];
+
+            if (options.length) {
+                const isOneOf = options.some(option => {
+                    if (typeof option === 'string') {
+                        stringOptions.push(option);
+                        return resolveParam(option) === value;
+                    }
+                    return true; // ignore functions // ToDo: should be checked as part of type.validateDefinition()
+                });
+                if (validateValue && !isOneOf) {
+                    errors.push(validationErrors.enum.ENUM_TYPE_VALIDATION_FAILED(value, stringOptions));
+                }
+            } else if (validateDefinition) {
+                errors.push(validationErrors.enum.NO_OPTIONS_DEFINED());
             }
 
-            if (errors.length > 0) {
-                res.error = createError(errors);
-            }
-
-            return res;
+            return {res, errors: errors.length ? errors : null};
         }
     }
 };
 
-// tslint:disable-next-line:max-line-length
-function resolveSubValidator(subValidator: SubValidator, validatorMeta: StateTypeValidator, value: any, resolveParam: (s: string) => string, errors: string[]) {
+function resolveSubValidator(
+    subValidator: SubValidator,
+    validatorMeta: StateTypeValidator,
+    value: any,
+    resolveParam: (s: string) => string,
+    errors: string[],
+    _validateDefinition: boolean,
+    validateValue: boolean) {
+
     const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
-    if (validationRes.error) {
-        errors.push(validationRes.error);
+
+    if (validateValue && validationRes.errors) {
+        errors.push(...validationRes.errors);
     }
 }

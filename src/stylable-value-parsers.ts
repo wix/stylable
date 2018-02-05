@@ -2,7 +2,7 @@ import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
-import { SRule } from './stylable-processor';
+import { SDecl, SRule } from './stylable-processor';
 import { Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
@@ -69,13 +69,13 @@ export const SBTypesParsers = {
         const selector: any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
         return selector.nodes[0].nodes;
     },
-    '-st-states'(value: string, rule: SRule, _diagnostics: Diagnostics) {
+    '-st-states'(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
         if (!value) {
             return {};
         }
 
         const mappedStates: MappedStates = {};
-        return processPseudoStates(value, rule, _diagnostics);
+        return processPseudoStates(value, decl, diagnostics);
     },
     '-st-extends'(value: string) {
         const ast = valueParser(value);
