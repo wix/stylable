@@ -174,6 +174,14 @@ export function evalDeclarationValue(
                         // TODO: Add try/catch, pipe error
                         try {
                             parsedNode.resolvedValue = formatter.symbol.apply(null, args);
+                            if (valueHook) {
+                                parsedNode.resolvedValue = valueHook(
+                                    parsedNode.resolvedValue!,
+                                    { name: parsedNode.value, args },
+                                    true,
+                                    passedThrough
+                                );
+                            }
                         } catch (error) {
                             // todo: issue diagnostic
                             parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
@@ -202,7 +210,7 @@ export function evalDeclarationValue(
     // TODO: check this thing. native function that accent our function dose not work
     // e.g: calc(getVarName())
     return valueParser.stringify(parsedValue.nodes, (node: ParsedValue) => {
-        if (node.resolvedValue) {
+        if (node.resolvedValue !== undefined) {
             return node.resolvedValue;
         } else {
             // TODO: warn

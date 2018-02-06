@@ -53,7 +53,12 @@ export interface ScopedSelectorResults {
     elements: ResolvedElement[][];
 }
 
-export type replaceValueHook = (value: string, name: string, isLocal: boolean, passedThrough: string[]) => string;
+export type replaceValueHook = (
+    value: string,
+    name: string | { name: string, args: string[] },
+    isLocal: boolean,
+    passedThrough: string[]) => string;
+
 export type postProcessor<T = {}> = (
     stylableResults: StylableResults,
     transformer: StylableTransformer

@@ -1,5 +1,7 @@
+export type Param = boolean | number | string;
+
 export interface StateMap {
-    [key: string]: string | number | boolean;
+    [key: string]: Param;
 }
 
 export interface Stylesheet {
