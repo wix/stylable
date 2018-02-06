@@ -4,27 +4,12 @@ import { ImportSymbol, process, processNamespace, StylableMeta } from '../src/st
 
 import * as chai from 'chai';
 import { resolve } from 'path';
-import { flatMatch } from './matchers/falt-match';
+import { VarSymbol } from '../src';
+import { flatMatch } from './matchers/flat-match';
+import { processSource } from './utils/generate-test-util';
 
 const expect = chai.expect;
 chai.use(flatMatch);
-
-export let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-    return processSource(content, { from: path });
-},
-    {
-        readFileSync() {
-            return '';
-        },
-        statSync() {
-            return { mtime: new Date() };
-        }
-    }
-);
-
-function processSource(source: string, options: postcss.ProcessOptions = {}) {
-    return process(postcss.parse(source, options));
-}
 
 describe('Stylable postcss process', () => {
 
@@ -189,7 +174,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('resolve local :vars (dont warn if name is imported)', () => {
-
+        // ToDo: check if test is needed
         const result = processSource(`
             :import {
                 -st-from: "./file.css";
@@ -267,46 +252,6 @@ describe('Stylable postcss process', () => {
                         name: 'class'
                     }
                 ]
-            }
-        });
-
-    });
-
-    it('collect typed classes with auto states', () => {
-
-        const result = processSource(`
-            .root {
-                -st-states: state1, state2;
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.classes).to.flatMatch({
-            root: {
-                '-st-states': {
-                    state1: null,
-                    state2: null
-                }
-            }
-        });
-
-    });
-
-    it('collect typed classes with mapping states', () => {
-
-        const result = processSource(`
-            .root {
-                -st-states: state1, state2("[data-mapped]");
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-        expect(result.classes).to.flatMatch({
-            root: {
-                '-st-states': {
-                    state1: null,
-                    state2: '[data-mapped]'
-                }
             }
         });
 
