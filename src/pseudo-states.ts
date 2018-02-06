@@ -346,7 +346,10 @@ function resolveStateValue(
     }
 
     node.type = 'attribute';
-    node.content = `${autoStateAttrName(name, namespace)}="${actualParam}"`;
+
+    const selectorSuffix = stateDef.type === 'tag' ? '~' : undefined; // TODO: should be generic
+
+    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}="${actualParam}"`;
 }
 
 function resolveParam(
@@ -362,6 +365,6 @@ function resolveParam(
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }
 
-export function autoStateAttrName(stateName: string, namespace: string) {
-    return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}`;
+export function autoStateAttrName(stateName: string, namespace: string, suffix = '') {
+    return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}${suffix}`;
 }

@@ -53,9 +53,9 @@ describe('pseudo-states', () => {
                         |-st-states: $state1(string, number(x))$|;
                     }
                 `, [{
-                    message: 'pseudo-state "state1(string, number(x))" definition must be of a single type',
-                    file: 'main.css'
-                }]);
+                        message: 'pseudo-state "state1(string, number(x))" definition must be of a single type',
+                        file: 'main.css'
+                    }]);
             });
 
             it('should warn when a state function receives no arguments', () => {
@@ -64,9 +64,9 @@ describe('pseudo-states', () => {
                         |-st-states: $state1()$|;
                     }
                 `, [{
-                    message: 'pseudo-state "state1" expected a definition of a single type, but received none',
-                    file: 'main.css'
-                }]);
+                        message: 'pseudo-state "state1" expected a definition of a single type, but received none',
+                        file: 'main.css'
+                    }]);
             });
 
             it('should warn when a validator function receives more than a single argument', () => {
@@ -75,10 +75,10 @@ describe('pseudo-states', () => {
                         |-st-states: $state1( string( contains(one, two) ) )$|;
                     }
                 `, [{
-                    // tslint:disable-next-line:max-line-length
-                    message: 'pseudo-state "state1" expected "contains" validator to receive a single argument, but it received "one, two"',
-                    file: 'main.css'
-                }]);
+                        // tslint:disable-next-line:max-line-length
+                        message: 'pseudo-state "state1" expected "contains" validator to receive a single argument, but it received "one, two"',
+                        file: 'main.css'
+                    }]);
             });
 
             describe('string', () => {
@@ -336,6 +336,48 @@ describe('pseudo-states', () => {
                                     defaultValue: 'small',
                                     type: 'enum',
                                     arguments: ['small', 'large']
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            describe('tag', () => {
+                it('as a simple validator', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: category(tag);
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                category: {
+                                    type: 'tag'
+                                }
+                            }
+                        }
+                    });
+                });
+
+                it('including a default value', () => {
+                    const res = processSource(`
+                        .root {
+                            -st-states: category(tag) movie;
+                        }
+                    `, { from: 'path/to/style.css' });
+
+                    expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+                    expect(res.classes).to.containSubset({
+                        root: {
+                            [valueMapping.states]: {
+                                category: {
+                                    defaultValue: 'movie',
+                                    type: 'tag'
                                 }
                             }
                         }
@@ -1148,6 +1190,83 @@ describe('pseudo-states', () => {
                     }]);
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-size="huge"] {}'
+                    });
+                });
+            });
+
+            describe('tag', () => {
+                it('should transform tag validator', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: category( tag );
+                                }
+                                .my-class:category(movie) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-category~="movie"] {}'
+                    });
+                });
+
+                it('should transform tag validator with a variable in its usage', () => {
+                    const res = generateStylableResult({
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                :vars {
+                                    category: disco;
+                                }
+                                .my-class {
+                                    -st-states: category( tag() );
+                                }
+                                .my-class:category(value(category)) {}
+                                `
+                            }
+                        }
+                    });
+
+                    expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-category~="disco"] {}'
+                    });
+                });
+
+                it('should warn when a value includes a space', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    -st-states: category( tag );
+                                }
+                                |.my-class:category($one two$)| {}
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: [
+                            'pseudo-state "category" with parameter "one two" failed validation:',
+                            'expected "one two" to be a single value with no spaces'
+                        ].join('\n'),
+                        file: '/entry.st.css'
+                    }]);
+                    expect(res).to.have.styleRules({
+                        1: '.entry--my-class[data-entry-category~="one two"] {}'
                     });
                 });
             });

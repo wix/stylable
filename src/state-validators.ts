@@ -25,6 +25,9 @@ const validationErrors = {
     enum: {
         ENUM_TYPE_VALIDATION_FAILED: (actualParam: string, options: string[]) => `expected "${actualParam}" to be one of the options: "${options.join(', ')}"`,
         NO_OPTIONS_DEFINED: () => `expected enum to be defined with one option or more`
+    },
+    tag: {
+        NO_SPACES_ALLOWED: (actualParam: string) => `expected "${actualParam}" to be a single value with no spaces`
     }
 };
 /* tslint:enable:max-line-length */
@@ -215,6 +218,23 @@ export const systemValidators: Pojo<StateParamType> = {
             }
 
             return {res, errors: errors.length ? errors : null};
+        }
+    },
+    tag: {
+        validate(
+            value: any,
+            _options: StateArguments,
+            _resolveParam: (s: string) => string,
+            _validateDefinition,
+            validateValue) {
+
+            const errors: string[] = [];
+
+            if (validateValue && ~value.indexOf(' ')) {
+                errors.push(validationErrors.tag.NO_SPACES_ALLOWED(value));
+            }
+
+            return {res: value, errors: errors.length ? errors : null};
         }
     }
 };
