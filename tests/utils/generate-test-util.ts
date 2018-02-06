@@ -68,6 +68,23 @@ export function createTransformer(
     });
 }
 
+// let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
+//     return processSource(content, { from: path });
+// },
+//     {
+//         readFileSync() {
+//             return '';
+//         },
+//         statSync() {
+//             return { mtime: new Date() };
+//         }
+//     }
+// );
+
+export function processSource(source: string, options: postcss.ProcessOptions = {}) {
+    return process(postcss.parse(source, options));
+}
+
 export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
     if (!isAbsolute(config.entry || '')) {
         throw new Error('entry must be absolute path: ' + config.entry);
@@ -97,6 +114,10 @@ export function createTransform(
             scopeRoot: false
         }).transform(meta).meta;
     };
+}
+
+export function generateStylableResult(config: Config) {
+    return generateFromMock(config);
 }
 
 export function generateStylableRoot(config: Config) {
