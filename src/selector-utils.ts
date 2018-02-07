@@ -7,6 +7,7 @@ export interface SelectorAstNode {
     content?: string;
     before?: string;
     value?: string;
+    operator?: string;
 }
 
 export interface PseudoSelectorAstNode extends SelectorAstNode {
@@ -109,6 +110,36 @@ export function matchAtMedia(selector: string) {
 
 export function isNodeMatch(nodeA: SelectorAstNode, nodeB: SelectorAstNode) {
     return nodeA.type === nodeB.type && nodeA.name === nodeB.name;
+}
+
+export interface SelectorChunk {
+    type: string;
+    operator?: string;
+    nodes: Array<Partial<SelectorAstNode>>;
+}
+
+export function separateChunks(selectorNode: SelectorAstNode) {
+    const selectors: SelectorChunk[][] = [];
+
+    traverseNode(selectorNode, node => {
+        if (node.type === 'selectors') {
+            // skip
+        } else if (node.type === 'selector') {
+            selectors.push([
+                { type: 'selector', nodes: [] }
+            ]);
+        } else if (node.type === 'operator') {
+            const chunks = selectors[selectors.length - 1];
+            chunks.push({ type: node.type, operator: node.operator, nodes: [] });
+        } else if (node.type === 'spacing') {
+            const chunks = selectors[selectors.length - 1];
+            chunks.push({ type: node.type, nodes: [] });
+        } else {
+            const chunks = selectors[selectors.length - 1];
+            chunks[chunks.length - 1].nodes.push(node);
+        }
+    });
+    return selectors;
 }
 
 export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {
