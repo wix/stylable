@@ -5,18 +5,12 @@ import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
+import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Pojo<JSResolve | CSSResolve | ValueFormatter | null>;
-export interface ParsedValue {
-    type: string;
-    value: string;
-    nodes?: any;
-    resolvedValue?: string;
-}
 
 /* tslint:disable:max-line-length */
 const errors = {
@@ -63,10 +57,8 @@ export function evalDeclarationValue(
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = []) {
+
     const parsedValue = valueParser(value);
-    if ((node as postcss.Declaration).prop === valueMapping.mixin) {
-        return (node as postcss.Declaration).value;
-    }
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
         switch (type) {

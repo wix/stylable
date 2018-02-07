@@ -1,28 +1,27 @@
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { evalDeclarationValue, ParsedValue, ResolvedFormatter } from './functions';
+import { evalDeclarationValue } from './functions';
 import {
-    isCssNativeFunction,
-    nativePseudoClasses,
     nativePseudoElements,
     reservedKeyFrames
 } from './native-reserved-lists';
-import { cssObjectToAst } from './parser';
+import {
+    autoStateAttrName,
+    transformPseudoStateSelector,
+    validateStateDefinition
+} from './pseudo-states';
 import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, ImportSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
-    createSubsetAst,
     findDeclaration,
     findRule,
-    getDeclStylable,
-    isValidDeclaration,
-    mergeRules
+    getDeclStylable
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
@@ -151,16 +150,26 @@ export class StylableTransformer {
 
         ast.walkDecls((decl: SDecl) => {
             getDeclStylable(decl).sourceValue = decl.value;
-            decl.value = evalDeclarationValue(
-                this.resolver,
-                decl.value,
-                meta,
-                decl,
-                variableOverride,
-                this.replaceValueHook,
-                this.diagnostics,
-                path.slice()
-            );
+
+            // TODO: filter out all irrelevant directives
+            switch (decl.prop) {
+                case valueMapping.mixin:
+                    break;
+                case valueMapping.states:
+                    validateStateDefinition(decl, meta, this.resolver, this.diagnostics);
+                    break;
+                default:
+                    decl.value = evalDeclarationValue(
+                        this.resolver,
+                        decl.value,
+                        meta,
+                        decl,
+                        variableOverride,
+                        this.replaceValueHook,
+                        this.diagnostics,
+                        path.slice()
+                    );
+            }
         });
 
         ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride, path));
@@ -433,7 +442,10 @@ export class StylableTransformer {
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-class') {
-                    current = this.handlePseudoClass(current, node, name, symbol, meta, originSymbol, rule);
+                    current = transformPseudoStateSelector(
+                        current, node, name, symbol, meta, originSymbol,
+                        this.resolver, this.diagnostics, rule
+                    );
                 } else if (type === 'nested-pseudo-class') {
                     if (name === 'global') {
                         node.type = 'selector';
@@ -704,80 +716,10 @@ export class StylableTransformer {
 
         return { _kind: 'css', meta: current, symbol };
     }
-    public handlePseudoClass(
-        meta: StylableMeta,
-        node: SelectorAstNode,
-        name: string,
-        symbol: StylableSymbol | null,
-        origin: StylableMeta,
-        originSymbol: ClassSymbol | ElementSymbol,
-        rule?: postcss.Rule) {
-
-        let current = meta;
-        let currentSymbol = symbol;
-
-        if (symbol !== originSymbol) {
-            const states = originSymbol[valueMapping.states];
-            if (states && states.hasOwnProperty(name)) {
-                if (states[name] === null) {
-                    node.type = 'attribute';
-                    node.content = this.autoStateAttrName(name, origin.namespace);
-                } else {
-                    node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
-                    node.value = states[name];
-                }
-                return current;
-            }
-        }
-        let found = false;
-        while (current && currentSymbol) {
-            if (currentSymbol && currentSymbol._kind === 'class') {
-                const states = currentSymbol[valueMapping.states];
-                const extend = currentSymbol[valueMapping.extends];
-
-                if (states && states.hasOwnProperty(name)) {
-                    found = true;
-                    if (states[name] === null) {
-                        node.type = 'attribute';
-                        node.content = this.autoStateAttrName(name, current.namespace);
-                    } else {
-                        // simply concat global mapped selector - ToDo: maybe change to 'selector'
-                        node.type = 'invalid';
-                        node.value = states[name];
-                    }
-                    break;
-                } else if (extend) {
-                    const next = this.resolver.resolve(extend);
-                    if (next && next.meta) {
-                        currentSymbol = next.symbol;
-                        current = next.meta;
-                    } else {
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-
-        if (!found && rule) {
-            if (nativePseudoClasses.indexOf(name) === -1) {
-                this.diagnostics.warn(rule, `unknown pseudo class "${name}"`, { word: name });
-            }
-        }
-
-        return meta;
-    }
-    // TODO: Extract to scoping utils
-    public autoStateAttrName(stateName: string, namespace: string) {
-        return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}`;
-    }
     public cssStates(stateMapping: Pojo<boolean> | null | undefined, namespace: string) {
         return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
             if (stateMapping[key]) {
-                states[this.autoStateAttrName(key, namespace)] = true;
+                states[autoStateAttrName(key, namespace)] = true;
             }
             return states;
         }, {}) : {};

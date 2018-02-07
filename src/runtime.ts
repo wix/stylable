@@ -21,9 +21,14 @@ export function create(
 
     function cssStates(stateMapping?: StateMap | null) {
         return stateMapping ? Object.keys(stateMapping).reduce((states, key) => {
-            if (stateMapping[key]) {
-                states['data-' + lo_ns + '-' + key.toLowerCase()] = true;
+            const stateValue = stateMapping[key];
+
+            if (stateValue === undefined || stateValue === null || stateValue === false) {
+                return states;
             }
+
+            states['data-' + lo_ns + '-' + key.toLowerCase()] = stateValue;
+
             return states;
         }, {} as StateMap) : {};
     }

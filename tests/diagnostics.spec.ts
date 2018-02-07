@@ -156,23 +156,6 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{ message: 'unknown directive "-st-something"', file: 'main.css' }]);
             });
         });
-        xdescribe('states', () => {
-            it('should return warning for state without selector', () => {
-                expectWarnings(`
-                    |:hover|{
-
-                    }
-                `, [{ message: 'global states are not supported, use .root:hover instead', file: 'main.css' }]);
-            });
-
-            it('should return warning for unknown state', () => {
-                expectWarnings(`
-                    .root:|shmover|{
-
-                    }
-                `, [{ message: 'unknown state "shmover"', file: 'main.css' }]);
-            });
-        });
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
                 expectWarnings(`
@@ -220,77 +203,7 @@ describe('diagnostics: warnings and errors', () => {
                     });
                 });
             });
-
-            describe('classes', () => {
-                it('should return a warning for an unknown pseudo class', () => {
-                    const config = {
-                        entry: '/main.css',
-                        files: {
-                            '/main.css': {
-                                content: `
-                                |.root:$superSelected$|{
-
-                                }`
-                            }
-                        }
-                    };
-                    expectWarningsFromTransform(
-                        config,
-                        [{ message: 'unknown pseudo class "superSelected"', file: '/main.css' }]
-                    );
-                });
-
-                nativePseudoClasses.forEach(nativeClass => {
-                    it(`should not return a warning for native ${nativeClass} pseudo class`, () => {
-                        const selector = `|.root:$${nativeClass}$|{`;
-                        const config = {
-                            entry: '/main.css',
-                            files: {
-                                '/main.css': {
-                                    content: `
-                                    ${selector}
-
-                                    }`
-                                }
-                            }
-                        };
-                        expectWarningsFromTransform(config, []);
-                    });
-                });
-
-                it(`should not report a warning when the custom state is declared in an imported stylesheet`, () => {
-                    const config = {
-                        entry: '/main.st.css',
-                        files: {
-                            '/main.st.css': {
-                                content: `
-                                    :import {
-                                        -st-from: "./comp.st.css";
-                                        -st-default: Comp;
-                                    }
-                                    .root {
-                                       -st-extends: Comp;
-                                    }
-                                    .root:loading {}
-                                `
-                            },
-                            '/comp.st.css': {
-                                content: `
-                                    .root {
-                                        -st-states: loading;
-                                    }
-                                `
-                            }
-                        }
-                    };
-
-                    expectWarningsFromTransform(config, []);
-                });
-
-            });
-
         });
-
     });
 
     describe('structure', () => {
@@ -300,31 +213,6 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(`
                     |.gaga .root|{}
                 `, [{ message: '.root class cannot be used after spacing', file: 'main.css' }]);
-            });
-        });
-
-        describe('-st-states', () => {
-            it('should return warning when defining states in complex selector', () => {
-                expectWarnings(`
-                    .gaga:hover{
-                        |-st-states|:shmover;
-                    }
-                `, [{ message: 'cannot define pseudo states inside complex selectors', file: 'main.css' }]);
-            });
-            it('should warn when defining states on element selector', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            MyElement{
-                                |-st-states|:shmover;
-                            }`
-                        }
-                    }
-                };
-                expectWarningsFromTransform(
-                    config, [{ message: 'cannot define pseudo states inside element selectors', file: '/main.css' }]);
             });
         });
 
@@ -667,21 +555,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 `, [{ message: 'override "-st-extends" on typed rule "root"', file: 'main.css' }]);
             });
-
-            it('should warn on typed class states override', () => {
-                expectWarnings(`
-
-                    .root {
-                        -st-states: mystate;
-                    }
-                    .root {
-                        |-st-states: mystate2;|
-                    }
-                `, [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]);
-            });
-
         });
-
     });
 
     describe('redeclare symbols', () => {
