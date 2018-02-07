@@ -25,11 +25,10 @@ export function stringifySelector(ast: SelectorAstNode): string {
     return tokenizer.stringify(ast);
 }
 
-export function traverseNode(
-    node: SelectorAstNode,
-    visitor: Visitor,
-    index: number = 0,
-    nodes: SelectorAstNode[] = [node]): boolean | void {
+export function traverseNode(node: SelectorAstNode,
+                             visitor: Visitor,
+                             index: number = 0,
+                             nodes: SelectorAstNode[] = [node]): boolean | void {
 
     if (!node) {
         return;
@@ -126,20 +125,75 @@ export function separateChunks(selectorNode: SelectorAstNode) {
             // skip
         } else if (node.type === 'selector') {
             selectors.push([
-                { type: 'selector', nodes: [] }
+                {type: 'selector', nodes: []}
             ]);
         } else if (node.type === 'operator') {
             const chunks = selectors[selectors.length - 1];
-            chunks.push({ type: node.type, operator: node.operator, nodes: [] });
+            chunks.push({type: node.type, operator: node.operator, nodes: []});
         } else if (node.type === 'spacing') {
             const chunks = selectors[selectors.length - 1];
-            chunks.push({ type: node.type, nodes: [] });
+            chunks.push({type: node.type, nodes: []});
         } else {
             const chunks = selectors[selectors.length - 1];
             chunks[chunks.length - 1].nodes.push(node);
         }
     });
     return selectors;
+}
+
+function getLastChunk(selectorChunk: SelectorChunk[]): SelectorChunk {
+    return selectorChunk[selectorChunk.length - 1];
+}
+
+export function filterByType(chunk: SelectorChunk, typeOptions: string[]): Array<Partial<SelectorAstNode>> {
+    return chunk.nodes.filter(node => {
+        return node.type && typeOptions.indexOf(node.type) !== -1;
+    });
+}
+
+export function isSameTargetElement(requestSelector: string, targetSelector: string): boolean {
+    // what about nested-pseudo-classes?
+    // handle multiple selector on target
+    // isSameTargetElement(selector1,selector2):
+
+    // a = separateChunks(requestingSelector)
+    // b = separateChunks(currentSelector)
+
+    // b.forEach((ib)=>{
+
+    // la = getLastChunk(a)
+    // lb = getLastChunk(ib)
+
+    // rla = filterByType(la, [class element pseudo-element])
+    // rlb = filterByType(lb, [class element pseudo-element])
+
+    // rlb.isContains(rla);
+    // })
+
+    const a = separateChunks(parseSelector(requestSelector));
+    const b = separateChunks(parseSelector(targetSelector));
+
+    const lastChunkA = getLastChunk(a[0]);
+    const relevantChunksA = filterByType(lastChunkA, ['class', 'element', 'pseudo-element']);
+
+    let found: boolean = false;
+    b.forEach(compoundSelector => {
+        let match: boolean = true;
+        const lastChunkB = getLastChunk(compoundSelector);
+        const relevantChunksB = filterByType(lastChunkB, ['class', 'element', 'pseudo-element']);
+
+        relevantChunksA.forEach(chunkA => {
+            if (relevantChunksB.find(chunkB => chunkB.name === chunkA.name) === undefined) {
+                // not found
+                match = false;
+            }
+        });
+        if (match) {
+            found = true;
+        }
+    });
+
+    return found;
 }
 
 export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {
