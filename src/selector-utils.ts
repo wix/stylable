@@ -162,6 +162,25 @@ function isPseudoDiff(a: nodeWithPseudo, b: nodeWithPseudo) {
     return aNodes!.every((node, index) => isNodeMatch(node, bNodes![index]));
 }
 
+function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): nodeWithPseudo[] {
+    const nodesWithPseudos: nodeWithPseudo[] = [];
+    nodes.forEach(node => {
+        if (node.type === 'class' || node.type === 'element') {
+            nodesWithPseudos.push({...node, pseudo: []});
+        } else if (node.type === 'pseudo-element') {
+            nodesWithPseudos[nodesWithPseudos.length - 1].pseudo.push({...node});
+        }
+    });
+
+    const nodesNoDuplicates: nodeWithPseudo[] = [];
+    nodesWithPseudos.forEach(node => {
+        if (node.pseudo.length || !nodesWithPseudos.find((n) => isNodeMatch(n, node) && node !== n)) {
+            nodesNoDuplicates.push(node);
+        }
+    });
+    return nodesNoDuplicates;
+}
+
 const containsInTheEnd = (originalElements: nodeWithPseudo[],
                           currentMatchingElements: nodeWithPseudo[]) => {
     const offset = originalElements.length - currentMatchingElements.length;
@@ -196,25 +215,6 @@ export function matchSelectorTarget(requestSelector: string, targetSelector: str
         relevantChunksB = relevantChunksB.filter(nodeB => relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB)));
         return containsInTheEnd(relevantChunksA, relevantChunksB);
     });
-}
-
-function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): nodeWithPseudo[] {
-    const nodesWithPseudos: nodeWithPseudo[] = [];
-    nodes.forEach(node => {
-        if (node.type === 'class' || node.type === 'element') {
-            nodesWithPseudos.push({...node, pseudo: []});
-        } else if (node.type === 'pseudo-element') {
-            nodesWithPseudos[nodesWithPseudos.length - 1].pseudo.push({...node});
-        }
-    });
-
-    const nodesNoDuplicates: nodeWithPseudo[] = [];
-    nodesWithPseudos.forEach(node => {
-        if (node.pseudo.length || !nodesWithPseudos.find((n) => isNodeMatch(n, node) && node !== n)) {
-            nodesNoDuplicates.push(node);
-        }
-    });
-    return nodesNoDuplicates;
 }
 
 export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {
