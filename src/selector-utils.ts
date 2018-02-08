@@ -199,10 +199,13 @@ const containsInTheEnd = (originalElements: nodeWithPseudo[],
     return arraysEqual;
 };
 
-export function matchSelectorTarget(requestSelector: string, targetSelector: string): boolean {
-    const a = separateChunks(parseSelector(requestSelector));
+export function matchSelectorTarget(sourceSelector: string, targetSelector: string): boolean {
+    const a = separateChunks(parseSelector(sourceSelector));
     const b = separateChunks(parseSelector(targetSelector));
 
+    if (a.length > 1) {
+        throw new Error('source selector must not be composed of more than one compound selector');
+    }
     const lastChunkA = getLastChunk(a[0]);
     const relevantChunksA = groupClassesAndPseudoElements(
         filterChunkNodesByType(lastChunkA, ['class', 'element', 'pseudo-element']));

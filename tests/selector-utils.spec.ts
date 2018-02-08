@@ -146,6 +146,10 @@ describe('Selector Utils', () => {
     });
 
     describe('matchSelectorTarget', () => {
+        it('source should be composed of only one compound selector',()=>{
+            expect(()=>matchSelectorTarget('.x,.menu::button', '.x')).to.throw('source selector must not be composed of more than one compound selector');
+        });
+
         it('should return true if requesting selector is contained in target selector', () => {
             expect(matchSelectorTarget('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
             expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
