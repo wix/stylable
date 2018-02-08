@@ -168,21 +168,21 @@ describe('Selector Utils', () => {
             expect(isSameTargetElement('.x', '.y,.z')).to.equal(false);
         });
 
-        it('should sregard order', () => {
+        it('should regard order', () => {
             expect(isSameTargetElement('.x::y', '.y::x')).to.equal(false);
         });
 
         it('should support complex cases', () => {
             // expect(isSameTargetElement('.root.x::y.z', '.x::y.z')).to.equal(false);
-            expect(isSameTargetElement('.root::x::y::z', '.x::y::k')).to.equal(false);
+            expect(isSameTargetElement('.x::y::z', '.x::y::k')).to.equal(false);
         });
 
-        it('should mashu', () => {
+        it('should group by classes', () => {
             expect(isSameTargetElement('.x::y', '.x::y.z'), '1').to.equal(true);
             expect(isSameTargetElement('.x::y', '.x::y::z'), '2').to.equal(false);
         });
 
-        it('should something', () => {
+        it('should filter duplicate classes', () => {
             expect(isSameTargetElement('.x.x::y.z', '.x::y.z'), '1').to.equal(true);
             expect(isSameTargetElement('.x::y.x.z', '.x::y.z'), '2').to.equal(true);
             expect(isSameTargetElement('.x::y.x.x.x::z.z', '.x::y'), '3').to.equal(false);
