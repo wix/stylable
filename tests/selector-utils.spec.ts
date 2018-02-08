@@ -1,5 +1,11 @@
 import {expect} from 'chai';
-import {filterByType, matchSelectorTarget, parseSelector, SelectorChunk, separateChunks} from '../src/selector-utils';
+import {
+    filterChunkNodesByType,
+    matchSelectorTarget,
+    parseSelector,
+    SelectorChunk,
+    separateChunks
+} from '../src/selector-utils';
 
 describe('Selector Utils', () => {
 
@@ -142,14 +148,11 @@ describe('Selector Utils', () => {
     describe('matchSelectorTarget', () => {
         it('should return true if requesting selector is contained in target selector', () => {
             expect(matchSelectorTarget('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
-
             expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
-            // expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover')).to.equal(true);
+
             expect(matchSelectorTarget('.menu::button', '.button'), '3').to.equal(false);
             expect(matchSelectorTarget('.menu::button', '.menu'), '4').to.equal(false);
-
             expect(matchSelectorTarget('.menu', '.menu::button'), '5').to.equal(false);
-            expect(matchSelectorTarget('.x', '.x.z'), '6').to.equal(true);
         });
 
         it('should not match empty requested selector in emptyly', () => {
@@ -172,14 +175,14 @@ describe('Selector Utils', () => {
             expect(matchSelectorTarget('.x::y', '.y::x')).to.equal(false);
         });
 
-        it('should support complex cases', () => {
-            // expect(matchSelectorTarget('.root.x::y.z', '.x::y.z')).to.equal(false);
+        it('should not match if end is different', () => {
             expect(matchSelectorTarget('.x::y::z', '.x::y::k')).to.equal(false);
         });
 
         it('should group by classes', () => {
             expect(matchSelectorTarget('.x::y', '.x::y.z'), '1').to.equal(true);
             expect(matchSelectorTarget('.x::y', '.x::y::z'), '2').to.equal(false);
+            expect(matchSelectorTarget('.x', '.x.z'), '3').to.equal(true);
         });
 
         it('should filter duplicate classes', () => {
@@ -190,13 +193,13 @@ describe('Selector Utils', () => {
         });
     });
 
-    describe('filterByType', () => {
+    describe('filterChunkNodesByType', () => {
         it('should filter selector nodes by type', () => {
-            expect(filterByType({nodes: [{name: '0', type: 'a'}], type: 'dont-care'}, ['a'])).to.eql([{
+            expect(filterChunkNodesByType({nodes: [{name: '0', type: 'a'}], type: 'dont-care'}, ['a'])).to.eql([{
                 name: '0',
                 type: 'a'
             }]);
-            expect(filterByType({
+            expect(filterChunkNodesByType({
                 nodes: [{name: '0', type: 'a'}, {name: '1', type: 'b'}, {name: '2', type: 'c'}],
                 type: 'dont-care'
             }, ['b', 'a'])).to.eql([{name: '0', type: 'a'}, {name: '1', type: 'b'}]);

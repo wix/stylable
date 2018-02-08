@@ -146,7 +146,7 @@ function getLastChunk(selectorChunk: SelectorChunk[]): SelectorChunk {
     return selectorChunk[selectorChunk.length - 1];
 }
 
-export function filterByType(chunk: SelectorChunk, typeOptions: string[]): Array<Partial<SelectorAstNode>> {
+export function filterChunkNodesByType(chunk: SelectorChunk, typeOptions: string[]): Array<Partial<SelectorAstNode>> {
     return chunk.nodes.filter(node => {
         return node.type && typeOptions.indexOf(node.type) !== -1;
     });
@@ -186,12 +186,12 @@ export function matchSelectorTarget(requestSelector: string, targetSelector: str
 
     const lastChunkA = getLastChunk(a[0]);
     const relevantChunksA = groupClassesAndPseudoElements(
-        filterByType(lastChunkA, ['class', 'element', 'pseudo-element']));
+        filterChunkNodesByType(lastChunkA, ['class', 'element', 'pseudo-element']));
 
     return b.some(compoundSelector => {
         const lastChunkB = getLastChunk(compoundSelector);
         let relevantChunksB =
-            groupClassesAndPseudoElements(filterByType(lastChunkB, ['class', 'element', 'pseudo-element']));
+            groupClassesAndPseudoElements(filterChunkNodesByType(lastChunkB, ['class', 'element', 'pseudo-element']));
 
         relevantChunksB = relevantChunksB.filter(nodeB => relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB)));
         return containsInTheEnd(relevantChunksA, relevantChunksB);
