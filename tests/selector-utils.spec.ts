@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {filterByType, isSameTargetElement, parseSelector, SelectorChunk, separateChunks} from '../src/selector-utils';
+import {filterByType, matchSelectorTarget, parseSelector, SelectorChunk, separateChunks} from '../src/selector-utils';
 
 describe('Selector Utils', () => {
 
@@ -139,54 +139,54 @@ describe('Selector Utils', () => {
 
     });
 
-    describe('isSameTargetElement', () => {
+    describe('matchSelectorTarget', () => {
         it('should return true if requesting selector is contained in target selector', () => {
-            expect(isSameTargetElement('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
+            expect(matchSelectorTarget('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
 
-            expect(isSameTargetElement('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
-            // expect(isSameTargetElement('.x .menu::button', '.menu::button::hover')).to.equal(true);
-            expect(isSameTargetElement('.menu::button', '.button'), '3').to.equal(false);
-            expect(isSameTargetElement('.menu::button', '.menu'), '4').to.equal(false);
+            expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
+            // expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover')).to.equal(true);
+            expect(matchSelectorTarget('.menu::button', '.button'), '3').to.equal(false);
+            expect(matchSelectorTarget('.menu::button', '.menu'), '4').to.equal(false);
 
-            expect(isSameTargetElement('.menu', '.menu::button'), '5').to.equal(false);
-            expect(isSameTargetElement('.x', '.x.z'), '6').to.equal(true);
+            expect(matchSelectorTarget('.menu', '.menu::button'), '5').to.equal(false);
+            expect(matchSelectorTarget('.x', '.x.z'), '6').to.equal(true);
         });
 
         it('should not match empty requested selector in emptyly', () => {
-            expect(isSameTargetElement('', '.menu::button')).to.equal(false);
+            expect(matchSelectorTarget('', '.menu::button')).to.equal(false);
         });
 
         it('should compare node types when comparing', () => {
-            expect(isSameTargetElement('.x::y', '.x::y'), '1').to.equal(true);
-            expect(isSameTargetElement('.x::y', '.x.y'), '2').to.equal(false);
-            expect(isSameTargetElement('.a::a', '.a.a'), '3').to.equal(false);
-            expect(isSameTargetElement('.a::a', '.a::a'), '4').to.equal(true);
+            expect(matchSelectorTarget('.x::y', '.x::y'), '1').to.equal(true);
+            expect(matchSelectorTarget('.x::y', '.x.y'), '2').to.equal(false);
+            expect(matchSelectorTarget('.a::a', '.a.a'), '3').to.equal(false);
+            expect(matchSelectorTarget('.a::a', '.a::a'), '4').to.equal(true);
         });
 
         it('should support multiple compound selectors', () => {
-            expect(isSameTargetElement('.x', '.y,.x')).to.equal(true);
-            expect(isSameTargetElement('.x', '.y,.z')).to.equal(false);
+            expect(matchSelectorTarget('.x', '.y,.x')).to.equal(true);
+            expect(matchSelectorTarget('.x', '.y,.z')).to.equal(false);
         });
 
         it('should regard order', () => {
-            expect(isSameTargetElement('.x::y', '.y::x')).to.equal(false);
+            expect(matchSelectorTarget('.x::y', '.y::x')).to.equal(false);
         });
 
         it('should support complex cases', () => {
-            // expect(isSameTargetElement('.root.x::y.z', '.x::y.z')).to.equal(false);
-            expect(isSameTargetElement('.x::y::z', '.x::y::k')).to.equal(false);
+            // expect(matchSelectorTarget('.root.x::y.z', '.x::y.z')).to.equal(false);
+            expect(matchSelectorTarget('.x::y::z', '.x::y::k')).to.equal(false);
         });
 
         it('should group by classes', () => {
-            expect(isSameTargetElement('.x::y', '.x::y.z'), '1').to.equal(true);
-            expect(isSameTargetElement('.x::y', '.x::y::z'), '2').to.equal(false);
+            expect(matchSelectorTarget('.x::y', '.x::y.z'), '1').to.equal(true);
+            expect(matchSelectorTarget('.x::y', '.x::y::z'), '2').to.equal(false);
         });
 
         it('should filter duplicate classes', () => {
-            expect(isSameTargetElement('.x.x::y.z', '.x::y.z'), '1').to.equal(true);
-            expect(isSameTargetElement('.x::y.x.z', '.x::y.z'), '2').to.equal(true);
-            expect(isSameTargetElement('.x::y.x.x.x::z.z', '.x::y'), '3').to.equal(false);
-            expect(isSameTargetElement('.x.x.x::y.z', '.x::y.z'), '4').to.equal(true);
+            expect(matchSelectorTarget('.x.x::y.z', '.x::y.z'), '1').to.equal(true);
+            expect(matchSelectorTarget('.x::y.x.z', '.x::y.z'), '2').to.equal(true);
+            expect(matchSelectorTarget('.x::y.x.x.x::z.z', '.x::y'), '3').to.equal(false);
+            expect(matchSelectorTarget('.x.x.x::y.z', '.x::y.z'), '4').to.equal(true);
         });
     });
 

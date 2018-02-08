@@ -180,7 +180,7 @@ const containsInTheEnd = (originalElements: nodeWithPseudo[],
     return arraysEqual;
 };
 
-export function isSameTargetElement(requestSelector: string, targetSelector: string): boolean {
+export function matchSelectorTarget(requestSelector: string, targetSelector: string): boolean {
     const a = separateChunks(parseSelector(requestSelector));
     const b = separateChunks(parseSelector(targetSelector));
 
