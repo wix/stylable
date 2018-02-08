@@ -9,7 +9,7 @@ import {
 
 describe('Selector Utils', () => {
 
-    const tests: Array<{ title: string, selector: string, expected: SelectorChunk[][] }> = [
+    const seperateChunksTestVectors: Array<{ title: string, selector: string, expected: SelectorChunk[][] }> = [
         {
             title: 'empty selector',
             selector: '',
@@ -137,7 +137,7 @@ describe('Selector Utils', () => {
     ];
 
     describe('separateChunks', () => {
-        tests.forEach(test => {
+        seperateChunksTestVectors.forEach(test => {
             it(test.title, () => {
                 expect(separateChunks(parseSelector(test.selector))).to.eql(test.expected);
             });
@@ -194,7 +194,7 @@ describe('Selector Utils', () => {
     });
 
     describe('filterChunkNodesByType', () => {
-        it('should filter selector nodes by type', () => {
+        it('should filter and return only selector nodes which match types specified in array', () => {
             expect(filterChunkNodesByType({nodes: [{name: '0', type: 'a'}], type: 'dont-care'}, ['a'])).to.eql([{
                 name: '0',
                 type: 'a'
