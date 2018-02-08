@@ -16,6 +16,7 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
 }
 
 export type Visitor = (node: SelectorAstNode, index: number, nodes: SelectorAstNode[]) => boolean | void;
+type nodeWithPseudo = Partial<SelectorAstNode> & { pseudo: Array<Partial<SelectorAstNode>> };
 
 export function parseSelector(selector: string): SelectorAstNode {
     return tokenizer.parse(selector);
@@ -107,7 +108,7 @@ export function matchAtMedia(selector: string) {
     return selector.match(/^@media\s*(.*)/);
 }
 
-export function isNodeMatch(nodeA: SelectorAstNode, nodeB: SelectorAstNode) {
+export function isNodeMatch(nodeA: Partial<SelectorAstNode>, nodeB: Partial<SelectorAstNode>) {
     return nodeA.type === nodeB.type && nodeA.name === nodeB.name;
 }
 
@@ -151,49 +152,69 @@ export function filterByType(chunk: SelectorChunk, typeOptions: string[]): Array
     });
 }
 
+function isPseudoDiff(a: nodeWithPseudo, b: nodeWithPseudo) {
+    const aNodes = a.pseudo;
+    const bNodes = b.pseudo;
+
+    if (!aNodes || !bNodes || aNodes.length !== bNodes.length) {
+        return false;
+    }
+    return aNodes!.every((node, index) => isNodeMatch(node, bNodes![index]));
+}
+
+const containsInTheEnd = (originalElements: nodeWithPseudo[],
+                          currentMatchingElements: nodeWithPseudo[]) => {
+    const offset = originalElements.length - currentMatchingElements.length;
+    let arraysEqual: boolean = false;
+    if (offset >= 0 && currentMatchingElements.length > 0) {
+        arraysEqual = true;
+        for (let i = 0; i < currentMatchingElements.length; i++) {
+            const a = originalElements[i + offset];
+            const b = currentMatchingElements[i];
+            if (a.name !== b.name || a.type !== b.type || !isPseudoDiff(a, b)) {
+                arraysEqual = false;
+                break;
+            }
+        }
+    }
+    return arraysEqual;
+};
+
 export function isSameTargetElement(requestSelector: string, targetSelector: string): boolean {
-    // what about nested-pseudo-classes?
-    // handle multiple selector on target
-    // isSameTargetElement(selector1,selector2):
-
-    // a = separateChunks(requestingSelector)
-    // b = separateChunks(currentSelector)
-
-    // b.forEach((ib)=>{
-
-    // la = getLastChunk(a)
-    // lb = getLastChunk(ib)
-
-    // rla = filterByType(la, [class element pseudo-element])
-    // rlb = filterByType(lb, [class element pseudo-element])
-
-    // rlb.isContains(rla);
-    // })
-
     const a = separateChunks(parseSelector(requestSelector));
     const b = separateChunks(parseSelector(targetSelector));
 
     const lastChunkA = getLastChunk(a[0]);
-    const relevantChunksA = filterByType(lastChunkA, ['class', 'element', 'pseudo-element']);
+    const relevantChunksA = groupClassesAndPseudoElements(
+        filterByType(lastChunkA, ['class', 'element', 'pseudo-element']));
 
-    let found: boolean = false;
-    b.forEach(compoundSelector => {
-        let match: boolean = true;
+    return b.some(compoundSelector => {
         const lastChunkB = getLastChunk(compoundSelector);
-        const relevantChunksB = filterByType(lastChunkB, ['class', 'element', 'pseudo-element']);
+        let relevantChunksB =
+            groupClassesAndPseudoElements(filterByType(lastChunkB, ['class', 'element', 'pseudo-element']));
 
-        relevantChunksA.forEach(chunkA => {
-            if (relevantChunksB.find(chunkB => chunkB.name === chunkA.name) === undefined) {
-                // not found
-                match = false;
-            }
-        });
-        if (match) {
-            found = true;
+        relevantChunksB = relevantChunksB.filter(nodeB => relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB)));
+        return containsInTheEnd(relevantChunksA, relevantChunksB);
+    });
+}
+
+function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): nodeWithPseudo[] {
+    const nodesWithPseudos: nodeWithPseudo[] = [];
+    nodes.forEach(node => {
+        if (node.type === 'class' || node.type === 'element') {
+            nodesWithPseudos.push({...node, pseudo: []});
+        } else if (node.type === 'pseudo-element') {
+            nodesWithPseudos[nodesWithPseudos.length - 1].pseudo.push({...node});
         }
     });
 
-    return found;
+    const nodesNoDuplicates: nodeWithPseudo[] = [];
+    nodesWithPseudos.forEach(node => {
+        if (node.pseudo.length || !nodesWithPseudos.find((n) => isNodeMatch(n, node) && node !== n)) {
+            nodesNoDuplicates.push(node);
+        }
+    });
+    return nodesNoDuplicates;
 }
 
 export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: SelectorAstNode) {

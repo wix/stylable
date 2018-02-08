@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-import * as postcss from 'postcss';
 import {filterByType, isSameTargetElement, parseSelector, SelectorChunk, separateChunks} from '../src/selector-utils';
 
 describe('Selector Utils', () => {
@@ -142,12 +141,26 @@ describe('Selector Utils', () => {
 
     describe('isSameTargetElement', () => {
         it('should return true if requesting selector is contained in target selector', () => {
-            expect(isSameTargetElement('.menu::button', '.x .menu:hover::button')).to.equal(true);
-            expect(isSameTargetElement('.x .menu::button', '.menu::button::hover')).to.equal(true);
-            expect(isSameTargetElement('.menu::button', '.button')).to.equal(false);
-            expect(isSameTargetElement('.menu::button', '.menu')).to.equal(false);
+            expect(isSameTargetElement('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
 
-            // expect(isSameTargetElement('.menu', '.menu::button')).to.equal(false);   // TODO shouldn't this pass?
+            expect(isSameTargetElement('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
+            // expect(isSameTargetElement('.x .menu::button', '.menu::button::hover')).to.equal(true);
+            expect(isSameTargetElement('.menu::button', '.button'), '3').to.equal(false);
+            expect(isSameTargetElement('.menu::button', '.menu'), '4').to.equal(false);
+
+            expect(isSameTargetElement('.menu', '.menu::button'), '5').to.equal(false);
+            expect(isSameTargetElement('.x', '.x.z'), '6').to.equal(true);
+        });
+
+        it('should not match empty requested selector in emptyly', () => {
+            expect(isSameTargetElement('', '.menu::button')).to.equal(false);
+        });
+
+        it('should compare node types when comparing', () => {
+            expect(isSameTargetElement('.x::y', '.x::y'), '1').to.equal(true);
+            expect(isSameTargetElement('.x::y', '.x.y'), '2').to.equal(false);
+            expect(isSameTargetElement('.a::a', '.a.a'), '3').to.equal(false);
+            expect(isSameTargetElement('.a::a', '.a::a'), '4').to.equal(true);
         });
 
         it('should support multiple compound selectors', () => {
@@ -155,16 +168,25 @@ describe('Selector Utils', () => {
             expect(isSameTargetElement('.x', '.y,.z')).to.equal(false);
         });
 
-        it('should disregard order?', () => {
-            expect(isSameTargetElement('.x::y', '.y::x')).to.equal(true);   // TODO really? barak?
+        it('should sregard order', () => {
+            expect(isSameTargetElement('.x::y', '.y::x')).to.equal(false);
         });
 
         it('should support complex cases', () => {
-            // don't think these should actually be here. however they don't pass:
-            // expect(isSameTargetElement('.root .x::y.z', '.x::y')).to.equal(true);
-            // expect(isSameTargetElement('.root::x::y.z', '.x::y')).to.equal(true);
-            //
+            // expect(isSameTargetElement('.root.x::y.z', '.x::y.z')).to.equal(false);
             expect(isSameTargetElement('.root::x::y::z', '.x::y::k')).to.equal(false);
+        });
+
+        it('should mashu', () => {
+            expect(isSameTargetElement('.x::y', '.x::y.z'), '1').to.equal(true);
+            expect(isSameTargetElement('.x::y', '.x::y::z'), '2').to.equal(false);
+        });
+
+        it('should something', () => {
+            expect(isSameTargetElement('.x.x::y.z', '.x::y.z'), '1').to.equal(true);
+            expect(isSameTargetElement('.x::y.x.z', '.x::y.z'), '2').to.equal(true);
+            expect(isSameTargetElement('.x::y.x.x.x::z.z', '.x::y'), '3').to.equal(false);
+            expect(isSameTargetElement('.x.x.x::y.z', '.x::y.z'), '4').to.equal(true);
         });
     });
 
