@@ -1,14 +1,18 @@
 ---
 id: references/state-parameter-types
-title: Pseudo-Classes parameter types
+title: Parameter Types Pseudo-Classes 
 layout: docs
 ---
 
-When defining a custom state that accepts a parameter, you need to provide a type validator. 
+Custom [pseudo-classes](./pseudo-classes.md) can either be simple or accept parameters. 
 
-A custom state with no parameters is considered as a [simple custom state](./pseudo-classes.md#simple-custom-states).
+A custom state with no parameters is considered a [simple custom state](./pseudo-classes.md#simple-custom-states).
 
-All custom states with a parameter must define the parameter type. It is also possible to provide each state definition with a `default value`, allowing it to be used without providing a parameter argument:
+When defining a custom state that accepts a parameter:
+* You must provide a type validator. 
+* You must define the parameter type. 
+* Optionally you can provide each state definition with a `default value`, enabling it to be used without providing a parameter argument.
+
 ```css
 .root {
     -st-states: stateX([type]) [default Value?], 
@@ -18,20 +22,20 @@ All custom states with a parameter must define the parameter type. It is also po
 .root:stateX(arg) {}
 
 .root:stateX {
-    /* argument will resolve to "default Value" if provided */
+    /* argument resolves to "default Value" if one was provided */
 }
 ```
 
-> **Note** 
-> You can use [variables](./variables.md) and [formatters](./formatters.md) when defining a `default value`.
+> **Note**   
+> When defining a `default value`, you can use [variables](./variables.md) and [formatters](./formatters.md).
 
 ## Tag
 
-Allows defining a custom state with a **tags value** (seperated by whitespace). and then targeting it using a pseudo-class selector with a matching **tag argument**:
+Using tags enables you to define a custom state with a **tag value** (seperated by whitespace), and then target it using a pseudo-class selector with a matching **tag argument**.
 
 ```css
 .root {
-    /* define the cart custom state */
+    /* define a custom state called "cart" */
     -st-states: cart( tag )
 }
 
@@ -46,11 +50,11 @@ Setting the state **tags value** in the view `<span {...style("root", {cart: "sh
 
 ## Enum
 
-Allows defining a custom state with possible **enum value** options. and then targeting one of the options using a pseudo-class selector with a matching **string argument**:
+You can define a custom state with possible **enum value** options, and then target one of the options using a pseudo-class selector with a matching **string argument**.
 
 ```css
 .root {
-    /* define the size custom state */
+    /* define the custom state "size" */
     -st-states: size( enum(small, medium, large) )
 }
 
@@ -59,15 +63,15 @@ Allows defining a custom state with possible **enum value** options. and then ta
 }
 
 .root:size(huge) {
-   /* invalid due to "huge" not being a valid option */
+   /* invalid because "huge" is not a value of the state "size" */
 }
 ```
 
-Setting the state **enum value** in the view `<span {...style("root", {size: "medium"})}>` will resolve to `<span data-size="medium" />`.
+Setting the state's **enum value** in the view `<span {...style("root", {size: "medium"})}>` will resolve to `<span data-size="medium" />`.
 
 ## String
 
-Allows defining a custom state with a **string value**. and then targeting it using a pseudo-class selector with a matching **string argument**:
+You can define a custom state with a **string value**, and then target it using a pseudo-class selector with a matching **string argument**.
 
 ```css
 .root {
