@@ -68,19 +68,6 @@ export function createTransformer(
     });
 }
 
-// let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-//     return processSource(content, { from: path });
-// },
-//     {
-//         readFileSync() {
-//             return '';
-//         },
-//         statSync() {
-//             return { mtime: new Date() };
-//         }
-//     }
-// );
-
 export function processSource(source: string, options: postcss.ProcessOptions = {}) {
     return process(postcss.parse(source, options));
 }
