@@ -87,7 +87,7 @@ export class StylableProcessor {
             this.handleRule(rule);
         });
 
-        root.walkDecls((decl: SDecl) => {
+        root.walkDecls(decl => {
             // TODO: optimize
             if (stValues.indexOf(decl.prop) !== -1) {
                 this.handleDirectives(decl.parent as SRule, decl);
