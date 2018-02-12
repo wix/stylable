@@ -133,7 +133,7 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 // TRANSFORM
 
 export function validateStateDefinition(
-    decl: SDecl,
+    decl: postcss.Declaration,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics) {
