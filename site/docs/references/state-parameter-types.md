@@ -1,14 +1,14 @@
 ---
 id: references/state-parameter-types
-title: Parameter Types Pseudo-Classes 
+title: Parameter Types to Use with Pseudo-Classes 
 layout: docs
 ---
 
 Custom [pseudo-classes](./pseudo-classes.md) can either be simple or accept parameters. 
 
-A custom state with no parameters is considered a [simple custom state](./pseudo-classes.md#simple-custom-states).
+A custom pseudo-class with no parameters is considered a [simple custom state](./pseudo-classes.md#simple-custom-states).
 
-When defining a custom pseudo-class that accepts a parameter:
+When defining a custom pseudo-class that can accept parameters:
 * You must provide a type validator. 
 * You must define the parameter type. 
 * Optionally you can provide each state definition with a `default value`, enabling it to be used without providing a parameter argument.
@@ -46,8 +46,8 @@ Using tags enables you to define a custom pseudo-class with a **tag value**, and
 }
 ```
 
-Setting the state **tag values** in the view `<span {...style("root", {cart: "shirt pants"})}>` will resolve to `<span data-cart="shirt pants" />`.
-/*ALR -  maybe explain this in words and then provide straight code sample?*/
+Setting the state **tag values** in the view `<span {...style("root", {cart: "shirt pants"})}>` resolves to `<span data-cart="shirt pants" />`.
+
 
 ## Enum
 
@@ -95,7 +95,7 @@ You can optionally pass a regular expression string as an argument to add valida
 ```css
 .root {
     /* validates that the targeting string argument begins with "user" */
-    -st-states: selected( string("^user") );
+    -st-states: selected( string(regex("^user")) );
 }
 
 /* a valid argument */
@@ -171,10 +171,10 @@ You can use several validators that the number type provides.
 .root:column(7) {}
 ```
 
-## Future intent
+## Coming soon
 
 * [Custom user types and validations](https://github.com/wix/stylable/issues/268).
 * [Custom pseudo-class type "nth"](https://github.com/wix/stylable/issues/270).
 * [Multiple named parameters](https://github.com/wix/stylable/issues/269).
 * [Custom pseudo-class string prefixes](https://github.com/wix/stylable/issues/271).
-* Lang type - take advantage of attribute selector `[state|="en"]` to support language code.
+* Lang type - use attribute selector `[state|="en"]` to support language code.
