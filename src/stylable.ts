@@ -20,10 +20,10 @@ export class Stylable {
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
         protected scopeRoot: boolean = true,
-        protected resolve: any = {}
+        protected resolveOptions: any = {}
     ) {
 
-        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
+        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess, resolveOptions);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
