@@ -9,7 +9,7 @@ import {
     traverseNode
 } from './selector-utils';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
-import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
+import { MixinValue, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
 const hash = require('murmurhash');
@@ -72,7 +72,7 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 }
 
 export class StylableProcessor {
-    protected meta: StylableMeta;
+    protected meta!: StylableMeta;
     constructor(protected diagnostics = new Diagnostics()) { }
     public process(root: postcss.Root): StylableMeta {
 
@@ -88,8 +88,7 @@ export class StylableProcessor {
         });
 
         root.walkDecls(decl => {
-            // TODO: optimize
-            if (stValues.indexOf(decl.prop) !== -1) {
+            if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             }
         });
