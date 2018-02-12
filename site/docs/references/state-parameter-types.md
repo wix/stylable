@@ -8,7 +8,7 @@ Custom [pseudo-classes](./pseudo-classes.md) can either be simple or accept para
 
 A custom state with no parameters is considered a [simple custom state](./pseudo-classes.md#simple-custom-states).
 
-When defining a custom state that accepts a parameter:
+When defining a custom pseudo-class that accepts a parameter:
 * You must provide a type validator. 
 * You must define the parameter type. 
 * Optionally you can provide each state definition with a `default value`, enabling it to be used without providing a parameter argument.
@@ -31,7 +31,7 @@ When defining a custom state that accepts a parameter:
 
 ## Tag
 
-Using tags enables you to define a custom state with a **tag value** (seperated by whitespace), and then target it using a pseudo-class selector with a matching **tag argument**.
+Using tags enables you to define a custom pseudo-class with a **tag value**, and then target it using a pseudo-class selector with a matching **tag argument**. You define multiple tag values separated by whitespace.
 
 ```css
 .root {
@@ -40,13 +40,14 @@ Using tags enables you to define a custom state with a **tag value** (seperated 
 }
 
 .root:cart(shirt) {
-    /* targets an element with a state value that
-    is a whitespace-separated list of words, 
+    /* targets an element that has a state with a value that
+    is a whitespace-separated list of tags, 
     one of which is exactly the tag argument "shirt" */
 }
 ```
 
-Setting the state **tags value** in the view `<span {...style("root", {cart: "shirt pants"})}>` will resolve to `<span data-cart="shirt pants" />`.
+Setting the state **tag values** in the view `<span {...style("root", {cart: "shirt pants"})}>` will resolve to `<span data-cart="shirt pants" />`.
+/*ALR -  maybe explain this in words and then provide straight code sample?*/
 
 ## Enum
 
@@ -59,7 +60,7 @@ You can define a custom state with possible **enum value** options, and then tar
 }
 
 .root:size(medium) {
-    /* target an element with a "medium" state value */
+    /* target an element with a state value of "medium" */
 }
 
 .root:size(huge) {
@@ -67,7 +68,7 @@ You can define a custom state with possible **enum value** options, and then tar
 }
 ```
 
-Setting the state's **enum value** in the view `<span {...style("root", {size: "medium"})}>` will resolve to `<span data-size="medium" />`.
+Setting the state's **enum value** in the view `<span {...style("root", {size: "medium"})}>` resolves to `<span data-size="medium" />`.
 
 ## String
 
@@ -75,8 +76,7 @@ You can define a custom state with a **string value**, and then target it using 
 
 ```css
 .root {
-    /* define the selected custom state 
-    with a string parameter type */
+    /* define the "selected" custom state with a string parameter type */
     -st-states: selected( string );
 }
 
@@ -86,32 +86,30 @@ You can define a custom state with a **string value**, and then target it using 
 }
 ```
 
-Setting the state **string value** in the view `<span {...style("root", {selected: "username"})}>` will resolve to `<span data-selected="username" />`.
+Setting the state **string value** in the view `<span {...style("root", {selected: "username"})}>` resolves to `<span data-selected="username" />`.
 
-### Validation [optional]
+### String validation [optional]
 
-You can pass an optional regex string (must be wrapped in quotes) as an argument in order to add validation for the pseudo-class selector **string argument**:
+You can optionally pass a regular expression string as an argument to add validation for the pseudo-class selector **string argument**. The regular expression must be within quotes.
 
 ```css
 .root {
-    /* validates the targeting string 
-    argument begins with "user" */
+    /* validates that the targeting string argument begins with "user" */
     -st-states: selected( string("^user") );
 }
 
 /* a valid argument */
 .root:selected(username) {}
 
-/* invalid due to regex mismatch */
+/* invalid because it doesn't match the regular expression "^user" */
 .root:selected(index) {}
 ```
 
-String type can also accept several other validations, including `minLength(number)`, `maxLength(number)` and `contains(string)`:
+String type can also accept several other validations, including `minLength(number)`, `maxLength(number)` and `contains(string)`.
 
 ```css
 .root {
-    /* validates the targeting string 
-    arguments with multiple validations */
+    /* validates the targeting string arguments with multiple validations */
     -st-states: selected( 
                     string( 
                         minLength(2), 
@@ -121,7 +119,7 @@ String type can also accept several other validations, including `minLength(numb
                 );
 }
 
-/* a valid argument */
+/* valid argument */
 .root:selected(username) {}
 
 /* invalid due to minLength(2) & contains(user) */
@@ -130,7 +128,7 @@ String type can also accept several other validations, including `minLength(numb
 
 ## Number
 
-Allows defining a custom state with a **number value**. and then targeting it using a pseudo-class selector with a matching **number argument**:
+You can define a custom state with a **number value**, and then target it using a pseudo-class selector with a matching **number argument**.
 
 ```html
 <span data-column="5" />
@@ -138,21 +136,20 @@ Allows defining a custom state with a **number value**. and then targeting it us
 
 ```css
 .root {
-    /* define the column custom state */
+    /* define the custom pseudo-class "column" */
     -st-states: column( number )
 }
 
 .root:column(5) {
-    /* target an element with a state value that 
-    is exactly the number argument "5" */
+    /* target an element with a state value that is exactly the number argument "5" */
 }
 ```
 
-Setting the state **number value** in the view `<span {...style("root", {column: 5})}>` will resolve to `<span data-column="5" />`.
+Setting the state **number value** in the view `<span {...style("root", {column: 5})}>` resolves to `<span data-column="5" />`.
 
-### Validation [optional]
+### Number validation [optional]
 
-You can use several sub validators that the number type provides:
+You can use several validators that the number type provides.
 
 ```css
 .root {
@@ -165,19 +162,19 @@ You can use several sub validators that the number type provides:
 .root:column(4),
 .root:column(6) {}
 
-/* invalid due to "multipleOf(2)" */
+/* invalid because not a "multipleOf(2)" */
 .root:column(3),
 .root:column(5) {}
 
-/* invalid due to "min(2)" and "max(6)" */
+/* invalid because of "min(2)" and "max(6)" validations */
 .root:column(1),
 .root:column(7) {}
 ```
 
-## Future Intent
+## Future intent
 
 * [Custom user types and validations](https://github.com/wix/stylable/issues/268).
-* [Custom pseudo state type "nth"](https://github.com/wix/stylable/issues/270).
+* [Custom pseudo-class type "nth"](https://github.com/wix/stylable/issues/270).
 * [Multiple named parameters](https://github.com/wix/stylable/issues/269).
-* [Custom pseudo state string prefixes](https://github.com/wix/stylable/issues/271).
+* [Custom pseudo-class string prefixes](https://github.com/wix/stylable/issues/271).
 * Lang type - take advantage of attribute selector `[state|="en"]` to support language code.
