@@ -291,6 +291,56 @@ describe('Mixins', () => {
 
         });
 
+        it('should not root scope js mixins', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                scopeRoot: true,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import{
+                            -st-from:'./mixin.js';
+                            -st-named: mixStuff;
+                        }
+                        .gaga{
+                            color:red;
+                            -st-mixin: mixStuff;
+                        }
+                    `
+                    },
+                    '/mixin.js': {
+                        content: `
+                        module.exports = {
+                            mixStuff:function(){
+                                return {
+                                    "background":"green",
+                                    ".child":{
+                                        "color": "yellow"
+                                    }
+                                }
+                            }
+                        };
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--root .entry--gaga',
+                'color:red;background:green'
+            );
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--root .entry--gaga .entry--child',
+                'color:yellow'
+            );
+        });
+
         it('multiple mixins', () => {
 
             const result = generateStylableRoot({
@@ -988,7 +1038,6 @@ describe('Mixins', () => {
 
         });
 
-
         describe('Mixins with named parameters', () => {
 
             it('apply mixin with :vars override (local scope)', () => {
@@ -1276,7 +1325,7 @@ describe('Mixins', () => {
 
         });
     });
-    
+
     describe('mixin diagnostics', () => {
 
         it('should not report missing function on -st-mixin directive', () => {

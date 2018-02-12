@@ -104,7 +104,13 @@ function handleJSMixin(
         }
     });
 
-    transformer.transformAst(mixinRoot, meta, undefined, variableOverride);
+    transformer.transformAst(
+        mixinRoot,
+        meta,
+        false,
+        undefined,
+        variableOverride
+    );
 
     mergeRules(mixinRoot, rule);
 
@@ -119,11 +125,12 @@ function handleImportedCSSMixin(
     path: string[],
     variableOverride?: Pojo<string>) {
 
+    const isRootMixin = resolvedClass.symbol.name === resolvedClass.meta.root;
     const mixinRoot = createSubsetAst<postcss.Root>(
         resolvedClass.meta.ast,
         (resolvedClass.symbol._kind === 'class' ? '.' : '') + resolvedClass.symbol.name,
         undefined,
-        resolvedClass.symbol.name === resolvedClass.meta.root
+        isRootMixin
     );
 
     const namedArgs = mix.mixin.options as Pojo<string>;
@@ -132,6 +139,7 @@ function handleImportedCSSMixin(
     transformer.transformAst(
         mixinRoot,
         resolvedClass.meta,
+        false,
         undefined,
         resolvedArgs,
         path.concat(mix.ref.name + ' from ' + meta.source)
@@ -154,8 +162,10 @@ function handleLocalClassMixin(
     const namedArgs = mix.mixin.options as Pojo<string>;
     const resolvedArgs = resolveArgumentsValue(namedArgs, transformer, meta, variableOverride, path);
     const mixinRoot = createSubsetAst<postcss.Root>(meta.ast, '.' + mix.ref.name);
-    transformer.transformAst(mixinRoot,
+    transformer.transformAst(
+        mixinRoot,
         meta,
+        false,
         undefined,
         resolvedArgs,
         path.concat(mix.ref.name + ' from ' + meta.source)
