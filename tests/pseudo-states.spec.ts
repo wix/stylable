@@ -1274,7 +1274,7 @@ describe('pseudo-states', () => {
 
         describe('custom mapping', () => {
 
-            it('should tranform any quoted string (trimmed)', () => {
+            it('should transform any quoted string (trimmed)', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {
