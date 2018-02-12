@@ -133,8 +133,8 @@ export class StylableTransformer {
             rule.selector = this.scopeRule(meta, rule, scopeRoot, metaExports);
         });
 
-        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
-            atRule.sourceParams = atRule.params;
+        ast.walkAtRules(/media$/, atRule => {
+            (atRule as SAtRule).sourceParams = atRule.params;
             atRule.params = evalDeclarationValue(
                 this.resolver,
                 atRule.params,
@@ -147,8 +147,8 @@ export class StylableTransformer {
             );
         });
 
-        ast.walkDecls((decl: SDecl) => {
-            getDeclStylable(decl).sourceValue = decl.value;
+        ast.walkDecls(decl => {
+            getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
             // TODO: filter out all irrelevant directives
             switch (decl.prop) {

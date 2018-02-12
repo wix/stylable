@@ -126,7 +126,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             throw rule.error('missing mixin entry');
         }
         // TODO: handle rules before and after decl on entry
-        mixinAst.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
+        mixinAst.nodes.slice().forEach(node => {
             if (node === mixinRoot) {
                 node.walkDecls(node => {
                     rule.insertBefore(mixinEntry!, node);
@@ -250,12 +250,12 @@ export function findDeclaration(importNode: Imported, test: any) {
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statment: any) => statment.prop === valueMapping.extends) {
+    test: any = (statement: any) => statement.prop === valueMapping.extends) {
 
     let found: any = null;
-    root.walkRules(selector, (rule: SRule) => {
+    root.walkRules(selector, rule => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
-        if (rule.isSimpleSelector && !!~declarationIndex) {
+        if ((rule as SRule).isSimpleSelector && !!~declarationIndex) {
             found = rule.nodes![declarationIndex];
         }
     });
