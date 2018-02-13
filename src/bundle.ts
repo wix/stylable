@@ -46,7 +46,8 @@ export class Bundler {
         return this.getDependencyPaths({ entries: this.outputCSS, themeEntries: {} });
     }
 
-    public generateCSS(usedSheetPaths?: string[], onBeforePrint?: (meta: StylableMeta) => void): string {
+    public generateCSS(
+        usedSheetPaths?: string[], onBeforePrint?: (meta: StylableMeta) => void, shouldRemoveUnused = true): string {
         // collect stylesheet meta list
         let outputMetaList: StylableMeta[];
         let themeEntries: ThemeEntries = this.themeAcc;
@@ -74,7 +75,9 @@ export class Bundler {
         // clean unused and add overrides
         outputMetaList = outputMetaList.map(entryMeta => {
             entryMeta = this.transform(entryMeta);
-            this.cleanUnused(entryMeta, outputPaths);
+            if (shouldRemoveUnused) {
+                this.cleanUnused(entryMeta, outputPaths);
+            }
             this.applyOverrides(entryMeta, pathToIndex, themeEntries);
             return entryMeta;
         });
