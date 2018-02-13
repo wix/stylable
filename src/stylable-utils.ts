@@ -215,16 +215,17 @@ export function removeUnusedRules(
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
-        const symbols = Object.keys(_import.named).concat(_import.defaultExport);
+        const symbols = Object.keys(_import.named).concat(_import.defaultExport) // .filter(Boolean);
         ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
             traverseNode(rule.selectorAst, node => {
+                // TODO: remove.
                 if (symbols.indexOf(node.name) !== -1) {
                     return shouldOutput = false;
                 }
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    let extend = symbol[valueMapping.extends];
+                    let extend = symbol[valueMapping.extends] || symbol.alias;
                     extend = extend && extend._kind !== 'import' ? (extend.alias || extend) : extend;
 
                     if (extend && extend._kind === 'import' &&
