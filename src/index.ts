@@ -38,3 +38,4 @@ export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } fr
 export * from './stylable-mixins';
 export * from './stylable-optimizer';
 export * from './functions';
+export * from './state-validators';
