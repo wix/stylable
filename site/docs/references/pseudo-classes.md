@@ -56,7 +56,7 @@ For example, a cell in a grid can be marked and later targeted using `column` an
 
 ## Mapped states
 
-**Stylable** generates selectors using custom `data-*` attributes. when you are building your components with **Stylable**While the standard DOM implementation is good , you might want to target the state in a custom way. 
+**Stylable** generates selectors using custom `data-*` attributes. When you are building your components with **Stylable** the standard DOM implementation is good, but you might want to target the state in a custom way. 
 
 You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on **Stylable**. 
 
@@ -81,7 +81,7 @@ In this example, `toggled` and `loading` are defined on the root class with thei
 > **Note**    
 > When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
-## State Inheritance
+## State inheritance
 
 You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1` is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
 
