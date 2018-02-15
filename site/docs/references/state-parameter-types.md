@@ -8,21 +8,24 @@ Custom [pseudo-classes](./pseudo-classes.md) can either be simple or accept para
 
 A custom pseudo-class with no parameters is considered a [simple custom state](./pseudo-classes.md#simple-custom-states).
 
-When defining a custom pseudo-class that can accept parameters:
-* You must provide a type validator. 
-* You must define the parameter type. 
+When defining a custom pseudo-class with a parameter:
+
+* You must provide a type definition.
+* Optionally you can provide validation arguments to the type defined
 * Optionally you can provide each state definition with a `default value`, enabling it to be used without providing a parameter argument.
 
 ```css
 .root {
-    -st-states: stateX([type]) [default Value?], 
+    -st-states: stateX([type]) [default Value?],
                 stateY([type]) [default Value?];
 }
 
 .root:stateX(arg) {}
 
 .root:stateX {
-    /* argument resolves to "default Value" if one was provided */
+    /* parameter resolves to "default Value", 
+    if no default value was provided,
+    this will fail validation */
 }
 ```
 
@@ -31,7 +34,7 @@ When defining a custom pseudo-class that can accept parameters:
 
 ## Tag
 
-Using tags enables you to define a custom pseudo-class with a **tag value**, and then target it using a pseudo-class selector with a matching **tag argument**. You define multiple tag values separated by whitespace.
+You can define a custom state with a **tags value** (seperated by whitespace), and then target it using a pseudo-class selector with a matching **tag argument**.
 
 ```css
 .root {
@@ -64,7 +67,8 @@ You can define a custom state with possible **enum value** options, and then tar
 }
 
 .root:size(huge) {
-   /* invalid because "huge" is not a value of the state "size" */
+   /* invalid because "huge" is not a one of the possible 
+   values defined for the state "size" */
 }
 ```
 
@@ -91,6 +95,10 @@ Setting the state **string value** in the view `<span {...style("root", {selecte
 ### String validation [optional]
 
 You can optionally pass a regular expression string as an argument to add validation for the pseudo-class selector **string argument**. The regular expression must be within quotes.
+
+You can optionally pass a regular expression function (`regex()`) to the string type to add regular expression validation for the pseudo-class selector. 
+This function accepts a single expression to be tested against the selector parameter. The expression must be within quotes.
+
 
 ```css
 .root {
@@ -171,7 +179,7 @@ You can use several validators that the number type provides.
 .root:column(7) {}
 ```
 
-## Coming soon
+## Future intent
 
 * [Custom user types and validations](https://github.com/wix/stylable/issues/268).
 * [Custom pseudo-class type "nth"](https://github.com/wix/stylable/issues/270).

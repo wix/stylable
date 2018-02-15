@@ -56,7 +56,7 @@ For example, a cell in a grid can be marked and later targeted using `column` an
 
 ## Mapped states
 
-**Stylable** generates selectors using custom `data-*` attributes. When you are building your components with **Stylable** the standard DOM implementation is good, but you might want to target the state in a custom way. 
+**Stylable** generates custom pseudo-classes using `data-*` attributes. When you are building your components with **Stylable** the standard DOM implementation is good, but you might want to target the state in a custom way. 
 
 You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on **Stylable**. 
 
