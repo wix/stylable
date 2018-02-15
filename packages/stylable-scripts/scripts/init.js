@@ -121,18 +121,22 @@ module.exports = function (
     console.log(`Installing dependencies and dev dependencies using ${displayedCommand}...`);
     console.log();
 
-    // install dependencies    
-    const depsInstall = spawn.sync(command, args, { stdio: 'inherit' });
-    if (depsInstall.status !== 0) {
-        console.error(`\`${command} ${args.join(' ')}\` failed`);
-        return;
+    if (templateDependencies.length) {
+        // install dependencies    
+        const depsInstall = spawn.sync(command, args, { stdio: 'inherit' });
+        if (depsInstall.status !== 0) {
+            console.error(`\`${command} ${args.join(' ')}\` failed`);
+            return;
+        }
     }
 
-    // install dev dependencies    
-    const devDepsInstall = spawn.sync(command, devArgs, { stdio: 'inherit' });
-    if (devDepsInstall.status !== 0) {
-        console.error(`\`${command} ${devArgs.join(' ')}\` failed`);
-        return;
+    if (templateDevDependencies) {
+        // install dev dependencies    
+        const devDepsInstall = spawn.sync(command, devArgs, { stdio: 'inherit' });
+        if (devDepsInstall.status !== 0) {
+            console.error(`\`${command} ${devArgs.join(' ')}\` failed`);
+            return;
+        }
     }
 
     // copy tsconfig.json
