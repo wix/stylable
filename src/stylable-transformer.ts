@@ -111,10 +111,8 @@ export class StylableTransformer {
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: Pojo<string> = {};
         const ast = meta.outputAst = meta.ast.clone();
-        this.transformAst(ast, meta, metaExports);
-        if (this.optimize) {
-            removeSTDirective(ast);
-        }
+        this.transformAst(ast, meta, this.scopeRoot, metaExports);
+        if (this.optimize) { removeSTDirective(ast); }
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -123,6 +121,7 @@ export class StylableTransformer {
     public transformAst(
         ast: postcss.Root,
         meta: StylableMeta,
+        scopeRoot: boolean = false,
         metaExports?: Pojo<string>,
         variableOverride?: Pojo<string>,
         path: string[] = []) {
@@ -131,11 +130,11 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             if (this.isChildOfAtRule(rule, 'keyframes')) { return; }
-            rule.selector = this.scopeRule(meta, rule, metaExports);
+            rule.selector = this.scopeRule(meta, rule, scopeRoot, metaExports);
         });
 
-        ast.walkAtRules(/media$/, (atRule: SAtRule) => {
-            atRule.sourceParams = atRule.params;
+        ast.walkAtRules(/media$/, atRule => {
+            (atRule as SAtRule).sourceParams = atRule.params;
             atRule.params = evalDeclarationValue(
                 this.resolver,
                 atRule.params,
@@ -148,8 +147,8 @@ export class StylableTransformer {
             );
         });
 
-        ast.walkDecls((decl: SDecl) => {
-            getDeclStylable(decl).sourceValue = decl.value;
+        ast.walkDecls(decl => {
+            getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
             // TODO: filter out all irrelevant directives
             switch (decl.prop) {
@@ -515,8 +514,9 @@ export class StylableTransformer {
             }
         });
     }
-    public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports?: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports, this.scopeRoot, false, rule).selector;
+    public scopeRule(
+        meta: StylableMeta, rule: postcss.Rule, scopeRoot: boolean, metaExports?: Pojo<string>): string {
+        return this.scopeSelector(meta, rule.selector, metaExports, scopeRoot, false, rule).selector;
     }
     public handleClass(
         meta: StylableMeta,

@@ -171,7 +171,7 @@ export class StylableResolver {
                 const res = this.resolve(extend);
                 if (res && res._kind === 'css' && (res.symbol._kind === 'element' || res.symbol._kind === 'class')) {
                     current = res;
-                    extend = res.symbol[valueMapping.extends];
+                    extend = res.symbol[valueMapping.extends] || res.symbol.alias;
                 } else {
                     break;
                 }

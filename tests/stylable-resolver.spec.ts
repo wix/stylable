@@ -99,6 +99,48 @@ describe('stylable-resolver', () => {
         expect(results).to.eql([]);
     });
 
+    it('should resolve extend through exported alias', () => {
+        const { fs } = createMinimalFS({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./index.st.css";
+                            -st-named: Comp;
+                        }
+                        .root {
+                            -st-extends: Comp;
+                        }
+                    `
+                },
+                '/index.st.css': {
+                    content: `
+                        :import{
+                            -st-from: "./button.st.css";
+                            -st-default: Comp;
+                        }
+                        Comp{}
+                    `
+                },
+                '/button.st.css': {
+                    content: `
+                        .root{}
+                    `
+                }
+            }
+        });
+        const results = createResolveExtendsResults(fs, resolve('/entry.st.css'), 'root');
+
+        expect(results[0].symbol.name).to.equal('root');
+        expect(results[1].symbol.name).to.equal('Comp');
+        expect(results[2].symbol.name).to.equal('root');
+
+        expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
+        expect(results[1].meta.source).to.equal(resolve('/index.st.css'));
+        expect(results[2].meta.source).to.equal(resolve('/button.st.css'));
+
+    });
+
     it('should resolve classes', () => {
 
         const { resolver, fileProcessor } = generateInfra({

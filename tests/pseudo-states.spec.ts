@@ -43,6 +43,23 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('should support explicit boolean state definition', () => {
+                const res = processSource(`
+                    .root {
+                        -st-states: state1(boolean);
+                    }
+                `, { from: 'path/to/style.css' });
+
+                expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
+
+                expect(res.classes).to.containSubset({
+                    root: {
+                        [valueMapping.states]: {
+                            state1: null
+                        }
+                    }
+                });
+            });
         });
 
         describe('advanced type', () => {
@@ -77,6 +94,17 @@ describe('pseudo-states', () => {
                 `, [{
                         // tslint:disable-next-line:max-line-length
                         message: 'pseudo-state "state1" expected "contains" validator to receive a single argument, but it received "one, two"',
+                        file: 'main.css'
+                    }]);
+            });
+
+            it('should warn when encountering an unknown type', () => {
+                expectWarnings(`
+                    .my-class {
+                        |-st-states: state1( $unknown$ )|;
+                    }
+                `, [{
+                        message: 'pseudo-state "state1" defined with unknown type: "unknown"',
                         file: 'main.css'
                     }]);
             });
@@ -147,7 +175,7 @@ describe('pseudo-states', () => {
                 it('with a regex validator', () => {
                     const res = processSource(`
                         .root {
-                            -st-states: state1(string("^user"));
+                            -st-states: state1( string( regex("^user") ));
                         }
                     `, { from: 'path/to/style.css' });
 
@@ -158,7 +186,10 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     type: 'string',
-                                    arguments: ['^user']
+                                    arguments: [{
+                                        name: 'regex',
+                                        args: ['^user']
+                                    }]
                                 }
                             }
                         }
@@ -225,7 +256,7 @@ describe('pseudo-states', () => {
                 it('with a nested validator and a regex validator', () => {
                     const res = processSource(`
                         .root {
-                            -st-states: state1(string("^user", contains(user)));
+                            -st-states: state1(string( regex("^user"), contains(user) ));
                         }
                     `, { from: 'path/to/style.css' });
 
@@ -237,7 +268,10 @@ describe('pseudo-states', () => {
                                 state1: {
                                     type: 'string',
                                     arguments: [
-                                        '^user',
+                                        {
+                                            name: 'regex',
+                                            args: ['^user']
+                                        },
                                         {
                                             name: 'contains',
                                             args: ['user']
@@ -511,6 +545,27 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('should support explicitly defined boolean state type', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1(boolean);
+                            }
+                            .my-class:state1 {}
+                            `
+                        }
+                    }
+                });
+
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry--my-class[data-entry-state1] {}'
+                });
+            });
         });
 
         describe('advanced type / validation', () => {
@@ -625,7 +680,7 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: state1( string("^user") );
+                                        -st-states: state1( string( regex("^user") ));
                                     }
                                     .my-class:state1(userName) {}
                                     `
@@ -647,7 +702,7 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: state1( string("^user") );
+                                        -st-states: state1( string( regex("^user") ));
                                     }
                                     |.my-class:state1(failingParameter)| {}
                                     `
@@ -752,7 +807,7 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: state1(string("^user", minLength(3), maxLength(5)));
+                                        -st-states: state1( string( regex("^user"), minLength(3), maxLength(5) ));
                                     }
                                     .my-class:state1(user) {}
                                     `
@@ -830,7 +885,7 @@ describe('pseudo-states', () => {
                                     namespace: 'entry',
                                     content: `
                                     .my-class {
-                                        -st-states: state1(string(maxLength(3), "^case"));
+                                        -st-states: state1( string( maxLength(3), regex("^case") ));
                                     }
                                     |.my-class:state1($user$)| {}
                                     `
@@ -873,9 +928,6 @@ describe('pseudo-states', () => {
                             ].join('\n'),
                             file: '/entry.st.css'
                         }]);
-                        // expect(res).to.have.styleRules({
-                        //     0: '.entry--my-class[data-entry-state1="passedValue"] {}'
-                        // });
                     });
                 });
             });
@@ -953,6 +1005,30 @@ describe('pseudo-states', () => {
                     expect(res).to.have.styleRules({
                         1: '.entry--my-class[data-entry-state1="blah"] {}'
                     });
+                });
+
+                it('should warn when trying to use an unknown number validator', () => {
+                    const config = {
+                        entry: `/entry.st.css`,
+                        files: {
+                            '/entry.st.css': {
+                                namespace: 'entry',
+                                content: `
+                                .my-class {
+                                    |-st-states: $state1( number( missing() ))$|;
+                                }
+                                `
+                            }
+                        }
+                    };
+
+                    const res = expectWarningsFromTransform(config, [{
+                        message: [
+                            'pseudo-state "state1" default value "" failed validation:',
+                            'encountered unknown number validator "missing"'
+                        ].join('\n'),
+                        file: '/entry.st.css'
+                    }]);
                 });
 
                 describe('specific validators', () => {
@@ -1274,7 +1350,7 @@ describe('pseudo-states', () => {
 
         describe('custom mapping', () => {
 
-            it('should tranform any quoted string (trimmed)', () => {
+            it('should transform any quoted string (trimmed)', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
                     files: {

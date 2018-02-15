@@ -2,24 +2,7 @@ import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { cachedProcessFile } from '../src/cached-process-file';
 import { process, StylableMeta } from '../src/stylable-processor';
-import { generateStylableRoot } from './utils/generate-test-util';
-
-export let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-    return processSource(content, { from: path });
-},
-    {
-        readFileSync() {
-            return '';
-        },
-        statSync() {
-            return { mtime: new Date() };
-        }
-    }
-);
-
-function processSource(source: string, options: postcss.ProcessOptions = {}) {
-    return process(postcss.parse(source, options));
-}
+import { generateStylableRoot, processSource } from './utils/generate-test-util';
 
 describe('@custom-selector', () => {
 

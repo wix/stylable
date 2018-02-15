@@ -3,7 +3,7 @@ import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { safeParse } from './parser';
-import { process, StylableMeta } from './stylable-processor';
+import { StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { Options, StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
 
@@ -19,9 +19,11 @@ export class Stylable {
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
-        protected scopeRoot: boolean = true) {
+        protected scopeRoot: boolean = true,
+        protected resolveOptions: any = {}
+    ) {
 
-        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess);
+        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess, resolveOptions);
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
@@ -50,7 +52,7 @@ export class Stylable {
 
         if (typeof meta === 'string') {
             const root = safeParse(meta, { from: resourcePath });
-            meta = process(root, new Diagnostics());
+            meta = new StylableProcessor(new Diagnostics()).process(root);
         }
 
         const transformer = this.createTransformer(options);

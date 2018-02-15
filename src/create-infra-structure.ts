@@ -12,11 +12,13 @@ export interface StylableInfrastructure {
 export function createInfrastructure(
     projectRoot: string,
     fileSystem: MinimalFS,
-    onProcess: (meta: StylableMeta, path: string) => StylableMeta = x => x
+    onProcess: (meta: StylableMeta, path: string) => StylableMeta = x => x,
+    resolveOptions: any = {}
 ): StylableInfrastructure {
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
-        fileSystem
+        fileSystem,
+        ...resolveOptions
     });
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
