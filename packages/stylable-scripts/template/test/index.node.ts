@@ -1,1 +1,0 @@
-import './ssr-compat.spec';
