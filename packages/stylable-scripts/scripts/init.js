@@ -92,7 +92,7 @@ module.exports = function (
         }
     );
 
-    function depsToArray(deps) {
+    function depsToArray(deps = {}) {
         return Object.keys(deps).map(key => {
             return `${key}@${deps[key]}`;
         });
