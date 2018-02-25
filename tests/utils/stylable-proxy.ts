@@ -1,20 +1,21 @@
 import {create} from '../../src/runtime';
+import { StylesheetLocals, RuntimeStylesheet } from '../../src/types';
 
 const idObj = new Proxy({}, {
-  get: (target: any, key: any) => {
+  get: (target: StylesheetLocals, key: string | symbol) => {
     if (key === Symbol.toPrimitive) {
       return () => {
         return null;
       };
     }
 
-    if (key.match(/^\$/)) { // e.g. $cssState
+    if (typeof key === 'string' && key.match(/^\$/)) { // e.g. $cssState
       return target[key]; // use the reserved stylable functions and don't proxy
     }
 
     return key;
   },
-  set: (target: any, key: any, value: any) => target[key] = value
+  set: (target: StylesheetLocals, key: string, value: any) => target[key] = value
 });
 
-export default (create('root', 'namespace', idObj, null, 'moduleId') as any);
+export default create('root', 'namespace', idObj, null, 'moduleId');
