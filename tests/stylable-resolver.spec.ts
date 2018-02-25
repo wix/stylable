@@ -79,8 +79,8 @@ describe('stylable-resolver', () => {
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
-        expect(results[0].symbol.name).to.equal('Button');
-        expect(results[1].symbol.name).to.equal('root');
+        expect(results[0].symbol!.name).to.equal('Button');
+        expect(results[1].symbol!.name).to.equal('root');
         expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
 
     });
@@ -131,9 +131,9 @@ describe('stylable-resolver', () => {
         });
         const results = createResolveExtendsResults(fs, resolve('/entry.st.css'), 'root');
 
-        expect(results[0].symbol.name).to.equal('root');
-        expect(results[1].symbol.name).to.equal('Comp');
-        expect(results[2].symbol.name).to.equal('root');
+        expect(results[0].symbol!.name).to.equal('root');
+        expect(results[1].symbol!.name).to.equal('Comp');
+        expect(results[2].symbol!.name).to.equal('root');
 
         expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
         expect(results[1].meta.source).to.equal(resolve('/index.st.css'));
@@ -245,4 +245,130 @@ describe('stylable-resolver', () => {
         expect(res1!.symbol).to.eql(btnXMeta.classes.root);
     });
 
+    it('should handle circular "re-declare" (deepResolve)', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./entry.st.css";
+                            -st-named: a;
+                        }
+                        .a {}
+                    `
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+
+        const a = entryMeta.mappedSymbols.a;
+        const res1 = resolver.deepResolve(a);
+
+        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+    });
+
+    it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./entry.st.css";
+                            -st-named: a;
+                        }
+                        .a {}
+                    `
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+
+        const a = entryMeta.mappedSymbols.a;
+        const res1 = resolver.resolveSymbolOrigin(a, entryMeta);
+
+        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+    });
+
+    it('should resolve alias origin', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./a.st.css";
+                            -st-named: a, b;
+                        }
+                        .a{}
+                        .b{}
+                    `
+                },
+                '/a.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./a1.st.css";
+                            -st-named: a, b;
+                        }
+                        .a{}
+                        .b{}
+                    `
+                },
+                '/a1.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-named: Comp;
+                        }
+                        .a{}
+                        .b{-st-extends: Comp}
+                    `
+                },
+                '/comp.st.css': {
+                    content: ``
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+        const a1 = fileProcessor.process('/a1.st.css');
+
+        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
+        const res2 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.b, entryMeta);
+
+        expect(res1!.symbol).to.eql(a1.classes.a);
+        expect(res2!.symbol).to.eql(a1.classes.b);
+    });
+
+
+    it('should not resolve extends on alias', () => {
+
+        const { resolver, fileProcessor } = generateInfra({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./a.st.css";
+                            -st-named: a;
+                        }
+                        .a {
+                           -st-extends: a;
+                        }
+                    `
+                },
+                '/a.st.css': {
+                    content: `
+                        .a{}
+                    `
+                }
+            }
+        });
+
+        const entryMeta = fileProcessor.process('/entry.st.css');
+        const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
+        expect(res1!.symbol).to.eql(entryMeta.classes.a);
+    });
 });

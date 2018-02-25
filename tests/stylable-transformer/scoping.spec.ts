@@ -363,7 +363,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 .to.equal('.Inner--root .Inner--deep .Deep--up');
         });
 
-        it.skip('resolve extend on extended alias (named)', () => {
+        it('resolve aliased pseudo-element', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,

@@ -691,7 +691,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply mixin from import (scope classes from mixin origin)', () => {
+        it('apply mixin from named import (scope classes from mixin origin)', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -737,6 +737,229 @@ describe('Mixins', () => {
             );
 
         });
+
+        it('apply mixin from local class with extends (scope class as root)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
+                'color: green'
+            );
+
+        });
+
+        it('apply mixin from named import with extends (scope classes from mixin origin)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                      `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
+                'color: green'
+            );
+
+        });
+
+        it('should apply root mixin on child class (Root mixin mode)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+
+                            .container {
+                                -st-mixin: root;
+                            }
+
+                            .class {
+
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .entry--container',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                2,
+                '.entry--container .entry--class',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                3,
+                '.entry--class',
+                ''
+            );
+        });
+
+        it('apply mixin from named import with extends (scope classes from mixin origin) !! with alias jump', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./jump.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+                        `
+                    },
+                    '/jump.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .my-mixin {}
+                            .my-mixin::part {}
+                      `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                      `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
+                'color: green'
+            );
+
+        });
+
 
         it('apply mixin with two root replacements', () => {
 

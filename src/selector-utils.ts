@@ -174,7 +174,7 @@ function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): 
 
     const nodesNoDuplicates: nodeWithPseudo[] = [];
     nodesWithPseudos.forEach(node => {
-        if (node.pseudo.length || !nodesWithPseudos.find((n) => isNodeMatch(n, node) && node !== n)) {
+        if (node.pseudo.length || !nodesWithPseudos.find(n => isNodeMatch(n, node) && node !== n)) {
             nodesNoDuplicates.push(node);
         }
     });
