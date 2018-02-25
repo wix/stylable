@@ -6,6 +6,7 @@
     "dist",
     "runtime.d.ts",
     "test-utils.d.ts",
+    "stylable-proxy.d.ts",
     "modules",
     "**/*~~.ts"
   ],
