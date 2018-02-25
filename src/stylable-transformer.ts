@@ -582,7 +582,7 @@ export class StylableTransformer {
 
             if (extend === symbol && extend.alias) {
                 const next = this.resolver.deepResolve(extend.alias);
-                if (next && next._kind === 'css') {
+                if (next && next._kind === 'css' && next.symbol) {
                     if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                         node.before = '';
                         node.type = 'selector';
@@ -612,7 +612,7 @@ export class StylableTransformer {
         const tRule = meta.elements[name] as StylableSymbol;
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
         const next = this.resolver.deepResolve(extend);
-        if (next && next._kind === 'css') {
+        if (next && next._kind === 'css' && next.symbol) {
             if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                 node.before = '';
                 node.type = 'selector';
