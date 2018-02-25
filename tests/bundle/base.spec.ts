@@ -1,5 +1,5 @@
-import {expect} from 'chai';
-import {createTestBundler, generateStylableOutput} from '../utils/generate-test-util';
+import { expect } from 'chai';
+import { createTestBundler, generateStylableOutput } from '../utils/generate-test-util';
 
 describe('bundle: base', () => {
 
@@ -242,7 +242,7 @@ describe('bundle: base', () => {
                             }
                             .b.a { color: blue; }
                             .b UnusedComp { color: black; }
-    
+
                             .c { color:gold; }
                         `
                     },
@@ -251,9 +251,9 @@ describe('bundle: base', () => {
                         content: ``
                     }
                 }
-    
+
             });
-    
+
             expect(output).to.eql([
                 `.entry--c { color:gold; }`
             ].join('\n'));
@@ -281,9 +281,9 @@ describe('bundle: base', () => {
                         content: ``
                     }
                 }
-    
+
             });
-    
+
             expect(output).to.eql([
                 `.entry--usedClass { color: red; }`
             ].join('\n'));
@@ -303,6 +303,7 @@ describe('bundle: base', () => {
                             :import {
                                 -st-from: './index.st.css';
                                 -st-named: Used, Unused;
+                                -st-theme: true;
                             }
                             Used { color: blue; }
                             Unused { color: blackest; }
@@ -336,9 +337,9 @@ describe('bundle: base', () => {
                         `
                     }
                 }
-    
+
             });
-    
+
             expect(output).to.eql([
                 `.used--root { color: red; }`,
                 `.used--root { color: green; }`,
