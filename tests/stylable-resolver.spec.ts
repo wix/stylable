@@ -245,7 +245,7 @@ describe('stylable-resolver', () => {
         expect(res1!.symbol).to.eql(btnXMeta.classes.root);
     });
 
-    it('should handle circular "redecalre"', () => {
+    it('should handle circular "re-declare" (deepResolve)', () => {
 
         const { resolver, fileProcessor } = generateInfra({
             files: {
@@ -269,7 +269,7 @@ describe('stylable-resolver', () => {
         expect(res1!.symbol).to.eql(entryMeta.classes.a);
     });
 
-    it('should handle circular "redecalre"', () => {
+    it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
 
         const { resolver, fileProcessor } = generateInfra({
             files: {
