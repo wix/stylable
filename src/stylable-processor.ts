@@ -312,7 +312,7 @@ export class StylableProcessor {
                         decl,
                         rule.selector,
                         valueMapping.extends,
-                        extendsRefSymbol
+                        getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
                     this.diagnostics.warn(
@@ -462,6 +462,14 @@ export class StylableProcessor {
         return importObj;
 
     }
+}
+
+function getAlias(symbol: StylableSymbol) {
+    return (
+        symbol &&
+        symbol._kind === 'class' ||
+        symbol._kind === 'element'
+    ) ? symbol.alias : undefined;
 }
 
 export interface Imported {

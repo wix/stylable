@@ -582,7 +582,7 @@ export class StylableTransformer {
 
             if (extend === symbol && extend.alias) {
                 const next = this.resolver.deepResolve(extend.alias);
-                if (next && next._kind === 'css') {
+                if (next && next._kind === 'css' && next.symbol) {
                     if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                         node.before = '';
                         node.type = 'selector';
@@ -612,7 +612,7 @@ export class StylableTransformer {
         const tRule = meta.elements[name] as StylableSymbol;
         const extend = tRule ? meta.mappedSymbols[name] : undefined;
         const next = this.resolver.deepResolve(extend);
-        if (next && next._kind === 'css') {
+        if (next && next._kind === 'css' && next.symbol) {
             if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
                 node.before = '';
                 node.type = 'selector';
@@ -670,12 +670,15 @@ export class StylableTransformer {
 
         }
 
+        // find if the current symbol exsists in the initial meta;
+
         let symbol = meta.mappedSymbols[name];
         let current = meta;
 
         while (!symbol) {
+            // go up the root extends path and find first symbol
             const root = current.mappedSymbols[current.root] as ClassSymbol;
-            next = this.resolver.resolve(root[valueMapping.extends]);
+            next = this.resolver.deepResolve(root[valueMapping.extends]);
             if (next && next._kind === 'css') {
                 current = next.meta;
                 symbol = next.meta.mappedSymbols[name];
@@ -686,21 +689,24 @@ export class StylableTransformer {
 
         if (symbol) {
             if (symbol._kind === 'class') {
-
                 node.type = 'class';
                 node.before = symbol[valueMapping.root] ? '' : ' ';
+                next = this.resolver.deepResolve(symbol);
+
                 if (symbol[valueMapping.global]) {
                     node.type = 'selector';
                     node.nodes = symbol[valueMapping.global] || [];
                 } else {
-                    node.name = this.scope(symbol.name, current.namespace);
+                    if (symbol.alias && !symbol[valueMapping.extends]) {
+                        if (next && next.meta && next.symbol) {
+                            node.name = this.scope(next.symbol.name, next.meta.namespace);
+                        } else {
+                            // TODO: maybe warn on un resolved alias
+                        }
+                    } else {
+                        node.name = this.scope(symbol.name, current.namespace);
+                    }
                 }
-
-                let extend = symbol[valueMapping.extends];
-                if (extend && extend._kind === 'class' && extend.alias) {
-                    extend = extend.alias;
-                }
-                next = this.resolver.resolve(extend);
 
                 if (next && next._kind === 'css') {
                     return next;

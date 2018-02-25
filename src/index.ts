@@ -39,3 +39,6 @@ export * from './stylable-mixins';
 export * from './stylable-optimizer';
 export * from './functions';
 export * from './state-validators';
+
+import * as pseudoStates from './pseudo-states';
+export { pseudoStates };
