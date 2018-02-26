@@ -38,7 +38,6 @@ export function create(
     }
 
     function mapClasses(classNameString: string): string {
-        console.log(classNameString);
         return classNameString.split(/\s+/g).map(className => get(className) || className).join(' ');
     }
 
