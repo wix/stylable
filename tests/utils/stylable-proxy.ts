@@ -1,5 +1,5 @@
 import {create} from '../../src/runtime';
-import { StylesheetLocals, RuntimeStylesheet } from '../../src/types';
+import { RuntimeStylesheet, StylesheetLocals } from '../../src/types';
 
 const idObj = new Proxy({}, {
   get: (target: StylesheetLocals, key: string | symbol) => {

@@ -2,7 +2,7 @@ import 'mocha';
 import {expect} from 'chai';
 import stylableProxy from './utils/stylable-proxy';
 
-describe.only('stylable-proxy', () => {
+describe('stylable-proxy', () => {
   before(() => {
     require.extensions['.css'] = function mockCss(module) {
       module.exports = stylableProxy;
