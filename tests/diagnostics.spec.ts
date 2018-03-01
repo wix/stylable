@@ -186,6 +186,40 @@ describe('diagnostics: warnings and errors', () => {
                         [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]
                     );
                 });
+                it('should not warn on vendor prefixed pseudo element', () => {
+                    const config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                .root::-webkit-element{
+
+                                }`
+                            }
+                        }
+                    };
+                    expectWarningsFromTransform(
+                        config,
+                        []
+                    );
+                });
+                it('should not warn on vendor prefixed pseudo class', () => {
+                    const config = {
+                        entry: '/main.css',
+                        files: {
+                            '/main.css': {
+                                content: `
+                                .root:-webkit-hover{
+
+                                }`
+                            }
+                        }
+                    };
+                    expectWarningsFromTransform(
+                        config,
+                        []
+                    );
+                });
                 nativePseudoElements.forEach(nativeElement => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
                         const selector = `|.root::$${nativeElement}$|{`;
