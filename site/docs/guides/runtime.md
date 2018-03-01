@@ -35,7 +35,7 @@ style.icon // "style__icon"
 
 ## Custom state mapping
 
-[Custom states](../references/pseudo-classes.md), which can be targeted from the style, are generated using the `$cssStats` function. The function accepts a map of local state names and generates an object with `data-*` attributes used to mark the element state.
+[Custom states](../references/pseudo-classes.md), which can be targeted from the style, are generated using the `$cssStates` function. The function accepts a map of local state names and generates an object with `data-*` attributes used to mark the element state.
 
 ```javascript
 /* { 'data-style-selected':true } */
