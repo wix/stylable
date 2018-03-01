@@ -26,6 +26,7 @@ import {
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 
+const isVendorPrefixed = require('is-vendor-prefixed');
 const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
 
@@ -713,7 +714,7 @@ export class StylableTransformer {
                 }
             }
         } else if (rule) {
-            if (nativePseudoElements.indexOf(name) === -1) {
+            if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
                 this.diagnostics.warn(rule,
                     `unknown pseudo element "${name}"`,
                     { word: name });

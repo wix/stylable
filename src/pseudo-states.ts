@@ -10,6 +10,7 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo, StateParsedValue } from './types';
 
+const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
 /* tslint:disable:max-line-length */
@@ -280,7 +281,7 @@ export function transformPseudoStateSelector(
     }
 
     if (!found && rule) {
-        if (nativePseudoClasses.indexOf(name) === -1) {
+        if (nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
             diagnostics.warn(rule, errors.UNKNOWN_STATE_USAGE(name), { word: name });
         }
     }
