@@ -2192,6 +2192,12 @@ is-utf8@^0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
 
+is-vendor-prefixed@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-vendor-prefixed/-/is-vendor-prefixed-1.0.0.tgz#d1043053f4d14cd7807ebe288621a6a0ead1adf8"
+  dependencies:
+    vendor-prefixes "1.0.0"
+
 is-wsl@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-wsl/-/is-wsl-1.1.0.tgz#1f16e4aa22b04d1336b66188a66af3c600c3a66d"
@@ -4404,6 +4410,10 @@ validate-npm-package-license@^3.0.1:
 vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
+
+vendor-prefixes@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/vendor-prefixes/-/vendor-prefixes-1.0.0.tgz#1c7b92ece46e2f1a06c5a907613f5d50045df531"
 
 vendors@^1.0.0:
   version "1.0.1"
