@@ -148,15 +148,14 @@ export class Bundler {
     }
 
     private cleanUnused(meta: StylableMeta, usedPaths: string[]): void {
-        const t = this.stylable.createTransformer();
+        const transformer = this.stylable.createTransformer();
 
         meta.ast.walkRules(rule => {
-            const s = rule.selectors!.filter(selector => {
-                return this.isInUse(t, meta, selector, usedPaths);
+            const outputSelectors = rule.selectors!.filter(selector => {
+                return this.isInUse(transformer, meta, selector, usedPaths);
             });
-
-            if (s.length) {
-                rule.selector = s.join();
+            if (outputSelectors.length) {
+                rule.selector = outputSelectors.join();
             } else {
                 rule.remove();
             }
@@ -164,11 +163,14 @@ export class Bundler {
 
     }
     private isInUse(transformer: StylableTransformer, meta: StylableMeta, selector: string, usedPaths: string[]) {
-        const r = transformer.resolveSelectorElements(meta, selector);
-        return r[0].every(res => {
-            const x = res.resolved[res.resolved.length - 1];
-            if (x) {
-                return usedPaths.indexOf(x.meta.source) !== -1;
+        const selectorElements = transformer.resolveSelectorElements(meta, selector);
+
+        // We expect to receive only one selectors at a time
+        return selectorElements[0].every(res => {
+            const lastChunk = res.resolved[res.resolved.length - 1];
+            if (lastChunk) {
+                const source = this.stylable.resolvePath(undefined, lastChunk.meta.source);
+                return usedPaths.indexOf(source) !== -1;
             }
             return true;
         });

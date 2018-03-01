@@ -303,7 +303,62 @@ describe('bundle: base', () => {
                             :import {
                                 -st-from: './index.st.css';
                                 -st-named: Used, Unused;
-                                -st-theme: true;
+                            }
+                            Used { color: blue; }
+                            Unused { color: blackest; }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            :import {
+                                -st-from: './unused.st.css';
+                                -st-default: Unused;
+                            }
+                            Used { }
+                            Unused { }
+                        `
+                    },
+                    '/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root { color: red; }
+                        `
+                    },
+                    '/unused.st.css': {
+                        namespace: 'unused',
+                        content: `
+                            .root { color: black; }
+                        `
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.used--root { color: red; }`,
+                `.used--root { color: blue; }`
+            ].join('\n'));
+        });
+
+        it.skip('should include selectors from "non used" (from js) files that are used in css', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css',
+                    '/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './index.st.css';
+                                -st-named: Used, Unused;
                             }
                             Used { color: blue; }
                             Unused { color: blackest; }
@@ -343,6 +398,72 @@ describe('bundle: base', () => {
             expect(output).to.eql([
                 `.used--root { color: red; }`,
                 `.used--root { color: green; }`,
+                `.used--root { color: blue; }`
+            ].join('\n'));
+        });
+
+
+        it('should keep selectors that used in 3rd party modules', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                resolve: {
+                    symlinks: false,
+                    alias: {
+                        components: '/node_modules/components'
+                    }
+                },
+                usedFiles: [
+                    '/entry.st.css',
+                    '/node_modules/components/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: 'components/index.st.css';
+                                -st-named: Used, Unused;
+                            }
+                            Used { color: blue; }
+                            Unused { color: blackest; }
+                        `
+                    },
+                    '/node_modules/components/package.json': {
+                        content: `{"name": "components"}`
+                    },
+                    '/node_modules/components/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            :import {
+                                -st-from: './unused.st.css';
+                                -st-default: Unused;
+                            }
+                            Used { }
+                            Unused { }
+                        `
+                    },
+                    '/node_modules/components/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root { color: red; }
+                        `
+                    },
+                    '/node_modules/components/unused.st.css': {
+                        namespace: 'unused',
+                        content: `
+                            .root { color: black; }
+                        `
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.used--root { color: red; }`,
                 `.used--root { color: blue; }`
             ].join('\n'));
         });

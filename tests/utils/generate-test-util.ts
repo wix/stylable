@@ -29,6 +29,7 @@ export interface Config {
     usedFiles?: string[];
     trimWS?: boolean;
     optimize?: boolean;
+    resolve?: any;
 }
 
 export type RequireType = (path: string) => any;
@@ -126,9 +127,9 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    }, undefined, undefined, !!config.scopeRoot);
+    }, undefined, undefined, !!config.scopeRoot, config.resolve);
 
-    return new Bundler(stylable);
+    return stylable.createBundler();
 }
 
 export function generateStylableOutput(config: Config) {
