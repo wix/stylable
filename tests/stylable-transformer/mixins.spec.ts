@@ -440,6 +440,45 @@ describe('Mixins', () => {
 
         });
 
+        it('@keyframes mixin', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./mixin";
+                            -st-default: mixin;
+                        }
+                        .container {
+                            -st-mixin: mixin;
+                        }
+                    `
+                    },
+                    '/mixin.js': {
+                        content: `
+                        module.exports = function() {
+                            return {
+                                "@keyframes abc": {
+                                    "0%": { "color": "red" },
+                                    "100%": { "color": "green" }
+                                }
+                            }
+                        }
+                    `
+                    }
+                }
+            });
+            
+            const {0:rule, 1:keyframes} = result.nodes!;
+            expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
+            if(keyframes.type !== "atrule"){ throw new Error('expected 2nd rule to be the @keyframes'); }
+            expect(keyframes.params!, 'keyframes id').to.equal('entry--abc');
+            expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
+            expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
+        });
+
     });
 
     describe('from css', () => {

@@ -109,6 +109,8 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         if (mixinRule.selector === '&' && !mixinRoot) {
             mixinRoot = mixinRule;
         } else {
+            const parentRule = mixinRule.parent;
+            if(parentRule.type === 'atrule' && parentRule.name === 'keyframes') return;
             const out = scopeSelector(rule.selector, mixinRule.selector);
             mixinRule.selector = out.selector;
             // mixinRule.selectorAst = out.selectorAst;
