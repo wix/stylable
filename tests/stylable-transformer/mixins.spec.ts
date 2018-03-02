@@ -693,6 +693,38 @@ describe('Mixins', () => {
 
         });
 
+        it.skip('should scope @keyframes from local mixin without duplicating the animation', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    .my-mixin {
+                        animation: original 2s;
+                    }
+                    @keyframes original {
+                        0% { color: red; }
+                        100% { color: green; }
+                    }
+                    .container {
+                        -st-mixin: my-mixin;
+                    }
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                2,
+                '.entry--container',
+                'animation: entry--original 2s'
+            );
+
+        });
+
         it('apply class mixins from import', () => {
 
             const result = generateStylableRoot({
