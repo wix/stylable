@@ -10,7 +10,7 @@ import { Options, StylableResults, StylableTransformer, TransformHooks } from '.
 export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
-    public resolvePath: (ctx: string, path: string) => string;
+    public resolvePath: (ctx: string | undefined, path: string) => string;
     constructor(
         protected projectRoot: string,
         protected fileSystem: MinimalFS,

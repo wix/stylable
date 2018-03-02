@@ -1,5 +1,5 @@
-import {expect} from 'chai';
-import {createTestBundler, generateStylableOutput} from '../utils/generate-test-util';
+import { expect } from 'chai';
+import { createTestBundler, generateStylableOutput } from '../utils/generate-test-util';
 
 describe('bundle: base', () => {
 
@@ -22,8 +22,7 @@ describe('bundle: base', () => {
         expect(output).to.eql(`.entry--b { color:green; }`);
     });
 
-    it('should support unresolveable vars', () => {
-
+    it('should handle unresolved named imports', () => {
         const output = generateStylableOutput({
             entry: '/entry.st.css',
             usedFiles: [
@@ -48,7 +47,6 @@ describe('bundle: base', () => {
         });
 
         expect(output).to.eql(`.entry--b { color:green; }`);
-
     });
 
     it('should output according to import order (entry strongest - bottom of CSS)', () => {
@@ -179,46 +177,6 @@ describe('bundle: base', () => {
         ].join('\n'));
     });
 
-    it('should not output selectors which contain unused files roots', () => {
-        const output = generateStylableOutput({
-            entry: '/entry.st.css',
-            usedFiles: [
-                '/entry.st.css'
-            ],
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: './unused-comp.st.css';
-                            -st-default: UnusedComp;
-                        }
-                        UnusedComp { color: red; }
-                        .a {
-                            -st-extends: UnusedComp;
-                            color: green;
-                        }
-                        .b.a { color: blue; }
-                        .b UnusedComp { color: black; }
-
-                        .c { color:gold; }
-                    `
-                },
-                '/unused-comp.st.css': {
-                    namespace: 'unusedComp',
-                    content: `
-                        .root { color:red; }
-                    `
-                }
-            }
-
-        });
-
-        expect(output).to.eql([
-            `.entry--c { color:gold; }`
-        ].join('\n'));
-    });
-
     it('should handle circular dependencies', () => {
         let output = null;
 
@@ -259,6 +217,257 @@ describe('bundle: base', () => {
 
             `.entryB--root { color: red; }`
         ].join('\n'));
+    });
+
+    describe('rule shaking', () => {
+
+        it('should remove rules with selectors which reference unused stylesheets', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './unused-comp.st.css';
+                                -st-default: UnusedComp;
+                            }
+                            UnusedComp { color: red; }
+                            .a {
+                                -st-extends: UnusedComp;
+                                color: green;
+                            }
+                            .b.a { color: blue; }
+                            .b UnusedComp { color: black; }
+
+                            .c { color:gold; }
+                        `
+                    },
+                    '/unused-comp.st.css': {
+                        namespace: 'unusedComp',
+                        content: ``
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.entry--c { color:gold; }`
+            ].join('\n'));
+        });
+
+        it('should remove just the unused selector and keep the rule if it has other used selectors', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './unused-comp.st.css';
+                                -st-default: UnusedComp;
+                            }
+                            UnusedComp, .usedClass { color: red; }
+                        `
+                    },
+                    '/unused-comp.st.css': {
+                        namespace: 'unusedComp',
+                        content: ``
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.entry--usedClass { color: red; }`
+            ].join('\n'));
+        });
+
+        it('should keep selectors which extends an edge used file', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css',
+                    '/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './index.st.css';
+                                -st-named: Used, Unused;
+                            }
+                            Used { color: blue; }
+                            Unused { color: blackest; }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            :import {
+                                -st-from: './unused.st.css';
+                                -st-default: Unused;
+                            }
+                            Used { }
+                            Unused { }
+                        `
+                    },
+                    '/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root { color: red; }
+                        `
+                    },
+                    '/unused.st.css': {
+                        namespace: 'unused',
+                        content: `
+                            .root { color: black; }
+                        `
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.used--root { color: red; }`,
+                `.used--root { color: blue; }`
+            ].join('\n'));
+        });
+
+        it.skip('should include selectors from "non used" (from js) files that are used in css', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                usedFiles: [
+                    '/entry.st.css',
+                    '/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './index.st.css';
+                                -st-named: Used, Unused;
+                            }
+                            Used { color: blue; }
+                            Unused { color: blackest; }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            :import {
+                                -st-from: './unused.st.css';
+                                -st-default: Unused;
+                            }
+                            Used { color: green; }
+                            Unused { color: blacker; }
+                        `
+                    },
+                    '/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root { color: red; }
+                        `
+                    },
+                    '/unused.st.css': {
+                        namespace: 'unused',
+                        content: `
+                            .root { color: black; }
+                        `
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.used--root { color: red; }`,
+                `.used--root { color: green; }`,
+                `.used--root { color: blue; }`
+            ].join('\n'));
+        });
+
+
+        it('should keep selectors that used in 3rd party modules', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                resolve: {
+                    symlinks: false,
+                    alias: {
+                        components: '/node_modules/components'
+                    }
+                },
+                usedFiles: [
+                    '/entry.st.css',
+                    '/node_modules/components/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: 'components/index.st.css';
+                                -st-named: Used, Unused;
+                            }
+                            Used { color: blue; }
+                            Unused { color: blackest; }
+                        `
+                    },
+                    '/node_modules/components/package.json': {
+                        content: `{"name": "components"}`
+                    },
+                    '/node_modules/components/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            :import {
+                                -st-from: './unused.st.css';
+                                -st-default: Unused;
+                            }
+                            Used { }
+                            Unused { }
+                        `
+                    },
+                    '/node_modules/components/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root { color: red; }
+                        `
+                    },
+                    '/node_modules/components/unused.st.css': {
+                        namespace: 'unused',
+                        content: `
+                            .root { color: black; }
+                        `
+                    }
+                }
+
+            });
+
+            expect(output).to.eql([
+                `.used--root { color: red; }`,
+                `.used--root { color: blue; }`
+            ].join('\n'));
+        });
+
     });
 
     describe('specific used files', () => {
