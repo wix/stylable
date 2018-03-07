@@ -2,6 +2,9 @@ sudo: false
 
 language: node_js
 
+notifications:
+    slack: wixc3:xUUjwQ3EV68OhBqh6LRdngEr
+    
 node_js:
   - "9"
   - "8"
