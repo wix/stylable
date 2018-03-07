@@ -32,6 +32,14 @@ const env = getClientEnvironment(publicUrl);
 
 const stylableCssFilename = 'static/css/[name].stylable.css';
 
+let externalLibsToTranspile = []
+try {
+  const packageJson = require(paths.appPackageJson)
+  if (packageJson && packageJson.transpileExternals && Array.isArray(packageJson.transpileExternals)) {
+    externalLibsToTranspile = packageJson.transpileExternals.map(libName => path.join(paths.appNodeModules, libName))
+  }
+}catch(e) { /* No externals to transpile is fine by us */ }
+
 // This is the development configuration.
 // It is focused on developer experience and fast rebuilds.
 // The production configuration is different and lives in a separate file.
@@ -149,6 +157,17 @@ module.exports = {
               // @remove-on-eject-begin
               // @remove-on-eject-end
             },
+          },
+
+          {
+            test: /\.js$/,
+            loader: require.resolve('ts-loader'),
+            include: externalLibsToTranspile,
+            options: {
+              // needed so it has a separate transpilation instance
+              instance: 'lib-compat',
+              transpileOnly: true
+            }
           },
 
           StylablePlugin.rule(),

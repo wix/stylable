@@ -54,6 +54,14 @@ const extractTextPluginOptions = shouldUseRelativeAssetPaths
     { publicPath: Array(cssFilename.split('/').length).join('../') }
   : {};
 
+  let externalLibsToTranspile = []
+  try {
+    const packageJson = require(paths.appPackageJson)
+    if (packageJson && packageJson.transpileExternals && Array.isArray(packageJson.transpileExternals)) {
+      externalLibsToTranspile = packageJson.transpileExternals.map(libName => path.join(paths.appNodeModules, libName))
+    }
+  }catch(e) { /* No externals to transpile is fine by us */ }
+
 // This is the production configuration.
 // It compiles slowly and is focused on producing a fast and minimal bundle.
 // The development configuration is different and lives in a separate file.
@@ -153,6 +161,17 @@ module.exports = {
               // presets: [require.resolve('babel-preset-react-app')],
               // @remove-on-eject-end
             },
+          },
+
+          {
+            test: /\.js$/,
+            loader: require.resolve('ts-loader'),
+            include: externalLibsToTranspile,
+            options: {
+              // needed so it has a separate transpilation instance
+              instance: 'lib-compat',
+              transpileOnly: true
+            }
           },
 
           StylablePlugin.rule(),
