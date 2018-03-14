@@ -23,6 +23,7 @@ export {
     TransformHooks
 } from './stylable-transformer';
 export { scopeSelector, expandCustomSelectors } from './stylable-utils';
+export { matchSelectorTarget } from './selector-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createGenerator } from './generator';
@@ -37,3 +38,7 @@ export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } fr
 export * from './stylable-mixins';
 export * from './stylable-optimizer';
 export * from './functions';
+export * from './state-validators';
+
+import * as pseudoStates from './pseudo-states';
+export { pseudoStates };

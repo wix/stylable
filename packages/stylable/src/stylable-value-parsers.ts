@@ -49,7 +49,11 @@ export const valueMapping = {
 
 export type stKeys = keyof typeof valueMapping;
 
-export const stValues: string[] = Object.keys(valueMapping).map((key: stKeys) => valueMapping[key]);
+export const stValues: string[] = Object.keys(valueMapping).map(key => valueMapping[key as stKeys]);
+export const stValuesMap: Pojo<boolean> = Object.keys(valueMapping).reduce((acc, key) => {
+    acc[valueMapping[key as stKeys]] = true;
+    return acc;
+}, {} as Pojo<boolean>);
 
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);

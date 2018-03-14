@@ -109,6 +109,8 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         if (mixinRule.selector === '&' && !mixinRoot) {
             mixinRoot = mixinRule;
         } else {
+            const parentRule = mixinRule.parent;
+            if(parentRule.type === 'atrule' && parentRule.name === 'keyframes') return;
             const out = scopeSelector(rule.selector, mixinRule.selector);
             mixinRule.selector = out.selector;
             // mixinRule.selectorAst = out.selectorAst;
@@ -126,7 +128,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             throw rule.error('missing mixin entry');
         }
         // TODO: handle rules before and after decl on entry
-        mixinAst.nodes.slice().forEach((node: SRule | postcss.Declaration | postcss.AtRule) => {
+        mixinAst.nodes.slice().forEach(node => {
             if (node === mixinRoot) {
                 node.walkDecls(node => {
                     rule.insertBefore(mixinEntry!, node);
@@ -215,16 +217,17 @@ export function removeUnusedRules(
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
-        const symbols = Object.keys(_import.named).concat(_import.defaultExport);
+        const symbols = Object.keys(_import.named).concat(_import.defaultExport) // .filter(Boolean);
         ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
             traverseNode(rule.selectorAst, node => {
+                // TODO: remove.
                 if (symbols.indexOf(node.name) !== -1) {
                     return shouldOutput = false;
                 }
                 const symbol = meta.mappedSymbols[node.name];
                 if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    let extend = symbol[valueMapping.extends];
+                    let extend = symbol[valueMapping.extends] || symbol.alias;
                     extend = extend && extend._kind !== 'import' ? (extend.alias || extend) : extend;
 
                     if (extend && extend._kind === 'import' &&
@@ -250,12 +253,12 @@ export function findDeclaration(importNode: Imported, test: any) {
 export function findRule(
     root: postcss.Root,
     selector: string,
-    test: any = (statment: any) => statment.prop === valueMapping.extends) {
+    test: any = (statement: any) => statement.prop === valueMapping.extends) {
 
     let found: any = null;
-    root.walkRules(selector, (rule: SRule) => {
+    root.walkRules(selector, rule => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
-        if (rule.isSimpleSelector && !!~declarationIndex) {
+        if ((rule as SRule).isSimpleSelector && !!~declarationIndex) {
             found = rule.nodes![declarationIndex];
         }
     });

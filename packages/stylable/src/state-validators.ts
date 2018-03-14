@@ -62,23 +62,15 @@ export const systemValidators: Pojo<StateParamType> = {
 
             if (validators.length > 0) {
                 validators.forEach(validatorMeta => {
-                    if (typeof validatorMeta === 'string') {
-                        const r = new RegExp(validatorMeta);
-
-                        if (validateValue && !r.test(value)) {
-                            errors.push(validationErrors.string.REGEX_VALIDATION_FAILED(validatorMeta, value));
-                        }
-                    } else if (typeof validatorMeta === 'object') {
+                    if (typeof validatorMeta === 'object') {
                         if (this.subValidators && this.subValidators[validatorMeta.name]) {
-                            resolveSubValidator(
-                                this.subValidators[validatorMeta.name],
-                                validatorMeta,
-                                value,
-                                resolveParam,
-                                errors,
-                                validateDefinition,
-                                validateValue
-                            );
+                            const subValidator = this.subValidators[validatorMeta.name];
+
+                            const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
+
+                            if (validateValue && validationRes.errors) {
+                                errors.push(...validationRes.errors);
+                            }
                         } else if (validateDefinition) {
                             errors.push(validationErrors.string.UKNOWN_VALIDATOR(validatorMeta.name));
                         }
@@ -86,9 +78,20 @@ export const systemValidators: Pojo<StateParamType> = {
                 });
             }
 
-            return {res, errors: errors.length ? errors : null};
+            return { res, errors: errors.length ? errors : null };
         },
         subValidators: {
+            regex: (value: string, regex: string) => {
+                const r = new RegExp(regex);
+                const valid = r.test(value);
+
+                return {
+                    res: value,
+                    errors: valid ?
+                        null :
+                        [validationErrors.string.REGEX_VALIDATION_FAILED(regex, value)]
+                };
+            },
             contains: (value: string, checkedValue: string) => {
                 const valid = !!~value.indexOf(checkedValue);
 
@@ -139,22 +142,22 @@ export const systemValidators: Pojo<StateParamType> = {
             } else if (validators.length > 0) {
                 validators.forEach(validatorMeta => {
                     if (typeof validatorMeta === 'object') {
-                        if (this.subValidators) {
-                            resolveSubValidator(
-                                this.subValidators[validatorMeta.name],
-                                validatorMeta,
-                                value,
-                                resolveParam,
-                                errors,
-                                validateDefinition,
-                                validateValue
-                            );
+                        if (this.subValidators && this.subValidators[validatorMeta.name]) {
+                            const subValidator = this.subValidators[validatorMeta.name];
+
+                            const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
+
+                            if (validateValue && validationRes.errors) {
+                                errors.push(...validationRes.errors);
+                            }
+                        } else if (validateDefinition) {
+                            errors.push(validationErrors.number.UKNOWN_VALIDATOR(validatorMeta.name));
                         }
                     }
                 });
             }
 
-            return {res, errors: errors.length ? errors : null};
+            return { res, errors: errors.length ? errors : null };
         },
         subValidators: {
             min: (value: string, minValue: string) => {
@@ -217,7 +220,7 @@ export const systemValidators: Pojo<StateParamType> = {
                 errors.push(validationErrors.enum.NO_OPTIONS_DEFINED());
             }
 
-            return {res, errors: errors.length ? errors : null};
+            return { res, errors: errors.length ? errors : null };
         }
     },
     tag: {
@@ -234,23 +237,7 @@ export const systemValidators: Pojo<StateParamType> = {
                 errors.push(validationErrors.tag.NO_SPACES_ALLOWED(value));
             }
 
-            return {res: value, errors: errors.length ? errors : null};
+            return { res: value, errors: errors.length ? errors : null };
         }
     }
 };
-
-function resolveSubValidator(
-    subValidator: SubValidator,
-    validatorMeta: StateTypeValidator,
-    value: any,
-    resolveParam: (s: string) => string,
-    errors: string[],
-    _validateDefinition: boolean,
-    validateValue: boolean) {
-
-    const validationRes = subValidator(value, resolveParam(validatorMeta.args[0]));
-
-    if (validateValue && validationRes.errors) {
-        errors.push(...validationRes.errors);
-    }
-}

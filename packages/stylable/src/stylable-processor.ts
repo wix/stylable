@@ -9,7 +9,7 @@ import {
     traverseNode
 } from './selector-utils';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
-import { MixinValue, SBTypesParsers, stValues, valueMapping } from './stylable-value-parsers';
+import { MixinValue, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 import { filename2varname, stripQuotation } from './utils';
 const hash = require('murmurhash');
@@ -72,7 +72,7 @@ export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
 }
 
 export class StylableProcessor {
-    protected meta: StylableMeta;
+    protected meta!: StylableMeta;
     constructor(protected diagnostics = new Diagnostics()) { }
     public process(root: postcss.Root): StylableMeta {
 
@@ -87,9 +87,8 @@ export class StylableProcessor {
             this.handleRule(rule);
         });
 
-        root.walkDecls((decl: SDecl) => {
-            // TODO: optimize
-            if (stValues.indexOf(decl.prop) !== -1) {
+        root.walkDecls(decl => {
+            if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             }
         });
@@ -313,7 +312,7 @@ export class StylableProcessor {
                         decl,
                         rule.selector,
                         valueMapping.extends,
-                        extendsRefSymbol
+                        getAlias(extendsRefSymbol) || extendsRefSymbol
                     );
                 } else {
                     this.diagnostics.warn(
@@ -463,6 +462,14 @@ export class StylableProcessor {
         return importObj;
 
     }
+}
+
+function getAlias(symbol: StylableSymbol) {
+    return (
+        symbol &&
+        symbol._kind === 'class' ||
+        symbol._kind === 'element'
+    ) ? symbol.alias : undefined;
 }
 
 export interface Imported {

@@ -363,6 +363,47 @@ describe('Stylable postcss transform (Scoping)', () => {
                 .to.equal('.Inner--root .Inner--deep .Deep--up');
         });
 
+        it('resolve aliased pseudo-element', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .x {
+                                -st-extends: Inner;
+                            }
+                            .x::y {}
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'Inner',
+                        content: `
+                            :import {
+                                -st-from: "./deep.st.css";
+                                -st-named: y;
+                            }
+                            .y {}
+                        `
+                    },
+                    '/deep.st.css': {
+                        namespace: 'Deep',
+                        content: `
+                            .y{}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--x.Inner--root .Deep--y');
+        });
+
     });
 
     describe('scoped classes', () => {
