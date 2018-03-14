@@ -29,6 +29,7 @@ export interface Config {
     usedFiles?: string[];
     trimWS?: boolean;
     optimize?: boolean;
+    resolve?: any;
 }
 
 export type RequireType = (path: string) => any;
@@ -67,19 +68,6 @@ export function createTransformer(
         scopeRoot: !!config.scopeRoot
     });
 }
-
-// let loadFile: any = cachedProcessFile<StylableMeta>((path, content) => {
-//     return processSource(content, { from: path });
-// },
-//     {
-//         readFileSync() {
-//             return '';
-//         },
-//         statSync() {
-//             return { mtime: new Date() };
-//         }
-//     }
-// );
 
 export function processSource(source: string, options: postcss.ProcessOptions = {}) {
     return process(postcss.parse(source, options));
@@ -139,9 +127,9 @@ export function createTestBundler(config: Config) {
     const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
         meta.namespace = config.files[path].namespace || meta.namespace;
         return meta;
-    }, undefined, undefined, !!config.scopeRoot);
+    }, undefined, undefined, !!config.scopeRoot, config.resolve);
 
-    return new Bundler(stylable);
+    return stylable.createBundler();
 }
 
 export function generateStylableOutput(config: Config) {

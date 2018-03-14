@@ -6,17 +6,20 @@ const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
-    resolvePath: (context: string, path: string) => string;
+    resolvePath: (context: string | undefined, path: string) => string;
 }
 
 export function createInfrastructure(
     projectRoot: string,
     fileSystem: MinimalFS,
-    onProcess: (meta: StylableMeta, path: string) => StylableMeta = x => x
+    onProcess: (meta: StylableMeta, path: string) => StylableMeta = x => x,
+    resolveOptions: any = {}
 ): StylableInfrastructure {
+
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
-        fileSystem
+        fileSystem,
+        ...resolveOptions
     });
 
     const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
@@ -47,7 +50,7 @@ export function createInfrastructure(
         });
 
     return {
-        resolvePath(context: string, moduleId: string) {
+        resolvePath(context: string | undefined = projectRoot, moduleId: string) {
             if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
                 moduleId = eResolver.resolveSync({}, context, moduleId);
             }

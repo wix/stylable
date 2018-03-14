@@ -23,25 +23,7 @@ export class StylableResolver {
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
     ) { }
-    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
-        if (!maybeImport || maybeImport._kind !== 'import') {
-            if (maybeImport && maybeImport._kind !== 'var') {
-                if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
-                    maybeImport = maybeImport.alias;
-                } else if (maybeImport[valueMapping.extends]) {
-                    maybeImport = maybeImport[valueMapping.extends];
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        }
-        if (!maybeImport || maybeImport._kind !== 'import') {
-            return null;
-        }
-
-        const importSymbol: ImportSymbol = maybeImport;
+    public resolveImport(importSymbol: ImportSymbol) {
 
         const { from } = importSymbol.import;
 
@@ -75,7 +57,27 @@ export class StylableResolver {
             return { _kind: 'js', symbol, meta: null } as JSResolve;
         }
     }
-    public deepResolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+    public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
+        if (!maybeImport || maybeImport._kind !== 'import') {
+            if (maybeImport && maybeImport._kind !== 'var') {
+                if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
+                    maybeImport = maybeImport.alias;
+                } else if (maybeImport[valueMapping.extends]) {
+                    maybeImport = maybeImport[valueMapping.extends];
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        if (!maybeImport || maybeImport._kind !== 'import') {
+            return null;
+        }
+        return this.resolveImport(maybeImport);
+    }
+    public deepResolve(
+        maybeImport: StylableSymbol | undefined, path: StylableSymbol[] = []): CSSResolve | JSResolve | null {
         let resolved = this.resolve(maybeImport);
         while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
             resolved = this.resolve(resolved.symbol);
@@ -83,13 +85,38 @@ export class StylableResolver {
         if (
             resolved
             && resolved.symbol
+            && resolved.meta
             && (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element')
             && resolved.symbol.alias
             && !resolved.symbol[valueMapping.extends]
         ) {
-            return this.deepResolve(resolved.symbol.alias);
+            if (path.indexOf(resolved.symbol) !== -1) {
+                return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
+            }
+            path.push(resolved.symbol);
+            return this.deepResolve(resolved.symbol.alias, path);
         }
         return resolved;
+    }
+    public resolveSymbolOrigin(
+        symbol: StylableSymbol | undefined, meta: StylableMeta, path: StylableSymbol[] = []): CSSResolve | null {
+        if (!symbol || !meta) { return null; }
+        if (symbol._kind === 'element' || symbol._kind === 'class') {
+            if (path.indexOf(symbol) !== -1) {
+                return { meta, symbol, _kind: 'css' };
+            }
+            path.push(symbol);
+            const isAliasOnly = symbol.alias && !symbol[valueMapping.extends];
+            return isAliasOnly ? this.resolveSymbolOrigin(symbol.alias, meta, path) : { meta, symbol, _kind: 'css' };
+        } else if (symbol._kind === 'import') {
+            const resolved = this.resolveImport(symbol);
+            if (resolved && resolved.symbol && resolved._kind === 'css') {
+                return this.resolveSymbolOrigin(resolved.symbol, resolved.meta, path);
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
     public resolveClass(meta: StylableMeta, symbol: StylableSymbol) {
         return this.resolveName(meta, symbol, false);
@@ -159,7 +186,12 @@ export class StylableResolver {
         const extendPath = [];
         const resolvedClass = this.resolveName(meta, bucket[className], isElement);
 
-        if (resolvedClass && resolvedClass._kind === 'css' && resolvedClass.symbol._kind === type) {
+        if (
+            resolvedClass &&
+            resolvedClass._kind === 'css' &&
+            resolvedClass.symbol &&
+            resolvedClass.symbol._kind === type
+        ) {
             let current = resolvedClass;
             let extend = resolvedClass.symbol[valueMapping.extends] || resolvedClass.symbol.alias;
 
@@ -169,9 +201,13 @@ export class StylableResolver {
                     break;
                 }
                 const res = this.resolve(extend);
-                if (res && res._kind === 'css' && (res.symbol._kind === 'element' || res.symbol._kind === 'class')) {
+                if (res &&
+                    res._kind === 'css' &&
+                    res.symbol &&
+                    (res.symbol._kind === 'element' || res.symbol._kind === 'class')
+                ) {
                     current = res;
-                    extend = res.symbol[valueMapping.extends];
+                    extend = res.symbol[valueMapping.extends] || res.symbol.alias;
                 } else {
                     break;
                 }

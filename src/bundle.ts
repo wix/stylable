@@ -2,7 +2,8 @@ import * as postcss from 'postcss';
 import { evalDeclarationValue } from './functions';
 import { Stylable } from './stylable';
 import { Imported, SDecl, StylableMeta } from './stylable-processor';
-import { removeUnusedRules } from './stylable-utils';
+import { StylableTransformer } from './stylable-transformer';
+import { getDeclStylable, removeUnusedRules } from './stylable-utils';
 import { Pojo } from './types';
 
 export type OverrideVars = Pojo<string>;
@@ -46,7 +47,8 @@ export class Bundler {
         return this.getDependencyPaths({ entries: this.outputCSS, themeEntries: {} });
     }
 
-    public generateCSS(usedSheetPaths?: string[], onBeforePrint?: (meta: StylableMeta) => void): string {
+    public generateCSS(
+        usedSheetPaths?: string[], onBeforePrint?: (meta: StylableMeta) => void, shouldRemoveUnused = true): string {
         // collect stylesheet meta list
         let outputMetaList: StylableMeta[];
         let themeEntries: ThemeEntries = this.themeAcc;
@@ -73,8 +75,10 @@ export class Bundler {
 
         // clean unused and add overrides
         outputMetaList = outputMetaList.map(entryMeta => {
+            if (shouldRemoveUnused) {
+                this.cleanUnused(entryMeta, outputPaths);
+            }
             entryMeta = this.transform(entryMeta);
-            this.cleanUnused(entryMeta, outputPaths);
             this.applyOverrides(entryMeta, pathToIndex, themeEntries);
             return entryMeta;
         });
@@ -144,8 +148,32 @@ export class Bundler {
     }
 
     private cleanUnused(meta: StylableMeta, usedPaths: string[]): void {
-        meta.imports.forEach(importRequest =>
-            removeUnusedRules(meta.outputAst!, meta, importRequest, usedPaths, this.resolvePath.bind(this)));
+        const transformer = this.stylable.createTransformer();
+
+        meta.ast.walkRules(rule => {
+            const outputSelectors = rule.selectors!.filter(selector => {
+                return this.isInUse(transformer, meta, selector, usedPaths);
+            });
+            if (outputSelectors.length) {
+                rule.selector = outputSelectors.join();
+            } else {
+                rule.remove();
+            }
+        });
+
+    }
+    private isInUse(transformer: StylableTransformer, meta: StylableMeta, selector: string, usedPaths: string[]) {
+        const selectorElements = transformer.resolveSelectorElements(meta, selector);
+
+        // We expect to receive only one selectors at a time
+        return selectorElements[0].every(res => {
+            const lastChunk = res.resolved[res.resolved.length - 1];
+            if (lastChunk) {
+                const source = this.stylable.resolvePath(undefined, lastChunk.meta.source);
+                return usedPaths.indexOf(source) !== -1;
+            }
+            return true;
+        });
     }
 
     private applyOverrides(entryMeta: StylableMeta, pathToIndex: Pojo<number>, themeEntries: ThemeEntries): void {
@@ -219,11 +247,11 @@ export class Bundler {
                     overrideSelector = '.' + rootSelector + isNestedSep + overrideSelector; // none theme selector
                 }
                 const ruleOverride = postcss.rule({ selector: overrideSelector });
-                srcRule.walkDecls((decl: SDecl) => {
+                srcRule.walkDecls(decl => {
 
                     const overriddenValue = evalDeclarationValue(
                         this.stylable.resolver,
-                        decl.stylable.sourceValue,
+                        getDeclStylable(decl as SDecl).sourceValue,
                         entryMeta,
                         srcRule,
                         overrideVars

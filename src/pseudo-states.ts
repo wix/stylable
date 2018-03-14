@@ -10,11 +10,13 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo, StateParsedValue } from './types';
 
+const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
 /* tslint:disable:max-line-length */
 const errors = {
-    UNKNOWN_STATE_TYPE: (name: string) => `unknown pseudo-state "${name}"`,
+    UNKNOWN_STATE_USAGE: (name: string) => `unknown pseudo-state "${name}"`,
+    UNKNOWN_STATE_TYPE: (name: string, type: string) => `pseudo-state "${name}" defined with unknown type: "${type}"`,
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
     NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`
@@ -56,7 +58,7 @@ function resolveStateType(
 
         diagnostics.warn(decl,
             errors.NO_STATE_TYPE_GIVEN(stateDefinition.value),
-            {word: decl.value});
+            { word: decl.value });
 
         return;
     }
@@ -64,7 +66,7 @@ function resolveStateType(
     if (stateDefinition.nodes.length > 1) {
         diagnostics.warn(decl,
             errors.TOO_MANY_STATE_TYPES(stateDefinition.value, listOptions(stateDefinition)),
-            {word: decl.value});
+            { word: decl.value });
     }
 
     const paramType = stateDefinition.nodes[0];
@@ -76,13 +78,21 @@ function resolveStateType(
 
     if (isCustomMapping(stateDefinition)) {
         mappedStates[stateDefinition.value] = stateType.type.trim().replace(/\\["']/g, '"');
-    } else if (paramType.type === 'function') {
+    } else if (typeof stateType === 'object' && stateType.type === 'boolean') {
+        resolveBooleanState(mappedStates, stateDefinition);
+        return;
+    } else if (paramType.type === 'function' && stateType.type in systemValidators) {
         if (paramType.nodes.length > 0) {
             resolveArguments(paramType, stateType, stateDefinition.value, diagnostics, decl);
         }
         mappedStates[stateDefinition.value] = stateType;
     } else if (stateType.type in systemValidators) {
         mappedStates[stateDefinition.value] = stateType;
+    } else {
+        diagnostics.warn(decl, errors.UNKNOWN_STATE_TYPE(
+            stateDefinition.value, paramType.value),
+            { word: paramType.value }
+        );
     }
 }
 
@@ -133,7 +143,7 @@ function resolveBooleanState(mappedStates: MappedStates, stateDefinition: Parsed
 // TRANSFORM
 
 export function validateStateDefinition(
-    decl: SDecl,
+    decl: postcss.Declaration,
     meta: StylableMeta,
     resolver: StylableResolver,
     diagnostics: Diagnostics) {
@@ -170,7 +180,7 @@ export function validateStateDefinition(
                                     res.errors.unshift(`pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`);
                                     diagnostics.warn(decl,
                                         res.errors.join('\n'),
-                                        {word: decl.value});
+                                        { word: decl.value });
                                 }
                             }
 
@@ -200,7 +210,7 @@ export function validateStateArgument(
     };
 
     const { type: paramType, arguments: paramValidators } = stateAst;
-    const validator = systemValidators[stateAst.type];
+    const validator = systemValidators[paramType];
 
     try {
         if (resolvedValidations.res || validateDefinition) {
@@ -271,8 +281,8 @@ export function transformPseudoStateSelector(
     }
 
     if (!found && rule) {
-        if (nativePseudoClasses.indexOf(name) === -1) {
-            diagnostics.warn(rule, errors.UNKNOWN_STATE_TYPE(name), { word: name });
+        if (nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+            diagnostics.warn(rule, errors.UNKNOWN_STATE_USAGE(name), { word: name });
         }
     }
 
@@ -341,7 +351,7 @@ function resolveStateValue(
 
             diagnostics.warn(rule,
                 stateParamOutput.errors.join('\n'),
-                {word: actualParam});
+                { word: actualParam });
         }
     }
 

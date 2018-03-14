@@ -291,6 +291,56 @@ describe('Mixins', () => {
 
         });
 
+        it('should not root scope js mixins', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                scopeRoot: true,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import{
+                            -st-from:'./mixin.js';
+                            -st-named: mixStuff;
+                        }
+                        .gaga{
+                            color:red;
+                            -st-mixin: mixStuff;
+                        }
+                    `
+                    },
+                    '/mixin.js': {
+                        content: `
+                        module.exports = {
+                            mixStuff:function(){
+                                return {
+                                    "background":"green",
+                                    ".child":{
+                                        "color": "yellow"
+                                    }
+                                }
+                            }
+                        };
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--root .entry--gaga',
+                'color:red;background:green'
+            );
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--root .entry--gaga .entry--child',
+                'color:yellow'
+            );
+        });
+
         it('multiple mixins', () => {
 
             const result = generateStylableRoot({
@@ -388,6 +438,45 @@ describe('Mixins', () => {
                 'color: blue'
             );
 
+        });
+
+        it('@keyframes mixin', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./mixin";
+                            -st-default: mixin;
+                        }
+                        .container {
+                            -st-mixin: mixin;
+                        }
+                    `
+                    },
+                    '/mixin.js': {
+                        content: `
+                        module.exports = function() {
+                            return {
+                                "@keyframes abc": {
+                                    "0%": { "color": "red" },
+                                    "100%": { "color": "green" }
+                                }
+                            }
+                        }
+                    `
+                    }
+                }
+            });
+            
+            const {0:rule, 1:keyframes} = result.nodes!;
+            expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
+            if(keyframes.type !== "atrule"){ throw new Error('expected 2nd rule to be the @keyframes'); }
+            expect(keyframes.params!, 'keyframes id').to.equal('entry--abc');
+            expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
+            expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
         });
 
     });
@@ -604,6 +693,38 @@ describe('Mixins', () => {
 
         });
 
+        it.skip('should scope @keyframes from local mixin without duplicating the animation', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    .my-mixin {
+                        animation: original 2s;
+                    }
+                    @keyframes original {
+                        0% { color: red; }
+                        100% { color: green; }
+                    }
+                    .container {
+                        -st-mixin: my-mixin;
+                    }
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                2,
+                '.entry--container',
+                'animation: entry--original 2s'
+            );
+
+        });
+
         it('apply class mixins from import', () => {
 
             const result = generateStylableRoot({
@@ -641,7 +762,7 @@ describe('Mixins', () => {
 
         });
 
-        it('apply mixin from import (scope classes from mixin origin)', () => {
+        it('apply mixin from named import (scope classes from mixin origin)', () => {
 
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -683,6 +804,228 @@ describe('Mixins', () => {
                 result,
                 1,
                 '.entry--container .imported--local',
+                'color: green'
+            );
+
+        });
+
+        it('apply mixin from local class with extends (scope class as root)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
+                'color: green'
+            );
+
+        });
+
+        it('apply mixin from named import with extends (scope classes from mixin origin)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                      `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
+                'color: green'
+            );
+
+        });
+
+        it('should apply root mixin on child class (Root mixin mode)', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+
+                            .container {
+                                -st-mixin: root;
+                            }
+
+                            .class {
+
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .entry--container',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                2,
+                '.entry--container .entry--class',
+                ''
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                3,
+                '.entry--class',
+                ''
+            );
+        });
+
+        it('apply mixin from named import with extends (scope classes from mixin origin) !! with alias jump', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./jump.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .container {
+                                -st-mixin: my-mixin;
+                            }
+                        `
+                    },
+                    '/jump.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-mixin;
+                            }
+                            .my-mixin {}
+                            .my-mixin::part {}
+                      `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .my-mixin {
+                                -st-extends: Base;
+                                color: red;
+                            }
+                            .my-mixin::part{
+                                color: green;
+                            }
+                      `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `.part{}`
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--container',
+                '-st-extends: Base;color: red'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--container .base--part',
                 'color: green'
             );
 
@@ -988,7 +1331,6 @@ describe('Mixins', () => {
 
         });
 
-
         describe('Mixins with named parameters', () => {
 
             it('apply mixin with :vars override (local scope)', () => {
@@ -1044,6 +1386,7 @@ describe('Mixins', () => {
                 matchRuleAndDeclaration(result, 0, '.entry--x', 'border:1px solid red');
 
             });
+
             it('apply mixin with :vars override', () => {
 
                 const result = generateStylableRoot({
@@ -1159,124 +1502,8 @@ describe('Mixins', () => {
 
         });
 
-        describe('Mixins with named parameters', () => {
-
-            it('apply mixin with :vars override (local scope)', () => {
-
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :vars {
-                                    color1: red;
-                                }
-
-                                .x {
-                                    -st-mixin: y(color1 green);
-                                }
-
-                                .y {color:value(color1);}
-
-                            `
-                        }
-                    }
-                });
-
-                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
-
-            });
-
-            it('apply mixin with :vars override with space in value', () => {
-
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :vars {
-                                    border1: red;
-                                }
-
-                                .x {
-                                    -st-mixin: y(border1 1px solid red);
-                                }
-
-                                .y {border:value(border1);}
-
-                            `
-                        }
-                    }
-                });
-
-                matchRuleAndDeclaration(result, 0, '.entry--x', 'border:1px solid red');
-
-            });
-            it('apply mixin with :vars override', () => {
-
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                :import {
-                                    -st-from: "./imported.st.css";
-                                    -st-named: y;
-                                }
-
-                                .x {
-                                    -st-mixin: y(color1 green);
-                                }
-                            `
-                        },
-                        '/imported.st.css': {
-                            namespace: 'imported',
-                            content: `
-                            :vars {
-                                color1: red;
-                            }
-                            .y {color:value(color1);}
-                        `
-                        }
-                    }
-                });
-
-                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
-
-            });
-
-            it('apply mixin with :vars multiple override', () => {
-
-                const result = generateStylableRoot({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                                .x {
-                                    -st-mixin: y(color1 green, color2 yellow);
-                                }
-
-                                .y {
-                                    color:value(color1);
-                                    background:value(color2);
-                                }
-                            `
-                        }
-                    }
-                });
-
-                matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green;background:yellow');
-
-            });
-
-
-        });
     });
-    
+
     describe('mixin diagnostics', () => {
 
         it('should not report missing function on -st-mixin directive', () => {
@@ -1303,6 +1530,7 @@ describe('Mixins', () => {
             expect(result.meta.transformDiagnostics!.reports.length).to.equal(0);
 
         });
+        
     });
 
 });

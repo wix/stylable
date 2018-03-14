@@ -14,9 +14,9 @@ To define custom pseudo-classes, you use the **Stylable** directive rule `-st-st
 
 The `-st-states` directive rule can be defined only for simple selectors like [class selector](./class-selectors.md) and [root](./root.md).
 
-## Simple custom states
+## Simple custom pseudo-classes
 
-To define custom pseudo-classes, or states, for a simple selector, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the root selector and then targeted with different colors. 
+To define custom pseudo-classes, or states, without parameters, you tell **Stylable** the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example `toggled` and `loading` are added to the `root` selector and then targeted with different colors. 
 
 ```css
 /* example1.st.css */
@@ -36,11 +36,11 @@ To define custom pseudo-classes, or states, for a simple selector, you tell **St
 .Example1__root[data-Example1-loading][data-Example1-toggled] { color: blue; }
 ```
 
-## States with Parameters
+## Custom pseudo-classes with parameters
 
-In some use cases it's useful to define custom states that accept a parameter to simplify the CSS selector interface. 
+To simplify the CSS selector interface, you can also define custom pseudo-classes that accept a parameter. 
 
-For example, a cell in a grid can be marked and later targeted using `column` and `row` pseudo-classes:
+For example, a cell in a grid can be marked and later targeted using `column` and `row` pseudo-classes.
 
 ```css
 .cell {
@@ -52,16 +52,16 @@ For example, a cell in a grid can be marked and later targeted using `column` an
     color:red;
 }
 ```
-
-**Stylable** offers a built-in [system state types](./state-parameter-types.md) that help to provide a better development experience when targeting a pseudo-state. 
+**Stylable** offers a built-in system of [state types](./state-parameter-types.md) that provide a better development experience when targeting pseudo-classes. 
 
 ## Mapped states
 
-**Stylable** generates selectors using a build in custom `data-*` attributes. And while the standard DOM implementation is good when you are building your components with **Stylable** inmind, you might want to target the state in a custom way. 
+**Stylable** generates custom pseudo-classes using `data-*` attributes. When you are building your components with **Stylable** the standard DOM implementation is good, but you might want to target the state in a custom way. 
 
-The reason ..You can use this feature to define states even if the existing components you are targeting are not based on **Stylable**. 
+You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on **Stylable**. 
 
 In this example, `toggled` and `loading` are defined on the root class with their custom implementation. 
+
 ```css
 /* example-custom.st.css */
 @namespace "ExampleCustom";
@@ -81,7 +81,7 @@ In this example, `toggled` and `loading` are defined on the root class with thei
 > **Note**    
 > When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
-## State Inheritance
+## State inheritance
 
 You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value `Comp1` is imported from the `example1.css` stylesheet and extended by `.mediaButton`. The custom pseudo-classes `toggled` and `selected` are defined to be used on the `mediaButton` component. 
 
