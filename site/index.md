@@ -84,7 +84,7 @@ layout: docs
   </div>
 </div>
 
-We &hearts; CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly-specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.
+We at [Wix](https://www.wix.engineering/) &hearts; CSS. Its simple, declarative syntax that is native in browsers is easily the fastest way to add styles to web pages and web apps. But when writing CSS that is scoped to individual components, developers have to maintain highly specific selectors, using elaborate conventions to fake namespacing. Writing and maintaining CSS across large teams and large projects can be tricky.
 
 We also &hearts; TypeScript. TypeScript helps us manage these large projects, exposing at build-time what we could once only see at run-time. 
 
@@ -108,9 +108,14 @@ So we created **Stylable** &mdash; a CSS preprocessor that allows you to write s
 
 ![Stylable Intelligence](./images/intelligence.gif)
 
-Treating CSS as a type system opens up a whole new world of tooling. We can get code completion that hints at the internal structure of components, we can get types for our parameters, and more. Our aim is to use Stylable to enhance the styling development process.
+Treating CSS as a type system opens up a whole new world of tooling. 
+* Get code completion that hints at the internal structure of components. 
+* Get types for your parameters.
+And so much more. 
 
-To get the full Stylable experience, please install our [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence) which suggests Stylable syntax, types and more.
+**Stylable** enhances the styling development process.
+
+To get the full **Stylable** experience, install **Stylable's** [VSCode Code Completion Plugin](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence). It supports code completions, diagnostics, go to definition, syntax highlighting and more.
 
 ## Shut up and take my money!
 
