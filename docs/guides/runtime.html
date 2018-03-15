@@ -172,7 +172,7 @@ The <a href="../references/root">root class</a> is available even when it is not
 
 <h2 id="custom-state-mapping">Custom state mapping</h2>
 
-<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="highlighter-rouge">$cssStats</code> function. The function accepts a map of local state names and generates an object with <code class="highlighter-rouge">data-*</code> attributes used to mark the element state.</p>
+<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="highlighter-rouge">$cssStates</code> function. The function accepts a map of local state names and generates an object with <code class="highlighter-rouge">data-*</code> attributes used to mark the element state.</p>
 
 <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="cm">/* { 'data-style-selected':true } */</span>
 <span class="nx">style</span><span class="p">.</span><span class="nx">$cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
@@ -247,8 +247,8 @@ Any <code class="highlighter-rouge">data-*</code> attribute passed in the base o
 </div>
 
 <footer></footer>
-<script src="/js/prism.js"></script>
-<script src="/js/tippy.all.min.js"></script>
+<script src="/js/vendor/prism/prism.js"></script>
+<script src="/js/vendor/tippy/tippy.all.min.js"></script>
 <script>
 	tippy('.code [title]', {
 		duration: 0

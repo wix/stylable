@@ -139,21 +139,19 @@
 
 <section class="docs-content">
     <h1>Pseudo-Classes</h1>
-    <p>In addition to CSS’s native <a href="https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-classes">pseudo-classes</a>, <strong>Stylable</strong> enables you to define custom pseudo-classes so that you can apply styles to your components based on state.</p>
+    <p>In addition to CSS’s native <a href="https://developer.mozilla.org/en/docs/Web/CSS/Pseudo-classes">pseudo-classes</a>, like <code class="highlighter-rouge">:hover</code> and <code class="highlighter-rouge">:nth-child()</code>, <strong>Stylable</strong> enables you to define custom pseudo-classes so that you can apply styles to your components based on state.</p>
 
 <p>Let’s say you want a component to have different styling applied to it when its content is loading. You can define <code class="highlighter-rouge">loading</code> as a custom pseudo-class and toggle it in your component.</p>
-
-<p>Native pseudo-classes like <code class="highlighter-rouge">:hover</code> and <code class="highlighter-rouge">:nth-child()</code> are valid and supported natively.</p>
 
 <h2 id="define-custom-pseudo-classes">Define custom pseudo-classes</h2>
 
 <p>To define custom pseudo-classes, you use the <strong>Stylable</strong> directive rule <code class="highlighter-rouge">-st-states</code> to provide a list of the possible custom pseudo-classes that you want to use in the CSS.</p>
 
-<p>The <code class="highlighter-rouge">-st-states</code> directive rule can be defined only for simple selectors like <a href="./tag-selectors">tag selector</a>, <a href="./class-selectors">class selector</a> and <a href="./root">root</a>.</p>
+<p>The <code class="highlighter-rouge">-st-states</code> directive rule can be defined only for simple selectors like <a href="./class-selectors">class selector</a> and <a href="./root">root</a>.</p>
 
-<h2 id="name-custom-pseudo-classes-and-assign-a-style-to-them">Name custom pseudo-classes and assign a style to them</h2>
+<h2 id="simple-custom-pseudo-classes">Simple custom pseudo-classes</h2>
 
-<p>To define custom pseudo-classes, or states, for a simple selector, you tell <strong>Stylable</strong> the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are added to the root selector and then assigned different colors.</p>
+<p>To define custom pseudo-classes, or states, without parameters, you tell <strong>Stylable</strong> the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are added to the <code class="highlighter-rouge">root</code> selector and then targeted with different colors.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example1.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Example1"</span><span class="p">;</span>
@@ -173,14 +171,56 @@
 </code></pre>
 </div>
 
+<h2 id="custom-pseudo-classes-with-parameters">Custom pseudo-classes with parameters</h2>
+
+<p>To simplify the CSS selector interface, you can also define custom pseudo-classes that accept a parameter.</p>
+
+<p>For example, a cell in a grid can be marked and later targeted using <code class="highlighter-rouge">column</code> and <code class="highlighter-rouge">row</code> pseudo-classes.</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.cell</span> <span class="p">{</span>
+    <span class="py">-st-states</span><span class="p">:</span> <span class="n">column</span><span class="p">(</span><span class="n">number</span><span class="p">),</span> 
+                <span class="n">row</span><span class="p">(</span><span class="n">number</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.cell</span><span class="nd">:column</span><span class="o">(</span><span class="nt">1</span><span class="o">)</span><span class="nd">:row</span><span class="o">(</span><span class="nt">4</span><span class="o">)</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span><span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p><strong>Stylable</strong> offers a built-in system of <a href="./state-parameter-types">state types</a> that provide a better development experience when targeting pseudo-classes.</p>
+
+<h2 id="mapped-states">Mapped states</h2>
+
+<p><strong>Stylable</strong> generates custom pseudo-classes using <code class="highlighter-rouge">data-*</code> attributes. When you are building your components with <strong>Stylable</strong> the standard DOM implementation is good, but you might want to target the state in a custom way.</p>
+
+<p>You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on <strong>Stylable</strong>.</p>
+
+<p>In this example, <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are defined on the root class with their custom implementation.</p>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example-custom.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"ExampleCustom"</span><span class="p">;</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">-st-states</span><span class="p">:</span> <span class="n">toggled</span><span class="p">(</span><span class="s1">".on"</span><span class="p">),</span> <span class="n">loading</span><span class="p">(</span><span class="s1">"[dataSpinner]"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nc">.root</span><span class="nd">:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.root</span><span class="nd">:loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+</code></pre>
+</div>
+
+<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.ExampleCustom__root.on</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.ExampleCustom__root</span><span class="o">[</span><span class="nt">dataSpinner</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+</code></pre>
+</div>
+
 <blockquote>
   <p><strong>Note</strong>  <br />
-You can also override the behavior of native pseudo-classes. This can enable you to write <a href="https://remysharp.com/2010/10/08/what-is-a-polyfill">polyfills</a> for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app’s behavior does not change. We don’t recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.</p>
+When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.</p>
 </blockquote>
 
-<h2 id="extend-external-stylesheet">Extend external stylesheet</h2>
+<h2 id="state-inheritance">State inheritance</h2>
 
-<p>You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value <code class="highlighter-rouge">Comp1</code>is imported from the <code class="highlighter-rouge">example1.css</code> stylesheet and extended by <code class="highlighter-rouge">.mediaButton</code>. The custom pseudo-classes <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">selected</code> are defined to be used on the <code class="highlighter-rouge">mediaButton</code> component.</p>
+<p>You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value <code class="highlighter-rouge">Comp1</code> is imported from the <code class="highlighter-rouge">example1.css</code> stylesheet and extended by <code class="highlighter-rouge">.mediaButton</code>. The custom pseudo-classes <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">selected</code> are defined to be used on the <code class="highlighter-rouge">mediaButton</code> component.</p>
 
 <div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example2.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Example2"</span><span class="p">;</span>
@@ -209,29 +249,9 @@ You can also override the behavior of native pseudo-classes. This can enable you
 </code></pre>
 </div>
 
-<h2 id="map-custom-pseudo-classes">Map custom pseudo-classes</h2>
-
-<p>You can use this feature to define states even if the existing components you are targeting are not based on <strong>Stylable</strong>. In this example, <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are defined on the root class with their custom implementation. <strong>Stylable</strong> generates selectors using custom <code class="highlighter-rouge">data-*</code> attributes. The CSS output uses the custom implementation defined in <code class="highlighter-rouge">-st-states</code> rather than its default generated <code class="highlighter-rouge">data-*</code> attributes.</p>
-
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example-custom.st.css */</span>
-<span class="k">@namespace</span> <span class="s1">"ExampleCustom"</span><span class="p">;</span>
-<span class="nc">.root</span> <span class="p">{</span>
-    <span class="py">-st-states</span><span class="p">:</span> <span class="n">toggled</span><span class="p">(</span><span class="s1">".on"</span><span class="p">),</span> <span class="n">loading</span><span class="p">(</span><span class="s1">"[dataSpinner]"</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="nc">.root</span><span class="nd">:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.root</span><span class="nd">:loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
-
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.ExampleCustom__root.on</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.ExampleCustom__root</span><span class="o">[</span><span class="nt">dataSpinner</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
-
 <blockquote>
   <p><strong>Note</strong>  <br />
-When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.</p>
+You can override the behavior of native pseudo-classes. This can enable you to write <a href="https://remysharp.com/2010/10/08/what-is-a-polyfill">polyfills</a> for forthcoming CSS pseudo-classes to ensure that when you define a name for a custom pseudo-class, if there are clashes with a new CSS pseudo-class in the future, your app’s behavior does not change. We don’t recommend you to override an existing CSS pseudo-class unless you want to drive your teammates insane.</p>
 </blockquote>
 
 <h2 id="enable-custom-pseudo-classes">Enable custom pseudo-classes</h2>
@@ -256,8 +276,8 @@ render() {
 </div>
 
 <footer></footer>
-<script src="/js/prism.js"></script>
-<script src="/js/tippy.all.min.js"></script>
+<script src="/js/vendor/prism/prism.js"></script>
+<script src="/js/vendor/tippy/tippy.all.min.js"></script>
 <script>
 	tippy('.code [title]', {
 		duration: 0
