@@ -60,15 +60,6 @@ class StylableBootstrapModule extends Module {
       );
       renderingCode.push(...imports);
       renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
-
-      // renderingCode.push(
-      //   `var $styleRenderer = ${RENDERER_SYMBOL}.createRenderer({createElement: document.createElement.bind(document)})`
-      // );
-      // renderingCode.push(`$update()`);
-      // renderingCode.push(`${RENDERER_SYMBOL}.onRegister($update)`);
-      // renderingCode.push(
-      //   `function $update() { $styleRenderer.render(document.head, ${RENDERER_SYMBOL}.styles) }`
-      // );
       renderingCode.push(`window.__stylable$renderer = ${RENDERER_SYMBOL}`);
       this.__source = new RawSource(renderingCode.join("\n"));
     } else {
