@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const StylableModulesPlugin = require("../..");
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   devServer: {
     inline: false,
     hot: false
@@ -32,9 +32,9 @@ module.exports = {
   },
   plugins: [
     new StylableModulesPlugin({
-      createRuntimeChunk: false,
-      outputCSS: false,
-      includeCSSInJS: true
+      createRuntimeChunk: true,
+      outputCSS: true,
+      includeCSSInJS: false
     }),
     new HtmlWebpackPlugin()
   ]
