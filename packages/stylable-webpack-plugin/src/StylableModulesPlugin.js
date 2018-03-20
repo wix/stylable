@@ -24,9 +24,9 @@ class StylableModulesPlugin {
       transformHooks: undefined,
       rootScope: true,
       createRuntimeChunk: false,
-      outputCSS: false,
       filename: "[name].bundle.css",
-      includeCSSInJS: false
+      outputCSS: false,
+      includeCSSInJS: true
     };
     return {
       ...defaults,
@@ -122,7 +122,10 @@ class StylableModulesPlugin {
 
               chunksBootstraps.forEach(([chunk, bootstrap]) => {
                 chunk.split(extractedStylableChunk);
-                extractedBootstrap.dependencies.push(...bootstrap.dependencies);
+                bootstrap.dependencies.forEach(dep => {
+                  extractedBootstrap.dependencies.push(dep);
+                  chunk.moveModule(dep.module, extractedStylableChunk);
+                });
               });
 
               compilation.addModule(extractedBootstrap);
