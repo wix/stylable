@@ -1,5 +1,4 @@
 const isUrl = require("url-regex")({ exact: true, strict: true });
-const utils = require("loader-utils");
 const { parseValues, stringifyValues } = require("css-selector-tokenizer");
 
 function replaceUrls(ast, replaceFn) {
