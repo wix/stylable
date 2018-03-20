@@ -73,7 +73,9 @@ class StylableGenerator {
         }.default = ${STYLESHEET_SYMBOL}.${createMethod}(`,
         args.map(_ => "  " + _).join(",\n"),
         `);`,
-        `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
+        this.options.includeCSSInJS
+          ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
+          : ""
       ].join("\n"),
       module.resource
     );
