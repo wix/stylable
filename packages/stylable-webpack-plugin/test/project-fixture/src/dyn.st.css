@@ -1,0 +1,7 @@
+.dyn {
+    xxx: true    
+} 
+
+:global(body){
+    background: red;
+}
