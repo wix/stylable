@@ -40,3 +40,25 @@ new StylableWebpackPlugin({
     createRuntimeChunk: true
 })
 ```
+
+CSS Assets Are handled by `url-loader` + `file-loader`
+
+```js
+ module: {
+    rules: [
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: "url-loader",
+            options: {
+              limit: 8192
+            }
+          }
+        ]
+      }
+    ]
+  }
+```
+
+**IF YOU USING CSS_LOADER/EXTRACT MAKE SURE TO EXCLUDE `.st.css` FILE FROM THE PROCESS**
