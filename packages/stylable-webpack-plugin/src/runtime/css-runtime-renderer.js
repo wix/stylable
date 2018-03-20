@@ -6,8 +6,8 @@ class RuntimeRenderer {
     this.stylesMap = {};
     this.renderer = null;
     this.window = null;
-    this.update = this.update.bind(this);
     this.id = null;
+    this.update = this.update.bind(this);
   }
   init(_window) {
     if (this.window || !_window) {
@@ -77,7 +77,7 @@ class RuntimeRenderer {
         return this.styles.indexOf(a) - this.styles.indexOf(b);
       });
     s.sort((a, b) => {
-      return a.depth - b.depth;
+      return a.$depth - b.$depth;
     });
     return s;
   }
