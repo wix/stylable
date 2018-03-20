@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { JSDOM } = require('jsdom');
-const { keyedListRenderer } = require('../src/runtime/keyed-list-renderer');
+const { keyedListRenderer } = require('../../src/runtime/keyed-list-renderer');
 
 describe('keyedListRenderer', () => {
     let document;
