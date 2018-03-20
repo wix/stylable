@@ -1,6 +1,4 @@
 const { keyedListRenderer } = require("./keyed-list-renderer");
-window.__stylable_renderer_global_counter =
-  window.__stylable_renderer_global_counter || 0;
 class RuntimeRenderer {
   constructor() {
     this.listeners = [];
@@ -8,13 +6,18 @@ class RuntimeRenderer {
     this.stylesMap = {};
     this.renderer = null;
     this.window = null;
-    this.id = window.__stylable_renderer_global_counter++;
     this.update = this.update.bind(this);
+    this.id = null;
   }
   init(_window) {
     if (this.window || !_window) {
       return;
     }
+
+    _window.__stylable_renderer_global_counter =
+      _window.__stylable_renderer_global_counter || 0;
+    this.id = _window.__stylable_renderer_global_counter++;
+
     this.window = _window;
     this.renderer = keyedListRenderer(
       createCacheStyleNodeRenderer({
