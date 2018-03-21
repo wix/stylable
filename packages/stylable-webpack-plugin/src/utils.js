@@ -30,7 +30,7 @@ function processNode(node, replaceFn) {
 }
 
 function isImportedByNonStylable(module) {
-  return module.reasons.some(({ module }) => module.type !== "stylable");
+  return module.reasons.some(({ module }) => module && module.type !== "stylable");
 }
 
 function getCSSDepthAndDeps(module, cssDependencies = [], path = []) {
@@ -71,14 +71,12 @@ function getCSSDepthAndDeps(module, cssDependencies = [], path = []) {
   // Component depth
   if (reasons && isCSS) {
     const name = resource.replace(/\.st\.css$/, "");
-    
     const views = reasons
       .filter(({ module: _module }) => {
-        return _module.resource && _module.resource.indexOf(name) !== -1;
+        return _module && _module.type !== "stylable" && _module.resource && _module.resource.indexOf(name) !== -1;
       })
       .map(({ module }) => module);
-
-
+    
     if (new Set(views).size > 1) {
       throw new Error(`only one file with the name ${name} allowed`);
     }
