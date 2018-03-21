@@ -38,10 +38,9 @@ function getCSSDepthAndDeps(module, cssDependencies = [], path = []) {
     return { depth: 0, cssDependencies };
   }
   const { resource, dependencies, reasons, type } = module;
-
-  const indent = path.map(_ => "\t").join("");
-
   const isCSS = type === "stylable";
+
+  // const indent = path.map(_ => "\t").join("");
   // if (isCSS) {
   //     console.log(indent + resource)
   // }
@@ -72,18 +71,21 @@ function getCSSDepthAndDeps(module, cssDependencies = [], path = []) {
   // Component depth
   if (reasons && isCSS) {
     const name = resource.replace(/\.st\.css$/, "");
+    
+    const views = reasons
+      .filter(({ module: _module }) => {
+        return _module.resource && _module.resource.indexOf(name) !== -1;
+      })
+      .map(({ module }) => module);
 
-    const views = reasons.filter(({ module: _module }) => {
-      return _module.resource.indexOf(name) !== -1;
-    });
 
-    if (views.length > 1) {
+    if (new Set(views).size > 1) {
       throw new Error(`only one file with the name ${name} allowed`);
     }
 
     if (views[0]) {
       jsDepth = getCSSDepthAndDeps(
-        views[0].module,
+        views[0],
         cssDependencies,
         path.concat(module)
       ).depth;
