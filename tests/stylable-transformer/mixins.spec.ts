@@ -470,10 +470,10 @@ describe('Mixins', () => {
                     }
                 }
             });
-            
-            const {0:rule, 1:keyframes} = result.nodes!;
+
+            const {0: rule, 1: keyframes} = result.nodes!;
             expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
-            if(keyframes.type !== "atrule"){ throw new Error('expected 2nd rule to be the @keyframes'); }
+            if(keyframes.type !== 'atrule'){ throw new Error('expected 2nd rule to be the @keyframes'); }
             expect(keyframes.params!, 'keyframes id').to.equal('entry--abc');
             expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
             expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
@@ -1630,7 +1630,7 @@ describe('Mixins', () => {
             expect(result.meta.transformDiagnostics!.reports.length).to.equal(0);
 
         });
-        
+
     });
 
 });

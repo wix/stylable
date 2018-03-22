@@ -148,6 +148,22 @@ describe('createSubsetAst', () => {
 
     });
 
+    it('should extract global when creating root chunk', () => {
+
+        const res = createSubsetAst(safeParse(`
+            :global(.x){}
+            :global(.x) .root{}
+        `), '.root', undefined, true);
+
+        const expected = [
+            { selector: ':global(.x)' },
+            { selector: ':global(.x) &' }
+        ];
+
+        testMatcher(expected, res.nodes!);
+
+    });
+
     it('should parts under @media', () => {
 
         const res = createSubsetAst(safeParse(`
