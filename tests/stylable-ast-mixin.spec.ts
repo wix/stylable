@@ -68,6 +68,11 @@ describe('scopeSelector', () => {
             root: '.a:hover, .b:focus',
             child: '& & &',
             selector: '.a:hover .a:hover .a:hover, .b:focus .b:focus .b:focus'
+        },
+        {
+            root: '.a',
+            child: ':global(.x) &',
+            selector: ':global(.x) .a'
         }
     ];
 
