@@ -393,13 +393,13 @@ export class StylableTransformer {
         return this.scopeSelector(meta, selector, undefined, false, true).elements;
     }
     public scopeSelector(
-        meta: StylableMeta,
+        originMeta: StylableMeta,
         selector: string,
         metaExports?: Pojo<string>,
         scopeRoot = false,
         calcPaths = false,
         rule?: postcss.Rule): ScopedSelectorResults {
-
+        let meta = originMeta;
         let current = meta;
         let symbol: StylableSymbol | null = null;
         let nestedSymbol: StylableSymbol | null;
@@ -423,8 +423,8 @@ export class StylableTransformer {
                         symbol = nestedSymbol;
                         nestedSymbol = null;
                     } else {
-                        current = meta;
-                        symbol = meta.classes[meta.root];
+                        current = originMeta;
+                        symbol = originMeta.classes[originMeta.root];
                         originSymbol = symbol;
                     }
                 } else if (type === 'class') {
@@ -439,6 +439,8 @@ export class StylableTransformer {
                     current = next.meta;
                 } else if (type === 'pseudo-element') {
                     const next = this.handlePseudoElement(current, node, name, selectorNode, addedSelectors, rule);
+                    originSymbol = current.classes[name];
+                    meta = current;
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-class') {

@@ -511,6 +511,106 @@ describe('Mixins', () => {
 
         });
 
+        it('transform state form imported element', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./design.st.css";
+                                -st-named: Base;
+                            }
+                            .y {
+                               -st-mixin: Base;
+                            }
+                        `
+                    },
+                    '/design.st.css': {
+                        namespace: 'design',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            Base{}
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                -st-states: disabled;
+                            }
+                            .root:disabled {
+                                color: red;
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--y[data-base-disabled]',
+                'color: red'
+            );
+
+        });
+
+        it('transform state form extended root when used as mixin', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./design.st.css";
+                                -st-default: Design;
+                            }
+                            .y {
+                               -st-mixin: Design;
+                            }
+                        `
+                    },
+                    '/design.st.css': {
+                        namespace: 'design',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .root {
+                               -st-extends: Base;
+                            }
+                            .root:disabled { color: red; }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                -st-states: disabled;
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--y[data-base-disabled]',
+                'color: red'
+            );
+
+        });
+
         it.skip('mixin with multiple rules in keyframes', () => {
 
             const result = generateStylableRoot({
