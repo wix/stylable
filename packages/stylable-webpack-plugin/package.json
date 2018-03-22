@@ -36,6 +36,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:wixplosives/stylable-webpack-plugin.git"
+    "url": "git@github.com:wix-playground/stylable-webpack-plugin.git"
   }
 }
