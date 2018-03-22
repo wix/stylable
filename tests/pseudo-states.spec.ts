@@ -1487,6 +1487,49 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('state lookup when exported as element', () => {
+
+                const result = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    -st-from: "./index.st.css";
+                                    -st-named: Element;
+                                }
+                                Element:disabled{}
+                            `
+                        },
+                        '/index.st.css': {
+                            namespace: 'index',
+                            content: `
+                                :import{
+                                    -st-from: "./element.st.css";
+                                    -st-default: Element;
+                                }
+                                Element{}
+                            `
+                        },
+                        '/element.st.css': {
+                            namespace: 'element',
+                            content: `
+                                .root {
+                                    -st-states: disabled;
+                                }
+                            `
+                        }
+                    }
+                });
+
+                expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
+                expect(result).to.have.styleRules({
+                    0: '.element--root[data-element-disabled]{}'
+                });
+
+            });
+
             it('should resolve state of pseudo-element', () => {
                 const res = generateStylableResult({
                     entry: `/entry.st.css`,
@@ -1593,6 +1636,88 @@ describe('pseudo-states', () => {
                 });
             });
 
+        });
+
+        
+        describe('extends local root with states', () => {
+            it('resolve states from extended local root', () => {
+
+                const result = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                .root {
+                                    -st-states: disabled;
+                                }
+
+                                .x {
+                                    -st-extends: root;
+                                }
+
+                                .x:disabled {}
+                            `
+                        }
+                    }
+                });
+
+                expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
+                expect(result).to.have.styleRules({
+                    2: '.entry--x.entry--root[data-entry-disabled] {}'
+                });
+
+            });
+        });
+
+        describe('state after pseudo-element', () => {
+            it('transform states after pseudo-element that extends states', () => {
+
+                const result = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import {
+                                    -st-from: "./menu.st.css";
+                                    -st-default: Menu;
+                                }
+
+                                .menu1 {
+                                    -st-extends: Menu;
+                                }
+
+                                .menu1::button:state {} /*TEST_SUBJECT*/
+                            `
+                        },
+                        '/menu.st.css': {
+                            namespace: 'menu',
+                            content: `
+                                :import {
+                                    -st-from: "./button.st.css";
+                                    -st-default: Button;
+                                }
+                                .button {
+                                    -st-extends: Button;
+                                    -st-states: state;
+                                }
+                            `
+                        },
+                        '/button.st.css': {
+                            namespace: 'button',
+                            content: ``
+                        }
+                    }
+                });
+
+                // result.meta.outputAst.toString();
+                expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
+                expect(result).to.have.styleRules({
+                    1: '.entry--menu1.menu--root .menu--button[data-menu-state] {}'
+                });
+
+            });
         });
     });
 
