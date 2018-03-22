@@ -65,6 +65,7 @@ export function scopeSelector(scopeSelectorRule: string, targetSelectorRule: str
 
             const first = outputSelector.nodes[0];
             const parentRef = first.type === 'invalid' && first.value === '&';
+            const globalSelector = first.type === 'nested-pseudo-class' && first.name === 'global';
 
             const startsWithScoping = rootScopeLevel ? scopingSelector.nodes.every((node: any, i) => {
                 const o = outputSelector.nodes[i];
@@ -76,7 +77,7 @@ export function scopeSelector(scopeSelectorRule: string, targetSelectorRule: str
                 return true;
             }) : false;
 
-            if (first && first.type !== 'spacing' && !parentRef && !startsWithScoping) {
+            if (first && first.type !== 'spacing' && !parentRef && !startsWithScoping && !globalSelector) {
                 outputSelector.nodes.unshift(...cloneDeep(scopingSelector.nodes, true), {
                     type: 'spacing',
                     value: ' '
@@ -110,7 +111,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             mixinRoot = mixinRule;
         } else {
             const parentRule = mixinRule.parent;
-            if(parentRule.type === 'atrule' && parentRule.name === 'keyframes') return;
+            if (parentRule.type === 'atrule' && parentRule.name === 'keyframes') { return; }
             const out = scopeSelector(rule.selector, mixinRule.selector);
             mixinRule.selector = out.selector;
             // mixinRule.selectorAst = out.selectorAst;

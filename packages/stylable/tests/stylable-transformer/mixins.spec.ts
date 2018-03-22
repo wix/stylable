@@ -470,10 +470,10 @@ describe('Mixins', () => {
                     }
                 }
             });
-            
-            const {0:rule, 1:keyframes} = result.nodes!;
+
+            const {0: rule, 1: keyframes} = result.nodes!;
             expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
-            if(keyframes.type !== "atrule"){ throw new Error('expected 2nd rule to be the @keyframes'); }
+            if(keyframes.type !== 'atrule'){ throw new Error('expected 2nd rule to be the @keyframes'); }
             expect(keyframes.params!, 'keyframes id').to.equal('entry--abc');
             expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
             expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
@@ -506,6 +506,106 @@ describe('Mixins', () => {
                 result,
                 1,
                 '.entry--container',
+                'color: red'
+            );
+
+        });
+
+        it('transform state form imported element', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./design.st.css";
+                                -st-named: Base;
+                            }
+                            .y {
+                               -st-mixin: Base;
+                            }
+                        `
+                    },
+                    '/design.st.css': {
+                        namespace: 'design',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            Base{}
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                -st-states: disabled;
+                            }
+                            .root:disabled {
+                                color: red;
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--y[data-base-disabled]',
+                'color: red'
+            );
+
+        });
+
+        it('transform state form extended root when used as mixin', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./design.st.css";
+                                -st-default: Design;
+                            }
+                            .y {
+                               -st-mixin: Design;
+                            }
+                        `
+                    },
+                    '/design.st.css': {
+                        namespace: 'design',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Base;
+                            }
+                            .root {
+                               -st-extends: Base;
+                            }
+                            .root:disabled { color: red; }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                -st-states: disabled;
+                            }
+                        `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--y[data-base-disabled]',
                 'color: red'
             );
 
@@ -1530,7 +1630,7 @@ describe('Mixins', () => {
             expect(result.meta.transformDiagnostics!.reports.length).to.equal(0);
 
         });
-        
+
     });
 
 });

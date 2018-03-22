@@ -244,20 +244,15 @@ export function transformPseudoStateSelector(
     let currentSymbol = symbol;
 
     if (symbol !== originSymbol) {
-        const states = originSymbol[valueMapping.states];
-        if (states && states.hasOwnProperty(name)) {
-            setStateToNode(
-                states, meta, name, node, origin.namespace, resolver, diagnostics, rule
-            );
-            return meta;
-        }
+        current = origin;
+        currentSymbol = originSymbol;
     }
     let found = false;
     while (current && currentSymbol) {
-        if (currentSymbol._kind === 'class') {
+        if (currentSymbol._kind === 'class' || currentSymbol._kind === 'element') {
             const states = currentSymbol[valueMapping.states];
             const extend = currentSymbol[valueMapping.extends];
-
+            const alias = currentSymbol.alias;
             if (states && states.hasOwnProperty(name)) {
                 found = true;
                 setStateToNode(
@@ -265,7 +260,23 @@ export function transformPseudoStateSelector(
                 );
                 break;
             } else if (extend) {
-                const next = resolver.resolve(extend);
+                if (current.mappedSymbols[extend.name]) {
+                    const nextCurrentSymbol = current.mappedSymbols[extend.name];
+                    if (currentSymbol === nextCurrentSymbol) {
+                        break;
+                    }
+                    currentSymbol = nextCurrentSymbol;
+                } else {
+                    const next = resolver.resolve(extend);
+                    if (next && next.meta) {
+                        currentSymbol = next.symbol;
+                        current = next.meta;
+                    } else {
+                        break;
+                    }
+                }
+            } else if (alias) {
+                const next = resolver.resolve(alias);
                 if (next && next.meta) {
                     currentSymbol = next.symbol;
                     current = next.meta;

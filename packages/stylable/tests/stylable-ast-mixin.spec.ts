@@ -68,6 +68,11 @@ describe('scopeSelector', () => {
             root: '.a:hover, .b:focus',
             child: '& & &',
             selector: '.a:hover .a:hover .a:hover, .b:focus .b:focus .b:focus'
+        },
+        {
+            root: '.a',
+            child: ':global(.x) &',
+            selector: ':global(.x) .a'
         }
     ];
 
@@ -142,6 +147,22 @@ describe('createSubsetAst', () => {
             { selector: '&.x.y' },
             { selector: '&&' }, // TODO: check if possible
             { selector: '&' }
+        ];
+
+        testMatcher(expected, res.nodes!);
+
+    });
+
+    it('should extract global when creating root chunk', () => {
+
+        const res = createSubsetAst(safeParse(`
+            :global(.x){}
+            :global(.x) .root{}
+        `), '.root', undefined, true);
+
+        const expected = [
+            { selector: ':global(.x)' },
+            { selector: ':global(.x) &' }
         ];
 
         testMatcher(expected, res.nodes!);
