@@ -404,6 +404,88 @@ describe('Stylable postcss transform (Scoping)', () => {
                 .to.equal('.entry--x.Inner--root .Deep--y');
         });
 
+        it('resolve aliased pseudo-element (with @custom-selector )', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .root {
+                                -st-extends: Inner;
+                            }
+                            .root::option:hovered {
+                                z-index: 1;
+                            }
+                            .root::optionY:hovered {
+                                z-index: 2;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'Inner',
+                        content: `
+                            @custom-selector :--option .root::x;
+                            @custom-selector :--optionY .root::x::y;
+                            :import {
+                                -st-from: "./deep.st.css";
+                                -st-default: Deep;
+                            }
+                            .root {
+                                -st-extends: Deep;
+                            }
+                        `
+                    },
+                    '/deep.st.css': {
+                        namespace: 'Deep',
+                        content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        .x{
+                            -st-extends: Comp;
+                        }
+                    `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'Comp',
+                        content: `
+                        :import {
+                            -st-from: "./y.st.css";
+                            -st-default: Y;
+                        }
+                        .root {
+                            -st-states:hovered;
+                        }
+                        .y {
+                            -st-extends: Y;
+                        }
+                        `
+                    },
+                    '/y.st.css': {
+                        namespace: 'Y',
+                        content: `
+                        .root {
+                            -st-states:hovered;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector)
+                .to.equal('.entry--root.Inner--root .Deep--x[data-comp-hovered]');
+            expect((result.nodes![2] as postcss.Rule).selector)
+                .to.equal('.entry--root.Inner--root .Deep--x .Comp--y[data-y-hovered]');
+
+        });
+
     });
 
     describe('scoped classes', () => {

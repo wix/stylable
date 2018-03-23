@@ -243,7 +243,7 @@ export function transformPseudoStateSelector(
     let current = meta;
     let currentSymbol = symbol;
 
-    if (symbol !== originSymbol) {
+    if (originSymbol && symbol !== originSymbol) {
         current = origin;
         currentSymbol = originSymbol;
     }
