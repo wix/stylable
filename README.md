@@ -44,3 +44,12 @@ To update the documentation on [Stylable.io](http://www.stylable.io), follow the
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE.md).
+
+## Spirit 
+
+The spirit of the project is best captured in the following video: 
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=jK88TqyXSWs
+" target="_blank"><img src="http://img.youtube.com/vi/jK88TqyXSWs/0.jpg" 
+alt="Stylable Musicale" width="240" height="180" border="10" /></a>
+
