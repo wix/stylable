@@ -468,6 +468,62 @@ describe('bundle: base', () => {
             ].join('\n'));
         });
 
+        it('resolve states from imported elements through 3rd party index', () => {
+            const output = generateStylableOutput({
+                entry: '/entry.st.css',
+                resolve: {
+                    symlinks: false,
+                    alias: {
+                        components: '/node_modules/components'
+                    }
+                },
+                usedFiles: [
+                    '/entry.st.css',
+                    '/node_modules/components/used.st.css'
+                ],
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: 'components/index.st.css';
+                                -st-named: Used;
+                            }
+                            .root {-st-extends: Used;}
+                            .root:error {color: red;}
+                        `
+                    },
+                    '/node_modules/components/package.json': {
+                        content: `{"name": "components"}`
+                    },
+                    '/node_modules/components/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './used.st.css';
+                                -st-default: Used;
+                            }
+                            Used { }
+                        `
+                    },
+                    '/node_modules/components/used.st.css': {
+                        namespace: 'used',
+                        content: `
+                            .root {-st-states: error;}
+                        `
+                    }
+                }
+
+            });
+
+
+            const expected = [`.used--root {-st-states: error;}`,
+                `.entry--root.used--root {-st-extends: Used;}`,
+                `.entry--root.used--root[data-used-error] {color: red;}`];
+
+            expect(output).to.eql(expected.join('\n'));
+        });
+
     });
 
     describe('specific used files', () => {
