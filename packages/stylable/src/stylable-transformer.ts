@@ -113,6 +113,7 @@ export class StylableTransformer {
         const metaExports: Pojo<string> = {};
         const ast = meta.outputAst = meta.ast.clone();
         this.transformAst(ast, meta, this.scopeRoot, metaExports);
+        this.transformGlobals(ast);
         if (this.optimize) { removeSTDirective(ast); }
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
@@ -389,6 +390,19 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
+    public transformGlobals(ast: postcss.Root) {
+        ast.walkRules(r => {
+            const selectorAst = parseSelector(r.selector);
+            traverseNode(selectorAst, node => {
+                if (node.type === 'nested-pseudo-class' && node.name === 'global') {
+                    node.type = 'selector';
+                    return true;
+                }
+                return undefined;
+            });
+            r.selector = stringifySelector(selectorAst);
+        });
+    }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
         return this.scopeSelector(meta, selector, undefined, false, true).elements;
     }
@@ -450,7 +464,7 @@ export class StylableTransformer {
                     );
                 } else if (type === 'nested-pseudo-class') {
                     if (name === 'global') {
-                        node.type = 'selector';
+                        // node.type = 'selector';
                         return true;
                     }
                     nestedSymbol = symbol;
@@ -493,7 +507,11 @@ export class StylableTransformer {
             this.scope(meta.root, meta.namespace);
         selectorAst.nodes.forEach(selector => {
             const first = selector.nodes[0];
-            if (first && first.type === 'selector' && first.name === 'global') {
+            /* This finds a transformed or non transform global selector */
+            if (first &&
+                (first.type === 'selector' || first.type === 'nested-pseudo-class') &&
+                first.name === 'global'
+            ) {
                 return;
             }
             // -st-global can make anther global inside root
