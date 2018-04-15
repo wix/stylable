@@ -260,7 +260,7 @@ export function transformPseudoStateSelector(
                 );
                 break;
             } else if (extend) {
-                if (current.mappedSymbols[extend.name]) {
+                if (current.mappedSymbols[extend.name] && current.mappedSymbols[extend.name]._kind !== 'import') {
                     const nextCurrentSymbol = current.mappedSymbols[extend.name];
                     if (currentSymbol === nextCurrentSymbol) {
                         break;
