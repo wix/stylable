@@ -25,4 +25,78 @@ describe('Stylable postcss transform (Global)', () => {
         expect((result.nodes![2] as postcss.Rule).selector).to.equal('.btn .style--container');
 
     });
+
+    it('should support :global() as mixin', () => {
+
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            // scopeRoot: false,
+            files: {
+                '/style.st.css': {
+                    namespace: 'style',
+                    content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        .root {
+                            -st-mixin: Comp;
+                        }
+                    `
+                },
+                '/comp.st.css': {
+                    namespace: 'comp',
+                    content: `
+                        :global(.btn) .root {}
+                    `
+                }
+            }
+        });
+
+        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style--root');
+
+    });
+
+    it('should support nested :global() as mixin', () => {
+
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            // scopeRoot: false,
+            files: {
+                '/style.st.css': {
+                    namespace: 'style',
+                    content: `
+                        :import {
+                            -st-from: "./mixin.st.css";
+                            -st-default: Mixin;
+                        }
+                        .root {
+                            -st-mixin: Mixin;
+                        }
+                    `
+                },
+                '/mixin.st.css': {
+                    namespace: 'mixin',
+                    content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        .root {
+                            -st-mixin: Comp;
+                        }
+                    `
+                },
+                '/comp.st.css': {
+                    namespace: 'comp',
+                    content: `
+                        :global(.btn) .root {}
+                    `
+                }
+            }
+        });
+
+        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style--root');
+
+    });
 });
