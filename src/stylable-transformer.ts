@@ -406,7 +406,6 @@ export class StylableTransformer {
         let originSymbol: ClassSymbol | ElementSymbol;
         const selectorAst = parseSelector(selector);
         const addedSelectors: AdditionalSelector[] = [];
-
         const elements = selectorAst.nodes.map(selectorNode => {
             const selectorElements: ResolvedElement[] = [];
             traverseNode(selectorNode, node => {
@@ -423,6 +422,7 @@ export class StylableTransformer {
                         symbol = nestedSymbol;
                         nestedSymbol = null;
                     } else {
+                        meta = originMeta;
                         current = originMeta;
                         symbol = originMeta.classes[originMeta.root];
                         originSymbol = symbol;
@@ -464,7 +464,7 @@ export class StylableTransformer {
         this.addAdditionalSelectors(addedSelectors, selectorAst);
 
         if (scopeRoot) {
-            this.applyRootScoping(meta, selectorAst);
+            this.applyRootScoping(originMeta, selectorAst);
         }
 
         return {
