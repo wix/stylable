@@ -13,8 +13,10 @@ declare module '*.css' {
     export default stylesheet;
 }
 
+type Param = boolean | number | string;
+
 interface StateMap {
-    [key: string]: boolean;
+    [key: string]: Param;
 }
 
 interface Stylesheet {
