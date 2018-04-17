@@ -3,13 +3,13 @@ const { Stylable } = require("stylable");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
 const { getCSSDepthAndDeps, isImportedByNonStylable } = require("./utils");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
+const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
 const StylableParser = require("./StylableParser");
 const StylableGenerator = require("./StylableGenerator");
 const {
   StylableImportDependency,
   StylableAssetDependency
 } = require("./StylableDependencies");
-const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
 
 class StylableModulesPlugin {
   constructor(options) {

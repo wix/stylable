@@ -1,8 +1,13 @@
 const StylableWebpackPlugin = require("../../src/StylableModulesPlugin");
-exports.config = {
-  entry: `${__dirname}/project1/index.js`,
-  plugins: [new StylableWebpackPlugin()]
-};
-exports.expect = (compilation, done) => {
-  done();
-};
+const runIt = require("../run-it");
+
+runIt(
+  "working",
+  {
+    entry: `${__dirname}/project1/index.js`,
+    plugins: [new StylableWebpackPlugin()]
+  },
+  (compilation, done) => {
+    done();
+  }
+);
