@@ -402,7 +402,6 @@ describe('bundle: base', () => {
             ].join('\n'));
         });
 
-
         it('should keep selectors that used in 3rd party modules', () => {
             const output = generateStylableOutput({
                 entry: '/entry.st.css',
@@ -515,7 +514,6 @@ describe('bundle: base', () => {
                 }
 
             });
-
 
             const expected = [`.used--root {-st-states: error;}`,
                 `.entry--root.used--root {-st-extends: Used;}`,

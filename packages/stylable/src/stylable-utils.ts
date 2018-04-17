@@ -218,7 +218,7 @@ export function removeUnusedRules(
     const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
 
     if (isUnusedImport) {
-        const symbols = Object.keys(_import.named).concat(_import.defaultExport) // .filter(Boolean);
+        const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
         ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
             traverseNode(rule.selectorAst, node => {
