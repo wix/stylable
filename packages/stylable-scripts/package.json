@@ -1,6 +1,6 @@
 {
   "name": "stylable-scripts",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "like react-scripts, but with stylable and typescript built-in",
   "repository": "wixplosives/stylable-scripts",
   "license": "MIT",
