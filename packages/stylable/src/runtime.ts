@@ -53,7 +53,7 @@ export function create(
     locals.$get = get;
     locals.$cssStates = cssStates;
 
-    function apply(className: string, states?: StateMap | null, props?: PartialProps) {
+    function stylable_runtime_stylesheet(className: string, states?: StateMap | null, props?: PartialProps) {
 
         className = className ? mapClasses(className) : '';
 
