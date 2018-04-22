@@ -78,7 +78,7 @@ export function create(
         return base;
     }
 
-    Object.setPrototypeOf(apply, locals);
+    Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
 
-    return apply as RuntimeStylesheet;
+    return stylable_runtime_stylesheet as RuntimeStylesheet;
 }
