@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { JSDOM } = require("jsdom");
-const { RuntimeRenderer } = require("../../src/runtime/css-runtime-renderer");
+const { RuntimeRenderer } = require("../../../src/runtime/css-runtime-renderer");
 
 function test(msg, fn, only = false) {
   const api = new RuntimeRenderer();

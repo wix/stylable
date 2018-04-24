@@ -40,6 +40,7 @@ class StylableParser {
     state.module.addDependency(new StylableExportsDependency(["default"]));
     state.module.addDependency(stylesheetDependency());
     state.module.addDependency(rendererDependency());
+
     meta.imports.forEach(stylableImport => {
       if (stylableImport.fromRelative.match(/\.st\.css$/)) {
         state.module.addDependency(
@@ -49,6 +50,7 @@ class StylableParser {
           })
         );
       }
+      //TODO: handle js dependencies?
     });
 
     return state;

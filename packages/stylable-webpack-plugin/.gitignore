@@ -2,6 +2,7 @@
 .vscode
 dist
 
+
 # Logs
 logs
 *.log
@@ -63,3 +64,6 @@ typings/
 
 # next.js build output
 .next
+
+# e2e projects
+!test/e2e/projects/*/node_modules

@@ -1,1 +1,1 @@
-module.exports = require('./StylableModulesPlugin')
+module.exports = require('./StylableWebpackPlugin')

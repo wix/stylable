@@ -1,7 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const StylableModulesPlugin = require("../..");
+const StylablePlugin = require("../..");
 
 module.exports = {
   mode: "development",//"production",
@@ -31,7 +31,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new StylableModulesPlugin({
+    new StylablePlugin({
       createRuntimeChunk: true,
       outputCSS: true,
       includeCSSInJS: false

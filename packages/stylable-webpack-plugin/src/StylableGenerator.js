@@ -111,10 +111,7 @@ class StylableGenerator {
       )[0];
       if (module) {
         replacements.push(module);
-        node.stringType = "";
-        delete node.innerSpacingBefore;
-        delete node.innerSpacingAfter;
-        node.url = `__css_asset_placeholder__${replacements.length - 1}__`;
+        this.rewriteUrl(node, replacements.length - 1);
       } else {
         //TODO: warn
       }
@@ -127,6 +124,13 @@ class StylableGenerator {
     return css.replace(/__css_asset_placeholder__(.*?)__/g, ($0, $1) => {
       return onAsset(replacements[$1]); //`" + __webpack_require__(${replacements[$1]}) + "`;
     });
+  }
+
+  rewriteUrl(node, replacementIndex) {
+    node.stringType = "";
+    delete node.innerSpacingBefore;
+    delete node.innerSpacingAfter;
+    node.url = `__css_asset_placeholder__${replacementIndex}__`;
   }
 }
 

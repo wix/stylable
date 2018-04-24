@@ -1,0 +1,5 @@
+
+.bg {
+    background: url('./asset.jpg'), url('/asset-in-root.png');
+}
+

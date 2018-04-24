@@ -41,7 +41,7 @@ function create(root, namespace, locals, css, depth, id) {
   locals.$get = get;
   locals.$cssStates = cssStates;
 
-  function apply(className, states, props) {
+  function stylable_runtime_stylesheet(className, states, props) {
     className = className ? mapClasses(className) : "";
 
     const base = cssStates(states);
@@ -65,9 +65,9 @@ function create(root, namespace, locals, css, depth, id) {
     return base;
   }
 
-  Object.setPrototypeOf(apply, locals);
+  Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
 
-  return apply;
+  return stylable_runtime_stylesheet;
 }
 
 function createTheme(css, depth, id) {

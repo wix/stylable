@@ -11,8 +11,8 @@ class StylableBootstrapModule extends Module {
     context,
     runtimeRenderer,
     dependencies = [],
-    name = "stylable-runtime-module",
-    type = "stylable-runtime"
+    name = "stylable-bootstrap-module",
+    type = "stylable-bootstrap"
   ) {
     super("javascript/auto", context);
 
@@ -29,7 +29,7 @@ class StylableBootstrapModule extends Module {
   }
 
   identifier() {
-    return `stylable-runtime ${this.name}`;
+    return `stylable-bootstrap ${this.name}`;
   }
 
   readableIdentifier() {
@@ -77,8 +77,7 @@ class StylableBootstrapModule extends Module {
     return this.__source ? this.__source.size() : 1;
   }
   updateHash(hash) {
-    hash.update("stylable module");
-    hash.update(this.name || "");
+    hash.update(this.identifier());
     super.updateHash(hash || "");
   }
   addStylableModuleDependency(module) {

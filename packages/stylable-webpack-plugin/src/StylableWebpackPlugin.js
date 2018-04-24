@@ -11,7 +11,7 @@ const {
   StylableAssetDependency
 } = require("./StylableDependencies");
 
-class StylableModulesPlugin {
+class StylableWebpackPlugin {
   constructor(options) {
     this.options = this.normalizeOptions(options);
   }
@@ -55,9 +55,9 @@ class StylableModulesPlugin {
     this.injectStylableRuntimeChunk(compiler);
   }
   injectStylableRuntimeInfo(compiler) {
-    compiler.hooks.compilation.tap(StylableModulesPlugin.name, compilation => {
+    compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
       compilation.hooks.optimizeModules.tap(
-        StylableModulesPlugin.name,
+        StylableWebpackPlugin.name,
         modules => {
           modules.forEach(module => {
             if (module.type === "stylable") {
@@ -73,10 +73,10 @@ class StylableModulesPlugin {
   }
   injectStylableRuntimeChunk(compiler) {
     compiler.hooks.thisCompilation.tap(
-      StylableModulesPlugin.name,
+      StylableWebpackPlugin.name,
       (compilation, data) => {
         compilation.hooks.optimizeChunks.tap(
-          StylableModulesPlugin.name,
+          StylableWebpackPlugin.name,
           chunks => {
             const runtimeRendererModule = compilation.getModule(
               cssRuntimeRendererRequest
@@ -144,7 +144,7 @@ class StylableModulesPlugin {
 
         if (this.options.outputCSS) {
           compilation.hooks.additionalChunkAssets.tap(
-            StylableModulesPlugin.name,
+            StylableWebpackPlugin.name,
             chunks => {
               chunks.forEach(chunk => {
                 if (chunk.entryModule instanceof StylableBootstrapModule) {
@@ -200,9 +200,10 @@ class StylableModulesPlugin {
       }
     );
   }
+  
   injectStylableCompilation(compiler) {
     compiler.hooks.compilation.tap(
-      StylableModulesPlugin.name,
+      StylableWebpackPlugin.name,
       (compilation, { normalModuleFactory }) => {
         compilation.dependencyFactories.set(
           StylableImportDependency,
@@ -214,12 +215,12 @@ class StylableModulesPlugin {
         );
         normalModuleFactory.hooks.createParser
           .for("stylable")
-          .tap(StylableModulesPlugin.name, () => {
+          .tap(StylableWebpackPlugin.name, () => {
             return new StylableParser(this.stylable);
           });
         normalModuleFactory.hooks.createGenerator
           .for("stylable")
-          .tap(StylableModulesPlugin.name, () => {
+          .tap(StylableWebpackPlugin.name, () => {
             return new StylableGenerator(this.stylable, compilation, {
               includeCSSInJS: this.options.includeCSSInJS
             });
@@ -229,7 +230,7 @@ class StylableModulesPlugin {
   }
   injectStylableModuleRuleSet(compiler) {
     compiler.hooks.normalModuleFactory.tap(
-      StylableModulesPlugin.name,
+      StylableWebpackPlugin.name,
       factory => {
         factory.ruleSet.rules.push(
           factory.ruleSet.constructor.normalizeRule(
@@ -249,4 +250,4 @@ class StylableModulesPlugin {
   }
 }
 
-module.exports = StylableModulesPlugin;
+module.exports = StylableWebpackPlugin;
