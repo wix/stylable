@@ -22,17 +22,8 @@ function getStyleElementsMetadata() {
   });
 }
 
-function getElementBackgroundColor(selector) {
-  const node = document.querySelector(selector);
-  if (node) {
-    return getComputedStyle(node).backgroundColor;
-  }
-  return null;
-}
-
 exports.filterAssetResponses = filterAssetResponses;
 
 exports.browserFunctions = {
-  getStyleElementsMetadata,
-  getElementBackgroundColor
+  getStyleElementsMetadata
 };

@@ -3,10 +3,7 @@
     -st-named: Button;
 }
 
-.root {
-
-}
-
 Button {
     font-size: 2em;
+    background: green;
 }

@@ -4,7 +4,7 @@ const { ProjectRunner } = require("./helpers/project-runner");
 const {
   browserFunctions,
   filterAssetResponses
-} = require("./helpers/matchers");
+} = require("./helpers/puppeteer-helpers");
 
 const projectFixtures = join(__dirname, "projects");
 

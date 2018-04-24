@@ -238,7 +238,7 @@ class StylableWebpackPlugin {
               test: /\.st\.css$/i,
               type: "stylable",
               resolve: {
-                mainFields: ["stylable"]
+                // mainFields: ["stylable"]
               }
             },
             factory.ruleSet.references,

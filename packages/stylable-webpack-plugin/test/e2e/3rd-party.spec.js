@@ -4,7 +4,7 @@ const { ProjectRunner } = require("./helpers/project-runner");
 const {
   browserFunctions,
   filterAssetResponses
-} = require("./helpers/matchers");
+} = require("./helpers/puppeteer-helpers");
 
 const projectFixtures = join(__dirname, "projects");
 
@@ -14,7 +14,7 @@ describe("(3rd-party)", () => {
       projectDir: join(projectFixtures, "3rd-party"),
       port: 3002,
       puppeteerOptions: {
-        headless: true
+        // headless: false
       }
     },
     before,
@@ -30,9 +30,21 @@ describe("(3rd-party)", () => {
 
     expect(styleElements).to.eql([
       { id: "./node_modules/test-components/button.st.css", depth: "1" },
-      { id: "./node_modules/test-components/index.st.css", depth: "2", theme: true },
+      {
+        id: "./node_modules/test-components/index.st.css",
+        depth: "2",
+        theme: true
+      },
       { id: "./src/index.st.css", depth: "3" }
     ]);
   });
 
+  it("override 3rd party", async () => {
+    const { page } = await projectRunner.openInBrowser();
+
+    const backgroundColor = await page.evaluate(()=>{
+      return getComputedStyle(btn).backgroundColor
+    });
+    expect(backgroundColor).to.eql("rgb(0, 128, 0)");
+  });
 });

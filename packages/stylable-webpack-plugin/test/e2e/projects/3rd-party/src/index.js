@@ -3,7 +3,9 @@ import { button } from "test-components";
 
 document.documentElement.classList.add(index.root);
 
-document.body.appendChild(button.render('I am a button'))
+const btn = button.render('I am a button');
+btn.id = 'btn'
+document.body.appendChild(btn)
 
 
 console.log("entry", index);

@@ -16,6 +16,7 @@ exports.ProjectRunner = class ProjectRunner {
     this.serverUrl = `http://localhost:${this.port}`;
     this.puppeteerOptions = puppeteerOptions;
     this.pages = [];
+    this.stats = null;
   }
   async bundle() {
     const webpackConfig = this.webpackConfig;
@@ -29,7 +30,10 @@ exports.ProjectRunner = class ProjectRunner {
     }
     const compiler = webpack(webpackConfig);
     compiler.run = promisify(compiler.run);
-    await compiler.run();
+    this.stats = await compiler.run();
+    if(this.stats.compilation.errors.length){
+      throw new Error(this.stats.compilation.errors);
+    }
   }
 
   async serve() {
@@ -74,11 +78,17 @@ exports.ProjectRunner = class ProjectRunner {
     this.pages.length = 0;
   }
 
+  getStylesheet() {
+    if (!this.stats) {
+      const compilation = this.stats;
+    }
+  }
+
   async destroy() {
-    this.browser && await this.browser.close();
-    this.browser = null
-    this.server && await this.server.close();
-    this.server = null
+    this.browser && (await this.browser.close());
+    this.browser = null;
+    this.server && (await this.server.close());
+    this.server = null;
     await rimraf(this.outputDir);
   }
   static mochaSetup(runnerOptions, before, afterEach, after) {
@@ -90,7 +100,7 @@ exports.ProjectRunner = class ProjectRunner {
     });
 
     afterEach("cleanup open pages", async () => {
-      // await projectRunner.closeAllPages();
+      await projectRunner.closeAllPages();
     });
 
     after("destroy runner", async () => {
