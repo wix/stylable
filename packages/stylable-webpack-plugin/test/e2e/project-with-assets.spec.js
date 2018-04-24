@@ -35,7 +35,7 @@ describe("(project-with-assets)", () => {
   });
 
   it("load assets from url() declaration value", async () => {
-    const expectedAssets = ["main.js", "asset.jpg", "asset-in-root.png"];
+    const expectedAssets = ["asset.jpg", "asset-in-root.png"];
     const { page, responses } = await projectRunner.openInBrowser();
     const assetResponses = filterAssetResponses(responses, expectedAssets);
 

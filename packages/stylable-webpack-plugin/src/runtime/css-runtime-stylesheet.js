@@ -71,7 +71,7 @@ function create(root, namespace, locals, css, depth, id) {
 }
 
 function createTheme(css, depth, id) {
-  return { $css: css, $depth: depth, $id: id };
+  return { $css: css, $depth: depth, $id: id, $theme: true };
 }
 
 exports.create = create;

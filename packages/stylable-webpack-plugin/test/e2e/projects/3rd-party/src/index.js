@@ -1,10 +1,10 @@
-import style from "./index.st.css";
+import index from "./index.st.css";
 import { button } from "test-components";
 
-document.documentElement.classList.add(style.root);
+document.documentElement.classList.add(index.root);
 
-document.body.appendChild(button.render('!!!!!!!!!!'))
+document.body.appendChild(button.render('I am a button'))
 
 
-console.log("entry", style);
+console.log("entry", index);
 console.log("entry", button);

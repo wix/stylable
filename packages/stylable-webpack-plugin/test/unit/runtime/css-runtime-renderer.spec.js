@@ -342,6 +342,31 @@ describe("init", () => {
     assertStyle(head.children[0], { key: "/a.st.css", $css: ".a{}" });
     assertStyle(head.children[1], { key: "/b.st.css", $css: ".b{}" });
   });
+
+  test("init should render theme", api => {
+    const { window } = new JSDOM(`
+            <body>
+                <div id="container"></div>
+            </body>
+        `);
+
+    const document = window.document;
+
+    const a = {
+      $id: "/a.st.css",
+      $depth: 0,
+      $css: `.a{}`,
+      $theme: true
+    };
+
+    api.register(a);
+
+    api.init(window);
+    const head = document.head;
+    expect(head.children.length).to.equal(1);
+    expect(head.children[0].getAttribute("st-theme")).to.equal("true");
+  });
+
 });
 
 function assertStyle(node, { $css, key }) {
