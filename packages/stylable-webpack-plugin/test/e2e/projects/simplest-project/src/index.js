@@ -1,2 +1,3 @@
-import style from "./index.st.css";
-console.log(style);
+import index from "./index.st.css";
+
+document.documentElement.classList.add(index.root);

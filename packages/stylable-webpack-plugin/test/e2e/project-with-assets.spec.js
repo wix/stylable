@@ -29,8 +29,7 @@ describe("(project-with-assets)", () => {
     );
 
     expect(styleElements).to.eql([
-      { id: "./src/assets/assets.st.css", depth: "1" },
-      { id: "./src/index.st.css", depth: "2" }
+      { id: "./src/assets/assets.st.css", depth: "1" }
     ]);
   });
 

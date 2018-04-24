@@ -28,9 +28,16 @@ describe("(simplest-project)", () => {
       browserFunctions.getStyleElementsMetadata
     );
 
-    expect(styleElements).to.eql([
-      { id: "./src/index.st.css", depth: "1" }
-    ]);
+    expect(styleElements).to.eql([{ id: "./src/index.st.css", depth: "1" }]);
   });
 
+  it("renders css", async () => {
+    const { page } = await projectRunner.openInBrowser();
+    const background = await page.evaluate(
+      browserFunctions.getElementBackgroundColor,
+      "html"
+    );
+
+    expect(background).to.eql("rgb(255, 0, 0)");
+  });
 });

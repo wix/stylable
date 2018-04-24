@@ -14,7 +14,7 @@ describe("(3rd-party)", () => {
       projectDir: join(projectFixtures, "3rd-party"),
       port: 3002,
       puppeteerOptions: {
-        headless: false
+        headless: true
       }
     },
     before,
