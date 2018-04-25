@@ -14,7 +14,7 @@ describe('StylableOptimizer', () => {
 
         new StylableOptimizer().removeComments(ast);
 
-        expect(ast.toString().trim()).to.equal(`.a { }`)
+        expect(ast.toString().trim()).to.equal(`.a { }`);
 
     });
 
