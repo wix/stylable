@@ -1,5 +1,6 @@
 const { RawSource } = require("webpack-sources");
 const { Stylable } = require("stylable");
+const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
 const { getCSSDepthAndDeps, isImportedByNonStylable } = require("./utils");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
@@ -13,7 +14,21 @@ const {
 
 class StylableWebpackPlugin {
   constructor(options) {
-    this.options = this.normalizeOptions(options);
+    const localConfig = this.loadLocalStylableConfig();
+    let fullOptions = this.normalizeOptions(options);
+    if (localConfig && localConfig.options) {
+      fullOptions = localConfig.options(fullOptions);
+    }
+    this.options = fullOptions;
+  }
+  loadLocalStylableConfig() {
+    let localConfigOverride;
+    try {
+      localConfigOverride = findConfig.require("stylable.config");
+    } catch (e) {
+      /* no op */
+    }
+    return localConfigOverride;
   }
   normalizeOptions(options = {}) {
     const defaults = {
