@@ -1,4 +1,4 @@
-const { Stylable } = require("stylable");
+const { StylableOptimizer } = require("stylable");
 const { ReplaceSource, OriginalSource } = require("webpack-sources");
 const { StylableImportDependency } = require("./StylableDependencies");
 const { getCSSDepthAndDeps } = require("./utils");
@@ -13,17 +13,34 @@ class StylableGenerator {
     this.stylable = stylable;
     this.compilation = compilation;
     this.options = options;
+    this.optimizer = new StylableOptimizer();
   }
   transform(module) {
-    const optimize = module.buildInfo.optimize;
-    const trans = this.stylable.createTransformer({ optimize });
-    if (optimize) {
-      new Optimizer(this.stylable).cleanUnused(
+    const {
+      removeUnusedComponents,
+      removeComments,
+      removeStylableDirectives
+    } = module.buildInfo.optimize;
+
+    if (removeUnusedComponents) {
+      this.optimizer.removeUnusedComponents(
+        this.stylable,
         module.buildInfo.stylableMeta,
         module.buildInfo.usedStylableModules
       );
     }
-    return trans.transform(module.buildInfo.stylableMeta);
+    const results = this.stylable
+      .createTransformer()
+      .transform(module.buildInfo.stylableMeta);
+
+    if (removeComments) {
+      this.optimizer.removeComments(results.meta.outputAst);
+    }
+    if (removeStylableDirectives) {
+      this.optimizer.removeStylableDirectives(results.meta.outputAst);
+    }
+
+    return results;
   }
   toCSS(module, onAsset) {
     const { meta } = this.transform(module);
@@ -46,6 +63,8 @@ class StylableGenerator {
         )
       : `""`;
 
+    this.reportDiagnostics(meta);
+
     const depth = module.buildInfo.runtimeInfo.depth;
     const id = runtimeTemplate.moduleId({
       module,
@@ -67,6 +86,23 @@ class StylableGenerator {
           id
         ]);
     return new ReplaceSource(originalSource);
+  }
+  reportDiagnostics(meta) {
+    const transformReports = meta.transformDiagnostics
+      ? meta.transformDiagnostics.reports
+      : [];
+    meta.diagnostics.reports.concat(transformReports).forEach(report => {
+      if (report.node) {
+        this.compilation.warnings.push(
+          report.node
+            .error(report.message, report.options)
+            .toString()
+            .replace("CssSyntaxError", "Stylable")
+        );
+      } else {
+        this.compilation.warnings.push(report.message);
+      }
+    });
   }
   createModuleSource(module, imports, createMethod, args) {
     return new OriginalSource(
@@ -140,42 +176,3 @@ class StylableGenerator {
 }
 
 module.exports = StylableGenerator;
-
-class Optimizer {
-  constructor(stylable) {
-    this.stylable = stylable;
-  }
-  cleanUnused(meta, usedPaths) {
-    const transformer = this.stylable.createTransformer();
-
-    meta.ast.walkRules(rule => {
-      const outputSelectors = rule.selectors.filter(selector => {
-        return this.isInUse(transformer, meta, selector, usedPaths);
-      });
-      if (outputSelectors.length) {
-        rule.selector = outputSelectors.join();
-      } else {
-        rule.remove();
-      }
-    });
-  }
-  isInUse(transformer, meta, selector, usedPaths) {
-    const selectorElements = transformer.resolveSelectorElements(
-      meta,
-      selector
-    );
-
-    // We expect to receive only one selectors at a time
-    return selectorElements[0].every(res => {
-      const lastChunk = res.resolved[res.resolved.length - 1];
-      if (lastChunk) {
-        const source = this.stylable.resolvePath(
-          undefined,
-          lastChunk.meta.source
-        );
-        return usedPaths.indexOf(source) !== -1;
-      }
-      return true;
-    });
-  }
-}

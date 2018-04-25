@@ -8,7 +8,12 @@ const rimrafCallback = require("rimraf");
 const rimraf = promisify(rimrafCallback);
 
 exports.ProjectRunner = class ProjectRunner {
-  constructor({ projectDir, port = 3000, puppeteerOptions = {} }) {
+  constructor({
+    projectDir,
+    port = 3000,
+    puppeteerOptions = {},
+    throwOnBuildError = true
+  }) {
     this.projectDir = projectDir;
     this.outputDir = join(this.projectDir, "dist");
     this.webpackConfig = require(join(this.projectDir, "webpack.config.js"));
@@ -17,6 +22,7 @@ exports.ProjectRunner = class ProjectRunner {
     this.puppeteerOptions = puppeteerOptions;
     this.pages = [];
     this.stats = null;
+    this.throwOnBuildError = throwOnBuildError;
   }
   async bundle() {
     const webpackConfig = this.webpackConfig;
@@ -31,7 +37,7 @@ exports.ProjectRunner = class ProjectRunner {
     const compiler = webpack(webpackConfig);
     compiler.run = promisify(compiler.run);
     this.stats = await compiler.run();
-    if(this.stats.compilation.errors.length){
+    if (this.throwOnBuildError && this.stats.compilation.errors.length) {
       throw new Error(this.stats.compilation.errors);
     }
   }
@@ -69,6 +75,10 @@ exports.ProjectRunner = class ProjectRunner {
     });
     await page.goto(this.serverUrl, { waitUntil: "networkidle0" });
     return { page, responses };
+  }
+
+  getBuildWarningMessages() {
+    return this.stats.compilation.warnings.slice();
   }
 
   async closeAllPages() {

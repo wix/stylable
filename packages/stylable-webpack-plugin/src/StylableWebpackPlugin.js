@@ -26,7 +26,12 @@ class StylableWebpackPlugin {
       createRuntimeChunk: false,
       filename: "[name].bundle.css",
       outputCSS: false,
-      includeCSSInJS: true
+      includeCSSInJS: true,
+      optimize: {
+        removeUnusedComponents: true,
+        removeComments: true,
+        removeStylableDirectives: true
+      }
     };
     return {
       ...defaults,
@@ -87,7 +92,7 @@ class StylableWebpackPlugin {
         modules => {
           modules.forEach(module => {
             if (module.type === "stylable") {
-              module.buildInfo.optimize = true;
+              module.buildInfo.optimize = this.options.optimize;
               module.buildInfo.stylableMeta.namespace = getNamespace(
                 module.buildInfo.stylableMeta
               );

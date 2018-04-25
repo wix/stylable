@@ -1,0 +1,13 @@
+
+:import {
+    -st-from: "./comp.st.css";
+    -st-named: unknown;
+}
+
+.root {
+    background-color: value(xxx); 
+}
+
+.x {
+    -st-extends: unknown;
+}
