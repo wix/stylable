@@ -116,11 +116,8 @@ export function generateStylableExports(config: Config) {
     return generateFromMock(config).exports;
 }
 
-export function createTestBundler(config: Config) {
+export function createStylableInstance(config: Config) {
     config.trimWS = true;
-    if (!config.usedFiles) {
-        throw new Error('usedFiles is not optional in generateStylableOutput');
-    }
 
     const { fs, requireModule } = createMinimalFS(config);
 
@@ -129,6 +126,14 @@ export function createTestBundler(config: Config) {
         return meta;
     }, undefined, undefined, !!config.scopeRoot, config.resolve);
 
+    return stylable;
+}
+
+export function createTestBundler(config: Config) {
+    if (!config.usedFiles) {
+        throw new Error('usedFiles is not optional in generateStylableOutput');
+    }
+    const stylable = createStylableInstance(config);
     return stylable.createBundler();
 }
 
