@@ -70,6 +70,36 @@ class StylableWebpackPlugin {
         }
       );
     });
+    this.injectStylableCSSOptimizer(compiler);
+  }
+  injectStylableCSSOptimizer(compiler) {
+    // TODO: what to do with the scope of these vars
+    let index = 0;
+    const namespaceMapping = {};
+    const getNamespace = meta =>
+      namespaceMapping[meta.source] ||
+      (namespaceMapping[meta.source] = "o" + index++);
+    const used = [];
+
+    compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
+      compilation.hooks.optimizeModules.tap(
+        StylableWebpackPlugin.name,
+        modules => {
+          modules.forEach(module => {
+            if (module.type === "stylable") {
+              module.buildInfo.optimize = true;
+              module.buildInfo.stylableMeta.namespace = getNamespace(
+                module.buildInfo.stylableMeta
+              );
+              module.buildInfo.usedStylableModules = used;
+              if (module.buildInfo.isImportedByNonStylable) {
+                used.push(module.resource);
+              }
+            }
+          });
+        }
+      );
+    });
   }
   injectStylableRuntimeChunk(compiler) {
     compiler.hooks.thisCompilation.tap(
@@ -148,27 +178,8 @@ class StylableWebpackPlugin {
             chunks => {
               chunks.forEach(chunk => {
                 if (chunk.entryModule instanceof StylableBootstrapModule) {
-                  const all = [];
-
-                  const cssBundleFilename = compilation.getPath(
-                    this.options.filename,
-                    { chunk, hash: compilation.hash }
-                  );
-
-                  chunk.entryModule.dependencies.forEach(({ module }) => {
-                    if (module.type === "stylable") {
-                      all.push(module);
-                    }
-                  });
-
-                  all.sort(
-                    (a, b) =>
-                      a.buildInfo.runtimeInfo.depth -
-                      b.buildInfo.runtimeInfo.depth
-                  );
-
-                  const used = all.filter(
-                    module => module.buildInfo.isImportedByNonStylable
+                  const all = getSortedStylableModulesFromBootstrap(
+                    chunk.entryModule
                   );
 
                   // console.log(used, all);
@@ -187,6 +198,11 @@ class StylableWebpackPlugin {
                     });
                   });
 
+                  const cssBundleFilename = compilation.getPath(
+                    this.options.filename,
+                    { chunk, hash: compilation.hash }
+                  );
+
                   compilation.assets[cssBundleFilename] = new RawSource(
                     cssSources.join("\n\n\n")
                   );
@@ -200,7 +216,7 @@ class StylableWebpackPlugin {
       }
     );
   }
-  
+
   injectStylableCompilation(compiler) {
     compiler.hooks.compilation.tap(
       StylableWebpackPlugin.name,
@@ -251,3 +267,15 @@ class StylableWebpackPlugin {
 }
 
 module.exports = StylableWebpackPlugin;
+function getSortedStylableModulesFromBootstrap(bootstrapModule) {
+  const all = [];
+  bootstrapModule.dependencies.forEach(({ module }) => {
+    if (module.type === "stylable") {
+      all.push(module);
+    }
+  });
+  all.sort(
+    (a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth
+  );
+  return all;
+}

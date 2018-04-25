@@ -8,7 +8,7 @@ function filterAssetResponses(responses, assetNames) {
     .filter(Boolean);
 }
 
-function getStyleElementsMetadata() {
+function getStyleElementsMetadata(getCss) {
   const styleElements = Array.from(document.head.getElementsByTagName("style"));
   return styleElements.map(styleEl => {
     const data = {
@@ -17,6 +17,9 @@ function getStyleElementsMetadata() {
     };
     if (styleEl.getAttribute("st-theme")) {
       data.theme = true;
+    }
+    if (getCss) {
+      data.css = styleEl.textContent;
     }
     return data;
   });

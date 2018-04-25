@@ -8,11 +8,11 @@ const {
 
 const projectFixtures = join(__dirname, "projects");
 
-describe("(simplest-project)", () => {
+describe("(optimizations)", () => {
   const projectRunner = ProjectRunner.mochaSetup(
     {
-      projectDir: join(projectFixtures, "simplest-project"),
-      port: 3001,
+      projectDir: join(projectFixtures, "optimizations"),
+      port: 3002,
       puppeteerOptions: {
         // headless: false
       }
@@ -25,18 +25,37 @@ describe("(simplest-project)", () => {
   it("renders css", async () => {
     const { page } = await projectRunner.openInBrowser();
     const styleElements = await page.evaluate(
-      browserFunctions.getStyleElementsMetadata
+      browserFunctions.getStyleElementsMetadata,
+      true
     );
 
-    expect(styleElements).to.eql([{ id: "./src/index.st.css", depth: "1" }]);
+    expect(styleElements).to.eql([
+      {
+        id: "./node_modules/test-components/button.st.css",
+        depth: "1",
+        theme: true,
+        css: ""
+      },
+      {
+        id: "./node_modules/test-components/index.st.css",
+        depth: "2",
+        theme: true,
+        css: ""
+      },
+      {
+        id: "./src/index.st.css",
+        depth: "3",
+        css: ".o0--used {\r\n    background: rgb(0, 0, 255)\n}"
+      }
+    ]);
   });
 
   it("css is working", async () => {
     const { page } = await projectRunner.openInBrowser();
     const backgroundColor = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).backgroundColor;
+      return getComputedStyle(document.body).backgroundColor;
     });
 
-    expect(backgroundColor).to.eql("rgb(255, 0, 0)");
+    expect(backgroundColor).to.eql("rgb(0, 0, 255)");
   });
 });

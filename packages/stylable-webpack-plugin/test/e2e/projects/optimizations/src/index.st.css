@@ -1,0 +1,19 @@
+:import {
+    -st-from: "test-components/index.st.css";
+    -st-named: Button;
+}
+
+.root {
+    /* empty rule */
+}
+
+.used {
+    background: rgb(0, 0, 255);
+}
+
+
+Button {
+    /* unused component */
+    font-size: 1em;
+}
+

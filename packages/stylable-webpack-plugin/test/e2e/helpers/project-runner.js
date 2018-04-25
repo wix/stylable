@@ -78,12 +78,6 @@ exports.ProjectRunner = class ProjectRunner {
     this.pages.length = 0;
   }
 
-  getStylesheet() {
-    if (!this.stats) {
-      const compilation = this.stats;
-    }
-  }
-
   async destroy() {
     this.browser && (await this.browser.close());
     this.browser = null;
