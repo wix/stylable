@@ -1,12 +1,12 @@
 {
   "name": "stylable-webpack-plugin",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
     "test": "mocha test/**/*.spec.js",
     "pretest": "npm run build",
-    "build": "babel src/runtime --out-dir src/runtime-es5 --presets=es2015",    
+    "build": "babel src/runtime --out-dir src/runtime-es5 --presets=es2015",
     "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
     "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
   },
