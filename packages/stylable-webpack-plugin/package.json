@@ -5,6 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha test/**/*.spec.js",
+    "pretest": "npm run build",
+    "build": "babel src/runtime --out-dir src/runtime-es5 --presets=es2015",    
     "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
     "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
   },
@@ -23,11 +25,12 @@
     "find-config": "^1.0.0",
     "typescript": "^2.8.3",
     "url-regex": "^4.1.1",
+    "webpack": "^4.6.0",
     "webpack-dev-middleware": "^3.1.2",
-    "webpack-sources": "^1.1.0",
-    "webpack": "^4.6.0"
+    "webpack-sources": "^1.1.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "chai": "^4.1.2",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",

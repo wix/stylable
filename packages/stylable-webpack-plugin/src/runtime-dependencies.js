@@ -4,7 +4,7 @@ const STYLESHEET_SYMBOL = "$stylesheet";
 
 const rendererDependency = () =>
   new StylableImportDependency(
-    require.resolve("./runtime/css-runtime-renderer"),
+    require.resolve("./runtime-es5/css-runtime-renderer"),
     {
       defaultImport: "$renderer",
       names: []
@@ -13,7 +13,7 @@ const rendererDependency = () =>
 
 const stylesheetDependency = () =>
   new StylableImportDependency(
-    require.resolve("./runtime/css-runtime-stylesheet"),
+    require.resolve("./runtime-es5/css-runtime-stylesheet"),
     {
       defaultImport: "$stylesheet",
       names: []
@@ -22,7 +22,7 @@ const stylesheetDependency = () =>
 
 const cssRuntimeRendererRequest = {
   identifier() {
-    return require.resolve("./runtime/css-runtime-renderer");
+    return require.resolve("./runtime-es5/css-runtime-renderer");
   }
 };
 
