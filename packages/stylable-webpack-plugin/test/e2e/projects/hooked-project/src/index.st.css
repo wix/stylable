@@ -1,0 +1,6 @@
+:vars {
+    myVar: 1;
+}
+.root {
+    background-color: value(myVar); 
+}

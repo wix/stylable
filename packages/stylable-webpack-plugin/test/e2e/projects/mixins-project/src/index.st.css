@@ -1,0 +1,19 @@
+:import {
+    -st-from: "./mixin";
+    -st-named: Mixin;
+}
+
+:import {
+    -st-from: "./mixin2.ts";
+    -st-named: Mixin as Mixin2;
+}
+
+:import {
+    -st-from: "./functions.js";
+    -st-named: add;
+}
+
+.root {
+    -st-mixin: Mixin(1, "2"), Mixin2(1px solid rgb(255, 0, 0));
+    z-index: add(4, 5);
+}

@@ -14,17 +14,20 @@ const {
 
 class StylableWebpackPlugin {
   constructor(options) {
-    const localConfig = this.loadLocalStylableConfig();
-    let fullOptions = this.normalizeOptions(options);
+    this.options = this.normalizeOptions(options);
+  }
+  overrideOptionsWithLocalConfig(context) {
+    let fullOptions = this.options;
+    const localConfig = this.loadLocalStylableConfig(context);
     if (localConfig && localConfig.options) {
       fullOptions = localConfig.options(fullOptions);
     }
     this.options = fullOptions;
   }
-  loadLocalStylableConfig() {
+  loadLocalStylableConfig(dir) {
     let localConfigOverride;
     try {
-      localConfigOverride = findConfig.require("stylable.config");
+      localConfigOverride = findConfig.require("stylable.config", { cwd: dir });
     } catch (e) {
       /* no op */
     }
@@ -68,6 +71,7 @@ class StylableWebpackPlugin {
     return stylable;
   }
   apply(compiler) {
+    this.overrideOptionsWithLocalConfig(compiler.context);
     this.stylable = this.createStylable(compiler);
     this.injectStylableModuleRuleSet(compiler);
     this.injectStylableCompilation(compiler);

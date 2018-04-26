@@ -4,7 +4,8 @@ const StylableWebpackPlugin = require("../../src/StylableWebpackPlugin");
 describe("StylableWebpackPlugin Unit", () => {
   it("should try load local stylable.config and run options hook", () => {
     class Test extends StylableWebpackPlugin {
-      loadLocalStylableConfig() {
+      loadLocalStylableConfig(context) {
+        expect(context, 'lookup context').to.equal('.');
         return {
           options(options) {
             expect(options.test, 'top level option').to.equal(true);
@@ -13,7 +14,10 @@ describe("StylableWebpackPlugin Unit", () => {
         };
       }
     }
+    const plugin  = new Test({ test: true });
+    
+    plugin.overrideOptionsWithLocalConfig('.');
 
-    expect(new Test({ test: true }).options.fromConfig, 'from local config').to.equal(true);
+    expect(plugin.options.fromConfig, 'from local config').to.equal(true);
   });
 });
