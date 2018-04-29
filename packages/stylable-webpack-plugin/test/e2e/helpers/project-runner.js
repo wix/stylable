@@ -7,7 +7,7 @@ const puppeteer = require("puppeteer");
 const rimrafCallback = require("rimraf");
 const rimraf = promisify(rimrafCallback);
 
-exports.ProjectRunner = class ProjectRunner {
+class ProjectRunner {
   constructor({
     projectDir,
     port = 3000,
@@ -16,13 +16,16 @@ exports.ProjectRunner = class ProjectRunner {
   }) {
     this.projectDir = projectDir;
     this.outputDir = join(this.projectDir, "dist");
-    this.webpackConfig = require(join(this.projectDir, "webpack.config.js"));
+    this.webpackConfig = this.loadTestConfig();
     this.port = port;
     this.serverUrl = `http://localhost:${this.port}`;
     this.puppeteerOptions = puppeteerOptions;
     this.pages = [];
     this.stats = null;
     this.throwOnBuildError = throwOnBuildError;
+  }
+  loadTestConfig() {
+    return require(join(this.projectDir, "webpack.config.js"));
   }
   async bundle() {
     const webpackConfig = this.webpackConfig;
@@ -96,7 +99,7 @@ exports.ProjectRunner = class ProjectRunner {
     await rimraf(this.outputDir);
   }
   static mochaSetup(runnerOptions, before, afterEach, after) {
-    const projectRunner = new ProjectRunner(runnerOptions);
+    const projectRunner = new this(runnerOptions);
 
     before("bundle and serve project", async () => {
       await projectRunner.bundle();
@@ -113,4 +116,21 @@ exports.ProjectRunner = class ProjectRunner {
 
     return projectRunner;
   }
-};
+}
+
+class StylableProjectRunner extends ProjectRunner {
+  loadTestConfig() {
+    const config = super.loadTestConfig();
+    if (config.plugins) {
+      const plugin = config.plugins.find(
+        p => p.constructor.name === "StylableWebpackPlugin"
+      );
+      if (plugin) {
+        plugin.options.optimize.shortNamespaces = true;
+      }
+    }
+    return config;
+  }
+}
+
+exports.ProjectRunner = StylableProjectRunner;

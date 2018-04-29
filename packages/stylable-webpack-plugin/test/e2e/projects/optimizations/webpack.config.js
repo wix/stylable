@@ -5,5 +5,16 @@ module.exports = {
   mode: "development",
   context: __dirname,
   devtool: "source-map",
-  plugins: [new StylableWebpackPlugin({rootScope: false}), new HtmlWebpackPlugin()]
+  plugins: [
+    new StylableWebpackPlugin({ 
+      rootScope: false,
+      optimize: {
+        removeUnusedComponents: true,
+        removeComments: true,
+        removeStylableDirectives: true,
+        shortNamespaces: true        
+      }
+    }),
+    new HtmlWebpackPlugin()
+  ]
 };

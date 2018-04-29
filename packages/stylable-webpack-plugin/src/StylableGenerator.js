@@ -1,4 +1,5 @@
 const { StylableOptimizer } = require("stylable");
+const { StylableClassNameOptimizer } = require("./classname-optimizer");
 const { ReplaceSource, OriginalSource } = require("webpack-sources");
 const { StylableImportDependency } = require("./StylableDependencies");
 const { getCSSDepthAndDeps } = require("./utils");
@@ -8,22 +9,26 @@ const {
 } = require("./runtime-dependencies");
 const { replaceUrls } = require("./utils");
 
+const optimizer = new StylableOptimizer();
+const classNameOptimizer = new StylableClassNameOptimizer();
+
 class StylableGenerator {
   constructor(stylable, compilation, options) {
     this.stylable = stylable;
     this.compilation = compilation;
     this.options = options;
-    this.optimizer = new StylableOptimizer();
+    this.optimizer = optimizer;
   }
   transform(module) {
     const {
       removeUnusedComponents,
       removeComments,
-      removeStylableDirectives
+      removeStylableDirectives,
+      classNameOptimizations
     } = module.buildInfo.optimize;
 
     if (removeUnusedComponents) {
-      this.optimizer.removeUnusedComponents(
+      optimizer.removeUnusedComponents(
         this.stylable,
         module.buildInfo.stylableMeta,
         module.buildInfo.usedStylableModules
@@ -39,7 +44,12 @@ class StylableGenerator {
     if (removeStylableDirectives) {
       this.optimizer.removeStylableDirectives(results.meta.outputAst);
     }
-
+    if (classNameOptimizations) {
+      classNameOptimizer.optimizeAstAndExports(
+        results.meta.outputAst,
+        results.exports
+      );
+    }
     return results;
   }
   toCSS(module, onAsset) {

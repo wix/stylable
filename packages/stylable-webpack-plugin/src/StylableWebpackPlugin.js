@@ -47,8 +47,10 @@ class StylableWebpackPlugin {
       includeCSSInJS: true,
       optimize: {
         removeUnusedComponents: true,
-        removeComments: true,
-        removeStylableDirectives: true
+        removeComments: false,
+        removeStylableDirectives: true,
+        classNameOptimizations: false,
+        shortNamespaces: false
       }
     };
     return {
@@ -112,9 +114,11 @@ class StylableWebpackPlugin {
           modules.forEach(module => {
             if (module.type === "stylable") {
               module.buildInfo.optimize = this.options.optimize;
-              module.buildInfo.stylableMeta.namespace = getNamespace(
-                module.buildInfo.stylableMeta
-              );
+              if (this.options.optimize.shortNamespaces) {
+                module.buildInfo.stylableMeta.namespace = getNamespace(
+                  module.buildInfo.stylableMeta
+                );
+              }
               module.buildInfo.usedStylableModules = used;
               if (module.buildInfo.isImportedByNonStylable) {
                 used.push(module.resource);
