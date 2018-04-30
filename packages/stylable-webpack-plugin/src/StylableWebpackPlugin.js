@@ -104,7 +104,7 @@ class StylableWebpackPlugin {
     });
     this.injectStylableCSSOptimizer(compiler);
   }
-  injectStylableCSSOptimizer(compiler) {   
+  injectStylableCSSOptimizer(compiler) {
     const used = [];
     compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
       compilation.hooks.optimizeModules.tap(
@@ -190,6 +190,8 @@ class StylableWebpackPlugin {
               extractedStylableChunk.entryModule = extractedBootstrap;
             } else {
               chunksBootstraps.forEach(([chunk, bootstrap]) => {
+                // this is here for metadata to generate assets
+                chunksBootstraps.stylableBootstrap = bootstrap;
                 if (chunk.entryModule) {
                   compilation.addModule(bootstrap);
                   connectChunkAndModule(chunk, bootstrap);
@@ -206,10 +208,13 @@ class StylableWebpackPlugin {
             StylableWebpackPlugin.name,
             chunks => {
               chunks.forEach(chunk => {
-                if (chunk.entryModule instanceof StylableBootstrapModule) {
-                  const all = getSortedStylableModulesFromBootstrap(
-                    chunk.entryModule
-                  );
+                const bootstrap =
+                  chunk.entryModule instanceof StylableBootstrapModule
+                    ? chunk.entryModule
+                    : chunk.stylableBootstrap;
+
+                if (bootstrap) {
+                  const all = getSortedStylableModulesFromBootstrap(bootstrap);
 
                   // console.log(used, all);
                   const cssSources = all.map(module => {
