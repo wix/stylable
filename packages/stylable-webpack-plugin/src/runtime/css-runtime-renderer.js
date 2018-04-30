@@ -89,7 +89,7 @@ function createCacheStyleNodeRenderer(options) {
   const create = (stylesheet, key) => {
     const node = createElement("style");
     node.textContent = stylesheet.$css;
-    stylesheet.$theme && node.setAttribute('st-theme', true);
+    stylesheet.$theme && node.setAttribute("st-theme", true);
     node.setAttribute(attrKey, key);
     node.setAttribute("st-depth", stylesheet.$depth);
     return node;
