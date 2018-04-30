@@ -59,12 +59,18 @@ class StylableWebpackPlugin {
     };
   }
   createStylable(compiler) {
+    const getNS = nsProvider();
     const stylable = new Stylable(
       compiler.context,
       compiler.inputFileSystem,
       this.options.requireModule,
       "--",
-      undefined,
+      meta => {
+        if (this.options.optimize.shortNamespaces) {
+          meta.namespace = getNS(meta);
+        }
+        return meta;
+      },
       undefined,
       this.options.transformHooks,
       this.options.rootScope,
@@ -98,15 +104,8 @@ class StylableWebpackPlugin {
     });
     this.injectStylableCSSOptimizer(compiler);
   }
-  injectStylableCSSOptimizer(compiler) {
-    // TODO: what to do with the scope of these vars
-    let index = 0;
-    const namespaceMapping = {};
-    const getNamespace = meta =>
-      namespaceMapping[meta.source] ||
-      (namespaceMapping[meta.source] = "o" + index++);
+  injectStylableCSSOptimizer(compiler) {   
     const used = [];
-
     compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
       compilation.hooks.optimizeModules.tap(
         StylableWebpackPlugin.name,
@@ -114,11 +113,6 @@ class StylableWebpackPlugin {
           modules.forEach(module => {
             if (module.type === "stylable") {
               module.buildInfo.optimize = this.options.optimize;
-              if (this.options.optimize.shortNamespaces) {
-                module.buildInfo.stylableMeta.namespace = getNamespace(
-                  module.buildInfo.stylableMeta
-                );
-              }
               module.buildInfo.usedStylableModules = used;
               if (module.buildInfo.isImportedByNonStylable) {
                 used.push(module.resource);
@@ -148,20 +142,25 @@ class StylableWebpackPlugin {
 
             const chunksBootstraps = [];
             chunks.forEach(chunk => {
-              if (chunk.containsModule(runtimeRendererModule)) {
-                const bootstrap = new StylableBootstrapModule(
-                  compiler.context,
-                  runtimeRendererModule
-                );
+              // if (chunk.containsModule(runtimeRendererModule)) {
+              const bootstrap = new StylableBootstrapModule(
+                compiler.context,
+                runtimeRendererModule
+              );
 
-                for (const module of chunk.modulesIterable) {
-                  if (module.type === "stylable") {
-                    bootstrap.addStylableModuleDependency(module);
-                  }
+              for (const module of chunk.modulesIterable) {
+                if (module.type === "stylable") {
+                  bootstrap.addStylableModuleDependency(module);
                 }
+              }
 
+              if (bootstrap.dependencies.length) {
                 chunksBootstraps.push([chunk, bootstrap]);
               }
+              // if (bootstrap.dependencies.length && chunk.entryModule) {
+              // chunksBootstraps.push([chunk, bootstrap]);
+              // }
+              // }
             });
 
             if (chunksBootstraps.length === 0) {
@@ -191,10 +190,12 @@ class StylableWebpackPlugin {
               extractedStylableChunk.entryModule = extractedBootstrap;
             } else {
               chunksBootstraps.forEach(([chunk, bootstrap]) => {
-                compilation.addModule(bootstrap);
-                bootstrap.addStylableModuleDependency(chunk.entryModule);
-                connectChunkAndModule(chunk, bootstrap);
-                chunk.entryModule = bootstrap;
+                if (chunk.entryModule) {
+                  compilation.addModule(bootstrap);
+                  connectChunkAndModule(chunk, bootstrap);
+                  bootstrap.addStylableModuleDependency(chunk.entryModule);
+                  chunk.entryModule = bootstrap;
+                }
               });
             }
           }
@@ -306,4 +307,12 @@ function getSortedStylableModulesFromBootstrap(bootstrapModule) {
     (a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth
   );
   return all;
+}
+function nsProvider() {
+  let index = 0;
+  const namespaceMapping = {};
+  const getNamespace = meta =>
+    namespaceMapping[meta.source] ||
+    (namespaceMapping[meta.source] = "o" + index++);
+  return getNamespace;
 }
