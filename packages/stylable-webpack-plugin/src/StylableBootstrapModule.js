@@ -15,14 +15,14 @@ class StylableBootstrapModule extends Module {
     type = "stylable-bootstrap"
   ) {
     super("javascript/auto", context);
-
+    this.entryReplacement = null;
     // from plugin
     this.runtimeRenderer = runtimeRenderer;
     this.dependencies = dependencies;
     this.name = name;
     this.type = type;
     this.built = true;
-    this.hash = '';
+    this.hash = "";
     this.buildMeta = {};
     this.buildInfo = {};
     this.usedExports = [];
@@ -39,7 +39,9 @@ class StylableBootstrapModule extends Module {
   build(options, compilation, resolver, fs, callback) {
     return callback();
   }
-
+  setEntryReplacement(entryReplacement) {
+    this.entryReplacement = entryReplacement;
+  }
   source(m, runtimeTemplate) {
     const imports = this.dependencies.map(dependency => {
       const id = runtimeTemplate.moduleId({
@@ -87,6 +89,35 @@ class StylableBootstrapModule extends Module {
     });
     dep.module = module;
     this.dependencies.push(dep);
+  }
+  getSortedStylableModules() {
+    const all = [];
+    this.dependencies.forEach(({ module }) => {
+      if (module.type === "stylable") {
+        all.push(module);
+      }
+    });
+    all.sort(
+      (a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth
+    );
+    return all;
+  }
+  renderStaticCSS(mainTemplate, hash) {
+    const all = this.getSortedStylableModules();
+    const cssSources = all.map(module => {
+      const publicPath = mainTemplate.getPublicPath({
+        hash
+      });
+      return module.generator.toCSS(module, assetModule => {
+        const source = assetModule.originalSource().source();
+        const getStaticPath = new Function(
+          ["__webpack_public_path__"],
+          "var module = {}; return " + source
+        );
+        return JSON.stringify(getStaticPath(publicPath));
+      });
+    });
+    return cssSources;
   }
 }
 

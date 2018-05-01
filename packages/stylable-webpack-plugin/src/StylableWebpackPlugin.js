@@ -51,7 +51,8 @@ class StylableWebpackPlugin {
         removeStylableDirectives: true,
         classNameOptimizations: false,
         shortNamespaces: false
-      }
+      },
+      plugins: []
     };
     return {
       ...defaults,
@@ -59,6 +60,15 @@ class StylableWebpackPlugin {
     };
   }
   createStylable(compiler) {
+    const nsProvider = function() {
+      let index = 0;
+      const namespaceMapping = {};
+      const getNamespace = meta =>
+        namespaceMapping[meta.source] ||
+        (namespaceMapping[meta.source] = "o" + index++);
+      return getNamespace;
+    };
+
     const getNS = nsProvider();
     const stylable = new Stylable(
       compiler.context,
@@ -85,6 +95,10 @@ class StylableWebpackPlugin {
     this.injectStylableCompilation(compiler);
     this.injectStylableRuntimeInfo(compiler);
     this.injectStylableRuntimeChunk(compiler);
+    this.injectPlugins(compiler);
+  }
+  injectPlugins(compiler) {
+    this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
   }
   injectStylableRuntimeInfo(compiler) {
     compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
@@ -191,11 +205,12 @@ class StylableWebpackPlugin {
             } else {
               chunksBootstraps.forEach(([chunk, bootstrap]) => {
                 // this is here for metadata to generate assets
-                chunksBootstraps.stylableBootstrap = bootstrap;
+                chunk.stylableBootstrap = bootstrap;
                 if (chunk.entryModule) {
                   compilation.addModule(bootstrap);
                   connectChunkAndModule(chunk, bootstrap);
                   bootstrap.addStylableModuleDependency(chunk.entryModule);
+                  bootstrap.setEntryReplacement(chunk.entryModule);
                   chunk.entryModule = bootstrap;
                 }
               });
@@ -214,23 +229,10 @@ class StylableWebpackPlugin {
                     : chunk.stylableBootstrap;
 
                 if (bootstrap) {
-                  const all = getSortedStylableModulesFromBootstrap(bootstrap);
-
-                  // console.log(used, all);
-                  const cssSources = all.map(module => {
-                    const publicPath = compilation.mainTemplate.getPublicPath({
-                      hash: compilation.hash
-                    });
-
-                    return module.generator.toCSS(module, assetModule => {
-                      const source = assetModule.originalSource().source();
-                      const getStaticPath = new Function(
-                        ["__webpack_public_path__ "],
-                        "var module = {}; return " + source
-                      );
-                      return JSON.stringify(getStaticPath(publicPath));
-                    });
-                  });
+                  const cssSources = bootstrap.renderStaticCSS(
+                    compilation.mainTemplate,
+                    compilation.hash
+                  );
 
                   const cssBundleFilename = compilation.getPath(
                     this.options.filename,
@@ -250,7 +252,6 @@ class StylableWebpackPlugin {
       }
     );
   }
-
   injectStylableCompilation(compiler) {
     compiler.hooks.compilation.tap(
       StylableWebpackPlugin.name,
@@ -301,23 +302,3 @@ class StylableWebpackPlugin {
 }
 
 module.exports = StylableWebpackPlugin;
-function getSortedStylableModulesFromBootstrap(bootstrapModule) {
-  const all = [];
-  bootstrapModule.dependencies.forEach(({ module }) => {
-    if (module.type === "stylable") {
-      all.push(module);
-    }
-  });
-  all.sort(
-    (a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth
-  );
-  return all;
-}
-function nsProvider() {
-  let index = 0;
-  const namespaceMapping = {};
-  const getNamespace = meta =>
-    namespaceMapping[meta.source] ||
-    (namespaceMapping[meta.source] = "o" + index++);
-  return getNamespace;
-}
