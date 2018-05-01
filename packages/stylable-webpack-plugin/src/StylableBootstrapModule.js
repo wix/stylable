@@ -102,8 +102,8 @@ class StylableBootstrapModule extends Module {
     );
     return all;
   }
-  renderStaticCSS(mainTemplate, hash) {
-    const all = this.getSortedStylableModules();
+  renderStaticCSS(mainTemplate, hash, filter = Boolean) {
+    const all = this.getSortedStylableModules().filter(filter);
     const cssSources = all.map(module => {
       const publicPath = mainTemplate.getPublicPath({
         hash
