@@ -19,43 +19,6 @@ class StylableGenerator {
     this.options = options;
     this.optimizer = optimizer;
   }
-  transform(module) {
-    const {
-      removeUnusedComponents,
-      removeComments,
-      removeStylableDirectives,
-      classNameOptimizations
-    } = module.buildInfo.optimize;
-
-    if (removeUnusedComponents) {
-      optimizer.removeUnusedComponents(
-        this.stylable,
-        module.buildInfo.stylableMeta,
-        module.buildInfo.usedStylableModules
-      );
-    }
-    const results = this.stylable
-      .createTransformer()
-      .transform(module.buildInfo.stylableMeta);
-
-    if (removeComments) {
-      this.optimizer.removeComments(results.meta.outputAst);
-    }
-    if (removeStylableDirectives) {
-      this.optimizer.removeStylableDirectives(results.meta.outputAst);
-    }
-    if (classNameOptimizations) {
-      classNameOptimizer.optimizeAstAndExports(
-        results.meta.outputAst,
-        results.exports
-      );
-    }
-    return results;
-  }
-  toCSS(module, onAsset) {
-    const { meta } = this.transform(module);
-    return this.getCSSInJSWithAssets(meta.outputAst, onAsset);
-  }
   generate(module, dependencyTemplates, runtimeTemplate) {
     const { meta, exports } = this.transform(module);
     const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
@@ -96,6 +59,44 @@ class StylableGenerator {
           id
         ]);
     return new ReplaceSource(originalSource);
+  }
+  transform(module) {
+    const {
+      removeUnusedComponents,
+      removeComments,
+      removeStylableDirectives,
+      classNameOptimizations
+    } = module.buildInfo.optimize;
+
+    if (removeUnusedComponents) {
+      optimizer.removeUnusedComponents(
+        this.stylable,
+        module.buildInfo.stylableMeta,
+        module.buildInfo.usedStylableModules
+      );
+    }
+    const results = this.stylable
+      .createTransformer()
+      .transform(module.buildInfo.stylableMeta);
+
+    if (removeComments) {
+      this.optimizer.removeComments(results.meta.outputAst);
+    }
+    if (removeStylableDirectives) {
+      this.optimizer.removeStylableDirectives(results.meta.outputAst);
+    }
+    if (classNameOptimizations) {
+      classNameOptimizer.optimizeAstAndExports(
+        results.meta.outputAst,
+        results.exports
+      );
+    }
+
+    return results;
+  }
+  toCSS(module, onAsset) {
+    const { meta } = this.transform(module);
+    return this.getCSSInJSWithAssets(meta.outputAst, onAsset);
   }
   reportDiagnostics(meta) {
     const transformReports = meta.transformDiagnostics
