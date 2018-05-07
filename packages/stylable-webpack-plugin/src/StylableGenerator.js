@@ -2,7 +2,6 @@ const { StylableOptimizer } = require("stylable");
 const { StylableClassNameOptimizer } = require("./classname-optimizer");
 const { ReplaceSource, OriginalSource } = require("webpack-sources");
 const { StylableImportDependency } = require("./StylableDependencies");
-const { getCSSDepthAndDeps } = require("./utils");
 const {
   RENDERER_SYMBOL,
   STYLESHEET_SYMBOL
