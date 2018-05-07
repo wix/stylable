@@ -2,7 +2,10 @@ const { RawSource } = require("webpack-sources");
 const { Stylable } = require("stylable");
 const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
-const { getCSSDepthAndDeps, isImportedByNonStylable } = require("./utils");
+const { isImportedByNonStylable } = require("./utils");
+const {
+  calculateModuleDepthAndShallowStylableDependencies
+} = require("./stylable-module-helpers");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
 const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
 const StylableParser = require("./StylableParser");
@@ -45,6 +48,7 @@ class StylableWebpackPlugin {
       filename: "[name].bundle.css",
       outputCSS: false,
       includeCSSInJS: true,
+      namespaceShortener: null,
       optimize: {
         removeUnusedComponents: true,
         removeComments: false,
@@ -77,7 +81,15 @@ class StylableWebpackPlugin {
       "--",
       meta => {
         if (this.options.optimize.shortNamespaces) {
-          meta.namespace = getNS(meta);
+          if (this.options.namespaceShortener) {
+            meta.namespace = this.options.namespaceShortener(
+              meta,
+              compiler,
+              this
+            );
+          } else {
+            meta.namespace = getNS(meta);
+          }
         }
         return meta;
       },
@@ -105,9 +117,15 @@ class StylableWebpackPlugin {
       compilation.hooks.optimizeModules.tap(
         StylableWebpackPlugin.name,
         modules => {
+          const cache = new WeakMap();
           modules.forEach(module => {
             if (module.type === "stylable") {
-              module.buildInfo.runtimeInfo = getCSSDepthAndDeps(module);
+              module.buildInfo.runtimeInfo = calculateModuleDepthAndShallowStylableDependencies(
+                module,
+                [],
+                [],
+                cache
+              );
               module.buildInfo.isImportedByNonStylable = isImportedByNonStylable(
                 module
               );
