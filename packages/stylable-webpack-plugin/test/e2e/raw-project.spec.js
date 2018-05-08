@@ -8,7 +8,7 @@ const {
 
 const projectFixtures = join(__dirname, "projects");
 
-describe.only("(raw-project)", () => {
+describe("(raw-project)", () => {
   const projectRunner = ProjectRunner.mochaSetup(
     {
       projectDir: join(projectFixtures, "raw-project"),
