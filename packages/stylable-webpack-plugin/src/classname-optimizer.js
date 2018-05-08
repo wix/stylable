@@ -15,25 +15,27 @@ class StylableClassNameOptimizer {
     traverseNode(ast, node => {
       if (node.type === "class") {
         if (!this.context.names[node.name]) {
-          this.context.names[node.name] =
-            "s" + Object.keys(this.context.names).length;
+          this.generateName(node.name);
         }
         node.name = this.context.names[node.name];
       }
     });
     return stringifySelector(ast);
   }
+  generateName(name){
+    return this.context.names[name] = "s" + Object.keys(this.context.names).length
+  }
   optimizeAstAndExports(ast, exported) {
     ast.walkRules(rule => {
-      rule.selector = this.rewriteSelector(rule.selector, this.context);
-      Object.keys(exported).forEach(originName => {
-        exported[originName] = exported[originName]
-          .split(" ")
-          .map(renderedNamed => {
-            return this.context.names[renderedNamed] || renderedNamed;
-          })
-          .join(" ");
-      });
+      rule.selector = this.rewriteSelector(rule.selector);
+    });
+    Object.keys(exported).forEach(originName => {
+      exported[originName] = exported[originName]
+        .split(" ")
+        .map(renderedNamed => {
+          return this.context.names[renderedNamed] || this.generateName(renderedNamed);
+        })
+        .join(" ");
     });
   }
 }
