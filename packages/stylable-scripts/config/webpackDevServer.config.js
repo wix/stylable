@@ -9,7 +9,7 @@
 'use strict';
 
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
-const path = require('path');
+const ignoredFiles = require('react-dev-utils/ignoredFiles');
 const config = require('./webpack.config.dev');
 const paths = require('./paths');
 
@@ -24,8 +24,8 @@ module.exports = function(proxy, allowedHost) {
     // https://medium.com/webpack/webpack-dev-server-middleware-security-issues-1489d950874a
     // However, it made several existing use cases such as development in cloud
     // environment or subdomains in development significantly more complicated:
-    // https://github.com/facebookincubator/create-react-app/issues/2271
-    // https://github.com/facebookincubator/create-react-app/issues/2233
+    // https://github.com/facebook/create-react-app/issues/2271
+    // https://github.com/facebook/create-react-app/issues/2233
     // While we're investigating better solutions, for now we will take a
     // compromise. Since our WDS configuration only serves files in the `public`
     // folder we won't consider accessing them a vulnerability. However, if you
@@ -71,16 +71,11 @@ module.exports = function(proxy, allowedHost) {
     // by listening to the compiler events with `compiler.plugin` calls above.
     quiet: true,
     // Reportedly, this avoids CPU overload on some systems.
-    // https://github.com/facebookincubator/create-react-app/issues/293
+    // https://github.com/facebook/create-react-app/issues/293
     // src/node_modules is not ignored to support absolute imports
-    // https://github.com/facebookincubator/create-react-app/issues/1065
+    // https://github.com/facebook/create-react-app/issues/1065
     watchOptions: {
-      ignored: new RegExp(
-        `^(?!${path
-          .normalize(paths.appSrc + '/')
-          .replace(/[\\]+/g, '\\\\')}).+[\\\\/]node_modules[\\\\/]`,
-        'g'
-      ),
+      ignored: ignoredFiles(paths.appSrc),
     },
     // Enable HTTPS if the HTTPS environment variable is set to 'true'
     https: protocol === 'https',
@@ -88,7 +83,7 @@ module.exports = function(proxy, allowedHost) {
     overlay: false,
     historyApiFallback: {
       // Paths with dots should still use the history fallback.
-      // See https://github.com/facebookincubator/create-react-app/issues/387.
+      // See https://github.com/facebook/create-react-app/issues/387.
       disableDotRule: true,
     },
     public: allowedHost,
