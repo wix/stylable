@@ -285,7 +285,7 @@ class StylableWebpackPlugin {
         normalModuleFactory.hooks.createParser
           .for("stylable")
           .tap(StylableWebpackPlugin.name, () => {
-            return new StylableParser(this.stylable);
+            return new StylableParser(this.stylable, compilation);
           });
         normalModuleFactory.hooks.createGenerator
           .for("stylable")

@@ -13,11 +13,19 @@ const {
 } = require("./StylableDependencies");
 
 class StylableParser {
-  constructor(stylable) {
+  constructor(stylable, compilation) {
     this.stylable = stylable;
+    this.compilation = compilation;
   }
 
   parse(source, state) {
+    if (state.module.loaders.length) {
+      this.compilation.warnings.push(
+        `Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors.\n"${state.module.rawRequest}" in "${state.module.issuer.resource}"`
+      );
+      state.module.type = "stylable-raw";
+      return state;
+    }
     const meta = this.stylable.process(state.module.resource);
     state.module.buildInfo.stylableMeta = meta;
     // state.module.buildMeta.exportsType = "namespace";

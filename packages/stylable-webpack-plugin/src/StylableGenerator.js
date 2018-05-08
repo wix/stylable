@@ -19,6 +19,9 @@ class StylableGenerator {
     this.optimizer = optimizer;
   }
   generate(module, dependencyTemplates, runtimeTemplate) {
+    if (module.type === 'stylable-raw') {
+      return module.originalSource();
+    }
     const { meta, exports } = this.transform(module);
     const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
     const imports = this.generateImports(module, runtimeTemplate);
