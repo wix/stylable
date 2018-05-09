@@ -3,14 +3,25 @@
     -st-named: Button;
 }
 
+:vars {
+    myValue: red;
+}
+
 .root {
+    -st-states: x;
+}
+
+.root:x {
+    font-family: MyFont;
+}
+
+.empty {
     /* empty rule */
 }
 
 .used {
     background: rgb(0, 0, 255);
 }
-
 
 Button {
     /* unused component */

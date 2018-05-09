@@ -22,20 +22,26 @@ class StylableClassNameOptimizer {
     });
     return stringifySelector(ast);
   }
-  generateName(name){
-    return this.context.names[name] = "s" + Object.keys(this.context.names).length
+  generateName(name) {
+    return (this.context.names[name] =
+      "s" + Object.keys(this.context.names).length);
   }
-  optimizeAstAndExports(ast, exported) {
+  optimizeAstAndExports(ast, exported, classes = Object.keys(exported)) {
     ast.walkRules(rule => {
       rule.selector = this.rewriteSelector(rule.selector);
     });
-    Object.keys(exported).forEach(originName => {
-      exported[originName] = exported[originName]
-        .split(" ")
-        .map(renderedNamed => {
-          return this.context.names[renderedNamed] || this.generateName(renderedNamed);
-        })
-        .join(" ");
+    classes.forEach(originName => {
+      if (exported[originName]) {
+        exported[originName] = exported[originName]
+          .split(" ")
+          .map(renderedNamed => {
+            return (
+              this.context.names[renderedNamed] ||
+              this.generateName(renderedNamed)
+            );
+          })
+          .join(" ");
+      }
     });
   }
 }

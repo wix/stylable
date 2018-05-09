@@ -12,6 +12,7 @@ module.exports = {
         removeUnusedComponents: true,
         removeComments: true,
         removeStylableDirectives: true,
+        classNameOptimizations: true,
         shortNamespaces: true        
       }
     }),

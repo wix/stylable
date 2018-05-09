@@ -90,7 +90,8 @@ class StylableGenerator {
     if (classNameOptimizations) {
       classNameOptimizer.optimizeAstAndExports(
         results.meta.outputAst,
-        results.exports
+        results.exports,
+        Object.keys(results.meta.classes)
       );
     }
 
