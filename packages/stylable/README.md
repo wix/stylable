@@ -1,4 +1,4 @@
-![Stylable CSS for Components](./site/branding/logo/SVG/96-logo-horizontal.svg)
+![Stylable CSS for Components](./assets/96-logo-horizontal.svg)
 
 [![npm version](https://badge.fury.io/js/stylable.svg)](https://www.npmjs.com/package/stylable)
 [![Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
@@ -18,28 +18,29 @@ Learn more in our [Documentation Center](https://stylable.io/).
 ## Installation
 
 There are two options for installing **Stylable**:
-* Write your own project based on a **Stylable** boilerplate 
+
+* Write your own project based on a **Stylable** boilerplate
 * Install **Stylable** to work with an existing project as follows:
 
 Install **stylable** and **stylable-integration** as a dependency in your local project.
 
 Using npm:
+
 ```bash
 npm install stylable stylable-integration --save-dev
 ```
+
 Using Yarn:
+
 ```bash
 yarn add stylable stylable-integration
 ```
-For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
+For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Contributing
 
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
-
-## Updating Documentation
-To update the documentation on [Stylable.io](http://www.stylable.io), follow the instructions [here](./updating-docs.md).
 
 ## License
 

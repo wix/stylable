@@ -12,7 +12,7 @@ It's a cliché that open-source projects have terrible documentation. We don't w
 
 ## Tell us what's missing
 
-What should **Stylable** be able to do, but currently doesn't? 
+What should **Stylable** be able to do, but currently doesn't?
 
 ## Talk to us!
 

@@ -4,8 +4,6 @@ dist
 .idea
 .history
 .DS_Store
-_site
-.sass-cache
 
 # Logs
 logs
@@ -13,8 +11,6 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-_site
-.sass-cache
 
 # Runtime data
 pids
