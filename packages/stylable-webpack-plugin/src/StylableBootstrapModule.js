@@ -10,6 +10,12 @@ class StylableBootstrapModule extends Module {
   constructor(
     context,
     runtimeRenderer,
+    options = {
+      autoInit: true,
+      globalInjection(symbol) {
+        return `window.__stylable_renderer__ = ${symbol}`;
+      }
+    },
     dependencies = [],
     name = "stylable-bootstrap-module",
     type = "stylable-bootstrap"
@@ -18,6 +24,7 @@ class StylableBootstrapModule extends Module {
     this.entryReplacement = null;
     // from plugin
     this.runtimeRenderer = runtimeRenderer;
+    this.options = options;
     this.dependencies = dependencies;
     this.name = name;
     this.type = type;
@@ -48,7 +55,12 @@ class StylableBootstrapModule extends Module {
         module: dependency.module,
         request: dependency.request
       });
-      return `__webpack_require__(${id});`;
+      if (dependency.module === this.entryReplacement) {
+        const moduleExports = `${this.moduleArgument}.${this.exportsArgument}`;
+        return `${moduleExports} = __webpack_require__(${id});`;
+      } else {
+        return `__webpack_require__(${id});`;
+      }
     });
 
     let renderingCode = [];
@@ -60,9 +72,16 @@ class StylableBootstrapModule extends Module {
       renderingCode.push(
         `var ${RENDERER_SYMBOL} = __webpack_require__(${id});`
       );
+      if (this.options.globalInjection) {
+        renderingCode.push(this.options.globalInjection(RENDERER_SYMBOL));
+      }
+
       renderingCode.push(...imports);
-      renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
-      renderingCode.push(`window.__stylable$renderer = ${RENDERER_SYMBOL}`);
+
+      if (this.options.autoInit) {
+        renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
+      }
+
       this.__source = new RawSource(renderingCode.join("\n"));
     } else {
       this.__source = new RawSource(imports.join("\n"));
