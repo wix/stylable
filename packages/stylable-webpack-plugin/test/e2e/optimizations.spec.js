@@ -45,7 +45,7 @@ describe("(optimizations)", () => {
       {
         id: "./src/index.st.css",
         depth: "3",
-        css: ".s2[data-o0-x] {\r\n    font-family: MyFont\n}\n.s3 {\r\n    background: rgb(0, 0, 255)\n}"
+        css: ".s3[data-o0-x] {\r\n    font-family: MyFont\n}\n.s4 {\r\n    background: rgb(0, 0, 255)\n}"
       }
     ]);
   });
@@ -63,9 +63,9 @@ describe("(optimizations)", () => {
 
     expect(exports.$namespace).to.eql("o0");
     expect(exports.myValue).to.eql("red");
-    expect(exports.root).to.eql("s2");
-    expect(exports.empty).to.eql("s4");
-    expect(exports.used).to.eql("s3");
+    expect(exports.root).to.eql("s3");
+    expect(exports.empty).to.eql("s5");
+    expect(exports.used).to.eql("s4");
 
     expect(backgroundColor).to.eql("rgb(0, 0, 255)");
     expect(fontFamily).to.eql("MyFont");
