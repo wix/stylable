@@ -8,7 +8,7 @@ const {
 } = require("./stylable-module-helpers");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
 const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
-const { ExtendedStylableOptimizer } = require("./extended-stylable-optimizer");
+const { WebpackStylableOptimizer } = require("./extended-stylable-optimizer");
 const StylableParser = require("./StylableParser");
 const StylableGenerator = require("./StylableGenerator");
 const {
@@ -63,7 +63,7 @@ class StylableWebpackPlugin {
         ...options.bootstrap
       },
       generate: {
-        optimizer: new ExtendedStylableOptimizer(),
+        optimizer: new WebpackStylableOptimizer(),
         ...options.generate
       },
       optimize: {
