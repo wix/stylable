@@ -8,6 +8,7 @@ const {
 } = require("./stylable-module-helpers");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
 const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
+const { ExtendedStylableOptimizer } = require("./extended-stylable-optimizer");
 const StylableParser = require("./StylableParser");
 const StylableGenerator = require("./StylableGenerator");
 const {
@@ -18,6 +19,15 @@ const {
 class StylableWebpackPlugin {
   constructor(options) {
     this.options = this.normalizeOptions(options);
+  }
+  apply(compiler) {
+    this.overrideOptionsWithLocalConfig(compiler.context);
+    this.stylable = this.createStylable(compiler);
+    this.injectStylableModuleRuleSet(compiler);
+    this.injectStylableCompilation(compiler);
+    this.injectStylableRuntimeInfo(compiler);
+    this.injectStylableRuntimeChunk(compiler);
+    this.injectPlugins(compiler);
   }
   overrideOptionsWithLocalConfig(context) {
     let fullOptions = this.options;
@@ -48,47 +58,53 @@ class StylableWebpackPlugin {
       filename: "[name].bundle.css",
       outputCSS: false,
       includeCSSInJS: true,
-      namespaceShortener: null,
+      bootstrap: {
+        autoInit: true,
+        ...options.bootstrap
+      },
+      generate: {
+        optimizer: new ExtendedStylableOptimizer(),
+        ...options.generate
+      },
       optimize: {
         removeUnusedComponents: true,
         removeComments: false,
         removeStylableDirectives: true,
         classNameOptimizations: false,
-        shortNamespaces: false
+        shortNamespaces: false,
+        ...options.optimize
       },
       plugins: []
     };
+
     return {
       ...defaults,
-      ...options
+      ...options,
+      optimize: defaults.optimize,
+      bootstrap: defaults.bootstrap,
+      generate: defaults.generate
     };
   }
   createStylable(compiler) {
-    const nsProvider = function() {
-      let index = 0;
-      const namespaceMapping = {};
-      const getNamespace = meta =>
-        namespaceMapping[meta.source] ||
-        (namespaceMapping[meta.source] = "o" + index++);
-      return getNamespace;
-    };
-
-    const getNS = nsProvider();
+    const {
+      generate: { optimizer },
+      optimize
+    } = this.options;
     const stylable = new Stylable(
       compiler.context,
       compiler.inputFileSystem,
       this.options.requireModule,
       "--",
       meta => {
-        if (this.options.optimize.shortNamespaces) {
-          if (this.options.namespaceShortener) {
-            meta.namespace = this.options.namespaceShortener(
+        if (optimize.shortNamespaces) {
+          if (optimizer && optimizer.namespaceOptimizer) {
+            meta.namespace = optimizer.namespaceOptimizer.getNamespace(
               meta,
               compiler,
               this
             );
           } else {
-            meta.namespace = getNS(meta);
+            throw new Error('Missing namespaceOptimizer: "shortNamespaces"');
           }
         }
         return meta;
@@ -99,15 +115,6 @@ class StylableWebpackPlugin {
       compiler.options.resolve
     );
     return stylable;
-  }
-  apply(compiler) {
-    this.overrideOptionsWithLocalConfig(compiler.context);
-    this.stylable = this.createStylable(compiler);
-    this.injectStylableModuleRuleSet(compiler);
-    this.injectStylableCompilation(compiler);
-    this.injectStylableRuntimeInfo(compiler);
-    this.injectStylableRuntimeChunk(compiler);
-    this.injectPlugins(compiler);
   }
   injectPlugins(compiler) {
     this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
@@ -137,18 +144,27 @@ class StylableWebpackPlugin {
     this.injectStylableCSSOptimizer(compiler);
   }
   injectStylableCSSOptimizer(compiler) {
-    const used = [];
     compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
+      const used = [];
+      const usageMapping = {};
       compilation.hooks.optimizeModules.tap(
         StylableWebpackPlugin.name,
         modules => {
           modules.forEach(module => {
             if (module.type === "stylable") {
               module.buildInfo.optimize = this.options.optimize;
+              module.buildInfo.usageMapping = usageMapping;
               module.buildInfo.usedStylableModules = used;
               if (module.buildInfo.isImportedByNonStylable) {
-                used.push(module.resource);
+                used.push(module);
               }
+              if (usageMapping[module.buildInfo.stylableMeta.namespace]) {
+                throw new Error(
+                  `Duplicate module namespace: ${module.buildInfo.stylableMeta.namespace} from ${module.resource}`
+                );
+              }
+              usageMapping[module.buildInfo.stylableMeta.namespace] =
+                module.buildInfo.isImportedByNonStylable;
             }
           });
         }
@@ -177,7 +193,8 @@ class StylableWebpackPlugin {
               // if (chunk.containsModule(runtimeRendererModule)) {
               const bootstrap = new StylableBootstrapModule(
                 compiler.context,
-                runtimeRendererModule
+                runtimeRendererModule,
+                this.options.bootstrap
               );
 
               for (const module of chunk.modulesIterable) {
@@ -206,7 +223,8 @@ class StylableWebpackPlugin {
 
               const extractedBootstrap = new StylableBootstrapModule(
                 compiler.context,
-                runtimeRendererModule
+                runtimeRendererModule,
+                this.options.bootstrap
               );
 
               chunksBootstraps.forEach(([chunk, bootstrap]) => {
@@ -291,7 +309,8 @@ class StylableWebpackPlugin {
           .for("stylable")
           .tap(StylableWebpackPlugin.name, () => {
             return new StylableGenerator(this.stylable, compilation, {
-              includeCSSInJS: this.options.includeCSSInJS
+              includeCSSInJS: this.options.includeCSSInJS,
+              ...this.options.generate
             });
           });
       }
