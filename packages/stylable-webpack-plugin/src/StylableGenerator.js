@@ -1,5 +1,3 @@
-const { StylableOptimizer } = require("stylable");
-const { StylableClassNameOptimizer } = require("./classname-optimizer");
 const { ReplaceSource, OriginalSource } = require("webpack-sources");
 const { StylableImportDependency } = require("./StylableDependencies");
 const {
@@ -8,15 +6,11 @@ const {
 } = require("./runtime-dependencies");
 const { replaceUrls } = require("./utils");
 
-const optimizer = new StylableOptimizer();
-const classNameOptimizer = new StylableClassNameOptimizer();
-
 class StylableGenerator {
   constructor(stylable, compilation, options) {
     this.stylable = stylable;
     this.compilation = compilation;
     this.options = options;
-    this.optimizer = optimizer;
   }
   generate(module, dependencyTemplates, runtimeTemplate) {
     if (module.type === 'stylable-raw') {
@@ -69,26 +63,28 @@ class StylableGenerator {
       removeStylableDirectives,
       classNameOptimizations
     } = module.buildInfo.optimize;
+    
+    const optimizer = this.options.optimizer;
 
-    if (removeUnusedComponents) {
-      optimizer.removeUnusedComponents(
-        this.stylable,
-        module.buildInfo.stylableMeta,
-        module.buildInfo.usedStylableModules
-      );
-    }
     const results = this.stylable
       .createTransformer()
       .transform(module.buildInfo.stylableMeta);
 
     if (removeComments) {
-      this.optimizer.removeComments(results.meta.outputAst);
+      optimizer.removeComments(results.meta.outputAst);
     }
     if (removeStylableDirectives) {
-      this.optimizer.removeStylableDirectives(results.meta.outputAst);
+      optimizer.removeStylableDirectives(results.meta.outputAst);
+    }
+    if (removeUnusedComponents) {
+      optimizer.removeUnusedComponents(
+        this.stylable,
+        module.buildInfo.stylableMeta,
+        module.buildInfo.usageMapping
+      );
     }
     if (classNameOptimizations) {
-      classNameOptimizer.optimizeAstAndExports(
+      optimizer.classNameOptimizer.optimizeAstAndExports(
         results.meta.outputAst,
         results.exports,
         Object.keys(results.meta.classes)
