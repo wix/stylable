@@ -49,4 +49,4 @@ class WebpackStylableOptimizer extends StylableOptimizer {
   }
 }
 
-exports.ExtendedStylableOptimizer = WebpackStylableOptimizer;
+exports.WebpackStylableOptimizer = WebpackStylableOptimizer;
