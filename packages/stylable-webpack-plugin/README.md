@@ -1,10 +1,9 @@
 # Stylable webpack plugin
-The Stylable webpack plugin (for webpack v4) serves as the main build utility for **[Stylable](https://stylable.io)*. It supports both a development and production mode providing flexability through configuration. 
+The Stylable webpack plugin (for webpack v4) is the main build utility for **[Stylable](https://stylable.io)**. It supports both development and production modes providing various configurations that can be tweaked according to your specific needs. 
+It enables loading of Stylable files (`.st.css`) from your local projects or imported from a 3rd party source (for example, NPM node modules).
 
-It enables loading of Stylable files (`.st.css`) within your project or imported from a 3rd party source (for example, NPM).
-
-This plugin works by transforming all Stylable files into JavaScript modules with CSS rendering capabilities.
-In practice, every bundle will have a `Stylable bootstrap module` entrypoint that will be responsible for loading all of the transformed modules and render them onto the DOM. It orders the CSS by keeping track of the depth of each module by resolving their dependencies and component dependencies. This allows us to load dynamic stylable modules with overrides and render them in the correct order.
+The plugin works by transforming all Stylable files into JavaScript modules with CSS rendering capabilities.
+In practice, every bundle will have a `stylable-bootstrap-module` entrypoint that is responsible for loading all of the transformed modules and rendering them onto the DOM. It orders the CSS, keeping track of the depth of each module by resolving their dependencies and component dependencies. This allows us to load dynamic stylable modules with overrides and render them in the correct order.
 
 ## Stylable bootstrap module
 The `stylable-bootstrap-module` is a generated module injected to the bundle entry that ensures all Stylable modules are injected into the runtime renderer. 
@@ -12,12 +11,38 @@ The `stylable-bootstrap-module` is a generated module injected to the bundle ent
 ### Runtime renderer
 The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
 
+## Getting started
+
+Install `stylable-webpack-plugin` as a dev dependency in your local project.
+
+Install using `npm`:
+
+```bash
+npm install stylable-webpack-plugin --save-dev
+```
+
+Or install using `yarn`:
+
+```bash
+yarn add stylable-webpack-plugin --dev
+```
+
+## Sample dev config
+```js
+// webpack.config.js
+module.exports = {
+  …
+  plugins: [new StylableWebpackPlugin()]
+  …
+};
+```
+
 ## Plugin Options
 |  option | type   | default   | description   |
 |---------|:-----:|:--------:|--------------|
-| outputCSS | boolean | false | Generate css asset files per bundle |
-| filename | string | [name].bundle.css | The name of the css bundle file when outputCSS is enabled |
-| includeCSSInJS | boolean | true | include target css in the JavaScript modules (used by runtime renderer) |
+| outputCSS | boolean | false | Generate CSS asset files per bundle |
+| filename | string | [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
+| includeCSSInJS | boolean | true | include target CSS in the JavaScript modules (used by runtime renderer) |
 | createRuntimeChunk | boolean | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
 | rootScope | boolean | true | Enables automatic component root scoping |
 | bootstrap.autoInit | boolean | true | Initialize the rendering of the CSS in the browser |
@@ -30,12 +55,7 @@ The core Stylable runtime renderer in the browser is responsible for rendering s
 > * This currently is also responsible for removing empty rules, we plan exposing it seperately.
 
 ## Production configuration
-The plugin defaults into a development mode. For a production build need to configure it manually according to your specific requirements.
-
-### Sample dev config
-```js
-new StylableWebpackPlugin()
-```
+The plugin defaults into development mode. For a production build a manual configuration is needed, according to your specific requirements.
 
 ### Sample production config
 ```js
