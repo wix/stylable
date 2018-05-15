@@ -1,3 +1,5 @@
+const path = require('path');
+
 function calculateModuleDepthAndShallowStylableDependencies(
   module,
   cssDependencies = [],
@@ -80,7 +82,7 @@ function getCSSComponentLogicModule(reasons, name) {
         _module &&
         _module.type !== "stylable" &&
         _module.resource &&
-        _module.resource.indexOf(name) !== -1
+        _module.resource.slice(0, - path.extname(_module.resource).length) === name
       );
     })
     .map(({ module }) => module);
