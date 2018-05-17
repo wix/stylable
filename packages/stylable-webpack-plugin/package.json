@@ -1,6 +1,6 @@
 {
   "name": "stylable-webpack-plugin",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
