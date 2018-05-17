@@ -1,29 +1,17 @@
 export { safeParse } from './parser';
 export { cachedProcessFile, FileProcessor, MinimalFS, CacheItem } from './cached-process-file';
-export {
-    createEmptyMeta,
-    StylableMeta,
-    process,
-    SDecl,
-    SRule,
-    StylableProcessor,
-    StylableSymbol,
-    ClassSymbol,
-    ElementSymbol,
-    Imported,
-    ImportSymbol,
-    VarSymbol
-} from './stylable-processor';
+export * from './stylable-processor';
 export {
     StylableTransformer,
     StylableResults,
     Options as TransformerOptions,
     postProcessor,
     replaceValueHook,
-    TransformHooks
+    TransformHooks,
+    ResolvedElement,
+    ScopedSelectorResults
 } from './stylable-transformer';
-export { scopeSelector, expandCustomSelectors } from './stylable-utils';
-export { matchSelectorTarget } from './selector-utils';
+export * from './stylable-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createGenerator } from './generator';
