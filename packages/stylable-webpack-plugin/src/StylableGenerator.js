@@ -90,6 +90,9 @@ class StylableGenerator {
         Object.keys(results.meta.classes)
       );
     }
+    if(this.options.afterTransform) {
+      this.options.afterTransform(results, module, this.stylable);
+    }
 
     return results;
   }
