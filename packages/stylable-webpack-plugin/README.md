@@ -1,33 +1,21 @@
-# Stylable webpack plugin
-The Stylable webpack plugin (for webpack v4) is the main build utility for **[Stylable](https://stylable.io)**. It supports both development and production modes providing various configurations that can be tweaked according to your specific needs. 
-It enables loading of Stylable files (`.st.css`) from your local projects or imported from a 3rd party source (for example, NPM node modules).
+# Stylable Webpack Plugin
 
-The plugin works by transforming all Stylable files into JavaScript modules with CSS rendering capabilities.
-In practice, every bundle will have a `stylable-bootstrap-module` entrypoint that is responsible for loading all of the transformed modules and rendering them onto the DOM. It orders the CSS, keeping track of the depth of each module by resolving their dependencies and component dependencies. This allows us to load dynamic stylable modules with overrides and render them in the correct order.
-
-## Stylable bootstrap module
-The `stylable-bootstrap-module` is a generated module injected to the bundle entry that ensures all Stylable modules are injected into the runtime renderer. 
-
-### Runtime renderer
-The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
+The Stylable Webpack Plugin (for Webpack version 4x) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 
 ## Getting started
-
 Install `stylable-webpack-plugin` as a dev dependency in your local project.
 
-Install using `npm`:
-
+Install using npm:
 ```bash
 npm install stylable-webpack-plugin --save-dev
 ```
 
-Or install using `yarn`:
-
+Install using yarn:
 ```bash
 yarn add stylable-webpack-plugin --dev
 ```
 
-## Sample dev config
+ Sample dev config:
 ```js
 // webpack.config.js
 module.exports = {
@@ -36,28 +24,25 @@ module.exports = {
   …
 };
 ```
-
-## Plugin Options
-|  option | type   | default   | description   |
+## Plugin Configuration Options
+| Option	| Type	| Default	| Description |
 |---------|:-----:|:--------:|--------------|
-| outputCSS | boolean | false | Generate CSS asset files per bundle |
-| filename | string | [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
-| includeCSSInJS | boolean | true | include target CSS in the JavaScript modules (used by runtime renderer) |
+|outputCSS | boolean |	false	| Generate CSS asset files per bundle |
+|filename	| string | [name].bundle.css	| The name of the CSS bundle file when outputCSS is enabled |
+|includeCSSInJS |	boolean	| true |	Include target CSS in the JavaScript modules (used by runtime renderer) |
 | createRuntimeChunk | boolean | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
-| rootScope | boolean | true | Enables automatic component root scoping |
+| rootScope | boolean | true | Enable automatically scoping the root component |
 | bootstrap.autoInit | boolean | true | Initialize the rendering of the CSS in the browser |
-| optimize.removeUnusedComponents | boolean | true | Removes selectors that contain namespaces (classes) that are not imported by JavaScript |
-| optimize.removeComments | boolean | false | Removes CSS comments from target |
-| optimize.removeStylableDirectives | boolean | true | Removes all `-st-*` from target*  |
-| optimize.classNameOptimizations | boolean | false | Shortened all class names and replaces them in the JavaScript modules |
-| optimize.shortNamespaces | boolean | false | Shorten all namespaces, this affects the resulting `data-*` selectors and DOM attributes |
-  
-> * This currently is also responsible for removing empty rules, we plan exposing it seperately.
+| optimize.removeUnusedComponents | boolean | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
+| optimize.removeComments | boolean | false | Remove CSS comments from the target |
+| optimize.removeStylableDirectives | boolean | true | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon)  |
+| optimize.classNameOptimizations | boolean | false | Shorten all class names and replace them in the JavaScript modules |
+| optimize.shortNamespaces | boolean | false | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
 
-## Production configuration
-The plugin defaults into development mode. For a production build a manual configuration is needed, according to your specific requirements.
+> **Note:**
+> The plugin defaults into development mode. For a production build, you must use a manual configuration, according to your specific requirements.
 
-### Sample production config
+### Sample production configuration
 ```js
 new StylableWebpackPlugin({ 
     outputCSS: true, 
@@ -71,10 +56,8 @@ new StylableWebpackPlugin({
     }
 })
 ```
-
 ## Asset handling
-CSS assets are handled by `url-loader` + `file-loader` combination.
-
+CSS assets are handled by a url-loader + file-loader combination.
 ```js
  module: {
     rules: [
@@ -92,7 +75,18 @@ CSS assets are handled by `url-loader` + `file-loader` combination.
     ]
   }
 ```
-
 ## Compatibilities with existing loading mechanisms
-1. If you're using `css_loader`/`extract` make sure to exclude `.st.css` files from the process
-2. You cannot use loaders with Stylable `.st.css` files
+If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
+
+## How it works (in case you're wondering)
+The plugin transforms all Stylable files into JavaScript modules with CSS rendering capabilities. 
+
+Every bundle that contains Stylable modules is injected with a `stylable-bootstrap-module` as its entrypoint. This module is responsible for: 
+* Ensuring that all of the transformed modules are imported in the proper order. 
+* Initializing the runtime DOM renderer. 
+
+The resulting renderer orders the CSS by the depth of each module, calculated from its dependencies and component dependencies. 
+
+**Stylable bootstrap module** The `stylable-bootstrap-module` is a generated module injected into the bundle as its entrypoint and ensures all Stylable modules are injected into the runtime renderer.
+
+**Runtime DOM renderer** The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
