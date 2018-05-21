@@ -22,7 +22,6 @@ export { Stylable } from './stylable';
 export { createInfrastructure, StylableInfrastructure } from './create-infra-structure';
 export { create } from './runtime';
 export * from './types';
-export { stColor, stString, stNumber, stImage, stPercent, stSize, stCssFrag } from './types';
 export * from './stylable-mixins';
 export * from './stylable-optimizer';
 export * from './functions';

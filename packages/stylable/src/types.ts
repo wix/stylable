@@ -53,21 +53,3 @@ export interface StateParsedValue {
     defaultValue?: string;
     arguments: StateArguments;
 }
-
-export type stColor<min extends number | null = null, max extends number | null = null> = string;
-export type stSize<
-    unit extends string,
-    min extends number | null = null,
-    max extends number | null = null,
-    mults extends number | null = null> = string;
-export type stPercent<
-    min extends number | null = null,
-    max extends number | null = null,
-    mults extends number | null = null> = string;
-export type stString = string;
-export type stNumber<
-    min extends number | null = null,
-    max extends number | null = null,
-    mults extends number | null = null> = string;
-export type stImage = string;
-export type stCssFrag = string;
