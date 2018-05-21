@@ -29,21 +29,28 @@ class StylableParser {
     const meta = this.stylable.process(state.module.resource);
     state.module.buildInfo.stylableMeta = meta;
     // state.module.buildMeta.exportsType = "namespace";
+    if (!meta.assetDependencies) {
+      meta.assetDependencies = [];
 
-    replaceUrls(meta.ast, node => {
-      const resourcePath = node.url;
-      const isAbs = path.isAbsolute(resourcePath);
-      if (isAbs && resourcePath[0] === "/") {
-        node.url = path.join(state.compilation.compiler.context, resourcePath);
-        state.module.addDependency(new StylableAssetDependency(node.url));
-      } else if (isAbs) {
-        node.url = resourcePath;
-        state.module.addDependency(new StylableAssetDependency(node.url));
-      } else {
-        node.url = path.join(state.module.context, resourcePath);
-        state.module.addDependency(new StylableAssetDependency(resourcePath));
-      }
-    });
+      replaceUrls(meta.ast, node => {
+        const resourcePath = node.url;
+        const isAbs = path.isAbsolute(resourcePath);
+        if (isAbs && resourcePath[0] === "/") {
+          node.url = path.join(state.compilation.compiler.context, resourcePath);
+          meta.assetDependencies.push(node.url);
+        } else if (isAbs) {
+          node.url = resourcePath;
+          meta.assetDependencies.push(node.url);
+        } else {
+          node.url = path.join(state.module.context, resourcePath);
+          meta.assetDependencies.push(resourcePath);
+        }
+      });
+    }
+
+    meta.assetDependencies.forEach((url) => {
+      state.module.addDependency(new StylableAssetDependency(url));
+    })
 
     state.module.addDependency(new StylableExportsDependency(["default"]));
     state.module.addDependency(stylesheetDependency());
