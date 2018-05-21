@@ -34,9 +34,9 @@
     "@types/node" "*"
     "@types/tapable" "^0"
 
-"@types/mocha@^2.2.48":
-  version "2.2.48"
-  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.48.tgz#3523b126a0b049482e1c3c11877460f76622ffab"
+"@types/mocha@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.2.0.tgz#b3c8e69f038835db1a7fdc0b3d879fc50506e29e"
 
 "@types/node@*":
   version "10.1.2"

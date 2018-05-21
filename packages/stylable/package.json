@@ -31,7 +31,7 @@
     "@types/chai": "^4.1.2",
     "@types/chai-subset": "^1.3.1",
     "@types/enhanced-resolve": "^3.0.5",
-    "@types/mocha": "^2.2.48",
+    "@types/mocha": "^5.2.0",
     "@types/node": "8",
     "chai": "^4.1.2",
     "chai-subset": "^1.6.0",
