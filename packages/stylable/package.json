@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "5.3.6",
+  "version": "5.3.7",
   "description": "CSS for Components",
   "license": "BSD-3-Clause",
   "main": "./dist/src/index.js",
