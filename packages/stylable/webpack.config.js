@@ -3,7 +3,7 @@ const first = testFiles.shift();
 const withMochaLoader = [`mocha-loader!${first}`].concat(testFiles);
 
 module.exports = {
-    devtool: 'eval',
+    mode: 'development',
     entry: {
         tests: withMochaLoader
     },
@@ -14,10 +14,10 @@ module.exports = {
         extensions: ['.ts', '.tsx', '.js']
     },
     node: {
-        fs: "empty"
+        fs: 'empty'
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
