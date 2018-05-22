@@ -45,6 +45,7 @@ try {
 // The production configuration is different and lives in a separate file.
 module.exports = {
   mode: 'development',
+  devtool: 'source-map',
 
   // You may want 'eval' instead if you prefer to see the compiled output in DevTools.
   // See the discussion in https://github.com/facebookincubator/create-react-app/issues/343.
