@@ -49,6 +49,7 @@ class StylableParser {
     }
 
     meta.assetDependencies.forEach((url) => {
+      state.module.buildInfo.fileDependencies.add(url);
       state.module.addDependency(new StylableAssetDependency(url));
     })
 
@@ -57,6 +58,7 @@ class StylableParser {
     state.module.addDependency(rendererDependency());
 
     meta.imports.forEach(stylableImport => {
+      state.module.buildInfo.fileDependencies.add(stylableImport.from);
       if (stylableImport.fromRelative.match(/\.st\.css$/)) {
         state.module.addDependency(
           new StylableImportDependency(stylableImport.fromRelative, {
@@ -64,11 +66,25 @@ class StylableParser {
             names: []
           })
         );
+        this.addChildDeps(stylableImport);
       }
       //TODO: handle js dependencies?
     });
 
     return state;
+  }
+  addChildDeps(stylableImport) {
+    try {
+      this.stylable.process(stylableImport.from).imports.forEach((childImport) => {
+        const fileDependencies = state.module.buildInfo.fileDependencies;
+        if (childImport.fromRelative.match(/\.st\.css$/)) {
+          if (!fileDependencies.has(childImport.from)) {
+            fileDependencies.add(childImport.from);
+            this.addChildDeps(childImport, this.stylable)
+          }
+        }
+      })
+    } catch (e) { }
   }
 }
 
