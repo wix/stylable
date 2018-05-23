@@ -1,3 +1,4 @@
+const { EOL } = require("os");
 const { RawSource } = require("webpack-sources");
 const { Stylable } = require("stylable");
 const findConfig = require("find-config");
@@ -276,7 +277,7 @@ class StylableWebpackPlugin {
                   );
 
                   compilation.assets[cssBundleFilename] = new RawSource(
-                    cssSources.join("\n\n\n")
+                    cssSources.join(EOL + EOL + EOL)
                   );
 
                   chunk.files.push(cssBundleFilename);

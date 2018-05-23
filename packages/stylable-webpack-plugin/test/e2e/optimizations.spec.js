@@ -45,7 +45,7 @@ describe("(optimizations)", () => {
       {
         id: "./src/index.st.css",
         depth: "3",
-        css: ".s3[data-o0-x] {\r\n    font-family: MyFont\n}\n.s4 {\r\n    background: rgb(0, 0, 255)\n}"
+        css: ".s3[data-o0-x] {\n    font-family: MyFont\n}\n.s4 {\n    background: rgb(0, 0, 255)\n}"
       }
     ]);
   });

@@ -1,3 +1,4 @@
+const { EOL } = require("os");
 const Module = require("webpack/lib/Module");
 const RawSource = require("webpack-sources").RawSource;
 const { StylableImportDependency } = require("./StylableDependencies");
@@ -82,9 +83,9 @@ class StylableBootstrapModule extends Module {
         renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
       }
 
-      this.__source = new RawSource(renderingCode.join("\n"));
+      this.__source = new RawSource(renderingCode.join(EOL));
     } else {
-      this.__source = new RawSource(imports.join("\n"));
+      this.__source = new RawSource(imports.join(EOL));
     }
 
     return this.__source;

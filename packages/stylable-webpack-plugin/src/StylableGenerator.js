@@ -1,3 +1,4 @@
+const { EOL } = require("os");
 const { ReplaceSource, OriginalSource } = require("webpack-sources");
 const { StylableImportDependency } = require("./StylableDependencies");
 const {
@@ -123,16 +124,16 @@ class StylableGenerator {
         `Object.defineProperty(${
           module.exportsArgument
         }, "__esModule", { value: true })`,
-        imports.join("\n"),
+        imports.join(EOL),
         `${
           module.exportsArgument
         }.default = ${STYLESHEET_SYMBOL}.${createMethod}(`,
-        args.map(_ => "  " + _).join(",\n"),
+        args.map(_ => "  " + _).join("," + EOL),
         `);`,
         this.options.includeCSSInJS
           ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
           : ""
-      ].join("\n"),
+      ].join(EOL),
       module.resource
     );
   }
