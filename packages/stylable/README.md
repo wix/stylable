@@ -19,22 +19,8 @@ Learn more in our [Documentation Center](https://stylable.io/).
 
 There are two options for installing **Stylable**:
 
-* Write your own project based on a **Stylable** boilerplate
-* Install **Stylable** to work with an existing project as follows:
-
-Install **stylable** and **stylable-integration** as a dependency in your local project.
-
-Using npm:
-
-```bash
-npm install stylable stylable-integration --save-dev
-```
-
-Using Yarn:
-
-```bash
-yarn add stylable stylable-integration
-```
+* Write your own project based on a **Stylable** [stylable-scripts](./packages/stylable-scripts), using create-react-app
+* Install **Stylable** and its [webpack plugin](./packages/stylable-webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
