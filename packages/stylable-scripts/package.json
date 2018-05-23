@@ -2,22 +2,6 @@
   "name": "stylable-scripts",
   "version": "0.5.1",
   "description": "like react-scripts, but with stylable and typescript built-in",
-  "repository": "wixplosives/stylable-scripts",
-  "license": "MIT",
-  "engines": {
-    "node": ">=8"
-  },
-  "bugs": {
-    "url": "https://github.com/wixplosives/stylable-scripts/issues"
-  },
-  "files": [
-    "bin",
-    "config",
-    "scripts",
-    "template",
-    "tsconfig.json",
-    "tsconfig.template.json"
-  ],
   "bin": {
     "stylable-scripts": "./bin/stylable-scripts.js"
   },
@@ -49,5 +33,19 @@
     "@types/react-dom": "16",
     "react": "16",
     "react-dom": "16"
-  }
+  },
+  "files": [
+    "bin",
+    "config",
+    "scripts",
+    "template",
+    "tsconfig.json",
+    "tsconfig.template.json"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "author": "Wix.com",
+  "license": "MIT"
 }
