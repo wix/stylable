@@ -1638,7 +1638,6 @@ describe('pseudo-states', () => {
 
         });
 
-        
         describe('extends local root with states', () => {
             it('resolve states from extended local root', () => {
 

@@ -343,7 +343,6 @@ describe('stylable-resolver', () => {
         expect(res2!.symbol).to.eql(a1.classes.b);
     });
 
-
     it('should not resolve extends on alias', () => {
 
         const { resolver, fileProcessor } = generateInfra({

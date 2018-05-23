@@ -48,7 +48,6 @@
 
 // });
 
-
 // // Button
 // // Button Button
 // // Button()
@@ -60,10 +59,6 @@
 
 // // Button(value(text-color), red)
 
-
-
 // // Button(text-color "red i value(blue)")
 
-
 // // Button(red, text-color red) // error
-
