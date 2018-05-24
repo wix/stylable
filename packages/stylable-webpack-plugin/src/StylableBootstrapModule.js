@@ -52,7 +52,7 @@ class StylableBootstrapModule extends Module {
   }
   source(m, runtimeTemplate) {
     const entry = [];
-    const imports = []
+    const imports = [];
     this.dependencies.forEach(dependency => {
       const id = runtimeTemplate.moduleId({
         module: dependency.module,
