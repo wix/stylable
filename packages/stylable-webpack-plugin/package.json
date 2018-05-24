@@ -4,9 +4,9 @@
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 test/**/*.spec.js",
-    "pretest": "npm run build",
     "build": "babel src/runtime --out-dir src/runtime-es5 --presets=es2015",
+    "pretest": "yarn build",
+    "test": "mocha --timeout 10000 test/**/*.spec.js",
     "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
     "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
   },
@@ -19,15 +19,6 @@
     "find-config": "^1.0.0",
     "url-regex": "^4.1.1",
     "webpack-sources": "^1.1.0"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "express": "^4.16.3",
-    "file-loader": "^1.1.11",
-    "html-webpack-plugin": "^3.2.0",
-    "jsdom": "^11.9.0",
-    "raw-loader": "^0.5.1",
-    "url-loader": "^1.0.1"
   },
   "files": [
     "src"
