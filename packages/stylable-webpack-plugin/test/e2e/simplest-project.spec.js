@@ -31,6 +31,15 @@ describe("(simplest-project)", () => {
     expect(styleElements).to.eql([{ id: "./src/index.st.css", depth: "1" }]);
   });
 
+  it("css is injected before entry running", async () => {
+    const { page } = await projectRunner.openInBrowser();
+    const backgroundColor = await page.evaluate(() => {
+      return window.backgroundColorAtLoadTime;
+    });
+
+    expect(backgroundColor).to.eql("rgb(255, 0, 0)");
+  });
+
   it("css is working", async () => {
     const { page } = await projectRunner.openInBrowser();
     const backgroundColor = await page.evaluate(() => {

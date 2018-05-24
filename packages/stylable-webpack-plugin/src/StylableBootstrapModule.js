@@ -51,16 +51,18 @@ class StylableBootstrapModule extends Module {
     this.entryReplacement = entryReplacement;
   }
   source(m, runtimeTemplate) {
-    const imports = this.dependencies.map(dependency => {
+    const entry = [];
+    const imports = [];
+    this.dependencies.forEach(dependency => {
       const id = runtimeTemplate.moduleId({
         module: dependency.module,
         request: dependency.request
       });
       if (dependency.module === this.entryReplacement) {
         const moduleExports = `${this.moduleArgument}.${this.exportsArgument}`;
-        return `${moduleExports} = __webpack_require__(${id});`;
+        entry.push(`${moduleExports} = __webpack_require__(${id});`);
       } else {
-        return `__webpack_require__(${id});`;
+        imports.push(`__webpack_require__(${id});`);
       }
     });
 
@@ -81,6 +83,9 @@ class StylableBootstrapModule extends Module {
 
       if (this.options.autoInit) {
         renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
+      }
+      if(entry.length){
+        renderingCode.push(...entry);
       }
 
       this.__source = new RawSource(renderingCode.join(EOL));

@@ -19,7 +19,7 @@ function getStyleElementsMetadata(getCss) {
       data.theme = true;
     }
     if (getCss) {
-      data.css = styleEl.textContent;
+      data.css = styleEl.textContent.replace(/\r?\n/g, '\n');
     }
     return data;
   });
