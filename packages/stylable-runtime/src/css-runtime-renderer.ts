@@ -1,15 +1,21 @@
-const { keyedListRenderer } = require("./keyed-list-renderer");
-class RuntimeRenderer {
-  constructor() {
-    this.listeners = [];
-    this.styles = [];
-    this.stylesMap = {};
-    this.renderer = null;
-    this.window = null;
-    this.id = null;
-    this.update = this.update.bind(this);
+import { RuntimeStylesheet } from './types';
+import { createDOMListRenderer, DOMListRenderer } from './keyed-list-renderer';
+import { createCacheStyleNodeRenderer } from './cached-node-renderer';
+
+declare global {
+  interface Window {
+    __stylable_renderer_global_counter?: number 
   }
-  init(_window) {
+}
+
+export class RuntimeRenderer {
+  styles: RuntimeStylesheet[] = [];
+  stylesMap: { [id: string]: RuntimeStylesheet } = {};
+  renderer: DOMListRenderer<RuntimeStylesheet, HTMLStyleElement> | null = null;
+  window: typeof window | null = null;
+  id: number | null = null;
+
+  init(_window: typeof window) {
     if (this.window || !_window) {
       return;
     }
@@ -19,7 +25,7 @@ class RuntimeRenderer {
     this.id = _window.__stylable_renderer_global_counter++;
 
     this.window = _window;
-    this.renderer = keyedListRenderer(
+    this.renderer = createDOMListRenderer(
       createCacheStyleNodeRenderer({
         attrKey: "st-id" + (this.id ? "-" + this.id : ""),
         createElement: _window.document.createElement.bind(_window.document)
@@ -27,9 +33,9 @@ class RuntimeRenderer {
     );
     this.update();
   }
-  update() {
+  update = () => {
     if (this.renderer) {
-      this.renderer.render(this.window.document.head, this.styles);
+      this.renderer.render(this.window!.document.head, this.styles);
     }
   }
   onRegister() {
@@ -37,7 +43,7 @@ class RuntimeRenderer {
       this.window.requestAnimationFrame(this.update);
     }
   }
-  register(stylesheet) {
+  register(stylesheet: RuntimeStylesheet) {
     const registered = this.stylesMap[stylesheet.$id];
 
     if (registered) {
@@ -49,14 +55,14 @@ class RuntimeRenderer {
     this.stylesMap[stylesheet.$id] = stylesheet;
     this.onRegister();
   }
-  removeStyle(stylesheet) {
+  removeStyle(stylesheet: RuntimeStylesheet) {
     const i = this.styles.indexOf(stylesheet);
     if (~i) {
       this.styles.splice(i, 1);
     }
     delete this.stylesMap[stylesheet.$id];
   }
-  findDepthIndex(depth) {
+  findDepthIndex(depth: number) {
     let index = this.styles.length;
     while (index--) {
       const stylesheet = this.styles[index];
@@ -66,10 +72,10 @@ class RuntimeRenderer {
     }
     return index;
   }
-  getStyles(ids, sortIndexes) {
+  getStyles(ids: string[], sortIndexes: boolean) {
     return this.sortStyles(ids.map(id => this.stylesMap[id]), sortIndexes);
   }
-  sortStyles(styles, sortIndexes = false) {
+  sortStyles(styles: RuntimeStylesheet[], sortIndexes = false) {
     const s = styles.slice();
 
     sortIndexes &&
@@ -82,37 +88,3 @@ class RuntimeRenderer {
     return s;
   }
 }
-
-function createCacheStyleNodeRenderer(options) {
-  const { createElement, attrKey = "stylable-key" } = options;
-
-  const create = (stylesheet, key) => {
-    const node = createElement("style");
-    node.textContent = stylesheet.$css;
-    stylesheet.$theme && node.setAttribute("st-theme", true);
-    node.setAttribute(attrKey, key);
-    node.setAttribute("st-depth", stylesheet.$depth);
-    return node;
-  };
-
-  const update = (stylesheet, node) => {
-    if (node.textContent !== stylesheet.$css) {
-      node.textContent = stylesheet.$css;
-    }
-    return node;
-  };
-
-  const renderKey = stylesheet => stylesheet.$id;
-
-  const hasKey = node => node.hasAttribute(attrKey);
-
-  return {
-    update,
-    create,
-    renderKey,
-    hasKey
-  };
-}
-
-module.exports = new RuntimeRenderer();
-module.exports.RuntimeRenderer = RuntimeRenderer;
