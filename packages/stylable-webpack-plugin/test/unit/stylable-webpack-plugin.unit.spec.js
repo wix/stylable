@@ -14,10 +14,45 @@ describe("StylableWebpackPlugin Unit", () => {
         };
       }
     }
-    const plugin  = new Test({ test: true });
-    
+    const plugin = new Test({ test: true });
+    plugin.normalizeOptions();
     plugin.overrideOptionsWithLocalConfig('.');
 
     expect(plugin.options.fromConfig, 'from local config').to.equal(true);
+  });
+  it("should have default options for production mode", () => {
+    const plugin = new StylableWebpackPlugin();
+    plugin.normalizeOptions('production');
+    expect(plugin.options).to.deep.include({
+      outputCSS: true,
+      includeCSSInJS: false,
+      optimize: {
+        removeComments: true,
+        shortNamespaces: true,
+        classNameOptimizations: true,
+        removeStylableDirectives: true,
+        removeUnusedComponents: true
+      }
+    });
+  });
+  it("user options are stronger then default production mode", () => {
+    const plugin = new StylableWebpackPlugin({
+      outputCSS: false,
+      optimize: {
+        removeComments: false,
+      }
+    });
+    plugin.normalizeOptions('production');
+    expect(plugin.options).to.deep.include({
+      outputCSS: false,
+      includeCSSInJS: false,
+      optimize: {
+        removeComments: false,
+        shortNamespaces: true,
+        classNameOptimizations: true,
+        removeStylableDirectives: true,
+        removeUnusedComponents: true
+      }
+    });
   });
 });
