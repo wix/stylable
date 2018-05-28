@@ -525,7 +525,6 @@ export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSym
 export interface StylableMeta {
     ast: postcss.Root;
     rawAst: postcss.Root;
-    outputAst?: postcss.Root;
     root: 'root';
     source: string;
     namespace: string;
@@ -537,6 +536,8 @@ export interface StylableMeta {
     mappedSymbols: Pojo<StylableSymbol>;
     customSelectors: Pojo<string>;
     diagnostics: Diagnostics;
+    outputAst?: postcss.Root;
+    parent?: StylableMeta;
     transformDiagnostics: Diagnostics | null;
 }
 

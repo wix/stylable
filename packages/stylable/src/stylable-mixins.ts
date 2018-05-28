@@ -215,6 +215,7 @@ function handleLocalClassMixin(
 
 function createInheritedMeta(resolvedClass: CSSResolve) {
     const mixinMeta: StylableMeta = Object.create(resolvedClass.meta);
+    mixinMeta.parent = resolvedClass.meta;
     mixinMeta.mappedSymbols = Object.create(resolvedClass.meta.mappedSymbols);
     mixinMeta.mappedSymbols[resolvedClass.meta.root] = resolvedClass.meta.mappedSymbols[resolvedClass.symbol.name];
     return mixinMeta;
