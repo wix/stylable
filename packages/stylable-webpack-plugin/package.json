@@ -21,10 +21,6 @@
     "url-regex": "^4.1.1",
     "webpack-sources": "^1.1.0"
   },
-  "devDependencies": {
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0"
-  },
   "files": [
     "src"
   ],
