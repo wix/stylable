@@ -1,9 +1,9 @@
 import { RuntimeStylesheet, StateMap, AttributeMap } from './types';
 
-function create(
+export function create(
   root: string,
   namespace: string,
-  locals: { [localName: string]: string },
+  locals: Partial<RuntimeStylesheet>,
   css: string,
   depth: number,
   id: string | number
@@ -31,11 +31,11 @@ function create(
       : {};
   }
 
-  function get(localName: string): string {
+  function get(localName: string) {
     return locals[localName];
   }
 
-  function mapClasses(className: string): string {
+  function mapClasses(className: string) {
     return className
       .split(/\s+/g)
       .map(className => get(className) || className)
@@ -54,7 +54,7 @@ function create(
   function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: AttributeMap) {
     className = className ? mapClasses(className) : "";
 
-    const base = cssStates(states);
+    const base: AttributeMap = cssStates(states);
 
     if (inheritedAttributes) {
       for (const k in inheritedAttributes) {
@@ -77,12 +77,9 @@ function create(
 
   Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
 
-  return stylable_runtime_stylesheet;
+  return stylable_runtime_stylesheet as RuntimeStylesheet;
 }
 
-function createTheme(css, depth, id) {
+export function createTheme(css: string, depth: number | string, id: number | string) {
   return { $css: css, $depth: depth, $id: id, $theme: true };
 }
-
-exports.create = create;
-exports.createTheme = createTheme;

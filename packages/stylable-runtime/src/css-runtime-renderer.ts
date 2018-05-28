@@ -1,17 +1,17 @@
-import { RuntimeStylesheet } from './types';
+import { RenderableStylesheet } from './types';
 import { createDOMListRenderer, DOMListRenderer } from './keyed-list-renderer';
-import { createCacheStyleNodeRenderer } from './cached-node-renderer';
+import { CacheStyleNodeRenderer } from './cached-node-renderer';
 
 declare global {
   interface Window {
-    __stylable_renderer_global_counter?: number 
+    __stylable_renderer_global_counter?: number
   }
 }
 
 export class RuntimeRenderer {
-  styles: RuntimeStylesheet[] = [];
-  stylesMap: { [id: string]: RuntimeStylesheet } = {};
-  renderer: DOMListRenderer<RuntimeStylesheet, HTMLStyleElement> | null = null;
+  styles: RenderableStylesheet[] = [];
+  stylesMap: { [id: string]: RenderableStylesheet } = {};
+  renderer: DOMListRenderer<RenderableStylesheet, HTMLStyleElement> | null = null;
   window: typeof window | null = null;
   id: number | null = null;
 
@@ -26,7 +26,7 @@ export class RuntimeRenderer {
 
     this.window = _window;
     this.renderer = createDOMListRenderer(
-      createCacheStyleNodeRenderer({
+      new CacheStyleNodeRenderer({
         attrKey: "st-id" + (this.id ? "-" + this.id : ""),
         createElement: _window.document.createElement.bind(_window.document)
       })
@@ -43,7 +43,7 @@ export class RuntimeRenderer {
       this.window.requestAnimationFrame(this.update);
     }
   }
-  register(stylesheet: RuntimeStylesheet) {
+  register(stylesheet: RenderableStylesheet) {
     const registered = this.stylesMap[stylesheet.$id];
 
     if (registered) {
@@ -55,7 +55,7 @@ export class RuntimeRenderer {
     this.stylesMap[stylesheet.$id] = stylesheet;
     this.onRegister();
   }
-  removeStyle(stylesheet: RuntimeStylesheet) {
+  removeStyle(stylesheet: RenderableStylesheet) {
     const i = this.styles.indexOf(stylesheet);
     if (~i) {
       this.styles.splice(i, 1);
@@ -75,7 +75,7 @@ export class RuntimeRenderer {
   getStyles(ids: string[], sortIndexes: boolean) {
     return this.sortStyles(ids.map(id => this.stylesMap[id]), sortIndexes);
   }
-  sortStyles(styles: RuntimeStylesheet[], sortIndexes = false) {
+  sortStyles(styles: RenderableStylesheet[], sortIndexes = false) {
     const s = styles.slice();
 
     sortIndexes &&
@@ -88,3 +88,5 @@ export class RuntimeRenderer {
     return s;
   }
 }
+// The $ export is a convention with the webpack plugin if changed both needs a change
+export const $ = new RuntimeRenderer();

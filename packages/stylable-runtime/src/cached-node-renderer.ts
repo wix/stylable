@@ -1,39 +1,25 @@
-import { RuntimeStylesheet, NodeRenderer } from "./types";
+import { RenderableStylesheet, NodeRenderer } from "./types";
 
 export interface CachedNodeRendererOptions {
     createElement: typeof document.createElement
     attrKey: string
 }
 
-export function createCacheStyleNodeRenderer(
-    options: CachedNodeRendererOptions
-): NodeRenderer<RuntimeStylesheet, HTMLStyleElement> {
-
-    const { createElement, attrKey = "stylable-key" } = options;
-
-    const create = (stylesheet: RuntimeStylesheet, key: string) => {
-        const node = createElement("style");
+export class CacheStyleNodeRenderer implements NodeRenderer<RenderableStylesheet, HTMLStyleElement> {
+    constructor(private options: CachedNodeRendererOptions){}
+    create = (stylesheet: RenderableStylesheet, key: string) => {
+        const node = this.options.createElement("style");
         node.textContent = stylesheet.$css || '';
-        node.setAttribute(attrKey, key);
+        node.setAttribute(this.options.attrKey, key);
         node.setAttribute("st-depth", stylesheet.$depth + '');
         return node;
     };
-
-    const update = (stylesheet: RuntimeStylesheet, node: HTMLStyleElement) => {
+    hasKey = (node: HTMLStyleElement) => node.hasAttribute(this.options.attrKey);
+    update = (stylesheet: RenderableStylesheet, node: HTMLStyleElement) => {
         if (node.textContent !== stylesheet.$css) {
             node.textContent = stylesheet.$css || '';
         }
         return node;
     };
-
-    const renderKey = (stylesheet: RuntimeStylesheet) => stylesheet.$id;
-
-    const hasKey = (node: HTMLStyleElement) => node.hasAttribute(attrKey);
-
-    return {
-        update,
-        create,
-        renderKey,
-        hasKey
-    };
+    renderKey = (stylesheet: RenderableStylesheet) => stylesheet.$id;
 }
