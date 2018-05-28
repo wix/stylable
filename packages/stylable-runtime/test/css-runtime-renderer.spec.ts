@@ -1,8 +1,8 @@
 const { expect } = require("chai");
 const { JSDOM } = require("jsdom");
-const { RuntimeRenderer } = require("../../../src/runtime/css-runtime-renderer");
+import { RuntimeRenderer } from "../src/css-runtime-renderer";
 
-function test(msg, fn, only = false) {
+function test(msg: string, fn: (api: RuntimeRenderer) => void, only = false) {
   const api = new RuntimeRenderer();
   (only ? it.only : it)(msg, () => fn(api));
 }
@@ -295,11 +295,11 @@ describe("init", () => {
             </body>
         `);
 
-    const document = window.document;
+    // const document = window.document;
 
-    this.renderer = null;
-    this.window = null;
-    this.id = null;
+    // this.renderer = null;
+    // this.window = null;
+    // this.id = null;
 
     expect(api.renderer).to.equal(null);
     expect(api.window).to.equal(null);
@@ -307,7 +307,7 @@ describe("init", () => {
 
     api.init(window);
 
-    expect(typeof api.renderer.render).to.equal("function");
+    expect(typeof api.renderer!.render).to.equal("function");
     expect(api.window).to.equal(window);
     expect(api.id).to.equal(0);
   });
@@ -364,12 +364,11 @@ describe("init", () => {
     api.init(window);
     const head = document.head;
     expect(head.children.length).to.equal(1);
-    expect(head.children[0].getAttribute("st-theme")).to.equal("true");
   });
 
 });
 
-function assertStyle(node, { $css, key }) {
+function assertStyle(node: Element, { $css, key }: { $css: string, key: string }) {
   expect(node.getAttribute("st-id")).to.equal(key);
   expect(node.textContent).to.equal($css);
 }

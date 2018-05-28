@@ -66,7 +66,7 @@ class StylableBootstrapModule extends Module {
         request: this.runtimeRenderer.request
       });
       renderingCode.push(
-        `var ${RENDERER_SYMBOL} = __webpack_require__(${id});`
+        `var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`
       );
       if (this.options.globalInjection) {
         renderingCode.push(this.options.globalInjection(RENDERER_SYMBOL));

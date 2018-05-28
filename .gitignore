@@ -1,5 +1,7 @@
 # stylable
 dist
+esm
+cjs
 .vscode
 .idea
 .history

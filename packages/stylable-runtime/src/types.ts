@@ -1,20 +1,20 @@
-type StateValue = boolean | number | string;
+export type StateValue = boolean | number | string;
 
-interface StateMap {
+export interface StateMap {
     [stateName: string]: StateValue;
 }
 
-interface AttributeMap {
+export interface AttributeMap {
     className?: string
     [attributeName: string]: StateValue | undefined
 }
 
-interface InheritedAttributes {
+export interface InheritedAttributes {
     className?: string
     [props: string]: any
 }
 
-type RuntimeStylesheet = {
+export type RuntimeStylesheet = {
     (className: string, states: StateMap, inheritedAttributes: InheritedAttributes): AttributeMap
     $root: string,
     $namespace: string,
@@ -26,17 +26,15 @@ type RuntimeStylesheet = {
     $cssStates(stateMapping?: StateMap | null): StateMap;
 } & { [localName: string]: string }
 
-declare module '*.st.css' {
-    const stylesheet: RuntimeStylesheet;
-    export default stylesheet;
+export interface NodeRenderer<I, O extends Element> {
+    update(stylesheet: I, node: O): O
+    create(stylesheet: I, key: string | number): O
+    renderKey(stylesheet: I): string | number
+    hasKey(node: O): boolean
 }
 
-declare module '*.svg' {
-    const urlToFile: string;
-    export default urlToFile;
-}
-
-declare module '*.css' {
-    const stylesheet: void;
-    export default stylesheet;
+export interface RenderableStylesheet {
+    $depth: number,
+    $id: string | number,
+    $css?: string,
 }

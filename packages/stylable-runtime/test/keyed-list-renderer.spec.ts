@@ -1,19 +1,23 @@
-const { expect } = require('chai');
-const { JSDOM } = require('jsdom');
-const { keyedListRenderer } = require('../../../src/runtime/keyed-list-renderer');
+import { expect } from 'chai';
+import { createDOMListRenderer, DOMListRenderer } from '../src/keyed-list-renderer';
+import { JSDOM } from 'jsdom';
+import { NodeRenderer } from '../src/types';
 
-describe('keyedListRenderer', () => {
-    let document;
-    let render;
-    let container;
-    const basicNodeRenderer = {
+interface TestNode { key: string, value: string }
+
+describe('createDOMListRenderer', () => {
+    let document: Document;
+    let container: Element;
+    let render: DOMListRenderer<TestNode, Element, Element>["render"];
+
+    const basicNodeRenderer: NodeRenderer<TestNode, Element> = {
         renderKey({ key }) { return key },
         hasKey(node) {
             return node.hasAttribute('key')
         },
         create(dataItem, key) {
             const node = document.createElement('div')
-            node.setAttribute('key', key)
+            node.setAttribute('key', key + '')
             this.update(dataItem, node);
             return node
         },
@@ -28,9 +32,9 @@ describe('keyedListRenderer', () => {
             <body><div id="container"></div></body>
         `)
 
-        let renderer = keyedListRenderer(basicNodeRenderer)
+        let renderer = createDOMListRenderer(basicNodeRenderer)
         document = dom.window.document
-        container = document.getElementById('container')
+        container = document.getElementById('container')!
         render = renderer.render
     });
 
@@ -143,7 +147,7 @@ describe('keyedListRenderer', () => {
         expect(container.children.length).to.equal(2)
         checkNode(container.children[0], a)
         checkNode(container.children[1], c)
-        
+
         render(container, [a, b, c])
         expect(container.children.length).to.equal(3)
         checkNode(container.children[0], a)
@@ -168,7 +172,7 @@ describe('keyedListRenderer', () => {
 
 })
 
-function checkNode(node, { value, key }) {
+function checkNode(node: Element, { value, key }: TestNode) {
     expect(node.getAttribute('key')).to.equal(key)
     expect(node.textContent).to.equal(value)
 }
