@@ -13,7 +13,7 @@ function calculateModuleDepthAndShallowStylableDependencies(
   if (!module || path.includes(module)) {
     return { depth: 0, cssDependencies };
   }
-  const { resource, dependencies, reasons, type } = module;
+  const { dependencies, reasons, type } = module;
   const isCSS = type === "stylable";
 
   // +1 for CSS
@@ -30,11 +30,10 @@ function calculateModuleDepthAndShallowStylableDependencies(
       ? Math.max(...stylableModulesDepth)
       : 0;
   }
-
+  
   // Component depth
   if (reasons && isCSS) {
-    const name = resource.replace(/\.st\.css$/, "");
-    const view = getCSSComponentLogicModule(reasons, name);
+    const view = getCSSComponentLogicModule(module);
 
     if (view) {
       jsDepth = calculateModuleDepthAndShallowStylableDependencies(
@@ -75,8 +74,10 @@ function getDependenciesModuleDepth(path, cssDependencies, module, cache) {
   };
 }
 
-function getCSSComponentLogicModule(reasons, name) {
-  const views = reasons
+function getCSSComponentLogicModule(stylableModule) {
+  const name = stylableModule.resource.replace(/\.st\.css$/, "");
+
+  const views = stylableModule.reasons
     .filter(({ module: _module }) => {
       return (
         _module &&
@@ -92,4 +93,5 @@ function getCSSComponentLogicModule(reasons, name) {
   return views[0];
 }
 
+module.exports.getCSSComponentLogicModule = getCSSComponentLogicModule;
 module.exports.calculateModuleDepthAndShallowStylableDependencies = calculateModuleDepthAndShallowStylableDependencies;

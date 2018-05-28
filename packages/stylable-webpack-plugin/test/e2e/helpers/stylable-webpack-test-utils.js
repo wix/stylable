@@ -1,5 +1,5 @@
-const renderer = require("../../../src/runtime/css-runtime-renderer");
-const stylesheet = require("../../../src/runtime/css-runtime-stylesheet");
+const renderer = require("stylable-runtime/cjs/css-runtime-renderer");
+const stylesheet = require("stylable-runtime/cjs/css-runtime-stylesheet");
 
 function findModule(modules, contextPath) {
   return modules.find(
@@ -46,7 +46,7 @@ function evalStylableModule(stylableModule, requireFunction) {
     }
     if (!requireFunction) {
       throw new Error(
-        "evalStylableModule: requireFunction missing in test with javascript files or assets"
+        `evalStylableModule("${id}"): requireFunction missing in test with javascript files or assets`
       );
     }
     return requireFunction(id);

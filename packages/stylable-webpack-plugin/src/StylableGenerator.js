@@ -125,10 +125,8 @@ class StylableGenerator {
           module.exportsArgument
         }, "__esModule", { value: true })`,
         imports.join(EOL),
-        `${
-          module.exportsArgument
-        }.default = ${STYLESHEET_SYMBOL}.${createMethod}(`,
-        args.map(_ => "  " + _).join("," + EOL),
+        `${module.exportsArgument}.default = ${STYLESHEET_SYMBOL}.${createMethod}(`,
+          args.map(_ => "  " + _).join("," + EOL),
         `);`,
         this.options.includeCSSInJS
           ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
@@ -150,7 +148,7 @@ class StylableGenerator {
             request: dependency.request
           });
           imports.push(
-            `var ${dependency.defaultImport} = __webpack_require__(${id});`
+            `var ${dependency.defaultImport} = __webpack_require__(${id})${dependency.defaultImport === RENDERER_SYMBOL ? '.$' : ''};`
           );
         }
       }

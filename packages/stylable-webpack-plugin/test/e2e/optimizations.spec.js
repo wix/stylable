@@ -33,13 +33,11 @@ describe("(optimizations)", () => {
       {
         id: "./node_modules/test-components/button.st.css",
         depth: "1",
-        theme: true,
         css: ""
       },
       {
         id: "./node_modules/test-components/index.st.css",
         depth: "2",
-        theme: true,
         css: ""
       },
       {
