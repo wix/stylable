@@ -1317,7 +1317,7 @@ describe('Mixins', () => {
                         namespace: 'imported',
                         content: `
                         :import {
-                            -st-from: "./comp.st.css"; 
+                            -st-from: "./comp.st.css";
                             -st-default: Comp;
                         }
                         .part {}
@@ -1340,7 +1340,6 @@ describe('Mixins', () => {
             matchRuleAndDeclaration(result, 1, '.entry--x .comp--part', 'color: green');
 
         });
-
 
         it('apply mixin when rootScoping enabled', () => {
 
