@@ -18,10 +18,12 @@ const {
 } = require("./StylableDependencies");
 
 class StylableWebpackPlugin {
-  constructor(options) {
-    this.options = this.normalizeOptions(options);
+  constructor(options = {}) {
+    this.userOptions = options;
+    this.options = null;
   }
   apply(compiler) {
+    this.normalizeOptions(compiler.options.mode);
     this.overrideOptionsWithLocalConfig(compiler.context);
     this.stylable = this.createStylable(compiler);
     this.injectStylableModuleRuleSet(compiler);
@@ -47,7 +49,9 @@ class StylableWebpackPlugin {
     }
     return localConfigOverride;
   }
-  normalizeOptions(options = {}) {
+  normalizeOptions(mode) {
+    const options = this.userOptions;
+    const isProd = mode === 'production';
     const defaults = {
       requireModule: id => {
         delete require.cache[id];
@@ -57,8 +61,8 @@ class StylableWebpackPlugin {
       rootScope: true,
       createRuntimeChunk: false,
       filename: "[name].bundle.css",
-      outputCSS: false,
-      includeCSSInJS: true,
+      outputCSS: isProd ? true : false,
+      includeCSSInJS: isProd ? false : true,
       bootstrap: {
         autoInit: true,
         ...options.bootstrap
@@ -69,16 +73,16 @@ class StylableWebpackPlugin {
       },
       optimize: {
         removeUnusedComponents: true,
-        removeComments: false,
+        removeComments: isProd ? true : false,
         removeStylableDirectives: true,
-        classNameOptimizations: false,
-        shortNamespaces: false,
+        classNameOptimizations: isProd ? true : false,
+        shortNamespaces: isProd ? true : false,
         ...options.optimize
       },
       plugins: []
     };
 
-    return {
+    this.options = {
       ...defaults,
       ...options,
       optimize: defaults.optimize,
@@ -176,6 +180,20 @@ class StylableWebpackPlugin {
     compiler.hooks.thisCompilation.tap(
       StylableWebpackPlugin.name,
       (compilation, data) => {
+
+        compilation.mainTemplate.hooks.startup.tap(
+          StylableWebpackPlugin.name,
+          (source, chunk) => {
+            if (chunk.stylableBootstrap) {
+              const id = compilation.runtimeTemplate.moduleId({
+                module: chunk.stylableBootstrap,
+                request: chunk.stylableBootstrap.name
+              });
+              return `__webpack_require__(${id});\n${source}`
+            }
+          }
+        )
+
         compilation.hooks.optimizeChunks.tap(
           StylableWebpackPlugin.name,
           chunks => {
@@ -187,68 +205,42 @@ class StylableWebpackPlugin {
               return;
             }
 
-            const createRuntimeChunk = this.options.createRuntimeChunk;
-
-            const chunksBootstraps = [];
-            chunks.forEach(chunk => {
-              // if (chunk.containsModule(runtimeRendererModule)) {
-              const bootstrap = new StylableBootstrapModule(
-                compiler.context,
-                runtimeRendererModule,
-                this.options.bootstrap
-              );
-
-              for (const module of chunk.modulesIterable) {
-                if (module.type === "stylable") {
-                  bootstrap.addStylableModuleDependency(module);
-                }
-              }
-
-              if (bootstrap.dependencies.length) {
-                chunksBootstraps.push([chunk, bootstrap]);
-              }
-              // if (bootstrap.dependencies.length && chunk.entryModule) {
-              // chunksBootstraps.push([chunk, bootstrap]);
-              // }
-              // }
-            });
+            const chunksBootstraps = chunks.map(chunk => this.createBootstrapModule(compiler, chunk, runtimeRendererModule));
 
             if (chunksBootstraps.length === 0) {
               return;
             }
 
-            if (createRuntimeChunk) {
+            if (this.options.createRuntimeChunk) {
               const extractedStylableChunk = compilation.addChunk(
                 "stylable-css-runtime"
               );
 
               const extractedBootstrap = new StylableBootstrapModule(
                 compiler.context,
+                extractedStylableChunk,
                 runtimeRendererModule,
                 this.options.bootstrap
               );
 
-              chunksBootstraps.forEach(([chunk, bootstrap]) => {
-                chunk.split(extractedStylableChunk);
+              chunksBootstraps.forEach(bootstrap => {
+                bootstrap.chunk.split(extractedStylableChunk);
                 bootstrap.dependencies.forEach(dep => {
                   extractedBootstrap.dependencies.push(dep);
-                  chunk.moveModule(dep.module, extractedStylableChunk);
+                  bootstrap.chunk.moveModule(dep.module, extractedStylableChunk);
                 });
               });
 
               compilation.addModule(extractedBootstrap);
               connectChunkAndModule(extractedStylableChunk, extractedBootstrap);
               extractedStylableChunk.entryModule = extractedBootstrap;
+              extractedStylableChunk.stylableBootstrap = extractedBootstrap;
             } else {
-              chunksBootstraps.forEach(([chunk, bootstrap]) => {
-                // this is here for metadata to generate assets
-                chunk.stylableBootstrap = bootstrap;
-                if (chunk.entryModule) {
+              chunksBootstraps.forEach(bootstrap => {
+                bootstrap.chunk.stylableBootstrap = bootstrap;
+                if (bootstrap.chunk.entryModule) {
                   compilation.addModule(bootstrap);
-                  connectChunkAndModule(chunk, bootstrap);
-                  bootstrap.addStylableModuleDependency(chunk.entryModule);
-                  bootstrap.setEntryReplacement(chunk.entryModule);
-                  chunk.entryModule = bootstrap;
+                  connectChunkAndModule(bootstrap.chunk, bootstrap);
                 }
               });
             }
@@ -260,10 +252,7 @@ class StylableWebpackPlugin {
             StylableWebpackPlugin.name,
             chunks => {
               chunks.forEach(chunk => {
-                const bootstrap =
-                  chunk.entryModule instanceof StylableBootstrapModule
-                    ? chunk.entryModule
-                    : chunk.stylableBootstrap;
+                const bootstrap = chunk.stylableBootstrap;
 
                 if (bootstrap) {
                   const cssSources = bootstrap.renderStaticCSS(
@@ -289,6 +278,21 @@ class StylableWebpackPlugin {
       }
     );
   }
+  createBootstrapModule(compiler, chunk, runtimeRendererModule) {
+    const bootstrap = new StylableBootstrapModule(
+      compiler.context,
+      chunk,
+      runtimeRendererModule,
+      this.options.bootstrap
+    );
+    for (const module of chunk.modulesIterable) {
+      if (module.type === "stylable") {
+        bootstrap.addStylableModuleDependency(module);
+      }
+    }
+    return bootstrap;
+  }
+
   injectStylableCompilation(compiler) {
     compiler.hooks.compilation.tap(
       StylableWebpackPlugin.name,

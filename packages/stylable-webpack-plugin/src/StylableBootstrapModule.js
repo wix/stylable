@@ -10,6 +10,7 @@ const {
 class StylableBootstrapModule extends Module {
   constructor(
     context,
+    chunk,
     runtimeRenderer,
     options = {
       autoInit: true,
@@ -22,10 +23,10 @@ class StylableBootstrapModule extends Module {
     type = "stylable-bootstrap"
   ) {
     super("javascript/auto", context);
-    this.entryReplacement = null;
-    // from plugin
+    this.chunk = chunk;
     this.runtimeRenderer = runtimeRenderer;
     this.options = options;
+    // from plugin
     this.dependencies = dependencies;
     this.name = name;
     this.type = type;
@@ -47,9 +48,6 @@ class StylableBootstrapModule extends Module {
   build(options, compilation, resolver, fs, callback) {
     return callback();
   }
-  setEntryReplacement(entryReplacement) {
-    this.entryReplacement = entryReplacement;
-  }
   source(m, runtimeTemplate) {
     const entry = [];
     const imports = [];
@@ -58,12 +56,7 @@ class StylableBootstrapModule extends Module {
         module: dependency.module,
         request: dependency.request
       });
-      if (dependency.module === this.entryReplacement) {
-        const moduleExports = `${this.moduleArgument}.${this.exportsArgument}`;
-        entry.push(`${moduleExports} = __webpack_require__(${id});`);
-      } else {
-        imports.push(`__webpack_require__(${id});`);
-      }
+      imports.push(`__webpack_require__(${id});`);
     });
 
     let renderingCode = [];
@@ -84,10 +77,6 @@ class StylableBootstrapModule extends Module {
       if (this.options.autoInit) {
         renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
       }
-      if(entry.length){
-        renderingCode.push(...entry);
-      }
-
       this.__source = new RawSource(renderingCode.join(EOL));
     } else {
       this.__source = new RawSource(imports.join(EOL));

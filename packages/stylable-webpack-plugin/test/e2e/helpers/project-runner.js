@@ -126,7 +126,8 @@ class StylableProjectRunner extends ProjectRunner {
         p => p.constructor.name === "StylableWebpackPlugin"
       );
       if (plugin) {
-        plugin.options.optimize.shortNamespaces = true;
+        plugin.userOptions.optimize = plugin.userOptions.optimize || {};
+        plugin.userOptions.optimize.shortNamespaces = true;
       }
     }
     return config;
