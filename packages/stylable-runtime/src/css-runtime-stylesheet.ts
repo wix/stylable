@@ -1,4 +1,4 @@
-import { RuntimeStylesheet, StateMap, AttributeMap } from './types';
+import { RuntimeStylesheet, StateMap, AttributeMap, InheritedAttributes } from './types';
 
 export function create(
   root: string,
@@ -51,7 +51,7 @@ export function create(
   locals.$get = get;
   locals.$cssStates = cssStates;
 
-  function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: AttributeMap) {
+  function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: InheritedAttributes) {
     className = className ? mapClasses(className) : "";
 
     const base: AttributeMap = cssStates(states);

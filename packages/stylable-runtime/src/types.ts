@@ -6,11 +6,16 @@ export interface StateMap {
 
 export interface AttributeMap {
     className?: string
-    [attributeName: string]: StateValue | undefined | null
+    [attributeName: string]: StateValue | undefined
+}
+
+export interface InheritedAttributes {
+    className?: string
+    [props: string]: any
 }
 
 export type RuntimeStylesheet = {
-    (className: string, states: StateMap, inheritedAttributes: AttributeMap): AttributeMap
+    (className: string, states: StateMap, inheritedAttributes: InheritedAttributes): AttributeMap
     $root: string,
     $namespace: string,
     $depth: number,

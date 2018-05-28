@@ -1,3 +1,31 @@
+type StateValue = boolean | number | string;
+
+interface StateMap {
+    [stateName: string]: StateValue;
+}
+
+interface AttributeMap {
+    className?: string
+    [attributeName: string]: StateValue | undefined
+}
+
+interface InheritedAttributes {
+    className?: string
+    [props: string]: any
+}
+
+type RuntimeStylesheet = {
+    (className: string, states: StateMap, inheritedAttributes: InheritedAttributes): AttributeMap
+    $root: string,
+    $namespace: string,
+    $depth: number,
+    $id: string | number,
+    $css?: string,
+
+    $get(localName: string): string | undefined;
+    $cssStates(stateMapping?: StateMap | null): StateMap;
+} & { [localName: string]: string }
+
 declare module '*.st.css' {
     const stylesheet: RuntimeStylesheet;
     export default stylesheet;
@@ -12,31 +40,3 @@ declare module '*.css' {
     const stylesheet: void;
     export default stylesheet;
 }
-
-type Param = boolean | number | string;
-
-interface StateMap {
-    [key: string]: Param;
-}
-
-interface Stylesheet {
-    namespace: string;
-    root: string;
-    get: (localName: string) => string;
-    cssStates: (stateMapping: StateMap) => StateMap;
-}
-
-interface RuntimeHelpers {
-    $get: (localName: string) => string;
-    $cssStates: (stateMapping: StateMap) => StateMap;
-}
-
-type StylesheetLocals = {[key: string]: string} & {$stylesheet: Stylesheet} & RuntimeHelpers;
-type RuntimeStylesheet = StylesheetLocals & (
-    (
-        className: string,
-        states?: StateMap,
-        props?: {className?: string, [key: string]: any}
-    ) => {[key: string]: string}
-);
-
