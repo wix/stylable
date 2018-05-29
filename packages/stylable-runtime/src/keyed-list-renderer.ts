@@ -1,8 +1,8 @@
-import { NodeRenderer } from "./types";
+import { NodeRenderer } from './types';
 
 export interface DOMListRenderer<I, O extends Element, C extends Element = Element> {
-  render(container: C, data?: I[]): void
-  nodes: { [key: string]: O }
+  nodes: { [key: string]: O };
+  render(container: C, data?: I[]): void;
 }
 
 export function createDOMListRenderer<I, O extends Element, C extends Element = Element>(
@@ -17,7 +17,7 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
 
   const renderNode = (dataItem: I) => {
     const key = nodeRenderer.renderKey(dataItem);
-    let node = nodes[key];
+    const node = nodes[key];
     return node
       ? nodeRenderer.update(dataItem, node)
       : setNode(dataItem, nodeRenderer.create(dataItem, key));
@@ -27,6 +27,7 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
     let node: O;
     if (data.length) {
       let next: O | undefined = first;
+      // tslint:disable-next-line:prefer-for-of
       for (let i = 0; i < data.length; i++) {
         node = renderNode(data[i]);
         if (node !== next) {

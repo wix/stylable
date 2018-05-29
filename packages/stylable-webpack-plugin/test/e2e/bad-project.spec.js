@@ -1,10 +1,10 @@
 const { expect } = require("chai");
 const { join } = require("path");
-const { ProjectRunner } = require("./helpers/project-runner");
-const {
+const { 
+  StylableProjectRunner: ProjectRunner,
   browserFunctions,
   filterAssetResponses
-} = require("./helpers/puppeteer-helpers");
+} = require("stylable-build-test-kit");
 
 const projectFixtures = join(__dirname, "projects");
 
