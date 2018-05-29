@@ -471,7 +471,7 @@ describe('Mixins', () => {
                 }
             });
 
-            const {0: rule, 1: keyframes} = result.nodes!;
+            const { 0: rule, 1: keyframes } = result.nodes!;
             expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
             if (keyframes.type !== 'atrule') { throw new Error('expected 2nd rule to be the @keyframes'); }
             expect(keyframes.params!, 'keyframes id').to.equal('entry--abc');
@@ -1293,6 +1293,51 @@ describe('Mixins', () => {
             const media = result.nodes![2] as postcss.AtRule;
             matchRuleAndDeclaration(media, 0, '.entry--x', 'color:yellow', '@media');
             matchRuleAndDeclaration(media, 1, '.entry--x .imported--y', 'color:gold', '@media');
+
+        });
+
+        it('apply named mixin with extends and conflicting pseudo-element class at mixin deceleration level', () => {
+
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    :import {
+                        -st-from: "./imported.st.css";
+                        -st-named: mixme;
+                    }
+                    .x {
+                        -st-mixin: mixme;
+                    }
+                    `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        .part {}
+                        .mixme {
+                            -st-extends: Comp;
+                            color: red;
+                        }
+                        .mixme::part .part {
+                            color: green;
+                        }
+                    `},
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                        .part{}
+                    `
+                    }
+                }
+            });
+            matchRuleAndDeclaration(result, 1, '.entry--x .comp--part .imported--part', 'color: green');
 
         });
 

@@ -468,6 +468,16 @@ export class StylableTransformer {
                         return true;
                     }
                     nestedSymbol = symbol;
+                } else if (type === 'invalid' && node.value === '&' && current.parent) {
+                    const origin = current.mappedSymbols[current.root];
+                    const next = this.handleClass(current, {
+                        type: 'class',
+                        nodes: [],
+                        name: origin.name
+                    }, origin.name);
+                    originSymbol = current.classes[origin.name];
+                    symbol = next.symbol;
+                    current = next.meta;
                 }
                 /* do nothing */
                 return undefined;
