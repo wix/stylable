@@ -1325,7 +1325,7 @@ describe('Mixins', () => {
                             -st-extends: Comp;
                             color: red;
                         }
-                        .mixme::part {
+                        .mixme::part .part {
                             color: green;
                         }
                     `},
@@ -1337,7 +1337,7 @@ describe('Mixins', () => {
                     }
                 }
             });
-            matchRuleAndDeclaration(result, 1, '.entry--x .comp--part', 'color: green');
+            matchRuleAndDeclaration(result, 1, '.entry--x .comp--part .imported--part', 'color: green');
 
         });
 
