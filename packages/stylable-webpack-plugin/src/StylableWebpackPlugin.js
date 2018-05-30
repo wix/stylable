@@ -184,13 +184,16 @@ class StylableWebpackPlugin {
         compilation.mainTemplate.hooks.startup.tap(
           StylableWebpackPlugin.name,
           (source, chunk) => {
-            if (chunk.stylableBootstrap) {
-              const id = compilation.runtimeTemplate.moduleId({
-                module: chunk.stylableBootstrap,
-                request: chunk.stylableBootstrap.name
-              });
-              return `__webpack_require__(${id});\n${source}`
+            const runtimeRendererModule = compilation.getModule(
+              cssRuntimeRendererRequest
+            );
+
+            if (!chunk.containsModule(runtimeRendererModule)) {
+              return source;
             }
+
+            const bootstrap = this.createBootstrapModule(compiler, chunk, runtimeRendererModule);
+            return bootstrap.source(null, compilation.runtimeTemplate).source() + '\n' + source
           }
         )
 
@@ -238,10 +241,10 @@ class StylableWebpackPlugin {
             } else {
               chunksBootstraps.forEach(bootstrap => {
                 bootstrap.chunk.stylableBootstrap = bootstrap;
-                if (bootstrap.chunk.entryModule) {
-                  compilation.addModule(bootstrap);
-                  connectChunkAndModule(bootstrap.chunk, bootstrap);
-                }
+                // if (bootstrap.chunk.entryModule) {
+                //   compilation.addModule(bootstrap);
+                //   connectChunkAndModule(bootstrap.chunk, bootstrap);
+                // }
               });
             }
           }
