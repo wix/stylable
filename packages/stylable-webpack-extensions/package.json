@@ -19,7 +19,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
-    "stylable": "^5.3.9",
+    "stylable": "^5.3.10",
     "webpack": "^4.8.3",
     "webpack-sources": "^1.1.0"
   },
