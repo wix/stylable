@@ -1,5 +1,5 @@
 {
-  "name": "stylable-extensions",
+  "name": "stylable-webpack-extensions",
   "version": "1.0.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
