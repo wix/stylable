@@ -83,7 +83,7 @@ export class ProjectRunner {
     compiler.run = promisify(compiler.run);
     this.stats = await compiler.run() as any as webpack.Stats;
     if (this.throwOnBuildError && (this.stats as any).compilation.errors.length) {
-      throw new Error((this.stats as any).errors);
+      throw new Error((this.stats as any).compilation.errors.join('\n'));
     }
   }
 

@@ -14,7 +14,7 @@ describe("(project-with-assets)", () => {
       projectDir: join(projectFixtures, "project-with-assets"),
       port: 3001,
       puppeteerOptions: {
-        headless: true
+        // headless: false
       }
     },
     before,

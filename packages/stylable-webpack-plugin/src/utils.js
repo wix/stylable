@@ -21,7 +21,7 @@ function processNode(node, replaceFn) {
       break;
     case "url":
       var url = node.url;
-      if (isUrl.test(url) || url === "") {
+      if (isUrl.test(url) || url === "" || url.startsWith('data:')) {
       } else {
         replaceFn(node);
       }
