@@ -5,13 +5,13 @@ export interface StateMap {
 }
 
 export interface AttributeMap {
-    className?: string
-    [attributeName: string]: StateValue | undefined
+    className?: string;
+    [attributeName: string]: StateValue | undefined;
 }
 
 export interface InheritedAttributes {
-    className?: string
-    [props: string]: any
+    className?: string;
+    [props: string]: any;
 }
 
 export type RuntimeStylesheet = {
@@ -24,17 +24,17 @@ export type RuntimeStylesheet = {
 
     $get(localName: string): string | undefined;
     $cssStates(stateMapping?: StateMap | null): StateMap;
-} & { [localName: string]: string }
+} & { [localName: string]: string };
 
 export interface NodeRenderer<I, O extends Element> {
-    update(stylesheet: I, node: O): O
-    create(stylesheet: I, key: string | number): O
-    renderKey(stylesheet: I): string | number
-    hasKey(node: O): boolean
+    update(stylesheet: I, node: O): O;
+    create(stylesheet: I, key: string | number): O;
+    renderKey(stylesheet: I): string | number;
+    hasKey(node: O): boolean;
 }
 
 export interface RenderableStylesheet {
-    $depth: number,
-    $id: string | number,
-    $css?: string,
+    $depth: number;
+    $id: string | number;
+    $css?: string;
 }

@@ -1,4 +1,4 @@
-import { RuntimeStylesheet, StateMap, AttributeMap, InheritedAttributes } from './types';
+import { AttributeMap, InheritedAttributes, RuntimeStylesheet, StateMap } from './types';
 
 export function create(
   root: string,
@@ -9,7 +9,7 @@ export function create(
   id: string | number
 ): RuntimeStylesheet {
 
-  const dataNamespace = "data-" + namespace.toLowerCase() + "-";
+  const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
 
   function cssStates(stateMapping: StateMap) {
     return stateMapping
@@ -39,7 +39,7 @@ export function create(
     return className
       .split(/\s+/g)
       .map(className => get(className) || className)
-      .join(" ");
+      .join(' ');
   }
 
   locals.$root = root;
@@ -52,7 +52,7 @@ export function create(
   locals.$cssStates = cssStates;
 
   function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: InheritedAttributes) {
-    className = className ? mapClasses(className) : "";
+    className = className ? mapClasses(className) : '';
 
     const base: AttributeMap = cssStates(states);
 
@@ -64,7 +64,7 @@ export function create(
       }
 
       if (inheritedAttributes.className) {
-        className += " " + inheritedAttributes.className;
+        className += ' ' + inheritedAttributes.className;
       }
     }
 

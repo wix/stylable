@@ -1,12 +1,15 @@
 import * as postcss from 'postcss';
-import { nativePseudoClasses, stringifySelector, parseSelector, traverseNode, Pojo, SelectorAstNode } from 'stylable';
+import { nativePseudoClasses, parseSelector, Pojo, SelectorAstNode, stringifySelector, traverseNode } from 'stylable';
 const cloneDeep = require('lodash.clonedeep');
 
-const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name) => { acc[name] = true; return acc }, {} as Pojo<boolean>);
+const nativePseudoClassesMap = nativePseudoClasses.reduce(
+  (acc, name) => { acc[name] = true; return acc; }, {} as Pojo<boolean>);
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
-export function applyStylableForceStateSelectors(outputAst: postcss.Root, namespaceMapping = {} as Pojo<boolean>, dataPrefix = OVERRIDE_STATE_PREFIX) {
+export function applyStylableForceStateSelectors(
+  outputAst: postcss.Root, namespaceMapping = {} as Pojo<boolean>, dataPrefix = OVERRIDE_STATE_PREFIX
+) {
   const mapping: Pojo<string> = {};
   addForceStateSelectors(outputAst, {
     getForceStateAttrContentFromNative(name) {
@@ -33,39 +36,39 @@ export function applyStylableForceStateSelectors(outputAst: postcss.Root, namesp
 }
 
 export interface AddForceStateSelectorsContext {
-  getForceStateAttrContentFromNative(name: string): string
-  getForceStateAttrContent(name: string): string
-  getStateAttrName(content: string): string
-  isStateAttr(content: string): boolean
-  onMapping(key: string, value: string): void
+  getForceStateAttrContentFromNative(name: string): string;
+  getForceStateAttrContent(name: string): string;
+  getStateAttrName(content: string): string;
+  isStateAttr(content: string): boolean;
+  onMapping(key: string, value: string): void;
 }
 
 export function addForceStateSelectors(ast: postcss.Root, context: AddForceStateSelectorsContext) {
-  ast.walkRules((rule) => {
+  ast.walkRules(rule => {
     const selectorAst = parseSelector(rule.selector);
 
     const overrideSelectors = selectorAst.nodes.reduce((selectors, selector) => {
       if (hasStates(selector, context)) {
-        selectors.push(transformStates(cloneDeep(selector), context))
+        selectors.push(transformStates(cloneDeep(selector), context));
       }
       return selectors;
-    }, [] as SelectorAstNode[])
+    }, [] as SelectorAstNode[]);
 
     if (overrideSelectors.length) {
       selectorAst.nodes.push(...overrideSelectors);
       rule.selector = stringifySelector(selectorAst);
     }
 
-  })
+  });
 }
 
 function isNative(name: string) {
-  return nativePseudoClassesMap.hasOwnProperty(name)
+  return nativePseudoClassesMap.hasOwnProperty(name);
 }
 
 function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
   let hasStates = false;
-  traverseNode(selector, (node) => {
+  traverseNode(selector, node => {
     if (node.type === 'pseudo-class') {
       return hasStates = true;
     } else if (node.type === 'attribute' && context.isStateAttr(node.content!)) {
@@ -77,7 +80,7 @@ function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsCon
 }
 
 function transformStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
-  traverseNode(selector, (node) => {
+  traverseNode(selector, node => {
     if (node.type === 'pseudo-class') {
       node.type = 'attribute';
       node.content = isNative(node.name) ?
@@ -90,6 +93,6 @@ function transformStates(selector: SelectorAstNode, context: AddForceStateSelect
       node.content = context.getForceStateAttrContent(name);
       context.onMapping(name, node.content);
     }
-  })
+  });
   return selector;
 }

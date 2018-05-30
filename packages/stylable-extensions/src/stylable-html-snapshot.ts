@@ -1,13 +1,12 @@
-import * as webpack from 'webpack';
+import { createElement } from 'react';
 // import * as path from 'path';
 // import { RawSource } from 'webpack-sources';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createElement } from 'react';
+import * as webpack from 'webpack';
 // import { getCSSComponentLogicModule } from '../stylable-module-helpers';``
 
-
 export class HTMLSnapshotPlugin {
-  apply(compiler: webpack.Compiler) {
+  public apply(compiler: webpack.Compiler) {
     compiler.hooks.compilation.tap('HTMLSnapshotPlugin', compilation => {
       compilation.hooks.optimizeModules.tap(
         'HTMLSnapshotPlugin',
@@ -16,9 +15,9 @@ export class HTMLSnapshotPlugin {
         }
       );
 
-    })
+    });
   }
-  handleModule(module: any) {
+  public handleModule(module: any) {
     if (module.type === 'stylable') {
       // const component = getCSSComponentLogicModule(module);
       // if (component) {
@@ -26,8 +25,8 @@ export class HTMLSnapshotPlugin {
       // }
     }
   }
-  renderComponentHTML(componentModule: any) {
-    const mod = require(componentModule.resource)
-    return renderToStaticMarkup(createElement(mod))
+  public renderComponentHTML(componentModule: any) {
+    const mod = require(componentModule.resource);
+    return renderToStaticMarkup(createElement(mod));
   }
 }

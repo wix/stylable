@@ -1,5 +1,5 @@
-import * as webpack from 'webpack';
 import * as path from 'path';
+import * as webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 
 export interface Preset {
@@ -18,17 +18,15 @@ export interface ComponentConfig {
   previewProps: { [name: string]: any };
 }
 
-
-
 export class StylableMetadataPlugin {
   constructor(private pkg: { name: string, version: string }, private componentConfigExt = '.component.json') {
   }
-  apply(compiler: webpack.Compiler) {
-    compiler.hooks.compilation.tap("StylableMetadataPlugin", compilation => {
-      compilation.hooks.optimizeChunks.tap("StylableMetadataPlugin", chunks => {
+  public apply(compiler: webpack.Compiler) {
+    compiler.hooks.compilation.tap('StylableMetadataPlugin', compilation => {
+      compilation.hooks.optimizeChunks.tap('StylableMetadataPlugin', chunks => {
         chunks.forEach(chunk => {
           const pkg = this.pkg;
-          const packageLocation = "/node_modules/" + pkg.name;
+          const packageLocation = '/node_modules/' + pkg.name;
           const output = {
             version: pkg.version,
             name: pkg.name,
@@ -46,7 +44,7 @@ export class StylableMetadataPlugin {
             const resourcePath = normPath(module.resource, compiler.options.context);
             const resourceName = path
               .basename(resourcePath)
-              .replace(/\.st\.css$/, "");
+              .replace(/\.st\.css$/, '');
 
             maxDepth = Math.max(maxDepth, depth);
 
@@ -59,7 +57,7 @@ export class StylableMetadataPlugin {
             };
 
             let resourceDir = '';
-            let componentConfig: ComponentConfig | undefined = undefined;
+            let componentConfig: ComponentConfig | undefined;
             try {
               resourceDir = path.dirname(module.resource);
               componentConfig = JSON.parse(
@@ -69,6 +67,7 @@ export class StylableMetadataPlugin {
                   )
                   .toString()
               );
+            // tslint:disable-next-line:no-empty
             } catch (e) { }
 
             if (resourceDir && componentConfig) {
@@ -92,7 +91,7 @@ export class StylableMetadataPlugin {
                         ] = {
                             depth,
                             namespace:
-                              name.replace(".st.css", "") + "-" + namespace,
+                              name.replace('.st.css', '') + '-' + namespace,
                             source: compilation.inputFileSystem
                               .readFileSync(variantPath)
                               .toString(),
@@ -101,9 +100,9 @@ export class StylableMetadataPlugin {
                       }
                     });
                 } catch (error) {
-                  if (error.code !== "ENOENT") {
+                  if (error.code !== 'ENOENT') {
                     throw new Error(
-                      "Error while creating variants for: " + resourcePath
+                      'Error while creating variants for: ' + resourcePath
                     );
                   }
                 }
@@ -119,10 +118,10 @@ export class StylableMetadataPlugin {
                     );
                     if (!output.fs[preset.path]) {
                       throw new Error(
-                        "Missing Variant for preset: " + preset.path
+                        'Missing Variant for preset: ' + preset.path
                       );
                     }
-                  };
+                  }
                 }
               }
 
@@ -138,11 +137,11 @@ export class StylableMetadataPlugin {
               }
             }
           });
-          if (output.fs[packageLocation + "/index.st.css"]) {
-            throw new Error("duplicate index");
+          if (output.fs[packageLocation + '/index.st.css']) {
+            throw new Error('duplicate index');
           }
 
-          output.fs[packageLocation + "/index.st.css"] = {
+          output.fs[packageLocation + '/index.st.css'] = {
             depth: maxDepth,
             namespace: chunk.name,
             source: Object.keys(output.components)
@@ -151,7 +150,7 @@ export class StylableMetadataPlugin {
                   output.components[name].stylesheetPath.replace(packageLocation, '.')
                   }"; -st-default: ${name}} ${name}{}`;
               })
-              .join("\n")
+              .join('\n')
           };
 
           if (stylableModules.length) {
@@ -163,12 +162,12 @@ export class StylableMetadataPlugin {
       });
     });
   }
-};
-
-function getStylableModules(chunk: webpack.compilation.Chunk) {
-  return Array.from(chunk.modulesIterable).filter(module => module.type === "stylable");
 }
 
-function normPath(resource: string, context = "") {
-  return resource.replace(context, "").replace(/\\/g, "/");
+function getStylableModules(chunk: webpack.compilation.Chunk) {
+  return Array.from(chunk.modulesIterable).filter(module => module.type === 'stylable');
+}
+
+function normPath(resource: string, context = '') {
+  return resource.replace(context, '').replace(/\\/g, '/');
 }

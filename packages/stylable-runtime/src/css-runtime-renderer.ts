@@ -1,21 +1,21 @@
-import { RenderableStylesheet } from './types';
-import { createDOMListRenderer, DOMListRenderer } from './keyed-list-renderer';
 import { CacheStyleNodeRenderer } from './cached-node-renderer';
+import { createDOMListRenderer, DOMListRenderer } from './keyed-list-renderer';
+import { RenderableStylesheet } from './types';
 
 declare global {
   interface Window {
-    __stylable_renderer_global_counter?: number
+    __stylable_renderer_global_counter?: number;
   }
 }
 
 export class RuntimeRenderer {
-  styles: RenderableStylesheet[] = [];
-  stylesMap: { [id: string]: RenderableStylesheet } = {};
-  renderer: DOMListRenderer<RenderableStylesheet, HTMLStyleElement> | null = null;
-  window: typeof window | null = null;
-  id: number | null = null;
+  public styles: RenderableStylesheet[] = [];
+  public stylesMap: { [id: string]: RenderableStylesheet } = {};
+  public renderer: DOMListRenderer<RenderableStylesheet, HTMLStyleElement> | null = null;
+  public window: typeof window | null = null;
+  public id: number | null = null;
 
-  init(_window: typeof window) {
+  public init(_window: typeof window) {
     if (this.window || !_window) {
       return;
     }
@@ -27,23 +27,23 @@ export class RuntimeRenderer {
     this.window = _window;
     this.renderer = createDOMListRenderer(
       new CacheStyleNodeRenderer({
-        attrKey: "st-id" + (this.id ? "-" + this.id : ""),
+        attrKey: 'st-id' + (this.id ? '-' + this.id : ''),
         createElement: _window.document.createElement.bind(_window.document)
       })
     );
     this.update();
   }
-  update = () => {
+  public update = () => {
     if (this.renderer) {
       this.renderer.render(this.window!.document.head, this.styles);
     }
   }
-  onRegister() {
+  public onRegister() {
     if (this.window) {
       this.window.requestAnimationFrame(this.update);
     }
   }
-  register(stylesheet: RenderableStylesheet) {
+  public register(stylesheet: RenderableStylesheet) {
     const registered = this.stylesMap[stylesheet.$id];
 
     if (registered) {
@@ -55,14 +55,14 @@ export class RuntimeRenderer {
     this.stylesMap[stylesheet.$id] = stylesheet;
     this.onRegister();
   }
-  removeStyle(stylesheet: RenderableStylesheet) {
+  public removeStyle(stylesheet: RenderableStylesheet) {
     const i = this.styles.indexOf(stylesheet);
     if (~i) {
       this.styles.splice(i, 1);
     }
     delete this.stylesMap[stylesheet.$id];
   }
-  findDepthIndex(depth: number) {
+  public findDepthIndex(depth: number) {
     let index = this.styles.length;
     while (index--) {
       const stylesheet = this.styles[index];
@@ -72,16 +72,18 @@ export class RuntimeRenderer {
     }
     return index;
   }
-  getStyles(ids: string[], sortIndexes: boolean) {
+  public getStyles(ids: string[], sortIndexes: boolean) {
     return this.sortStyles(ids.map(id => this.stylesMap[id]), sortIndexes);
   }
-  sortStyles(styles: RenderableStylesheet[], sortIndexes = false) {
+  public sortStyles(styles: RenderableStylesheet[], sortIndexes = false) {
     const s = styles.slice();
 
-    sortIndexes &&
+    if (sortIndexes) {
       s.sort((a, b) => {
         return this.styles.indexOf(a) - this.styles.indexOf(b);
       });
+    }
+
     s.sort((a, b) => {
       return a.$depth - b.$depth;
     });
