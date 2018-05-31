@@ -8,7 +8,7 @@ import {
     reservedKeyFrames
 } from '../src/native-reserved-lists';
 import { safeParse } from '../src/parser';
-import { process } from '../src/stylable-processor';
+import { process, warnings } from '../src/stylable-processor';
 import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 import {
@@ -789,6 +789,63 @@ describe('diagnostics: warnings and errors', () => {
             );
         });
 
+        describe('root scoping disabled', () => {
+            it('should not warn when using native elements with root scoping', () => {
+                expectWarnings(`
+                    .root button {}
+                `, []);
+            });
+
+            it('should not warn when using native elements with root scoping', () => {
+                expectWarnings(`
+                    .class {}
+                    .class button {}
+                `, []);
+            });
+
+            it('should not warn when using imported elements (classes) with scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: Blah;
+                    }
+
+                    |$Blah$| {}
+                `, []);
+            });
+
+            it('should not warn when using imported elements (classes) with scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: Blah;
+                    }
+
+                    |.$Blah$| {}
+                `, []);
+            });
+
+            it('should warn when using native elements without scoping', () => {
+                expectWarnings(`
+                    |$button$| {}
+                `, [
+                    { message: warnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
+                ]);
+            });
+
+            it('should warn when using imported elements (classes) without scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: blah;
+                    }
+
+                    |.$blah$| {}
+                `, [
+                    { message: warnings.UNSCOPED_CLASS('blah'), file: 'main.css' }
+                ]);
+            });
+        });
     });
 
     describe('transforms', () => {
@@ -861,7 +918,7 @@ describe('diagnostics: warnings and errors', () => {
                             }|
 
                             .Imported{}
-                            .inner-class{}
+                            .root .inner-class{}
                         `
                     },
                     '/imported.st.css': {

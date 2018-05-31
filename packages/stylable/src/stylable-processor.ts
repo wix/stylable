@@ -4,6 +4,8 @@ import { Diagnostics } from './diagnostics';
 import {
     createRootAfterSpaceChecker,
     createSimpleSelectorChecker,
+    isChildOfAtRule,
+    isCompRoot,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -21,6 +23,13 @@ const parseCompose = SBTypesParsers[valueMapping.compose];
 const parseTheme = SBTypesParsers[valueMapping.theme];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
+
+/* tslint:disable:max-line-length */
+export const warnings = {
+    UNSCOPED_CLASS(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
+    UNSCOPED_ELEMENT(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; }
+};
+/* tslint:enable:max-line-length */
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
     const reservedRootName = 'root';
@@ -83,8 +92,10 @@ export class StylableProcessor {
         const stubs = this.insertCustomSelectorsStubs();
 
         root.walkRules((rule: SRule) => {
-            this.handleCustomSelectors(rule);
-            this.handleRule(rule);
+            if (!isChildOfAtRule(rule, 'keyframes')) {
+                this.handleCustomSelectors(rule);
+                this.handleRule(rule);
+            }
         });
 
         root.walkDecls(decl => {
@@ -149,8 +160,9 @@ export class StylableProcessor {
 
         const checker = createSimpleSelectorChecker();
         const isValidRootUsage = createRootAfterSpaceChecker();
+        let locallyScoped: boolean = false;
 
-        traverseNode(rule.selectorAst, (node, index, nodes) => {
+        traverseNode(rule.selectorAst, (node, _index, _nodes) => {
             isValidRootUsage(node);
             if (!checker(node)) {
                 rule.isSimpleSelector = false;
@@ -176,11 +188,19 @@ export class StylableProcessor {
                 }
             } else if (type === 'class') {
                 this.addClassSymbolOnce(name, rule);
+
+                if (this.meta.classes[name]) {
+                    if (!this.meta.classes[name].alias) {
+                        locallyScoped = true;
+                    } else if (locallyScoped === false && !isCompRoot(name)) {
+                        this.diagnostics.warn(rule, warnings.UNSCOPED_CLASS(name), { word: name });
+                    }
+                }
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
-                const prev = nodes[index - 1];
-                if (prev) {
-                    /*TODO: maybe warn on element that is not a direct child div vs > div*/
+
+                if (locallyScoped === false && !isCompRoot(name)) {
+                    this.diagnostics.warn(rule, warnings.UNSCOPED_ELEMENT(name), { word: name });
                 }
             }
             return void 0;
@@ -207,7 +227,7 @@ export class StylableProcessor {
     }
 
     protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
-        if (name.charAt(0).match(/[A-Z]/) && !this.meta.elements[name]) {
+        if (isCompRoot(name) && !this.meta.elements[name]) {
             let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
             if (alias && alias._kind !== 'import') {
                 this.checkRedeclareSymbol(name, rule);

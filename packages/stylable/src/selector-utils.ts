@@ -1,3 +1,4 @@
+import * as postcss from 'postcss';
 const tokenizer = require('css-selector-tokenizer');
 
 export interface SelectorAstNode {
@@ -237,4 +238,12 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
         }
         return undefined;
     });
+}
+
+export function isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
+    return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
+}
+
+export function isCompRoot(name: string) {
+    return name.charAt(0).match(/[A-Z]/);
 }
