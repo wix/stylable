@@ -8,7 +8,7 @@ import {
     reservedKeyFrames
 } from '../src/native-reserved-lists';
 import { safeParse } from '../src/parser';
-import { process, warnings } from '../src/stylable-processor';
+import { process, processorWarnings } from '../src/stylable-processor';
 import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 import {
@@ -247,6 +247,29 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(`
                     |.gaga .root|{}
                 `, [{ message: '.root class cannot be used after spacing', file: 'main.css' }]);
+            });
+
+            it('should return warning for ".root" after global and local classes', () => {
+                expectWarnings(`
+                    |:global(*) .x .root|{}
+                `, [
+                    { message: '.root class cannot be used after spacing', file: 'main.css' }
+                ]);
+            });
+
+            it('should return warning for ".root" after global and element', () => {
+                expectWarnings(`
+                    |:global(*) div .root|{}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
+                    { message: '.root class cannot be used after spacing', file: 'main.css' }
+                ]);
+            });
+
+            it('should not return warning for ".root" after global selector', () => {
+                expectWarnings(`
+                    :global(*) .root{}
+                `, []);
             });
         });
 
@@ -796,25 +819,14 @@ describe('diagnostics: warnings and errors', () => {
                 `, []);
             });
 
-            it('should not warn when using native elements with root scoping', () => {
+            it('should not warn when using native elements after scoping', () => {
                 expectWarnings(`
                     .class {}
                     .class button {}
                 `, []);
             });
 
-            it('should not warn when using imported elements (classes) with scoping', () => {
-                expectWarnings(`
-                    :import {
-                        -st-from: "./blah.st.css";
-                        -st-named: Blah;
-                    }
-
-                    |$Blah$| {}
-                `, []);
-            });
-
-            it('should not warn when using imported elements (classes) with scoping', () => {
+            it('should warn when using imported elements (classes) without scoping', () => {
                 expectWarnings(`
                     :import {
                         -st-from: "./blah.st.css";
@@ -822,14 +834,38 @@ describe('diagnostics: warnings and errors', () => {
                     }
 
                     |.$Blah$| {}
-                `, []);
+                `, [
+                    { message: processorWarnings.UNSCOPED_CLASS('Blah'), file: 'main.css' }
+
+                ]);
+            });
+
+            it('should warn regardless if using a global before the element', () => {
+                expectWarnings(`
+                    |:global(div) $button$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
+                ]);
+            });
+
+            it('should warn when using imported element', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-default: Blah;
+                    }
+
+                    |$Blah$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('Blah'), file: 'main.css' }
+                ]);
             });
 
             it('should warn when using native elements without scoping', () => {
                 expectWarnings(`
                     |$button$| {}
                 `, [
-                    { message: warnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
+                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
                 ]);
             });
 
@@ -842,7 +878,7 @@ describe('diagnostics: warnings and errors', () => {
 
                     |.$blah$| {}
                 `, [
-                    { message: warnings.UNSCOPED_CLASS('blah'), file: 'main.css' }
+                    { message: processorWarnings.UNSCOPED_CLASS('blah'), file: 'main.css' }
                 ]);
             });
         });
@@ -917,7 +953,7 @@ describe('diagnostics: warnings and errors', () => {
                                 -st-named: $inner-class$;
                             }|
 
-                            .Imported{}
+                            .root .Imported{}
                             .root .inner-class{}
                         `
                     },

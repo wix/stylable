@@ -6,6 +6,7 @@ import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
+    isGlobal,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -25,7 +26,7 @@ const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
 /* tslint:disable:max-line-length */
-export const warnings = {
+export const processorWarnings = {
     UNSCOPED_CLASS(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
     UNSCOPED_ELEMENT(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; }
 };
@@ -159,11 +160,10 @@ export class StylableProcessor {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
-        const isValidRootUsage = createRootAfterSpaceChecker();
+        const isValidRootUsage = createRootAfterSpaceChecker(rule.selectorAst, 'root');
         let locallyScoped: boolean = false;
 
         traverseNode(rule.selectorAst, (node, _index, _nodes) => {
-            isValidRootUsage(node);
             if (!checker(node)) {
                 rule.isSimpleSelector = false;
             }
@@ -192,16 +192,18 @@ export class StylableProcessor {
                 if (this.meta.classes[name]) {
                     if (!this.meta.classes[name].alias) {
                         locallyScoped = true;
-                    } else if (locallyScoped === false && !isCompRoot(name)) {
-                        this.diagnostics.warn(rule, warnings.UNSCOPED_CLASS(name), { word: name });
+                    } else if (locallyScoped === false) {
+                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), { word: name });
                     }
                 }
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
 
-                if (locallyScoped === false && !isCompRoot(name)) {
-                    this.diagnostics.warn(rule, warnings.UNSCOPED_ELEMENT(name), { word: name });
+                if (locallyScoped === false) {
+                    this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), { word: name });
                 }
+            } else if (type === 'nested-pseudo-class' && name === 'global') {
+                return true;
             }
             return void 0;
         });
@@ -213,7 +215,7 @@ export class StylableProcessor {
             rule.selectorType = 'complex';
         }
 
-        if (!isValidRootUsage()) {
+        if (!isValidRootUsage) {
             this.diagnostics.warn(rule, '.root class cannot be used after spacing');
         }
 

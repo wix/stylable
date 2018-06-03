@@ -75,22 +75,47 @@ export function createChecker(types: Array<string | string[]>) {
     };
 }
 
-export function createRootAfterSpaceChecker() {
-    let hasSpacing = false;
+export function isSpacing(node: SelectorAstNode) {
+    return node.type === 'spacing';
+}
+
+export function isElement(node: SelectorAstNode) {
+    return node.type === 'element';
+}
+
+export function isClass(node: SelectorAstNode) {
+    return node.type === 'class';
+}
+
+export function isGlobal(node: SelectorAstNode) {
+    return node.type === 'nested-pseudo-class' && node.name === 'global';
+}
+
+export function createRootAfterSpaceChecker(ast: SelectorAstNode, rootName: string) {
     let isValid = true;
-    return (node?: SelectorAstNode) => {
-        if (!node) {
-            return isValid;
+
+    traverseNode(ast, (node, index, nodes) => {
+        if (node.type === 'nested-pseudo-class') {
+            return true;
         }
-        if (node.type === 'selector') {
-            hasSpacing = false;
-        } else if (node.type === 'spacing') {
-            hasSpacing = true;
-        } else if (node.type === 'class' && node.name === 'root' && hasSpacing) {
-            isValid = false;
+        if (node.type === 'class' && node.name === rootName) {
+            let isLastScopeGlobal = false;
+            for (let i = 0; i < index; i++) {
+                const p = nodes[i];
+                if (isGlobal(p)) {
+                    isLastScopeGlobal = true;
+                }
+                if (isSpacing(p) && !isLastScopeGlobal) {
+                    isValid = false;
+                }
+                if (isElement(p) || (isClass(p) && p.value !== 'root')) {
+                    isLastScopeGlobal = false;
+                }
+            }
         }
-        return isValid;
-    };
+        return undefined;
+    });
+    return isValid;
 }
 
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);

@@ -1,7 +1,7 @@
 import { expect, use } from 'chai';
 import chaiSubset = require('chai-subset');
 import * as postcss from 'postcss';
-import { valueMapping } from '../src/index';
+import { processorWarnings, valueMapping } from '../src/index';
 import { nativeFunctionsDic, nativePseudoClasses } from '../src/native-reserved-lists';
 import { mediaQuery, styleRules } from './matchers/results';
 import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
@@ -1499,7 +1499,7 @@ describe('pseudo-states', () => {
                                     -st-from: "./index.st.css";
                                     -st-named: Element;
                                 }
-                                Element:disabled{}
+                                .root Element:disabled{}
                             `
                         },
                         '/index.st.css': {
@@ -1509,7 +1509,7 @@ describe('pseudo-states', () => {
                                     -st-from: "./element.st.css";
                                     -st-default: Element;
                                 }
-                                Element{}
+                                .root Element{}
                             `
                         },
                         '/element.st.css': {
@@ -1525,7 +1525,7 @@ describe('pseudo-states', () => {
 
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    0: '.element--root[data-element-disabled]{}'
+                    0: '.entry--root .element--root[data-element-disabled]{}'
                 });
 
             });
@@ -1761,10 +1761,14 @@ describe('pseudo-states', () => {
                 MyElement {
                     |-st-states|:shmover;
                 }
-            `, [{ message: 'cannot define pseudo states inside element selectors', file: 'main.css' }]);
+            `, [
+                // skipping root scoping warning
+                { message: processorWarnings.UNSCOPED_ELEMENT('MyElement'), file: 'main.css', skip: true },
+                { message: 'cannot define pseudo states inside element selectors', file: 'main.css' }
+            ]);
         });
 
-        it('should warn when overriding class states', () => { // TODO: move to pseudo-states spec
+        it('should warn when overriding class states', () => {
             expectWarnings(`
                 .root {
                     -st-states: mystate;
