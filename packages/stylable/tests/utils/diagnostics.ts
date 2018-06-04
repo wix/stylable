@@ -9,6 +9,7 @@ export interface Diagnostic {
     message: string;
     file: string;
     skipLocationCheck?: boolean;
+    skip?: boolean;
 }
 
 export function findTestLocations(css: string) {
@@ -49,6 +50,8 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
     const res = process(root);
 
     res.diagnostics.reports.forEach((report, i) => {
+        if (warnings[i].skip) { return; }
+
         expect(report.message).to.equal(warnings[i].message);
         expect(report.node.source.start, 'start').to.eql(source.start);
         if (source.word !== null) {

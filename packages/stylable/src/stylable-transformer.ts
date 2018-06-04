@@ -11,7 +11,7 @@ import {
     transformPseudoStateSelector,
     validateStateDefinition
 } from './pseudo-states';
-import { parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import { isChildOfAtRule, parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import { removeSTDirective } from './stylable-optimizer';
 import {
@@ -131,7 +131,7 @@ export class StylableTransformer {
         const keyframeMapping = this.scopeKeyframes(ast, meta);
 
         ast.walkRules((rule: SRule) => {
-            if (this.isChildOfAtRule(rule, 'keyframes')) { return; }
+            if (isChildOfAtRule(rule, 'keyframes')) { return; }
             rule.selector = this.scopeRule(meta, rule, scopeRoot, metaExports);
         });
 
@@ -180,10 +180,6 @@ export class StylableTransformer {
             this.exportLocalVars(meta, metaExports, variableOverride);
             this.exportKeyframes(keyframeMapping, metaExports);
         }
-
-    }
-    public isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
-        return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
     }
     public exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>, variableOverride?: Pojo<string>) {
         meta.vars.forEach(varSymbol => {

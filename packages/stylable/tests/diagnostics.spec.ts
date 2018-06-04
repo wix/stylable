@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { resolve } from 'path';
-import { Diagnostics } from '../src';
+import { Diagnostics, valueMapping } from '../src';
 import {
     nativeFunctionsDic,
     nativePseudoClasses,
@@ -8,7 +8,7 @@ import {
     reservedKeyFrames
 } from '../src/native-reserved-lists';
 import { safeParse } from '../src/parser';
-import { process } from '../src/stylable-processor';
+import { process, processorWarnings } from '../src/stylable-processor';
 import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 import {
@@ -243,10 +243,39 @@ describe('diagnostics: warnings and errors', () => {
     describe('structure', () => {
 
         describe('root', () => {
-            it('should return warning for ".root" after selector', () => {
+            it('should return warning for ".root" after a selector', () => {
                 expectWarnings(`
                     |.gaga .root|{}
-                `, [{ message: '.root class cannot be used after spacing', file: 'main.css' }]);
+                `, [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]);
+            });
+
+            it('should return warning for ".root" after global and local classes', () => {
+                expectWarnings(`
+                    |:global(*) .x .root|{}
+                `, [
+                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
+                ]);
+            });
+
+            it('should return warning for ".root" after a global and element', () => {
+                expectWarnings(`
+                    |:global(*) div .root|{}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
+                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
+                ]);
+            });
+
+            it('should not return warning for ".root" after a global selector', () => {
+                expectWarnings(`
+                    :global(*) .root{}
+                `, []);
+            });
+
+            it('should not return warning for ".root" after a complex global selector', () => {
+                expectWarnings(`
+                    :global(body[dir="rtl"] > header) .root {}
+                `, []);
             });
         });
 
@@ -392,7 +421,7 @@ describe('diagnostics: warnings and errors', () => {
                     myColor:red;
                 }
 
-                `, [{ message: 'cannot define ":vars" inside a complex selector', file: 'main.css' }]);
+                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':vars'), file: 'main.css' }]);
             });
         });
 
@@ -402,7 +431,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga:hover{
                         |-st-variant|:true;
                     }
-                `, [{ message: 'cannot define "-st-variant" inside complex selector', file: 'main.css' }]);
+                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-variant'), file: 'main.css' }]);
             });
 
             it('should return warning when -st-variant value is not true or false', () => {
@@ -422,31 +451,41 @@ describe('diagnostics: warnings and errors', () => {
             it('should return warning when defined in a complex selector', () => {
                 expectWarnings(`
                     |.gaga:import|{
-                        -st-from:"./file";
+                        -st-from:"./file.st.css";
                         -st-default:Theme;
                     }
-                `, [{ message: 'cannot define ":import" inside a complex selector', file: 'main.css' }]);
+                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'), file: 'main.css' }]);
             });
+
+            it('should return warning when default import is defined with a lowercase first letter', () => {
+                expectWarnings(`
+                    |:import{
+                        -st-from:"./file.st.css";
+                        -st-default: $theme$;
+                    }|
+                `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
+            });
+
             it('should return warning for non import rules inside imports', () => {
                 const config = {
-                    entry: '/main.css',
+                    entry: '/main.st.css',
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import{
-                                -st-from:"./file.css";
+                                -st-from:"./file.st.css";
                                 -st-default:Comp;
                                 |$color$:red;|
                             }
                           `
                         },
-                        'file.css': {
+                        '/file.st.css': {
                             content: customButton
                         }
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: `'color' css attribute cannot be used inside :import block`, file: '/main.css' }]);
+                    [{ message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'), file: '/main.st.css' }]);
             });
 
             it('should return warning for import with missing "from"', () => {
@@ -455,7 +494,7 @@ describe('diagnostics: warnings and errors', () => {
                     |:import{
                         -st-default:Comp;
                     }
-                `, [{ message: `'-st-from' is missing in :import block`, file: 'main.css' }]
+                `, [{ message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(), file: 'main.st.css' }]
                 );
 
             });
@@ -472,9 +511,7 @@ describe('diagnostics: warnings and errors', () => {
                     .root:hover{
                         |-st-extends|:Comp;
                     }
-                `, [{ message: 'cannot define "-st-extends" inside a complex selector', file: 'main.css' }]
-                );
-
+                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'), file: 'main.css' }]);
             });
 
             it('Only import of type class can be used to extend', () => {
@@ -559,10 +596,10 @@ describe('diagnostics: warnings and errors', () => {
                             content: `
                             :import {
                                 |-st-from: $'./file.css'$|;
-                                -st-default: special;
+                                -st-default: Special;
                             }
                             .myclass {
-                                -st-extends: special
+                                -st-extends: Special
                             }
                             `
                         }
@@ -587,7 +624,9 @@ describe('diagnostics: warnings and errors', () => {
                     .root {
                         |-st-extends: Comp;|
                     }
-                `, [{ message: 'override "-st-extends" on typed rule "root"', file: 'main.css' }]);
+                `, [
+                    { message: processorWarnings.OVERRIDE_TYPED_RULE(valueMapping.extends, 'root'), file: 'main.css' }
+                ]);
             });
         });
     });
@@ -611,7 +650,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: 'override mixin on same rule', file: '/main.css' }]);
+            expectWarningsFromTransform(config, [{ message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' }]);
         });
 
         describe('from import', () => {
@@ -649,35 +688,35 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(`
                     |:import {
                         -st-from: './file.css';
-                        -st-default: name;
-                        -st-named: $name$;
+                        -st-default: Name;
+                        -st-named: $Name$;
                     }
-                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block)', () => {
                 expectWarnings(`
                     :import {
                         -st-from: './file.css';
-                        -st-default: name;
+                        -st-default: Name;
                     }
                     |:import {
                         -st-from: './file.css';
-                        -st-default: $name$;
+                        -st-default: $Name$;
                     }
-                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block types)', () => {
                 expectWarnings(`
                     :import {
                         -st-from: './file.css';
-                        -st-default: name;
+                        -st-default: Name;
                     }
                     :vars {
-                        |$name$: red;
+                        |$Name$: red;
                     }
-                `, [{ message: 'redeclare symbol "name"', file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
             });
 
         });
@@ -789,6 +828,76 @@ describe('diagnostics: warnings and errors', () => {
             );
         });
 
+        describe('root scoping disabled', () => {
+            it('should not warn when using native elements with root scoping', () => {
+                expectWarnings(`
+                    .root button {}
+                `, []);
+            });
+
+            it('should not warn when using native elements after scoping', () => {
+                expectWarnings(`
+                    .class {}
+                    .class button {}
+                `, []);
+            });
+
+            it('should warn when using imported elements (classes) without scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: Blah;
+                    }
+
+                    |.$Blah$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_CLASS('Blah'), file: 'main.css' }
+
+                ]);
+            });
+
+            it('should warn regardless if using a global before the element', () => {
+                expectWarnings(`
+                    |:global(div) $button$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
+                ]);
+            });
+
+            it('should warn when using imported element with no root scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-default: Blah;
+                    }
+
+                    |$Blah$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('Blah'), file: 'main.css' }
+                ]);
+            });
+
+            it('should warn when using native elements without scoping', () => {
+                expectWarnings(`
+                    |$button$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
+                ]);
+            });
+
+            it('should warn when using imported elements (classes) without scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: blah;
+                    }
+
+                    |.$blah$| {}
+                `, [
+                    { message: processorWarnings.UNSCOPED_CLASS('blah'), file: 'main.css' }
+                ]);
+            });
+        });
     });
 
     describe('transforms', () => {
@@ -860,8 +969,8 @@ describe('diagnostics: warnings and errors', () => {
                                 -st-named: $inner-class$;
                             }|
 
-                            .Imported{}
-                            .inner-class{}
+                            .root .Imported{}
+                            .root .inner-class{}
                         `
                     },
                     '/imported.st.css': {
@@ -875,26 +984,26 @@ describe('diagnostics: warnings and errors', () => {
 
         it('should not add warning when compose value is a string', () => {
             const config = {
-                entry: '/main.css',
+                entry: '/main.st.css',
                 files: {
-                    '/main.css': {
+                    '/main.st.css': {
                         content: `
                         :import {
-                            -st-from: "./imported.css";
-                            -st-default: myCompose;
+                            -st-from: "./imported.st.css";
+                            -st-default: MyCompose;
                         }
                         .container {
-                            |-st-compose: $"myCompose"$|;
+                            |-st-compose: $"MyCompose"$|;
                         }
                         `
                     },
-                    '/imported.css': {
+                    '/imported.st.css': {
                         content: ``
                     }
                 }
             };
             expectWarningsFromTransform(config,
-                [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }]);
+                [{ message: 'value can not be a string (remove quotes?)', file: '/main.st.css' }]);
         });
 
     });

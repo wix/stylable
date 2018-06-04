@@ -1,3 +1,4 @@
+import * as postcss from 'postcss';
 const tokenizer = require('css-selector-tokenizer');
 
 export interface SelectorAstNode {
@@ -74,22 +75,35 @@ export function createChecker(types: Array<string | string[]>) {
     };
 }
 
-export function createRootAfterSpaceChecker() {
-    let hasSpacing = false;
+export function isGlobal(node: SelectorAstNode) {
+    return node.type === 'nested-pseudo-class' && node.name === 'global';
+}
+
+export function isRootValid(ast: SelectorAstNode, rootName: string) {
     let isValid = true;
-    return (node?: SelectorAstNode) => {
-        if (!node) {
-            return isValid;
+
+    traverseNode(ast, (node, index, nodes) => {
+        if (node.type === 'nested-pseudo-class') {
+            return true;
         }
-        if (node.type === 'selector') {
-            hasSpacing = false;
-        } else if (node.type === 'spacing') {
-            hasSpacing = true;
-        } else if (node.type === 'class' && node.name === 'root' && hasSpacing) {
-            isValid = false;
+        if (node.type === 'class' && node.name === rootName) {
+            let isLastScopeGlobal = false;
+            for (let i = 0; i < index; i++) {
+                const part = nodes[i];
+                if (isGlobal(part)) {
+                    isLastScopeGlobal = true;
+                }
+                if (part.type === 'spacing' && !isLastScopeGlobal) {
+                    isValid = false;
+                }
+                if (part.type === 'element' || (part.type === 'class' && part.value !== 'root')) {
+                    isLastScopeGlobal = false;
+                }
+            }
         }
-        return isValid;
-    };
+        return undefined;
+    });
+    return isValid;
 }
 
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
@@ -237,4 +251,12 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
         }
         return undefined;
     });
+}
+
+export function isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
+    return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
+}
+
+export function isCompRoot(name: string) {
+    return name.charAt(0).match(/[A-Z]/);
 }
