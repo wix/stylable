@@ -243,32 +243,38 @@ describe('diagnostics: warnings and errors', () => {
     describe('structure', () => {
 
         describe('root', () => {
-            it('should return warning for ".root" after selector', () => {
+            it('should return warning for ".root" after a selector', () => {
                 expectWarnings(`
                     |.gaga .root|{}
-                `, [{ message: '.root class cannot be used after spacing', file: 'main.css' }]);
+                `, [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]);
             });
 
             it('should return warning for ".root" after global and local classes', () => {
                 expectWarnings(`
                     |:global(*) .x .root|{}
                 `, [
-                    { message: '.root class cannot be used after spacing', file: 'main.css' }
+                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
                 ]);
             });
 
-            it('should return warning for ".root" after global and element', () => {
+            it('should return warning for ".root" after a global and element', () => {
                 expectWarnings(`
                     |:global(*) div .root|{}
                 `, [
                     { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
-                    { message: '.root class cannot be used after spacing', file: 'main.css' }
+                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
                 ]);
             });
 
-            it('should not return warning for ".root" after global selector', () => {
+            it('should not return warning for ".root" after a global selector', () => {
                 expectWarnings(`
                     :global(*) .root{}
+                `, []);
+            });
+
+            it('should not return warning for ".root" after a complex global selector', () => {
+                expectWarnings(`
+                    :global(body[dir="rtl"] > header) .root {}
                 `, []);
             });
         });
@@ -858,7 +864,7 @@ describe('diagnostics: warnings and errors', () => {
                 ]);
             });
 
-            it('should warn when using imported element', () => {
+            it('should warn when using imported element with no root scoping', () => {
                 expectWarnings(`
                     :import {
                         -st-from: "./blah.st.css";

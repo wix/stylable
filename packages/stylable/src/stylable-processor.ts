@@ -2,11 +2,11 @@ import * as path from 'path';
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import {
-    createRootAfterSpaceChecker,
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
     isGlobal,
+    isRootValid,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -30,7 +30,7 @@ export const processorWarnings = {
     UNSCOPED_CLASS(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
     UNSCOPED_ELEMENT(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) { return `cannot define "${name}" inside a complex selector`; },
-    ROOT_AFTER_SPACING() { return '.root class cannot be used after spacing'; },
+    ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
     DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
     ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside :import block`; },
     FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
@@ -175,7 +175,7 @@ export class StylableProcessor {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
-        const isValidRootUsage = createRootAfterSpaceChecker(rule.selectorAst, 'root');
+        const validRoot = isRootValid(rule.selectorAst, 'root');
         let locallyScoped: boolean = false;
 
         traverseNode(rule.selectorAst, (node, _index, _nodes) => {
@@ -230,7 +230,7 @@ export class StylableProcessor {
             rule.selectorType = 'complex';
         }
 
-        if (!isValidRootUsage) {
+        if (!validRoot) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
 

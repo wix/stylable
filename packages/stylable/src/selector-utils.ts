@@ -75,23 +75,11 @@ export function createChecker(types: Array<string | string[]>) {
     };
 }
 
-export function isSpacing(node: SelectorAstNode) {
-    return node.type === 'spacing';
-}
-
-export function isElement(node: SelectorAstNode) {
-    return node.type === 'element';
-}
-
-export function isClass(node: SelectorAstNode) {
-    return node.type === 'class';
-}
-
 export function isGlobal(node: SelectorAstNode) {
     return node.type === 'nested-pseudo-class' && node.name === 'global';
 }
 
-export function createRootAfterSpaceChecker(ast: SelectorAstNode, rootName: string) {
+export function isRootValid(ast: SelectorAstNode, rootName: string) {
     let isValid = true;
 
     traverseNode(ast, (node, index, nodes) => {
@@ -101,14 +89,14 @@ export function createRootAfterSpaceChecker(ast: SelectorAstNode, rootName: stri
         if (node.type === 'class' && node.name === rootName) {
             let isLastScopeGlobal = false;
             for (let i = 0; i < index; i++) {
-                const p = nodes[i];
-                if (isGlobal(p)) {
+                const part = nodes[i];
+                if (isGlobal(part)) {
                     isLastScopeGlobal = true;
                 }
-                if (isSpacing(p) && !isLastScopeGlobal) {
+                if (part.type === 'spacing' && !isLastScopeGlobal) {
                     isValid = false;
                 }
-                if (isElement(p) || (isClass(p) && p.value !== 'root')) {
+                if (part.type === 'element' || (part.type === 'class' && part.value !== 'root')) {
                     isLastScopeGlobal = false;
                 }
             }
