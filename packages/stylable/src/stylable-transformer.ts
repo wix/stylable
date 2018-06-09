@@ -6,6 +6,7 @@ import {
     nativePseudoElements,
     reservedKeyFrames
 } from './native-reserved-lists';
+import { removeSTDirective } from './optimizer/stylable-optimizer';
 import {
     autoStateAttrName,
     transformPseudoStateSelector,
@@ -13,9 +14,8 @@ import {
 } from './pseudo-states';
 import { isChildOfAtRule, parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
-import { removeSTDirective } from './stylable-optimizer';
 import {
-    ClassSymbol, ElementSymbol, SAtRule, SDecl, SRule, StylableMeta, StylableSymbol
+    ClassSymbol, ElementSymbol, SDecl, SRule, StylableMeta, StylableSymbol
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
@@ -25,6 +25,7 @@ import {
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
+import { deprecated } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
 const cloneDeep = require('lodash.clonedeep');
@@ -114,7 +115,10 @@ export class StylableTransformer {
         const ast = meta.outputAst = meta.ast.clone();
         this.transformAst(ast, meta, this.scopeRoot, metaExports);
         this.transformGlobals(ast);
-        if (this.optimize) { removeSTDirective(ast); }
+        if (this.optimize) {
+            deprecated('StylableTransformer optimize is deprecated. Use new StylableOptimizer');
+            removeSTDirective(ast);
+        }
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
@@ -136,7 +140,6 @@ export class StylableTransformer {
         });
 
         ast.walkAtRules(/media$/, atRule => {
-            (atRule as SAtRule).sourceParams = atRule.params;
             atRule.params = evalDeclarationValue(
                 this.resolver,
                 atRule.params,
