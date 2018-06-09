@@ -1,7 +1,14 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isAbsolute, resolve } from './path';
-import { DeclStylableProps, Imported, SDecl, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
+import {
+    DeclStylableProps,
+    Imported,
+    SDecl,
+    SRule,
+    StylableMeta,
+    StylableSymbol
+} from './stylable-processor';
 
 import {
     createSimpleSelectorChecker,
@@ -12,6 +19,7 @@ import {
     stringifySelector,
     traverseNode
 } from './selector-utils';
+import { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
@@ -334,7 +342,7 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     return source ? resolve(source) : source;
 }
 
-export function getAlias(symbol: StylableSymbol) {
+export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
     return (symbol && symbol._kind === 'class') || symbol._kind === 'element'
         ? symbol.alias
         : undefined;
