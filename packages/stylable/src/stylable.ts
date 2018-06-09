@@ -2,12 +2,54 @@ import { Bundler } from './bundle';
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
+import { StylableOptimizer } from './optimizer/stylable-optimizer';
 import { safeParse } from './parser';
 import { StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
-import { Options, StylableResults, StylableTransformer, TransformHooks } from './stylable-transformer';
+import {
+    Options,
+    StylableResults,
+    StylableTransformer,
+    TransformHooks
+} from './stylable-transformer';
+
+export interface StylableConfig {
+    projectRoot: string;
+    fileSystem: MinimalFS;
+    requireModule?: (path: string) => any;
+    delimiter?: string;
+    onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
+    diagnostics?: Diagnostics;
+    hooks?: TransformHooks;
+    scopeRoot?: boolean;
+    resolveOptions?: {
+        alias: any;
+        symlinks: boolean;
+        [key: string]: any;
+    };
+    optimizer?: StylableOptimizer;
+}
 
 export class Stylable {
+    public static create(config: StylableConfig) {
+        return new this(
+            config.projectRoot,
+            config.fileSystem,
+            id => {
+                if (config.requireModule) {
+                    return config.requireModule(id);
+                }
+                throw new Error('Javascript files are not supported without requireModule options');
+            },
+            config.delimiter,
+            config.onProcess,
+            config.diagnostics,
+            config.hooks,
+            config.scopeRoot,
+            config.resolveOptions,
+            config.optimizer
+        );
+    }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public resolvePath: (ctx: string | undefined, path: string) => string;
@@ -20,10 +62,15 @@ export class Stylable {
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
         protected scopeRoot: boolean = true,
-        protected resolveOptions: any = {}
+        protected resolveOptions: any = {},
+        protected optimizer: StylableOptimizer = new StylableOptimizer()
     ) {
-
-        const { fileProcessor, resolvePath } = createInfrastructure(projectRoot, fileSystem, onProcess, resolveOptions);
+        const { fileProcessor, resolvePath } = createInfrastructure(
+            projectRoot,
+            fileSystem,
+            onProcess,
+            resolveOptions
+        );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
@@ -48,13 +95,13 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<Options> = {}): StylableResults {
-
+        options: Partial<Options> = {}
+    ): StylableResults {
         if (typeof meta === 'string') {
+            // meta = this.fileProcessor.processContent(meta, resourcePath + '');
             const root = safeParse(meta, { from: resourcePath });
-            meta = new StylableProcessor(new Diagnostics()).process(root);
+            meta = new StylableProcessor().process(root);
         }
-
         const transformer = this.createTransformer(options);
 
         this.fileProcessor.add(meta.source, meta);
