@@ -29,7 +29,7 @@ describe("(mixins-project)", () => {
       id: "./src/index.st.css",
       depth: "1"
     });
-    expect(styleElements[0].css.replace(/\s\s*/gm, ' ')).to.equal(`.o0--root { arguments: ["1","2"]; border: 1px solid rgb(255, 0, 0); z-index: 9 }`)
+    expect(styleElements[0].css.replace(/\s\s*/gm, ' ').trim()).to.equal(`.o0--root { arguments: ["1","2"]; border: 1px solid rgb(255, 0, 0); z-index: 9; }`)
   });
 
   it("css is working", async () => {

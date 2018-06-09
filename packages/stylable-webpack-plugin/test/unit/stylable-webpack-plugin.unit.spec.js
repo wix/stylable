@@ -31,7 +31,9 @@ describe("StylableWebpackPlugin Unit", () => {
         shortNamespaces: true,
         classNameOptimizations: true,
         removeStylableDirectives: true,
-        removeUnusedComponents: true
+        removeUnusedComponents: true,
+        removeEmptyNodes: true,
+        minify: true
       }
     });
   });
@@ -51,7 +53,9 @@ describe("StylableWebpackPlugin Unit", () => {
         shortNamespaces: true,
         classNameOptimizations: true,
         removeStylableDirectives: true,
-        removeUnusedComponents: true
+        removeUnusedComponents: true,
+        removeEmptyNodes: true,
+        minify: true
       }
     });
   });

@@ -24,9 +24,13 @@ describe("(raw-project)", () => {
   it("loading is working for raw-loader", async () => {
     const { page } = await projectRunner.openInBrowser();
     const text = await page.evaluate(() => {
-      return document.body.textContent
+      return {
+        css: window.css,
+        index: window.index
+      }
     });
-    expect(text).to.match(/\/\* CONTENT \*\//);
+    expect(text.index).to.match(/\/\* CONTENT \*\//);
+    expect(text.css).to.equal('data:text/css;base64,LyogQ09OVEVOVCAqLw==');
     expect(projectRunner.getBuildWarningMessages()[0]).to.match(/Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors\.\n".*?" in ".*?"/);
   });
 });

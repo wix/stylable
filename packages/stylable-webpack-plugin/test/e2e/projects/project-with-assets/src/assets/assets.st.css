@@ -3,7 +3,6 @@
     background: url('./asset.jpg'), url('/asset-in-root.png');
 }
 
-
 .bg-data-url {
     background: url(data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D);
 }

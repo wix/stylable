@@ -30,7 +30,7 @@ describe("(hooked-project)", () => {
       depth: "1"
     });
 
-    expect(styleElements[0].css.replace(/\s\s*/gm, ' ')).to.equal(`.o0--root { background-color: hook_var_1; background-color: rgb(1, 0, 0) }`)
+    expect(styleElements[0].css.replace(/\s\s*/gm, ' ').trim()).to.equal(`.o0--root { background-color: hook_var_1; background-color: rgb(1, 0, 0); }`)
   });
 
   it("css is working", async () => {

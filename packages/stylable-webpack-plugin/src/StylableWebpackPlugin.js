@@ -9,7 +9,6 @@ const {
 } = require("./stylable-module-helpers");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
 const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
-const { WebpackStylableOptimizer } = require("./extended-stylable-optimizer");
 const StylableParser = require("./StylableParser");
 const StylableGenerator = require("./StylableGenerator");
 const {
@@ -25,7 +24,7 @@ class StylableWebpackPlugin {
   apply(compiler) {
     this.normalizeOptions(compiler.options.mode);
     this.overrideOptionsWithLocalConfig(compiler.context);
-    this.stylable = this.createStylable(compiler);
+    this.createStylable(compiler);
     this.injectStylableModuleRuleSet(compiler);
     this.injectStylableCompilation(compiler);
     this.injectStylableRuntimeInfo(compiler);
@@ -68,15 +67,18 @@ class StylableWebpackPlugin {
         ...options.bootstrap
       },
       generate: {
-        optimizer: new WebpackStylableOptimizer(),
+        afterTransform: null,
         ...options.generate
       },
+      optimizer: undefined,
       optimize: {
         removeUnusedComponents: true,
         removeComments: isProd ? true : false,
         removeStylableDirectives: true,
         classNameOptimizations: isProd ? true : false,
         shortNamespaces: isProd ? true : false,
+        removeEmptyNodes: isProd ? true : false,
+        minify: isProd ? true : false,
         ...options.optimize
       },
       plugins: []
@@ -91,35 +93,28 @@ class StylableWebpackPlugin {
     };
   }
   createStylable(compiler) {
-    const {
-      generate: { optimizer },
-      optimize
-    } = this.options;
     const stylable = new Stylable(
       compiler.context,
       compiler.inputFileSystem,
       this.options.requireModule,
       "--",
-      meta => {
-        if (optimize.shortNamespaces) {
-          if (optimizer && optimizer.namespaceOptimizer) {
-            meta.namespace = optimizer.namespaceOptimizer.getNamespace(
-              meta,
-              compiler,
-              this
-            );
-          } else {
-            throw new Error('Missing namespaceOptimizer: "shortNamespaces"');
-          }
+      meta => { // TODO: move to stylable as param. 
+        if (this.options.optimize.shortNamespaces) {
+          meta.namespace = stylable.optimizer.namespaceOptimizer.getNamespace(
+            meta,
+            compiler.context,
+            stylable
+          );
         }
         return meta;
       },
       undefined,
       this.options.transformHooks,
       this.options.rootScope,
-      compiler.options.resolve
+      compiler.options.resolve,
+      this.options.optimizer
     );
-    return stylable;
+    this.stylable = stylable;
   }
   injectPlugins(compiler) {
     this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
