@@ -1,6 +1,7 @@
 import * as  postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
+import { fixRelativeUrls } from './stylable-assets';
 import { ClassSymbol, ImportSymbol, RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
@@ -42,7 +43,7 @@ export function appendMixin(
             if (resolvedMixin._kind === 'js') {
                 if (typeof resolvedMixin.symbol === 'function') {
                     try {
-                        handleJSMixin(transformer, mix.mixin, resolvedMixin.symbol, meta, rule, variableOverride);
+                        handleJSMixin(transformer, mix, resolvedMixin.symbol, meta, rule, variableOverride);
                     } catch (e) {
                         transformer.diagnostics.error(rule, 'could not apply mixin: ' + e, { word: mix.mixin.type });
                         return;
@@ -84,13 +85,13 @@ function checkRecursive(
 
 function handleJSMixin(
     transformer: StylableTransformer,
-    mixin: MixinValue,
+    mix: RefedMixin,
     mixinFunction: (...args: any[]) => any,
     meta: StylableMeta,
     rule: postcss.Rule,
     variableOverride?: Pojo<string>) {
 
-    const res = mixinFunction((mixin.options as any[]).map(v => v.value));
+    const res = mixinFunction((mix.mixin.options as any[]).map(v => v.value));
     const mixinRoot = cssObjectToAst(res).root;
 
     mixinRoot.walkDecls(decl => {
@@ -106,6 +107,8 @@ function handleJSMixin(
         undefined,
         variableOverride
     );
+
+    fixRelativeUrls(mixinRoot, mix, meta);
 
     mergeRules(mixinRoot, rule);
 
@@ -140,6 +143,8 @@ function createMixinRootFromCSSResolve(
         resolvedArgs,
         path.concat(mix.ref.name + ' from ' + meta.source)
     );
+
+    fixRelativeUrls(mixinRoot, mix, meta);
 
     return mixinRoot;
 }
