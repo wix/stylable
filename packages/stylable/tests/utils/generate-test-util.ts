@@ -1,9 +1,9 @@
-import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import { Bundler } from '../../src/bundle';
 import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
 import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
+import { isAbsolute } from '../../src/path';
 import { Stylable } from '../../src/stylable';
 import { process, StylableMeta } from '../../src/stylable-processor';
 import { StylableResolver } from '../../src/stylable-resolver';
@@ -43,7 +43,7 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = ne
         const meta = process(postcss.parse(content, { from }), diagnostics);
         meta.namespace = config.files[from].namespace || meta.namespace;
         return meta;
-    }, fs);
+    }, fs, x => x);
 
     const resolver = new StylableResolver(fileProcessor, requireModule);
 

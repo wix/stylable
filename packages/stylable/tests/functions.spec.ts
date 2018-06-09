@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import * as path from 'path';
 import * as postcss from 'postcss';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
+import * as path from '../src/path';
 import { expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableRoot } from './utils/generate-test-util';
 

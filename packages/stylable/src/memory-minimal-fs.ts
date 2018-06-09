@@ -1,5 +1,5 @@
 const deindent = require('deindent');
-import { resolve } from 'path';
+import { resolve } from './path';
 
 import { MinimalFS } from './cached-process-file';
 
@@ -43,19 +43,19 @@ export function createMinimalFS(config: MinimalFSSetup) {
         }
     };
 
-    const requireModule = function require(path: string): any {
+    const requireModule = function require(id: string): any {
         const _module = {
-            id: path,
+            id,
             exports: {}
         };
         try {
-            if (!path.match(/\.js$/)) {
-                path += '.js';
+            if (!id.match(/\.js$/)) {
+                id += '.js';
             }
-            const fn = new Function('module', 'exports', 'require', files[path].content);
+            const fn = new Function('module', 'exports', 'require', files[id].content);
             fn(_module, _module.exports, requireModule);
         } catch (e) {
-            throw new Error('Cannot require file: ' + path);
+            throw new Error('Cannot require file: ' + id);
         }
         return _module.exports;
     };
