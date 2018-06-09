@@ -22,7 +22,17 @@ export function filename2varname(filename: string) {
 }
 
 export function string2varname(str: string) {
-    return str
-        .replace(/[^0-9a-zA-Z_]/gm, '')
-        .replace(/^[^a-zA-Z_]+/gm, '');
+    return str.replace(/[^0-9a-zA-Z_]/gm, '').replace(/^[^a-zA-Z_]+/gm, '');
+}
+
+const deprecatedCache: { [id: string]: boolean } = {};
+export function deprecated(staticMessage: string) {
+    if (!deprecatedCache[staticMessage]) {
+        deprecatedCache[staticMessage] = true;
+        try {
+            console.warn('DEPRECATED: ' + staticMessage);
+        } catch {
+            /**/
+        }
+    }
 }

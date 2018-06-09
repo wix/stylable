@@ -39,6 +39,7 @@ export interface ParsedValue {
     value: string;
     nodes?: any;
     resolvedValue?: string;
+    url?: string;
 }
 
 export interface StateTypeValidator {
