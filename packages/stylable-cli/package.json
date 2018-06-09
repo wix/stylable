@@ -1,0 +1,37 @@
+{
+  "name": "stylable-cli",
+  "version": "1.0.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "private": true,
+  "bin": {
+    "stc": "./dist/cli.js"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "lint": "tslint --project .",
+    "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
+  },
+  "dependencies": {
+    "deindent": "^0.1.0",
+    "dependency-tree": "^6.1.0",
+    "lodash.clonedeep": "^4.5.0",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "stylable": "^5.3.10",
+    "webpack": "^4.8.3",
+    "webpack-sources": "^1.1.0"
+  },
+  "files": [
+    "cjs",
+    "esm"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}
