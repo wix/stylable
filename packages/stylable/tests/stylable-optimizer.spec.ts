@@ -1,10 +1,13 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { removeCommentNodes, removeSTDirective, StylableOptimizer } from '../src/stylable-optimizer';
+import {
+    removeCommentNodes,
+    removeSTDirective,
+    StylableOptimizer
+} from '../src/optimizer/stylable-optimizer';
 import { createStylableInstance } from './utils/generate-test-util';
-
+const deindent = require('deindent');
 describe('StylableOptimizer', () => {
-
     it('removeComments', () => {
         const ast = postcss.parse(`
                 /* comment 1 */
@@ -12,20 +15,24 @@ describe('StylableOptimizer', () => {
                 /* comment 3 */
             `);
 
-        new StylableOptimizer().removeComments(ast);
+        removeCommentNodes(ast);
 
         expect(ast.toString().trim()).to.equal(`.a { }`);
+    });
 
+    it('removeComments in decls', () => {
+        const ast = postcss.parse(`
+                .a { color: red /* red */ green }
+            `);
+
+        removeCommentNodes(ast);
+
+        expect(ast.toString().trim()).to.equal(`.a { color: red  green }`);
     });
 
     it('removeStylableDirectives', () => {
-        const ast = postcss.parse(`
+        const ast = postcss.parse(deindent`
                 .a {
-                    -st-: 1;
-                    -st-states: 2;
-                }
-                .b {
-                    color: red;
                     -st-: 1;
                     -st-states: 2;
                 }
@@ -33,17 +40,21 @@ describe('StylableOptimizer', () => {
                     .c {
                         -st-: 1;
                     }
-                    .d {}
                 }
-                .e {}
             `);
 
         (ast as any).cleanRaws(false);
 
         new StylableOptimizer().removeStylableDirectives(ast);
 
-        expect(ast.toString().trim()).to.equal(`.b {\n    color: red\n}`);
-
+        expect(ast.toString()).to.equal(
+            deindent`
+                .a {}
+                @media (max-width) {
+                    .c {}
+                }
+            `.trim()
+        );
     });
 
     it('removeUnusedComponents', () => {
@@ -55,12 +66,40 @@ describe('StylableOptimizer', () => {
                 `
             }
         };
+
         const stylable = createStylableInstance({ files });
-        const { meta } = stylable.transform(files[index].content, index);
+        const result = stylable.transform(files[index].content, index);
+        const usageMapping = {
+            [result.meta.namespace]: false
+        };
 
-        new StylableOptimizer().removeUnusedComponents(stylable, meta, []);
+        new StylableOptimizer().optimize(
+            { removeUnusedComponents: true },
+            result,
+            stylable.delimiter,
+            usageMapping
+        );
 
-        expect(meta.ast!.toString().trim()).to.equal('');
+        expect(result.meta.outputAst!.toString().trim()).to.equal('');
     });
 
+    it('minifyCSS', () => {
+        const index = 'index.st.css';
+        const files = {
+            [index]: {
+                content: `
+                    .x{/* empty */}
+                    .x{color: /* empty */ red}
+                    @media screen {
+                        .x{/* empty */}
+                    }
+                `
+            }
+        };
+
+        const stylable = createStylableInstance({ files });
+        const { meta } = stylable.transform(files[index].content, index);
+        const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
+        expect(output).to.equal(`.${meta.namespace}--x{color:red}`);
+    });
 });
