@@ -9,6 +9,7 @@ import {
 } from '../src/native-reserved-lists';
 import { safeParse } from '../src/parser';
 import { process, processorWarnings } from '../src/stylable-processor';
+import { valueParserWarnings } from '../src/stylable-value-parsers';
 import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
 import {
@@ -288,6 +289,21 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{ message: 'unknown mixin: "myMixin"', file: 'main.css' }]);
             });
 
+            it('should return a warning for a CSS mixin using un-named params', () => {
+                expectWarnings(`
+                    .mixed {
+                        color: red;
+                    }
+                    .gaga{
+                        |-st-mixin: mixed($1$)|;
+                    }
+
+                `, [{
+                    message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
+                    file: 'main.css'
+                }]);
+            });
+
             it('should add error when can not append css mixins', () => {
                 const config = {
                     entry: '/main.css',
@@ -410,7 +426,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: 'value can not be a string (remove quotes?)', file: '/main.css' }]);
+                    [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }]);
             });
         });
 
@@ -1003,7 +1019,7 @@ describe('diagnostics: warnings and errors', () => {
                 }
             };
             expectWarningsFromTransform(config,
-                [{ message: 'value can not be a string (remove quotes?)', file: '/main.st.css' }]);
+                [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.st.css' }]);
         });
 
     });

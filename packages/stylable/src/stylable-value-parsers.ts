@@ -7,6 +7,13 @@ import { Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
+/* tslint:disable:max-line-length */
+export const valueParserWarnings = {
+    VALUE_CANNOT_BE_STRING() { return 'value can not be a string (remove quotes?)'; },
+    CSS_MIXIN_FORCE_NAMED_PARAMS() { return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")'; }
+};
+/* tslint:enable:max-line-length */
+
 export interface MappedStates {
     [s: string]: StateParsedValue | string | null;
 }
@@ -32,6 +39,8 @@ export interface ExtendsValue {
     symbolName: string;
     args: ArgValue[][] | null;
 }
+
+type ReportWarning = (message: string, options?: { word: string }) => void;
 
 export const valueMapping = {
     from: '-st-from' as '-st-from',
@@ -130,14 +139,18 @@ export const SBTypesParsers = {
         const ast = valueParser(mixinNode.value);
         const mixins: Array<{ type: string, options: Array<{ value: string }> | Pojo<string> }> = [];
 
+        function reportWarning(message: string, options?: { word: string } ) {
+            if (diagnostics) {
+                diagnostics.warn(mixinNode, message, options);
+            }
+        }
+
         ast.nodes.forEach((node: any) => {
-            // const symbol = m[node.value];
-            // if (symbol.)
             const strat = strategy(node.value);
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: strategies[strat](node)
+                    options: strategies[strat](node, reportWarning)
                 });
             } else if (node.type === 'word') {
                 mixins.push({
@@ -147,7 +160,7 @@ export const SBTypesParsers = {
             } else if (node.type === 'string' && diagnostics) {
                 diagnostics.error(
                     mixinNode,
-                    `value can not be a string (remove quotes?)`,
+                    valueParserWarnings.VALUE_CANNOT_BE_STRING(),
                     { word: mixinNode.value }
                 );
             }
@@ -167,7 +180,7 @@ export const SBTypesParsers = {
             } else if (node.type === 'string') {
                 diagnostics.error(
                     composeNode,
-                    `value can not be a string (remove quotes?)`,
+                    valueParserWarnings.VALUE_CANNOT_BE_STRING(),
                     { word: composeNode.value }
                 );
             }
@@ -214,17 +227,24 @@ export function groupValues(nodes: any[], divType = 'div') {
 }
 
 const strategies = {
-    named: (node: any) => {
+    named: (node: any, reportWarning?: ReportWarning) => {
         const named: Pojo<string> = {};
-        getNamedArgs(node).forEach(_ => {
-            if (_[1].type !== 'space') {
-                // TODO: maybe warn
+        getNamedArgs(node).forEach(mixinArgsGroup => {
+            const argsDivider = mixinArgsGroup[1];
+            if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
+                if (reportWarning) {
+                    const argValue = mixinArgsGroup[0];
+                    reportWarning(
+                        valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
+                        { word: argValue.value });
+                }
+                return;
             }
-            named[_[0].value] = stringifyParam(_.slice(2));
+            named[mixinArgsGroup[0].value] = stringifyParam(mixinArgsGroup.slice(2));
         });
         return named;
     },
-    args: (node: any) => {
+    args: (node: any, _reportWarning?: ReportWarning) => {
         return groupValues(node.nodes, 'div').map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
             if (n.type === 'div') {
                 return null;
