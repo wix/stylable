@@ -38,6 +38,7 @@ module.exports = {
 | optimize.removeStylableDirectives | boolean | true | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon)  |
 | optimize.classNameOptimizations | boolean | false | Shorten all class names and replace them in the JavaScript modules |
 | optimize.shortNamespaces | boolean | false | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
+| optimize.minify | boolean | false | Minify each css asset. |
 
 > **Note:**
 > The plugin defaults into development mode. For a production build, you must use a manual configuration, according to your specific requirements.
@@ -52,7 +53,8 @@ new StylableWebpackPlugin({
       removeComments: true,
       removeStylableDirectives: true,
       classNameOptimizations: true,
-      shortNamespaces: true
+      shortNamespaces: true,
+      minify: true
     }
 })
 ```
