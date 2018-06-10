@@ -78,4 +78,3 @@ class StylableParser {
 }
 
 module.exports = StylableParser;
-exports.require = require;
