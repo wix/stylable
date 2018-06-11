@@ -1,10 +1,7 @@
-import * as postcss from 'postcss';
-import { cachedProcessFile } from '../src/cached-process-file';
-import { ImportSymbol, process, processNamespace, StylableMeta } from '../src/stylable-processor';
-
 import * as chai from 'chai';
-import { resolve } from 'path';
-import { VarSymbol } from '../src';
+import * as postcss from 'postcss';
+import { resolve } from '../src/path';
+import { ImportSymbol, processNamespace } from '../src/stylable-processor';
 import { flatMatch } from './matchers/flat-match';
 import { processSource } from './utils/generate-test-util';
 

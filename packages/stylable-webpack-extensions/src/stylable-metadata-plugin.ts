@@ -148,7 +148,7 @@ export class StylableMetadataPlugin {
               .map(name => {
                 return `:import {-st-from: "${
                   output.components[name].stylesheetPath.replace(packageLocation, '.')
-                  }"; -st-default: ${name}} ${name}{}`;
+                  }"; -st-default: ${name}} .root ${name}{}`;
               })
               .join('\n')
           };

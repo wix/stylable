@@ -8,7 +8,7 @@
 }
 
 .root {
-    -st-states: x;
+    -st-states: /*x state*/ x;
 }
 
 .root:x {
@@ -28,3 +28,12 @@ Button {
     font-size: 1em;
 }
 
+@media screen {
+    .empty-in-media {
+        /* empty rule */
+    }
+    Button {
+        /* unused component */
+        font-size: 2em;
+    }
+}

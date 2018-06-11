@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { generateStylableExports } from '../utils/generate-test-util';
 
-describe('Exports', () => {
+describe('Exports to js', () => {
 
     it('contain root exports', () => {
 
@@ -315,6 +315,37 @@ describe('Exports', () => {
         });
 
         expect(cssExports['my-class']).to.equal('project--my-class');
+
+    });
+
+    it('should not export element', () => {
+
+        const cssExports = generateStylableExports({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./index.st.css";
+                            -st-named: Elm;
+                        }
+                        Elm {}
+                    `
+                },
+                '/index.st.css': {
+                    namespace: 'index',
+                    content: `
+                        :import {
+                            -st-from: "./elm.st.css";
+                            -st-default: Elm;
+                        }
+                        Elm {}
+                    `
+                }
+            }
+        });
+        expect(cssExports.Elm).to.equal(undefined);
 
     });
 

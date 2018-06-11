@@ -70,25 +70,3 @@ export function styleRules(chai: any, util: any) {
 
     });
 }
-
-// TODO: refactor later to replace current diagnostic reporting
-// export function styleDiagnostics(chai: any, util: any) {
-//     const { flag } = util;
-
-//     chai.Assertion.addMethod('styleDiagnostics', function(this: any, expectedDiagnostics: Diagnostic[]) {
-//         const actual = flag(this, 'object') as StylableResults;
-//         if (!actual.meta || !actual.exports) {
-//            throw new Error(`expected Stylable result {meta, exports}, but got: {${Object.keys(actual).join(', ')}}`);
-//         }
-
-//         const { diagnostics } = actual.meta;
-
-//         const foundAll = expectedDiagnostics.every(expectedDiagnostic => {
-//             return !!diagnostics.reports.find(actualDiagnostic => {
-//                 return expectedDiagnostic.message === actualDiagnostic.message &&
-//                     expectedDiagnostic.file === actualDiagnostic.file;
-//             });
-//         });
-//         expect(flatten(flag(this, 'object'), { maxDepth })).to.contain(flatten(obj));
-//     });
-// }

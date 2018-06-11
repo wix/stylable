@@ -18,6 +18,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "lodash.clonedeep": "^4.5.0",
+    "memory-fs": "^0.4.1",
+    "node-eval": "^2.0.0",
     "puppeteer": "^1.4.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
@@ -36,5 +38,8 @@
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "@types/memory-fs": "^0.3.1"
+  }
 }

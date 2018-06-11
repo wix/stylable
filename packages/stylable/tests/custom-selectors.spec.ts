@@ -1,7 +1,5 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { cachedProcessFile } from '../src/cached-process-file';
-import { process, StylableMeta } from '../src/stylable-processor';
 import { generateStylableRoot, processSource } from './utils/generate-test-util';
 
 describe('@custom-selector', () => {

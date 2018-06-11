@@ -13,7 +13,9 @@ module.exports = {
         removeComments: true,
         removeStylableDirectives: true,
         classNameOptimizations: true,
-        shortNamespaces: true        
+        shortNamespaces: true,
+        removeEmptyNodes: true,
+        minify: true        
       }
     }),
     new HtmlWebpackPlugin()

@@ -1,20 +1,30 @@
-import * as path from 'path';
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
+import * as path from './path';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
-    isGlobal,
     isRootValid,
     parseSelector,
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors } from './stylable-utils';
-import { MixinValue, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
-import { filename2varname, stripQuotation } from './utils';
+import { processDeclarationUrls } from './stylable-assets';
+import {
+    ClassSymbol,
+    ElementSymbol,
+    Imported,
+    ImportSymbol,
+    RefedMixin,
+    StylableDirectives,
+    StylableMeta,
+    VarSymbol
+} from './stylable-meta';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, getSourcePath } from './stylable-utils';
+import { SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import { deprecated, filename2varname, stripQuotation } from './utils';
+export * from './stylable-meta'; /* TEMP EXPORT */
 const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -47,61 +57,12 @@ export const processorWarnings = {
 };
 /* tslint:enable:max-line-length */
 
-export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    const reservedRootName = 'root';
-    const rootSymbol: ClassSymbol = {
-        _kind: 'class',
-        name: reservedRootName,
-        [valueMapping.root]: true
-    };
-
-    return {
-        ast: root,
-        rawAst: root.clone(),
-        root: reservedRootName,
-        source: getSourcePath(root, diagnostics),
-        namespace: '',
-        imports: [],
-        vars: [],
-        keyframes: [],
-        elements: {},
-        classes: {
-            [reservedRootName]: rootSymbol
-        },
-        mappedSymbols: {
-            [reservedRootName]: rootSymbol
-        },
-        customSelectors: {},
-        diagnostics,
-        transformDiagnostics: null
-    };
-
-}
-
-export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
-    const source = root.source.input.file || '';
-    if (!source) {
-        diagnostics.error(root, 'missing source filename');
-    } else if (!path.isAbsolute(source)) {
-        throw new Error('source filename is not absolute path: "' + source + '"');
-    }
-    return source;
-}
-
-export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source); // .toString(36);
-}
-
-export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
-    return new StylableProcessor(diagnostics).process(root);
-}
-
 export class StylableProcessor {
     protected meta!: StylableMeta;
     constructor(protected diagnostics = new Diagnostics()) { }
     public process(root: postcss.Root): StylableMeta {
 
-        this.meta = createEmptyMeta(root, this.diagnostics);
+        this.meta = new StylableMeta(root, this.diagnostics);
 
         this.handleAtRules(root);
 
@@ -118,6 +79,9 @@ export class StylableProcessor {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             }
+            processDeclarationUrls(decl, node => {
+                this.meta.urls.push(node.url!);
+            }, false);
         });
 
         stubs.forEach(s => s && s.remove());
@@ -292,7 +256,7 @@ export class StylableProcessor {
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 
-            const prev = decl.prev();
+            const prev = decl.prev() as postcss.Comment;
             if (prev && prev.type === 'comment') {
                 const typeMatch = prev.text.match(/^@type (.+)$/);
                 if (typeMatch) {
@@ -510,86 +474,17 @@ export class StylableProcessor {
     }
 }
 
-function getAlias(symbol: StylableSymbol) {
-    return (
-        symbol &&
-        symbol._kind === 'class' ||
-        symbol._kind === 'element'
-    ) ? symbol.alias : undefined;
+export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
+    deprecated('createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"');
+    return new StylableMeta(root, diagnostics);
 }
 
-export interface Imported {
-    from: string;
-    defaultExport: string;
-    named: Pojo<string>;
-    overrides: postcss.Declaration[];
-    theme: boolean;
-    rule: postcss.Rule;
-    fromRelative: string;
+export function processNamespace(namespace: string, source: string) {
+    return namespace + hash.v3(source); // .toString(36);
 }
 
-export interface StylableDirectives {
-    '-st-root'?: boolean;
-    '-st-compose'?: Array<ImportSymbol | ClassSymbol>;
-    '-st-states'?: any;
-    '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
-    '-st-theme'?: boolean;
-    '-st-global'?: SelectorAstNode[];
-}
-
-export interface ClassSymbol extends StylableDirectives {
-    _kind: 'class';
-    name: string;
-    alias?: ImportSymbol;
-    scoped?: string;
-}
-
-export interface ElementSymbol extends StylableDirectives {
-    _kind: 'element';
-    name: string;
-    alias?: ImportSymbol;
-}
-
-export interface ImportSymbol {
-    _kind: 'import';
-    type: 'named' | 'default';
-    name: string;
-    import: Imported;
-}
-
-export interface VarSymbol {
-    _kind: 'var';
-    name: string;
-    value: string;
-    text: string;
-    valueType: string | null;
-    node: postcss.Node;
-}
-
-export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;
-
-export interface StylableMeta {
-    ast: postcss.Root;
-    rawAst: postcss.Root;
-    root: 'root';
-    source: string;
-    namespace: string;
-    imports: Imported[];
-    vars: VarSymbol[];
-    keyframes: postcss.AtRule[];
-    classes: Pojo<ClassSymbol>;
-    elements: Pojo<ElementSymbol>;
-    mappedSymbols: Pojo<StylableSymbol>;
-    customSelectors: Pojo<string>;
-    diagnostics: Diagnostics;
-    outputAst?: postcss.Root;
-    parent?: StylableMeta;
-    transformDiagnostics: Diagnostics | null;
-}
-
-export interface RefedMixin {
-    mixin: MixinValue;
-    ref: ImportSymbol | ClassSymbol;
+export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
+    return new StylableProcessor(diagnostics).process(root);
 }
 
 // TODO: maybe put under stylable namespace object in v2
@@ -598,11 +493,6 @@ export interface SRule extends postcss.Rule {
     isSimpleSelector: boolean;
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
-}
-
-// TODO: maybe put under stylable namespace object in v2
-export interface SAtRule extends postcss.AtRule {
-    sourceParams: string;
 }
 
 // TODO: maybe put under stylable namespace object in v2

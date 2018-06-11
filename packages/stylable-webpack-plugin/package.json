@@ -18,7 +18,6 @@
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",
     "stylable-runtime": "^1.0.0",
-    "url-regex": "^4.1.1",
     "webpack-sources": "^1.1.0"
   },
   "files": [

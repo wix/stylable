@@ -23,7 +23,8 @@ export { createInfrastructure, StylableInfrastructure } from './create-infra-str
 export { create } from './runtime';
 export * from './types';
 export * from './stylable-mixins';
-export * from './stylable-optimizer';
+export * from './stylable-assets';
+export * from './optimizer/stylable-optimizer';
 export * from './functions';
 export * from './state-validators';
 export * from './selector-utils';

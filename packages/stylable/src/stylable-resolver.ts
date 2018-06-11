@@ -1,5 +1,3 @@
-// import * as postcss from 'postcss';
-// import * as path from 'path';
 import { FileProcessor } from './cached-process-file';
 import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';

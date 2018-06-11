@@ -1,43 +1,71 @@
+import { Pojo } from './types';
+
 export type processFn<T> = (fullpath: string, content: string) => T;
 
 export interface CacheItem<T> {
-    value: T; stat: {mtime: Date};
+    value: T;
+    stat: { mtime: Date };
 }
 
 export interface MinimalFS {
-    statSync: (fullpath: string) => {mtime: Date};
+    statSync: (fullpath: string) => { mtime: Date };
     readFileSync: (fullpath: string, encoding: string) => string;
 }
 
 export interface FileProcessor<T> {
     process: (fullpath: string) => T;
     add: (fullpath: string, value: T) => void;
+    processContent: (content: string, fullpath: string) => T;
+    cache: Pojo<CacheItem<T>>;
+    postProcessors: Array<(value: T, path: string) => T>;
 }
 
-export function cachedProcessFile<T = any>(processor: processFn<T>, fs: MinimalFS): FileProcessor<T> {
-    const cache: {[key: string]: CacheItem<T>} = {};
+export function cachedProcessFile<T = any>(
+    processor: processFn<T>,
+    fs: MinimalFS,
+    resolvePath: (path: string) => string
+): FileProcessor<T> {
+    const cache: { [key: string]: CacheItem<T> } = {};
+    const postProcessors: Array<(value: T, path: string) => T> = [];
 
     function process(fullpath: string, ignoreCache: boolean = false) {
-        const stat = fs.statSync(fullpath);
-        const cached = cache[fullpath];
-        if (ignoreCache || !cached || (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())) {
-            const content = fs.readFileSync(fullpath, 'utf8');
-            const value = processor(fullpath, content);
-            cache[fullpath] = {value, stat};
+        const resolvedPath = resolvePath(fullpath);
+        const stat = fs.statSync(resolvedPath);
+        const cached = cache[resolvedPath];
+        if (
+            ignoreCache ||
+            !cached ||
+            (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())
+        ) {
+            const content = fs.readFileSync(resolvedPath, 'utf8');
+            const value = processContent(content, resolvedPath);
+
+            cache[resolvedPath] = { value, stat: { mtime: stat.mtime } };
         }
-        return cache[fullpath].value;
+        return cache[resolvedPath].value;
+    }
+
+    function processContent(content: string, filePath: string): T {
+        return postProcessors.reduce<T>((value, postProcessor) => {
+            return postProcessor(value, filePath);
+        }, processor(filePath, content));
     }
 
     function add(fullpath: string, value: T) {
-        cache[fullpath] = {
+        const resolved = resolvePath(fullpath);
+        cache[resolved] = {
             value,
-            stat: fs.statSync(fullpath)
+            stat: {
+                mtime: fs.statSync(resolved).mtime
+            }
         };
     }
 
     return {
+        processContent,
+        postProcessors,
+        cache,
         process,
         add
     };
-
 }

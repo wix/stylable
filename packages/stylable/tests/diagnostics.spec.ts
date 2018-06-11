@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { resolve } from 'path';
 import { Diagnostics, valueMapping } from '../src';
 import {
     nativeFunctionsDic,
@@ -8,6 +7,7 @@ import {
     reservedKeyFrames
 } from '../src/native-reserved-lists';
 import { safeParse } from '../src/parser';
+import { resolve } from '../src/path';
 import { process, processorWarnings } from '../src/stylable-processor';
 import { Config, generateFromMock } from './utils/generate-test-util';
 const deindent = require('deindent');
@@ -16,7 +16,6 @@ import {
     expectWarningsFromTransform,
     findTestLocations
 } from './utils/diagnostics';
-const path = require('path');
 
 const customButton = `
     .root{
@@ -327,7 +326,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                const mainPath = path.resolve('/main.css');
+                const mainPath = resolve('/main.css');
                 const xPath = `y from ${mainPath} --> x from ${mainPath}`;
                 const yPath = `x from ${mainPath} --> y from ${mainPath}`;
                 expectWarningsFromTransform(config, [
@@ -1140,7 +1139,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                const mainPath = path.resolve('/main.st.css');
+                const mainPath = resolve('/main.st.css');
                 expectWarningsFromTransform(config,
                     [{ message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, file: '/main.st.css' }]); // tslint:disable-line:max-line-length
             });

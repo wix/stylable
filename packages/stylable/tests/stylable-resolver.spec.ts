@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { resolve } from 'path';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
+import { resolve } from '../src/path';
 import { StylableMeta } from '../src/stylable-processor';
 import { generateInfra } from './utils/generate-test-util';
 
@@ -13,7 +13,7 @@ function createResolveExtendsResults(
 ) {
     const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
         return process(safeParse(content, { from: fullpath }));
-    }, fs);
+    }, fs, x => x);
 
     const resolver = new StylableResolver(processFile, (module: string) => (module && ''));
     return resolver.resolveExtends(processFile.process(fileToProcess), classNameToLookup, isElement);
