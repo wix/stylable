@@ -86,6 +86,7 @@ export interface ImportSymbol {
     type: 'named' | 'default';
     name: string;
     import: Imported;
+    context: string;
 }
 
 export interface VarSymbol {

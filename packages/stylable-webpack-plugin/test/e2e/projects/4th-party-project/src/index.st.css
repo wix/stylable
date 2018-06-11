@@ -1,0 +1,10 @@
+@namespace "mainIndex";
+
+:import {
+    -st-from: "test-components/index.st.css";
+    -st-named: Button;
+}
+
+.root {
+    -st-mixin: Button;
+}

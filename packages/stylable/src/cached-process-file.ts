@@ -13,7 +13,7 @@ export interface MinimalFS {
 }
 
 export interface FileProcessor<T> {
-    process: (fullpath: string) => T;
+    process: (fullpath: string, ignoreCache?: boolean, context?: string) => T;
     add: (fullpath: string, value: T) => void;
     processContent: (content: string, fullpath: string) => T;
     cache: Pojo<CacheItem<T>>;
@@ -23,13 +23,13 @@ export interface FileProcessor<T> {
 export function cachedProcessFile<T = any>(
     processor: processFn<T>,
     fs: MinimalFS,
-    resolvePath: (path: string) => string
+    resolvePath: (path: string, context?: string) => string
 ): FileProcessor<T> {
     const cache: { [key: string]: CacheItem<T> } = {};
     const postProcessors: Array<(value: T, path: string) => T> = [];
 
-    function process(fullpath: string, ignoreCache: boolean = false) {
-        const resolvedPath = resolvePath(fullpath);
+    function process(fullpath: string, ignoreCache: boolean = false, context?: string) {
+        const resolvedPath = resolvePath(fullpath, context);
         const stat = fs.statSync(resolvedPath);
         const cached = cache[resolvedPath];
         if (
@@ -52,11 +52,10 @@ export function cachedProcessFile<T = any>(
     }
 
     function add(fullpath: string, value: T) {
-        const resolved = resolvePath(fullpath);
-        cache[resolved] = {
+        cache[fullpath] = {
             value,
             stat: {
-                mtime: fs.statSync(resolved).mtime
+                mtime: fs.statSync(fullpath).mtime
             }
         };
     }
