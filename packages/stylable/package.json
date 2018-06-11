@@ -1,12 +1,13 @@
 {
   "name": "stylable",
-  "version": "5.3.12-rc.1",
+  "version": "5.3.11",
   "description": "CSS for Components",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "webpack-dev-server --hot --inline",
+    "clean": "rimraf ./dist",
     "test": "yarn test:node",
     "test:node": "mocha \"./tests/**/*.spec.ts\" --watch-extensions ts --require ts-node/register",
     "lint": "tslint --project ./tsconfig.json",

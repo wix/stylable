@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "peerDependencies": {
-    "stylable": "^5.3.5",
+    "stylable": "^5.3.11",
     "webpack": "^4.6.0"
   },
   "dependencies": {
