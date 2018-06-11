@@ -179,7 +179,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     // keyframes on class mixin?
 
     const prefixType = parseSelector(selectorPrefix).nodes[0].nodes[0];
-    const containsPrefix = containsMatchInFistChunk.bind(null, prefixType);
+    const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
 
     root.nodes!.forEach(node => {
@@ -316,7 +316,7 @@ function destructiveReplaceNode(
     return ast;
 }
 
-function containsMatchInFistChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
+function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
     let isMatch = false;
     traverseNode(selectorNode, node => {
         if (node.type === 'operator' || node.type === 'spacing') {
