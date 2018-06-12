@@ -5,8 +5,6 @@ import { Pojo } from '../types';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
 
-const CleanCSS = require('clean-css');
-
 export interface OptimizeConfig {
     removeComments?: boolean;
     removeStylableDirectives?: boolean;
@@ -22,6 +20,7 @@ export class StylableOptimizer {
     ) {}
 
     public minifyCSS(css: string) {
+        const CleanCSS = require('clean-css');
         return new CleanCSS({}).minify(css).styles;
     }
     public optimize(
@@ -148,41 +147,6 @@ export function removeEmptyNodes(root: postcss.Root) {
 
     toRemove.forEach(node => {
         removeRecursiveUpIfEmpty(node);
-    });
-}
-
-export function removeSTDirective(root: postcss.Root, shouldComment = false) {
-    const toRemove: postcss.Node[] = [];
-
-    root.walkRules((rule: postcss.Rule) => {
-        if (rule.nodes && rule.nodes.length === 0) {
-            toRemove.push(rule);
-            return;
-        }
-        rule.walkDecls((decl: postcss.Declaration) => {
-            if (decl.prop.startsWith('-st-')) {
-                toRemove.push(decl);
-            }
-        });
-        if (rule.raws) {
-            rule.raws = {
-                after: '\n'
-            };
-        }
-    });
-
-    if (root.raws) {
-        root.raws = {};
-    }
-
-    toRemove.forEach(node => {
-        if (!shouldComment) {
-            removeRecursiveUpIfEmpty(node);
-        } else if (node.type === 'decl') {
-            replaceRecursiveUpIfEmpty('STYLABLE_DIRECTIVE', node);
-        } else {
-            replaceRecursiveUpIfEmpty('EMPTY_NODE', node);
-        }
     });
 }
 

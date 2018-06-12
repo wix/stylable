@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import * as postcss from 'postcss';
 
 export function matchRuleAndDeclaration(
@@ -9,11 +8,13 @@ export function matchRuleAndDeclaration(
     msg?: string
 ) {
     const rule = parent.nodes![selectorIndex] as postcss.Rule;
-    expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    expect(
-        rule.nodes!.map(x => x.toString()).join(';'),
-        `${msg ? msg + ' ' : ''}selector ${selectorIndex} first declaration`
-    ).to.equal(decl);
+    if (rule.selector !== selector) {
+        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex}`);
+    }
+    // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
+    if (rule.nodes!.map(x => x.toString()).join(';') !== decl) {
+        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex} first declaration`);
+    }
 }
 
 export function matchAllRulesAndDeclarations(

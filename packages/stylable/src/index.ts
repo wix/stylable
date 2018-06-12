@@ -9,7 +9,8 @@ export {
     replaceValueHook,
     TransformHooks,
     ResolvedElement,
-    ScopedSelectorResults
+    ScopedSelectorResults,
+    removeSTDirective
 } from './stylable-transformer';
 export * from './stylable-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
@@ -24,7 +25,6 @@ export { create } from './runtime';
 export * from './types';
 export * from './stylable-mixins';
 export * from './stylable-assets';
-export * from './optimizer/stylable-optimizer';
 export * from './functions';
 export * from './state-validators';
 export * from './selector-utils';

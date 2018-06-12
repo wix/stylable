@@ -1,6 +1,6 @@
 {
   "name": "stylable-cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -20,7 +20,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
-    "stylable": "^5.3.11",
+    "stylable": "^5.4.2",
     "webpack": "^4.8.3",
     "webpack-sources": "^1.1.0"
   },
