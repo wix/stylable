@@ -6,7 +6,6 @@ import {
     nativePseudoElements,
     reservedKeyFrames
 } from './native-reserved-lists';
-import { removeSTDirective } from './optimizer/stylable-optimizer';
 import { dirname } from './path';
 import {
     autoStateAttrName,
@@ -765,4 +764,40 @@ export class StylableTransformer {
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
     }
+}
+
+export function removeSTDirective(root: postcss.Root) {
+    const toRemove: postcss.Node[] = [];
+
+    root.walkRules((rule: postcss.Rule) => {
+        if (rule.nodes && rule.nodes.length === 0) {
+            toRemove.push(rule);
+            return;
+        }
+        rule.walkDecls((decl: postcss.Declaration) => {
+            if (decl.prop.startsWith('-st-')) {
+                toRemove.push(decl);
+            }
+        });
+        if (rule.raws) {
+            rule.raws = {
+                after: '\n'
+            };
+        }
+    });
+
+    if (root.raws) {
+        root.raws = {};
+    }
+
+    function removeRecursiveUpIfEmpty(node: postcss.Node) {
+        const parent = node.parent;
+        node.remove();
+        if (parent && parent.nodes && parent.nodes.length === 0) {
+            removeRecursiveUpIfEmpty(parent);
+        }
+    }
+    toRemove.forEach(node => {
+        removeRecursiveUpIfEmpty(node);
+    });
 }
