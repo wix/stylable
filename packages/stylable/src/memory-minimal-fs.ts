@@ -1,5 +1,5 @@
 const deindent = require('deindent');
-import { resolve } from './path';
+import { resolve, sep } from './path';
 
 import { MinimalFS } from './cached-process-file';
 
@@ -21,7 +21,11 @@ export function createMinimalFS(config: MinimalFSSetup) {
             files[resolve(file)] = files[file];
         }
     }
-
+    function isDir(path: string) {
+        return Object.keys(files).some(p => {
+            return p.startsWith(path[path.length - 1] === sep ? path : path + sep);
+        });
+    }
     const fs: MinimalFS = {
         readFileSync(path: string) {
             if (!files[path]) {
@@ -33,12 +37,19 @@ export function createMinimalFS(config: MinimalFSSetup) {
             return files[path].content;
         },
         statSync(path: string) {
-            if (!files[path]) {
+            const isDirectory = isDir(path);
+            if (!files[path] && !isDirectory) {
                 throw new Error('Cannot find file: ' + path);
             }
+
             return {
-                isFile() { return true; },
-                mtime: files[path].mtime!
+                isDirectory() {
+                    return isDirectory;
+                },
+                isFile() {
+                    return true;
+                },
+                mtime: isDirectory ? new Date() : files[path].mtime!
             };
         }
     };

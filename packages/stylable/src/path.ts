@@ -6,10 +6,17 @@ const sPath = {
     join: path.join,
     basename: path.basename,
     dirname: path.dirname,
-    relative: path.relative
+    relative: path.relative,
+    sep: path.sep
 };
 
 export default sPath;
+
+export const sep = {
+    toString() {
+        return sPath.sep;
+    }
+};
 
 export const resolve: typeof path.resolve = (...args) => {
     return sPath.resolve(...args);

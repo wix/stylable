@@ -20,16 +20,16 @@ export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
-    ) { }
+    ) {}
     public resolveImport(importSymbol: ImportSymbol) {
-
+        const { context } = importSymbol;
         const { from } = importSymbol.import;
 
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
             let meta;
             try {
-                meta = this.fileProcessor.process(from);
+                meta = this.fileProcessor.process(from, false, context);
             } catch (e) {
                 return null;
             }
@@ -41,9 +41,7 @@ export class StylableResolver {
             }
 
             return { _kind: 'css', symbol, meta } as CSSResolve;
-
         } else {
-
             const _module = this.requireModule(from);
 
             if (importSymbol.type === 'default') {
@@ -75,18 +73,25 @@ export class StylableResolver {
         return this.resolveImport(maybeImport);
     }
     public deepResolve(
-        maybeImport: StylableSymbol | undefined, path: StylableSymbol[] = []): CSSResolve | JSResolve | null {
+        maybeImport: StylableSymbol | undefined,
+        path: StylableSymbol[] = []
+    ): CSSResolve | JSResolve | null {
         let resolved = this.resolve(maybeImport);
-        while (resolved && resolved._kind === 'css' && resolved.symbol && resolved.symbol._kind === 'import') {
+        while (
+            resolved &&
+            resolved._kind === 'css' &&
+            resolved.symbol &&
+            resolved.symbol._kind === 'import'
+        ) {
             resolved = this.resolve(resolved.symbol);
         }
         if (
-            resolved
-            && resolved.symbol
-            && resolved.meta
-            && (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element')
-            && resolved.symbol.alias
-            && !resolved.symbol[valueMapping.extends]
+            resolved &&
+            resolved.symbol &&
+            resolved.meta &&
+            (resolved.symbol._kind === 'class' || resolved.symbol._kind === 'element') &&
+            resolved.symbol.alias &&
+            !resolved.symbol[valueMapping.extends]
         ) {
             if (path.indexOf(resolved.symbol) !== -1) {
                 return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
@@ -97,15 +102,22 @@ export class StylableResolver {
         return resolved;
     }
     public resolveSymbolOrigin(
-        symbol: StylableSymbol | undefined, meta: StylableMeta, path: StylableSymbol[] = []): CSSResolve | null {
-        if (!symbol || !meta) { return null; }
+        symbol: StylableSymbol | undefined,
+        meta: StylableMeta,
+        path: StylableSymbol[] = []
+    ): CSSResolve | null {
+        if (!symbol || !meta) {
+            return null;
+        }
         if (symbol._kind === 'element' || symbol._kind === 'class') {
             if (path.indexOf(symbol) !== -1) {
                 return { meta, symbol, _kind: 'css' };
             }
             path.push(symbol);
             const isAliasOnly = symbol.alias && !symbol[valueMapping.extends];
-            return isAliasOnly ? this.resolveSymbolOrigin(symbol.alias, meta, path) : { meta, symbol, _kind: 'css' };
+            return isAliasOnly
+                ? this.resolveSymbolOrigin(symbol.alias, meta, path)
+                : { meta, symbol, _kind: 'css' };
         } else if (symbol._kind === 'import') {
             const resolved = this.resolveImport(symbol);
             if (resolved && resolved.symbol && resolved._kind === 'css') {
@@ -120,7 +132,11 @@ export class StylableResolver {
         return this.resolveName(meta, symbol, false);
     }
 
-    public resolveName(meta: StylableMeta, symbol: StylableSymbol, isElement: boolean): CSSResolve | null {
+    public resolveName(
+        meta: StylableMeta,
+        symbol: StylableSymbol,
+        isElement: boolean
+    ): CSSResolve | null {
         const type = isElement ? 'element' : 'class';
         let finalSymbol;
         let finalMeta;
@@ -178,7 +194,6 @@ export class StylableResolver {
             } else {
                 return [];
             }
-
         }
 
         const extendPath = [];
@@ -199,7 +214,8 @@ export class StylableResolver {
                     break;
                 }
                 const res = this.resolve(extend);
-                if (res &&
+                if (
+                    res &&
                     res._kind === 'css' &&
                     res.symbol &&
                     (res.symbol._kind === 'element' || res.symbol._kind === 'class')

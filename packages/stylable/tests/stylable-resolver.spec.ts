@@ -1,9 +1,10 @@
 import { expect } from 'chai';
+import * as postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 import { resolve } from '../src/path';
 import { StylableMeta } from '../src/stylable-processor';
-import { generateInfra } from './utils/generate-test-util';
+import { createStylableInstance, generateInfra } from './utils/generate-test-util';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -369,5 +370,49 @@ describe('stylable-resolver', () => {
         const entryMeta = fileProcessor.process('/entry.st.css');
         const res1 = resolver.resolveSymbolOrigin(entryMeta.mappedSymbols.a, entryMeta);
         expect(res1!.symbol).to.eql(entryMeta.classes.a);
+    });
+
+    it('should resolve 4rd party according to context', () => {
+
+        const stylable = createStylableInstance({
+            resolve: {
+                symlinks: false
+            },
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "a/index.st.css";
+                            -st-default: A;
+                        }
+                        .root {
+                            -st-extends: A;
+                        }
+                    `
+                },
+                '/node_modules/a/index.st.css': {
+                    namespace: 'A',
+                    content: `
+                        :import {
+                            -st-from: "b/index.st.css"
+                            -st-default: B;
+                        }
+                        .root {
+                            -st-extends: B;
+                        }
+                    `
+                },
+                '/node_modules/a/node_modules/b/index.st.css': {
+                    namespace: 'B',
+                    content: ``
+                }
+            }
+        });
+
+        const {meta} = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
+        const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+        expect(rule.selector).to.equal('.A--root.B--root');
+
     });
 });

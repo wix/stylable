@@ -46,7 +46,7 @@ export function createInfrastructure(
                 return stat;
             }
         },
-        path => resolvePath(projectRoot, path)
+        (path, context) => resolvePath(context || projectRoot, path)
     );
 
     if (onProcess) {

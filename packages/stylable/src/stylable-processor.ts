@@ -237,7 +237,8 @@ export class StylableProcessor {
                 _kind: 'import',
                 type: 'default',
                 name: 'default',
-                import: importDef
+                import: importDef,
+                context: path.dirname(this.meta.source)
             };
         }
         Object.keys(importDef.named).forEach(name => {
@@ -246,7 +247,8 @@ export class StylableProcessor {
                 _kind: 'import',
                 type: 'named',
                 name: importDef.named[name],
-                import: importDef
+                import: importDef,
+                context: path.dirname(this.meta.source)
             };
         });
     }

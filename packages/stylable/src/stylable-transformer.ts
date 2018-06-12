@@ -7,6 +7,7 @@ import {
     reservedKeyFrames
 } from './native-reserved-lists';
 import { removeSTDirective } from './optimizer/stylable-optimizer';
+import { dirname } from './path';
 import {
     autoStateAttrName,
     transformPseudoStateSelector,
@@ -231,7 +232,8 @@ export class StylableTransformer {
                     _kind: 'import',
                     type: 'default',
                     name: 'default',
-                    import: _import
+                    import: _import,
+                    context: dirname(meta.source)
                 });
                 if (resolved && resolved._kind === 'css') {
                     const clsExports: Pojo<string> = {};
