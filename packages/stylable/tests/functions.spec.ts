@@ -711,7 +711,6 @@ describe('Stylable functions (native, formatter and variable)', () => {
             });
 
             it('should warn a formatter throws an error', () => {
-                const key = 'print';
                 const config = {
                     entry: `/main.st.css`,
                     files: {

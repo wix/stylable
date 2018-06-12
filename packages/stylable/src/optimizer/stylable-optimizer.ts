@@ -1,6 +1,5 @@
 import * as postcss from 'postcss';
 import { parseSelector, SelectorAstNode, traverseNode } from '../selector-utils';
-import { StylableMeta } from '../stylable-processor';
 import { StylableResults } from '../stylable-transformer';
 import { Pojo } from '../types';
 import { StylableClassNameOptimizer } from './classname-optimizer';

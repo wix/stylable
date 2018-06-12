@@ -3,7 +3,7 @@ import { evalDeclarationValue } from './functions';
 import { Stylable } from './stylable';
 import { Imported, SDecl, StylableMeta } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';
-import { getDeclStylable, removeUnusedRules } from './stylable-utils';
+import { getDeclStylable } from './stylable-utils';
 import { Pojo } from './types';
 
 export type OverrideVars = Pojo<string>;
@@ -103,9 +103,9 @@ export class Bundler {
         return this.stylable.transform(meta).meta;
     }
 
-    private resolvePath(ctx: string, path: string) {
-        return this.stylable.resolvePath(ctx, path);
-    }
+    // private resolvePath(ctx: string, path: string) {
+    //     return this.stylable.resolvePath(ctx, path);
+    // }
 
     private aggregateTheme(entryMeta: StylableMeta, entryIndex: number, themeEntries: ThemeEntries): void {
         const aggregateDependencies = (srcMeta: StylableMeta, overrideVars: OverrideVars, importPath: string[]) => {

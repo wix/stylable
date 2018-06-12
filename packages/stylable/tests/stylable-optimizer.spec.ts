@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import * as postcss from 'postcss';
 import {
     removeCommentNodes,
-    removeSTDirective,
     StylableOptimizer
 } from '../src/optimizer/stylable-optimizer';
 import { createStylableInstance } from './utils/generate-test-util';

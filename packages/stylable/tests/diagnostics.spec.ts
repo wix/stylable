@@ -1,22 +1,19 @@
 import { expect } from 'chai';
-import { Diagnostics, valueMapping } from '../src';
+import { valueMapping } from '../src';
 import {
     nativeFunctionsDic,
-    nativePseudoClasses,
     nativePseudoElements,
     reservedKeyFrames
 } from '../src/native-reserved-lists';
-import { safeParse } from '../src/parser';
 import { resolve } from '../src/path';
-import { process, processorWarnings } from '../src/stylable-processor';
+import { processorWarnings } from '../src/stylable-processor';
 import { valueParserWarnings } from '../src/stylable-value-parsers';
-import { Config, generateFromMock } from './utils/generate-test-util';
-const deindent = require('deindent');
 import {
     expectWarnings,
     expectWarningsFromTransform,
     findTestLocations
 } from './utils/diagnostics';
+import { Config } from './utils/generate-test-util';
 
 const customButton = `
     .root{

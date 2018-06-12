@@ -11,7 +11,6 @@ import {
 } from './stylable-processor';
 
 import {
-    createSimpleSelectorChecker,
     fixChunkOrdering,
     isNodeMatch,
     parseSelector,

@@ -4,7 +4,7 @@ import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
-import { ClassSymbol, ElementSymbol, SDecl, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
+import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
@@ -209,7 +209,7 @@ export function validateStateArgument(
         errors: null
     };
 
-    const { type: paramType, arguments: paramValidators } = stateAst;
+    const { type: paramType } = stateAst;
     const validator = systemValidators[paramType];
 
     try {
@@ -335,7 +335,6 @@ function resolveStateValue(
 
     let actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content || stateDef.defaultValue);
 
-    const { type: paramType, arguments: paramValidators } = stateDef;
     const validator = systemValidators[stateDef.type];
 
     let stateParamOutput;
