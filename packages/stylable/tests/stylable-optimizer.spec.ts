@@ -1,10 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import {
-    removeCommentNodes,
-    removeSTDirective,
-    StylableOptimizer
-} from '../src/optimizer/stylable-optimizer';
+import { removeCommentNodes, StylableOptimizer } from '../src/optimizer/stylable-optimizer';
 import { createStylableInstance } from './utils/generate-test-util';
 const deindent = require('deindent');
 describe('StylableOptimizer', () => {
