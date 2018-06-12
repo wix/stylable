@@ -23,6 +23,6 @@
       "mocha"
     ],
     "noUnusedLocals": false,
-    "noUnusedParameters": true
+    "esModuleInterop": false, 
   }
 }
