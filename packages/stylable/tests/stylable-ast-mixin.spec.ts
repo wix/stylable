@@ -1,11 +1,6 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
 import { safeParse } from '../src/parser';
-import { StylableMeta } from '../src/stylable-processor';
-import { StylableTransformer } from '../src/stylable-transformer';
 import { createSubsetAst, scopeSelector } from '../src/stylable-utils';
-import { valueMapping } from '../src/stylable-value-parsers';
-import { createTransformer } from './utils/generate-test-util';
 
 describe('scopeSelector', () => {
     const tests = [

@@ -1,11 +1,7 @@
 /* tslint:disable:max-line-length */
 import { expect } from 'chai';
-import * as postcss from 'postcss';
 import {
-    generateFromMock,
-    generateStylableRoot,
-    matchAllRulesAndDeclarations,
-    matchRuleAndDeclaration
+    generateFromMock
 } from '../utils/test-utils';
 
 describe('Mixin diagnostics', () => {

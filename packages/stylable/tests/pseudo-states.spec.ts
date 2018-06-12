@@ -1,13 +1,10 @@
 import { expect, use } from 'chai';
 import chaiSubset = require('chai-subset');
-import * as postcss from 'postcss';
 import { processorWarnings, valueMapping } from '../src/index';
-import { nativeFunctionsDic, nativePseudoClasses } from '../src/native-reserved-lists';
+import { nativePseudoClasses } from '../src/native-reserved-lists';
 import { mediaQuery, styleRules } from './matchers/results';
 import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
-import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
-
-const valueParser = require('postcss-value-parser');
+import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 use(chaiSubset); // move all of these to a central place
 use(styleRules);
@@ -921,7 +918,7 @@ describe('pseudo-states', () => {
                             }
                         };
 
-                        const res = expectWarningsFromTransform(config, [{
+                        expectWarningsFromTransform(config, [{
                             message: [
                                 'pseudo-state "state1" default value "" failed validation:',
                                 'encountered unknown string validator "missing"'
@@ -970,7 +967,7 @@ describe('pseudo-states', () => {
                         }
                     };
 
-                    const res = expectWarningsFromTransform(config, [{
+                    expectWarningsFromTransform(config, [{
                         message: [
                             'pseudo-state "state1" default value "defaultBlah" failed validation:',
                             'expected "defaultBlah" to be of type number'
@@ -1022,7 +1019,7 @@ describe('pseudo-states', () => {
                         }
                     };
 
-                    const res = expectWarningsFromTransform(config, [{
+                    expectWarningsFromTransform(config, [{
                         message: [
                             'pseudo-state "state1" default value "" failed validation:',
                             'encountered unknown number validator "missing"'
@@ -1159,7 +1156,7 @@ describe('pseudo-states', () => {
                             }
                         };
 
-                        const res = expectWarningsFromTransform(config, [{
+                        expectWarningsFromTransform(config, [{
                             message: [
                                 'pseudo-state "size" default value "" failed validation:',
                                 'expected enum to be defined with one option or more'
@@ -1183,7 +1180,7 @@ describe('pseudo-states', () => {
                             }
                         };
 
-                        const res = expectWarningsFromTransform(config, [{
+                        expectWarningsFromTransform(config, [{
                             message: [
                                 'pseudo-state "size" default value "huge" failed validation:',
                                 'expected "huge" to be one of the options: "small, large"'

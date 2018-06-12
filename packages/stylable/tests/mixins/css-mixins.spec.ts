@@ -2,7 +2,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import {
-    generateFromMock,
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration
@@ -117,33 +116,33 @@ describe('CSS Mixins', () => {
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {
-        const result = generateStylableRoot({
-            entry: `/entry.st.css`,
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        .x {
-                            color: red;
-                        }
-                        .x:hover {
-                            color: green;
-                        }
+        // const result = generateStylableRoot({
+        //     entry: `/entry.st.css`,
+        //     files: {
+        //         '/entry.st.css': {
+        //             namespace: 'entry',
+        //             content: `
+        //                 .x {
+        //                     color: red;
+        //                 }
+        //                 .x:hover {
+        //                     color: green;
+        //                 }
 
-                        @keyframes my-name {
+        //                 @keyframes my-name {
 
-                            0% {
-                                -st-mixin: x;
-                            }
-                            100% {
+        //                     0% {
+        //                         -st-mixin: x;
+        //                     }
+        //                     100% {
 
-                            }
+        //                     }
 
-                        }
-                    `
-                }
-            }
-        });
+        //                 }
+        //             `
+        //         }
+        //     }
+        // });
 
         throw new Error('Test me');
     });

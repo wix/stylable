@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-import * as postcss from 'postcss';
 import { resolve } from '../src/path';
 import { ImportSymbol, processNamespace } from '../src/stylable-processor';
 import { flatMatch } from './matchers/flat-match';

@@ -2,7 +2,6 @@ import { FileProcessor } from './cached-process-file';
 import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
-import { stripQuotation } from './utils';
 
 export interface CSSResolve {
     _kind: 'css';
