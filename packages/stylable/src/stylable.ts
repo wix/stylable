@@ -63,7 +63,7 @@ export class Stylable {
         protected hooks: TransformHooks = {},
         protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
-        protected optimizer: StylableOptimizer = new StylableOptimizer()
+        protected optimizer?: StylableOptimizer
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
