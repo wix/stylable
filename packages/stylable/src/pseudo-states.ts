@@ -369,7 +369,8 @@ function resolveStateValue(
 
     const selectorSuffix = stateDef.type === 'tag' ? '~' : undefined; // TODO: should be generic
 
-    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}="${actualParam}"`;
+    const strippedParam = actualParam.replace(/['"`]+/g, '');
+    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}="${strippedParam}"`;
 }
 
 function resolveParam(

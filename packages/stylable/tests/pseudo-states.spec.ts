@@ -596,6 +596,28 @@ describe('pseudo-states', () => {
                 });
             });
 
+            it('should strip quotation marks when transform any state parameter', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .my-class {
+                                -st-states: state1(string);
+                            }
+                            .my-class:state1("someString") {}
+                            `
+                        }
+                    }
+                });
+
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry--my-class[data-entry-state1="someString"] {}'
+                });
+            });
+
             describe('string', () => {
 
                 it('should transform string validator', () => {
