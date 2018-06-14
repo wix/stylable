@@ -102,9 +102,6 @@ describe('post-process-and-hooks', () => {
 
     it('should call replaceValueHook on mixin overrides', () => {
         let index = 0;
-        const expectedValueCalls = [
-            ['green', 'param1', true, []]
-        ];
 
         const t = createTransformer({
             files: {
@@ -170,8 +167,7 @@ describe('post-process-and-hooks', () => {
             ['Ariel', 'param2', true, [`default from ${path.resolve('/entry.st.css')}`]]
         ];
 
-        const res = t.transform(t.fileProcessor.process('/entry.st.css'));
-
+        t.transform(t.fileProcessor.process('/entry.st.css'));
     });
 
     it('should enable/disable root scoping by flag (enable)', () => {

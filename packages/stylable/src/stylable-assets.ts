@@ -55,7 +55,7 @@ export function processDeclarationUrls(
 }
 
 function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
-    const { type, url, nodes = [] } = node;
+    const { type, nodes = [] } = node;
     switch (type) {
         case 'value':
             nodes.forEach((_: ParsedValue) => findUrls(_, onUrl));

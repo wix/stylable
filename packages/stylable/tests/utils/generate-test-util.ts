@@ -1,5 +1,4 @@
 import * as postcss from 'postcss';
-import { Bundler } from '../../src/bundle';
 import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
 import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
@@ -9,6 +8,7 @@ import { process, StylableMeta } from '../../src/stylable-processor';
 import { StylableResolver } from '../../src/stylable-resolver';
 import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
 
+import { Bundler } from '../../src';
 import { Pojo } from '../../src/types';
 
 export interface File {
@@ -134,7 +134,7 @@ export function createTestBundler(config: Config) {
         throw new Error('usedFiles is not optional in generateStylableOutput');
     }
     const stylable = createStylableInstance(config);
-    return stylable.createBundler();
+    return stylable.createBundler() as Bundler;
 }
 
 export function generateStylableOutput(config: Config) {

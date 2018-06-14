@@ -2,7 +2,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import {
-    generateFromMock,
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration

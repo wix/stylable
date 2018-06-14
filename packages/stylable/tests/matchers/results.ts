@@ -1,8 +1,6 @@
-const flatten = require('flat');
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { StylableResults } from '../../src/index';
-import { Diagnostic } from '../utils/diagnostics';
 
 export function mediaQuery(chai: any, util: any) {
     const { flag } = util;

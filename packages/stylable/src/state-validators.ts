@@ -1,4 +1,4 @@
-import { Pojo, StateArguments, StateTypeValidator } from './types';
+import { Pojo, StateArguments } from './types';
 
 export interface StateResult {
     res: string;

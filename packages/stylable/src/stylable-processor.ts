@@ -21,7 +21,7 @@ import {
     StylableMeta,
     VarSymbol
 } from './stylable-meta';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, getSourcePath } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
 import { SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
