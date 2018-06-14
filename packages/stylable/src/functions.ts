@@ -30,8 +30,8 @@ export function resolveArgumentsValue(
     transformer: StylableTransformer,
     meta: StylableMeta,
     variableOverride?: Pojo<string>,
-    path?: string[]) {
-
+    path?: string[]
+) {
     const resolvedArgs = {} as Pojo<string>;
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
@@ -56,8 +56,8 @@ export function evalDeclarationValue(
     variableOverride?: Pojo<string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
-    passedThrough: string[] = []) {
-
+    passedThrough: string[] = []
+): string {
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
@@ -68,7 +68,7 @@ export function evalDeclarationValue(
                     if (args.length === 1) {
                         const varName = args[0];
                         if (variableOverride && variableOverride[varName]) {
-                            return parsedNode.resolvedValue = variableOverride[varName];
+                            return (parsedNode.resolvedValue = variableOverride[varName]);
                         }
                         const refUniqID = createUniqID(meta.source, varName);
                         if (passedThrough.indexOf(refUniqID) !== -1) {
@@ -76,9 +76,9 @@ export function evalDeclarationValue(
                             const cyclicChain = passedThrough.map(variable => variable || '');
                             cyclicChain.push(refUniqID);
                             if (diagnostics) {
-                                diagnostics.warn(node,
-                                    errors.CYCLIC_VALUE(cyclicChain),
-                                    { word: refUniqID });
+                                diagnostics.warn(node, errors.CYCLIC_VALUE(cyclicChain), {
+                                    word: refUniqID
+                                });
                             }
                             return stringifyFunction(value, parsedNode);
                         }
@@ -96,9 +96,9 @@ export function evalDeclarationValue(
                                 passedThrough.concat(createUniqID(meta.source, varName))
                             );
 
-                            parsedNode.resolvedValue = valueHook ?
-                                valueHook(resolvedValue, varName, true, passedThrough) :
-                                resolvedValue;
+                            parsedNode.resolvedValue = valueHook
+                                ? valueHook(resolvedValue, varName, true, passedThrough)
+                                : resolvedValue;
                         } else if (varSymbol && varSymbol._kind === 'import') {
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
@@ -116,29 +116,34 @@ export function evalDeclarationValue(
                                             diagnostics,
                                             passedThrough.concat(createUniqID(meta.source, varName))
                                         );
-                                        parsedNode.resolvedValue = valueHook ?
-                                            valueHook(resolvedValue, varName, false, passedThrough) :
-                                            resolvedValue;
+                                        parsedNode.resolvedValue = valueHook
+                                            ? valueHook(
+                                                  resolvedValue,
+                                                  varName,
+                                                  false,
+                                                  passedThrough
+                                              )
+                                            : resolvedValue;
                                     } else {
                                         const errorKind =
-                                            (
-                                                resolvedVarSymbol._kind === 'class'
-                                                &&
+                                            resolvedVarSymbol._kind === 'class' &&
                                                 resolvedVarSymbol[valueMapping.root]
-                                            ) ?
-                                                'stylesheet' : resolvedVarSymbol._kind;
+                                                ? 'stylesheet'
+                                                : resolvedVarSymbol._kind;
 
                                         if (diagnostics) {
-                                            diagnostics.warn(node,
+                                            diagnostics.warn(
+                                                node,
                                                 errors.CANNOT_USE_AS_VALUE(errorKind, varName),
-                                                { word: varName });
+                                                { word: varName }
+                                            );
                                         }
                                     }
                                 } else if (resolvedVar._kind === 'js' && diagnostics) {
                                     // ToDo: provide actual exported id (default/named as x)
-                                    diagnostics.warn(node,
-                                        errors.CANNOT_USE_JS_AS_VALUE(varName),
-                                        { word: varName });
+                                    diagnostics.warn(node, errors.CANNOT_USE_JS_AS_VALUE(varName), {
+                                        word: varName
+                                    });
                                 }
                             } else {
                                 // TODO: move this to a seperate mechanism to check imports unrelated to usage
@@ -147,9 +152,14 @@ export function evalDeclarationValue(
                                 });
                                 if (namedDecl && diagnostics) {
                                     // ToDo: provide actual exported id (default/named as x)
-                                    diagnostics.error(namedDecl,
-                                        errors.CANNOT_FIND_IMPORTED_VAR(varName, varSymbol.import.fromRelative),
-                                        { word: varName });
+                                    diagnostics.error(
+                                        namedDecl,
+                                        errors.CANNOT_FIND_IMPORTED_VAR(
+                                            varName,
+                                            varSymbol.import.fromRelative
+                                        ),
+                                        { word: varName }
+                                    );
                                 }
                             }
                         } else if (diagnostics) {
@@ -157,15 +167,17 @@ export function evalDeclarationValue(
                         }
                     } else if (diagnostics) {
                         const argsAsString = args.filter((arg: string) => arg !== ', ').join(', ');
-                        diagnostics.warn(
-                            node,
-                            errors.MULTI_ARGS_IN_VALUE(argsAsString),
-                            { word: argsAsString });
+                        diagnostics.warn(node, errors.MULTI_ARGS_IN_VALUE(argsAsString), {
+                            word: argsAsString
+                        });
                     }
                 } else if (value === 'url') {
                     // postcss-value-parser treats url differently:
                     // https://github.com/TrySound/postcss-value-parser/issues/34
+                } else if (value === '') {
+                    parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                 } else {
+
                     const formatterRef = meta.mappedSymbols[value];
                     const formatter = resolver.deepResolve(formatterRef);
                     const args = getFormatterArgs(parsedNode);
@@ -188,8 +200,12 @@ export function evalDeclarationValue(
                             if (diagnostics) {
                                 diagnostics.warn(
                                     node,
-                                    errors.FAIL_TO_EXECUTE_FORMATTER(parsedNode.resolvedValue, error.message),
-                                    { word: (node as postcss.Declaration).value });
+                                    errors.FAIL_TO_EXECUTE_FORMATTER(
+                                        parsedNode.resolvedValue,
+                                        error.message
+                                    ),
+                                    { word: (node as postcss.Declaration).value }
+                                );
                             }
                         }
                     } else if (isCssNativeFunction(value)) {
@@ -203,7 +219,6 @@ export function evalDeclarationValue(
                 return valueParser.stringify(parsedNode);
             }
         }
-
     }, true);
 
     // TODO: handle calc (parse internals but maintain expression)
@@ -228,7 +243,7 @@ function getFormatterArgs(node: ParsedValue) {
             argsResult.push(currentArg.trim());
             currentArg = '';
         } else if (currentNode.type !== 'comment') {
-            currentArg += (currentNode.resolvedValue || valueParser.stringify(currentNode));
+            currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
         }
     }
 
