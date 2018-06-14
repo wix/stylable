@@ -9,6 +9,7 @@ import { StylableResolver } from './stylable-resolver';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo, StateParsedValue } from './types';
+import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
@@ -369,8 +370,8 @@ function resolveStateValue(
 
     const selectorSuffix = stateDef.type === 'tag' ? '~' : undefined; // TODO: should be generic
 
-    const strippedParam = actualParam.replace(/['"`]+/g, '');
-    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}="${strippedParam}"`;
+    const strippedParam = stripQuotation(actualParam);
+    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}=${JSON.stringify(strippedParam)}`;
 }
 
 function resolveParam(
