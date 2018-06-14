@@ -193,7 +193,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         });
 
                         const rule = result.nodes![0] as postcss.Rule;
-                        expect(rule.nodes![0].toString()).to.equal(`border: ${cssFunc}(${cssFunc}(1))`);
+                        expect(rule.nodes![0].toString()).to.equal(
+                            `border: ${cssFunc}(${cssFunc}(1))`
+                        );
                     });
                 }
             });
@@ -556,11 +558,12 @@ describe('Stylable functions (native, formatter and variable)', () => {
     describe('diagnostics', () => {
         describe('value()', () => {
             it('should return warning when passing more than one argument to a value() function', () => {
-                expectWarningsFromTransform({
-                    entry: '/style.st.css',
-                    files: {
-                        '/style.st.css': {
-                            content: `
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
                             :vars {
                                 color1: red;
                                 color2: gold;
@@ -569,27 +572,35 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 |color:value($color1, color2$)|;
                             }
                             `
+                            }
                         }
-                    }
-                }, [{
-                    message: 'value function accepts only a single argument: "value(color1, color2)"',
-                    file: '/style.st.css'
-                }]);
+                    },
+                    [
+                        {
+                            message:
+                                'value function accepts only a single argument: "value(color1, color2)"',
+                            file: '/style.st.css'
+                        }
+                    ]
+                );
             });
 
             it('should return warning for unknown var on transform', () => {
-                expectWarningsFromTransform({
-                    entry: '/style.st.css',
-                    files: {
-                        '/style.st.css': {
-                            content: `
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
                             .gaga{
                                 |color:value($myColor$)|;
                             }
                             `
+                            }
                         }
-                    }
-                }, [{ message: 'unknown var "myColor"', file: '/style.st.css' }]);
+                    },
+                    [{ message: 'unknown var "myColor"', file: '/style.st.css' }]
+                );
             });
 
             it('class cannot be used as var', () => {
@@ -614,8 +625,12 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: 'class "my-class" cannot be used as a variable', file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: 'class "my-class" cannot be used as a variable',
+                        file: '/main.st.css'
+                    }
+                ]);
             });
 
             it('stylesheet cannot be used as var', () => {
@@ -638,8 +653,12 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: 'stylesheet "Comp" cannot be used as a variable', file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: 'stylesheet "Comp" cannot be used as a variable',
+                        file: '/main.st.css'
+                    }
+                ]);
             });
 
             it('JS imports cannot be used as vars', () => {
@@ -662,8 +681,12 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: 'JavaScript import "my-mixin" cannot be used as a variable', file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: 'JavaScript import "my-mixin" cannot be used as a variable',
+                        file: '/main.st.css'
+                    }
+                ]);
             });
 
             it('should warn when encountering a cyclic dependecy in a var definition', () => {
@@ -685,8 +708,12 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     }
                 };
                 const mainPath = path.resolve('/main.st.css');
-                expectWarningsFromTransform(config,
-                    [{ message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, file: '/main.st.css' }]); // tslint:disable-line:max-line-length
+                expectWarningsFromTransform(config, [
+                    {
+                        message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, // tslint:disable-line:max-line-length
+                        file: '/main.st.css'
+                    }
+                ]);
             });
         });
 
@@ -706,8 +733,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     }
                 };
 
-                expectWarningsFromTransform(config,
-                    [{ message: `cannot find formatter: ${key}`, file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: `cannot find formatter: ${key}`, file: '/main.st.css' }
+                ]);
             });
 
             it('should warn a formatter throws an error', () => {
@@ -738,11 +766,35 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     }
                 };
 
-                expectWarningsFromTransform(config,
-                    [{
+                expectWarningsFromTransform(config, [
+                    {
                         message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
                         file: '/main.st.css'
-                    }]);
+                    }
+                ]);
+            });
+
+            it('should handle empty functions', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: `/style.st.css`,
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                                :vars {
+                                    a: 100px;
+                                    b: "max-width: 100px";
+                                }
+                                .x{font-family: (aaa)}
+                                @media screen (max-width: 100px) {}
+                                @media screen (max-width: value(a)) {}
+                                @media screen (value(b)) {}
+                            `
+                            }
+                        }
+                    },
+                    []
+                );
             });
         });
 
