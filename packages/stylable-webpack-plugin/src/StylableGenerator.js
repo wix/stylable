@@ -12,7 +12,7 @@ class StylableGenerator {
         this.options = options;
     }
     generate(module, dependencyTemplates, runtimeTemplate) {
-        if (module.type === 'stylable-raw') {
+        if (module.type === 'stylable-raw' || !module.buildInfo.stylableMeta) {
             return module.originalSource();
         }
         const { meta, exports } = this.transform(module);

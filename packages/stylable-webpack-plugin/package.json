@@ -6,8 +6,7 @@
   "scripts": {
     "test": "mocha --timeout 10000 test/**/*.spec.js",
     "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
-    "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js",
-    "prepack": "yarn build"
+    "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
   },
   "peerDependencies": {
     "stylable": "^5.3.11",
