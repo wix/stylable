@@ -11,7 +11,7 @@
     "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "stylable": "^5.4.3",
+    "stylable": "^5.4.2",
     "stylable-runtime": "^1.0.0"
   },
   "files": [
