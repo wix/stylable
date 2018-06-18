@@ -15,7 +15,7 @@ export interface InheritedAttributes {
 }
 
 export type RuntimeStylesheet = {
-    (className: string, states: StateMap, inheritedAttributes: InheritedAttributes): AttributeMap
+    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap
     $root: string,
     $namespace: string,
     $depth: number,
