@@ -52,10 +52,16 @@ export function cachedProcessFile<T = any>(
     }
 
     function add(fullpath: string, value: T) {
+        let mtime;
+        try {
+            mtime = fs.statSync(fullpath).mtime;
+        } catch (e) {
+            mtime = new Date();
+        }
         cache[fullpath] = {
             value,
             stat: {
-                mtime: fs.statSync(fullpath).mtime
+                mtime
             }
         };
     }
