@@ -1,12 +1,9 @@
 {
-  "name": "stylable-cli",
-  "version": "1.0.2",
-  "main": "dist/build.js",
-  "types": "dist/build.d.ts",
+  "name": "stylable-jest",
+  "version": "1.0.0",
+  "main": "dist/jest.js",
+  "types": "dist/jest.d.ts",
   "private": true,
-  "bin": {
-    "stc": "./dist/cli.js"
-  },
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
@@ -14,15 +11,8 @@
     "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "deindent": "^0.1.0",
-    "dependency-tree": "^6.1.0",
-    "lodash.clonedeep": "^4.5.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
-    "stylable": "^5.4.2",
     "stylable-node": "^1.0.0",
-    "webpack": "^4.8.3",
-    "webpack-sources": "^1.1.0"
+    "node-eval": "^2.0.0"
   },
   "files": [
     "dist"

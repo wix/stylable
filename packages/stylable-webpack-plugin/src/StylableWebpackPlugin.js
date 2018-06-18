@@ -8,6 +8,7 @@ const { isImportedByNonStylable } = require("./utils");
 const {
   calculateModuleDepthAndShallowStylableDependencies
 } = require("./stylable-module-helpers");
+const { normalizeOptions } = require("./PluginOptions");
 const { StylableBootstrapModule } = require("./StylableBootstrapModule");
 const { cssRuntimeRendererRequest } = require("./runtime-dependencies");
 const StylableParser = require("./StylableParser");
@@ -32,6 +33,9 @@ class StylableWebpackPlugin {
     this.injectStylableRuntimeChunk(compiler);
     this.injectPlugins(compiler);
   }
+  normalizeOptions(mode) {
+    this.options = normalizeOptions(this.userOptions, mode);
+  }
   overrideOptionsWithLocalConfig(context) {
     let fullOptions = this.options;
     const localConfig = this.loadLocalStylableConfig(context);
@@ -48,50 +52,6 @@ class StylableWebpackPlugin {
       /* no op */
     }
     return localConfigOverride;
-  }
-  normalizeOptions(mode) {
-    const options = this.userOptions;
-    const isProd = mode === 'production';
-    const defaults = {
-      requireModule: id => {
-        delete require.cache[id];
-        return require(id);
-      },
-      transformHooks: undefined,
-      rootScope: true,
-      createRuntimeChunk: false,
-      filename: "[name].bundle.css",
-      outputCSS: isProd ? true : false,
-      includeCSSInJS: isProd ? false : true,
-      bootstrap: {
-        autoInit: true,
-        ...options.bootstrap
-      },
-      generate: {
-        afterTransform: null,
-        ...options.generate
-      },
-      optimizer: undefined,
-      optimize: {
-        removeUnusedComponents: true,
-        removeComments: isProd ? true : false,
-        removeStylableDirectives: true,
-        classNameOptimizations: isProd ? true : false,
-        shortNamespaces: isProd ? true : false,
-        removeEmptyNodes: isProd ? true : false,
-        minify: isProd ? true : false,
-        ...options.optimize
-      },
-      plugins: []
-    };
-
-    this.options = {
-      ...defaults,
-      ...options,
-      optimize: defaults.optimize,
-      bootstrap: defaults.bootstrap,
-      generate: defaults.generate
-    };
   }
   createStylable(compiler) {
     const stylable = new Stylable(
@@ -137,6 +97,7 @@ class StylableWebpackPlugin {
               module.buildInfo.isImportedByNonStylable = isImportedByNonStylable(
                 module
               );
+              // module.factoryMeta.sideEffectFree = !module.buildInfo.isImportedByNonStylable;
             }
           });
         }
@@ -152,7 +113,7 @@ class StylableWebpackPlugin {
         StylableWebpackPlugin.name,
         modules => {
           modules.forEach(module => {
-            if (module.type === "stylable") {
+            if (module.type === "stylable" && module.buildInfo.stylableMeta) {
               module.buildInfo.optimize = this.options.optimize;
               module.buildInfo.usageMapping = usageMapping;
               module.buildInfo.usedStylableModules = used;
@@ -160,9 +121,9 @@ class StylableWebpackPlugin {
                 used.push(module);
               }
               if (usageMapping[module.buildInfo.stylableMeta.namespace]) {
-                throw new Error(
+                compilation.errors.push(new Error(
                   `Duplicate module namespace: ${module.buildInfo.stylableMeta.namespace} from ${module.resource}`
-                );
+                ));
               }
               usageMapping[module.buildInfo.stylableMeta.namespace] =
                 module.buildInfo.isImportedByNonStylable;
@@ -251,25 +212,7 @@ class StylableWebpackPlugin {
             StylableWebpackPlugin.name,
             chunks => {
               chunks.forEach(chunk => {
-                const bootstrap = chunk.stylableBootstrap;
-
-                if (bootstrap) {
-                  const cssSources = bootstrap.renderStaticCSS(
-                    compilation.mainTemplate,
-                    compilation.hash
-                  );
-
-                  const cssBundleFilename = compilation.getPath(
-                    this.options.filename,
-                    { chunk, hash: compilation.hash }
-                  );
-
-                  compilation.assets[cssBundleFilename] = new RawSource(
-                    cssSources.join(EOL + EOL + EOL)
-                  );
-
-                  chunk.files.push(cssBundleFilename);
-                }
+                this.createChunkCSSBundle(chunk, compilation);
               });
             }
           );
@@ -277,6 +220,16 @@ class StylableWebpackPlugin {
       }
     );
   }
+  createChunkCSSBundle(chunk, compilation) {
+    const bootstrap = chunk.stylableBootstrap;
+    if (bootstrap) {
+      const cssSources = bootstrap.renderStaticCSS(compilation.mainTemplate, compilation.hash);
+      const cssBundleFilename = compilation.getPath(this.options.filename, { chunk, hash: compilation.hash });
+      compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL + EOL + EOL));
+      chunk.files.push(cssBundleFilename);
+    }
+  }
+
   createBootstrapModule(compiler, chunk, runtimeRendererModule) {
     const bootstrap = new StylableBootstrapModule(
       compiler.context,
