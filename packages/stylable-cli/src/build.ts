@@ -1,7 +1,7 @@
 import { basename, dirname, join, relative, resolve } from 'path';
 import { isAsset, Stylable, StylableResults } from 'stylable';
+import { generateModuleSource } from 'stylable-node';
 import { FileSystem, findFiles } from './find-files';
-import { generateModuleSource } from './stylable-module-source';
 
 // const StylableWebpackPlugin = require('stylable-webpack-plugin');
 // const dt = require('dependency-tree');
