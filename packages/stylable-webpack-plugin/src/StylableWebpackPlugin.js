@@ -24,7 +24,7 @@ class StylableWebpackPlugin {
     this.options = null;
   }
   apply(compiler) {
-    this.options = normalizeOptions(this.userOptions, compiler.options.mode);
+    this.normalizeOptions(compiler.options.mode);
     this.overrideOptionsWithLocalConfig(compiler.context);
     this.createStylable(compiler);
     this.injectStylableModuleRuleSet(compiler);
@@ -32,6 +32,9 @@ class StylableWebpackPlugin {
     this.injectStylableRuntimeInfo(compiler);
     this.injectStylableRuntimeChunk(compiler);
     this.injectPlugins(compiler);
+  }
+  normalizeOptions(mode) {
+    this.options = normalizeOptions(this.userOptions, mode);
   }
   overrideOptionsWithLocalConfig(context) {
     let fullOptions = this.options;
