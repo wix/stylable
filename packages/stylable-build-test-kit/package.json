@@ -1,6 +1,6 @@
 {
   "name": "stylable-build-test-kit",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -24,8 +24,8 @@
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "rimraf": "^2.6.2",
-    "stylable": "^5.4.7",
-    "stylable-runtime": "^1.0.3",
+    "stylable": "^5.4.9",
+    "stylable-runtime": "^1.0.5",
     "webpack": "^4.8.3",
     "webpack-sources": "^1.1.0"
   },

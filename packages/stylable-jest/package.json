@@ -1,6 +1,6 @@
 {
   "name": "stylable-jest",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
   "private": true,
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "node-eval": "^2.0.0",
-    "stylable-node": "^1.0.1"
+    "stylable-node": "^1.0.2"
   },
   "files": [
     "dist"

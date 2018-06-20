@@ -1,6 +1,6 @@
 {
   "name": "stylable-scripts",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "like react-scripts, but with stylable and typescript built-in",
   "bin": {
     "stylable-scripts": "./bin/stylable-scripts.js"
@@ -15,8 +15,8 @@
     "html-webpack-plugin": "3.2.0",
     "object-assign": "4.1.1",
     "react-dev-utils": "^5.0.1",
-    "stylable": "^5.4.7",
-    "stylable-webpack-plugin": "^1.1.2",
+    "stylable": "^5.4.9",
+    "stylable-webpack-plugin": "^1.1.3",
     "ts-loader": "4.4.1",
     "tslib": "^1.9.2",
     "typescript": "~2.8.3",
