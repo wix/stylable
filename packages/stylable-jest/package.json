@@ -1,6 +1,6 @@
 {
   "name": "stylable-jest",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
   "private": true,
@@ -11,8 +11,8 @@
     "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "stylable-node": "^1.0.0",
-    "node-eval": "^2.0.0"
+    "node-eval": "^2.0.0",
+    "stylable-node": "^1.0.1"
   },
   "files": [
     "dist"
