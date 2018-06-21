@@ -431,6 +431,13 @@ export class StylableProcessor {
                     break;
                 case valueMapping.default:
                     importObj.defaultExport = decl.value;
+
+                    if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
+                        this.diagnostics.warn(
+                            decl,
+                            processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
+                            { word: importObj.defaultExport });
+                    }
                     break;
                 case valueMapping.named:
                     importObj.named = parseNamed(decl.value);
@@ -443,14 +450,6 @@ export class StylableProcessor {
                     break;
             }
         });
-
-        if (importObj.defaultExport && !isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
-            this.diagnostics.warn(
-                rule,
-                processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
-                { word: importObj.defaultExport }
-            );
-        }
 
         if (!importObj.theme) {
             importObj.overrides.forEach(decl => {
