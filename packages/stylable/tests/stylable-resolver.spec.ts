@@ -412,7 +412,7 @@ describe('stylable-resolver', () => {
 
         const {meta} = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
-        expect(rule.selector).to.equal('.A--root.B--root');
+        expect(rule.selector).to.equal('.A--root');
 
     });
 });

@@ -1446,7 +1446,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class.inner--root[data-inner-my-state] {}'
+                    1: '.entry--my-class[data-inner-my-state] {}'
                 });
             });
 
@@ -1501,8 +1501,8 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    2: '.entry--direct.extendedState--root[data-entry-my-state] {}',
-                    3: '.entry--proxy.proxyState--root[data-entry-my-state] {}'
+                    2: '.entry--direct[data-entry-my-state] {}',
+                    3: '.entry--proxy[data-entry-my-state] {}'
                 });
             });
 
@@ -1579,7 +1579,7 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry--local.imported--root .imported--inner[data-imported-my-state] {}',
+                    1: '.entry--local .imported--inner[data-imported-my-state] {}',
                     2: '.imported--root .imported--inner[data-imported-my-state] {}'
                 });
             });
@@ -1625,7 +1625,7 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class.type--root .type--element[data-withstate-my-state] {}'
+                    1: '.entry--my-class .type--element[data-withstate-my-state] {}'
                 });
             });
         });
@@ -1682,7 +1682,7 @@ describe('pseudo-states', () => {
 
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    2: '.entry--x.entry--root[data-entry-disabled] {}'
+                    2: '.entry--x[data-entry-disabled] {}'
                 });
 
             });
@@ -1732,7 +1732,7 @@ describe('pseudo-states', () => {
                 // result.meta.outputAst.toString();
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    1: '.entry--menu1.menu--root .menu--button[data-menu-state] {}'
+                    1: '.entry--menu1 .menu--button[data-menu-state] {}'
                 });
 
             });

@@ -595,48 +595,79 @@ export class StylableTransformer {
             scopedName = this.exportClass(meta, name, symbol, metaExports);
         }
 
+        if (globalScopedSelector) {
+            node.before = '';
+            node.type = 'selector';
+            node.nodes = symbol[valueMapping.global] || [];
+        } else {
+            node.name = scopedName;
+        }
         const next = this.resolver.deepResolve(extend);
+
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
-            node.before = globalScopedSelector || '.' + scopedName;
-            const mappedClassNodes = next.symbol[valueMapping.global];
-            if (mappedClassNodes) {
-                node.type = 'selector';
-                node.nodes = mappedClassNodes;
-            } else {
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
-            }
             return next;
         }
 
+        // local
         if (extend && extend._kind === 'class') {
-            node.before = globalScopedSelector || '.' + scopedName;
-
             if (extend === symbol && extend.alias) {
                 const next = this.resolver.deepResolve(extend.alias);
                 if (next && next._kind === 'css' && next.symbol) {
-                    if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
-                        node.before = '';
-                        node.type = 'selector';
-                        node.nodes = next.symbol[valueMapping.global] || [];
-                    } else {
-                        node.name = this.scope(next.symbol.name, next.meta.namespace);
-                    }
-                    // node.name = (next.symbol as ClassSymbol)[valueMapping.global] ||
-                    //             this.scope(next.symbol.name, next.meta.namespace);
                     return next;
                 }
-            } else {
-                node.name = this.scope(extend.name, meta.namespace);
-            }
-        } else {
-            if (globalScopedSelector) {
-                node.before = '';
-                node.type = 'selector';
-                node.nodes = symbol[valueMapping.global] || [];
-            } else {
-                node.name = scopedName;
             }
         }
+
+        // const next = this.resolver.deepResolve(extend);
+        // if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
+        //     const mappedClassNodes = next.symbol[valueMapping.global];
+        //     if (mappedClassNodes) {
+        //         debugger;
+        //         node.before = globalScopedSelector || '.' + scopedName;
+
+        //         node.type = 'selector';
+        //         node.nodes = mappedClassNodes;
+        //     } else {
+        //         node.before = globalScopedSelector || '.' + scopedName;
+
+        //         node.name = node.before.slice(1);
+        //         node.before = '';
+        //         //node.name = this.scope(next.symbol.name, next.meta.namespace);
+        //     }
+        //     return next;
+        // }
+
+        // if (extend && extend._kind === 'class') {
+        //     node.before = globalScopedSelector || '.' + scopedName;
+
+        //     if (extend === symbol && extend.alias) {
+        //         const next = this.resolver.deepResolve(extend.alias);
+        //         if (next && next._kind === 'css' && next.symbol) {
+        //             if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
+        //                 node.before = '';
+        //                 node.type = 'selector';
+        //                 node.nodes = next.symbol[valueMapping.global] || [];
+        //             } else {
+        //                 node.name = node.before.slice(1);
+        //                 node.before = '';
+        //                 //node.name = this.scope(next.symbol.name, next.meta.namespace);
+        //             }
+        //             // node.name = (next.symbol as ClassSymbol)[valueMapping.global] ||
+        //             //             this.scope(next.symbol.name, next.meta.namespace);
+        //             return next;
+        //         }
+        //     } else {
+        //         node.name = this.scope(extend.name, meta.namespace);
+        //     }
+        // } else {
+        //     if (globalScopedSelector) {
+        //         node.before = '';
+        //         node.type = 'selector';
+        //         node.nodes = symbol[valueMapping.global] || [];
+        //     } else {
+        //         node.name = scopedName;
+        //     }
+        // }
         return { _kind: 'css', meta, symbol };
     }
     public handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {
