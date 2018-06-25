@@ -13,20 +13,20 @@
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint --project src",
     "lint:test": "tslint --project test",
-    "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
     "express": "^4.16.3",
     "lodash.clonedeep": "^4.5.0",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
-    "puppeteer": "^1.4.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "puppeteer": "^1.5.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "rimraf": "^2.6.2",
     "stylable": "^5.4.9",
     "stylable-runtime": "^1.0.5",
-    "webpack": "^4.8.3",
+    "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"
   },
   "files": [

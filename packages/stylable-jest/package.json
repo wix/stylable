@@ -8,7 +8,7 @@
     "clean": "rimraf ./dist",
     "build": "tsc",
     "lint": "tslint --project .",
-    "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
+    "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
     "node-eval": "^2.0.0",

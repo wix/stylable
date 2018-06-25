@@ -1,8 +1,7 @@
 const StylableWebpackPlugin = require("../../../../src");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-require("ts-node").register({
-  /* options */
-});
+require('typescript-support');
+
 module.exports = {
   mode: "development",
   context: __dirname,
