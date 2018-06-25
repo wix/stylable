@@ -8,7 +8,7 @@
   "dependencies": {
     "case-sensitive-paths-webpack-plugin": "2.1.2",
     "chalk": "2.4.1",
-    "dotenv": "5.0.1",
+    "dotenv": "6.0.0",
     "dotenv-expand": "4.2.0",
     "file-loader": "1.1.11",
     "fs-extra": "^6.0.1",
@@ -18,15 +18,15 @@
     "stylable": "^5.4.9",
     "stylable-webpack-plugin": "^1.1.3",
     "ts-loader": "4.4.1",
-    "tslib": "^1.9.2",
-    "typescript": "~2.8.3",
+    "tslib": "^1.9.3",
+    "typescript": "~2.9.2",
     "url-loader": "1.0.1",
-    "webpack": "^4.12.0",
+    "webpack": "^4.12.1",
     "webpack-dev-server": "^3.1.4",
     "webpack-manifest-plugin": "2.0.3"
   },
   "optionalDependencies": {
-    "fsevents": "^1.2.3"
+    "fsevents": "^1.2.4"
   },
   "devDependencies": {
     "@types/react": "16",

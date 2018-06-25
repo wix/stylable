@@ -13,14 +13,14 @@
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint --project src",
     "lint:test": "tslint --project test",
-    "test": "mocha -r ts-node/register \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "stylable": "^5.4.9",
-    "webpack": "^4.8.3",
+    "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"
   },
   "files": [

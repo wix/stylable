@@ -2,7 +2,6 @@
 dist
 esm
 cjs
-.vscode
 .idea
 .history
 .DS_Store
