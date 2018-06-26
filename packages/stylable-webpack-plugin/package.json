@@ -4,7 +4,7 @@
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 test/**/*.spec.js",
+    "test": "mocha --timeout 3000 -r typescript-support \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx",
     "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
     "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
   },

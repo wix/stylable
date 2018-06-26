@@ -25,6 +25,7 @@ function calculateModuleDepthAndShallowStylableDependencies(
   if (dependencies) {
     const stylableModulesDepth = dependencies
       .map(dep => dep.module)
+      .filter(Boolean)
       .map(getDependenciesModuleDepth(path, cssDependencies, module, cache));
     cssDepth = stylableModulesDepth.length
       ? Math.max(...stylableModulesDepth)
@@ -42,6 +43,7 @@ function calculateModuleDepthAndShallowStylableDependencies(
         path.concat(module),
         cache
       ).depth;
+      cache.delete(view)
     }
   }
 
@@ -93,5 +95,43 @@ function getCSSComponentLogicModule(stylableModule) {
   return views[0];
 }
 
-module.exports.getCSSComponentLogicModule = getCSSComponentLogicModule;
-module.exports.calculateModuleDepthAndShallowStylableDependencies = calculateModuleDepthAndShallowStylableDependencies;
+function getStylableModulesFromDependencies(dependencies){
+  const modules = [];
+  dependencies.forEach(({ module }) => {
+    if (module.type === "stylable") {
+      modules.push(module);
+    }
+  });
+  return modules;
+}
+
+function sortedStylableModulesByDepth(modules) {
+  modules.sort(
+    (a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth
+  );
+  return modules;
+}
+
+function renderStaticCSS(modules, mainTemplate, hash, filter = Boolean) {
+  const modulesByDepth = sortedStylableModulesByDepth(modules.filter(filter));
+  const cssSources = modulesByDepth.map(module => {
+    const publicPath = mainTemplate.getPublicPath({
+      hash
+    });
+    return module.generator.toCSS(module, assetModule => {
+      const source = assetModule.originalSource().source();
+      const getStaticPath = new Function(
+        ["__webpack_public_path__"],
+        "var module = {}; return " + source
+      );
+      return JSON.stringify(getStaticPath(publicPath));
+    });
+  });
+  return cssSources;
+}
+
+exports.renderStaticCSS = renderStaticCSS;
+exports.sortedStylableModulesByDepth = sortedStylableModulesByDepth;
+exports.getStylableModulesFromDependencies = getStylableModulesFromDependencies;
+exports.getCSSComponentLogicModule = getCSSComponentLogicModule;
+exports.calculateModuleDepthAndShallowStylableDependencies = calculateModuleDepthAndShallowStylableDependencies;
