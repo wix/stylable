@@ -10,7 +10,7 @@ describe('(dynamic-chunk-depth-project)', () => {
             projectDir: join(projectFixtures, 'dynamic-chunk-depth-project'),
             port: 3001,
             puppeteerOptions: {
-                headless: false
+                // headless: false
             }
         },
         before,
