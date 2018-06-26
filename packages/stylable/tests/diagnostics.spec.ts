@@ -471,10 +471,10 @@ describe('diagnostics: warnings and errors', () => {
 
             it('should return warning when default import is defined with a lowercase first letter', () => {
                 expectWarnings(`
-                    |:import{
+                    :import{
                         -st-from:"./file.st.css";
-                        -st-default: $theme$;
-                    }|
+                        |-st-default: $theme$;|
+                    }
                 `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
             });
 
