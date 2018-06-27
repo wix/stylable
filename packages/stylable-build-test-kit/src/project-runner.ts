@@ -14,7 +14,7 @@ export interface Options {
   projectDir: string;
   port: number;
   puppeteerOptions: puppeteer.LaunchOptions;
-  throwOnBuildError: boolean;
+  throwOnBuildError?: boolean;
 }
 
 const rimraf = promisify(rimrafCallback);
@@ -67,7 +67,7 @@ export class ProjectRunner {
     this.throwOnBuildError = throwOnBuildError;
   }
   public loadTestConfig() {
-    return require(join(this.projectDir, 'webpack.config.js'));
+    return require(join(this.projectDir, 'webpack.config'));
   }
   public async bundle() {
     const webpackConfig = this.webpackConfig;
