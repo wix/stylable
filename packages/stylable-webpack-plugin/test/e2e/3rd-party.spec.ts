@@ -2,13 +2,13 @@ import { expect } from 'chai';
 import { join } from 'path';
 import { browserFunctions, StylableProjectRunner } from 'stylable-build-test-kit';
 
-const project = 'dynamic-chunk-depth-project';
+const project = '3rd-party';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            port: 3001,
+            port: 3002,
             puppeteerOptions: {
                 // headless: false
             }
@@ -23,8 +23,20 @@ describe(`(${project})`, () => {
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
 
         expect(styleElements).to.eql([
-            { id: './src/button.st.css', depth: '1' },
-            { id: './src/gallery.st.css', depth: '2' }
+            { id: './node_modules/test-components/button.st.css', depth: '1' },
+            {
+                id: './node_modules/test-components/index.st.css',
+                depth: '2'
+            },
+            { id: './src/index.st.css', depth: '3' }
         ]);
+    });
+
+    it('override 3rd party', async () => {
+        const { page } = await projectRunner.openInBrowser();
+        const backgroundColor = await page.evaluate(() => {
+            return getComputedStyle((window as any).btn).backgroundColor;
+        });
+        expect(backgroundColor).to.eql('rgb(0, 128, 0)');
     });
 });

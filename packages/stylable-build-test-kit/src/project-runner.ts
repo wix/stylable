@@ -126,6 +126,10 @@ export class ProjectRunner {
     return (this.stats as any).compilation.warnings.slice();
   }
 
+  public getBuildAsset(assetPath: string) {
+    return (this.stats as any).compilation.assets[assetPath].source();
+  }
+
   public async closeAllPages() {
     for (const page of this.pages) {
       await page.close();
