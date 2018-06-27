@@ -1,6 +1,6 @@
-import { expect } from 'chai';
+// import { expect } from 'chai';
 import { join } from 'path';
-import { browserFunctions, StylableProjectRunner } from 'stylable-build-test-kit';
+import { StylableProjectRunner } from 'stylable-build-test-kit';
 
 const project = '4th-party-project';
 
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
     );
 
     it('renders css', async () => {
-        const { page } = await projectRunner.openInBrowser();
+        await projectRunner.openInBrowser();
         // TODO: add expect
     });
 });
