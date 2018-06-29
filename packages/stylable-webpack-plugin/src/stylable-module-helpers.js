@@ -89,8 +89,14 @@ function getCSSComponentLogicModule(stylableModule) {
       );
     })
     .map(({ module }) => module);
-  if (new Set(views).size > 1) {
-    throw new Error(`only one file with the name ${name} allowed`);
+  const set = new Set(views);
+  if (set.size > 1) {
+    throw new Error(
+      `Stylable Component Conflict:\n ${
+        stylableModule.resource
+      } has multiple components entries [${
+        Array.from(set).map((m)=>m.resource)
+      }] `);
   }
   return views[0];
 }
