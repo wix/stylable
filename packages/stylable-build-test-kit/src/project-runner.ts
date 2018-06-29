@@ -1,7 +1,7 @@
 /* tslint:disable:no-unused-expression */
 import * as express from 'express';
 import * as http from 'http';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import * as puppeteer from 'puppeteer';
 import { promisify } from 'util';
 import * as webpack from 'webpack';
@@ -127,7 +127,7 @@ export class ProjectRunner {
   }
 
   public getBuildAsset(assetPath: string) {
-    return (this.stats as any).compilation.assets[assetPath].source();
+    return (this.stats as any).compilation.assets[normalize(assetPath)].source();
   }
 
   public async closeAllPages() {
