@@ -1,10 +1,9 @@
 {
-  "name": "stylable-webpack-extensions",
-  "version": "1.0.4",
+  "name": "@stylable/webpack-extensions",
+  "version": "0.0.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
-  "private": true,
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "run-p build:cjs build:esm",
@@ -32,5 +31,6 @@
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "keywords": ["css", "stylable", "webpack", "webpack-plugin"]
 }
