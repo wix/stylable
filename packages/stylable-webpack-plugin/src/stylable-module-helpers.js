@@ -112,7 +112,7 @@ function getDeepCSSDependencies(m, deps = new Set(), origin = m) {
 
 function getStylableModulesFromDependencies(dependencies) {
     const modules = [];
-    dependencies.forEach((module) => {
+    dependencies.forEach(({module}) => {
         if (module.type === 'stylable') {
             modules.push(module);
         }
