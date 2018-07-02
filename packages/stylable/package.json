@@ -1,6 +1,6 @@
 {
   "name": "stylable",
-  "version": "5.4.9",
+  "version": "5.4.10",
   "description": "CSS for Components",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",

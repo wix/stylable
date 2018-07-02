@@ -1,6 +1,6 @@
 {
   "name": "stylable-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
   "private": true,
@@ -18,8 +18,8 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "stylable": "^5.4.9",
-    "stylable-node": "^1.0.2",
+    "stylable": "^5.4.10",
+    "stylable-node": "^1.0.3",
     "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"
   },
