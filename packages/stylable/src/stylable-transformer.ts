@@ -452,7 +452,8 @@ export class StylableTransformer {
                     symbol = next.symbol;
                     current = next.meta;
                 } else if (type === 'pseudo-element') {
-                    const next = this.handlePseudoElement(current, node, name, selectorNode, addedSelectors, rule);
+                    // tslint:disable-next-line:max-line-length
+                    const next = this.handlePseudoElement(current, symbol, node, name, selectorNode, addedSelectors, rule);
                     originSymbol = current.classes[name];
                     meta = current;
                     symbol = next.symbol;
@@ -661,6 +662,7 @@ export class StylableTransformer {
     }
     public handlePseudoElement(
         meta: StylableMeta,
+        rSymbol: StylableSymbol | null,
         node: SelectorAstNode,
         name: string,
         selectorNode: SelectorAstNode,
@@ -705,16 +707,32 @@ export class StylableTransformer {
 
         let symbol = meta.mappedSymbols[name];
         let current = meta;
+        let pSym;
+        let classSymbol;
+
+        if (rSymbol && rSymbol !== current.mappedSymbols[current.root]) {
+            pSym = rSymbol;
+        }
 
         while (!symbol) {
             // go up the root extends path and find first symbol
-            const root = current.mappedSymbols[current.root] as ClassSymbol;
-            next = this.resolver.deepResolve(root[valueMapping.extends]);
-            if (next && next._kind === 'css') {
-                current = next.meta;
-                symbol = next.meta.mappedSymbols[name];
-            } else {
+            const lookupName = pSym ? pSym.name : current.root;
+            if (pSym && pSym !== current.mappedSymbols[current.root]) {
+                next = this.resolver.deepResolve(pSym);
                 break;
+            } else {
+                classSymbol = current.mappedSymbols[lookupName] as ClassSymbol;
+                next = this.resolver.deepResolve(classSymbol[valueMapping.extends]);
+                if (next && next._kind === 'css') {
+                    current = next.meta;
+                    if (next.symbol !== current.mappedSymbols[current.root]) {
+                        pSym = next.symbol;
+                    } else {
+                        symbol = next.meta.mappedSymbols[name];
+                    }
+                } else {
+                    break;
+                }
             }
         }
 

@@ -173,6 +173,89 @@ describe('Stylable postcss transform (Scoping)', () => {
 
         });
 
+        it('class selector that targets a pseudo-element on an imported extended classxxx', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-named: midClass;
+                            }
+                            .gaga {
+                                -st-extends: midClass;
+                            }
+                            .gaga::topClass {
+                                color: gold;
+                            }
+                            .gaga::topClass::lucifer {
+                                color: gold;
+                            }
+                            .topClass {} /* should not pick this class */
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            :import {
+                                -st-from: "./deep.st.css";
+                                -st-named: deepClass;
+                            }
+                            .midClass {
+                                -st-extends: deepClass;
+                            }
+                            .topClass {} /* should not pick this class */
+                        `
+                    },
+                    '/deep.st.css': {
+                        namespace: 'ns2',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Comp;
+                            }
+                            .deepClass {
+                                -st-extends: Comp;
+                            }
+                            .topClass {} /* should not pick this class */
+
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            :import {
+                                -st-from: "./hell.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                -st-extends: Comp;
+                            }
+                            .topClass {
+                                color: beige;
+                            }
+                        `
+                    },
+                    '/hell.st.css': {
+                        namespace: 'hell',
+                        content: `
+                            .lucifer {
+                                color: red;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--gaga.ns1--midClass .base--topClass');
+            // tslint:disable-next-line:max-line-length
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns--gaga.ns1--midClass .base--topClass .hell--lucifer');
+
+        });
+
         it('resolve and transform pseudo-element from deeply extended type', () => {
 
             const result = generateStylableRoot({
