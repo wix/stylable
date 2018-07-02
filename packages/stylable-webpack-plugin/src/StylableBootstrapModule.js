@@ -75,7 +75,7 @@ class StylableBootstrapModule extends Module {
             renderingCode.push(...imports);
 
             if (this.options.autoInit) {
-                renderingCode.push(`${RENDERER_SYMBOL}.init(window);`);
+                renderingCode.push(`if(typeof window !== 'undefined') { ${RENDERER_SYMBOL}.init(window); }`);
             }
             this.__source = new RawSource(renderingCode.join(EOL));
         } else {
