@@ -179,70 +179,70 @@ describe('Stylable postcss transform (Scoping)', () => {
                 entry: `/style.st.css`,
                 files: {
                     '/style.st.css': {
-                        namespace: 'ns',
+                        namespace: 'ns4',
                         content: `
                             :import {
-                                -st-from: "./inner.st.css";
+                                -st-from: "./inner3.st.css";
                                 -st-named: midClass;
                             }
                             .gaga {
                                 -st-extends: midClass;
                             }
-                            .gaga::topClass {
+                            .gaga::deep {
                                 color: gold;
                             }
-                            .gaga::topClass::lucifer {
+                            .gaga::deep::deepest {
                                 color: gold;
                             }
-                            .topClass {} /* should not pick this class */
+                            .deep {} /* should not pick this class */
                         `
                     },
-                    '/inner.st.css': {
-                        namespace: 'ns1',
+                    '/inner3.st.css': {
+                        namespace: 'ns3',
                         content: `
                             :import {
-                                -st-from: "./deep.st.css";
+                                -st-from: "./inner2.st.css";
                                 -st-named: deepClass;
                             }
                             .midClass {
                                 -st-extends: deepClass;
                             }
-                            .topClass {} /* should not pick this class */
+                            .deep {} /* should not pick this class */
                         `
                     },
-                    '/deep.st.css': {
+                    '/inner2.st.css': {
                         namespace: 'ns2',
                         content: `
                             :import {
-                                -st-from: "./base.st.css";
+                                -st-from: "./inner1.st.css";
                                 -st-default: Comp;
                             }
                             .deepClass {
                                 -st-extends: Comp;
                             }
-                            .topClass {} /* should not pick this class */
+                            .deep {} /* should not pick this class */
 
                         `
                     },
-                    '/base.st.css': {
-                        namespace: 'base',
+                    '/inner1.st.css': {
+                        namespace: 'ns1',
                         content: `
                             :import {
-                                -st-from: "./hell.st.css";
+                                -st-from: "./inner0.st.css";
                                 -st-default: Comp;
                             }
                             .root {
                                 -st-extends: Comp;
                             }
-                            .topClass {
+                            .deep {
                                 color: beige;
                             }
                         `
                     },
-                    '/hell.st.css': {
-                        namespace: 'hell',
+                    '/inner0.st.css': {
+                        namespace: 'ns0',
                         content: `
-                            .lucifer {
+                            .deepest {
                                 color: red;
                             }
                         `
@@ -250,9 +250,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--gaga.ns1--midClass .base--topClass');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4--gaga.ns3--midClass .ns1--deep');
             // tslint:disable-next-line:max-line-length
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns--gaga.ns1--midClass .base--topClass .hell--lucifer');
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns4--gaga.ns3--midClass .ns1--deep .ns0--deepest');
 
         });
 
