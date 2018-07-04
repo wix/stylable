@@ -1,0 +1,19 @@
+:import {
+    -st-from: "test-components/index.st.css";
+    -st-named: Label;
+}
+
+.root {
+    background-color: red;
+}
+
+.lbl1 {
+    -st-extends: Label;
+    background: green
+}
+
+.lbl2 {
+    -st-extends: Label;
+    background: fuchsia
+}
+

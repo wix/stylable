@@ -19,6 +19,7 @@
         afterTransform: null,
         ...options.generate
       },
+      optimizeStylableModulesPerChunks: true,
       optimizer: undefined,
       optimize: {
         removeUnusedComponents: true,

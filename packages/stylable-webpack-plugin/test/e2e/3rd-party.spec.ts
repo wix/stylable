@@ -24,10 +24,10 @@ describe(`(${project})`, () => {
 
         expect(styleElements).to.eql([
             { id: './node_modules/test-components/button.st.css', depth: '1' },
-            {
-                id: './node_modules/test-components/index.st.css',
-                depth: '2'
-            },
+            // {
+            //     id: './node_modules/test-components/index.st.css',
+            //     depth: '2'
+            // },
             { id: './src/index.st.css', depth: '3' }
         ]);
     });
