@@ -1,12 +1,10 @@
 {
   "name": "stylable-webpack-plugin",
-  "version": "1.1.3",
+  "version": "1.1.6",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 test/**/*.spec.js",
-    "build:fixture": "webpack --config ./test/project-fixture/webpack.config.js",
-    "start:fixture": "webpack-dev-server --config ./test/project-fixture/webpack.config.js"
+    "test": "mocha --timeout 10000 -r typescript-support \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx"
   },
   "peerDependencies": {
     "stylable": "^5.3.11",
@@ -16,7 +14,7 @@
     "css-selector-tokenizer": "^0.7.0",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",
-    "stylable-runtime": "^1.0.5",
+    "stylable-runtime": "^1.0.6",
     "webpack-sources": "^1.1.0"
   },
   "files": [

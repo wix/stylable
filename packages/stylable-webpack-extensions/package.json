@@ -1,10 +1,9 @@
 {
-  "name": "stylable-webpack-extensions",
-  "version": "1.0.4",
+  "name": "@stylable/webpack-extensions",
+  "version": "0.0.1",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
-  "private": true,
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "run-p build:cjs build:esm",
@@ -19,7 +18,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "stylable": "^5.4.9",
+    "stylable": "^5.4.10",
     "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"
   },
@@ -32,5 +31,11 @@
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "css",
+    "stylable",
+    "webpack",
+    "webpack-plugin"
+  ]
 }

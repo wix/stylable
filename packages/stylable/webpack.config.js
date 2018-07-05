@@ -23,7 +23,8 @@ module.exports = {
                 loader: 'ts-loader',
                 options: {
                     compilerOptions: {
-                        declaration: false
+                        declaration: false,
+                        declarationMap: false
                     }
                 }
             }

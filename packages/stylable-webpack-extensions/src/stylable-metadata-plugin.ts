@@ -1,173 +1,157 @@
-import * as path from 'path';
+import { dirname, join } from 'path';
 import * as webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
+import { compileAsEntry, exec } from './compile-as-entry';
+import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
-export interface Preset {
-  path: string;
-  overrides: { [name: string]: string };
-  named?: string;
-  style?: string;
-}
-
-export interface ComponentConfig {
-  id: string;
-  namespace: string;
-  stylesheetPath: string;
-  presets: Preset[];
-  variantsPath: string;
-  previewProps: { [name: string]: any };
-}
+const {
+    getCSSComponentLogicModule
+} = require('stylable-webpack-plugin/src/stylable-module-helpers');
 
 export class StylableMetadataPlugin {
-  constructor(private pkg: { name: string, version: string }, private componentConfigExt = '.component.json') {
-  }
-  public apply(compiler: webpack.Compiler) {
-    compiler.hooks.compilation.tap('StylableMetadataPlugin', compilation => {
-      compilation.hooks.optimizeChunks.tap('StylableMetadataPlugin', chunks => {
-        chunks.forEach(chunk => {
-          const pkg = this.pkg;
-          const packageLocation = '/node_modules/' + pkg.name;
-          const output = {
-            version: pkg.version,
-            name: pkg.name,
-            fs: {} as { [path: string]: any },
-            components: {} as { [path: string]: ComponentConfig },
-            packageLocation
-          };
-
-          let maxDepth = 0;
-
-          const stylableModules = getStylableModules(chunk);
-          stylableModules.forEach((module: any) => {
-            const { depth } = module.buildInfo.runtimeInfo;
-            const namespace = module.buildInfo.stylableMeta.namespace;
-            const resourcePath = normPath(module.resource, compiler.options.context);
-            const resourceName = path
-              .basename(resourcePath)
-              .replace(/\.st\.css$/, '');
-
-            maxDepth = Math.max(maxDepth, depth);
-
-            output.fs[packageLocation + resourcePath] = {
-              depth,
-              namespace,
-              source: compilation.inputFileSystem
-                .readFileSync(module.resource)
-                .toString()
-            };
-
-            let resourceDir = '';
-            let componentConfig: ComponentConfig | undefined;
-            try {
-              resourceDir = path.dirname(module.resource);
-              componentConfig = JSON.parse(
-                compilation.inputFileSystem
-                  .readFileSync(
-                    path.join(resourceDir, resourceName + this.componentConfigExt)
-                  )
-                  .toString()
-              );
-            // tslint:disable-next-line:no-empty
-            } catch (e) { }
-
-            if (resourceDir && componentConfig) {
-              if (componentConfig.variantsPath) {
-                const variantsPath = componentConfig.variantsPath;
-                const variantsFolder = path.join(resourceDir, variantsPath);
-
-                try {
-                  compilation.inputFileSystem
-                    .readdirSync(variantsFolder)
-                    .forEach((name: string) => {
-                      if (name.match(/\.st\.css/)) {
-                        const variantPath = path.join(
-                          resourceDir,
-                          variantsPath,
-                          name
-                        );
-                        output.fs[
-                          packageLocation +
-                          normPath(variantPath, compiler.options.context)
-                        ] = {
-                            depth,
-                            namespace:
-                              name.replace('.st.css', '') + '-' + namespace,
-                            source: compilation.inputFileSystem
-                              .readFileSync(variantPath)
-                              .toString(),
-                            variant: true
-                          };
-                      }
-                    });
-                } catch (error) {
-                  if (error.code !== 'ENOENT') {
-                    throw new Error(
-                      'Error while creating variants for: ' + resourcePath
-                    );
-                  }
-                }
-
-                componentConfig.variantsPath = packageLocation + normPath(
-                  variantsFolder,
-                  compiler.options.context
-                );
-                if (componentConfig.presets) {
-                  for (const preset of componentConfig.presets) {
-                    preset.path = normPath(
-                      path.join(componentConfig.variantsPath, preset.path)
-                    );
-                    if (!output.fs[preset.path]) {
-                      throw new Error(
-                        'Missing Variant for preset: ' + preset.path
-                      );
-                    }
-                  }
-                }
-              }
-
-              componentConfig.stylesheetPath = packageLocation + resourcePath;
-              componentConfig.namespace = namespace;
-
-              if (!output.components[componentConfig.id]) {
-                output.components[componentConfig.id] = componentConfig;
-              } else {
-                throw new Error(
-                  `Duplicate Component ID: ${componentConfig.id}`
-                );
-              }
-            }
-          });
-          if (output.fs[packageLocation + '/index.st.css']) {
-            throw new Error('duplicate index');
-          }
-
-          output.fs[packageLocation + '/index.st.css'] = {
-            depth: maxDepth,
-            namespace: chunk.name,
-            source: Object.keys(output.components)
-              .map(name => {
-                return `:import {-st-from: "${
-                  output.components[name].stylesheetPath.replace(packageLocation, '.')
-                  }"; -st-default: ${name}} .root ${name}{}`;
-              })
-              .join('\n')
-          };
-
-          if (stylableModules.length) {
-            compilation.assets[`${output.name}-metadata.json`] = new RawSource(
-              JSON.stringify(output, null, 2)
-            );
-          }
+    constructor(
+        private options: {
+            name: string;
+            version: string;
+            configExtension?: string;
+            renderSnapshot?: (
+                moduleExports: any,
+                component: any,
+                componentConfig: ComponentConfig
+            ) => string;
+        }
+    ) {}
+    public apply(compiler: webpack.Compiler) {
+        compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
+            compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
+                await this.createMetadataAssets(compilation);
+            });
         });
-      });
-    });
-  }
-}
+    }
+    private loadComponentConfig(
+        fs: { readFileSync(path: string): Buffer },
+        resource: string
+    ): ComponentConfig | null {
+        try {
+            return JSON.parse(fs.readFileSync(resource).toString());
+        } catch (e) {
+            return null;
+        }
+    }
+    private async createMetadataAssets(compilation: webpack.compilation.Compilation) {
+        const stylableModules = compilation.modules.filter(m => m.type === 'stylable');
 
-function getStylableModules(chunk: webpack.compilation.Chunk) {
-  return Array.from(chunk.modulesIterable).filter(module => module.type === 'stylable');
-}
+        const builder = new ComponentMetadataBuilder(
+            compilation.compiler.options.context || process.cwd(),
+            this.options.name,
+            this.options.version
+        );
 
-function normPath(resource: string, context = '') {
-  return resource.replace(context, '').replace(/\\/g, '/');
+        for (const module of stylableModules) {
+            const namespace = module.buildInfo.stylableMeta.namespace;
+            const depth = module.buildInfo.runtimeInfo.depth;
+
+            builder.addSource(
+                module.resource,
+                compilation.inputFileSystem.readFileSync(module.resource).toString(),
+                { namespace, depth }
+            );
+
+            const component = getCSSComponentLogicModule(module);
+            if (!component) {
+                continue;
+            }
+
+            const componentConfig = this.loadComponentConfig(
+                compilation.inputFileSystem,
+                component.resource.replace(
+                    /\.[^.]+$/,
+                    this.options.configExtension || '.component.json'
+                )
+            );
+
+            if (!componentConfig) {
+                continue;
+            }
+
+            builder.addComponent(module.resource, componentConfig, namespace);
+
+            this.handleVariants(
+                componentConfig,
+                dirname(module.resource),
+                compilation,
+                builder,
+                namespace,
+                depth
+            );
+
+            if (this.options.renderSnapshot) {
+                const source = await compileAsEntry(
+                    compilation,
+                    component.context,
+                    component.resource
+                );
+
+                const componentModule = exec(source, component.resource, component.context);
+
+                const html = this.options.renderSnapshot(
+                    componentModule,
+                    component,
+                    componentConfig
+                );
+                builder.addComponentSnapshot(componentConfig.id, html);
+            }
+        }
+
+        if (builder.hasPackages()) {
+            builder.createIndex();
+            compilation.assets[`${this.options.name}.metadata.json`] = new RawSource(
+                JSON.stringify(builder.build(), null, 2)
+            );
+        }
+    }
+
+    private handleVariants(
+        componentConfig: ComponentConfig,
+        componentDir: string,
+        compilation: webpack.compilation.Compilation,
+        builder: ComponentMetadataBuilder,
+        namespace: any,
+        depth: any
+    ) {
+        if (componentConfig.variantsPath) {
+            const variantsDir = join(componentDir, componentConfig.variantsPath);
+            let variants;
+
+            try {
+                variants = compilation.inputFileSystem.readdirSync(variantsDir);
+            } catch (e) {
+                throw new Error(
+                    `Error while reading variants for: ${
+                        componentConfig.id
+                    } in ${variantsDir}\nOriginal Error:\n${e}`
+                );
+            }
+
+            variants.forEach((name: string) => {
+                if (!name.match(/\.st\.css/)) {
+                    return;
+                }
+                const variantPath = join(variantsDir, name);
+                let content;
+                try {
+                    content = compilation.inputFileSystem.readFileSync(variantPath).toString();
+                } catch (e) {
+                    throw new Error(
+                        `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`
+                    );
+                }
+                builder.addSource(variantPath, content, {
+                    namespace: name.replace('.st.css', '') + '-' + namespace,
+                    variant: true,
+                    depth
+                });
+            });
+        }
+    }
 }

@@ -117,18 +117,21 @@ class StylableGenerator {
         const imports = [];
         for (const dependency of module.dependencies) {
             if (dependency instanceof StylableImportDependency) {
-                if (
-                    dependency.defaultImport === STYLESHEET_SYMBOL ||
-                    dependency.defaultImport === RENDERER_SYMBOL
-                ) {
+                if(dependency.defaultImport === STYLESHEET_SYMBOL){
                     const id = runtimeTemplate.moduleId({
                         module: dependency.module,
                         request: dependency.request
                     });
                     imports.push(
-                        `var ${dependency.defaultImport} = __webpack_require__(${id})${
-                            dependency.defaultImport === RENDERER_SYMBOL ? '.$' : ''
-                        };`
+                        `var ${STYLESHEET_SYMBOL} = __webpack_require__(${id});`
+                    );
+                } else if (dependency.defaultImport === RENDERER_SYMBOL) {
+                    const id = runtimeTemplate.moduleId({
+                        module: dependency.module,
+                        request: dependency.request
+                    });
+                    imports.push(
+                        `var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`
                     );
                 }
             }

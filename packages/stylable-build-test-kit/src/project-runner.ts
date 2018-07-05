@@ -1,7 +1,7 @@
 /* tslint:disable:no-unused-expression */
 import * as express from 'express';
 import * as http from 'http';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import * as puppeteer from 'puppeteer';
 import { promisify } from 'util';
 import * as webpack from 'webpack';
@@ -14,7 +14,7 @@ export interface Options {
   projectDir: string;
   port: number;
   puppeteerOptions: puppeteer.LaunchOptions;
-  throwOnBuildError: boolean;
+  throwOnBuildError?: boolean;
 }
 
 const rimraf = promisify(rimrafCallback);
@@ -67,7 +67,7 @@ export class ProjectRunner {
     this.throwOnBuildError = throwOnBuildError;
   }
   public loadTestConfig() {
-    return require(join(this.projectDir, 'webpack.config.js'));
+    return require(join(this.projectDir, 'webpack.config'));
   }
   public async bundle() {
     const webpackConfig = this.webpackConfig;
@@ -124,6 +124,10 @@ export class ProjectRunner {
 
   public getBuildWarningMessages() {
     return (this.stats as any).compilation.warnings.slice();
+  }
+
+  public getBuildAsset(assetPath: string) {
+    return (this.stats as any).compilation.assets[normalize(assetPath)].source();
   }
 
   public async closeAllPages() {

@@ -1,0 +1,58 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Plugin Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-r",
+                "typescript-support",
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/packages/stylable-webpack-plugin/test/**/**.spec.js"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Cli Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "cwd": "${workspaceFolder}/packages/stylable-cli",
+            "args": [
+                "-r",
+                "typescript-support",
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceFolder}/packages/stylable-cli/test/**/**.spec.ts"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Current",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-r",
+                "typescript-support",
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${file}"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}

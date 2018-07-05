@@ -54,9 +54,11 @@ export class StylableOptimizer {
     }
     public removeStylableDirectives(root: postcss.Root, shouldComment: boolean = false) {
         const toRemove: postcss.Node[] = [];
-        root.walkDecls(
-            (decl: postcss.Declaration) => decl.prop.startsWith('-st-') && toRemove.push(decl)
-        );
+        root.walkDecls((decl: postcss.Declaration) => {
+            if (decl.prop.startsWith('-st-')) {
+                toRemove.push(decl);
+            }
+        });
         toRemove.forEach(
             shouldComment
                 ? node => {
