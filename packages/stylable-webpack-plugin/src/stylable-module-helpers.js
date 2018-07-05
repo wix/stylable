@@ -98,11 +98,14 @@ function getCSSComponentLogicModule(stylableModule) {
     return views[0];
 }
 
-function getDeepCSSDependencies(m, deps = new Set(), origin = m) {
+function getDeepCSSDependencies(m, onlyUsed = true, deps = new Set(), origin = m) {
     if (!deps.has(m)) {
         m.buildInfo.runtimeInfo.cssDependencies.forEach(dep => {
             if (origin !== dep) {
-                getDeepCSSDependencies(dep, deps, origin);
+                getDeepCSSDependencies(dep, onlyUsed, deps, origin);
+                if(onlyUsed && !dep.buildInfo.isImportedByNonStylable) {
+                    return;
+                }
                 deps.add(dep);
             }
         });

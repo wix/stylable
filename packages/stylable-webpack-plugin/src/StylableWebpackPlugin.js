@@ -31,6 +31,7 @@ class StylableWebpackPlugin {
     this.injectStylableCompilation(compiler);
     this.injectStylableRuntimeInfo(compiler);
     this.injectStylableRuntimeChunk(compiler);
+    this.injectChunkOptimizer(compiler);
     this.injectPlugins(compiler);
   }
   normalizeOptions(mode) {
@@ -104,6 +105,15 @@ class StylableWebpackPlugin {
       );
     });
     this.injectStylableCSSOptimizer(compiler);
+  }
+  injectChunkOptimizer(compiler) {
+    if(this.options.optimizeStylableModulesPerChunks) {
+      compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, compilation => {
+        compilation.hooks.afterOptimizeChunkIds.tap(StylableWebpackPlugin.name, chunks => {
+          this.optimizeChunks(chunks);
+        });
+      });
+    }
   }
   injectStylableCSSOptimizer(compiler) {
     compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
@@ -219,6 +229,33 @@ class StylableWebpackPlugin {
         }
       }
     );
+  }
+  optimizeChunks(chunks) {
+    chunks.forEach(chunk => {
+      const stModules = Array.from(chunk.modulesIterable).filter(m => {
+        return m.type === "stylable";
+      });
+
+      stModules.forEach(m => {
+        const shouldKeep = m.reasons.some(r => {
+          if (r.module.type === "stylable") {
+            return false;
+          } else {
+            return chunk.containsModule(r.module);
+          }
+        });
+        if (!shouldKeep) {
+          // console.log(`REMOVED ${m.resource} from ${chunk.name}`);
+          if (m.chunksIterable.size === 1) {
+            if (m.buildInfo.isImportedByNonStylable) {
+              // console.log(`REMOVED LAST ${m.resource}`);
+              return;
+            }
+          }
+          chunk.removeModule(m);
+        }
+      });
+    });
   }
   createChunkCSSBundle(chunk, compilation) {
     const bootstrap = chunk.stylableBootstrap;

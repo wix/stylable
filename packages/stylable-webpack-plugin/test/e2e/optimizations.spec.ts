@@ -23,20 +23,20 @@ describe(`(${project})`, () => {
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
 
         expect(styleElements).to.eql([
-            {
-                id: './node_modules/test-components/button.st.css',
-                depth: '1',
-                css: ''
-            },
-            {
-                id: './node_modules/test-components/index.st.css',
-                depth: '2',
-                css: ''
-            },
+            // {
+            //     id: './node_modules/test-components/button.st.css',
+            //     depth: '1',
+            //     css: ''
+            // },
+            // {
+            //     id: './node_modules/test-components/index.st.css',
+            //     depth: '2',
+            //     css: ''
+            // },
             {
                 id: './src/index.st.css',
                 depth: '3',
-                css: '.s3[data-o0-x]{font-family:MyFont}.s4{background:#00f}'
+                css: '.s0[data-o0-x]{font-family:MyFont}.s1{background:#00f}'
             }
         ]);
     });
@@ -53,9 +53,9 @@ describe(`(${project})`, () => {
 
         expect(exports.$namespace).to.eql('o0');
         expect(exports.myValue).to.eql('red');
-        expect(exports.root).to.eql('s3');
-        expect(exports.empty).to.eql('s5');
-        expect(exports.used).to.eql('s4');
+        expect(exports.root).to.eql('s0');
+        expect(exports.used).to.eql('s1');
+        expect(exports.empty).to.eql('s2');
 
         expect(backgroundColor).to.eql('rgb(0, 0, 255)');
         expect(fontFamily).to.eql('MyFont');
