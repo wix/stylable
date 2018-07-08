@@ -28,6 +28,7 @@ export interface StylableConfig {
         [key: string]: any;
     };
     optimizer?: StylableOptimizer;
+    mode?: 'production' | 'development';
 }
 
 export class Stylable {
@@ -47,7 +48,8 @@ export class Stylable {
             config.hooks,
             config.scopeRoot,
             config.resolveOptions,
-            config.optimizer
+            config.optimizer,
+            config.mode
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -63,7 +65,8 @@ export class Stylable {
         protected hooks: TransformHooks = {},
         protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
-        protected optimizer?: StylableOptimizer
+        protected optimizer?: StylableOptimizer,
+        protected mode: 'production' | 'development' = 'production'
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,

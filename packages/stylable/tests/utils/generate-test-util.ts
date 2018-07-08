@@ -30,6 +30,7 @@ export interface Config {
     trimWS?: boolean;
     optimize?: boolean;
     resolve?: any;
+    mode?: 'production' | 'development';
 }
 
 export type RequireType = (path: string) => any;
@@ -65,7 +66,8 @@ export function createTransformer(
         optimize: config.optimize,
         replaceValueHook,
         postProcessor,
-        scopeRoot: !!config.scopeRoot
+        scopeRoot: !!config.scopeRoot,
+        mode: config.mode
     });
 }
 

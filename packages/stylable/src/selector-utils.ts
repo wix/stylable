@@ -260,3 +260,31 @@ export function isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
+
+export function createWarningRule(extendedNode: string, extendingNode: string) {
+    return {
+        selector: `.${extendingNode}:not(.${extendedNode})::before`,
+        selectorType: 'complex',
+        nodes: [{
+                prop: 'content',
+                value: `"INVALID CSS CLASS ASSIGNMENT of '.${extendingNode}'" !important`
+            },
+            {
+                prop: 'width',
+                value: `200px !important`
+            },
+            {
+                prop: 'height',
+                value: `200px !important`
+            },
+            {
+                prop: 'background-color',
+                value: `red !important`
+            },
+            {
+                prop: 'color',
+                value: `white !important`
+            }
+        ]
+    };
+}
