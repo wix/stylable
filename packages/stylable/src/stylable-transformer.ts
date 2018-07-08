@@ -616,7 +616,11 @@ export class StylableTransformer {
 
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
             if (this.mode === 'development' && rule && (rule as SRule).selectorType === 'class') {
-                 rule.after(createWarningRule(next.symbol.name, name));
+                 rule.after(createWarningRule(
+                     next.symbol.name,
+                     this.scope(next.symbol.name, next.meta.namespace),
+                     name,
+                     this.scope(name, meta.namespace)));
             }
             return next;
         }

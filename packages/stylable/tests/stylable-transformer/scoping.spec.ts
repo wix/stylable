@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
+import { createWarningRule } from '../../src';
 import { generateStylableRoot } from '../utils/generate-test-util';
 
 describe('Stylable postcss transform (Scoping)', () => {
@@ -131,25 +132,16 @@ describe('Stylable postcss transform (Scoping)', () => {
                         content: `
                             :import {
                                 -st-from: "./inner.st.css";
-                                -st-named: root1;
+                                -st-default: Inner;
                             }
                             .root {
-                                -st-extends: root1;
-                            }
-                            .root::part {
-                                color: pink;
+                                -st-extends: Inner;
                             }
                         `
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
                         content: `
-                            .root1 {
-                                color: green;
-                            }
-                            .part {
-                                color: yellow;
-                            }
                         `
                     }
                 },
@@ -157,16 +149,13 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root:not(.ns1--root1)::before');
-            expect((result.nodes![1] as postcss.Rule).nodes).to.eql([
-                { prop: 'content', value: `"INVALID CSS CLASS ASSIGNMENT of '.root'" !important`},
-                { prop: 'width', value: '200px !important'},
-                { prop: 'height', value: '200px !important'},
-                { prop: 'background-color', value: 'red !important'},
-                { prop: 'color', value: 'white !important'}
-            ]);
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns--root .ns1--part');
-            expect((result.nodes!.length)).to.equal(3);
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root:not(.ns1--root)::before');
+            // tslint:disable:max-line-length
+            (createWarningRule('root', 'ns1--root', 'root', 'ns--root').nodes as postcss.Declaration[]).forEach((decl: postcss.Declaration, index: number) => {
+                expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).prop).to.eql(decl.prop);
+                expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).value).to.eql(decl.value);
+            });
+            expect((result.nodes!.length)).to.equal(2);
         });
 
         it('should NOT add a warning rule while in production mode', () => {

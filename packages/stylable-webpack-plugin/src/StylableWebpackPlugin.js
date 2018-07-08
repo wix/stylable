@@ -74,7 +74,8 @@ class StylableWebpackPlugin {
       this.options.transformHooks,
       this.options.rootScope,
       compiler.options.resolve,
-      this.options.optimizer || new StylableOptimizer()
+      this.options.optimizer || new StylableOptimizer(),
+      compiler.options.mode
     );
     this.stylable = stylable;
   }

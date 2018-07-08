@@ -90,6 +90,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             scopeRoot: this.scopeRoot,
+            mode: this.mode,
             ...options
         });
     }

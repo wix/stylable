@@ -261,30 +261,40 @@ export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
 
-export function createWarningRule(extendedNode: string, extendingNode: string) {
-    return {
+export function createWarningRule(
+    extendedNode: string,
+    scopedExtendedNode: string,
+    extendingNode: string,
+    scopedExtendingNode: string) {
+    // tslint:disable-next-line:max-line-length
+    const message = `"Invalid CSS class assignment of '.${scopedExtendingNode}', target node is missing extended class '.${scopedExtendedNode}'"`;
+    return postcss.rule({
         selector: `.${extendingNode}:not(.${extendedNode})::before`,
-        selectorType: 'complex',
-        nodes: [{
+        nodes: [
+            postcss.decl({
                 prop: 'content',
-                value: `"INVALID CSS CLASS ASSIGNMENT of '.${extendingNode}'" !important`
-            },
-            {
+                value: message
+            }),
+            postcss.decl({
                 prop: 'width',
                 value: `200px !important`
-            },
-            {
+            }),
+            postcss.decl({
                 prop: 'height',
                 value: `200px !important`
-            },
-            {
+            }),
+            postcss.decl({
+                prop: 'font-family',
+                value: `monospace !important`
+            }),
+            postcss.decl({
                 prop: 'background-color',
                 value: `red !important`
-            },
-            {
+            }),
+            postcss.decl({
                 prop: 'color',
                 value: `white !important`
-            }
+            })
         ]
-    };
+    });
 }

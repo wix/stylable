@@ -1,0 +1,9 @@
+:import {
+    -st-from: "./other.st.css";
+    -st-default: Blah;
+}
+
+.root {
+    -st-extends: Blah;
+    background-color: green; 
+}
