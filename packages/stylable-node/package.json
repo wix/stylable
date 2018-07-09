@@ -1,9 +1,8 @@
 {
-  "name": "stylable-node",
-  "version": "1.0.3",
+  "name": "@stylable/node",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
@@ -19,6 +18,9 @@
   ],
   "engines": {
     "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",

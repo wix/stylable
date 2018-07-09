@@ -28,10 +28,19 @@ export class StylableMetadataPlugin {
             });
         });
     }
-    private loadComponentConfig(
+    public loadComponentConfig(compilation: webpack.compilation.Compilation, component: any) {
+        return this.loadJSON<ComponentConfig>(
+            compilation.inputFileSystem,
+            component.resource.replace(
+                /\.[^.]+$/,
+                this.options.configExtension || '.component.json'
+            )
+        );
+    }
+    private loadJSON<T>(
         fs: { readFileSync(path: string): Buffer },
         resource: string
-    ): ComponentConfig | null {
+    ): T | null {
         try {
             return JSON.parse(fs.readFileSync(resource).toString());
         } catch (e) {
@@ -62,13 +71,7 @@ export class StylableMetadataPlugin {
                 continue;
             }
 
-            const componentConfig = this.loadComponentConfig(
-                compilation.inputFileSystem,
-                component.resource.replace(
-                    /\.[^.]+$/,
-                    this.options.configExtension || '.component.json'
-                )
-            );
+            const componentConfig = this.loadComponentConfig(compilation, component);
 
             if (!componentConfig) {
                 continue;
