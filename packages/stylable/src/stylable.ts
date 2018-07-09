@@ -54,7 +54,7 @@ export class Stylable {
     public resolver: StylableResolver;
     public resolvePath: (ctx: string | undefined, path: string) => string;
     constructor(
-        protected projectRoot: string,
+        public projectRoot: string,
         protected fileSystem: MinimalFS,
         protected requireModule: (path: string) => any,
         public delimiter: string = '--',
