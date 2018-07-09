@@ -59,7 +59,7 @@ export const processorWarnings = {
 
 export class StylableProcessor {
     protected meta!: StylableMeta;
-    constructor(protected diagnostics = new Diagnostics()) { }
+    constructor(protected diagnostics = new Diagnostics(), private resolveNamespace = processNamespace) { }
     public process(root: postcss.Root): StylableMeta {
 
         this.meta = new StylableMeta(root, this.diagnostics);
@@ -132,7 +132,7 @@ export class StylableProcessor {
         });
         toRemove.forEach(node => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = processNamespace(namespace, this.meta.source);
+        this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
     }
 
     protected handleRule(rule: SRule) {
@@ -484,8 +484,9 @@ export function processNamespace(namespace: string, source: string) {
     return namespace + hash.v3(source); // .toString(36);
 }
 
-export function process(root: postcss.Root, diagnostics = new Diagnostics()) {
-    return new StylableProcessor(diagnostics).process(root);
+export function process(
+    root: postcss.Root, diagnostics = new Diagnostics(), resolveNamespace?: typeof processNamespace) {
+    return new StylableProcessor(diagnostics, resolveNamespace).process(root);
 }
 
 // TODO: maybe put under stylable namespace object in v2
