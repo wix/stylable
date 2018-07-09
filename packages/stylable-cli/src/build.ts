@@ -1,6 +1,6 @@
+import { generateModuleSource } from '@stylable/node';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { isAsset, Stylable, StylableResults } from 'stylable';
-import { generateModuleSource } from 'stylable-node';
 import { FileSystem, findFiles } from './find-files';
 
 // const StylableWebpackPlugin = require('stylable-webpack-plugin');
