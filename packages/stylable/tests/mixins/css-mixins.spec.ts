@@ -1086,5 +1086,53 @@ describe('CSS Mixins', () => {
                 'border: 1px solid green;background: yellow'
             );
         });
+
+        it('apply mixin when symbol used as both element and mixin', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./test.st.css";
+                            -st-default: Comp;
+                        }
+
+                        .root Comp {
+                            color: aquamarine;
+                        }
+
+                        .local {
+                            -st-mixin: Comp;
+                        }
+                `
+                    },
+                    '/test.st.css': {
+                        namespace: 'test',
+                        content: `
+                        .root{
+                            z-index: 1;
+                        }
+                    `
+                    }
+                }
+            });
+
+            matchRuleAndDeclaration(
+                result,
+                0,
+                '.entry--root .test--root',
+                'color: aquamarine'
+            );
+
+            matchRuleAndDeclaration(
+                result,
+                1,
+                '.entry--local',
+                'z-index: 1'
+            );
+
+        });
     });
 });

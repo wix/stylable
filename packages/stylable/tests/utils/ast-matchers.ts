@@ -8,12 +8,23 @@ export function matchRuleAndDeclaration(
     msg?: string
 ) {
     const rule = parent.nodes![selectorIndex] as postcss.Rule;
+    const errors = [];
     if (rule.selector !== selector) {
-        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex}`);
+        errors.push(
+            `${msg ? msg + ' ' : ''}selector ${selectorIndex} expected ${
+                rule.selector
+            } to equal ${selector}`
+        );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    if (rule.nodes!.map(x => x.toString()).join(';') !== decl) {
-        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex} first declaration`);
+    const declRes = rule.nodes!.map(x => x.toString()).join(';');
+    if (declRes !== decl) {
+        errors.push(
+            `${msg ? msg + ' ' : ''}selector ${selectorIndex} expected ${declRes} to equal ${decl}`
+        );
+    }
+    if (errors.length) {
+        throw new Error(errors.join('\n'));
     }
 }
 

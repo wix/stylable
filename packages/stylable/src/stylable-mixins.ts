@@ -35,7 +35,7 @@ export function appendMixin(
     if (checkRecursive(transformer, meta, mix, rule, path)) { return; }
 
     const local = meta.mappedSymbols[mix.ref.name];
-    if (local && (local._kind === 'class' || local._kind === 'element')) {
+    if (local && (local._kind === 'class' || (local._kind === 'element' && !local.alias))) {
         handleLocalClassMixin(mix, transformer, meta, variableOverride, path, rule);
     } else {
         const resolvedMixin = transformer.resolver.resolve(mix.ref);

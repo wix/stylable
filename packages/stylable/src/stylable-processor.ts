@@ -19,6 +19,7 @@ import {
     RefedMixin,
     StylableDirectives,
     StylableMeta,
+    StylableSymbol,
     VarSymbol
 } from './stylable-meta';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
@@ -339,7 +340,7 @@ export class StylableProcessor {
 
             }, this.diagnostics).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
-                if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
+                if (mixinRefSymbol && isValidMixinSymbol(mixinRefSymbol)) {
                     mixins.push({
                         mixin,
                         ref: mixinRefSymbol
@@ -473,6 +474,13 @@ export class StylableProcessor {
         return importObj;
 
     }
+}
+
+function isValidMixinSymbol(mixinRefSymbol: StylableSymbol):
+mixinRefSymbol is ImportSymbol | ElementSymbol | ClassSymbol {
+    return mixinRefSymbol._kind === 'import' ||
+        mixinRefSymbol._kind === 'class' ||
+        mixinRefSymbol._kind === 'element';
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {

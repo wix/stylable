@@ -102,5 +102,5 @@ export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSym
 
 export interface RefedMixin {
     mixin: MixinValue;
-    ref: ImportSymbol | ClassSymbol;
+    ref: ImportSymbol | ClassSymbol | ElementSymbol;
 }
