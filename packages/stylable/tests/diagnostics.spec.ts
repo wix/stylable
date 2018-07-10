@@ -993,31 +993,6 @@ describe('diagnostics: warnings and errors', () => {
             };
             expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }]);
         });
-
-        it('should not add warning when compose value is a string', () => {
-            const config = {
-                entry: '/main.st.css',
-                files: {
-                    '/main.st.css': {
-                        content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-default: MyCompose;
-                        }
-                        .container {
-                            |-st-compose: $"MyCompose"$|;
-                        }
-                        `
-                    },
-                    '/imported.st.css': {
-                        content: ``
-                    }
-                }
-            };
-            expectWarningsFromTransform(config,
-                [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.st.css' }]);
-        });
-
     });
 
     describe('functions', () => {

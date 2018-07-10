@@ -260,7 +260,6 @@ export class StylableTransformer {
 
         if (metaExports && !metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
-            const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
             let exportedClasses = scopedName;
 
             if (extend && extend !== classSymbol) {
@@ -326,43 +325,6 @@ export class StylableTransformer {
                 }
             }
 
-            if (compose) {
-                compose.forEach(symbol => {
-                    let finalName;
-                    let finalMeta;
-                    if (symbol._kind === 'class') {
-                        finalName = symbol.name;
-                        finalMeta = meta;
-                    } else if (symbol._kind === 'import') {
-                        const resolved = this.resolver.deepResolve(symbol);
-                        if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                            if (resolved.symbol._kind === 'class') {
-                                finalName = resolved.symbol.name;
-                                finalMeta = resolved.meta;
-                            } else {
-                                // TODO2: warn second phase
-                            }
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    } else {
-                        // TODO2: warn second phase
-                    }
-
-                    if (finalName && finalMeta) {
-                        const classExports: Pojo<string> = {};
-                        this.handleClass(
-                            finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports
-                        );
-                        if (classExports[finalName]) {
-                            exportedClasses += ' ' + classExports[finalName];
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    }
-
-                });
-            }
             metaExports[name] = exportedClasses;
         }
 

@@ -226,43 +226,6 @@ describe('Stylable postcss process', () => {
 
     });
 
-    it('collect typed classes compose', () => {
-
-        const result = processSource(`
-            :import {
-                -st-from: './file.css';
-                -st-default: Style;
-            }
-            .class {}
-            .my-class {
-                -st-compose: Style, class;
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-
-        expect(result.classes).to.flatMatch({
-            'my-class': {
-                '-st-compose': [
-                    {
-                        _kind: 'import',
-                        type: 'default',
-                        import: {
-                            // from: '/path/to/file.css',
-                            fromRelative: './file.css',
-                            defaultExport: 'Style'
-                        }
-                    },
-                    {
-                        _kind: 'class',
-                        name: 'class'
-                    }
-                ]
-            }
-        });
-
-    });
-
     it('collect typed elements', () => {
 
         const result = processSource(`

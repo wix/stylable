@@ -61,7 +61,6 @@ export interface Imported {
 
 export interface StylableDirectives {
     '-st-root'?: boolean;
-    '-st-compose'?: Array<ImportSymbol | ClassSymbol>;
     '-st-states'?: any;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-theme'?: boolean;
