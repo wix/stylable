@@ -171,8 +171,8 @@ describe('bundle: base', () => {
             `.usedComp--root { color: red; }`,
 
             `.usedComp--root { color: red; }`,
-            `.entry--a.usedComp--root {\n    -st-extends: UsedComp;\n    color: green;\n}`,
-            `.entry--b.entry--a.usedComp--root { color: blue; }`,
+            `.entry--a {\n    -st-extends: UsedComp;\n    color: green;\n}`,
+            `.entry--b.entry--a { color: blue; }`,
             `.entry--b .usedComp--root { color: black; }`
         ].join('\n'));
     });
@@ -516,8 +516,8 @@ describe('bundle: base', () => {
             });
 
             const expected = [`.used--root {-st-states: error;}`,
-                `.entry--root.used--root {-st-extends: Used;}`,
-                `.entry--root.used--root[data-used-error] {color: red;}`];
+                `.entry--root {-st-extends: Used;}`,
+                `.entry--root[data-used-error] {color: red;}`];
 
             expect(output).to.eql(expected.join('\n'));
         });

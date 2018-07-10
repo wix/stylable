@@ -98,7 +98,7 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--x.button-x--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--x');
 
         });
 

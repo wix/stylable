@@ -28,6 +28,7 @@ export interface StylableConfig {
         [key: string]: any;
     };
     optimizer?: StylableOptimizer;
+    mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
 }
 
@@ -49,6 +50,7 @@ export class Stylable {
             config.scopeRoot,
             config.resolveOptions,
             config.optimizer,
+            config.mode,
             config.resolveNamespace
         );
     }
@@ -66,6 +68,7 @@ export class Stylable {
         protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
         protected optimizer?: StylableOptimizer,
+        protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
@@ -90,6 +93,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             scopeRoot: this.scopeRoot,
+            mode: this.mode,
             ...options
         });
     }

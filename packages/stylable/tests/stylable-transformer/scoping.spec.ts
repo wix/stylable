@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
+import { createWarningRule } from '../../src';
 import { generateStylableRoot } from '../utils/generate-test-util';
 
 describe('Stylable postcss transform (Scoping)', () => {
@@ -116,10 +117,85 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root .ns1--inner');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app .ns1--inner');
             expect((result.nodes![2] as postcss.Rule).selector)
-                .to.equal('.ns--app.ns1--root .ns1--inner .ns2--deep');
+                .to.equal('.ns--app .ns1--inner .ns2--deep');
+        });
 
+        it('should add a warning rule while in development mode that targets a broken inheritance structure', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .root {
+                                -st-extends: Inner;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                        `
+                    }
+                },
+                mode: 'development'
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root:not(.ns1--root)::before');
+            // tslint:disable:max-line-length
+            (createWarningRule('root', 'ns1--root', 'root', 'ns--root').nodes as postcss.Declaration[]).forEach((decl: postcss.Declaration, index: number) => {
+                expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).prop).to.eql(decl.prop);
+                expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).value).to.eql(decl.value);
+            });
+            expect((result.nodes!.length)).to.equal(2);
+        });
+
+        it('should NOT add a warning rule while in production mode', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-named: root1;
+                            }
+                            .root {
+                                -st-extends: root1;
+                            }
+                            .root::part {
+                                color: pink;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            .root1 {
+                                color: green;
+                            }
+                            .part {
+                                color: yellow;
+                            }
+                        `
+                    }
+                },
+                mode: 'production'
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns1--part');
+            expect((result.nodes!.length)).to.equal(2);
         });
 
         it('class selector that extends root uses pseudo-element after pseudo-class', () => {
@@ -169,7 +245,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root:hover .ns1--inner');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app:hover .ns1--inner');
 
         });
 
@@ -212,7 +288,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root .ns2--deep');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app .ns2--deep');
 
         });
 
@@ -256,7 +332,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app.ns1--root .ns1--deep');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--app .ns1--deep');
 
         });
 
@@ -288,7 +364,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![1] as postcss.Rule).selector)
-                .to.equal('.entry--root.inner--root .inner--inner, .entry--inner');
+                .to.equal('.entry--root .inner--inner, .entry--inner');
 
         });
 
@@ -401,7 +477,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![1] as postcss.Rule).selector)
-                .to.equal('.entry--x.Inner--root .Deep--y');
+                .to.equal('.entry--x .Deep--y');
         });
 
         it('resolve aliased pseudo-element (with @custom-selector )', () => {
@@ -480,9 +556,9 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![1] as postcss.Rule).selector)
-                .to.equal('.entry--root.Inner--root .Deep--x[data-comp-hovered]');
+                .to.equal('.entry--root .Deep--x[data-comp-hovered]');
             expect((result.nodes![2] as postcss.Rule).selector)
-                .to.equal('.entry--root.Inner--root .Deep--x .Comp--y[data-y-hovered]');
+                .to.equal('.entry--root .Deep--x .Comp--y[data-y-hovered]');
 
         });
 
@@ -600,7 +676,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a.entry--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a');
 
         });
 
@@ -646,7 +722,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a.imported--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a');
 
         });
 
@@ -677,7 +753,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a.x');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry--a');
 
         });
 
@@ -746,7 +822,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector, 'class alias')
-                .to.equal('.entry--inner-class.imported--inner-class');
+                .to.equal('.entry--inner-class');
 
         });
 
@@ -815,7 +891,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--b.ns--a');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--b');
 
         });
 
@@ -847,7 +923,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--a.ns1--b');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--a');
 
         });
 
