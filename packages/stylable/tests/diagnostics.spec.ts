@@ -15,20 +15,6 @@ import {
 } from './utils/diagnostics';
 import { Config } from './utils/generate-test-util';
 
-const customButton = `
-    .root{
-        -st-states:shmover;
-    }
-    .my-part{
-
-    }
-    .my-variant{
-        -st-variant:true;
-        color:red;
-    }
-
-`;
-
 describe('findTestLocations', () => {
 
     it('find single location 1', () => {
@@ -437,28 +423,6 @@ describe('diagnostics: warnings and errors', () => {
             });
         });
 
-        xdescribe('-st-variant', () => {
-            it('should return warning when defining variant in complex selector', () => {
-                expectWarnings(`
-                    .gaga:hover{
-                        |-st-variant|:true;
-                    }
-                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-variant'), file: 'main.css' }]);
-            });
-
-            it('should return warning when -st-variant value is not true or false', () => {
-                expectWarnings(`
-                    .gaga {
-                        -st-variant:|red|;
-                    }
-                `,
-                    [{
-                        message: '-st-variant can only be true or false, the value "red" is illegal',
-                        file: 'main.css'
-                    }]);
-            });
-        });
-
         describe(':import', () => {
             it('should return warning when defined in a complex selector', () => {
                 expectWarnings(`
@@ -485,14 +449,18 @@ describe('diagnostics: warnings and errors', () => {
                         '/main.st.css': {
                             content: `
                             :import{
-                                -st-from:"./file.st.css";
+                                -st-from:"./imported.st.css";
                                 -st-default:Comp;
                                 |$color$:red;|
                             }
-                          `
+                            `
                         },
-                        '/file.st.css': {
-                            content: customButton
+                        '/imported.st.css': {
+                            content: `
+                            .root{
+                                color: green;
+                            }
+                            `
                         }
                     }
                 };
@@ -656,9 +624,6 @@ describe('diagnostics: warnings and errors', () => {
                             |-st-mixin: a|;
                         }
                       `
-                    },
-                    'file.css': {
-                        content: customButton
                     }
                 }
             };
@@ -753,65 +718,18 @@ describe('diagnostics: warnings and errors', () => {
                             }`
                         },
                         '/file.css': {
-                            content: customButton
+                            content: `
+                            :vars {
+                                otherVar: someValue;
+                            }
+                            `
                         }
                     }
                 };
                 expectWarningsFromTransform(config,
                     [{ message: `cannot find export 'myVar' in './file.css'`, file: '/main.css' }]);
-
             });
-
         });
-        describe('cross variance', () => {
-
-            xit('component variant cannot be used for native node', () => {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-
-                    .gaga{
-                        -st-mixin:|my-variant|;
-                    }
-                `, [{
-                        // tslint:disable-next-line:max-line-length
-                        message: '"my-variant" cannot be applied to ".gaga", ".gaga" refers to a native node and "my-variant" can only be spplied to "$namespace of comp"',
-                        file: 'main.css'
-                    }]
-                );
-
-            });
-
-            xit('variants can only be used for a specific component', () => {
-                expectWarnings(`
-                    :import{
-                        -st-from:"./file";
-                        -st-default:Comp;
-                        -st-named:my-variant;
-                    }
-                    :import{
-                        -st-from:"./file2";
-                        -st-default:Comp2;
-                        -st-named:my-variant2;
-                    }
-                    .gaga{
-                        -st-extends:Comp;
-                        -st-apply:|my-variant2|;
-                    }
-                `, [{
-                        // tslint:disable-next-line:max-line-length
-                        message: '"my-variant2" cannot be applied to ".gaga", ".gaga" refers to "$namespace of comp" and "my-variant" can only be spplied to "$namespace of Comp2"',
-                        file: 'main.css'
-                    }]
-                );
-
-            });
-
-        });
-
     });
 
     describe('selectors', () => {

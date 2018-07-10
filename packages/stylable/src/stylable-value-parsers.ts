@@ -22,7 +22,6 @@ export interface TypedClass {
     '-st-root'?: boolean;
     '-st-states'?: string[] | MappedStates;
     '-st-extends'?: string;
-    '-st-variant'?: boolean;
 }
 
 export interface MixinValue {
@@ -49,7 +48,6 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    variant: '-st-variant' as '-st-variant',
     theme: '-st-theme' as '-st-theme',
     global: '-st-global' as '-st-global'
 };
@@ -68,10 +66,7 @@ export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 export const SBTypesParsers = {
     '-st-root'(value: string) {
         return value === 'false' ? false : true;
-    },
-    '-st-variant'(value: string) {
-        return value === 'false' ? false : true;
-    },
+    }
     '-st-theme'(value: string) {
         return value === 'false' ? false : true;
     },
