@@ -4,7 +4,7 @@ import { Diagnostics } from '../../src/diagnostics';
 import { createMinimalFS } from '../../src/memory-minimal-fs';
 import { isAbsolute } from '../../src/path';
 import { Stylable } from '../../src/stylable';
-import { process, StylableMeta } from '../../src/stylable-processor';
+import { process, processNamespace, StylableMeta } from '../../src/stylable-processor';
 import { StylableResolver } from '../../src/stylable-resolver';
 import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
 
@@ -69,8 +69,9 @@ export function createTransformer(
     });
 }
 
-export function processSource(source: string, options: postcss.ProcessOptions = {}) {
-    return process(postcss.parse(source, options));
+export function processSource(
+    source: string, options: postcss.ProcessOptions = {}, resolveNamespace?: typeof processNamespace) {
+    return process(postcss.parse(source, options), undefined, resolveNamespace);
 }
 
 export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {

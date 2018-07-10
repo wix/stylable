@@ -42,6 +42,16 @@ describe('Stylable postcss process', () => {
 
     });
 
+    it('resolve namespace hook', () => {
+        const from = resolve('/path/to/style.css');
+        const result = processSource(`
+            @namespace "name";
+        `, { from }, s => 'Test-' + s);
+
+        expect(result.namespace).to.equal('Test-name');
+
+    });
+
     it('use filename as default namespace prefix', () => {
         const from = resolve('/path/to/style.css');
 
