@@ -10,7 +10,7 @@ export class StylableNamespaceOptimizer {
         this.namespacePrefix = 'o';
         this.namespaceMapping = {};
     }
-    public getNamespace(meta: StylableMeta, _compiler?: any, _plugin?: any) {
+    public getNamespace(meta: StylableMeta, ..._env: any[]) {
         return (
             this.namespaceMapping[meta.source] ||
             (this.namespaceMapping[meta.source] = this.namespacePrefix + this.index++)

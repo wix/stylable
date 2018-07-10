@@ -4,7 +4,7 @@ import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { StylableOptimizer } from './optimizer/stylable-optimizer';
 import { safeParse } from './parser';
-import { StylableMeta, StylableProcessor } from './stylable-processor';
+import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
     Options,
@@ -29,6 +29,7 @@ export interface StylableConfig {
     };
     optimizer?: StylableOptimizer;
     mode?: 'production' | 'development';
+    resolveNamespace?: typeof processNamespace;
 }
 
 export class Stylable {
@@ -49,7 +50,8 @@ export class Stylable {
             config.scopeRoot,
             config.resolveOptions,
             config.optimizer,
-            config.mode
+            config.mode,
+            config.resolveNamespace
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -66,7 +68,8 @@ export class Stylable {
         protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
         protected optimizer?: StylableOptimizer,
-        protected mode: 'production' | 'development' = 'production'
+        protected mode: 'production' | 'development' = 'production',
+        protected resolveNamespace?: typeof processNamespace
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -102,9 +105,10 @@ export class Stylable {
         options: Partial<Options> = {}
     ): StylableResults {
         if (typeof meta === 'string') {
+            // TODO: refactor to use fileProcessor
             // meta = this.fileProcessor.processContent(meta, resourcePath + '');
             const root = safeParse(meta, { from: resourcePath });
-            meta = new StylableProcessor().process(root);
+            meta = new StylableProcessor(undefined, this.resolveNamespace).process(root);
         }
         const transformer = this.createTransformer(options);
 
