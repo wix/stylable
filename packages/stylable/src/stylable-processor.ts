@@ -30,7 +30,6 @@ const hash = require('murmurhash');
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
-const parseTheme = SBTypesParsers[valueMapping.theme];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
@@ -383,7 +382,7 @@ export class StylableProcessor {
     protected handleImport(rule: postcss.Rule) {
 
         const importObj: Imported = {
-            defaultExport: '', from: '', fromRelative: '', named: {}, overrides: [], rule, theme: false
+            defaultExport: '', from: '', fromRelative: '', named: {}, rule
         };
 
         rule.walkDecls(decl => {
@@ -411,24 +410,15 @@ export class StylableProcessor {
                 case valueMapping.named:
                     importObj.named = parseNamed(decl.value);
                     break;
-                case valueMapping.theme:
-                    importObj.theme = parseTheme(decl.value);
-                    break;
                 default:
-                    importObj.overrides.push(decl);
+                    this.diagnostics.warn(
+                        decl,
+                        processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop),
+                        { word: decl.prop }
+                    );
                     break;
             }
         });
-
-        if (!importObj.theme) {
-            importObj.overrides.forEach(decl => {
-                this.diagnostics.warn(
-                    decl,
-                    processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop),
-                    { word: decl.prop }
-                );
-            });
-        }
 
         if (!importObj.from) {
             this.diagnostics.error(

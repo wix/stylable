@@ -48,7 +48,6 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    theme: '-st-theme' as '-st-theme',
     global: '-st-global' as '-st-global'
 };
 
@@ -65,9 +64,6 @@ export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
 
 export const SBTypesParsers = {
     '-st-root'(value: string) {
-        return value === 'false' ? false : true;
-    }
-    '-st-theme'(value: string) {
         return value === 'false' ? false : true;
     },
     '-st-global'(decl: postcss.Declaration, _diagnostics: Diagnostics) {

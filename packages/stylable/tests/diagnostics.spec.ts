@@ -428,7 +428,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(`
                     |.gaga:import|{
                         -st-from:"./file.st.css";
-                        -st-default:Theme;
+                        -st-default:Comp;
                     }
                 `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'), file: 'main.css' }]);
             });
@@ -437,7 +437,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(`
                     :import{
                         -st-from:"./file.st.css";
-                        |-st-default: $theme$;|
+                        |-st-default: $comp$;|
                     }
                 `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
             });
@@ -864,26 +864,6 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }]);
             });
-        });
-
-        it('should return error when trying to import theme from js', () => {
-            const config = {
-                entry: '/main.css',
-                files: {
-                    '/main.css': {
-                        content: `
-                        :import {
-                            -st-theme: true;
-                            |-st-from: $"./file.js"$|;
-                        }
-                        `
-                    },
-                    '/file.js': {
-                        content: ``
-                    }
-                }
-            };
-            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown file', file: '/main.css' }]);
         });
 
         it('should error on unresolved alias', () => {

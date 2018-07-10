@@ -53,8 +53,6 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Pojo<string>;
-    overrides: postcss.Declaration[];
-    theme: boolean;
     rule: postcss.Rule;
     fromRelative: string;
 }
@@ -63,7 +61,6 @@ export interface StylableDirectives {
     '-st-root'?: boolean;
     '-st-states'?: any;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
-    '-st-theme'?: boolean;
     '-st-global'?: SelectorAstNode[];
 }
 

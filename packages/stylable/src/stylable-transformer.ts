@@ -222,7 +222,6 @@ export class StylableTransformer {
         });
     }
     public exportRootClass(meta: StylableMeta, metaExports: Pojo<string>) {
-        // TODO: move the theme root composition to the process;
         const classExports: Pojo<string> = {};
         this.handleClass(
             meta, {
@@ -233,27 +232,7 @@ export class StylableTransformer {
             meta.mappedSymbols[meta.root].name,
             classExports
         );
-        let scopedName = classExports[meta.mappedSymbols[meta.root].name];
-        meta.imports.forEach(_import => {
-            if (_import.theme) {
-                const resolved = this.resolver.deepResolve({
-                    _kind: 'import',
-                    type: 'default',
-                    name: 'default',
-                    import: _import,
-                    context: dirname(meta.source)
-                });
-                if (resolved && resolved._kind === 'css') {
-                    const clsExports: Pojo<string> = {};
-                    this.exportRootClass(resolved.meta, clsExports);
-                    scopedName += ' ' + clsExports[resolved.symbol.name];
-                } else {
-                    const node = findDeclaration(_import, (n: any) => n.prop === valueMapping.from);
-                    this.diagnostics.error(node, 'Trying to import unknown file', { word: node.value });
-                }
-            }
-        });
-        metaExports[meta.root] = scopedName;
+        metaExports[meta.root] = classExports[meta.mappedSymbols[meta.root].name];
     }
     public exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports?: Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
