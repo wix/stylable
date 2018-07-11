@@ -13,7 +13,7 @@ describe('require hook', () => {
 
     it('should work on .st.css', () => {
         attachHook();
-        const m = require('./fixtures/test.st.css');
+        const m = require('./fixtures/test.st.css').default;
         expect(m.root).to.equal(m.$namespace + '--root');
         expect(m.test).to.equal(m.$namespace + '--test');
     });
