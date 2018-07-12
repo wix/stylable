@@ -25,23 +25,23 @@ module.exports = {
 };
 ```
 ## Plugin Configuration Options
-| Option	| Type	| Default	| Description |
-|---------|:-----:|:--------:|--------------|
-|outputCSS | boolean |	false	| Generate CSS asset files per bundle |
-|filename	| string | [name].bundle.css	| The name of the CSS bundle file when outputCSS is enabled |
-|includeCSSInJS |	boolean	| true |	Include target CSS in the JavaScript modules (used by runtime renderer) |
-| createRuntimeChunk | boolean | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
-| rootScope | boolean | true | Enable automatically scoping the root component |
-| bootstrap.autoInit | boolean | true | Initialize the rendering of the CSS in the browser |
-| optimize.removeUnusedComponents | boolean | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
-| optimize.removeComments | boolean | false | Remove CSS comments from the target |
-| optimize.removeStylableDirectives | boolean | true | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon)  |
-| optimize.classNameOptimizations | boolean | false | Shorten all class names and replace them in the JavaScript modules |
-| optimize.shortNamespaces | boolean | false | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
-| optimize.minify | boolean | false | Minify each css asset. |
+Some of the default values given to configuration parameters depend on what environment mode is currently active in webpack (`development` or `production`).
+Below you can see the various possible configuration parameters and their default values.
 
-> **Note:**
-> The plugin defaults into development mode. For a production build, you must use a manual configuration, according to your specific requirements.
+| Option	| Type	| Development Mode Default | Production Mode Default | Description |
+|---------|:-----:|:-----------------:|:----------------:|------------|
+|outputCSS | boolean |	false	| true | Generate CSS asset files per bundle |
+|filename	| string | -	| [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
+|includeCSSInJS |	boolean	| true | false | Include target CSS in the JavaScript modules (used by runtime renderer) |
+| createRuntimeChunk | boolean | false | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
+| rootScope | boolean | true | true | Enable automatically scoping the root component (will default to `false` in the upcoming future)|
+| bootstrap.autoInit | boolean | true | true | Initialize the rendering of the CSS in the browser |
+| optimize.removeUnusedComponents | boolean | true | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
+| optimize.removeComments | boolean | false | true | Remove CSS comments from the target |
+| optimize.removeStylableDirectives | boolean | true | true | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon) |
+| optimize.classNameOptimizations | boolean | false | true | Shorten all class names and replace them in the JavaScript modules |
+| optimize.shortNamespaces | boolean | false | true | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
+| optimize.minify | boolean | false | true | Minify each css asset. |
 
 ### Sample production configuration
 ```js
