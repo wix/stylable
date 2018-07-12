@@ -264,10 +264,12 @@ export function isCompRoot(name: string) {
 export function createWarningRule(
     extendedNode: string,
     scopedExtendedNode: string,
+    extendedFile: string,
     extendingNode: string,
-    scopedExtendingNode: string) {
+    scopedExtendingNode: string,
+    extendingFile: string) {
     // tslint:disable-next-line:max-line-length
-    const message = `"Invalid CSS class assignment of '.${scopedExtendingNode}', target node is missing extended class '.${scopedExtendedNode}'"`;
+    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'"`;
     return postcss.rule({
         selector: `.${extendingNode}:not(.${extendedNode})::before`,
         nodes: [
@@ -276,12 +278,8 @@ export function createWarningRule(
                 value: message
             }),
             postcss.decl({
-                prop: 'width',
-                value: `200px !important`
-            }),
-            postcss.decl({
-                prop: 'height',
-                value: `200px !important`
+                prop: 'display',
+                value: `block !important`
             }),
             postcss.decl({
                 prop: 'font-family',

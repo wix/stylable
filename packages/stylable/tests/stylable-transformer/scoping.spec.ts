@@ -151,7 +151,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--root');
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root:not(.ns1--root)::before');
             // tslint:disable:max-line-length
-            (createWarningRule('root', 'ns1--root', 'root', 'ns--root').nodes as postcss.Declaration[]).forEach((decl: postcss.Declaration, index: number) => {
+            (createWarningRule('root', 'ns1--root', 'style.st.css', 'root', 'ns--root', 'inner.st.css').nodes as postcss.Declaration[]).forEach((decl: postcss.Declaration, index: number) => {
                 expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).prop).to.eql(decl.prop);
                 expect(((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration).value).to.eql(decl.value);
             });
