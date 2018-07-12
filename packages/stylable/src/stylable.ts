@@ -1,4 +1,3 @@
-import { Bundler } from './bundle';
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
@@ -28,6 +27,7 @@ export interface StylableConfig {
         [key: string]: any;
     };
     optimizer?: StylableOptimizer;
+    mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
 }
 
@@ -49,6 +49,7 @@ export class Stylable {
             config.scopeRoot,
             config.resolveOptions,
             config.optimizer,
+            config.mode,
             config.resolveNamespace
         );
     }
@@ -66,6 +67,7 @@ export class Stylable {
         protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
         protected optimizer?: StylableOptimizer,
+        protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
@@ -78,9 +80,6 @@ export class Stylable {
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
-    public createBundler(): Bundler {
-        return new Bundler(this);
-    }
     public createTransformer(options: Partial<Options> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
@@ -90,6 +89,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             scopeRoot: this.scopeRoot,
+            mode: this.mode,
             ...options
         });
     }

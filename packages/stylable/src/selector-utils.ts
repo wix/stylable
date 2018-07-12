@@ -260,3 +260,39 @@ export function isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
 export function isCompRoot(name: string) {
     return name.charAt(0).match(/[A-Z]/);
 }
+
+export function createWarningRule(
+    extendedNode: string,
+    scopedExtendedNode: string,
+    extendedFile: string,
+    extendingNode: string,
+    scopedExtendingNode: string,
+    extendingFile: string) {
+    // tslint:disable-next-line:max-line-length
+    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'"`;
+    return postcss.rule({
+        selector: `.${extendingNode}:not(.${extendedNode})::before`,
+        nodes: [
+            postcss.decl({
+                prop: 'content',
+                value: message
+            }),
+            postcss.decl({
+                prop: 'display',
+                value: `block !important`
+            }),
+            postcss.decl({
+                prop: 'font-family',
+                value: `monospace !important`
+            }),
+            postcss.decl({
+                prop: 'background-color',
+                value: `red !important`
+            }),
+            postcss.decl({
+                prop: 'color',
+                value: `white !important`
+            })
+        ]
+    });
+}

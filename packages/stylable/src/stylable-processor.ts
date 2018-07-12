@@ -30,8 +30,6 @@ const hash = require('murmurhash');
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
-const parseCompose = SBTypesParsers[valueMapping.compose];
-const parseTheme = SBTypesParsers[valueMapping.theme];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
@@ -48,9 +46,7 @@ export const processorWarnings = {
     STATE_DEFINITION_IN_COMPLEX() { return 'cannot define pseudo states inside complex selectors'; },
     REDECLARE_SYMBOL(name: string) { return `redeclare symbol "${name}"`; },
     CANNOT_RESOLVE_EXTEND(name: string) { return `cannot resolve '${valueMapping.extends}' type for '${name}'`; },
-    CANNOT_RESOLVE_COMPOSE(name: string) { return `cannot resolve '${valueMapping.compose}' type for '${name}'`; },
     CANNOT_EXTEND_IN_COMPLEX() { return `cannot define "${valueMapping.extends}" inside a complex selector`; },
-    CANNOT_COMPOSE_IN_COMPLEX() { return `cannot define "${valueMapping.compose}" inside a complex selector`; },
     UNKNOWN_MIXIN(name: string) { return `unknown mixin: "${name}"`; },
     OVERRIDE_MIXIN() { return `override mixin on same rule`; },
     OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; }
@@ -354,34 +350,6 @@ export class StylableProcessor {
             }
 
             rule.mixins = mixins;
-        } else if (decl.prop === valueMapping.compose) {
-            const composes = parseCompose(decl, this.diagnostics);
-            if (rule.isSimpleSelector) {
-                const composeSymbols = composes.map(name => {
-                    const extendsRefSymbol = this.meta.mappedSymbols[name];
-                    if (
-                        extendsRefSymbol &&
-                        (extendsRefSymbol._kind === 'import' || extendsRefSymbol._kind === 'class')
-                    ) {
-                        return extendsRefSymbol;
-                    } else {
-                        this.diagnostics.warn(
-                            decl,
-                            processorWarnings.CANNOT_RESOLVE_COMPOSE(name),
-                            { word: name }
-                        );
-                        return null;
-                    }
-                }).filter(x => !!x);
-                this.extendTypedRule(
-                    decl,
-                    rule.selector,
-                    valueMapping.compose,
-                    composeSymbols
-                );
-            } else {
-                this.diagnostics.warn(decl, processorWarnings.CANNOT_COMPOSE_IN_COMPLEX());
-            }
         } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.setClassGlobalMapping(decl, rule);
@@ -414,7 +382,7 @@ export class StylableProcessor {
     protected handleImport(rule: postcss.Rule) {
 
         const importObj: Imported = {
-            defaultExport: '', from: '', fromRelative: '', named: {}, overrides: [], rule, theme: false
+            defaultExport: '', from: '', fromRelative: '', named: {}, rule
         };
 
         rule.walkDecls(decl => {
@@ -442,24 +410,15 @@ export class StylableProcessor {
                 case valueMapping.named:
                     importObj.named = parseNamed(decl.value);
                     break;
-                case valueMapping.theme:
-                    importObj.theme = parseTheme(decl.value);
-                    break;
                 default:
-                    importObj.overrides.push(decl);
+                    this.diagnostics.warn(
+                        decl,
+                        processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop),
+                        { word: decl.prop }
+                    );
                     break;
             }
         });
-
-        if (!importObj.theme) {
-            importObj.overrides.forEach(decl => {
-                this.diagnostics.warn(
-                    decl,
-                    processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop),
-                    { word: decl.prop }
-                );
-            });
-        }
 
         if (!importObj.from) {
             this.diagnostics.error(

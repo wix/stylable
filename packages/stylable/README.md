@@ -7,7 +7,6 @@
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
 * Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
-* Uses themes so you can apply different look and feel across your web application.
 
 At build time, the preprocessor converts the **Stylable** CSS into flat, static, valid vanilla CSS that works cross-browser.
 

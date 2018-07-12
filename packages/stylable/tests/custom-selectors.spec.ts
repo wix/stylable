@@ -122,7 +122,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp--root > .comp--icon.child--root .child--top');
+        expect(r.selector).to.equal('.comp--root > .comp--icon .child--top');
 
     });
 

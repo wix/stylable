@@ -119,35 +119,6 @@ describe('Stylable postcss process', () => {
 
     });
 
-    xit('collect :import warnings', () => {
-
-        const result = processSource(`
-            :import {}
-            :import {
-                color: red;
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.diagnostics.reports[0].message).to.eql('"-st-from" is missing in :import block');
-        expect(result.diagnostics.reports[1].message)
-            .to.eql('"color" css attribute cannot be used inside :import block');
-
-    });
-
-    it('collect :import overrides', () => {
-
-        const result = processSource(`
-            :import {
-                color: red;
-                color2: blue;
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.imports[0].overrides[0].toString()).to.equal('color: red');
-        expect(result.imports[0].overrides[1].toString()).to.equal('color2: blue');
-
-    });
-
     it('collect :vars', () => {
 
         const result = processSource(`
@@ -221,43 +192,6 @@ describe('Stylable postcss process', () => {
                         defaultExport: 'Style'
                     }
                 }
-            }
-        });
-
-    });
-
-    it('collect typed classes compose', () => {
-
-        const result = processSource(`
-            :import {
-                -st-from: './file.css';
-                -st-default: Style;
-            }
-            .class {}
-            .my-class {
-                -st-compose: Style, class;
-            }
-        `, { from: 'path/to/style.css' });
-
-        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-
-        expect(result.classes).to.flatMatch({
-            'my-class': {
-                '-st-compose': [
-                    {
-                        _kind: 'import',
-                        type: 'default',
-                        import: {
-                            // from: '/path/to/file.css',
-                            fromRelative: './file.css',
-                            defaultExport: 'Style'
-                        }
-                    },
-                    {
-                        _kind: 'class',
-                        name: 'class'
-                    }
-                ]
             }
         });
 
@@ -338,22 +272,5 @@ describe('Stylable postcss process', () => {
         `, { from: 'path/to/style.css' });
 
         expect(result.keyframes.length).to.eql(2);
-
     });
-
-    it('should annotate import with -st-theme', () => {
-
-        const result = processSource(`
-            :import {
-                -st-theme: true;
-                -st-from: "./theme.st.css";
-            }
-        `);
-
-        const importSymbol = result.imports[0];
-
-        expect(importSymbol.theme).to.eql(true);
-
-    });
-
 });

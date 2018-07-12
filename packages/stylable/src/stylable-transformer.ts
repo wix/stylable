@@ -12,7 +12,13 @@ import {
     transformPseudoStateSelector,
     validateStateDefinition
 } from './pseudo-states';
-import { isChildOfAtRule, parseSelector, SelectorAstNode, stringifySelector, traverseNode } from './selector-utils';
+import {
+    createWarningRule,
+    isChildOfAtRule,
+    parseSelector,
+    SelectorAstNode,
+    stringifySelector,
+    traverseNode } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
 import {
     ClassSymbol, ElementSymbol, SDecl, SRule, StylableMeta, StylableSymbol
@@ -81,6 +87,7 @@ export interface Options {
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     scopeRoot?: boolean;
+    mode?: 'production' | 'development';
 }
 
 export interface AdditionalSelector {
@@ -99,6 +106,7 @@ export class StylableTransformer {
     public scopeRoot: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
+    public mode: 'production' | 'development';
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
@@ -109,6 +117,7 @@ export class StylableTransformer {
         this.postProcessor = options.postProcessor;
         this.scopeRoot = options.scopeRoot === undefined ? true : options.scopeRoot;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
+        this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: Pojo<string> = {};
@@ -213,7 +222,6 @@ export class StylableTransformer {
         });
     }
     public exportRootClass(meta: StylableMeta, metaExports: Pojo<string>) {
-        // TODO: move the theme root composition to the process;
         const classExports: Pojo<string> = {};
         this.handleClass(
             meta, {
@@ -224,34 +232,13 @@ export class StylableTransformer {
             meta.mappedSymbols[meta.root].name,
             classExports
         );
-        let scopedName = classExports[meta.mappedSymbols[meta.root].name];
-        meta.imports.forEach(_import => {
-            if (_import.theme) {
-                const resolved = this.resolver.deepResolve({
-                    _kind: 'import',
-                    type: 'default',
-                    name: 'default',
-                    import: _import,
-                    context: dirname(meta.source)
-                });
-                if (resolved && resolved._kind === 'css') {
-                    const clsExports: Pojo<string> = {};
-                    this.exportRootClass(resolved.meta, clsExports);
-                    scopedName += ' ' + clsExports[resolved.symbol.name];
-                } else {
-                    const node = findDeclaration(_import, (n: any) => n.prop === valueMapping.from);
-                    this.diagnostics.error(node, 'Trying to import unknown file', { word: node.value });
-                }
-            }
-        });
-        metaExports[meta.root] = scopedName;
+        metaExports[meta.root] = classExports[meta.mappedSymbols[meta.root].name];
     }
     public exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports?: Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
 
         if (metaExports && !metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
-            const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
             let exportedClasses = scopedName;
 
             if (extend && extend !== classSymbol) {
@@ -317,43 +304,6 @@ export class StylableTransformer {
                 }
             }
 
-            if (compose) {
-                compose.forEach(symbol => {
-                    let finalName;
-                    let finalMeta;
-                    if (symbol._kind === 'class') {
-                        finalName = symbol.name;
-                        finalMeta = meta;
-                    } else if (symbol._kind === 'import') {
-                        const resolved = this.resolver.deepResolve(symbol);
-                        if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                            if (resolved.symbol._kind === 'class') {
-                                finalName = resolved.symbol.name;
-                                finalMeta = resolved.meta;
-                            } else {
-                                // TODO2: warn second phase
-                            }
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    } else {
-                        // TODO2: warn second phase
-                    }
-
-                    if (finalName && finalMeta) {
-                        const classExports: Pojo<string> = {};
-                        this.handleClass(
-                            finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports
-                        );
-                        if (classExports[finalName]) {
-                            exportedClasses += ' ' + classExports[finalName];
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    }
-
-                });
-            }
             metaExports[name] = exportedClasses;
         }
 
@@ -442,7 +392,7 @@ export class StylableTransformer {
                         originSymbol = symbol;
                     }
                 } else if (type === 'class') {
-                    const next = this.handleClass(current, node, name, metaExports);
+                    const next = this.handleClass(current, node, name, metaExports, rule);
                     originSymbol = current.classes[name];
                     symbol = next.symbol;
                     current = next.meta;
@@ -553,7 +503,8 @@ export class StylableTransformer {
         meta: StylableMeta,
         node: SelectorAstNode,
         name: string,
-        metaExports?: Pojo<string>): CSSResolve {
+        metaExports?: Pojo<string>,
+        rule?: postcss.Rule): CSSResolve {
 
         const symbol = meta.classes[name];
         const extend = symbol ? symbol[valueMapping.extends] : undefined;
@@ -595,48 +546,38 @@ export class StylableTransformer {
             scopedName = this.exportClass(meta, name, symbol, metaExports);
         }
 
+        if (globalScopedSelector) {
+            node.before = '';
+            node.type = 'selector';
+            node.nodes = symbol[valueMapping.global] || [];
+        } else {
+            node.name = scopedName;
+        }
         const next = this.resolver.deepResolve(extend);
+
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
-            node.before = globalScopedSelector || '.' + scopedName;
-            const mappedClassNodes = next.symbol[valueMapping.global];
-            if (mappedClassNodes) {
-                node.type = 'selector';
-                node.nodes = mappedClassNodes;
-            } else {
-                node.name = this.scope(next.symbol.name, next.meta.namespace);
+            if (this.mode === 'development' && rule && (rule as SRule).selectorType === 'class') {
+                rule.after(createWarningRule(
+                    next.symbol.name,
+                    this.scope(next.symbol.name, next.meta.namespace),
+                    next.meta.source.slice(next.meta.source.lastIndexOf('/') + 1),
+                    name,
+                    this.scope(symbol.name, meta.namespace),
+                    meta.source.slice(meta.source.lastIndexOf('/') + 1)));
             }
             return next;
         }
 
+        // local
         if (extend && extend._kind === 'class') {
-            node.before = globalScopedSelector || '.' + scopedName;
-
             if (extend === symbol && extend.alias) {
                 const next = this.resolver.deepResolve(extend.alias);
                 if (next && next._kind === 'css' && next.symbol) {
-                    if (next.symbol._kind === 'class' && next.symbol[valueMapping.global]) {
-                        node.before = '';
-                        node.type = 'selector';
-                        node.nodes = next.symbol[valueMapping.global] || [];
-                    } else {
-                        node.name = this.scope(next.symbol.name, next.meta.namespace);
-                    }
-                    // node.name = (next.symbol as ClassSymbol)[valueMapping.global] ||
-                    //             this.scope(next.symbol.name, next.meta.namespace);
                     return next;
                 }
-            } else {
-                node.name = this.scope(extend.name, meta.namespace);
-            }
-        } else {
-            if (globalScopedSelector) {
-                node.before = '';
-                node.type = 'selector';
-                node.nodes = symbol[valueMapping.global] || [];
-            } else {
-                node.name = scopedName;
             }
         }
+
         return { _kind: 'css', meta, symbol };
     }
     public handleElement(meta: StylableMeta, node: SelectorAstNode, name: string) {

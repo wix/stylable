@@ -22,7 +22,6 @@ export interface TypedClass {
     '-st-root'?: boolean;
     '-st-states'?: string[] | MappedStates;
     '-st-extends'?: string;
-    '-st-variant'?: boolean;
 }
 
 export interface MixinValue {
@@ -49,9 +48,6 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    variant: '-st-variant' as '-st-variant',
-    compose: '-st-compose' as '-st-compose',
-    theme: '-st-theme' as '-st-theme',
     global: '-st-global' as '-st-global'
 };
 
@@ -70,12 +66,6 @@ export const SBTypesParsers = {
     '-st-root'(value: string) {
         return value === 'false' ? false : true;
     },
-    '-st-variant'(value: string) {
-        return value === 'false' ? false : true;
-    },
-    '-st-theme'(value: string) {
-        return value === 'false' ? false : true;
-    },
     '-st-global'(decl: postcss.Declaration, _diagnostics: Diagnostics) {
         // Experimental
         const selector: any = parseSelector(decl.value.replace(/^['"]/, '').replace(/['"]$/, ''));
@@ -85,6 +75,7 @@ export const SBTypesParsers = {
         if (!value) {
             return {};
         }
+
         return processPseudoStates(value, decl, diagnostics);
     },
     '-st-extends'(value: string) {
@@ -129,6 +120,7 @@ export const SBTypesParsers = {
                 }
             });
         }
+
         return namedMap;
     },
     '-st-mixin'(
@@ -164,25 +156,6 @@ export const SBTypesParsers = {
         });
 
         return mixins;
-
-    },
-    '-st-compose'(composeNode: postcss.Declaration, diagnostics: Diagnostics) {
-        const ast = valueParser(composeNode.value);
-        const composes: string[] = [];
-        ast.walk((node: any) => {
-            if (node.type === 'function') {
-                // TODO
-            } else if (node.type === 'word') {
-                composes.push(node.value);
-            } else if (node.type === 'string') {
-                diagnostics.error(
-                    composeNode,
-                    valueParserWarnings.VALUE_CANNOT_BE_STRING(),
-                    { word: composeNode.value }
-                );
-            }
-        });
-        return composes;
     }
 };
 
