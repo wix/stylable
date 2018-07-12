@@ -13,7 +13,8 @@ export function generateModuleSource(stylableResult: StylableResults, injectCSS:
     //     i => (i.fromRelative.match(/\.st\.css$/) ? `require("${i.fromRelative}");` : '')
     // );
     return `
-module.exports = require(${JSON.stringify(runtimePath)}).create(
+Object.defineProperty(module, "__esModule", { value: true })
+module.exports.default = require(${JSON.stringify(runtimePath)}).create(
     ${root},
     ${namespace},
     ${localsExports},
