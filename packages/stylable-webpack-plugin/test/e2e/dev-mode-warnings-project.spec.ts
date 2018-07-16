@@ -30,6 +30,6 @@ describe(`(${project})`, () => {
 
         expect(values.color).to.eql('rgb(255, 0, 0)');
         // tslint:disable-next-line:max-line-length
-        expect(values.content).to.eql(`"Invalid CSS class assignment of '.o0--root', target node is missing extended class '.o1--root'"`);
+        expect(values.content).to.eql(`"class extending component '.root => o0--root' in stylesheet 'index.st.css' was set on a node that does not extend '.root => o1--root' from stylesheet 'other.st.css'"`);
     });
 });

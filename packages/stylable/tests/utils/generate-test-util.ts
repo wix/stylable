@@ -8,7 +8,6 @@ import { process, processNamespace, StylableMeta } from '../../src/stylable-proc
 import { StylableResolver } from '../../src/stylable-resolver';
 import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
 
-import { Bundler } from '../../src';
 import { Pojo } from '../../src/types';
 
 export interface File {
@@ -130,26 +129,4 @@ export function createStylableInstance(config: Config) {
     }, undefined, undefined, !!config.scopeRoot, config.resolve);
 
     return stylable;
-}
-
-export function createTestBundler(config: Config) {
-    if (!config.usedFiles) {
-        throw new Error('usedFiles is not optional in generateStylableOutput');
-    }
-    const stylable = createStylableInstance(config);
-    return stylable.createBundler() as Bundler;
-}
-
-export function generateStylableOutput(config: Config) {
-    config.trimWS = true;
-    if (!config.usedFiles) {
-        throw new Error('usedFiles is not optional in generateStylableOutput');
-    }
-    const bundler = createTestBundler(config);
-
-    config.usedFiles.forEach(path => bundler.addUsedFile(path));
-
-    return bundler.generateCSS();
-    // return bundle(config.usedFiles, resolver, createProcess(fileProcessor),
-    //               createTransform(fileProcessor, requireModule), (_ctx: string, path: string) => path).css;
 }

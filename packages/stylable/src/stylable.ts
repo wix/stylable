@@ -1,4 +1,3 @@
-import { Bundler } from './bundle';
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
@@ -80,9 +79,6 @@ export class Stylable {
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
-    }
-    public createBundler(): Bundler {
-        return new Bundler(this);
     }
     public createTransformer(options: Partial<Options> = {}) {
         return new StylableTransformer({

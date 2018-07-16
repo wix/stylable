@@ -222,7 +222,6 @@ export class StylableTransformer {
         });
     }
     public exportRootClass(meta: StylableMeta, metaExports: Pojo<string>) {
-        // TODO: move the theme root composition to the process;
         const classExports: Pojo<string> = {};
         this.handleClass(
             meta, {
@@ -233,34 +232,13 @@ export class StylableTransformer {
             meta.mappedSymbols[meta.root].name,
             classExports
         );
-        let scopedName = classExports[meta.mappedSymbols[meta.root].name];
-        meta.imports.forEach(_import => {
-            if (_import.theme) {
-                const resolved = this.resolver.deepResolve({
-                    _kind: 'import',
-                    type: 'default',
-                    name: 'default',
-                    import: _import,
-                    context: dirname(meta.source)
-                });
-                if (resolved && resolved._kind === 'css') {
-                    const clsExports: Pojo<string> = {};
-                    this.exportRootClass(resolved.meta, clsExports);
-                    scopedName += ' ' + clsExports[resolved.symbol.name];
-                } else {
-                    const node = findDeclaration(_import, (n: any) => n.prop === valueMapping.from);
-                    this.diagnostics.error(node, 'Trying to import unknown file', { word: node.value });
-                }
-            }
-        });
-        metaExports[meta.root] = scopedName;
+        metaExports[meta.root] = classExports[meta.mappedSymbols[meta.root].name];
     }
     public exportClass(meta: StylableMeta, name: string, classSymbol: ClassSymbol, metaExports?: Pojo<string>) {
         const scopedName = this.scope(name, meta.namespace);
 
         if (metaExports && !metaExports[name]) {
             const extend = classSymbol ? classSymbol[valueMapping.extends] : undefined;
-            const compose = classSymbol ? classSymbol[valueMapping.compose] : undefined;
             let exportedClasses = scopedName;
 
             if (extend && extend !== classSymbol) {
@@ -326,43 +304,6 @@ export class StylableTransformer {
                 }
             }
 
-            if (compose) {
-                compose.forEach(symbol => {
-                    let finalName;
-                    let finalMeta;
-                    if (symbol._kind === 'class') {
-                        finalName = symbol.name;
-                        finalMeta = meta;
-                    } else if (symbol._kind === 'import') {
-                        const resolved = this.resolver.deepResolve(symbol);
-                        if (resolved && resolved._kind === 'css' && resolved.symbol) {
-                            if (resolved.symbol._kind === 'class') {
-                                finalName = resolved.symbol.name;
-                                finalMeta = resolved.meta;
-                            } else {
-                                // TODO2: warn second phase
-                            }
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    } else {
-                        // TODO2: warn second phase
-                    }
-
-                    if (finalName && finalMeta) {
-                        const classExports: Pojo<string> = {};
-                        this.handleClass(
-                            finalMeta, { type: 'class', name: finalName, nodes: [] }, finalName, classExports
-                        );
-                        if (classExports[finalName]) {
-                            exportedClasses += ' ' + classExports[finalName];
-                        } else {
-                            // TODO2: warn second phase
-                        }
-                    }
-
-                });
-            }
             metaExports[name] = exportedClasses;
         }
 
@@ -616,11 +557,13 @@ export class StylableTransformer {
 
         if (next && next._kind === 'css' && next.symbol && next.symbol._kind === 'class') {
             if (this.mode === 'development' && rule && (rule as SRule).selectorType === 'class') {
-                 rule.after(createWarningRule(
-                     next.symbol.name,
-                     this.scope(next.symbol.name, next.meta.namespace),
-                     name,
-                     this.scope(name, meta.namespace)));
+                rule.after(createWarningRule(
+                    next.symbol.name,
+                    this.scope(next.symbol.name, next.meta.namespace),
+                    next.meta.source.slice(next.meta.source.lastIndexOf('/') + 1),
+                    name,
+                    this.scope(symbol.name, meta.namespace),
+                    meta.source.slice(meta.source.lastIndexOf('/') + 1)));
             }
             return next;
         }
