@@ -12,7 +12,7 @@ export interface Preset {
 export interface LocalComponentConfig {
     id: string;
     presets?: Preset[];
-    snapshots: string[];
+    snapshots?: string[];
     variantsPath?: string;
     previewProps?: { [name: string]: any };
 }
@@ -86,10 +86,14 @@ export class ComponentMetadataBuilder {
         }
         this.output.components[componentConfig.id] = componentConfig;
     }
-    public addComponentSnapshot(id: string, snapshot: string) {
+    public addComponentSnapshot(id: string, snapshot: string | string[]) {
         const componentConfig = this.output.components[id];
         componentConfig.snapshots = componentConfig.snapshots || [];
-        componentConfig.snapshots.push(snapshot);
+        if (Array.isArray(snapshot)) {
+            componentConfig.snapshots.push(...snapshot);
+        } else {
+            componentConfig.snapshots.push(snapshot);
+        }
     }
     public createIndex() {
         const indexPath = this.localResourcePath('/index.st.css');
@@ -153,7 +157,7 @@ function normPath(resource: string, context = '') {
 }
 
 function cloneObject<T = object>(obj: T) {
-    const clone = {} as T;
+    const clone = (Array.isArray(obj) ? [] : {}) as T;
     for (const i in obj) {
         const v = obj[i];
         if (v && typeof v === 'object') {
