@@ -2,6 +2,7 @@ import { expect, use } from 'chai';
 import chaiSubset = require('chai-subset');
 import { processorWarnings, valueMapping } from '../src/index';
 import { nativePseudoClasses } from '../src/native-reserved-lists';
+import { stateErrors } from '../src/pseudo-states';
 import { mediaQuery, styleRules } from './matchers/results';
 import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableResult, processSource } from './utils/generate-test-util';
@@ -1750,7 +1751,7 @@ describe('pseudo-states', () => {
             `, [{ message: 'global states are not supported, use .root:hover instead', file: 'main.css' }]);
         });
 
-        it('should trigger a warning when trying target an unknown state and keep the state', () => {
+        it('should trigger a warning when trying to target an unknown state and keep the state', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -1796,6 +1797,18 @@ describe('pseudo-states', () => {
                     |-st-states: mystate2;|
                 }
             `, [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]);
+        });
+
+        it('should warn when defining a state starting with "--"', () => {
+            expectWarnings(`
+                .root {
+                    |-st-states: $--someState$|;
+                }
+            `, [{
+                message: stateErrors.STATE_VARIABLE_NAME_CLASH('--someState'),
+                file: 'main.css',
+                severity: 'error'
+            }]);
         });
 
         // TODO: test for case insensitivity in validators
