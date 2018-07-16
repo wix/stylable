@@ -252,7 +252,6 @@ describe('Javascript Mixins', () => {
     it('should not root scope js mixins', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
-            scopeRoot: true,
             files: {
                 '/entry.st.css': {
                     namespace: 'entry',
@@ -287,13 +286,13 @@ describe('Javascript Mixins', () => {
         matchRuleAndDeclaration(
             result,
             0,
-            '.entry--root .entry--gaga',
+            '.entry--gaga',
             'color:red;background:green'
         );
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry--root .entry--gaga .entry--child',
+            '.entry--gaga .entry--child',
             'color:yellow'
         );
     });

@@ -86,7 +86,6 @@ export interface Options {
     optimize?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
-    scopeRoot?: boolean;
     mode?: 'production' | 'development';
 }
 
@@ -103,7 +102,6 @@ export class StylableTransformer {
     public delimiter: string;
     public keepValues: boolean;
     public optimize: boolean;
-    public scopeRoot: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: 'production' | 'development';
@@ -115,14 +113,13 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.scopeRoot = options.scopeRoot === undefined ? true : options.scopeRoot;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
         const metaExports: Pojo<string> = {};
         const ast = meta.outputAst = meta.ast.clone();
-        this.transformAst(ast, meta, this.scopeRoot, metaExports);
+        this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast);
         if (this.optimize) {
             deprecated('StylableTransformer optimize is deprecated. Use new StylableOptimizer');
@@ -136,7 +133,6 @@ export class StylableTransformer {
     public transformAst(
         ast: postcss.Root,
         meta: StylableMeta,
-        scopeRoot: boolean = false,
         metaExports?: Pojo<string>,
         variableOverride?: Pojo<string>,
         path: string[] = []) {
@@ -145,7 +141,7 @@ export class StylableTransformer {
 
         ast.walkRules((rule: SRule) => {
             if (isChildOfAtRule(rule, 'keyframes')) { return; }
-            rule.selector = this.scopeRule(meta, rule, scopeRoot, metaExports);
+            rule.selector = this.scopeRule(meta, rule, metaExports);
         });
 
         ast.walkAtRules(/media$/, atRule => {
@@ -354,13 +350,12 @@ export class StylableTransformer {
         });
     }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
-        return this.scopeSelector(meta, selector, undefined, false, true).elements;
+        return this.scopeSelector(meta, selector, undefined, true).elements;
     }
     public scopeSelector(
         originMeta: StylableMeta,
         selector: string,
         metaExports?: Pojo<string>,
-        scopeRoot = false,
         calcPaths = false,
         rule?: postcss.Rule): ScopedSelectorResults {
         let meta = originMeta;
@@ -437,10 +432,6 @@ export class StylableTransformer {
 
         this.addAdditionalSelectors(addedSelectors, selectorAst);
 
-        if (scopeRoot) {
-            this.applyRootScoping(originMeta, selectorAst);
-        }
-
         return {
             current,
             symbol,
@@ -496,8 +487,8 @@ export class StylableTransformer {
         });
     }
     public scopeRule(
-        meta: StylableMeta, rule: postcss.Rule, scopeRoot: boolean, metaExports?: Pojo<string>): string {
-        return this.scopeSelector(meta, rule.selector, metaExports, scopeRoot, false, rule).selector;
+        meta: StylableMeta, rule: postcss.Rule, metaExports?: Pojo<string>): string {
+        return this.scopeSelector(meta, rule.selector, metaExports, false, rule).selector;
     }
     public handleClass(
         meta: StylableMeta,

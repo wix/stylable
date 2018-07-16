@@ -20,7 +20,6 @@ export interface StylableConfig {
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     diagnostics?: Diagnostics;
     hooks?: TransformHooks;
-    scopeRoot?: boolean;
     resolveOptions?: {
         alias: any;
         symlinks: boolean;
@@ -46,7 +45,6 @@ export class Stylable {
             config.onProcess,
             config.diagnostics,
             config.hooks,
-            config.scopeRoot,
             config.resolveOptions,
             config.optimizer,
             config.mode,
@@ -64,7 +62,6 @@ export class Stylable {
         protected onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
-        protected scopeRoot: boolean = true,
         protected resolveOptions: any = {},
         protected optimizer?: StylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
@@ -88,7 +85,6 @@ export class Stylable {
             requireModule: this.requireModule,
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
-            scopeRoot: this.scopeRoot,
             mode: this.mode,
             ...options
         });

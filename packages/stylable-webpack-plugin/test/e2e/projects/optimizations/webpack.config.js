@@ -7,7 +7,6 @@ module.exports = {
   devtool: "source-map",
   plugins: [
     new StylableWebpackPlugin({ 
-      rootScope: false,
       optimize: {
         removeUnusedComponents: true,
         removeComments: true,
