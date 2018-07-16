@@ -61,7 +61,6 @@ export function createTransformer(
         requireModule,
         diagnostics,
         keepValues: false,
-        optimize: config.optimize,
         replaceValueHook,
         postProcessor,
         mode: config.mode

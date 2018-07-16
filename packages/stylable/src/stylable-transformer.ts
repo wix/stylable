@@ -83,7 +83,6 @@ export interface Options {
     diagnostics: Diagnostics;
     delimiter?: string;
     keepValues?: boolean;
-    optimize?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     mode?: 'production' | 'development';
@@ -101,7 +100,6 @@ export class StylableTransformer {
     public resolver: StylableResolver;
     public delimiter: string;
     public keepValues: boolean;
-    public optimize: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: 'production' | 'development';
@@ -109,7 +107,6 @@ export class StylableTransformer {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '--';
         this.keepValues = options.keepValues || false;
-        this.optimize = options.optimize || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
@@ -121,10 +118,6 @@ export class StylableTransformer {
         const ast = meta.outputAst = meta.ast.clone();
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast);
-        if (this.optimize) {
-            deprecated('StylableTransformer optimize is deprecated. Use new StylableOptimizer');
-            removeSTDirective(ast);
-        }
         meta.transformDiagnostics = this.diagnostics;
         const result = { meta, exports: metaExports };
 
