@@ -8,18 +8,21 @@ const {
     getCSSComponentLogicModule
 } = require('stylable-webpack-plugin/src/stylable-module-helpers');
 
+export interface MetadataOptions {
+    name: string;
+    version: string;
+    configExtension?: string;
+    context?: string;
+    renderSnapshot?: (
+        moduleExports: any,
+        component: any,
+        componentConfig: ComponentConfig
+    ) => string;
+}
+
 export class StylableMetadataPlugin {
     constructor(
-        private options: {
-            name: string;
-            version: string;
-            configExtension?: string;
-            renderSnapshot?: (
-                moduleExports: any,
-                component: any,
-                componentConfig: ComponentConfig
-            ) => string;
-        }
+        private options: MetadataOptions
     ) {}
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
@@ -51,7 +54,7 @@ export class StylableMetadataPlugin {
         const stylableModules = compilation.modules.filter(m => m.type === 'stylable');
 
         const builder = new ComponentMetadataBuilder(
-            compilation.compiler.options.context || process.cwd(),
+            this.options.context || compilation.compiler.options.context || process.cwd(),
             this.options.name,
             this.options.version
         );
