@@ -62,6 +62,7 @@ class StylableWebpackPlugin {
       "--",
       meta => { // TODO: move to stylable as param. 
         if (this.options.optimize.shortNamespaces) {
+          resolveNamespace(meta.namespace, meta.source);
           meta.namespace = stylable.optimizer.namespaceOptimizer.getNamespace(
             meta,
             compiler.context,
@@ -333,3 +334,15 @@ class StylableWebpackPlugin {
 }
 
 module.exports = StylableWebpackPlugin;
+
+
+
+const { dirname, relative } = require('path');
+
+const resolveNamespace = (namespace, source) => {
+    const configPath = findConfig('package.json', { cwd: dirname(source) });
+    const config = require(configPath);
+    const fromRoot = relative(dirname(configPath), source);
+    console.log(namespace, fromRoot, config.name + '@' + config.version);
+    return '!!!';
+};
