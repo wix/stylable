@@ -6,7 +6,7 @@ import {
     nativePseudoElements,
     reservedKeyFrames
 } from './native-reserved-lists';
-import { dirname } from './path';
+import { basename } from './path';
 import {
     autoStateAttrName,
     transformPseudoStateSelector,
@@ -544,10 +544,10 @@ export class StylableTransformer {
                 rule.after(createWarningRule(
                     next.symbol.name,
                     this.scope(next.symbol.name, next.meta.namespace),
-                    next.meta.source.slice(next.meta.source.lastIndexOf('/') + 1),
+                    basename(next.meta.source),
                     name,
                     this.scope(symbol.name, meta.namespace),
-                    meta.source.slice(meta.source.lastIndexOf('/') + 1)));
+                    basename(meta.source)));
             }
             return next;
         }
