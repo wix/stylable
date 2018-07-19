@@ -34,7 +34,6 @@ Below you can see the various possible configuration parameters and their defaul
 |filename	| string | -	| [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
 |includeCSSInJS |	boolean	| true | false | Include target CSS in the JavaScript modules (used by runtime renderer) |
 | createRuntimeChunk | boolean | false | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
-| rootScope | boolean | true | true | Enable automatically scoping the root component (will default to `false` in the upcoming future)|
 | bootstrap.autoInit | boolean | true | true | Initialize the rendering of the CSS in the browser |
 | optimize.removeUnusedComponents | boolean | true | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
 | optimize.removeComments | boolean | false | true | Remove CSS comments from the target |

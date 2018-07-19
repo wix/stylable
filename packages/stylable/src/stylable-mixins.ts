@@ -103,7 +103,6 @@ function handleJSMixin(
     transformer.transformAst(
         mixinRoot,
         meta,
-        false,
         undefined,
         variableOverride
     );
@@ -138,7 +137,6 @@ function createMixinRootFromCSSResolve(
     transformer.transformAst(
         mixinRoot,
         mixinMeta,
-        false,
         undefined,
         resolvedArgs,
         path.concat(mix.ref.name + ' from ' + meta.source)
@@ -210,7 +208,6 @@ function handleLocalClassMixin(
     transformer.transformAst(
         mixinRoot,
         isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
-        false,
         undefined,
         resolvedArgs,
         path.concat(mix.ref.name + ' from ' + meta.source)

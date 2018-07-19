@@ -6,7 +6,6 @@
         return require(id);
       },
       transformHooks: undefined,
-      rootScope: true,
       createRuntimeChunk: false,
       filename: "[name].bundle.css",
       outputCSS: isProd ? true : false,

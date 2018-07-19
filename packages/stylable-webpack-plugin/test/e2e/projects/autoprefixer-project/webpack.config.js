@@ -10,7 +10,6 @@ module.exports = {
   context: __dirname,
   devtool: "source-map",
   plugins: [new StylableWebpackPlugin({
-    rootScope: false,
     transformHooks: {
       postProcessor: (stylableResult) => {
         autoprefixProcessor.process(stylableResult.meta.outputAst).sync();

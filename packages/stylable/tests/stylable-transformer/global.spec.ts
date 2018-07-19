@@ -30,7 +30,6 @@ describe('Stylable postcss transform (Global)', () => {
 
         const result = generateStylableRoot({
             entry: `/style.st.css`,
-            // scopeRoot: false,
             files: {
                 '/style.st.css': {
                     namespace: 'style',
@@ -61,7 +60,6 @@ describe('Stylable postcss transform (Global)', () => {
 
         const result = generateStylableRoot({
             entry: `/style.st.css`,
-            // scopeRoot: false,
             files: {
                 '/style.st.css': {
                     namespace: 'style',

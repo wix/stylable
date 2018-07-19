@@ -716,7 +716,6 @@ describe('CSS Mixins', () => {
     it('apply mixin when rootScoping enabled', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
-            scopeRoot: true,
             files: {
                 '/entry.st.css': {
                     namespace: 'entry',
