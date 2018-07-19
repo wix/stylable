@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,8 +10,8 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "stylable": "^5.4.10",
-    "stylable-runtime": "^1.0.6"
+    "stylable": "^5.4.11",
+    "stylable-runtime": "^1.0.7"
   },
   "files": [
     "dist"
