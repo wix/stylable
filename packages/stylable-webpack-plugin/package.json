@@ -17,6 +17,9 @@
     "stylable-runtime": "^1.0.7",
     "webpack-sources": "^1.1.0"
   },
+  "devDependencies": {
+    "@stylable/e2e-test-kit": "^1.0.7"
+  },
   "files": [
     "src"
   ],

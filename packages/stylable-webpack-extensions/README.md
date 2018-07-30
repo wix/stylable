@@ -1,19 +1,31 @@
-# stylable-webpack-extensions
+[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)
 
-This repo contains stylable webpack plugins for various use cases.
+`@stylable/webpack-extensions` contains experimental Stylable webpack plugins for various use cases.
 
-### remove-unused-css-modules
+## Installation
+```sh
+yarn add --dev @stylable/webpack-extensions
+```
 
-Remove all css modules that are not being used by javascript
+## `remove-unused-css-modules`
 
-### stylable-metadata-plugin
+Remove all css modules that are not being used by any javascript file.
+
+## `stylable-metadata-plugin`
 
 Generate component metadata for tooling.
 
-### stylable-forcestates-plugin
+## `stylable-forcestates-plugin`
 
-Generate css that allow to force css state on dom node
+Generate css that allow to force css state on dom node.
 
+## Contributing
+
+Read our [contributing guidelines](../../CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+
+## License
+
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
 
 
 
