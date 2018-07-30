@@ -59,7 +59,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |------------|-----------|
 |[stylable-intelligence](https://github.com/wix/stylable-intelligence)|VSCode extension providing language services for **Stylable**
 
-> Note: Stylable is in the process of [migrating](https://github.com/wix/stylable/issues/361) to a [scoped package](https://docs.npmjs.com/misc/scope) project structure on NPM, hence some packages are published with "@stylable/*" while some are not. Eventually all packages will be published under the @stylable scope.
+> Note: Stylable is in the process of [migrating](https://github.com/wix/stylable/issues/361) to a [scoped package](https://docs.npmjs.com/misc/scope) project structure on NPM, hence some packages are published with `@stylable/*` while some are not. Eventually all packages will be published under the `@stylable` scope.
 
 ## Contributing
 
