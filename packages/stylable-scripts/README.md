@@ -1,5 +1,3 @@
-> TODO: PUBLISH ME & FIX BADGES
-
 [![npm version](https://img.shields.io/npm/v/stylable-scripts.svg)](https://www.npmjs.com/package/stylable-scripts)
 
 
