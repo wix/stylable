@@ -11,8 +11,6 @@ Use the `process` utility imported from `@stylable/jest` to configure your Jest 
 
 > Note: Jest should also be configured to ignore `.st.css` files in its transformations.
 
-// TODO: fix example
-
 ```ts
 const { process } = require('@stylable/jest');
 
