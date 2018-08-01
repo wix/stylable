@@ -1,6 +1,6 @@
 // import { expect } from 'chai';
+import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { join } from 'path';
-import { StylableProjectRunner } from 'stylable-build-test-kit';
 
 const project = '4th-party-project';
 
