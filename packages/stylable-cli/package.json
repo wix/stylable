@@ -1,9 +1,8 @@
 {
-  "name": "stylable-cli",
-  "version": "1.0.6",
+  "name": "@stylable/cli",
+  "version": "1.0.0",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
-  "private": true,
   "bin": {
     "stc": "./dist/cli.js"
   },
@@ -28,6 +27,9 @@
   ],
   "engines": {
     "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
