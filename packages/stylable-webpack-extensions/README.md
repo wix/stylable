@@ -1,3 +1,5 @@
+# @stylable/webpack-extension
+
 [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)
 
 `@stylable/webpack-extensions` contains experimental Stylable webpack plugins for various use cases.

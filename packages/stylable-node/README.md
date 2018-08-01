@@ -1,3 +1,5 @@
+# @stylable/node
+
 [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)
 
 `@stylable/node` is a simple integration that allows integrating **Stylable** into your node application. The most common use-case is server-side rendering.

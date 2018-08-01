@@ -1,3 +1,5 @@
+# @stylable/cli
+
 <!-- [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli) -->
 
 `@stylable/cli` is a low-level utility used for working with **Stylable** projects directly.

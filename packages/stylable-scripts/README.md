@@ -1,5 +1,6 @@
-[![npm version](https://img.shields.io/npm/v/stylable-scripts.svg)](https://www.npmjs.com/package/stylable-scripts)
+# @stylable/scripts
 
+[![npm version](https://img.shields.io/npm/v/stylable-scripts.svg)](https://www.npmjs.com/package/stylable-scripts)
 
 # stylable-scripts
 

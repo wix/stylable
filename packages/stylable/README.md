@@ -1,7 +1,8 @@
-[![Stylable CSS for Components](./stylable.svg)](https://stylable.io)
+# @stylable/core
 
 [![npm version](https://img.shields.io/npm/v/stylable.svg)](https://www.npmjs.com/package/stylable)
-[![Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
+
+`@stylable/core` is at the center of how Stylable operates. It provides the basic capabilities required for Stylable to parse stylesheets and transform their output to valid plain CSS.
 
 ## Running Stylable
 Follow these instructions in order to run Stylable in development mode, this allows you to run the package tests with hot-loading enabled.
