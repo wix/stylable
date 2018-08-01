@@ -3,7 +3,6 @@
 [![Travis Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
 [![AppVoyer Build Status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/AlexShemeshWix/stylable)
 
-
 **Stylable** enables you to write reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
 * Scopes styles to components so they don't "leak" and clash with other styles.
