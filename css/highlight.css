@@ -77,6 +77,13 @@ pre[class*="language-"] {
     color: #7B7E80;
 }
 
+.token.comment::selection,
+.token.prolog::selection,
+.token.doctype::selection,
+.token.cdata::selection {
+    color: rgb(0, 55, 92);
+}
+
 .token.punctuation {
     color: #B9BCC7;
 }

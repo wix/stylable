@@ -157,7 +157,7 @@ code.highlighter-rouge {
 
 header {
     position: fixed;
-    ;
+    pointer-events: none;
     height: 88px;
     width: 100%;
     top: 0;
@@ -182,6 +182,7 @@ header .logo {
     text-decoration: none;
     opacity: 0.9;
     transition: all 0.3s ease-in;
+    pointer-events: auto;
 }
 
 header .logo a {
@@ -220,17 +221,14 @@ header .main-nav a {
     padding: 0 10px;
     height: 65px;
     line-height: 65px;
+    pointer-events: auto;
 }
 
-header .logo-git {
-    content: " ";
-    background-image: url(../images/logo-git.svg);
+header .main-nav img {
     margin: 0px 8px 0px 24px;
     width: 24px;
     height: 24px;
     display: inline-block;
-    background-size: contain;
-    background-repeat: no-repeat;
 }
 
 .menu-icon {
@@ -254,7 +252,6 @@ header .logo-git {
     min-height: 100%;
     margin-bottom: 20px;
 }
-
 
 /**************/
 
@@ -688,10 +685,11 @@ li.active > .docs-nav-item {
         height: 54px;
         background: #FFFFFF;
         box-shadow: 0 1px 2px 0 rgba(22, 45, 61, 0.24);
+        pointer-events: auto;
     }
     header > .header-content {
         display: flex;
-        align-items: baseline
+        align-items: baseline;
     }
     header .logo::before {
         background-image: url(../images/96-logo-OnlySymbol.svg);
@@ -715,6 +713,7 @@ li.active > .docs-nav-item {
         background-size: contain;
         background-repeat: no-repeat;
         cursor: pointer;
+        pointer-events: auto;
     }
     .hidden-control_menu:checked ~ .main-content .docs-nav {
         display: block;
@@ -726,5 +725,4 @@ li.active > .docs-nav-item {
     .code:last-child {
         border-top: 1px solid #171c25;
     }
-
 }

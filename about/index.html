@@ -19,10 +19,10 @@
 	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
 	<meta name="twitter:url" content="https://stylable.io/">
 
-    <link rel="stylesheet" href="/css/normalize.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/highlight.css">
-    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/main.css?cacheKill=4">
+    <link rel="stylesheet" href="./css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="./images/favicon-1.png">
     <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">    
 </head>
@@ -31,10 +31,11 @@
     <div class="header-content">
         <label class="menu-icon" for="menu">
     </label>
-        <a href="/"><span class="logo"></span></a>
+        <a href="."><span class="logo"></span></a>
 
         <ul class="main-nav">
-            <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
+            <li><a href="https://github.com/wix/stylable" target="_blank"><img src="/images/logo-git.svg" alt="Stylable on GitHub"></a></li>
+            <li><a href="https://twitter.com/stylableio" target="_blank"><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"></a></li>
         </ul>
     </div>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
@@ -66,13 +67,17 @@
 </section>
 </div>
 
-<footer></footer>
-<script src="/js/vendor/prism/prism.js"></script>
-<script src="/js/vendor/tippy/tippy.all.min.js"></script>
+
+<script src="./js/vendor/prism/prism.js"></script>
+<script src="./js/vendor/tippy/tippy.all.min.js"></script>
 <script>
 	tippy('.code [title]', {
 		duration: 0
 	});
 </script>
+
+<script src="https://static.parastorage.com/unpkg/react@16.2.0//umd/react.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/react-dom@16.2.0//umd/react-dom.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
 </body>
 </html>

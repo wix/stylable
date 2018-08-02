@@ -1,84 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-
-	<!-— facebook open graph tags -->
-	<meta property="og:type" content="website">
-	<meta property="og:url" content="https://stylable.io/">
-	<meta property="og:title" content="Stylable - scoped CSS for components">
-	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
-	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
-	 
-	<!-— twitter card tags additive with the og: tags -->
-	<meta name="twitter:card" content="summary">
-	<meta name="twitter:domain" content="stylable.io">
-	<meta name="twitter:title" content="Stylable - scoped CSS for components">
-	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
-	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
-	<meta name="twitter:url" content="https://stylable.io/">
-
-    <link rel="stylesheet" href="/css/normalize.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/highlight.css">
-    <link rel="icon" type="image/x-icon" href="/images/favicon-1.png">
-    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-</head>
-<body>
-<header>
-    <div class="header-content">
-        <label class="menu-icon" for="menu">
-    </label>
-        <a href="/"><span class="logo"></span></a>
-
-        <ul class="main-nav">
-            <li><a href="https://github.com/wix/stylable" target="_blank"><div class="logo-git"></div></a></li>
-        </ul>
-    </div>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
-    <script>
-       window.dataLayer = window.dataLayer || [];
-       function gtag(){dataLayer.push(arguments);}
-       gtag('js', new Date());
-       gtag('config', 'UA-109043375-1');
-    </script>
-</header>
-
-
-<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
-<div class="main-content">
-    <style type="text/css" media="screen">
+<style type="text/css" media="screen">
   .container {
     margin: 10px auto;
     max-width: 600px;
     text-align: center;
   }
   h1 {
-    margin: 30px 0;
+    margin: 60px 0 30px 0;
     font-size: 4em;
     line-height: 1;
     letter-spacing: -1px;
+    font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  }
+  p {
+    font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  }
+  .site-logo {
+    margin: 30px auto;
   }
 </style>
 
 <div class="container">
   <h1>404</h1>
 
-  <p><strong>Page not found :(</strong></p>
-  <p>The requested page could not be found.</p>
-</div>
+  <img src="/branding/logo/PNG/96-logo-OnlySymbol.png" alt="Stylable Logo" class="site-logo" />
 
+  <p>We couldn't find this page.</p>
+  <p>Try going back to the <a href="https://stylable.io/">Stylable Home</a> page.</p>
 </div>
-
-<footer></footer>
-<script src="/js/vendor/prism/prism.js"></script>
-<script src="/js/vendor/tippy/tippy.all.min.js"></script>
-<script>
-	tippy('.code [title]', {
-		duration: 0
-	});
-</script>
-</body>
-</html>
