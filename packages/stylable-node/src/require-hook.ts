@@ -6,19 +6,20 @@ export interface Options {
     matcher: (filename: string) => boolean;
     stylableConfig: Partial<StylableConfig>;
     afterCompile?: (code: string, filename: string) => string;
+    runtimePath?: string;
 }
 
 const HOOK_EXTENSION = '.css';
 
 const defaultStylableMatcher = (filename: string) => !!filename.match(/\.st\.css$/);
 
-export function attachHook({ matcher, afterCompile, stylableConfig }: Partial<Options> = {}) {
+export function attachHook({ matcher, afterCompile, stylableConfig, runtimePath }: Partial<Options> = {}) {
     const stylableToModule = stylableModuleFactory({
         projectRoot: 'root',
         fileSystem: fs,
         requireModule: require,
         ...stylableConfig
-    });
+    }, runtimePath);
 
     if (!matcher) {
         matcher = defaultStylableMatcher;
