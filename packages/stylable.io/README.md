@@ -1,6 +1,6 @@
 # stylable.io Site and Documentation
 
-This is the source of the [Stylable site](https://stylable.io/) and is not intended to be directly read here. 
+This is the source for the [Stylable site](https://stylable.io/).
 
 ## Installation
 
@@ -18,16 +18,8 @@ yarn dev
 ```
 
 Deploy
-
 ```
 yarn deploy
 ```
 
-After deployment you can view the site at [Github pages URL](https://wixplosives.github.io/stylable.io/)
-
-
-## UNLICENSED
-
-Copyright (C) Wix.com, Inc - All Rights Reserved January 2018  
-Unauthorized copying of this file, via any medium is strictly prohibited  
-Proprietary and confidential  
+After deployment you can view the site at [stylable.io](https://stylable.io/)
