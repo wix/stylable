@@ -6,6 +6,9 @@ cjs
 .history
 .DS_Store
 
+# Created by the extension "VS Live Share"
+.vs
+
 # https://github.com/github/gitignore/blob/master/Node.gitignore
 
 # Logs

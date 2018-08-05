@@ -1,0 +1,15 @@
+{
+  "name": "stylable.io",
+  "version": "1.0.0",
+  "description": "The Stylable website https://stylable.io/",
+  "private": true,
+  "main": "N/A",
+  "scripts": {
+    "deploy": "bundle install && bundle exec jekyll build && gh-pages -d ./_site",
+    "dev": "bundle exec jekyll serve"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "license": "UNLICENSED",
+  "homepage": "https://stylable.io/",
+  "author": "Wix.com"
+}

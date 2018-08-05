@@ -1,10 +1,10 @@
-import { expect } from 'chai';
-import { join } from 'path';
 import {
     browserFunctions,
     filterAssetResponses,
     StylableProjectRunner
-} from 'stylable-build-test-kit';
+} from '@stylable/e2e-test-kit';
+import { expect } from 'chai';
+import { join } from 'path';
 
 const project = 'project-with-assets';
 

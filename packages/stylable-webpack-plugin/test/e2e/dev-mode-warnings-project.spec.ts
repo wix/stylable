@@ -1,6 +1,6 @@
+import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
-import { StylableProjectRunner } from 'stylable-build-test-kit';
 
 const project = 'dev-mode-warnings-project';
 

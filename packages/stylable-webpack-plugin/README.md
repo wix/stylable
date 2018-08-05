@@ -1,4 +1,6 @@
-# Stylable Webpack Plugin
+# @stylable/webpack-plugin
+
+[![npm version](https://img.shields.io/npm/v/stylable-webpack-plugin.svg)](https://www.npmjs.com/package/stylable-webpack-plugin)
 
 The Stylable Webpack Plugin (for Webpack version 4x) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 
@@ -79,7 +81,7 @@ CSS assets are handled by a url-loader + file-loader combination.
 ## Compatibilities with existing loading mechanisms
 If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
 
-## How it works (in case you're wondering)
+## How it works
 The plugin transforms all Stylable files into JavaScript modules with CSS rendering capabilities. 
 
 Every bundle that contains Stylable modules is injected with a `stylable-bootstrap-module` as its entrypoint. This module is responsible for: 
@@ -91,3 +93,7 @@ The resulting renderer orders the CSS by the depth of each module, calculated fr
 **Stylable bootstrap module** The `stylable-bootstrap-module` is a generated module injected into the bundle as its entrypoint and ensures all Stylable modules are injected into the runtime renderer.
 
 **Runtime DOM renderer** The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
+
+## License
+
+Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).

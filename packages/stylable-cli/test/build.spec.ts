@@ -1,7 +1,7 @@
+import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import * as path from 'path';
 import { Stylable } from 'stylable';
-import { createMemoryFileSystemWithFiles as createFS } from 'stylable-build-test-kit';
 import { build } from '../src/build';
 
 describe('build stand alone', () => {
