@@ -1,6 +1,6 @@
 # @stylable/core
 
-[![npm version](https://img.shields.io/npm/v/stylable.svg)](https://www.npmjs.com/package/stylable)
+[![npm version](https://img.shields.io/npm/v/@stylable/core.svg)](https://www.npmjs.com/package/stylable/core)
 
 `@stylable/core` is at the center of how Stylable operates. It provides the basic capabilities required for Stylable to parse stylesheets and transform their output to valid plain CSS.
 

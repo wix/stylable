@@ -1,6 +1,6 @@
 # @stylable/webpack-plugin
 
-[![npm version](https://img.shields.io/npm/v/stylable-webpack-plugin.svg)](https://www.npmjs.com/package/stylable-webpack-plugin)
+[![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)
 
 The Stylable Webpack Plugin (for Webpack version 4x) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 

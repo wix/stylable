@@ -1,6 +1,6 @@
 # @stylable/e2e-test-kit
 
-<!-- [![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit) -->
+[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)
 
 `@stylable/e2e-test-kit` serves as a collection of tools to help test **Stylable** components and applications. It offers various capabilities to bundle, run and test your project in memory, or in the browser.
 
