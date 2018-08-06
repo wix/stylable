@@ -3,7 +3,7 @@ const path = require('path');
 const { ReplaceSource, OriginalSource } = require('webpack-sources');
 const { StylableImportDependency } = require('./StylableDependencies');
 const { RENDERER_SYMBOL, STYLESHEET_SYMBOL } = require('./runtime-dependencies');
-const { processDeclarationUrls, makeAbsolute, isAsset } = require('stylable');
+const { processDeclarationUrls, makeAbsolute, isAsset } = require('@stylable/core');
 
 class StylableGenerator {
     constructor(stylable, compilation, options) {

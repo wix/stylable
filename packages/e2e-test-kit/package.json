@@ -24,7 +24,7 @@
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "rimraf": "^2.6.2",
-    "stylable": "^5.4.11",
+    "@stylable/core": "^0.1.0",
     "stylable-runtime": "^1.0.7",
     "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"

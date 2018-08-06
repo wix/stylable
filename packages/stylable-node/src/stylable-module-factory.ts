@@ -1,4 +1,4 @@
-import { Stylable, StylableConfig } from 'stylable';
+import { Stylable, StylableConfig } from '@stylable/core';
 import { generateModuleSource } from './stylable-module-source';
 
 export function stylableModuleFactory(stylableOptions: StylableConfig) {

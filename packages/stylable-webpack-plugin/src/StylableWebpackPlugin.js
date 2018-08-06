@@ -1,7 +1,7 @@
 const { EOL } = require("os");
 const { RawSource } = require("webpack-sources");
-const { Stylable } = require("stylable");
-const { StylableOptimizer } = require("stylable/dist/src/optimizer/stylable-optimizer");
+const { Stylable } = require("@stylable/core");
+const { StylableOptimizer } = require("@stylable/core/dist/src/optimizer/stylable-optimizer");
 const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
 const { isImportedByNonStylable } = require("./utils");

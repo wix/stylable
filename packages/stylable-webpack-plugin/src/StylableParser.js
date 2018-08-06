@@ -8,7 +8,7 @@ const {
     StylableImportDependency,
     StylableAssetDependency
 } = require('./StylableDependencies');
-const { isAsset, makeAbsolute } = require('stylable');
+const { isAsset, makeAbsolute } = require('@stylable/core');
 
 const stylableExtension = /\.st\.css$/;
 

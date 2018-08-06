@@ -1,5 +1,5 @@
+import { StylableConfig } from '@stylable/core';
 import * as fs from 'fs';
-import { StylableConfig } from 'stylable';
 import { stylableModuleFactory } from './stylable-module-factory';
 
 export interface Options {

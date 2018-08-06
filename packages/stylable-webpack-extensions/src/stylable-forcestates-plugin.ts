@@ -1,4 +1,3 @@
-import * as postcss from 'postcss';
 import {
     nativePseudoClasses,
     parseSelector,
@@ -6,7 +5,8 @@ import {
     SelectorAstNode,
     stringifySelector,
     traverseNode
-} from 'stylable';
+} from '@stylable/core';
+import * as postcss from 'postcss';
 const cloneDeep = require('lodash.clonedeep');
 
 const nativePseudoClassesMap = nativePseudoClasses.reduce<Pojo<boolean>>((acc, name: string) => {

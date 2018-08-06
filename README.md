@@ -44,7 +44,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |[e2e-test-kit](./packages/e2e-test-kit)|`@stylable/e2e-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)|`webpack` project runner used for `E2E` testing |
 |[cli](./packages/stylable-cli)|`@stylable/cli`|[![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)|Used for managing Stylable stylesheets in a project|
 |[stylable-scripts](./packages/stylable-scripts)|`@stylable/stylable-scripts`|[![npm version](https://img.shields.io/npm/v/@stylable/stylable-scripts.svg)](https://www.npmjs.com/package/@stylable/stylable-scripts)|`create-react-app` boilerplate generator scripts|
-|[stylable.io](./packages/stylable.io)|not published as a module|-|source for [stylable.io](http://stylable.io)|
+|[stylable.io](./packages/stylable.io)|unpublished to `npm`|-|source for [stylable.io](http://stylable.io)|
 
 ### Integrations
 

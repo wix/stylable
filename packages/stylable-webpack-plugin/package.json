@@ -7,7 +7,7 @@
     "test": "mocha --timeout 10000 -r typescript-support \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx"
   },
   "peerDependencies": {
-    "stylable": "^5.3.11",
+    "@stylable/core": "^0.1.0",
     "webpack": "^4.6.0"
   },
   "dependencies": {

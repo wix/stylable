@@ -1,4 +1,4 @@
-import { StylableResults } from 'stylable';
+import { StylableResults } from '@stylable/core';
 
 const runtimePath = require.resolve('stylable-runtime/cjs/css-runtime-stylesheet');
 

@@ -10,7 +10,7 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "stylable": "^5.4.11",
+    "@stylable/core": "^0.1.0",
     "stylable-runtime": "^1.0.7"
   },
   "files": [
