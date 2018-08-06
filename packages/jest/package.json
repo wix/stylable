@@ -1,6 +1,6 @@
 {
-  "name": "stylable-jest",
-  "version": "1.0.4",
+  "name": "@stylable/jest",
+  "version": "0.1.0",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
   "private": true,
@@ -19,6 +19,9 @@
   ],
   "engines": {
     "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
