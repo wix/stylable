@@ -29,6 +29,9 @@
     "postcss-value-parser": "^3.3.0",
     "url-regex": "^4.1.1"
   },
+  "devDependencies": {
+    "@stylable/runtime": "^0.1.0"
+  },
   "files": [
     "dist",
     "src",

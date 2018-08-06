@@ -15,11 +15,9 @@ export {
 export * from './stylable-utils';
 export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
-export { createGenerator } from './generator';
 export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';
 export { valueMapping, SBTypesParsers, stKeys } from './stylable-value-parsers';
 export { createInfrastructure, StylableInfrastructure } from './create-infra-structure';
-export { create } from './runtime';
 export * from './stylable';
 export * from './types';
 export * from './stylable-mixins';

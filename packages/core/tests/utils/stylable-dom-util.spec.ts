@@ -1,10 +1,10 @@
+import { create } from '@stylable/runtime';
 import { expect } from 'chai';
-import { create } from '../../src/runtime';
 import { StylableDOMUtil } from './stylable-dom-util';
 
 describe('stylable-dom-utils', () => {
 
-    const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, null, '0');
+    const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, '', 0, '0');
 
     const util = new StylableDOMUtil(s);
 

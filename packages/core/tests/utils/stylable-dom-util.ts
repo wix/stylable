@@ -1,5 +1,5 @@
+import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 import { parseSelector, stringifySelector, traverseNode } from '../../src/selector-utils';
-import { Param, RuntimeStylesheet } from '../../src/types';
 
 export interface QueryElement {
     querySelector: typeof Element.prototype.querySelector;
@@ -41,7 +41,7 @@ export class StylableDOMUtil {
     }
     public hasStyleState(
         element: { getAttribute: typeof Element.prototype.getAttribute },
-        stateName: string, param: Param = true
+        stateName: string, param: StateValue = true
     ): boolean {
         const { stateKey, styleState } = this.getStateDataAttrKey(stateName, param);
         const actual = element.getAttribute(stateKey);
@@ -56,12 +56,12 @@ export class StylableDOMUtil {
         return element.getAttribute(stateKey);
     }
 
-    private getStateDataAttrKey(state: string, param: Param = true) {
+    private getStateDataAttrKey(state: string, param: StateValue = true) {
         const styleState = this.style.$cssStates({ [state]: param });
         return { stateKey: Object.keys(styleState)[0], styleState };
     }
 
-    private getStateDataAttr(state: string, param: Param = true): string {
+    private getStateDataAttr(state: string, param: StateValue = true): string {
         const { stateKey, styleState } = this.getStateDataAttrKey(state, param);
         return `${stateKey}="${styleState[stateKey]}"`;
     }
