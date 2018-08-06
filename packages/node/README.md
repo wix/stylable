@@ -13,7 +13,7 @@ yarn add --dev @stylable/node
 Import the `attachHook` utility from `@stylable/node`, and invoke it.
 The `attachHook` can receive optional arguments in the form of a `config` object. 
 
-See the type definition [here](https://github.com/wix/stylable/blob/master/packages/stylable-node/src/require-hook.ts#L5).
+See the type definition [here](https://github.com/wix/stylable/blob/master/packages/node/src/require-hook.ts#L5).
 
 ```ts
 const {attachHook} = require('@stylable/node');

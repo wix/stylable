@@ -5,16 +5,16 @@
 The Stylable Webpack Plugin (for Webpack version 4x) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 
 ## Getting started
-Install `stylable-webpack-plugin` as a dev dependency in your local project.
+Install `@stylable/webpack-plugin` as a dev dependency in your local project.
 
 Install using npm:
 ```bash
-npm install stylable-webpack-plugin --save-dev
+npm install @stylable/webpack-plugin --save-dev
 ```
 
 Install using yarn:
 ```bash
-yarn add stylable-webpack-plugin --dev
+yarn add @stylable/webpack-plugin --dev
 ```
 
  Sample dev config:

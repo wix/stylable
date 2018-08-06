@@ -18,14 +18,14 @@ Learn more in our [Documentation Center](https://stylable.io/).
 There are two options for installing Stylable:
 
 * Create a new project based on Stylable [stylable-scripts](./packages/stylable-scripts), using [create-react-app](https://github.com/facebook/create-react-app)
-* Install Stylable and its [webpack plugin](./packages/stylable-webpack-plugin) to an existing webpack based project
+* Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Demos
 * [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using [stylable-scripts](./packages/stylable-scripts)
 * [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
-* [Various webpack project setups](./packages/stylable-webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
+* [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
 ## Repository Structure
 This repository is a `mono-repo` containing multiple `packages` that together comprise the Stylable ecosystem. It uses [Lerna](https://lernajs.io/) and [Yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) to manage the various packages and their dependencies.

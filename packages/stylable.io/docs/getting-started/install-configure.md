@@ -22,17 +22,17 @@ The project includes several basic components and **Stylable** stylesheets which
 
 ## Install Stylable to work with an existing project
 
-To work with an existing `webpack` based project, you can install [Stylable](https://github.com/wix/stylable) and the [stylable-webpack-plugin](https://github.com/wix/stylable-webpack-plugin) packages from our GitHub repositories. 
+To work with an existing `webpack` based project, you can install [Stylable](https://github.com/wix/stylable) and the [@stylable/webpack-plugin](https://github.com/wix/stylable/tree/master/packages/webpack-plugin) packages from our GitHub repositories. 
 
-Install **Stylable** and the **stylable-webpack-plugin** as a dependency in your local project.
+Install **Stylable** and the **@stylable/webpack-plugin** as a dependency in your local project.
 
 Using npm:
 ```bash
-npm install stylable stylable-webpack-plugin --save-dev
+npm install stylable @stylable/webpack-plugin --save-dev
 ```
 Using Yarn:
 ```bash
-yarn add stylable stylable-webpack-plugin --dev
+yarn add stylable @stylable/webpack-plugin --dev
 ```
 
 ## Write in Stylable
@@ -48,7 +48,7 @@ Currently we support Webpack as our build system. To author a component library,
 Add **Stylable** to your Webpack configuration as follows: 
 
 ```js
-const StylableWebpackPlugin = require('stylable-webpack-plugin');
+const StylableWebpackPlugin = require('@stylable/webpack-plugin');
 ...
 {
     module: {
@@ -72,7 +72,7 @@ const StylableWebpackPlugin = require('stylable-webpack-plugin');
 }
 ```
 
-For more information on configuring the stylable-webpack-plugin, see the   [readme file](https://github.com/wix/stylable/tree/master/packages/webpack-plugin).
+For more information on configuring the @stylable/webpack-plugin, see the [readme file](https://github.com/wix/stylable/tree/master/packages/webpack-plugin).
 
 ## Types
 

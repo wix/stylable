@@ -6,7 +6,7 @@ import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-
 
 const {
     getCSSComponentLogicModule
-} = require('stylable-webpack-plugin/src/stylable-module-helpers');
+} = require('@stylable/webpack-plugin/src/stylable-module-helpers');
 
 export interface MetadataOptions {
     name: string;

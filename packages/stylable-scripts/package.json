@@ -16,7 +16,7 @@
     "object-assign": "4.1.1",
     "react-dev-utils": "^5.0.1",
     "@stylable/core": "^0.1.0",
-    "stylable-webpack-plugin": "^1.1.7",
+    "@stylable/webpack-plugin": "^0.1.0",
     "ts-loader": "4.4.1",
     "tslib": "^1.9.3",
     "typescript": "~2.9.2",

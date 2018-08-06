@@ -17,7 +17,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/packages/stylable-webpack-plugin/test/**/**.spec.js"
+                "${workspaceFolder}/packages/webpack-plugin/test/**/**.spec.js"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         },{
@@ -25,7 +25,7 @@
             "request": "launch",
             "name": "Cli Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-            "cwd": "${workspaceFolder}/packages/stylable-cli",
+            "cwd": "${workspaceFolder}/packages/cli",
             "args": [
                 "-r",
                 "typescript-support",
@@ -34,7 +34,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/packages/stylable-cli/test/**/**.spec.ts"
+                "${workspaceFolder}/packages/cli/test/**/**.spec.ts"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         },{

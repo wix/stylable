@@ -20,7 +20,7 @@ There are currently two options for installing and working with **Stylable**:
 
 * To begin writing your own project, you can [create a **Stylable** app](./getting-started/install-configure.md) from our boilerplate. 
 
-* To work with an existing project, you can install [stylable](https://github.com/wix/stylable) and the [stylable-webpack-plugin](https://github.com/wix/stylable-webpack-plugin) packages from GitHub. 
+* To work with an existing project, you can install [stylable](https://github.com/wix/stylable) and the [@stylable/webpack-plugin](https://github.com/wix/stylable/tree/master/packages/webpack-plugin) packages from GitHub. 
 
  While **Stylable** can work with any component framework, we offer a [React component integration](./getting-started/react-integration.md) that works with both installation options. If you're a Vue.js fan, here's an example of [Vue and Stylable](https://github.com/wix-playground/stylable-vue-example) working together.
 

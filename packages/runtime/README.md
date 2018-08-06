@@ -4,7 +4,7 @@
 
 `@stylable/runtime` provides the utility that is used to create the stylesheet functions that apply `classNames` and `states` to the DOM. It also exposes an optional DOM renderer that is responsible for loading CSS in its correct order.
 
-End-users will usually not add this package directly as a dependency themselves, and would instead receive it as a dependency of their chosen integration (e.g. `stylable-webpack-plugin`).
+End-users will usually not add this package directly as a dependency themselves, and would instead receive it as a dependency of their chosen integration (e.g. `@stylable/webpack-plugin`).
 
 ## Usage
 `@stylable/runtime` exposes two methods, `Stylesheet` and `Renderer`.

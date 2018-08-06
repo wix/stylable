@@ -3,7 +3,7 @@ import { generateModuleSource } from '@stylable/node';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { FileSystem, findFiles } from './find-files';
 
-// const StylableWebpackPlugin = require('stylable-webpack-plugin');
+// const StylableWebpackPlugin = require('@stylable/webpack-plugin');
 // const dt = require('dependency-tree');
 // const webpack = require('webpack');
 
@@ -140,8 +140,8 @@ function buildSingleFile(
 // function testBuild(filePath: string, fullSrcDir: string, fs: any) {
 //     debugger;
 //     const x = dt({
-//         filename: 'C:\\projects\\stylable\\packages\\stylable-cli\\test\\fixtures\\deps\\comp.js',
-//         directory: 'C:\\projects\\stylable\\packages\\stylable-cli\\test\\fixtures',
+//         filename: 'C:\\projects\\stylable\\packages\\cli\\test\\fixtures\\deps\\comp.js',
+//         directory: 'C:\\projects\\stylable\\packages\\cli\\test\\fixtures',
 //         // requireConfig: 'path/to/requirejs/config', // optional
 //         // webpackConfig: 'path/to/webpack/config', // optional
 //         // nodeModulesConfig: {

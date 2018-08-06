@@ -9,7 +9,7 @@ import { compileAsEntry, exec } from './compile-as-entry';
 
 const {
     getCSSComponentLogicModule
-} = require('stylable-webpack-plugin/src/stylable-module-helpers');
+} = require('@stylable/webpack-plugin/src/stylable-module-helpers');
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;

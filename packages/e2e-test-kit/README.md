@@ -9,7 +9,7 @@ This package is currently set to `private` and used only within the **Stylable**
 
 ## Usage
 
-You can find a set of example configurations setups [here](./packages/stylable-webpack-plugin/test/e2e).
+You can find a set of example configurations setups [here](./packages/webpack-plugin/test/e2e).
 
 ## License
 
