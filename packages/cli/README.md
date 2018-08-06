@@ -20,7 +20,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |rootDir|root directory of project|`cwd`|
 |srcDir|source directory relative to root|`./`|
 |outDir|target directory relative to root|`./`|
-|indexFile|filename of the generated index|`index.st.css`|
+|indexFile|filename of the generated index|`false`|
 |ext|extension of stylable css files|`.st.css`|
 |log|verbose log|`false`|
 |diagnostics|verbose diagnostics|`false`|
