@@ -35,14 +35,14 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:-------:|-----------|
 |[core](./packages/stylable)|`@stylable/core`|[![npm version](https://img.shields.io/npm/v/@stylable/core.svg)](https://www.npmjs.com/package/@stylable/core)|Core CSS preprocessor|
-|[runtime](./packages/@stylable/core)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
+|[runtime](./packages/core)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
 
 ### Tooling & Utilities
 
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:------------:|-----------|
 |[e2e-test-kit](./packages/e2e-test-kit)|`@stylable/e2e-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)|`webpack` project runner used for `E2E` testing |
-|[cli](./packages/stylable-cli)|`@stylable/cli`|[![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)|Used for managing Stylable stylesheets in a project|
+|[cli](./packages/cli)|`@stylable/cli`|[![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)|Used for managing Stylable stylesheets in a project|
 |[stylable-scripts](./packages/stylable-scripts)|`@stylable/stylable-scripts`|[![npm version](https://img.shields.io/npm/v/@stylable/stylable-scripts.svg)](https://www.npmjs.com/package/@stylable/stylable-scripts)|`create-react-app` boilerplate generator scripts|
 |[stylable.io](./packages/stylable.io)|unpublished to `npm`|-|source for [stylable.io](http://stylable.io)|
 
@@ -50,10 +50,10 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:------------:|-----------|
-|[jest](./packages/stylable-jest)|`@stylable/jest`|[![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)|Jest Stylable processor plugin |
-|[node](./packages/stylable-node)|`@stylable/node`|[![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)|`require` hook and Node module factory |
-|[webpack-extensions](./packages/stylable-webpack-extensions)|`@stylable/webpack-extension`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extension.svg)](https://www.npmjs.com/package/@stylable/webpack-extension)|Experimental features for `webpack` integration|
-|[webpack-plugin](./packages/stylable-webpack-plugin)|`@stylable/webpack-plugin`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)|`webpack` (`v4.x`) integration plugin|
+|[jest](./packages/jest)|`@stylable/jest`|[![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)|Jest Stylable processor plugin |
+|[node](./packages/node)|`@stylable/node`|[![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)|`require` hook and Node module factory |
+|[webpack-extensions](./packages/webpack-extensions)|`@stylable/webpack-extension`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extension.svg)](https://www.npmjs.com/package/@stylable/webpack-extension)|Experimental features for `webpack` integration|
+|[webpack-plugin](./packages/webpack-plugin)|`@stylable/webpack-plugin`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)|`webpack` (`v4.x`) integration plugin|
 
 ### External Packages
 |Package Name|Description|
