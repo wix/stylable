@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@stylable/core": "^0.1.0",
-    "stylable-runtime": "^1.0.7"
+    "@stylable/runtime": "^0.1.0"
   },
   "files": [
     "dist"

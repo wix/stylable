@@ -72,7 +72,7 @@ const StylableWebpackPlugin = require('stylable-webpack-plugin');
 }
 ```
 
-For more information on configuring the stylable-webpack-plugin, see the   [readme file](https://github.com/wix/stylable-webpack-plugin).
+For more information on configuring the stylable-webpack-plugin, see the   [readme file](https://github.com/wix/stylable/tree/master/packages/webpack-plugin).
 
 ## Types
 
@@ -80,7 +80,7 @@ TypeScript requires to be made aware of Stylable in order to provide typings and
 
 ```js
 declare module '*.st.css' {
-    const stylesheet: import('stylable-runtime').RuntimeStylesheet;
+    const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
     export default stylesheet;
 }
 ```
@@ -121,5 +121,3 @@ declare module '*.st.css' {
     export default stylesheet;
 }
 ```
-
-> Note: you must define `stylable-runtime` as a dependency.

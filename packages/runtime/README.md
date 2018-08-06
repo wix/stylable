@@ -19,8 +19,8 @@ style(className: string, states?: StateMap, props: InheritedAttributes)
 |Argument|Type|Description|Required|
 |---------|----|-----------|:------:|
 |className|string|`className` to be namespaced|true|
-|states|[StateMap](https://github.com/wix/stylable/blob/master/packages/stylable-runtime/src/types.ts#L3)|object containing states and their values|false|
-|inheritedAttributes|[InheritedAttributes](https://github.com/wix/stylable/blob/master/packages/stylable-runtime/src/types.ts#L12)|`props` passed to the root node from the parent component (automatically passing through `className` and `data-*` attributes) |false|
+|states|[StateMap](https://github.com/wix/stylable/blob/master/packages/runtime/src/types.ts#L3)|object containing states and their values|false|
+|inheritedAttributes|[InheritedAttributes](https://github.com/wix/stylable/blob/master/packages/runtime/src/types.ts#L12)|`props` passed to the root node from the parent component (automatically passing through `className` and `data-*` attributes) |false|
 
 ```tsx
 import style from './local.st.css';

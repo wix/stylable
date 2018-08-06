@@ -4,7 +4,7 @@ import { memoryFS } from './mem-fs';
 const webpack = require('webpack');
 const _eval = require('node-eval');
 
-const runtimeDir = path.dirname(require.resolve('stylable-runtime/cjs'));
+const runtimeDir = path.dirname(require.resolve('@stylable/runtime/cjs'));
 const content = readdirSync(runtimeDir).map(f => {
     const fullpath = path.join(runtimeDir, f);
     return {

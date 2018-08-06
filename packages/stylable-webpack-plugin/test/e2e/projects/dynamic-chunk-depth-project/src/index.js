@@ -1,5 +1,5 @@
-import { $ } from "stylable-runtime/cjs/css-runtime-renderer";
-import { create } from "stylable-runtime/cjs/css-runtime-stylesheet";
+import { $ } from "@stylable/runtime/cjs/css-runtime-renderer";
+import { create } from "@stylable/runtime/cjs/css-runtime-stylesheet";
 
 const Lib = {
     renderer: $,

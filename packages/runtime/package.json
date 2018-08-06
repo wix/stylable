@@ -1,6 +1,6 @@
 {
-  "name": "stylable-runtime",
-  "version": "1.0.7",
+  "name": "@stylable/runtime",
+  "version": "0.1.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -21,6 +21,9 @@
   ],
   "engines": {
     "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
