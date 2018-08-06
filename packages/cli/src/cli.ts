@@ -18,7 +18,7 @@ const argv = require('yargs')
 
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
-    .default('indexFile', 'index.st.css')
+    .default('indexFile', false)
 
     .option('ext')
     .describe('ext', 'extension of stylable css files')
