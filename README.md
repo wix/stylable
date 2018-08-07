@@ -52,7 +52,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |------------|--------------|:------------:|-----------|
 |[jest](./packages/jest)|`@stylable/jest`|[![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)|Jest Stylable processor plugin |
 |[node](./packages/node)|`@stylable/node`|[![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)|`require` hook and Node module factory |
-|[webpack-extensions](./packages/webpack-extensions)|`@stylable/webpack-extension`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extension.svg)](https://www.npmjs.com/package/@stylable/webpack-extension)|Experimental features for `webpack` integration|
+|[webpack-extensions](./packages/webpack-extensions)|`@stylable/webpack-extensions`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)|Experimental features for `webpack` integration|
 |[webpack-plugin](./packages/webpack-plugin)|`@stylable/webpack-plugin`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)|`webpack` (`v4.x`) integration plugin|
 
 ### External Packages
