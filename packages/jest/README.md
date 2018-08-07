@@ -5,7 +5,7 @@
 `@stylable/jest` is a simple integration that allows testing your **Stylable**  React components using [Jest](https://jestjs.io/). 
 
 ## Installation
-This package is currently a work-in-progress and is set to `private`. Once it matures, it will be published externally to NPM.
+This package is still a work-in-progress within the **Stylable** mono-repo. Once it matures, further details will be added here.
 
 ## Usage
 

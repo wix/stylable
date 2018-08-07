@@ -5,7 +5,7 @@
 `@stylable/e2e-test-kit` serves as a collection of tools to help test **Stylable** components and applications. It offers various capabilities to bundle, run and test your project in memory, or in the browser.
 
 ## Installation
-This package is currently set to `private` and used only within the **Stylable** mono-repo. Once it matures, it will be published externally to NPM.
+This package is still a work-in-progress within the **Stylable** mono-repo. Once it matures, further details will be added here.
 
 ## Usage
 

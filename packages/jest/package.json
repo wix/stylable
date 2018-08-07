@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
-  "private": true,
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
