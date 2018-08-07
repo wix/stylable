@@ -143,7 +143,7 @@
 <p>To begin writing your own project, you can create a <strong>Stylable</strong> app from our boilerplate. It is based on <a href="https://github.com/facebookincubator/create-react-app">create-react-app</a>. To create the project, follow these instructions:</p>
 
 <p>Using npm:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npx create-react-app --scripts-version stylable-scripts <span class="o">[</span>APP NAME]
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npx create-react-app --scripts-version @stylable/react-scripts <span class="o">[</span>APP NAME]
 </code></pre>
 </div>
 
@@ -153,16 +153,16 @@
 
 <h2 id="install-stylable-to-work-with-an-existing-project">Install Stylable to work with an existing project</h2>
 
-<p>To work with an existing <code class="highlighter-rouge">webpack</code> based project, you can install <a href="https://github.com/wix/stylable">Stylable</a> and the <a href="https://github.com/wix/stylable-webpack-plugin">stylable-webpack-plugin</a> packages from our GitHub repositories.</p>
+<p>To work with an existing <code class="highlighter-rouge">webpack</code> based project, you can install <a href="https://github.com/wix/stylable">Stylable</a> and the <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">@stylable/webpack-plugin</a> packages from our GitHub repositories.</p>
 
-<p>Install <strong>Stylable</strong> and the <strong>stylable-webpack-plugin</strong> as a dependency in your local project.</p>
+<p>Install <strong>Stylable</strong> and the <strong>@stylable/webpack-plugin</strong> as a dependency in your local project.</p>
 
 <p>Using npm:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install stylable stylable-webpack-plugin --save-dev
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>npm install stylable @stylable/webpack-plugin --save-dev
 </code></pre>
 </div>
 <p>Using Yarn:</p>
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>yarn add stylable stylable-webpack-plugin --dev
+<div class="language-bash highlighter-rouge"><pre class="highlight"><code>yarn add stylable @stylable/webpack-plugin --dev
 </code></pre>
 </div>
 
@@ -178,7 +178,7 @@
 
 <p>Add <strong>Stylable</strong> to your Webpack configuration as follows:</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kr">const</span> <span class="nx">StylableWebpackPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'stylable-webpack-plugin'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kr">const</span> <span class="nx">StylableWebpackPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'@stylable/webpack-plugin'</span><span class="p">);</span>
 <span class="p">...</span>
 <span class="p">{</span>
     <span class="nl">module</span><span class="p">:</span> <span class="p">{</span>
@@ -203,14 +203,14 @@
 </code></pre>
 </div>
 
-<p>For more information on configuring the stylable-webpack-plugin, see the   <a href="https://github.com/wix/stylable-webpack-plugin">readme file</a>.</p>
+<p>For more information on configuring the @stylable/webpack-plugin, see the <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">readme file</a>.</p>
 
 <h2 id="types">Types</h2>
 
 <p>TypeScript requires to be made aware of Stylable in order to provide typings and module resolution for <code class="highlighter-rouge">*.st.css</code> files. To do this, create a <code class="highlighter-rouge">globals.d.ts</code> file in your <code class="highlighter-rouge">./src</code> directory and add the following declaration.</p>
 
 <div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">declare</span> <span class="nx">module</span> <span class="s1">'*.st.css'</span> <span class="p">{</span>
-    <span class="kr">const</span> <span class="nx">stylesheet</span><span class="err">:</span> <span class="kr">import</span><span class="p">(</span><span class="s1">'stylable-runtime'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">stylesheet</span><span class="err">:</span> <span class="kr">import</span><span class="p">(</span><span class="s1">'@stylable/runtime'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
     <span class="kr">export</span> <span class="k">default</span> <span class="nx">stylesheet</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
@@ -252,10 +252,6 @@
 <span class="p">}</span>
 </code></pre>
 </div>
-
-<blockquote>
-  <p>Note: you must define <code class="highlighter-rouge">stylable-runtime</code> as a dependency.</p>
-</blockquote>
 
 </section>
 
