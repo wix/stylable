@@ -269,7 +269,7 @@ export function createWarningRule(
     scopedExtendingNode: string,
     extendingFile: string) {
     // tslint:disable-next-line:max-line-length
-    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'"`;
+    const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
         selector: `.${extendingNode}:not(.${extendedNode})::before`,
         nodes: [
