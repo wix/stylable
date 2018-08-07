@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-plugin",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
@@ -11,14 +11,14 @@
     "webpack": "^4.6.0"
   },
   "dependencies": {
+    "@stylable/runtime": "^0.1.5",
     "css-selector-tokenizer": "^0.7.0",
     "find-config": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",
-    "@stylable/runtime": "^0.1.0",
     "webpack-sources": "^1.1.0"
   },
   "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.0.7"
+    "@stylable/e2e-test-kit": "^1.0.12"
   },
   "files": [
     "src"
