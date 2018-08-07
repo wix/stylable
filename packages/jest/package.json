@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
   "scripts": {

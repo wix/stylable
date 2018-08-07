@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
   "bin": {

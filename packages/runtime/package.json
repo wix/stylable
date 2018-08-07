@@ -1,6 +1,6 @@
 {
   "name": "@stylable/runtime",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
