@@ -45,6 +45,9 @@
   "engines": {
     "node": ">=8"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
   "license": "MIT"
