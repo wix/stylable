@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
   "bin": {
@@ -13,8 +13,8 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "@stylable/core": "^0.1.5",
-    "@stylable/node": "^0.1.5",
+    "@stylable/core": "^0.1.7",
+    "@stylable/node": "^0.1.7",
     "deindent": "^0.1.0",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.1",

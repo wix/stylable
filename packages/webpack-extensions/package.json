@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.5",
+    "@stylable/core": "^0.1.7",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
