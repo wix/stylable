@@ -66,7 +66,7 @@ module.exports = {
 // @remove-on-eject-begin
 const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
-// config before eject: we're in ./node_modules/stylable-scripts/config/
+// config before eject: we're in ./node_modules/@stylable/react-scripts/config/
 module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
@@ -86,7 +86,7 @@ module.exports = {
   ownNodeModules: resolveOwn('node_modules'), // This is empty on npm 3
 };
 
-// detect if template should be used, ie. when cwd is stylable-scripts itself
+// detect if template should be used, ie. when cwd is @stylable/react-scripts itself
 const useTemplate =
   appDirectory === fs.realpathSync(path.join(__dirname, '..'));
 

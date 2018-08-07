@@ -104,7 +104,7 @@ inquirer
     const userTsConfig = path.join(appPath, 'tsconfig.json');
     if (fs.existsSync(userTsConfig)) {
       const configContent = fs.readFileSync(userTsConfig, 'utf8');
-      fs.writeFileSync(userTsConfig, configContent.replace('./node_modules/stylable-scripts/tsconfig.json', './tsconfig.base.json'));
+      fs.writeFileSync(userTsConfig, configContent.replace('./node_modules/@stylable/react-scripts/tsconfig.json', './tsconfig.base.json'));
     }
     
     console.log();
@@ -145,7 +145,7 @@ inquirer
     console.log(cyan('Updating the dependencies'));
     const ownPackageName = ownPackage.name;
     if (appPackage.devDependencies) {
-      // We used to put stylable-scripts in devDependencies
+      // We used to put @stylable/react-scripts in devDependencies
       if (appPackage.devDependencies[ownPackageName]) {
         console.log(`  Removing ${cyan(ownPackageName)} from devDependencies`);
         delete appPackage.devDependencies[ownPackageName];
@@ -206,7 +206,7 @@ inquirer
     // "Don't destroy what isn't ours"
     if (ownPath.indexOf(appPath) === 0) {
       try {
-        // remove stylable-scripts and stylable-scripts binaries from app node_modules
+        // remove @stylable/react-scripts and stylable-scripts binaries from app node_modules
         Object.keys(ownPackage.bin).forEach(binKey => {
           fs.removeSync(path.join(appPath, 'node_modules', '.bin', binKey));
         });

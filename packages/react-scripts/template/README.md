@@ -1,6 +1,6 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and [stylable-scripts](https://github.com/wix/stylable-scripts).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and [@stylable/react-scripts](https://github.com/wix/stylable/tree/master/packages/react-scripts).
 
-`stylable-scripts` has a similar, yet bit different, configuration
+`@stylable/react-scripts` has a similar, yet bit different, configuration
 and capabilities:
 - Uses TypeScript instead of Babel
 - Uses Stylable instead of css-loader

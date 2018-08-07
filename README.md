@@ -17,13 +17,13 @@ Learn more in our [Documentation Center](https://stylable.io/).
 
 There are two options for installing Stylable:
 
-* Create a new project based on Stylable [stylable-scripts](./packages/stylable-scripts), using [create-react-app](https://github.com/facebook/create-react-app)
+* Create a new project based on Stylable [react-scripts](./packages/react-scripts), using [create-react-app](https://github.com/facebook/create-react-app)
 * Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Demos
-* [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using [stylable-scripts](./packages/stylable-scripts)
+* [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using [@stylable/react-scripts](./packages/react-scripts)
 * [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
 * [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
@@ -34,8 +34,8 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:-------:|-----------|
-|[core](./packages/stylable)|`@stylable/core`|[![npm version](https://img.shields.io/npm/v/@stylable/core.svg)](https://www.npmjs.com/package/@stylable/core)|Core CSS preprocessor|
-|[runtime](./packages/core)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
+|[core](./packages/core)|`@stylable/core`|[![npm version](https://img.shields.io/npm/v/@stylable/core.svg)](https://www.npmjs.com/package/@stylable/core)|Core CSS preprocessor|
+|[runtime](./packages/runtime)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
 
 ### Tooling & Utilities
 
@@ -43,7 +43,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |------------|--------------|:------------:|-----------|
 |[e2e-test-kit](./packages/e2e-test-kit)|`@stylable/e2e-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)|`webpack` project runner used for `E2E` testing |
 |[cli](./packages/cli)|`@stylable/cli`|[![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)|Used for managing Stylable stylesheets in a project|
-|[stylable-scripts](./packages/stylable-scripts)|`@stylable/stylable-scripts`|[![npm version](https://img.shields.io/npm/v/@stylable/stylable-scripts.svg)](https://www.npmjs.com/package/@stylable/stylable-scripts)|`create-react-app` boilerplate generator scripts|
+|[react-scripts](./packages/react-scripts)|`@stylable/react-scripts`|[![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)|`create-react-app` boilerplate generator scripts|
 |[stylable.io](./packages/stylable.io)|unpublished to `npm`|-|source for [stylable.io](http://stylable.io)|
 
 ### Integrations

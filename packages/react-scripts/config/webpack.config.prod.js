@@ -95,9 +95,9 @@ module.exports = {
     extensions: ['.web.ts', '.ts', 'web.tsx', '.tsx', '.web.js', '.js', '.json'],
     alias: {
       // @remove-on-eject-begin
-      // Resolve TypeScript runtime relative to stylable-scripts.
+      // Resolve TypeScript runtime relative to @stylable/react-scripts.
       // It usually still works on npm 3 without this but it would be
-      // unfortunate to rely on, as stylable-scripts could be symlinked,
+      // unfortunate to rely on, as @stylable/react-scripts could be symlinked,
       // and thus tslib might not be resolvable from the source.
       'tslib': path.dirname(require.resolve('tslib/package.json')),
       // @remove-on-eject-end

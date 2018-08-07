@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/stylable-scripts/tsconfig.json",  
+  "extends": "./node_modules/@stylable/react-scripts/tsconfig.json",  
   "compilerOptions": {
     /* Basic Options */
     "outDir": "./build/dist"                  /* Redirect output structure to the directory. */
