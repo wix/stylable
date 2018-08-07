@@ -1,0 +1,28 @@
+{
+  "name": "@stylable/node",
+  "version": "0.0.2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "lint": "tslint --project .",
+    "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
+  },
+  "dependencies": {
+    "@stylable/core": "^0.1.0",
+    "@stylable/runtime": "^0.1.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

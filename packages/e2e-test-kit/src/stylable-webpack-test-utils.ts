@@ -1,5 +1,5 @@
-import { RuntimeRenderer } from 'stylable-runtime/cjs/css-runtime-renderer';
-import * as stylesheet from 'stylable-runtime/cjs/css-runtime-stylesheet';
+import { RuntimeRenderer } from '@stylable/runtime/cjs/css-runtime-renderer';
+import * as stylesheet from '@stylable/runtime/cjs/css-runtime-stylesheet';
 
 export interface MinimalModule {
   type: string;

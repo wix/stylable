@@ -1,6 +1,6 @@
 {
-  "name": "@stylable/e2e-test-kit",
-  "version": "1.0.7",
+  "name": "@stylable/webpack-extensions",
+  "version": "0.0.4",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -15,16 +15,10 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "express": "^4.16.3",
     "lodash.clonedeep": "^4.5.0",
-    "memory-fs": "^0.4.1",
-    "node-eval": "^2.0.0",
-    "puppeteer": "^1.5.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "rimraf": "^2.6.2",
     "@stylable/core": "^0.1.0",
-    "@stylable/runtime": "^0.1.0",
     "webpack": "^4.12.1",
     "webpack-sources": "^1.1.0"
   },
@@ -41,7 +35,10 @@
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
   "license": "BSD-3-Clause",
-  "devDependencies": {
-    "@types/memory-fs": "^0.3.1"
-  }
+  "keywords": [
+    "css",
+    "stylable",
+    "webpack",
+    "webpack-plugin"
+  ]
 }

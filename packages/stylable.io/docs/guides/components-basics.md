@@ -9,7 +9,7 @@ This guide walks you through the basics of how to style and work with components
 You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extention `.st.css`.
 
 > **Note**:  
-> This guide shows the `JSX` side of our [stylable-webpack-plugin](https://github.com/wix/stylable/tree/master/packages/stylable-webpack-plugin){:target="_blank"} integration with React. 
+> This guide shows the `JSX` side of our [@stylable/webpack-plugin](https://github.com/wix/stylable/tree/master/packages/webpack-plugin){:target="_blank"} integration with React. 
 
 **Stylable** styles are similar to a type-system. Once you have declared that a CSS class is of the type `Button` for example, **Stylable** knows its internal structure and can match its internal parts and states.
 

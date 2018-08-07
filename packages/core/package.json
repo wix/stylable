@@ -1,0 +1,52 @@
+{
+  "name": "@stylable/core",
+  "version": "0.1.0",
+  "description": "CSS for Components",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "webpack-dev-server --hot --inline",
+    "clean": "rimraf ./dist",
+    "test": "yarn test:node",
+    "test:node": "mocha \"./tests/**/*.spec.ts\" --watch-extensions ts --require typescript-support",
+    "lint": "tslint --project ./tsconfig.json",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "clean-css": "^4.1.11",
+    "css-selector-tokenizer": "^0.7.0",
+    "deindent": "^0.1.0",
+    "enhanced-resolve": "^4.0.0",
+    "is-vendor-prefixed": "^1.0.0",
+    "lodash.clonedeep": "^4.5.0",
+    "murmurhash": "^0.0.2",
+    "postcss": "^6.0.23",
+    "postcss-js": "^1.0.1",
+    "postcss-nested": "^3.0.0",
+    "postcss-safe-parser": "^3.0.1",
+    "postcss-selector-matches": "^3.0.1",
+    "postcss-value-parser": "^3.3.0",
+    "url-regex": "^4.1.1"
+  },
+  "devDependencies": {
+    "@stylable/runtime": "^0.1.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "runtime.js",
+    "runtime.d.ts",
+    "test-utils.js",
+    "test-utils.d.ts"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

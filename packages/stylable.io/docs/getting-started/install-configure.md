@@ -13,7 +13,7 @@ To begin writing your own project, you can create a **Stylable** app from our bo
 
 Using npm:
 ```bash
-npx create-react-app --scripts-version stylable-scripts [APP NAME]
+npx create-react-app --scripts-version @stylable/react-scripts [APP NAME]
 ```
 
 For the `[APP NAME]` placeholder above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run `yarn`, followed by `yarn start` to view the project in a browser, or `yarn build` to build your project's target code.
@@ -22,17 +22,17 @@ The project includes several basic components and **Stylable** stylesheets which
 
 ## Install Stylable to work with an existing project
 
-To work with an existing `webpack` based project, you can install [Stylable](https://github.com/wix/stylable) and the [stylable-webpack-plugin](https://github.com/wix/stylable-webpack-plugin) packages from our GitHub repositories. 
+To work with an existing `webpack` based project, you can install [Stylable](https://github.com/wix/stylable) and the [@stylable/webpack-plugin](https://github.com/wix/stylable/tree/master/packages/webpack-plugin) packages from our GitHub repositories. 
 
-Install **Stylable** and the **stylable-webpack-plugin** as a dependency in your local project.
+Install **Stylable** and the **@stylable/webpack-plugin** as a dependency in your local project.
 
 Using npm:
 ```bash
-npm install stylable stylable-webpack-plugin --save-dev
+npm install stylable @stylable/webpack-plugin --save-dev
 ```
 Using Yarn:
 ```bash
-yarn add stylable stylable-webpack-plugin --dev
+yarn add stylable @stylable/webpack-plugin --dev
 ```
 
 ## Write in Stylable
@@ -48,7 +48,7 @@ Currently we support Webpack as our build system. To author a component library,
 Add **Stylable** to your Webpack configuration as follows: 
 
 ```js
-const StylableWebpackPlugin = require('stylable-webpack-plugin');
+const StylableWebpackPlugin = require('@stylable/webpack-plugin');
 ...
 {
     module: {
@@ -72,7 +72,7 @@ const StylableWebpackPlugin = require('stylable-webpack-plugin');
 }
 ```
 
-For more information on configuring the stylable-webpack-plugin, see the   [readme file](https://github.com/wix/stylable-webpack-plugin).
+For more information on configuring the @stylable/webpack-plugin, see the [readme file](https://github.com/wix/stylable/tree/master/packages/webpack-plugin).
 
 ## Types
 
@@ -80,7 +80,7 @@ TypeScript requires to be made aware of Stylable in order to provide typings and
 
 ```js
 declare module '*.st.css' {
-    const stylesheet: import('stylable-runtime').RuntimeStylesheet;
+    const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
     export default stylesheet;
 }
 ```
@@ -121,5 +121,3 @@ declare module '*.st.css' {
     export default stylesheet;
 }
 ```
-
-> Note: you must define `stylable-runtime` as a dependency.

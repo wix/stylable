@@ -1,0 +1,32 @@
+{
+  "name": "@stylable/webpack-plugin",
+  "version": "0.1.0",
+  "description": "Webpack (4.x) plugin for Stylable modules",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha --timeout 10000 -r typescript-support \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx"
+  },
+  "peerDependencies": {
+    "@stylable/core": "^0.1.0",
+    "webpack": "^4.6.0"
+  },
+  "dependencies": {
+    "css-selector-tokenizer": "^0.7.0",
+    "find-config": "^1.0.0",
+    "lodash.clonedeep": "^4.5.0",
+    "@stylable/runtime": "^0.1.0",
+    "webpack-sources": "^1.1.0"
+  },
+  "devDependencies": {
+    "@stylable/e2e-test-kit": "^1.0.7"
+  },
+  "files": [
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "git@github.com:wix/stylable.git",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

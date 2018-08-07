@@ -1,15 +1,15 @@
 # @stylable/e2e-test-kit
 
-<!-- [![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit) -->
+[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)
 
 `@stylable/e2e-test-kit` serves as a collection of tools to help test **Stylable** components and applications. It offers various capabilities to bundle, run and test your project in memory, or in the browser.
 
 ## Installation
-This package is currently set to `private` and used only within the **Stylable** mono-repo. Once it matures, it will be published externally to NPM.
+This package is still a work-in-progress within the **Stylable** mono-repo. Once it matures, further details will be added here.
 
 ## Usage
 
-You can find a set of example configurations setups [here](./packages/stylable-webpack-plugin/test/e2e).
+You can find a set of example configurations setups [here](./packages/webpack-plugin/test/e2e).
 
 ## License
 
