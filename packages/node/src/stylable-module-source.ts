@@ -1,8 +1,9 @@
 import { StylableResults } from '@stylable/core';
 
-const runtimePath = require.resolve('@stylable/runtime/cjs/css-runtime-stylesheet');
-
-export function generateModuleSource(stylableResult: StylableResults, injectCSS: boolean): string {
+export function generateModuleSource(
+    stylableResult: StylableResults,
+    injectCSS: boolean,
+    runtimePath: string = '@stylable/runtime'): string {
     const { exports, meta } = stylableResult;
     const localsExports = JSON.stringify(exports);
     const root = JSON.stringify(meta.root);
