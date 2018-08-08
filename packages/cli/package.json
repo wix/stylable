@@ -14,13 +14,10 @@
   },
   "dependencies": {
     "@stylable/core": "^0.1.7",
-    "@stylable/node": "^0.1.7",
-    "deindent": "^0.1.0",
-    "lodash.clonedeep": "^4.5.0",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "webpack": "^4.12.1",
-    "webpack-sources": "^1.1.0"
+    "@stylable/node": "^0.1.7"
+  },
+  "devDependencies": {
+    "@stylable/e2e-test-kit": "^1.0.14"
   },
   "files": [
     "dist"

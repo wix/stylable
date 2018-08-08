@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { CSSObject } from './types';
 const postcssJS = require('postcss-js');
 const postcssNested = require('postcss-nested');

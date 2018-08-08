@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isAbsolute, resolve } from './path';
@@ -22,7 +23,6 @@ import { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
-const cloneDeep = require('lodash.clonedeep');
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -70,7 +70,7 @@ export function scopeSelector(
     const nodes: any[] = [];
     targetSelectorAst.nodes.forEach(targetSelector => {
         scopingSelectorAst.nodes.forEach(scopingSelector => {
-            const outputSelector = cloneDeep(targetSelector);
+            const outputSelector: any = cloneDeep(targetSelector);
 
             outputSelector.before = scopingSelector.before || outputSelector.before;
 
@@ -97,7 +97,7 @@ export function scopeSelector(
                 !startsWithScoping &&
                 !globalSelector
             ) {
-                outputSelector.nodes.unshift(...cloneDeep(scopingSelector.nodes, true), {
+                outputSelector.nodes.unshift(...cloneDeep(scopingSelector.nodes), {
                     type: 'spacing',
                     value: ' '
                 });
@@ -105,7 +105,7 @@ export function scopeSelector(
 
             traverseNode(outputSelector, (node, i, nodes) => {
                 if (node.type === 'invalid' && node.value === '&') {
-                    nodes.splice(i, 1, ...cloneDeep(scopingSelector.nodes, true));
+                    nodes.splice(i, 1, ...cloneDeep(scopingSelector.nodes));
                 }
             });
 

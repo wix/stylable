@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import * as postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
@@ -34,7 +35,6 @@ import { Pojo } from './types';
 import { deprecated } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
-const cloneDeep = require('lodash.clonedeep');
 const valueParser = require('postcss-value-parser');
 
 export interface ResolvedElement {

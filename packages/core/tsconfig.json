@@ -22,7 +22,6 @@
       "node",
       "mocha"
     ],
-    "noUnusedLocals": false,
-    "esModuleInterop": false, 
+    "noUnusedLocals": false
   }
 }
