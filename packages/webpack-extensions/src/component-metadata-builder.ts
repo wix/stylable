@@ -153,7 +153,8 @@ export class ComponentMetadataBuilder {
 }
 
 function normPath(resource: string, context = '') {
-    return resource.replace(context, '').replace(/\\/g, '/');
+    const v = resource.replace(context, '').replace(/\\/g, '/');
+    return v.charAt(0) === '/' ? v : `/${v}`;
 }
 
 function cloneObject<T = object>(obj: T) {
