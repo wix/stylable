@@ -12,9 +12,7 @@
   },
   "dependencies": {
     "@stylable/runtime": "^0.1.7",
-    "css-selector-tokenizer": "^0.7.0",
     "find-config": "^1.0.0",
-    "lodash.clonedeep": "^4.5.0",
     "webpack-sources": "^1.1.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import * as  postcss from 'postcss';
+import postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
