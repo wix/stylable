@@ -442,7 +442,7 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
             });
 
-            it('should return warning for non import rules inside imports', () => {
+            it('should return a warning for non import rules inside imports', () => {
                 const config = {
                     entry: '/main.st.css',
                     files: {
@@ -468,7 +468,7 @@ describe('diagnostics: warnings and errors', () => {
                     [{ message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'), file: '/main.st.css' }]);
             });
 
-            it('should return warning for import with missing "from"', () => {
+            it('should return a warning for import with missing "-st-from" declaration', () => {
                 expectWarnings(`
                     |:import{
                         -st-default:Comp;
@@ -477,13 +477,24 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
 
-            it('should return warning for import with empty "from"', () => {
+            it('should return a warning for import with empty "-st-from" declaration', () => {
                 expectWarnings(`
                     :import{
                         |-st-from: "   ";|
                         -st-default: Comp;
                     }
                 `, [{ severity: 'error', message: processorWarnings.EMPTY_IMPORT_FROM(), file: 'main.st.css' }]
+                );
+            });
+
+            it('should return a warning for multiple "-st-from" declarations', () => {
+                expectWarnings(`
+                    |:import{
+                        -st-from: "a";
+                        -st-from: "b";
+                        -st-default: Comp;
+                    }|
+                `, [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
 

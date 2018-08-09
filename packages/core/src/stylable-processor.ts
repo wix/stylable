@@ -52,7 +52,8 @@ export const processorWarnings = {
     FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
     INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
     EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; },
-    EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; }
+    EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; },
+    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -391,7 +392,7 @@ export class StylableProcessor {
     }
 
     protected handleImport(rule: postcss.Rule) {
-
+        let fromExists = false;
         const importObj: Imported = {
             defaultExport: '', from: '', fromRelative: '', named: {}, rule
         };
@@ -403,6 +404,11 @@ export class StylableProcessor {
                     if (!importPath.trim()) {
                         this.diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
                     }
+
+                    if (fromExists) {
+                        this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
+                    }
+
                     if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
                         importObj.fromRelative = importPath;
                         importObj.from = importPath;
@@ -410,6 +416,7 @@ export class StylableProcessor {
                         importObj.fromRelative = importPath;
                         importObj.from = path.resolve(path.dirname(this.meta.source), importPath);
                     }
+                    fromExists = true;
                     break;
                 case valueMapping.default:
                     importObj.defaultExport = decl.value;
