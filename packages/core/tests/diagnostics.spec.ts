@@ -470,13 +470,21 @@ describe('diagnostics: warnings and errors', () => {
 
             it('should return warning for import with missing "from"', () => {
                 expectWarnings(`
-
                     |:import{
                         -st-default:Comp;
-                    }
+                    }|
                 `, [{ message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(), file: 'main.st.css' }]
                 );
+            });
 
+            it('should return warning for import with empty "from"', () => {
+                expectWarnings(`
+                    :import{
+                        |-st-from: "   ";|
+                        -st-default: Comp;
+                    }
+                `, [{ severity: 'error', message: processorWarnings.EMPTY_IMPORT_FROM(), file: 'main.st.css' }]
+                );
             });
 
         });

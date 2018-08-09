@@ -51,7 +51,8 @@ export const processorWarnings = {
     OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; },
     FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
     INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
-    EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; }
+    EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; },
+    EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; }
 };
 /* tslint:enable:max-line-length */
 
@@ -399,6 +400,9 @@ export class StylableProcessor {
             switch (decl.prop) {
                 case valueMapping.from:
                     const importPath = stripQuotation(decl.value);
+                    if (!importPath.trim()) {
+                        this.diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
+                    }
                     if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
                         importObj.fromRelative = importPath;
                         importObj.from = importPath;
