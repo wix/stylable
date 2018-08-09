@@ -41,7 +41,6 @@ export const processorWarnings = {
     ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
     DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
     ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside :import block`; },
-    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
     STATE_DEFINITION_IN_ELEMENT() { return 'cannot define pseudo states inside element selectors'; },
     STATE_DEFINITION_IN_COMPLEX() { return 'cannot define pseudo states inside complex selectors'; },
     REDECLARE_SYMBOL(name: string) { return `redeclare symbol "${name}"`; },
@@ -49,7 +48,10 @@ export const processorWarnings = {
     CANNOT_EXTEND_IN_COMPLEX() { return `cannot define "${valueMapping.extends}" inside a complex selector`; },
     UNKNOWN_MIXIN(name: string) { return `unknown mixin: "${name}"`; },
     OVERRIDE_MIXIN() { return `override mixin on same rule`; },
-    OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; }
+    OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; },
+    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
+    INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
+    EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; }
 };
 /* tslint:enable:max-line-length */
 
@@ -108,8 +110,16 @@ export class StylableProcessor {
             switch (atRule.name) {
                 case 'namespace':
                     const match = atRule.params.match(/["'](.*?)['"]/);
-                    match ? (namespace = match[1]) : this.diagnostics.error(atRule, 'invalid namespace');
-                    toRemove.push(atRule);
+                    if (match) {
+                        if (!!match[1].trim()) {
+                            namespace = match[1];
+                        } else {
+                            this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
+                        }
+                        toRemove.push(atRule);
+                    } else {
+                        this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
+                    }
                     break;
                 case 'keyframes':
                     this.meta.keyframes.push(atRule);
@@ -430,7 +440,6 @@ export class StylableProcessor {
         rule.remove();
 
         return importObj;
-
     }
 }
 

@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import { resolve } from '../src/path';
-import { ImportSymbol, processNamespace } from '../src/stylable-processor';
+import { ImportSymbol, processNamespace, processorWarnings } from '../src/stylable-processor';
 import { flatMatch } from './matchers/flat-match';
 import { processSource } from './utils/generate-test-util';
 
@@ -27,7 +27,20 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: 'invalid namespace'
+            message: processorWarnings.INVALID_NAMESPACE_DEF()
+        });
+    });
+
+    it('warn on empty-ish namespace', () => {
+
+        const { diagnostics } = processSource(
+            `@namespace '   ';`,
+            { from: '/path/to/source' }
+        );
+
+        expect(diagnostics.reports[0]).to.include({
+            type: 'error',
+            message: processorWarnings.EMPTY_NAMESPACE_DEF()
         });
     });
 
