@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { valueMapping } from '../src';
+import { functionWarnings, valueMapping } from '../src';
 import {
     nativeFunctionsDic,
     nativePseudoElements,
@@ -1067,7 +1067,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
 
                 expectWarningsFromTransform(config,
-                    [{ message: `cannot find formatter: ${key}`, file: '/main.st.css' }]);
+                    [{ message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' }]);
             });
 
             it('should warn a formatter throws an error', () => {

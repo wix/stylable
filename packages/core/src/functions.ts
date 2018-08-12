@@ -13,14 +13,14 @@ export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Pojo<JSResolve | CSSResolve | ValueFormatter | null>;
 
 /* tslint:disable:max-line-length */
-const errors = {
+export const functionWarnings = {
     FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) => `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
     CYCLIC_VALUE: (cyclicChain: string[]) => `Cyclic value definition detected: "${cyclicChain.map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s).join('\n')}"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`,
     CANNOT_USE_JS_AS_VALUE: (varName: string) => `JavaScript import "${varName}" cannot be used as a variable`,
     CANNOT_FIND_IMPORTED_VAR: (varName: string, path: string) => `cannot find export '${varName}' in '${path}'`,
     MULTI_ARGS_IN_VALUE: (args: string) => `value function accepts only a single argument: "value(${args})"`,
-    UNKNOWN_FORMATTER: (name: string) => `cannot find formatter: ${name}`,
+    UNKNOWN_FORMATTER: (name: string) => `cannot find native function or custom formatter called ${name}`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
 };
 /* tslint:enable:max-line-length */
@@ -76,7 +76,7 @@ export function evalDeclarationValue(
                             const cyclicChain = passedThrough.map(variable => variable || '');
                             cyclicChain.push(refUniqID);
                             if (diagnostics) {
-                                diagnostics.warn(node, errors.CYCLIC_VALUE(cyclicChain), {
+                                diagnostics.warn(node, functionWarnings.CYCLIC_VALUE(cyclicChain), {
                                     word: refUniqID
                                 });
                             }
@@ -134,14 +134,14 @@ export function evalDeclarationValue(
                                         if (diagnostics) {
                                             diagnostics.warn(
                                                 node,
-                                                errors.CANNOT_USE_AS_VALUE(errorKind, varName),
+                                                functionWarnings.CANNOT_USE_AS_VALUE(errorKind, varName),
                                                 { word: varName }
                                             );
                                         }
                                     }
                                 } else if (resolvedVar._kind === 'js' && diagnostics) {
                                     // ToDo: provide actual exported id (default/named as x)
-                                    diagnostics.warn(node, errors.CANNOT_USE_JS_AS_VALUE(varName), {
+                                    diagnostics.warn(node, functionWarnings.CANNOT_USE_JS_AS_VALUE(varName), {
                                         word: varName
                                     });
                                 }
@@ -154,7 +154,7 @@ export function evalDeclarationValue(
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.error(
                                         namedDecl,
-                                        errors.CANNOT_FIND_IMPORTED_VAR(
+                                        functionWarnings.CANNOT_FIND_IMPORTED_VAR(
                                             varName,
                                             varSymbol.import.fromRelative
                                         ),
@@ -163,11 +163,11 @@ export function evalDeclarationValue(
                                 }
                             }
                         } else if (diagnostics) {
-                            diagnostics.warn(node, errors.UNKNOWN_VAR(varName), { word: varName });
+                            diagnostics.warn(node, functionWarnings.UNKNOWN_VAR(varName), { word: varName });
                         }
                     } else if (diagnostics) {
                         const argsAsString = args.filter((arg: string) => arg !== ', ').join(', ');
-                        diagnostics.warn(node, errors.MULTI_ARGS_IN_VALUE(argsAsString), {
+                        diagnostics.warn(node, functionWarnings.MULTI_ARGS_IN_VALUE(argsAsString), {
                             word: argsAsString
                         });
                     }
@@ -200,7 +200,7 @@ export function evalDeclarationValue(
                             if (diagnostics) {
                                 diagnostics.warn(
                                     node,
-                                    errors.FAIL_TO_EXECUTE_FORMATTER(
+                                    functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
                                         parsedNode.resolvedValue,
                                         error.message
                                     ),
@@ -211,7 +211,7 @@ export function evalDeclarationValue(
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     } else if (diagnostics) {
-                        diagnostics.warn(node, errors.UNKNOWN_FORMATTER(value), { word: value });
+                        diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), { word: value });
                     }
                 }
                 break;
