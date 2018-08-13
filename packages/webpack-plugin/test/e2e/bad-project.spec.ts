@@ -21,7 +21,7 @@ describe(`(${project})`, () => {
 
     it('reports warnings', async () => {
         const warnings = projectRunner.getBuildWarningMessages();
-        const expected = [/Could not resolve 'unknown'/, /unknown var "xxx"/];
+        const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
         expect(warnings.length).to.equal(2);
         warnings.forEach((warning: string, i: number) => {
             expect(warning).to.match(expected[i]);

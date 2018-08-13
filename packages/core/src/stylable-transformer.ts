@@ -96,6 +96,19 @@ export interface AdditionalSelector {
     customElementChunk: string;
 }
 
+/* tslint:disable:max-line-length */
+export const transformerWarnings = {
+    SYMBOL_IN_USE(name: string) { return `symbol '${name}' is already in use`; },
+    UNKNOWN_PSEUDO_ELEMENT(name: string) { return `unknown pseudo element "${name}"`; },
+    IMPORT_ISNT_EXTENDABLE() { return 'import is not extendable'; },
+    CANNOT_RESOLVE_SYMBOL(value: string) { return `could not resolve "${value}"`; },
+    CANNOT_EXTEND_JS() { return 'JS import is not extendable'; },
+    IMPORT_FROM_UNKNOWN(from: string) { return `imported file "${from}" not found`; },
+    KEYFRAME_NAME_RESERVED(name: string) { return `keyframes "${name}" is reserved`; },
+    UNKNOWN_ALIAS_IMPORTED() { return 'Trying to import unknown alias'; }
+};
+/* tslint:enable:max-line-length */
+
 export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
     public diagnostics: Diagnostics;
@@ -189,7 +202,7 @@ export class StylableTransformer {
             if (metaExports[varSymbol.name]) {
                 this.diagnostics.warn(
                     varSymbol.node,
-                    `symbol '${varSymbol.name}' is already in use`,
+                    transformerWarnings.SYMBOL_IN_USE(varSymbol.name),
                     { word: varSymbol.name }
                 );
             } else {
@@ -206,7 +219,10 @@ export class StylableTransformer {
     public exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach(name => {
             if (metaExports[name] === keyframeMapping[name].value) {
-                this.diagnostics.warn(keyframeMapping[name].node, `symbol ${name} is already in use`, { word: name });
+                this.diagnostics.warn(
+                    keyframeMapping[name].node,
+                    transformerWarnings.SYMBOL_IN_USE(name),
+                    { word: name });
             } else {
                 metaExports[name] = keyframeMapping[name].value;
             }
@@ -250,7 +266,10 @@ export class StylableTransformer {
                         } else {
                             const found = findRule(meta.ast, '.' + classSymbol.name);
                             if (!!found) {
-                                this.diagnostics.error(found, 'import is not extendable', { word: found.value });
+                                this.diagnostics.error(
+                                    found,
+                                    transformerWarnings.IMPORT_ISNT_EXTENDABLE(),
+                                    { word: found.value });
                             }
                         }
                     } else {
@@ -262,11 +281,14 @@ export class StylableTransformer {
                                 );
                                 this.diagnostics.error(
                                     importNode,
-                                    `Could not resolve '${found.value}'`,
+                                    transformerWarnings.CANNOT_RESOLVE_SYMBOL(found.value),
                                     { word: found.value }
                                 );
                             } else {
-                                this.diagnostics.error(found, 'JS import is not extendable', { word: found.value });
+                                this.diagnostics.error(
+                                    found,
+                                    transformerWarnings.CANNOT_EXTEND_JS(),
+                                    { word: found.value });
                             }
                         } else {
                             const importNode = findDeclaration(
@@ -274,7 +296,7 @@ export class StylableTransformer {
                             );
                             this.diagnostics.error(
                                 importNode,
-                                `Imported file '${extend.import.from}' not found`,
+                                transformerWarnings.IMPORT_FROM_UNKNOWN(extend.import.from),
                                 { word: importNode.value }
                             );
                         }
@@ -307,7 +329,7 @@ export class StylableTransformer {
         ast.walkAtRules(/keyframes$/, atRule => {
             const name = atRule.params;
             if (!!~reservedKeyFrames.indexOf(name)) {
-                this.diagnostics.error(atRule, `keyframes ${name} is reserved`, { word: name });
+                this.diagnostics.error(atRule, transformerWarnings.KEYFRAME_NAME_RESERVED(name), { word: name });
             }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
@@ -517,7 +539,7 @@ export class StylableTransformer {
             } else {
                 this.diagnostics.error(
                     symbol.alias.import.rule,
-                    'Trying to import unknown alias',
+                    transformerWarnings.UNKNOWN_ALIAS_IMPORTED(),
                     { word: symbol.alias.name }
                 );
             }
@@ -673,7 +695,7 @@ export class StylableTransformer {
         } else if (rule) {
             if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
                 this.diagnostics.warn(rule,
-                    `unknown pseudo element "${name}"`,
+                    transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name),
                     { word: name });
             }
         }

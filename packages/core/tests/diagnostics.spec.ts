@@ -7,6 +7,7 @@ import {
 } from '../src/native-reserved-lists';
 import { resolve } from '../src/path';
 import { processorWarnings } from '../src/stylable-processor';
+import { transformerWarnings } from '../src/stylable-transformer';
 import { valueParserWarnings } from '../src/stylable-value-parsers';
 import {
     expectWarnings,
@@ -166,7 +167,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]
+                        [{ message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'), file: '/main.css' }]
                     );
                 });
                 it('should not warn on vendor prefixed pseudo element', () => {
@@ -581,7 +582,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'import is not extendable', file: '/main.st.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' }]);
             });
             it('should warn if extends by js import', () => {
                 const config = {
@@ -603,7 +605,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'JS import is not extendable', file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' }]);
             });
             it('should warn if named extends does not exist', () => {
                 const config = {
@@ -629,7 +632,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `Could not resolve 'special'`, file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.CANNOT_RESOLVE_SYMBOL('special'), file: '/main.css' }]);
             });
             it('should warn if file not found', () => {
                 const config = {
@@ -649,7 +653,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: `Imported file '${resolve('/file.css')}' not found`, file: '/main.css' }]);
+                    [{ message: transformerWarnings.IMPORT_FROM_UNKNOWN(resolve('/file.css')), file: '/main.css' }]);
             });
         });
 
@@ -721,7 +725,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `Could not resolve 'momo'`, file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.CANNOT_RESOLVE_SYMBOL('momo'), file: '/main.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
@@ -908,7 +913,8 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: 'symbol name is already in use', file: '/main.css' }]);
+            expectWarningsFromTransform(config,
+                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.css' }]);
         });
 
         it('should not allow @keyframe of reserved words', () => {
@@ -925,7 +931,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' }]);
             });
         });
 
@@ -952,7 +959,8 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }]);
+            expectWarningsFromTransform(config,
+                [{ message: transformerWarnings.UNKNOWN_ALIAS_IMPORTED(), file: '/main.st.css' }]);
         });
     });
 
