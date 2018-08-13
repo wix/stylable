@@ -9,6 +9,15 @@ import { createSubsetAst, findDeclaration, isValidDeclaration, mergeRules } from
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 
+/* tslint:disable:max-line-length */
+export const mixinWarnings = {
+    FAILED_TO_APPLY_MIXIN(error: string) { return `could not apply mixin: ${error}`; },
+    JS_MIXIN_NOT_A_FUNC() { return `js mixin must be a function`; },
+    CIRCULAR_MIXIN(path: string[]) { return `circular mixin found: ${path.join(' --> ')}`; },
+    IMPORTED_MIXIN_UNKNOWN() { return `import mixin does not exist`; }
+};
+/* tslint:enable:max-line-length */
+
 export function appendMixins(
     transformer: StylableTransformer,
     rule: SRule,
@@ -45,11 +54,14 @@ export function appendMixin(
                     try {
                         handleJSMixin(transformer, mix, resolvedMixin.symbol, meta, rule, variableOverride);
                     } catch (e) {
-                        transformer.diagnostics.error(rule, 'could not apply mixin: ' + e, { word: mix.mixin.type });
+                        transformer.diagnostics.error(
+                            rule,
+                            mixinWarnings.FAILED_TO_APPLY_MIXIN(e),
+                            { word: mix.mixin.type });
                         return;
                     }
                 } else {
-                    transformer.diagnostics.error(rule, 'js mixin must be a function', { word: mix.mixin.type });
+                    transformer.diagnostics.error(rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), { word: mix.mixin.type });
                 }
             } else {
                 handleImportedCSSMixin(
@@ -76,8 +88,7 @@ function checkRecursive(
 
     const isRecursive = path.indexOf(mix.ref.name + ' from ' + meta.source) !== -1;
     if (isRecursive) {
-        transformer.diagnostics.warn(rule, `circular mixin found: ${path.join(' --> ')}`, { word: mix.ref.name });
-        // TODO: add warn
+        transformer.diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), { word: mix.ref.name });
         return true;
     }
     return false;
@@ -119,6 +130,7 @@ function createMixinRootFromCSSResolve(
     meta: StylableMeta,
     resolvedClass: CSSResolve,
     path: string[],
+    decl: postcss.Declaration,
     variableOverride?: Pojo<string>) {
 
     const isRootMixin = resolvedClass.symbol.name === resolvedClass.meta.root;
@@ -130,7 +142,15 @@ function createMixinRootFromCSSResolve(
     );
 
     const namedArgs = mix.mixin.options as Pojo<string>;
-    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer, meta, variableOverride, path);
+    const resolvedArgs = resolveArgumentsValue(
+        namedArgs,
+        transformer,
+        meta,
+        transformer.diagnostics,
+        decl,
+        variableOverride,
+        path
+    );
 
     const mixinMeta: StylableMeta = isRootMixin ? resolvedClass.meta : createInheritedMeta(resolvedClass);
 
@@ -159,12 +179,14 @@ function handleImportedCSSMixin(
     const roots = [];
 
     while (resolvedClass && resolvedClass.symbol && resolvedClass._kind === 'css') {
+        const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
         roots.push(createMixinRootFromCSSResolve(
             transformer,
             mix,
             meta,
             resolvedClass,
             path,
+            mixinDecl,
             variableOverride));
         if (
             (resolvedClass.symbol._kind === 'class' || resolvedClass.symbol._kind === 'element') &&
@@ -187,7 +209,7 @@ function handleImportedCSSMixin(
         );
         transformer.diagnostics.error(
             importNode,
-            'import mixin does not exist',
+            mixinWarnings.IMPORTED_MIXIN_UNKNOWN(),
             { word: importNode.value }
         );
     }
@@ -203,8 +225,18 @@ function handleLocalClassMixin(
 
     const isRootMixin = mix.ref.name === meta.root;
     const namedArgs = mix.mixin.options as Pojo<string>;
-    const resolvedArgs = resolveArgumentsValue(namedArgs, transformer, meta, variableOverride, path);
+    const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
+    const resolvedArgs = resolveArgumentsValue(namedArgs,
+        transformer,
+        meta,
+        transformer.diagnostics,
+        mixinDecl,
+        variableOverride,
+        path
+    );
+
     const mixinRoot = createSubsetAst<postcss.Root>(meta.ast, '.' + mix.ref.name, undefined, isRootMixin);
+
     transformer.transformAst(
         mixinRoot,
         isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
@@ -221,4 +253,10 @@ function createInheritedMeta(resolvedClass: CSSResolve) {
     mixinMeta.mappedSymbols = Object.create(resolvedClass.meta.mappedSymbols);
     mixinMeta.mappedSymbols[resolvedClass.meta.root] = resolvedClass.meta.mappedSymbols[resolvedClass.symbol.name];
     return mixinMeta;
+}
+
+function getMixinDeclaration(rule: postcss.Rule) {
+    return (rule.nodes && rule.nodes.find(node => {
+        return node.type === 'decl' && node.prop === valueMapping.mixin;
+    }) as postcss.Declaration);
 }

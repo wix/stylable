@@ -29,6 +29,8 @@ export function resolveArgumentsValue(
     options: Pojo<string>,
     transformer: StylableTransformer,
     meta: StylableMeta,
+    diagnostics: Diagnostics,
+    node: postcss.Node,
     variableOverride?: Pojo<string>,
     path?: string[]
 ) {
@@ -38,10 +40,10 @@ export function resolveArgumentsValue(
             transformer.resolver,
             options[k],
             meta,
-            postcss.decl(),
+            node,
             variableOverride,
             transformer.replaceValueHook,
-            undefined,
+            diagnostics,
             path
         );
     }

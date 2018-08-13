@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { functionWarnings, valueMapping } from '../src';
+import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
     nativeFunctionsDic,
     nativePseudoElements,
@@ -326,11 +326,11 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 const mainPath = resolve('/main.css');
-                const xPath = `y from ${mainPath} --> x from ${mainPath}`;
-                const yPath = `x from ${mainPath} --> y from ${mainPath}`;
+                const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
+                const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
                 expectWarningsFromTransform(config, [
-                    { message: `circular mixin found: ${xPath}`, file: '/main.css', skipLocationCheck: true },
-                    { message: `circular mixin found: ${yPath}`, file: '/main.css', skipLocationCheck: true }
+                    { message: mixinWarnings.CIRCULAR_MIXIN(xPath), file: '/main.css', skipLocationCheck: true },
+                    { message: mixinWarnings.CIRCULAR_MIXIN(yPath), file: '/main.css', skipLocationCheck: true }
                 ]);
             });
 
@@ -359,7 +359,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: 'could not apply mixin: bug in mixin', file: '/main.css' }]);
+                    [{ message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'), file: '/main.css' }]);
             });
 
             it('js mixin must be a function', () => {
@@ -384,7 +384,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }]);
+                // tslint:disable-next-line:max-line-length
+                expectWarningsFromTransform(config, [{ message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' }]);
             });
 
             it('should not add warning when mixin value is a string', () => {
@@ -409,6 +410,49 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config,
                     [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }]);
+            });
+
+            it('should warn about non-existing variables in mixin overrides', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            .mixed {}
+                            .container {
+                                |-st-mixin: mixed(arg value($missingVar$))|;
+                            }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
+            });
+
+            it('should warn about non-existing variables in a multi-argument mixin override', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :vars {
+                                color1: red;
+                                color2: green;
+                            }
+                            .mixed {
+                                color: value(color1);
+                                background: value(color2);
+                            }
+                            .container {
+                                |-st-mixin: mixed(color1 blue, color2 value($missingVar$))|;
+                            }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
             });
         });
 
