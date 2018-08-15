@@ -1,6 +1,6 @@
 import { create } from '@stylable/runtime';
 import { expect } from 'chai';
-import { StylableDOMUtil } from './stylable-dom-util';
+import { StylableDOMUtil } from '../src';
 
 describe('stylable-dom-utils', () => {
 

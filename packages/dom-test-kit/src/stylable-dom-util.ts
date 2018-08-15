@@ -1,5 +1,5 @@
+import { parseSelector, stringifySelector, traverseNode } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
-import { parseSelector, stringifySelector, traverseNode } from '../../src/selector-utils';
 
 export interface QueryElement {
     querySelector: typeof Element.prototype.querySelector;
