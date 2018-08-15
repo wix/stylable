@@ -18,7 +18,7 @@ Follow these instructions in order to run Stylable in development mode, this all
 Stylable's workflow contains two main parts that together perform the CSS transpilation.
 
 - `stylable-processor` - Parses each `stylesheet` separately into its own AST ([abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree), extracting the required data without any resolution of dependencies in other files.
-- `stylable-transformer` - Processes each stylesheeet using the previously created data including other file dependencies. Transforms our Stylable CSS into vanilla CSS.
+- `stylable-transformer` - Processes each stylesheet using the previously created data including other file dependencies. Transforms our Stylable CSS into vanilla CSS.
 
 ## License
 
