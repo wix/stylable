@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)
 
-`@stylable/cli` is a low-level utility used for working with **Stylable** projects directly.
+`@stylable/cli` is a low-level utility used for working with Stylable projects directly.
 
 - Build and transform stylesheets into JavaScript modules
 - Generate an entry index file to help consume a published project

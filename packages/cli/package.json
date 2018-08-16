@@ -1,6 +1,7 @@
 {
   "name": "@stylable/cli",
   "version": "1.0.7",
+  "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
   "bin": {
