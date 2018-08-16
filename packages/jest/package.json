@@ -1,6 +1,7 @@
 {
   "name": "@stylable/jest",
   "version": "0.1.7",
+  "description": "Test your Stylable React components using Jest",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
   "scripts": {

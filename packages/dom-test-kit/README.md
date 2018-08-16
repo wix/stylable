@@ -2,33 +2,49 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/dom-test-kit.svg)](https://www.npmjs.com/package/stylable/dom-test-kit)
 
-`@stylable/dom-test-kit` is at the center of how Stylable operates. It provides the basic capabilities required for Stylable to parse stylesheets and transform their output to valid plain CSS.
+`@stylable/dom-test-kit` is comprised of a single class named `StylableDOMUtil` which exposes several DOM related testing utilities.
 
-## How to use
+## Example
+```css
+/* style.st.css */
+.root {}
 
-The `@stylable/dom-test-kit` exposes a single class named `StylableDOMUtil`, and from that class, several testing utilities are available:
+.part {
+    -st-states: loading;
+}
+```
+```ts
+/* test.ts */
+import { StylableDOMUtil } from '@stylable/dom-test-kit';
+import style from './my-component.st.css';
 
-#### `select(selector?: string, element?: QueryElement): Element | null` -
-Select the first `element` in the DOM that matches the provided Stylable selector.
+const domUtil = new StylableDOMUtil(style);
+const partElement = domUtil.select(style.part);
 
-#### `selectAll(selector?: string, element?: QueryElement): Element[] | null` -
-Select all `elements` in the DOM that match the provided Stylable selector.
+domUtil.hasStyleState(partElement, 'loading');
+```
 
-#### `scopeSelector(selector?: string): string` -
+## What does it do?
+
+> Note: currently all of the provided utilities support only simplified Stylable selectors, consisting only of `class` and `pseudo-class` selectors.
+
+### `constructor(style: RuntimeStylesheet, root?: Element)`
+Initialize the `StylableDOMUtil` by providing a source stylesheet that would function as the base for all testing utilities. You may pass a DOM root element to serve as the default entry point for the `select` methods,
+
+### `select(selector?: string, element?: Element): Element | null`
+Select the first `element` in the DOM that matches the provided Stylable `selector`.
+
+### `selectAll(selector?: string, element?: Element): Element[] | null`
+Select all `elements` in the DOM that match the provided Stylable `selector`.
+
+### `scopeSelector(selector?: string): string`
 Transforms a Stylable `selector` to its target vanilla CSS.
 
-#### `hasStyleState(element: StateElement, stateName: string, param: StateValue = true): boolean` -
+### `hasStyleState(element: Element, stateName: string, param: StateValue = true): boolean`
 Check whether the provided `element` has the corresponding state set. This method can also receive a third optional param to validate the state active value.
 
-#### `getStyleState(element: StateElement, stateName: string): string | null` -
+### `getStyleState(element: Element, stateName: string): string | null`
 Get an `element` state value if exists, `null` if it does not.
-
-#### `getStateDataAttrKey(state: string, param: StateValue = true` -
-Transform a Stylable `state` to its target DOM attribute key.
-
-#### `getStateDataAttr(state: string, param: StateValue = true): string` -
-Transform a Stylable `state` to its target DOM attribute and value.
-
 
 ## License
 

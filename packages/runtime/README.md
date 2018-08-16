@@ -10,7 +10,7 @@ End-users will usually not add this package directly as a dependency themselves,
 `@stylable/runtime` exposes two methods, `Stylesheet` and `Renderer`.
 
 ### Stylesheet 
-The stylesheet function is returned when importing a **Stylable** stylesheet. It is used for creating the DOM-attributes required for CSS to be applied.
+The stylesheet function is returned when importing a Stylable stylesheet. It is used for creating the DOM-attributes required for CSS to be applied.
 
 ```ts
 style(className: string, states?: StateMap, props: InheritedAttributes)
