@@ -6,7 +6,7 @@
 
 ## Example
 ```css
-/* style.st.css */
+/* my-component.st.css */
 .root {}
 
 .part {
