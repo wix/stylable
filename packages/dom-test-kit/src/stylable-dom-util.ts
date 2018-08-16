@@ -1,22 +1,13 @@
 import { parseSelector, stringifySelector, traverseNode } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
-export interface StateElement {
-    getAttribute: typeof Element.prototype.getAttribute;
-}
-
-export interface QueryElement {
-    querySelector: typeof Element.prototype.querySelector;
-    querySelectorAll: typeof Element.prototype.querySelectorAll;
-}
-
 export class StylableDOMUtil {
-    constructor(private style: RuntimeStylesheet, private root?: QueryElement) { }
-    public select(selector?: string, element?: QueryElement): Element | null {
+    constructor(private style: RuntimeStylesheet, private root?: Element) { }
+    public select(selector?: string, element?: Element): Element | null {
         const el = (element || this.root);
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
     }
-    public selectAll(selector?: string, element?: QueryElement): Element[] | null {
+    public selectAll(selector?: string, element?: Element): Element[] | null {
         const el = (element || this.root);
         return el ? Array.prototype.slice.call(
             el.querySelectorAll(this.scopeSelector(selector))
@@ -43,13 +34,13 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
-    public hasStyleState(element: StateElement, stateName: string, param: StateValue = true): boolean {
+    public hasStyleState(element: Element, stateName: string, param: StateValue = true): boolean {
         const { stateKey, styleState } = this.getStateDataAttrKey(stateName, param);
         const actual = element.getAttribute(stateKey);
         return String(styleState[stateKey]) === actual;
     }
 
-    public getStyleState(element: StateElement, stateName: string): string | null {
+    public getStyleState(element: Element, stateName: string): string | null {
         const { stateKey } = this.getStateDataAttrKey(stateName);
         return element.getAttribute(stateKey);
     }

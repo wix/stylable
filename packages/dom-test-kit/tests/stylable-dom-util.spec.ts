@@ -45,7 +45,7 @@ describe('stylable-dom-utils', () => {
                 state = styleState;
                 return 'true';
             };
-            expect(util.hasStyleState({ getAttribute }, 'loading')).to.equal(true);
+            expect(util.hasStyleState(({ getAttribute } as Element), 'loading')).to.equal(true);
             expect(state).to.equal('data-ns-loading');
         });
 
@@ -55,7 +55,7 @@ describe('stylable-dom-utils', () => {
                 state = styleState;
                 return 'true';
             };
-            expect(util.getStyleState({ getAttribute }, 'loading')).to.equal('true');
+            expect(util.getStyleState(({ getAttribute } as Element), 'loading')).to.equal('true');
             expect(state).to.equal('data-ns-loading');
         });
     });
