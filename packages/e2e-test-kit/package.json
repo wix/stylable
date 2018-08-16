@@ -1,6 +1,7 @@
 {
   "name": "@stylable/e2e-test-kit",
   "version": "1.0.14",
+  "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -19,7 +20,7 @@
     "express": "^4.16.3",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
-    "puppeteer": "^1.6.2",
+    "puppeteer": "^1.7.0",
     "rimraf": "^2.6.2",
     "webpack": "^4.16.5"
   },

@@ -1,7 +1,7 @@
 {
   "name": "@stylable/react-scripts",
   "version": "0.1.7",
-  "description": "like react-scripts, but with stylable and typescript built-in",
+  "description": "Like react-scripts, but with stylable and typescript built-in",
   "bin": {
     "stylable-scripts": "./bin/stylable-scripts.js"
   },
