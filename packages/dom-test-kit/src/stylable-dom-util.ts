@@ -1,13 +1,19 @@
 import { parseSelector, stringifySelector, traverseNode } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
+export interface PartialElement {
+    querySelector: typeof Element.prototype.querySelector;
+    querySelectorAll: typeof Element.prototype.querySelectorAll;
+    getAttribute: typeof Element.prototype.getAttribute;
+}
+
 export class StylableDOMUtil {
     constructor(private style: RuntimeStylesheet, private root?: Element) { }
-    public select(selector?: string, element?: Element): Element | null {
+    public select(selector?: string, element?: PartialElement): Element | null {
         const el = (element || this.root);
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
     }
-    public selectAll(selector?: string, element?: Element): Element[] | null {
+    public selectAll(selector?: string, element?: PartialElement): Element[] | null {
         const el = (element || this.root);
         return el ? Array.prototype.slice.call(
             el.querySelectorAll(this.scopeSelector(selector))
@@ -18,7 +24,7 @@ export class StylableDOMUtil {
             return this.scopeSelector('.root');
         }
         const ast = parseSelector(selector);
-        traverseNode(ast, node => {
+        traverseNode(ast, (node: any) => {
             if (node.type === 'class') {
                 node.name = this.style[node.name] || node.name;
             } else if (node.type === 'pseudo-class') {
@@ -34,13 +40,13 @@ export class StylableDOMUtil {
         });
         return stringifySelector(ast);
     }
-    public hasStyleState(element: Element, stateName: string, param: StateValue = true): boolean {
+    public hasStyleState(element: PartialElement, stateName: string, param: StateValue = true): boolean {
         const { stateKey, styleState } = this.getStateDataAttrKey(stateName, param);
         const actual = element.getAttribute(stateKey);
         return String(styleState[stateKey]) === actual;
     }
 
-    public getStyleState(element: Element, stateName: string): string | null {
+    public getStyleState(element: PartialElement, stateName: string): string | null {
         const { stateKey } = this.getStateDataAttrKey(stateName);
         return element.getAttribute(stateKey);
     }
