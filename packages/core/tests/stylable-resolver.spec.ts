@@ -372,7 +372,7 @@ describe('stylable-resolver', () => {
         expect(res1!.symbol).to.eql(entryMeta.classes.a);
     });
 
-    it('should resolve 4rd party according to context', () => {
+    it('should resolve 4th party according to context', () => {
 
         const stylable = createStylableInstance({
             resolve: {
