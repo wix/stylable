@@ -269,7 +269,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         |-st-mixin: $myMixin$|;
                     }
-                `, [{ message: 'unknown mixin: "myMixin"', file: 'main.css' }]);
+                `, [{ message: processorWarnings.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]);
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
@@ -635,26 +635,6 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarningsFromTransform(config,
                     [{ message: transformerWarnings.CANNOT_RESOLVE_SYMBOL('special'), file: '/main.css' }]);
             });
-            it('should warn if file not found', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                |-st-from: $'./file.css'$|;
-                                -st-default: Special;
-                            }
-                            .myclass {
-                                -st-extends: Special
-                            }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: transformerWarnings.IMPORT_FROM_UNKNOWN(resolve('/file.css')), file: '/main.css' }]);
-            });
         });
 
         describe('override -st-* warnings', () => {
@@ -901,9 +881,9 @@ describe('diagnostics: warnings and errors', () => {
     describe('transforms', () => {
         it('should return warning if @keyframe symbol is used', () => {
             const config = {
-                entry: '/main.css',
+                entry: '/main.st.css',
                 files: {
-                    '/main.css': {
+                    '/main.st.css': {
                         content: `
                         .name {}
                         |@keyframes $name$| {
@@ -914,7 +894,7 @@ describe('diagnostics: warnings and errors', () => {
                 }
             };
             expectWarningsFromTransform(config,
-                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.css' }]);
+                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.st.css' }]);
         });
 
         it('should not allow @keyframe of reserved words', () => {
@@ -961,6 +941,45 @@ describe('diagnostics: warnings and errors', () => {
             };
             expectWarningsFromTransform(config,
                 [{ message: transformerWarnings.UNKNOWN_ALIAS_IMPORTED(), file: '/main.st.css' }]);
+        });
+
+        describe('imports', () => {
+            it('should error on unresolved file', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    |-st-from: "$./missing.st.css$";|
+                                }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.UNKNOWN_FILE('/missing.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved file from third party', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    |-st-from: "$missing-package/index.st.css$";|
+                                }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: transformerWarnings.UNKNOWN_FILE('missing-package/index.st.css'), file: '/main.st.css' }]);
+            });
         });
     });
 

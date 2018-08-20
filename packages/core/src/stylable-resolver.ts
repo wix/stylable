@@ -1,4 +1,5 @@
 import { FileProcessor } from './cached-process-file';
+import { Imported } from './stylable-meta';
 import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
@@ -16,41 +17,47 @@ export interface JSResolve {
 }
 
 export class StylableResolver {
+    // protected resolvedImports: WeakMap<StylableMeta, any> = new WeakMap();
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
     ) {}
-    public resolveImport(importSymbol: ImportSymbol) {
-        const { context } = importSymbol;
-        const { from } = importSymbol.import;
-
+    public resolveImported(imported: Imported, name: string) {
+        const { context, from } = imported;
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
             let meta;
             try {
                 meta = this.fileProcessor.process(from, false, context);
+                // this.resolvedImports.set(meta, )
             } catch (e) {
                 return null;
             }
 
-            if (importSymbol.type === 'default') {
+            if (!name) {
                 symbol = meta.mappedSymbols[meta.root];
             } else {
-                symbol = meta.mappedSymbols[importSymbol.name];
+                symbol = meta.mappedSymbols[name];
             }
 
             return { _kind: 'css', symbol, meta } as CSSResolve;
         } else {
             const _module = this.requireModule(from);
 
-            if (importSymbol.type === 'default') {
+            if (!name) {
                 symbol = _module.default || _module;
             } else {
-                symbol = _module[importSymbol.name];
+                symbol = _module[name];
             }
 
             return { _kind: 'js', symbol, meta: null } as JSResolve;
         }
+    }
+    public resolveImport(importSymbol: ImportSymbol) {
+        const name = importSymbol.type === 'named' ?
+            importSymbol.name :
+            '';
+        return this.resolveImported(importSymbol.import, name);
     }
     public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {

@@ -394,7 +394,7 @@ export class StylableProcessor {
     protected handleImport(rule: postcss.Rule) {
         let fromExists = false;
         const importObj: Imported = {
-            defaultExport: '', from: '', fromRelative: '', named: {}, rule
+            defaultExport: '', from: '', fromRelative: '', named: {}, rule, context: path.dirname(this.meta.source)
         };
 
         rule.walkDecls(decl => {

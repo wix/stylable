@@ -103,9 +103,9 @@ export const transformerWarnings = {
     IMPORT_ISNT_EXTENDABLE() { return 'import is not extendable'; },
     CANNOT_RESOLVE_SYMBOL(value: string) { return `could not resolve "${value}"`; },
     CANNOT_EXTEND_JS() { return 'JS import is not extendable'; },
-    IMPORT_FROM_UNKNOWN(from: string) { return `imported file "${from}" not found`; },
     KEYFRAME_NAME_RESERVED(name: string) { return `keyframes "${name}" is reserved`; },
-    UNKNOWN_ALIAS_IMPORTED() { return 'Trying to import unknown alias'; }
+    UNKNOWN_ALIAS_IMPORTED() { return 'trying to import unknown alias'; },
+    UNKNOWN_FILE(path: string) { return `cannot resolve imported file: "${path}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -164,6 +164,22 @@ export class StylableTransformer {
                 path.slice()
             );
         });
+
+        for (const importObj of meta.imports) {
+            const resolvedImport = this.resolver.resolveImported(importObj, '');
+
+            if (!resolvedImport) {
+                const fromDecl = importObj.rule.nodes &&
+                    importObj.rule.nodes.find(decl => decl.type === 'decl' && decl.prop === valueMapping.from);
+
+                if (fromDecl) {
+                    this.diagnostics.warn(
+                        fromDecl,
+                        transformerWarnings.UNKNOWN_FILE(importObj.from),
+                        { word: importObj.fromRelative });
+                }
+            }
+        }
 
         ast.walkDecls(decl => {
             getDeclStylable(decl as SDecl).sourceValue = decl.value;
@@ -291,14 +307,14 @@ export class StylableTransformer {
                                     { word: found.value });
                             }
                         } else {
-                            const importNode = findDeclaration(
-                                extend.import, (node: any) => node.prop === valueMapping.from
-                            );
-                            this.diagnostics.error(
-                                importNode,
-                                transformerWarnings.IMPORT_FROM_UNKNOWN(extend.import.from),
-                                { word: importNode.value }
-                            );
+                            // const importNode = findDeclaration(
+                            //     extend.import, (node: any) => node.prop === valueMapping.from
+                            // );
+                            // this.diagnostics.error(
+                            //     importNode,
+                            //     transformerWarnings.UNKNOWN_EXTENDED_SYMBOL(extend.import.),
+                            //     { word: importNode.value }
+                            // );
                         }
                     }
                 }
