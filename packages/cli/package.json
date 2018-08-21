@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@stylable/core": "^0.1.7",
-    "@stylable/node": "^0.1.7"
+    "@stylable/node": "^0.1.8"
   },
   "devDependencies": {
     "@stylable/e2e-test-kit": "^1.0.14"
