@@ -14,7 +14,11 @@ const {
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
     render: (componentModule: any, component: any) => string | false;
-    // TODO: Comment this
+    /**
+     * Logic that decides which module to import the stylable component from. For
+     * example, if you have more than one file that imports a certain style, you may
+     * want to build a specific one
+     */
     moduleFilterLogic?: (stylableModule: any) => any;
 }
 
