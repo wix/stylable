@@ -86,7 +86,9 @@ function getCSSComponentLogicModule(stylableModule) {
                 _module.resource.slice(0, -path.extname(_module.resource).length) === name
             );
         })
-        .map(({ module }) => module);
+        .map(({ module }) => {
+            return module;
+        });
     const set = new Set(views);
     if (set.size > 1) {
         throw new Error(
