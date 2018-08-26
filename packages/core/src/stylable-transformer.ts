@@ -105,7 +105,8 @@ export const transformerWarnings = {
     CANNOT_EXTEND_JS() { return 'JS import is not extendable'; },
     KEYFRAME_NAME_RESERVED(name: string) { return `keyframes "${name}" is reserved`; },
     UNKNOWN_ALIAS_IMPORTED() { return 'trying to import unknown alias'; },
-    UNKNOWN_FILE(path: string) { return `cannot resolve imported file: "${path}"`; }
+    UNKNOWN_IMPORTED_FILE(path: string) { return `cannot resolve imported file: "${path}"`; },
+    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) { return `cannot resolve imported symbol "${name}" in stylesheet "${path}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -169,14 +170,31 @@ export class StylableTransformer {
             const resolvedImport = this.resolver.resolveImported(importObj, '');
 
             if (!resolvedImport) {
+                // warn about unknown imported files
                 const fromDecl = importObj.rule.nodes &&
                     importObj.rule.nodes.find(decl => decl.type === 'decl' && decl.prop === valueMapping.from);
 
                 if (fromDecl) {
                     this.diagnostics.warn(
                         fromDecl,
-                        transformerWarnings.UNKNOWN_FILE(importObj.from),
+                        transformerWarnings.UNKNOWN_IMPORTED_FILE(importObj.fromRelative),
                         { word: importObj.fromRelative });
+                }
+
+            } else if (resolvedImport._kind === 'css') {
+                // warn about unknown named imported symbols
+                for (const name in importObj.named) {
+                    const origName = importObj.named[name];
+                    const resolvedSymbol = this.resolver.resolveImported(importObj, origName);
+                    const namedDecl = importObj.rule.nodes &&
+                        importObj.rule.nodes.find(decl => decl.type === 'decl' && decl.prop === valueMapping.named);
+
+                    if (!resolvedSymbol!.symbol && namedDecl) {
+                        this.diagnostics.warn(
+                            namedDecl,
+                            transformerWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.fromRelative),
+                            { word: origName });
+                    }
                 }
             }
         }

@@ -959,7 +959,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: transformerWarnings.UNKNOWN_FILE('/missing.st.css'), file: '/main.st.css' }]);
+                    [{ message: transformerWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'), file: '/main.st.css' }]);
             });
 
             it('should error on unresolved file from third party', () => {
@@ -978,7 +978,30 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config,
                     // tslint:disable-next-line:max-line-length
-                    [{ message: transformerWarnings.UNKNOWN_FILE('missing-package/index.st.css'), file: '/main.st.css' }]);
+                    [{ message: transformerWarnings.UNKNOWN_IMPORTED_FILE('missing-package/index.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved named symbol', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    -st-from: "./imported.st.css";
+                                    |-st-named: $Missing$;|
+                                }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: transformerWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
             });
         });
     });
