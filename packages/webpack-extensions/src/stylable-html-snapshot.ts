@@ -14,18 +14,19 @@ const {
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
     render: (componentModule: any, component: any) => string | false;
-    moduleFilterLogic?: (stylableModule: any) => webpack.Module[];
+    // TODO: Comment this
+    moduleFilterLogic?: (stylableModule: any) => any;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private options: Partial<HTMLSnapshotPluginOptions>;
+    private moduleFilterLogic: (stylableModule: any) => any;
 
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.options = options;
+        this.moduleFilterLogic = options.moduleFilterLogic ? options.moduleFilterLogic : getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', compilation => {
@@ -38,8 +39,7 @@ export class HTMLSnapshotPlugin {
         });
     }
     public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = this.options.moduleFilterLogic
-        ? this.options.moduleFilterLogic(module) : getCSSComponentLogicModule(module);
+        const component = this.moduleFilterLogic(module);
 
         if (!component) {
             return;
