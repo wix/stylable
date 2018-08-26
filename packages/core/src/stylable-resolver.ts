@@ -17,7 +17,6 @@ export interface JSResolve {
 }
 
 export class StylableResolver {
-    // protected resolvedImports: WeakMap<StylableMeta, any> = new WeakMap();
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
         protected requireModule: (modulePath: string) => any
@@ -29,26 +28,17 @@ export class StylableResolver {
             let meta;
             try {
                 meta = this.fileProcessor.process(from, false, context);
-                // this.resolvedImports.set(meta, )
+                symbol = !name ? meta.mappedSymbols[meta.root] : meta.mappedSymbols[name];
             } catch (e) {
                 return null;
-            }
-
-            if (!name) {
-                symbol = meta.mappedSymbols[meta.root];
-            } else {
-                symbol = meta.mappedSymbols[name];
             }
 
             return { _kind: 'css', symbol, meta } as CSSResolve;
         } else {
             const _module = this.requireModule(from);
-
-            if (!name) {
-                symbol = _module.default || _module;
-            } else {
-                symbol = _module[name];
-            }
+            symbol = !name ?
+                _module.default || _module :
+                _module[name];
 
             return { _kind: 'js', symbol, meta: null } as JSResolve;
         }

@@ -18,7 +18,7 @@ export const functionWarnings = {
     CYCLIC_VALUE: (cyclicChain: string[]) => `Cyclic value definition detected: "${cyclicChain.map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s).join('\n')}"`,
     CANNOT_USE_AS_VALUE: (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`,
     CANNOT_USE_JS_AS_VALUE: (varName: string) => `JavaScript import "${varName}" cannot be used as a variable`,
-    CANNOT_FIND_IMPORTED_VAR: (varName: string, path: string) => `cannot find export '${varName}' in '${path}'`,
+    CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
     MULTI_ARGS_IN_VALUE: (args: string) => `value function accepts only a single argument: "value(${args})"`,
     UNKNOWN_FORMATTER: (name: string) => `cannot find native function or custom formatter called ${name}`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
@@ -155,11 +155,8 @@ export function evalDeclarationValue(
                                 if (namedDecl && diagnostics) {
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.error(
-                                        namedDecl,
-                                        functionWarnings.CANNOT_FIND_IMPORTED_VAR(
-                                            varName,
-                                            varSymbol.import.fromRelative
-                                        ),
+                                        node,
+                                        functionWarnings.CANNOT_FIND_IMPORTED_VAR(varName),
                                         { word: varName }
                                     );
                                 }

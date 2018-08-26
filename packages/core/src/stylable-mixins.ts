@@ -14,7 +14,7 @@ export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) { return `could not apply mixin: ${error}`; },
     JS_MIXIN_NOT_A_FUNC() { return `js mixin must be a function`; },
     CIRCULAR_MIXIN(path: string[]) { return `circular mixin found: ${path.join(' --> ')}`; },
-    IMPORTED_MIXIN_UNKNOWN() { return `import mixin does not exist`; }
+    UNKNOWN_MIXIN_SYMBOL(name: string) { return `cannot mixin unknown symbol "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -203,15 +203,20 @@ function handleImportedCSSMixin(
         roots.forEach(root => mixinRoot.prepend(...root.nodes!));
         mergeRules(mixinRoot, rule);
     } else {
-        const importNode = findDeclaration(
-            (mix.ref as ImportSymbol).import,
-            (node: any) => node.prop === valueMapping.named
-        );
-        transformer.diagnostics.error(
-            importNode,
-            mixinWarnings.IMPORTED_MIXIN_UNKNOWN(),
-            { word: importNode.value }
-        );
+        // const importNode = findDeclaration(
+        //     (mix.ref as ImportSymbol).import,
+        //     (node: any) => node.prop === valueMapping.named
+        // );
+
+        const mixinDecl = getMixinDeclaration(rule);
+
+        if (mixinDecl) {
+            transformer.diagnostics.error(
+                mixinDecl,
+                mixinWarnings.UNKNOWN_MIXIN_SYMBOL(mixinDecl.value),
+                { word: mixinDecl.value }
+            );
+        }
     }
 }
 

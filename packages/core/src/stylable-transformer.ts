@@ -101,10 +101,10 @@ export const transformerWarnings = {
     SYMBOL_IN_USE(name: string) { return `symbol '${name}' is already in use`; },
     UNKNOWN_PSEUDO_ELEMENT(name: string) { return `unknown pseudo element "${name}"`; },
     IMPORT_ISNT_EXTENDABLE() { return 'import is not extendable'; },
-    CANNOT_RESOLVE_SYMBOL(value: string) { return `could not resolve "${value}"`; },
+    CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) { return `cannot extend unknown symbol "${name}"`; },
     CANNOT_EXTEND_JS() { return 'JS import is not extendable'; },
     KEYFRAME_NAME_RESERVED(name: string) { return `keyframes "${name}" is reserved`; },
-    UNKNOWN_ALIAS_IMPORTED() { return 'trying to import unknown alias'; },
+    UNKNOWN_IMPORT_ALIAS(name: string) { return `cannot use alias for unknown import "${name}"`; },
     UNKNOWN_IMPORTED_FILE(path: string) { return `cannot resolve imported file: "${path}"`; },
     UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) { return `cannot resolve imported symbol "${name}" in stylesheet "${path}"`; }
 };
@@ -292,13 +292,13 @@ export class StylableTransformer {
                     finalMeta = meta;
                 } else if (extend._kind === 'import') {
                     const resolved = this.resolver.deepResolve(extend);
+                    const found = findRule(meta.ast, '.' + classSymbol.name);
                     if (resolved && resolved._kind === 'css' && resolved.symbol) {
                         if (resolved.symbol._kind === 'class') {
                             finalSymbol = resolved.symbol;
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            const found = findRule(meta.ast, '.' + classSymbol.name);
                             if (!!found) {
                                 this.diagnostics.error(
                                     found,
@@ -307,15 +307,15 @@ export class StylableTransformer {
                             }
                         }
                     } else {
-                        const found = findRule(meta.ast, '.' + classSymbol.name);
+                        // const found = findRule(meta.ast, '.' + classSymbol.name);
                         if (found && resolved) {
                             if (!resolved.symbol) {
                                 const importNode = findDeclaration(
                                     extend.import, (node: any) => node.prop === valueMapping.named
                                 );
                                 this.diagnostics.error(
-                                    importNode,
-                                    transformerWarnings.CANNOT_RESOLVE_SYMBOL(found.value),
+                                    found,
+                                    transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),
                                     { word: found.value }
                                 );
                             } else {
@@ -570,10 +570,10 @@ export class StylableTransformer {
                 } else {
                     return next;
                 }
-            } else {
+            } else if (rule) {
                 this.diagnostics.error(
-                    symbol.alias.import.rule,
-                    transformerWarnings.UNKNOWN_ALIAS_IMPORTED(),
+                    rule,
+                    transformerWarnings.UNKNOWN_IMPORT_ALIAS(name),
                     { word: symbol.alias.name }
                 );
             }

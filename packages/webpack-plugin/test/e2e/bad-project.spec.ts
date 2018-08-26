@@ -19,10 +19,12 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('reports warnings', async () => {
+    it.only('reports warnings', async () => {
         const warnings = projectRunner.getBuildWarningMessages();
-        const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
-        expect(warnings.length).to.equal(2);
+        // const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
+        // tslint:disable-next-line:max-line-length
+        const expected = [/cannot extend unknown symbol "unknown"/, /cannot resolve imported symbol "unknown" in stylesheet "\.\/comp\.st\.css"/, /unknown var "xxx"/];
+        expect(warnings.length).to.equal(3);
         warnings.forEach((warning: string, i: number) => {
             expect(warning).to.match(expected[i]);
         });
