@@ -22,7 +22,7 @@
     "node-eval": "^2.0.0",
     "puppeteer": "^1.7.0",
     "rimraf": "^2.6.2",
-    "webpack": "^4.16.5"
+    "webpack": "^4.17.1"
   },
   "files": [
     "cjs",

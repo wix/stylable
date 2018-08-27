@@ -2,10 +2,10 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)
 
-A fork of [react-scripts](https://github.com/facebook/create-react-app/tree/next/packages/react-scripts) used tailored for quick and easy creation of Stylable projects.
+A fork of [react-scripts](https://github.com/facebook/create-react-app/tree/next/packages/react-scripts) tailored for quick and easy creation of Stylable projects.
 
 ## Major changes from `react-scripts`
-- Uses TypeScript instead of Babel, configured to work with Webpack's tree-shaking and dynamic chunks on import();
+- Uses TypeScript instead of Babel, configured to work with Webpack's tree-shaking and dynamic chunks on `import()`.
 - Adds built-in support for [Stylable](http://stylable.io/).
 
 ## Getting started
