@@ -55,6 +55,7 @@ export interface Imported {
     named: Pojo<string>;
     rule: postcss.Rule;
     fromRelative: string;
+    context: string;
 }
 
 export interface StylableDirectives {

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
+import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
 import * as path from '../src/path';
 import { expectWarningsFromTransform } from './utils/diagnostics';
@@ -734,7 +735,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
 
                 expectWarningsFromTransform(config, [
-                    { message: `cannot find formatter: ${key}`, file: '/main.st.css' }
+                    { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' }
                 ]);
             });
 

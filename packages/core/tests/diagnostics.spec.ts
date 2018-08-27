@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { valueMapping } from '../src';
+import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
     nativeFunctionsDic,
     nativePseudoElements,
@@ -7,6 +7,8 @@ import {
 } from '../src/native-reserved-lists';
 import { resolve } from '../src/path';
 import { processorWarnings } from '../src/stylable-processor';
+import { resolverWarnings } from '../src/stylable-resolver';
+import { transformerWarnings } from '../src/stylable-transformer';
 import { valueParserWarnings } from '../src/stylable-value-parsers';
 import {
     expectWarnings,
@@ -166,7 +168,7 @@ describe('diagnostics: warnings and errors', () => {
                     };
                     expectWarningsFromTransform(
                         config,
-                        [{ message: 'unknown pseudo element "myBtn"', file: '/main.css' }]
+                        [{ message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'), file: '/main.css' }]
                     );
                 });
                 it('should not warn on vendor prefixed pseudo element', () => {
@@ -268,7 +270,7 @@ describe('diagnostics: warnings and errors', () => {
                     .gaga{
                         |-st-mixin: $myMixin$|;
                     }
-                `, [{ message: 'unknown mixin: "myMixin"', file: 'main.css' }]);
+                `, [{ message: processorWarnings.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]);
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
@@ -286,7 +288,7 @@ describe('diagnostics: warnings and errors', () => {
                 }]);
             });
 
-            it('should add error when can not append css mixins', () => {
+            it('should add error when attempting to mix in an unknown mixin symbol', () => {
                 const config = {
                     entry: '/main.css',
                     files: {
@@ -294,10 +296,10 @@ describe('diagnostics: warnings and errors', () => {
                             content: `
                             :import {
                                 -st-from: "./imported.st.css";
-                                |-st-named: $my-mixin$;|
+                                -st-named: my-mixin;
                             }
                             .container {
-                                -st-mixin: my-mixin;
+                                |-st-mixin: $my-mixin$|;
                             }
                             `
                         },
@@ -306,7 +308,12 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'import mixin does not exist', file: '/main.css' }]);
+                // tslint:disable-next-line:max-line-length
+                expectWarningsFromTransform(config, [
+                    // tslint:disable-next-line:max-line-length
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('my-mixin', './imported.st.css'), file: '/main.css', skip: true, skipLocationCheck: true },
+                    { message: mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'), file: '/main.css' }
+                ]);
             });
 
             it('should add error on circular mixins', () => {
@@ -326,11 +333,11 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 const mainPath = resolve('/main.css');
-                const xPath = `y from ${mainPath} --> x from ${mainPath}`;
-                const yPath = `x from ${mainPath} --> y from ${mainPath}`;
+                const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
+                const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
                 expectWarningsFromTransform(config, [
-                    { message: `circular mixin found: ${xPath}`, file: '/main.css', skipLocationCheck: true },
-                    { message: `circular mixin found: ${yPath}`, file: '/main.css', skipLocationCheck: true }
+                    { message: mixinWarnings.CIRCULAR_MIXIN(xPath), file: '/main.css', skipLocationCheck: true },
+                    { message: mixinWarnings.CIRCULAR_MIXIN(yPath), file: '/main.css', skipLocationCheck: true }
                 ]);
             });
 
@@ -359,7 +366,7 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config,
-                    [{ message: 'could not apply mixin: bug in mixin', file: '/main.css' }]);
+                    [{ message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'), file: '/main.css' }]);
             });
 
             it('js mixin must be a function', () => {
@@ -384,7 +391,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'js mixin must be a function', file: '/main.css' }]);
+                // tslint:disable-next-line:max-line-length
+                expectWarningsFromTransform(config, [{ message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' }]);
             });
 
             it('should not add warning when mixin value is a string', () => {
@@ -409,6 +417,49 @@ describe('diagnostics: warnings and errors', () => {
                 };
                 expectWarningsFromTransform(config,
                     [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }]);
+            });
+
+            it('should warn about non-existing variables in mixin overrides', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            .mixed {}
+                            .container {
+                                |-st-mixin: mixed(arg value($missingVar$))|;
+                            }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
+            });
+
+            it('should warn about non-existing variables in a multi-argument mixin override', () => {
+                const config = {
+                    entry: '/main.css',
+                    files: {
+                        '/main.css': {
+                            content: `
+                            :vars {
+                                color1: red;
+                                color2: green;
+                            }
+                            .mixed {
+                                color: value(color1);
+                                background: value(color2);
+                            }
+                            .container {
+                                |-st-mixin: mixed(color1 blue, color2 value($missingVar$))|;
+                            }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
             });
         });
 
@@ -442,7 +493,7 @@ describe('diagnostics: warnings and errors', () => {
                 `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
             });
 
-            it('should return warning for non import rules inside imports', () => {
+            it('should return a warning for non import rules inside imports', () => {
                 const config = {
                     entry: '/main.st.css',
                     files: {
@@ -468,15 +519,34 @@ describe('diagnostics: warnings and errors', () => {
                     [{ message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'), file: '/main.st.css' }]);
             });
 
-            it('should return warning for import with missing "from"', () => {
+            it('should return a warning for import with missing "-st-from" declaration', () => {
                 expectWarnings(`
-
                     |:import{
                         -st-default:Comp;
-                    }
+                    }|
                 `, [{ message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(), file: 'main.st.css' }]
                 );
+            });
 
+            it('should return a warning for import with empty "-st-from" declaration', () => {
+                expectWarnings(`
+                    :import{
+                        |-st-from: "   ";|
+                        -st-default: Comp;
+                    }
+                `, [{ severity: 'error', message: processorWarnings.EMPTY_IMPORT_FROM(), file: 'main.st.css' }]
+                );
+            });
+
+            it('should return a warning for multiple "-st-from" declarations', () => {
+                expectWarnings(`
+                    |:import{
+                        -st-from: "a";
+                        -st-from: "b";
+                        -st-default: Comp;
+                    }|
+                `, [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
+                );
             });
 
         });
@@ -518,7 +588,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'import is not extendable', file: '/main.st.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' }]);
             });
             it('should warn if extends by js import', () => {
                 const config = {
@@ -527,7 +598,7 @@ describe('diagnostics: warnings and errors', () => {
                         '/main.css': {
                             content: `
                             :import {
-                                -st-from: './file.js';
+                                -st-from: './imported.js';
                                 -st-default: special;
                             }
                             .myclass {
@@ -535,12 +606,13 @@ describe('diagnostics: warnings and errors', () => {
                             }
                             `
                         },
-                        '/file.js': {
+                        '/imported.js': {
                             content: ``
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: 'JS import is not extendable', file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' }]);
             });
             it('should warn if named extends does not exist', () => {
                 const config = {
@@ -550,43 +622,23 @@ describe('diagnostics: warnings and errors', () => {
                             content: `
                             :import {
                                 -st-from: './file.st.css';
-                                |-st-named: $special$;|
+                                -st-named: special;
                             }
                             .myclass {
-                                -st-extends: special;
+                                |-st-extends: $special$;|
                             }
                             `
                         },
                         '/file.st.css': {
-                            content: `
-                                .notSpecial {
-                                    color: red;
-                                }
-                            `
+                            content: ``
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `Could not resolve 'special'`, file: '/main.css' }]);
-            });
-            it('should warn if file not found', () => {
-                const config = {
-                    entry: '/main.css',
-                    files: {
-                        '/main.css': {
-                            content: `
-                            :import {
-                                |-st-from: $'./file.css'$|;
-                                -st-default: Special;
-                            }
-                            .myclass {
-                                -st-extends: Special
-                            }
-                            `
-                        }
-                    }
-                };
-                expectWarningsFromTransform(config,
-                    [{ message: `Imported file '${resolve('/file.css')}' not found`, file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    // tslint:disable-next-line:max-line-length
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('special', './file.st.css'), file: '/main.css', skip: true, skipLocationCheck: true },
+                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' }
+                ]);
             });
         });
 
@@ -633,23 +685,23 @@ describe('diagnostics: warnings and errors', () => {
         describe('from import', () => {
             it('should warn for unknown import', () => {
                 const config = {
-                    entry: '/main.css',
+                    entry: '/main.st.css',
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import{
-                                -st-from:"./import.css";
-                                |-st-named: shlomo, $momo$;|
+                                -st-from:"./import.st.css";
+                                -st-named: shlomo, momo;
                             }
                             .myClass {
                                 -st-extends: shlomo;
                             }
                             .myClass1 {
-                                -st-extends: momo;
+                                |-st-extends: $momo$;|
                             }
                           `
                         },
-                        '/import.css': {
+                        '/import.st.css': {
                             content: `
                                 .shlomo {
                                     color: red
@@ -658,42 +710,46 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `Could not resolve 'momo'`, file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    // tslint:disable-next-line:max-line-length
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('momo', './import.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
+                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'), file: '/main.st.css' }
+                ]);
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
                 expectWarnings(`
                     |:import {
-                        -st-from: './file.css';
+                        -st-from: './file.st.css';
                         -st-default: Name;
                         -st-named: $Name$;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block)', () => {
                 expectWarnings(`
                     :import {
-                        -st-from: './file.css';
+                        -st-from: './file.st.css';
                         -st-default: Name;
                     }
                     |:import {
-                        -st-from: './file.css';
+                        -st-from: './file.st.css';
                         -st-default: $Name$;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
             });
 
             it('should warn when import redeclare same symbol (in different block types)', () => {
                 expectWarnings(`
                     :import {
-                        -st-from: './file.css';
+                        -st-from: './file.st.css';
                         -st-default: Name;
                     }
                     :vars {
                         |$Name$: red;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.css' }]);
+                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
             });
 
         });
@@ -704,20 +760,19 @@ describe('diagnostics: warnings and errors', () => {
         describe(':import', () => {
             it('should return warning for unknown var import', () => {
                 const config = {
-                    entry: '/main.css',
+                    entry: '/main.st.css',
                     files: {
-                        '/main.css': {
+                        '/main.st.css': {
                             content: `
                             :import{
-                                -st-from:"./file.css";
-                                -st-default:Comp;
-                                |-st-named:$myVar$|;
+                                -st-from: "./file.st.css";
+                                -st-named: myVar;
                             }
                             .root {
-                                color:value(myVar);
+                                |color: value($myVar$);|
                             }`
                         },
-                        '/file.css': {
+                        '/file.st.css': {
                             content: `
                             :vars {
                                 otherVar: someValue;
@@ -726,8 +781,11 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: `cannot find export 'myVar' in './file.css'`, file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    // tslint:disable-next-line:max-line-length
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
+                    { message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'), file: '/main.st.css' }
+                ]);
             });
         });
     });
@@ -833,9 +891,9 @@ describe('diagnostics: warnings and errors', () => {
     describe('transforms', () => {
         it('should return warning if @keyframe symbol is used', () => {
             const config = {
-                entry: '/main.css',
+                entry: '/main.st.css',
                 files: {
-                    '/main.css': {
+                    '/main.st.css': {
                         content: `
                         .name {}
                         |@keyframes $name$| {
@@ -845,7 +903,8 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: 'symbol name is already in use', file: '/main.css' }]);
+            expectWarningsFromTransform(config,
+                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.st.css' }]);
         });
 
         it('should not allow @keyframe of reserved words', () => {
@@ -862,7 +921,8 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config, [{ message: `keyframes ${key} is reserved`, file: '/main.css' }]);
+                expectWarningsFromTransform(config,
+                    [{ message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' }]);
             });
         });
 
@@ -873,14 +933,14 @@ describe('diagnostics: warnings and errors', () => {
                     '/main.st.css': {
                         namespace: 'entry',
                         content: `
-                            |:import{
+                            :import{
                                 -st-from: "./imported.st.css";
                                 -st-default: Imported;
-                                -st-named: $inner-class$;
-                            }|
+                                -st-named: inner-class;
+                            }
 
                             .root .Imported{}
-                            .root .inner-class{}
+                            |.root .$inner-class$ {}|
                         `
                     },
                     '/imported.st.css': {
@@ -889,7 +949,96 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: 'Trying to import unknown alias', file: '/main.st.css' }]);
+            expectWarningsFromTransform(config, [
+                // tslint:disable-next-line:max-line-length
+                { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('inner-class', './imported.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
+                { message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'), file: '/main.st.css' }
+            ]);
+        });
+
+        describe('imports', () => {
+            it('should error on unresolved file', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    |-st-from: "$./missing.st.css$";|
+                                }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved file from third party', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    |-st-from: "$missing-package/index.st.css$";|
+                                }
+                            `
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_FILE('missing-package/index.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved named symbol', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    -st-from: "./imported.st.css";
+                                    |-st-named: $Missing$;|
+                                }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved named symbol with alias', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    -st-from: "./imported.st.css";
+                                    |-st-named: $Missing$ as LocalMissing;|
+                                }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
+            });
         });
     });
 
@@ -1048,7 +1197,7 @@ describe('diagnostics: warnings and errors', () => {
                 };
 
                 expectWarningsFromTransform(config,
-                    [{ message: `cannot find formatter: ${key}`, file: '/main.st.css' }]);
+                    [{ message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' }]);
             });
 
             it('should warn a formatter throws an error', () => {
