@@ -13,7 +13,7 @@ import { Pojo } from './types';
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) { return `could not apply mixin: ${error}`; },
     JS_MIXIN_NOT_A_FUNC() { return `js mixin must be a function`; },
-    CIRCULAR_MIXIN(path: string[]) { return `circular mixin found: ${path.join(' --> ')}`; },
+    CIRCULAR_MIXIN(paths: string[]) { return `circular mixin found: ${paths.join(' --> ')}`; },
     UNKNOWN_MIXIN_SYMBOL(name: string) { return `cannot mixin unknown symbol "${name}"`; }
 };
 /* tslint:enable:max-line-length */
