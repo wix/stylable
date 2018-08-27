@@ -270,33 +270,21 @@ export class StylableTransformer {
                                     { word: found.value });
                             }
                         }
-                    } else {
-                        // const found = findRule(meta.ast, '.' + classSymbol.name);
-                        if (found && resolved) {
-                            if (!resolved.symbol) {
-                                const importNode = findDeclaration(
-                                    extend.import, (node: any) => node.prop === valueMapping.named
-                                );
-                                this.diagnostics.error(
-                                    found,
-                                    transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),
-                                    { word: found.value }
-                                );
-                            } else {
-                                this.diagnostics.error(
-                                    found,
-                                    transformerWarnings.CANNOT_EXTEND_JS(),
-                                    { word: found.value });
-                            }
+                    } else if (found && resolved) {
+                        if (!resolved.symbol) {
+                            const importNode = findDeclaration(
+                                extend.import, (node: any) => node.prop === valueMapping.named
+                            );
+                            this.diagnostics.error(
+                                found,
+                                transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),
+                                { word: found.value }
+                            );
                         } else {
-                            // const importNode = findDeclaration(
-                            //     extend.import, (node: any) => node.prop === valueMapping.from
-                            // );
-                            // this.diagnostics.error(
-                            //     importNode,
-                            //     transformerWarnings.UNKNOWN_EXTENDED_SYMBOL(extend.import.),
-                            //     { word: importNode.value }
-                            // );
+                            this.diagnostics.error(
+                                found,
+                                transformerWarnings.CANNOT_EXTEND_JS(),
+                                { word: found.value });
                         }
                     }
                 }
