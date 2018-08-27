@@ -25,12 +25,12 @@ export interface HTMLSnapshotPluginOptions {
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private stylesheetFilterLogic: (stylableModule: any) => any;
+    private stylesheetLogicFilter: (stylableModule: any) => any;
 
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.stylesheetFilterLogic = options.stylesheetLogicFilter
+        this.stylesheetLogicFilter = options.stylesheetLogicFilter
         ? options.stylesheetLogicFilter : getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
@@ -44,7 +44,7 @@ export class HTMLSnapshotPlugin {
         });
     }
     public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = this.stylesheetFilterLogic(module);
+        const component = this.stylesheetLogicFilter(module);
 
         if (!component) {
             return;
