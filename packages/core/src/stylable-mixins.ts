@@ -13,7 +13,7 @@ import { Pojo } from './types';
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) { return `could not apply mixin: ${error}`; },
     JS_MIXIN_NOT_A_FUNC() { return `js mixin must be a function`; },
-    CIRCULAR_MIXIN(paths: string[]) { return `circular mixin found: ${paths.join(' --> ')}`; },
+    CIRCULAR_MIXIN(circularPaths: string[]) { return `circular mixin found: ${circularPaths.join(' --> ')}`; },
     UNKNOWN_MIXIN_SYMBOL(name: string) { return `cannot mixin unknown symbol "${name}"`; }
 };
 /* tslint:enable:max-line-length */
@@ -260,7 +260,7 @@ function createInheritedMeta(resolvedClass: CSSResolve) {
     return mixinMeta;
 }
 
-function getMixinDeclaration(rule: postcss.Rule) {
+function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {
     return (rule.nodes && rule.nodes.find(node => {
         return node.type === 'decl' && node.prop === valueMapping.mixin;
     }) as postcss.Declaration);
