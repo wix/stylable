@@ -635,9 +635,9 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' },
                     // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('special', './file.st.css'), file: '/main.css', skip: true, skipLocationCheck: true }
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('special', './file.st.css'), file: '/main.css', skip: true, skipLocationCheck: true },
+                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' }
                 ]);
             });
         });
@@ -711,9 +711,9 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'), file: '/main.st.css' },
                     // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('momo', './import.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true }
+                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('momo', './import.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
+                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'), file: '/main.st.css' }
                 ]);
             });
 
@@ -950,9 +950,9 @@ describe('diagnostics: warnings and errors', () => {
                 }
             };
             expectWarningsFromTransform(config, [
-                { message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'), file: '/main.st.css' },
                 // tslint:disable-next-line:max-line-length
-                { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('inner-class', './imported.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true }
+                { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('inner-class', './imported.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
+                { message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'), file: '/main.st.css' }
             ]);
         });
 
@@ -1004,6 +1004,29 @@ describe('diagnostics: warnings and errors', () => {
                                 :import{
                                     -st-from: "./imported.st.css";
                                     |-st-named: $Missing$;|
+                                }
+                            `
+                        },
+                        '/imported.st.css': {
+                            content: `.root{}`
+                        }
+                    }
+                };
+                expectWarningsFromTransform(config,
+                    // tslint:disable-next-line:max-line-length
+                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
+            });
+
+            it('should error on unresolved named symbol with alias', () => {
+                const config = {
+                    entry: '/main.st.css',
+                    files: {
+                        '/main.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import{
+                                    -st-from: "./imported.st.css";
+                                    |-st-named: $Missing$ as LocalMissing;|
                                 }
                             `
                         },
