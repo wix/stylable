@@ -14,14 +14,23 @@ const {
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
     render: (componentModule: any, component: any) => string | false;
+    /**
+     * By default, gets component logic related to the stylesheet being imported. E.g., you
+     * have stylesheet `a.st.css`, which is imported by a few files. By default, this method
+     * will attempt to find `a.tsx`.
+     */
+    getLogicModule?: (stylableModule: any) => any;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
+    private getLogicModule: (stylableModule: any) => any;
+
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
+        this.getLogicModule = options.getLogicModule || getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', compilation => {
@@ -34,7 +43,8 @@ export class HTMLSnapshotPlugin {
         });
     }
     public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = getCSSComponentLogicModule(module);
+        const component = this.getLogicModule(module);
+
         if (!component) {
             return;
         }
