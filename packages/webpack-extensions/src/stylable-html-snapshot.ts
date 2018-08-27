@@ -19,18 +19,19 @@ export interface HTMLSnapshotPluginOptions {
      * example, if you have more than one file that imports a certain style, you may
      * want to build a specific one
      */
-    moduleFilterLogic?: (stylableModule: any) => any;
+    stylesheetLogicFilter?: (stylableModule: any) => any;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private moduleFilterLogic: (stylableModule: any) => any;
+    private stylesheetFilterLogic: (stylableModule: any) => any;
 
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.moduleFilterLogic = options.moduleFilterLogic ? options.moduleFilterLogic : getCSSComponentLogicModule;
+        this.stylesheetFilterLogic = options.stylesheetLogicFilter
+        ? options.stylesheetLogicFilter : getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', compilation => {
@@ -43,7 +44,7 @@ export class HTMLSnapshotPlugin {
         });
     }
     public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = this.moduleFilterLogic(module);
+        const component = this.stylesheetFilterLogic(module);
 
         if (!component) {
             return;

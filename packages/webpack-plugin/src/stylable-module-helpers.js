@@ -87,7 +87,6 @@ function getCSSComponentLogicModule(stylableModule) {
             );
         })
         .map(({ module }) => module);
-
     const set = new Set(views);
     if (set.size > 1) {
         throw new Error(
