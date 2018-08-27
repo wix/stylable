@@ -203,11 +203,6 @@ function handleImportedCSSMixin(
         roots.forEach(root => mixinRoot.prepend(...root.nodes!));
         mergeRules(mixinRoot, rule);
     } else {
-        // const importNode = findDeclaration(
-        //     (mix.ref as ImportSymbol).import,
-        //     (node: any) => node.prop === valueMapping.named
-        // );
-
         const mixinDecl = getMixinDeclaration(rule);
 
         if (mixinDecl) {
