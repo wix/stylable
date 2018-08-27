@@ -15,23 +15,22 @@ export interface HTMLSnapshotPluginOptions {
     outDir: string;
     render: (componentModule: any, component: any) => string | false;
     /**
-     * Logic that decides which module to import the stylable component from. For
-     * example, if you have more than one file that imports a certain style, you may
-     * want to build a specific one
+     * By default, gets component logic related to the stylesheet being imported. E.g., you
+     * have stylesheet `a.st.css`, which is imported by a few files. By default, this method
+     * will attempt to find `a.tsx`.
      */
-    stylesheetLogicFilter?: (stylableModule: any) => any;
+    getLogicModule?: (stylableModule: any) => any;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private stylesheetLogicFilter: (stylableModule: any) => any;
+    private getLogicModule: (stylableModule: any) => any;
 
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.stylesheetLogicFilter = options.stylesheetLogicFilter
-        ? options.stylesheetLogicFilter : getCSSComponentLogicModule;
+        this.getLogicModule = options.getLogicModule || getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', compilation => {
@@ -44,7 +43,7 @@ export class HTMLSnapshotPlugin {
         });
     }
     public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = this.stylesheetLogicFilter(module);
+        const component = this.getLogicModule(module);
 
         if (!component) {
             return;
