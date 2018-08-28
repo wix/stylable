@@ -34,7 +34,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "git@github.com:wix/stylable.git",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/e2e-test-kit",
   "author": "Wix.com",
   "license": "BSD-3-Clause"
 }

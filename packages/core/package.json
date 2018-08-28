@@ -46,7 +46,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "git@github.com:wix/stylable.git",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/core",
+  "homepage": "https://stylable.io",
   "author": "Wix.com",
   "license": "BSD-3-Clause"
 }
