@@ -1,6 +1,6 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Stylable DOM testing utilities",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -14,8 +14,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.8",
-    "@stylable/runtime": "^0.1.7"
+    "@stylable/core": "^0.1.9",
+    "@stylable/runtime": "^0.1.8"
   },
   "files": [
     "dist",

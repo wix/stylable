@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-plugin",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
@@ -11,12 +11,12 @@
     "webpack": "^4.6.0"
   },
   "dependencies": {
-    "@stylable/runtime": "^0.1.7",
+    "@stylable/runtime": "^0.1.8",
     "find-config": "^1.0.0",
     "webpack-sources": "^1.1.0"
   },
   "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.0.15"
+    "@stylable/e2e-test-kit": "^1.0.16"
   },
   "files": [
     "src"

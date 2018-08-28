@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Experimental Stylable webpack plugins",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -16,7 +16,7 @@
     "test": "mocha --timeout 10000 -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.8",
+    "@stylable/core": "^0.1.9",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",

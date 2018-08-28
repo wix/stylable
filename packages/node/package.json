@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "@stylable/core": "^0.1.8"
+    "@stylable/core": "^0.1.9"
   },
   "files": [
     "dist"
