@@ -42,7 +42,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "git@github.com:wix/stylable.git",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/react-scripts",
   "author": "Wix.com",
   "license": "MIT"
 }
