@@ -37,7 +37,7 @@ $ stc --srcDir="./src" --outDir="./dist" --indexFile="index.st.css"
 To transform your project stylesheets to target JavaScript modules containing the transformed source files, you must provide the `indexFile` paramter with an empty string.
 
 ```sh
-$ stc --srcDir="./src" --outDir="./dist" --indexFile=""
+$ stc --srcDir="./src" --outDir="./dist"
 ```
 
 ## License
