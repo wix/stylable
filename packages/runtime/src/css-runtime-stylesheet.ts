@@ -6,7 +6,8 @@ export function create(
   locals: Partial<RuntimeStylesheet>,
   css: string,
   depth: number,
-  id: string | number
+  id: string | number,
+  cssDeps: RuntimeStylesheet[]
 ): RuntimeStylesheet {
 
   const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
@@ -47,6 +48,7 @@ export function create(
   locals.$depth = depth;
   locals.$id = id;
   locals.$css = css;
+  locals.$cssDeps = cssDeps;
 
   locals.$get = get;
   locals.$cssStates = cssStates;
@@ -80,6 +82,6 @@ export function create(
   return stylable_runtime_stylesheet as RuntimeStylesheet;
 }
 
-export function createTheme(css: string, depth: number | string, id: number | string) {
-  return { $css: css, $depth: depth, $id: id, $theme: true };
+export function createTheme(css: string, depth: number | string, id: number | string, cssDeps: RuntimeStylesheet[]) {
+  return { $css: css, $depth: depth, $id: id, $cssDeps: cssDeps };
 }

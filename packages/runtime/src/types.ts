@@ -21,6 +21,7 @@ export type RuntimeStylesheet = {
     $depth: number,
     $id: string | number,
     $css?: string,
+    $cssDeps?: RuntimeStylesheet[] | undefined,
 
     $get(localName: string): string | undefined;
     $cssStates(stateMapping?: StateMap | null): StateMap;
@@ -37,4 +38,5 @@ export interface RenderableStylesheet {
     $depth: number;
     $id: string | number;
     $css?: string;
+    $cssDeps?: string[];
 }

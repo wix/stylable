@@ -285,6 +285,29 @@ describe('Sort Styles', () => {
       api.getStyles(['/d.st.css', '/c.st.css', '/b.st.css', '/a.st.css'], true)
     ).to.eql([a, c, d, b]);
   });
+
+  test('getStyles should include css dependencies', api => {
+
+    const b = {
+      $id: '/b.st.css',
+      $depth: 0,
+      $css: `.b{}`
+    };
+
+    const a = {
+      $id: '/a.st.css',
+      $depth: 1,
+      $css: `.a{}`,
+      $cssDeps: ['/b.st.css']
+    };
+
+    api.register(b);
+    api.register(a);
+
+    expect(
+      api.getStyles(['/a.st.css'], true)
+    ).to.eql([b, a]);
+  });
 });
 
 describe('init', () => {
