@@ -1,13 +1,13 @@
 {
   "name": "@stylable/react-scripts",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Like react-scripts, but with stylable and typescript built-in",
   "bin": {
     "stylable-scripts": "./bin/stylable-scripts.js"
   },
   "dependencies": {
     "@stylable/core": "^0.1.9",
-    "@stylable/webpack-plugin": "^0.1.9",
+    "@stylable/webpack-plugin": "^0.1.10",
     "case-sensitive-paths-webpack-plugin": "^2.1.2",
     "chalk": "^2.4.1",
     "dotenv": "^6.0.0",
