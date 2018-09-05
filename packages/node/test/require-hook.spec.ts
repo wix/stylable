@@ -38,4 +38,10 @@ describe('require hook', () => {
             require('./fixtures/test.st.css');
         }).to.throw('Unexpected token');
     });
+
+    it('should mark the generated module as an esm module', () => {
+        attachHook();
+        const m = require('./fixtures/test.st.css');
+        expect(m.__esModule).to.equal(true);
+    });
 });
