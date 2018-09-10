@@ -18,8 +18,8 @@
   "dependencies": {
     "@stylable/core": "^0.1.9",
     "lodash.clonedeep": "^4.5.0",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
+    "react": "^16.5.0",
+    "react-dom": "^16.5.0",
     "webpack": "^4.17.2",
     "webpack-sources": "^1.2.0"
   },

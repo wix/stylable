@@ -1,14 +1,11 @@
 /* tslint:disable:no-unused-expression */
-import * as express from 'express';
-import * as http from 'http';
+import express from 'express';
+import http from 'http';
 import { join, normalize } from 'path';
-import * as puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer';
+import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
-import * as webpack from 'webpack';
-const rimrafCallback = require('rimraf');
-const { launch } = require('puppeteer');
-const runExpress = require('express');
-const runWebpack = require('webpack');
+import webpack from 'webpack';
 
 export interface Options {
   projectDir: string;
@@ -79,9 +76,9 @@ export class ProjectRunner {
         path: this.outputDir
       };
     }
-    const compiler = runWebpack(webpackConfig);
+    const compiler = webpack(webpackConfig);
     compiler.run = promisify(compiler.run);
-    this.stats = await compiler.run() as any as webpack.Stats;
+    this.stats = await (compiler as any).run() as webpack.Stats;
     if (this.throwOnBuildError && (this.stats as any).compilation.errors.length) {
       throw new Error((this.stats as any).compilation.errors.join('\n'));
     }
@@ -91,7 +88,7 @@ export class ProjectRunner {
     if (this.server) {
       throw new Error('project server is already running in port ' + this.port);
     }
-    const app = runExpress();
+    const app = express();
     app.use(
       express.static(this.outputDir, { cacheControl: false, etag: false })
     );
@@ -108,7 +105,7 @@ export class ProjectRunner {
 
   public async openInBrowser() {
     if (!this.browser) {
-      this.browser = await launch(this.puppeteerOptions);
+      this.browser = await puppeteer.launch(this.puppeteerOptions);
     }
     const page = await this.browser!.newPage();
     this.pages.push(page);
