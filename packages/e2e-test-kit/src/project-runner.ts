@@ -77,10 +77,11 @@ export class ProjectRunner {
       };
     }
     const compiler = webpack(webpackConfig);
-    compiler.run = promisify(compiler.run);
-    this.stats = await (compiler as any).run() as webpack.Stats;
-    if (this.throwOnBuildError && (this.stats as any).compilation.errors.length) {
-      throw new Error((this.stats as any).compilation.errors.join('\n'));
+    compiler.run = compiler.run.bind(compiler);
+    const promisedRun = promisify(compiler.run);
+    this.stats = await promisedRun();
+    if (this.throwOnBuildError && this.stats.compilation.errors.length) {
+      throw new Error(this.stats.compilation.errors.join('\n'));
     }
   }
 
@@ -120,11 +121,11 @@ export class ProjectRunner {
   }
 
   public getBuildWarningMessages() {
-    return (this.stats as any).compilation.warnings.slice();
+    return this.stats!.compilation.warnings.slice();
   }
 
   public getBuildAsset(assetPath: string) {
-    return (this.stats as any).compilation.assets[normalize(assetPath)].source();
+    return this.stats!.compilation.assets[normalize(assetPath)].source();
   }
 
   public async closeAllPages() {
