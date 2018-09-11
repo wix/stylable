@@ -4,7 +4,7 @@ import { PartialElement, StylableDOMUtil } from '../src';
 
 describe('stylable-dom-utils', () => {
 
-    const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, '', 0, '0');
+    const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, '', 0, '0', []);
 
     const util = new StylableDOMUtil(s);
 

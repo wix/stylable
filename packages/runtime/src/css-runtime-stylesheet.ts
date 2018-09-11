@@ -7,7 +7,7 @@ export function create(
   css: string,
   depth: number,
   id: string | number,
-  cssDeps: RuntimeStylesheet[]
+  cssDeps: string[]
 ): RuntimeStylesheet {
 
   const dataNamespace = 'data-' + namespace.toLowerCase() + '-';

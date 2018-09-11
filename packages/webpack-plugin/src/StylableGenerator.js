@@ -41,6 +41,9 @@ class StylableGenerator {
             module,
             request: module.request
         });
+        const cssModules = module.buildInfo.runtimeInfo.cssDependencies;
+
+        const cssModuleIds = this.resolveModuleIds(cssModules, runtimeTemplate);
 
         const originalSource = isImportedByNonStylable
             ? this.createModuleSource(module, imports, 'create', [
@@ -49,9 +52,10 @@ class StylableGenerator {
                   JSON.stringify(exports),
                   css,
                   depth,
-                  id
+                  id,
+                  '['+cssModuleIds.join(',')+']'
               ])
-            : this.createModuleSource(module, imports, 'createTheme', [css, depth, id]);
+            : this.createModuleSource(module, imports, 'createTheme', [css, depth, id, cssModuleIds]);
         return new ReplaceSource(originalSource);
     }
     transform(module) {
@@ -112,6 +116,9 @@ class StylableGenerator {
             ].join(EOL),
             module.resource
         );
+    }
+    resolveModuleIds(modules, runtimeTemplate) {
+        return modules.map(module => `${runtimeTemplate.moduleId({ module, request: 'css dependency' })}`);
     }
     generateImports(module, runtimeTemplate) {
         const imports = [];
