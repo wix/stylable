@@ -23,7 +23,7 @@
     "url-loader": "^1.1.1",
     "webpack": "^4.18.0",
     "webpack-dev-server": "^3.1.8",
-    "webpack-manifest-plugin": "^2.0.3"
+    "webpack-manifest-plugin": "^2.0.4"
   },
   "optionalDependencies": {
     "fsevents": "^1.2.4"
