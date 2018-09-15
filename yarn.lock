@@ -377,9 +377,9 @@
     inquirer "^6.2.0"
     npmlog "^4.1.2"
 
-"@lerna/publish@^3.3.2":
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/@lerna/publish/-/publish-3.3.2.tgz#bfd54183dbbc3d8d3fdfcb8860af5dd1d7906689"
+"@lerna/publish@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@lerna/publish/-/publish-3.4.0.tgz#d2665f7b16eb3b2b8962c47fcf31fe901ff9a288"
   dependencies:
     "@lerna/batch-packages" "^3.1.2"
     "@lerna/check-working-tree" "^3.3.0"
@@ -388,6 +388,7 @@
     "@lerna/command" "^3.3.0"
     "@lerna/describe-ref" "^3.3.0"
     "@lerna/get-npm-exec-opts" "^3.0.0"
+    "@lerna/npm-conf" "^3.0.0"
     "@lerna/npm-dist-tag" "^3.3.0"
     "@lerna/npm-publish" "^3.3.1"
     "@lerna/output" "^3.0.0"
@@ -397,7 +398,9 @@
     "@lerna/validation-error" "^3.0.0"
     "@lerna/version" "^3.3.2"
     fs-extra "^7.0.0"
+    libnpmaccess "^3.0.0"
     npm-package-arg "^6.0.0"
+    npm-registry-fetch "^3.8.0"
     npmlog "^4.1.2"
     p-finally "^1.0.0"
     p-map "^1.2.0"
@@ -624,9 +627,9 @@
   dependencies:
     "@types/react" "*"
 
-"@types/puppeteer@^1.6.3":
-  version "1.6.3"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.6.3.tgz#13b4a70ae9997b7f6b6c9d6771d2aa34c710b809"
+"@types/puppeteer@^1.6.4":
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-1.6.4.tgz#c3b27b72241c782053f21e3996edad561e31db9a"
   dependencies:
     "@types/events" "*"
     "@types/node" "*"
@@ -864,14 +867,23 @@ acorn-dynamic-import@^3.0.0:
     acorn "^5.0.0"
 
 acorn-globals@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.1.0.tgz#ab716025dbe17c54d3ef81d32ece2b2d99fe2538"
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.0.tgz#e3b6f8da3c1552a95ae627571f7dd6923bb54103"
   dependencies:
-    acorn "^5.0.0"
+    acorn "^6.0.1"
+    acorn-walk "^6.0.1"
+
+acorn-walk@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-6.0.1.tgz#c7827bdbb8e21aa97b609adfa225400d9ae348ba"
 
 acorn@^5.0.0, acorn@^5.6.2, acorn@^5.7.1:
   version "5.7.3"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.3.tgz#67aa231bf8812974b85235a96771eb6bd07ea279"
+
+acorn@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.0.1.tgz#66e6147e1027704479dc6d9b20d884c572db3cc1"
 
 address@1.0.3, address@^1.0.1:
   version "1.0.3"
@@ -962,6 +974,10 @@ anymatch@^2.0.0:
 aproba@^1.0.3, aproba@^1.1.1:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-1.2.0.tgz#6802e6264efd18c790a1b0d517f0f2627bf2c94a"
+
+aproba@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/aproba/-/aproba-2.0.0.tgz#52520b8ae5b569215b354efc0caa3fe1e45a8adc"
 
 are-we-there-yet@~1.1.2:
   version "1.1.5"
@@ -4165,9 +4181,9 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-lerna@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/lerna/-/lerna-3.3.2.tgz#c5df2744007a0c8b8b0efb60dc45368db86a5fac"
+lerna@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/lerna/-/lerna-3.4.0.tgz#c1403852b4b3fa986072de11d7f549604fd41775"
   dependencies:
     "@lerna/add" "^3.3.2"
     "@lerna/bootstrap" "^3.3.2"
@@ -4181,7 +4197,7 @@ lerna@^3.3.2:
     "@lerna/init" "^3.3.0"
     "@lerna/link" "^3.3.0"
     "@lerna/list" "^3.3.2"
-    "@lerna/publish" "^3.3.2"
+    "@lerna/publish" "^3.4.0"
     "@lerna/run" "^3.3.2"
     "@lerna/version" "^3.3.2"
     import-local "^1.0.0"
@@ -4193,6 +4209,15 @@ levn@~0.3.0:
   dependencies:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
+
+libnpmaccess@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/libnpmaccess/-/libnpmaccess-3.0.0.tgz#33cc9c8a5cb53e87d06bf2e547c2eba974f619af"
+  dependencies:
+    aproba "^2.0.0"
+    get-stream "^4.0.0"
+    npm-package-arg "^6.1.0"
+    npm-registry-fetch "^3.8.0"
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -4893,7 +4918,7 @@ npm-pick-manifest@^2.1.0:
     npm-package-arg "^6.0.0"
     semver "^5.4.1"
 
-npm-registry-fetch@^3.0.0:
+npm-registry-fetch@^3.0.0, npm-registry-fetch@^3.8.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/npm-registry-fetch/-/npm-registry-fetch-3.8.0.tgz#aa7d9a7c92aff94f48dba0984bdef4bd131c88cc"
   dependencies:
@@ -6806,9 +6831,9 @@ trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
 
-ts-loader@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-5.1.0.tgz#ac13facb9360af4a4b072c851a120d17cbcaf1fa"
+ts-loader@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-5.1.1.tgz#361eeae3cc3c6f63d2e9f421dba90c4b14659aa6"
   dependencies:
     chalk "^2.3.0"
     enhanced-resolve "^4.0.0"
@@ -7273,8 +7298,8 @@ whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.4:
     iconv-lite "0.4.23"
 
 whatwg-mimetype@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-2.1.0.tgz#f0f21d76cbba72362eb609dbed2a30cd17fcc7d4"
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-2.2.0.tgz#a3d58ef10b76009b042d03e25591ece89b88d171"
 
 whatwg-url@^7.0.0:
   version "7.0.0"
