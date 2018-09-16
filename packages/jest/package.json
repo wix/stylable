@@ -11,7 +11,8 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "@stylable/node": "^0.1.11"
+    "@stylable/node": "^0.1.11",
+    "@stylable/runtime": "^0.1.8"
   },
   "files": [
     "dist"
