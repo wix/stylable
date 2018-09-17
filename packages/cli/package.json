@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
@@ -14,12 +14,12 @@
     "test": "mocha -r typescript-support \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --project \"./test/tsconfig.json\""
   },
   "dependencies": {
-    "@stylable/core": "^0.1.9",
-    "@stylable/node": "^0.1.11",
+    "@stylable/core": "^0.1.10",
+    "@stylable/node": "^0.1.12",
     "yargs": "^12.0.2"
   },
   "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.0.17"
+    "@stylable/e2e-test-kit": "^1.0.18"
   },
   "files": [
     "dist"
