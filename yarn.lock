@@ -614,8 +614,8 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.2.5.tgz#8a4accfc403c124a0bafe8a9fc61a05ec1032073"
 
 "@types/node@*":
-  version "10.10.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.0.tgz#2b08a1a7d1fa317173a776c2130bf240545cc33e"
+  version "10.10.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.1.tgz#d5c96ca246a418404914d180b7fdd625ad18eca6"
 
 "@types/node@8":
   version "8.10.29"
@@ -1840,10 +1840,10 @@ component-emitter@^1.2.1:
   resolved "https://registry.yarnpkg.com/component-emitter/-/component-emitter-1.2.1.tgz#137918d6d78283f7df7a6b7c5a63e140e69425e6"
 
 compressible@~2.0.14:
-  version "2.0.14"
-  resolved "https://registry.yarnpkg.com/compressible/-/compressible-2.0.14.tgz#326c5f507fbb055f54116782b969a81b67a29da7"
+  version "2.0.15"
+  resolved "https://registry.yarnpkg.com/compressible/-/compressible-2.0.15.tgz#857a9ab0a7e5a07d8d837ed43fe2defff64fe212"
   dependencies:
-    mime-db ">= 1.34.0 < 2"
+    mime-db ">= 1.36.0 < 2"
 
 compression@^1.5.2:
   version "1.7.3"
@@ -4507,7 +4507,7 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
-"mime-db@>= 1.34.0 < 2", mime-db@~1.36.0:
+"mime-db@>= 1.36.0 < 2", mime-db@~1.36.0:
   version "1.36.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.36.0.tgz#5020478db3c7fe93aad7bbcc4dcf869c43363397"
 
@@ -4830,9 +4830,9 @@ node-releases@^1.0.0-alpha.11:
   dependencies:
     semver "^5.3.0"
 
-node-typescript-service@^0.4.4:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/node-typescript-service/-/node-typescript-service-0.4.4.tgz#bced583e0ea7ed6836058943adfad74a6b4515aa"
+node-typescript-service@^0.4.5:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/node-typescript-service/-/node-typescript-service-0.4.5.tgz#c0960ac0724fff0d7572339efe72e3b4cfff369a"
 
 "nopt@2 || 3":
   version "3.0.6"
@@ -6900,11 +6900,11 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript-support@^0.5.4:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/typescript-support/-/typescript-support-0.5.4.tgz#b4569a2895a3f6dd167ab04aad8079b8dff97e0b"
+typescript-support@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/typescript-support/-/typescript-support-0.5.5.tgz#0793aa52bca186e3401aca487808e72dd19b038b"
   dependencies:
-    node-typescript-service "^0.4.4"
+    node-typescript-service "^0.4.5"
     source-map-support "^0.5.9"
 
 typescript@~3.0.3:
