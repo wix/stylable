@@ -25,7 +25,7 @@
     "postcss-js": "^2.0.0",
     "postcss-nested": "^4.1.0",
     "postcss-safe-parser": "^4.0.1",
-    "postcss-selector-matches": "^3.0.1",
+    "postcss-selector-matches": "^4.0.0",
     "postcss-value-parser": "^3.3.0",
     "url-regex": "^4.1.1"
   },
