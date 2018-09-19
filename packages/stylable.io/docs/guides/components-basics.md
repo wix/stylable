@@ -6,7 +6,7 @@ layout: docs
 
 This guide walks you through the basics of how to style and work with components using **Stylable**. 
 
-You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extention `.st.css`.
+You use **Stylable** with a component file (for example using React), along with a **Stylable** CSS file that has the extension `.st.css`.
 
 > **Note**:  
 > This guide shows the `JSX` side of our [@stylable/webpack-plugin](https://github.com/wix/stylable/tree/master/packages/webpack-plugin){:target="_blank"} integration with React. 
