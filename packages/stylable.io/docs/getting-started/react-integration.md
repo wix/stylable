@@ -26,7 +26,7 @@ The result of the above generates and adds the props needed to define the root e
 * Marks component root by setting the root target `className`
 * Sets component states using `data-*` attributes 
 * Appends `className` override from component props to the root `className`
-* Custom or overriden component states are added from external `data-*` props
+* Custom or overridden component states are added from external `data-*` props
 
 > **Note**  
 > To enable external styling, we recommend passing the props `className` and `data-*`. To make the component more stylable, we also recommend also merging the `style` prop.
