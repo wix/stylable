@@ -79,7 +79,7 @@ In this example, `toggled` and `loading` are defined on the root class with thei
 ```
 
 > **Note**    
-> When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.
+> When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS child selector.
 
 ## State inheritance
 
