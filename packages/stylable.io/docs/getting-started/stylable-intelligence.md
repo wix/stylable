@@ -11,7 +11,7 @@ layout: docs
 ## Installation
 
 You can install **Stylable Intelligence** from the [Visual Studio Code market](https://marketplace.visualstudio.com/items?itemName=wix.stylable-intelligence):
-* In your VSC window, click the **Extentions** icon to open the market.
+* In your VSC window, click the **Extensions** icon to open the market.
 * In the search field, enter **Stylable Intelligence**. 
 * Install and reload the window when prompted.
 
