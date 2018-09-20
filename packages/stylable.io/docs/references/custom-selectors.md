@@ -150,7 +150,7 @@ selector:
 
 Aliasing multiple selectors in a `custom selector` may generate lots of CSS that could affect performance.
 
-For example, when you import the `Comp` stylesheet (the selector described in the previous example) into another stylesheet, in the ouput the selector is split for each override.
+For example, when you import the `Comp` stylesheet (the selector described in the previous example) into another stylesheet, in the output the selector is split for each override.
 
 ```css
 /* CSS */

@@ -98,7 +98,7 @@ Multiple variables can be comma separated or written on multiple lines:
  
  Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
 
-Here is an example of using a variable in a CSS mixin and how it can be overriden by the mixin's parameter value.
+Here is an example of using a variable in a CSS mixin and how it can be overridden by the mixin's parameter value.
 
 ```css
 /* CSS */
@@ -230,7 +230,7 @@ Mixins can add CSS declarations to the CSS ruleset to which they are applied.
 Rules are added at the position in the CSS where the `-st-mixin` is declared.
 Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.
 
-You can apply multiple mixins from either CSS or JavaScript, or both seperated by comma `-st-mixin: mixinA, mixinB`.
+You can apply multiple mixins from either CSS or JavaScript, or both separated by comma `-st-mixin: mixinA, mixinB`.
 Multiple mixins are applied according to the order that they are declared left to right.
 
 ## Considerations when using mixins
@@ -246,7 +246,7 @@ Example:
     -st-mixin: mix(300, "xx,x"); /* ["300", "xx,x"] */
 }
 ```
-They can also be used to include quotes or backslashes as part of the paramater.
+They can also be used to include quotes or backslashes as part of the parameter.
 ```css
 .y { /* escape slashes */
     -st-mixin: mix(300, "\"xxx\""); /* ["300", "\"xxx\""] */
