@@ -9,7 +9,7 @@
     "build": "lerna run build --stream",
     "pretest": "run-p lint build",
     "lint": "lerna run lint --stream --parallel",
-    "test": "lerna run test --stream -- --parallel --colors"
+    "test": "lerna run test --stream --parallel -- --colors"
   },
   "devDependencies": {
     "@ts-tools/node": "^0.6.2",
