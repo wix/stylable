@@ -9,7 +9,7 @@
     "start": "webpack-dev-server --hot --inline",
     "clean": "rimraf ./dist",
     "test": "yarn test:node",
-    "test:node": "mocha \"./tests/**/*.spec.ts\" --watch-extensions ts --require typescript-support",
+    "test:node": "mocha -r @ts-tools/node \"./tests/**/*.spec.ts\" --watch-extensions ts",
     "lint": "tslint --project ./tsconfig.json",
     "prepack": "yarn build"
   },

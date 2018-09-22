@@ -4,7 +4,7 @@
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 -r typescript-support \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx"
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx --timeout 10000"
   },
   "peerDependencies": {
     "@stylable/core": "^0.1.0",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@stylable/runtime": "^0.1.8",
     "find-config": "^1.0.0",
-    "webpack-sources": "^1.2.0"
+    "webpack-sources": "^1.3.0"
   },
   "devDependencies": {
     "@stylable/e2e-test-kit": "^1.0.18"
