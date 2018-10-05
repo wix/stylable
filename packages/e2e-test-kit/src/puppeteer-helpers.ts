@@ -9,7 +9,7 @@ export function filterAssetResponses(responses: any, assetNames: string[]) {
 }
 
 function getStyleElementsMetadata(getCss: boolean) {
-  const styleElements = Array.from(document.head.getElementsByTagName('style'));
+  const styleElements = Array.from(document.head!.getElementsByTagName('style'));
   return styleElements.map(styleEl => {
     const data: { id?: string, depth?: string, css?: string } = {
       id: styleEl.getAttribute('st-id')!,

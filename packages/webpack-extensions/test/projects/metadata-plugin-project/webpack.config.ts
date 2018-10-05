@@ -1,8 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const StylableWebpackPlugin = require('@stylable/webpack-plugin');
-import { createElement as el } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { HTMLSnapshotPlugin } from '../../../../src/stylable-html-snapshot';
+import { basename } from 'path';
+import { StylableMetadataPlugin } from '../../../src/stylable-metadata-plugin';
 
 module.exports = {
     mode: 'development',
@@ -10,10 +9,11 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin(),
-        new HTMLSnapshotPlugin({
-            outDir: 'snapshots',
-            render(module) {
-                return renderToStaticMarkup(el(module.Index));
+        new StylableMetadataPlugin({
+            name: 'test',
+            version: '1.0.0',
+            renderSnapshot(_exp, res) {
+                return `<snapshot>${basename(res.resource)}</snapshot>`;
             }
         }),
         new HtmlWebpackPlugin()

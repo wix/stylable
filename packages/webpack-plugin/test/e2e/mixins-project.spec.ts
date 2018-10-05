@@ -34,7 +34,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement).border;
+            return getComputedStyle(document.documentElement!).border;
         });
 
         expect(backgroundColor).to.eql('1px solid rgb(255, 0, 0)');

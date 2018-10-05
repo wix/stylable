@@ -46,7 +46,7 @@ describe(`(${project})`, () => {
         const { fontFamily, backgroundColor, exports } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
-                fontFamily: getComputedStyle(document.documentElement).fontFamily,
+                fontFamily: getComputedStyle(document.documentElement!).fontFamily,
                 exports: Object.getPrototypeOf((window as any).stylableIndex)
             };
         });

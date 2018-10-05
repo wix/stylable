@@ -35,7 +35,7 @@ export class RuntimeRenderer {
   }
   public update = () => {
     if (this.renderer) {
-      this.renderer.render(this.window!.document.head, this.styles);
+      this.renderer.render(this.window!.document.head!, this.styles);
     }
   }
   public onRegister() {
