@@ -388,6 +388,32 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red;color: green');
     });
 
+    it(`apply mixin from named "as" import to a target class sharing the mixin source name`, () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./base.st.css";
+                    -st-named: a as b;
+                }
+                .a { -st-mixin: b; }
+            `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                .a { color: red; }
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--a', 'color: red');
+    });
+
     it('apply mixin from local class with extends (scope class as root)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
