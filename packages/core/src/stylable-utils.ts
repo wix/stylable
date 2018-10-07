@@ -122,10 +122,11 @@ export function scopeSelector(
 }
 
 export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
-    let mixinRoot: postcss.Rule | null = null;
+    const mixinRoot: postcss.Rule[] = [];
     mixinAst.walkRules((mixinRule: postcss.Rule) => {
-        if (mixinRule.selector === '&' && !mixinRoot) {
-            mixinRoot = mixinRule;
+        const parentRule = mixinRule.parent;
+        if (mixinRule.selector === '&' && !(parentRule.type === 'atrule' && parentRule.name === 'media')) {
+            mixinRoot.push(mixinRule);
         } else {
             const parentRule = mixinRule.parent;
             if (parentRule.type === 'atrule' && parentRule.name === 'keyframes') {
@@ -133,7 +134,6 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             }
             const out = scopeSelector(rule.selector, mixinRule.selector);
             mixinRule.selector = out.selector;
-            // mixinRule.selectorAst = out.selectorAst;
         }
     });
 
@@ -149,7 +149,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         }
         // TODO: handle rules before and after decl on entry
         mixinAst.nodes.slice().forEach(node => {
-            if (node === mixinRoot) {
+            if (node.type === 'rule' && mixinRoot.indexOf(node) !== -1) {
                 node.walkDecls(node => {
                     rule.insertBefore(mixinEntry!, node);
                 });

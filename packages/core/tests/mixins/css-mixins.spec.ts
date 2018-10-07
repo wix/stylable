@@ -352,6 +352,42 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 1, '.entry--container .imported--local', 'color: green');
     });
 
+    it('re-exported mixin maintains original definitions', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./enriched.st.css";
+                    -st-named: a;
+                }
+                .b { -st-mixin: a; }
+            `
+                },
+                '/enriched.st.css': {
+                    namespace: 'enriched',
+                    content: `
+                :import {
+                    -st-from: "./base.st.css";
+                    -st-named: a;
+                }
+                .a { color: green; }
+            `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                .a { color: red; }
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red;color: green');
+    });
+
     it('apply mixin from local class with extends (scope class as root)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
