@@ -13,7 +13,7 @@ describe('build index', () => {
             '/compA.st.css': `
                .a{}
             `,
-            '/a/b/compB.st.css': `
+            '/a/b/comp-B.st.css': `
                .b{}
             `
         });
@@ -37,8 +37,42 @@ describe('build index', () => {
             [
                 ':import {-st-from: "./compA.st.css";-st-default:CompA;}',
                 '.root CompA{}',
-                ':import {-st-from: "./a/b/compB.st.css";-st-default:CompB;}',
+                ':import {-st-from: "./a/b/comp-B.st.css";-st-default:CompB;}',
                 '.root CompB{}'
+            ].join('\n')
+        );
+    });
+    it('should create index file using a the default generator', async () => {
+        const fs = createFS({
+            '/comp-A.st.css': `
+               .a{}
+            `,
+            '/b/1-some-comp-B-.st.css': `
+               .b{}
+            `
+        });
+
+        const stylable = new Stylable('/', fs as any, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs: fs as any,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            indexFile: 'index.st.css',
+            rootDir: path.resolve('/'),
+            log
+        });
+
+        const res = fs.readFileSync(path.resolve('/index.st.css')).toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "./comp-A.st.css";-st-default:CompA;}',
+                '.root CompA{}',
+                ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;}',
+                '.root SomeCompB{}'
             ].join('\n')
         );
     });
