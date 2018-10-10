@@ -1,5 +1,5 @@
+import { processNamespace } from '@stylable/core';
 import { dirname, relative } from 'path';
-import { processNamespace } from 'stylable';
 const findConfig = require('find-config');
 
 export const resolveNamespace: typeof processNamespace = (namespace, source) => {
