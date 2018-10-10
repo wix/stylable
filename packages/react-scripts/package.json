@@ -1,0 +1,48 @@
+{
+  "name": "@stylable/react-scripts",
+  "version": "0.1.11",
+  "description": "Like react-scripts, but with stylable and typescript built-in",
+  "bin": {
+    "stylable-scripts": "./bin/stylable-scripts.js"
+  },
+  "dependencies": {
+    "@stylable/core": "^0.1.10",
+    "@stylable/webpack-plugin": "^0.1.11",
+    "case-sensitive-paths-webpack-plugin": "^2.1.2",
+    "chalk": "^2.4.1",
+    "dotenv": "^6.0.0",
+    "dotenv-expand": "^4.2.0",
+    "file-loader": "^2.0.0",
+    "fs-extra": "^7.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "object-assign": "^4.1.1",
+    "react-dev-utils": "^6.0.4",
+    "ts-loader": "^5.2.1",
+    "tslib": "^1.9.3",
+    "typescript": "~3.1.1",
+    "url-loader": "^1.1.1",
+    "webpack": "^4.20.2",
+    "webpack-dev-server": "^3.1.9",
+    "webpack-manifest-plugin": "^2.0.4"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.2.4"
+  },
+  "files": [
+    "bin",
+    "config",
+    "scripts",
+    "template",
+    "tsconfig.json",
+    "tsconfig.template.json"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/react-scripts",
+  "author": "Wix.com",
+  "license": "MIT"
+}

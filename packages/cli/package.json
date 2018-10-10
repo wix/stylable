@@ -1,0 +1,36 @@
+{
+  "name": "@stylable/cli",
+  "version": "1.0.12",
+  "description": "A low-level utility used for working with Stylable projects",
+  "main": "dist/build.js",
+  "types": "dist/build.d.ts",
+  "bin": {
+    "stc": "./dist/cli.js"
+  },
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "lint": "tslint --project .",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+  },
+  "dependencies": {
+    "@stylable/core": "^0.1.10",
+    "@stylable/node": "^0.1.12",
+    "yargs": "^12.0.2"
+  },
+  "devDependencies": {
+    "@stylable/e2e-test-kit": "^1.0.18"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/cli",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

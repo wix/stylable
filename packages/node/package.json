@@ -1,0 +1,29 @@
+{
+  "name": "@stylable/node",
+  "version": "0.1.12",
+  "description": "Integrate Stylable into your node application",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "lint": "tslint --project .",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+  },
+  "dependencies": {
+    "find-config": "^1.0.0",
+    "@stylable/core": "^0.1.10"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/node",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

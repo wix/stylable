@@ -1,0 +1,37 @@
+{
+  "name": "@stylable/e2e-test-kit",
+  "version": "1.0.18",
+  "description": "A collection of tools to help test Stylable components and applications from end-to-end",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs ./esm",
+    "build": "run-p build:cjs build:esm",
+    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
+    "build:esm": "tsc --project src --outDir esm --module esnext",
+    "lint": "tslint --project src"
+  },
+  "dependencies": {
+    "@stylable/runtime": "^0.1.8",
+    "express": "^4.16.3",
+    "memory-fs": "^0.4.1",
+    "node-eval": "^2.0.0",
+    "puppeteer": "^1.9.0",
+    "rimraf": "^2.6.2",
+    "webpack": "^4.20.2"
+  },
+  "files": [
+    "cjs",
+    "esm"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/e2e-test-kit",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

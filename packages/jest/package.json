@@ -1,0 +1,29 @@
+{
+  "name": "@stylable/jest",
+  "version": "0.1.11",
+  "description": "Test your Stylable React components using Jest",
+  "main": "dist/jest.js",
+  "types": "dist/jest.d.ts",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "lint": "tslint --project .",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+  },
+  "dependencies": {
+    "@stylable/node": "^0.1.12",
+    "@stylable/runtime": "^0.1.8"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/jest",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

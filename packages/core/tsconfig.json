@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "exclude": [
+    "site",
+    "_docs",
+    "node_modules",
+    "dist",
+    "runtime.d.ts",
+    "test-utils.d.ts",
+    "modules",
+    "**/*~~.ts"
+  ],
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": [
+      "es2015",
+      "dom"    
+    ],
+    "outDir": "./dist",
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "noUnusedLocals": false
+  }
+}
