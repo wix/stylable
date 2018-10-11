@@ -10,6 +10,7 @@
       filename: "[name].bundle.css",
       outputCSS: isProd ? true : false,
       includeCSSInJS: isProd ? false : true,
+      splitCSSByDepth: false,
       bootstrap: {
         autoInit: true,
         ...options.bootstrap

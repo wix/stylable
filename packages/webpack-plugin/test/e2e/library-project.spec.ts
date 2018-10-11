@@ -25,4 +25,5 @@ describe(`(${project})`, () => {
 
         expect(Object.keys(global.Library)).to.eql(['Label', 'Button']);
     });
+
 });

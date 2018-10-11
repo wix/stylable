@@ -18,62 +18,65 @@ class StylableParser {
         this.compilation = compilation;
     }
     parse(source, state) {
+        const currentModule = state.module;
         if (
-            isLoadedByLoaders(state.module, () => {
+            isLoadedByLoaders(currentModule, () => {
                 this.compilation.warnings.push(
                     `Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors.\n"${
-                        state.module.rawRequest
-                    }" in "${state.module.issuer.resource}"`
+                        currentModule.rawRequest
+                    }" in "${currentModule.issuer.resource}"`
                 );
             })
         ) {
             return state;
         }
-        const meta = this.stylable.process(state.module.resource);
-        state.module.buildInfo.stylableMeta = meta;
-        // state.module.buildMeta.exportsType = "namespace";
+        const meta = this.stylable.process(currentModule.resource);
+        currentModule.buildInfo.stylableMeta = meta;
+        // currentModule.buildMeta.exportsType = "namespace";
         meta.urls.filter(url => isAsset(url)).forEach(asset => {
             const absPath = makeAbsolute(
                 asset,
                 this.compilation.options.context,
-                path.dirname(state.module.resource)
+                path.dirname(currentModule.resource)
             );
-            state.module.buildInfo.fileDependencies.add(absPath);
-            state.module.addDependency(new StylableAssetDependency(absPath));
+            currentModule.buildInfo.fileDependencies.add(absPath);
+            currentModule.addDependency(new StylableAssetDependency(absPath));
         });
 
-        state.module.addDependency(new StylableExportsDependency(['default']));
-        state.module.addDependency(stylesheetDependency());
-        state.module.addDependency(rendererDependency());
+        currentModule.addDependency(new StylableExportsDependency(['default']));
+        currentModule.addDependency(stylesheetDependency());
+        currentModule.addDependency(rendererDependency());
 
         meta.imports.forEach(stylableImport => {
-            state.module.buildInfo.fileDependencies.add(stylableImport.from);
+            currentModule.buildInfo.fileDependencies.add(stylableImport.from);
             if (stylableImport.fromRelative.match(stylableExtension)) {
-                state.module.addDependency(
+                currentModule.addDependency(
                     new StylableImportDependency(stylableImport.fromRelative, {
                         defaultImport: stylableImport.defaultExport,
                         names: []
-                    })
+                    }, false)
                 );
-                this.addChildDeps(stylableImport);
+                this.addChildDeps(stylableImport, currentModule);
             }
             //TODO: handle js dependencies?
         });
 
         return state;
     }
-    addChildDeps(stylableImport) {
+    addChildDeps(stylableImport, module) {
         try {
             this.stylable.process(stylableImport.from).imports.forEach(childImport => {
-                const fileDependencies = state.module.buildInfo.fileDependencies;
+                const fileDependencies = module.buildInfo.fileDependencies;
                 if (childImport.fromRelative.match(stylableExtension)) {
                     if (!fileDependencies.has(childImport.from)) {
                         fileDependencies.add(childImport.from);
-                        this.addChildDeps(childImport, this.stylable);
+                        this.addChildDeps(childImport, module);
                     }
                 }
             });
-        } catch (e) {}
+        } catch (e) {
+            // console.log('addChildDeps', e)
+        }
     }
 }
 

@@ -19,21 +19,21 @@ class StylableExportsDependency extends NullDependency {
 }
 
 class StylableImportDependency extends ModuleDependency {
-  constructor(request, { defaultImport, names }) {
+  constructor(request, { defaultImport, names }, hesReference = true) {
     super(request);
     this.defaultImport = defaultImport;
     this.names = names;
-
+    this.hesReference = hesReference
   }
 
   getReference() {
     if (!this.module) return null;
-    return {
+    return this.hesReference ? {
       module: this.module,
       importedNames: this.defaultImport
         ? ['default'].concat(this.names)
         : this.names.slice()
-    };
+    } : null;
   }
 
   get type() {

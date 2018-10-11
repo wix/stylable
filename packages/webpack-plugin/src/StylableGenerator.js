@@ -57,7 +57,6 @@ class StylableGenerator {
     transform(module) {
 
         const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
-        const outputAst = results.meta.outputAst;
 
         this.stylable.optimizer.optimize(
             module.buildInfo.optimize,

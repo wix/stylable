@@ -8,7 +8,8 @@ const rendererDependency = () =>
     {
       defaultImport: "$renderer",
       names: []
-    }
+    },
+    true
   );
 
 const stylesheetDependency = () =>
@@ -17,7 +18,8 @@ const stylesheetDependency = () =>
     {
       defaultImport: "$stylesheet",
       names: []
-    }
+    },
+    true
   );
 
 const cssRuntimeRendererRequest = {

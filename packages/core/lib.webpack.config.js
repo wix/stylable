@@ -1,9 +1,10 @@
-const WBA = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const IgnorePlugin = require('webpack').IgnorePlugin;
+// const WBA = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const IgnorePlugin = require('webpack').IgnorePlugin;
 module.exports = {
-    mode: 'production',
+    // mode: 'production',
+    mode: 'development',
     entry: {
-        stylable: './src/stylable.ts'
+        stylable: ['./src/stylable.ts']
     },
     output: {
         filename: '[name].lib.bundle.js',
@@ -28,7 +29,8 @@ module.exports = {
                 loader: 'ts-loader',
                 options: {
                     compilerOptions: {
-                        declaration: false
+                        declaration: false,
+                        declarationMap: false
                     }
                 }
             }
@@ -36,7 +38,7 @@ module.exports = {
     },
     plugins: [
         // new IgnorePlugin(/(source-map)|(chalk)|(support-color)/,/node_modules/),
-        new WBA()
+        // new WBA()
     ]
 }
 

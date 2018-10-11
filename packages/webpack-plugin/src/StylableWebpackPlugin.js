@@ -6,6 +6,7 @@ const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
 const { isImportedByNonStylable } = require("./utils");
 const {
+  renderStaticCSS,
   calculateModuleDepthAndShallowStylableDependencies
 } = require("./stylable-module-helpers");
 const { normalizeOptions } = require("./PluginOptions");
@@ -30,7 +31,7 @@ class StylableWebpackPlugin {
     this.injectStylableModuleRuleSet(compiler);
     this.injectStylableCompilation(compiler);
     this.injectStylableRuntimeInfo(compiler);
-    this.injectStylableRuntimeChunk(compiler);
+    this.options.splitCSSByDepth ? this.injectSplitCSSChunksByDepth(compiler) : this.injectStylableRuntimeChunk(compiler);
     this.injectChunkOptimizer(compiler);
     this.injectPlugins(compiler);
   }
@@ -147,7 +148,7 @@ class StylableWebpackPlugin {
     compiler.hooks.thisCompilation.tap(
       StylableWebpackPlugin.name,
       (compilation, data) => {
-
+  
         compilation.mainTemplate.hooks.startup.tap(
           StylableWebpackPlugin.name,
           (source, chunk) => {
@@ -216,7 +217,7 @@ class StylableWebpackPlugin {
             }
           }
         );
-
+        
         if (this.options.outputCSS) {
           compilation.hooks.additionalChunkAssets.tap(
             StylableWebpackPlugin.name,
@@ -229,6 +230,113 @@ class StylableWebpackPlugin {
         }
       }
     );
+  }
+  injectSplitCSSChunksByDepth(compiler) {
+    compiler.hooks.thisCompilation.tap(
+      StylableWebpackPlugin.name,
+      (compilation, data) => {
+        
+      const actions = [];
+      const ID_PREFIX = "stylable-depth_";
+      compilation.hooks.afterOptimizeChunkIds.tap(StylableWebpackPlugin.name, chunks => {
+        function getDepth(module) {
+          return module.buildInfo.runtimeInfo.depth;
+        }
+        const chunkDepthMap = {};
+        const modulesByDepth = {};
+        
+        chunks.forEach((chunk) => {
+          [...chunk.modulesIterable].forEach((module) => {
+            if (module.type === 'stylable') {
+              const d = getDepth(module);
+              chunkDepthMap[d] = chunkDepthMap[d] || new Set();
+              chunkDepthMap[d].add(chunk);
+              modulesByDepth[d] = modulesByDepth[d] || []
+              modulesByDepth[d].push(module)
+            }
+          });
+        });
+
+        Object.keys(chunkDepthMap).sort((a, b) => Number(a) - Number(b)).forEach((depth) => {
+          const id = ID_PREFIX + depth;
+          const extractedStylableChunk = compilation.addChunk(id);
+          const css = renderStaticCSS(modulesByDepth[depth], compilation.mainTemplate, compilation.hash);
+          compilation.assets[id + '.css'] = new RawSource(css.join('\n'));
+          extractedStylableChunk.id = id;
+          extractedStylableChunk.ids = [id];
+          [...chunkDepthMap[depth]].forEach((chunk) => {
+            // not main chunks (dynamic, async)
+            if (!chunk.hasRuntime()) {
+              chunk.split(extractedStylableChunk);
+            }
+            else {
+              actions.push(() => {
+                chunk.files.push(id + '.css');
+              });
+            }
+          });
+        });
+      });
+      compilation.hooks.additionalChunkAssets.tap(StylableWebpackPlugin.name, chunks => {
+        actions.forEach((fn) => fn());
+      });
+      compilation.hooks.optimizeAssets.tap(StylableWebpackPlugin.name, assets => {
+        for (const k in assets) {
+          if (k.startsWith(ID_PREFIX) && !k.endsWith('.css')) {
+            delete assets[k];
+          }
+        }
+      });
+      compilation.mainTemplate.hooks.requireExtensions.tap(StylableWebpackPlugin.name, source => {
+        return (source +
+          `\n
+              const loadedCSSChunks = {};
+              __webpack_require__.lcss = function load(id) {
+                  const status = loadedCSSChunks[id];
+                  if(status) { return status; }
+                  return loadedCSSChunks[id] = new Promise((res)=> {      
+                      const link = document.createElement('link');
+                      link.href = id + '.css';
+                      link.rel = 'stylesheet';
+                      link.stylableDepth = Number(id.split('_').pop());
+                      link.addEventListener('load', check)
+                      
+                      for(var i = 0; i < document.head.children.length; i++){
+                        const el = document.head.children[i];
+                        if(el.tagName === 'LINK') {
+                          const m = el.href.match(/${ID_PREFIX}(\\d+).css/);
+                          if(m && Number(m[1]) === link.stylableDepth) {
+                            return res();
+                          }
+                          if(m && Number(m[1]) > link.stylableDepth) {
+                            document.head.insertBefore(link, el);
+                            break;
+                          }
+                        }
+                      }
+                      if(!link.parentNode){
+                        document.head.appendChild(link)
+                      }
+                      
+                  
+                      function check() {
+                          if (link.sheet) {
+                            link.removeEventListener('load', check)
+                            res();
+                          } else {
+                            setTimeout(check, 0)
+                          }
+                      }
+                  })
+              }
+            \n`);
+      });
+      compilation.mainTemplate.hooks.requireEnsure.tap(StylableWebpackPlugin.name, source => {
+        return (`if(String.prototype.startsWith.call(chunkId, "${ID_PREFIX}")){
+                return __webpack_require__.lcss(chunkId)
+              }\n${source}`);
+      });
+    })
   }
   optimizeChunks(chunks) {
     chunks.forEach(chunk => {
