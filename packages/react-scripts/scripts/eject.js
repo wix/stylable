@@ -21,6 +21,7 @@ const chalk = require('chalk');
 const paths = require('../config/paths');
 const inquirer = require('react-dev-utils/inquirer');
 const spawnSync = require('react-dev-utils/crossSpawn').sync;
+const os = require('os');
 
 const green = chalk.green;
 const cyan = chalk.cyan;
@@ -53,11 +54,17 @@ inquirer
     if (gitStatus) {
       console.error(
         chalk.red(
-          `This git repository has untracked files or uncommitted changes:\n\n` +
-            gitStatus.split('\n').map(line => '  ' + line) +
-            '\n\n' +
+          'This git repository has untracked files or uncommitted changes:'
+        ) +
+          '\n\n' +
+          gitStatus
+            .split('\n')
+            .map(line => line.match(/ .*/g)[0].trim())
+            .join('\n') +
+          '\n\n' +
+          chalk.red(
             'Remove untracked files, stash or commit any changes, and try again.'
-        )
+          )
       );
       process.exit(1);
     }
@@ -106,7 +113,7 @@ inquirer
       const configContent = fs.readFileSync(userTsConfig, 'utf8');
       fs.writeFileSync(userTsConfig, configContent.replace('./node_modules/@stylable/react-scripts/tsconfig.json', './tsconfig.base.json'));
     }
-    
+
     console.log();
     console.log(cyan(`Copying files into ${appPath}`));
 
@@ -199,14 +206,14 @@ inquirer
 
     fs.writeFileSync(
       path.join(appPath, 'package.json'),
-      JSON.stringify(appPackage, null, 2) + '\n'
+      JSON.stringify(appPackage, null, 2) + os.EOL
     );
     console.log();
 
     // "Don't destroy what isn't ours"
     if (ownPath.indexOf(appPath) === 0) {
       try {
-        // remove @stylable/react-scripts and stylable-scripts binaries from app node_modules
+        // remove @stylable/react-scripts and its binaries from app node_modules
         Object.keys(ownPackage.bin).forEach(binKey => {
           fs.removeSync(path.join(appPath, 'node_modules', '.bin', binKey));
         });
@@ -217,21 +224,35 @@ inquirer
     }
 
     if (fs.existsSync(paths.yarnLockFile)) {
-      // TODO: this is disabled for three reasons.
-      //
-      // 1. It produces garbage warnings on Windows on some systems:
-      //    https://github.com/facebookincubator/create-react-app/issues/2030
-      //
-      // 2. For the above reason, it breaks Windows CI:
-      //    https://github.com/facebookincubator/create-react-app/issues/2624
-      //
-      // 3. It is wrong anyway: re-running yarn will respect the lockfile
-      //    rather than package.json we just updated. Instead we should have
-      //    updated the lockfile. So we might as well not do it while it's broken.
-      //    https://github.com/facebookincubator/create-react-app/issues/2627
-      //
-      // console.log(cyan('Running yarn...'));
-      // spawnSync('yarnpkg', [], { stdio: 'inherit' });
+      const windowsCmdFilePath = path.join(
+        appPath,
+        'node_modules',
+        '.bin',
+        'stylable-scripts.cmd'
+      );
+      let windowsCmdFileContent;
+      if (process.platform === 'win32') {
+        // https://github.com/facebook/create-react-app/pull/3806#issuecomment-357781035
+        // Yarn is diligent about cleaning up after itself, but this causes the react-scripts.cmd file
+        // to be deleted while it is running. This trips Windows up after the eject completes.
+        // We'll read the batch file and later "write it back" to match npm behavior.
+        try {
+          windowsCmdFileContent = fs.readFileSync(windowsCmdFilePath);
+        } catch (err) {
+          // If this fails we're not worse off than if we didn't try to fix it.
+        }
+      }
+
+      console.log(cyan('Running yarn...'));
+      spawnSync('yarnpkg', ['--cwd', process.cwd()], { stdio: 'inherit' });
+
+      if (windowsCmdFileContent && !fs.existsSync(windowsCmdFilePath)) {
+        try {
+          fs.writeFileSync(windowsCmdFilePath, windowsCmdFileContent);
+        } catch (err) {
+          // If this fails we're not worse off than if we didn't try to fix it.
+        }
+      }
     } else {
       console.log(cyan('Running npm install...'));
       spawnSync('npm', ['install', '--loglevel', 'error'], {
