@@ -132,7 +132,7 @@ module.exports = {
           {
             test: /\.(ts|tsx)$/,
             include: paths.appSrc,
-            loader: require.resolve('ts-loader'),
+            loader: require.resolve('@ts-tools/webpack-loader'),
             options: {
               // @remove-on-eject-begin
               // babelrc: false,
@@ -143,12 +143,12 @@ module.exports = {
 
           {
             test: /\.js$/,
-            loader: require.resolve('ts-loader'),
+            loader: require.resolve('@ts-tools/webpack-loader'),
             include: externalLibsToTranspile,
             options: {
-              // needed so it has a separate transpilation instance
-              instance: 'lib-compat',
-              transpileOnly: true
+              compilerOptions: {
+                target: 'es5'
+              }
             }
           },
 
