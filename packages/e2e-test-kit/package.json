@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@stylable/runtime": "^0.1.8",
-    "express": "^4.16.3",
+    "express": "^4.16.4",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
     "puppeteer": "^1.9.0",
