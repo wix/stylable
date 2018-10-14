@@ -76,6 +76,41 @@ describe('build index', () => {
             ].join('\n')
         );
     });
+    it('should create index file using a custom generator', async () => {
+        const fs = createFS({
+            '/comp-A.st.css': `
+               .a{}
+            `,
+            '/b/1-some-comp-B-.st.css': `
+               .b{}
+            `
+        });
+
+        const stylable = new Stylable('/', fs as any, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs: fs as any,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            indexFile: 'index.st.css',
+            rootDir: path.resolve('/'),
+            log,
+            generatorPath: require.resolve('./fixtures/test-generator')
+        });
+
+        const res = fs.readFileSync(path.resolve('/index.st.css')).toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "./comp-A.st.css";-st-default:Style0;}',
+                '.root Style0{}',
+                ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:Style1;}',
+                '.root Style1{}'
+            ].join('\n')
+        );
+    });
     it('should handle name collisions by failing', async () => {
         const fs = createFS({
             '/comp.st.css': `

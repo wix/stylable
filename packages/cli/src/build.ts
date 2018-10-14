@@ -34,7 +34,7 @@ export async function build({
     generatorPath
 }: BuildOptions) {
 
-    const generatorModule = generatorPath ? require(generatorPath) : require('./default-generator');
+    const generatorModule = generatorPath ? require(resolve(generatorPath)) : require('./default-generator');
     const generator: Generator = new generatorModule.Generator();
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
