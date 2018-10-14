@@ -63,7 +63,6 @@ class StylableWebpackPlugin {
       "--",
       meta => { // TODO: move to stylable as param. 
         if (this.options.optimize.shortNamespaces) {
-          // meta.namespace = resolveNamespace(meta.namespace, meta.source);
           meta.namespace = stylable.optimizer.namespaceOptimizer.getNamespace(
             meta,
             compiler.context,
