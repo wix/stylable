@@ -1,5 +1,6 @@
 import { StylableConfig } from '@stylable/core';
 import * as fs from 'fs';
+import { resolveNamespace } from './resolveNamespace';
 import { stylableModuleFactory } from './stylable-module-factory';
 
 export interface Options {
@@ -18,6 +19,7 @@ export function attachHook({ matcher, afterCompile, stylableConfig, runtimePath 
         projectRoot: 'root',
         fileSystem: fs,
         requireModule: require,
+        resolveNamespace,
         ...stylableConfig
     }, runtimePath);
 

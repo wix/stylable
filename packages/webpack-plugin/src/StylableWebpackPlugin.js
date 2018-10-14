@@ -1,6 +1,7 @@
 const { EOL } = require("os");
 const { RawSource } = require("webpack-sources");
 const { Stylable } = require("@stylable/core");
+const { resolveNamespace } = require("@stylable/node");
 const { StylableOptimizer } = require("@stylable/core/dist/src/optimizer/stylable-optimizer");
 const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
@@ -61,6 +62,7 @@ class StylableWebpackPlugin {
       this.options.requireModule,
       "--",
       meta => { // TODO: move to stylable as param. 
+        
         if (this.options.optimize.shortNamespaces) {
           resolveNamespace(meta.namespace, meta.source);
           meta.namespace = stylable.optimizer.namespaceOptimizer.getNamespace(
@@ -75,7 +77,8 @@ class StylableWebpackPlugin {
       this.options.transformHooks,
       compiler.options.resolve,
       this.options.optimizer || new StylableOptimizer(),
-      compiler.options.mode
+      compiler.options.mode,
+      resolveNamespace
     );
     this.stylable = stylable;
   }
