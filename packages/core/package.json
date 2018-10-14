@@ -35,8 +35,6 @@
   "files": [
     "dist",
     "src",
-    "runtime.js",
-    "runtime.d.ts",
     "test-utils.js",
     "test-utils.d.ts"
   ],

@@ -1,14 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "exclude": [
-    "site",
-    "_docs",
     "node_modules",
     "dist",
-    "runtime.d.ts",
-    "test-utils.d.ts",
-    "modules",
-    "**/*~~.ts"
+    "test-utils.d.ts"
   ],
   "compilerOptions": {
     "target": "es5",
