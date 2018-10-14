@@ -11,8 +11,9 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
+    "@stylable/core": "^0.1.10",
     "find-config": "^1.0.0",
-    "@stylable/core": "^0.1.10"
+    "murmurhash": "^0.0.2"
   },
   "files": [
     "dist"

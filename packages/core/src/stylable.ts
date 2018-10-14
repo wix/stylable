@@ -71,7 +71,8 @@ export class Stylable {
             projectRoot,
             fileSystem,
             onProcess,
-            resolveOptions
+            resolveOptions,
+            this.resolveNamespace
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
