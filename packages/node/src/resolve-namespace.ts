@@ -5,7 +5,6 @@ const findConfig = require('find-config');
 
 export const resolveNamespace: typeof processNamespace = (namespace, stylesheetPath) => {
     const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
-    console.log(configPath)
     const config = require(configPath);
     const fromRoot = relative(dirname(configPath), stylesheetPath);
     return namespace + hash.v3(config.name + '@' + config.version + '/' + fromRoot);
