@@ -111,6 +111,34 @@ describe('build index', () => {
             ].join('\n')
         );
     });
+    it('should create non-existing folders in path to the generated indexFile', async () => {
+        const fs = createFS({
+            '/comp.st.css': `
+               .a{}
+            `
+        });
+
+        const stylable = new Stylable('/', fs as any, () => ({}));
+        await build({
+            extension: '.st.css',
+            fs: fs as any,
+            stylable,
+            outDir: './some-dir/other-dir/',
+            srcDir: '.',
+            indexFile: 'index.st.css',
+            rootDir: path.resolve('/'),
+            log
+        });
+
+        const res = fs.readFileSync(path.resolve('/some-dir/other-dir/index.st.css')).toString();
+
+        expect(res.trim()).to.equal(
+            [
+                ':import {-st-from: "../../comp.st.css";-st-default:Comp;}',
+                '.root Comp{}'
+            ].join('\n')
+        );
+    });
     it('should handle name collisions by failing', async () => {
         const fs = createFS({
             '/comp.st.css': `

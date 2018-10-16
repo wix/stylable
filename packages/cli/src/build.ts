@@ -91,6 +91,8 @@ function generateIndexFile(
         .join('\n');
     const indexFileTargetPath = join(fullOutDir, indexFile);
     log('[Build]', 'creating index file: ' + indexFileTargetPath);
+
+    ensureDirectory(fullOutDir, fs);
     tryRun(
         () => fs.writeFileSync(indexFileTargetPath, '\n' + indexFileContent + '\n'),
         'Write Index File Error'
