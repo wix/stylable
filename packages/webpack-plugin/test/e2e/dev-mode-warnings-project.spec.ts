@@ -30,6 +30,6 @@ describe(`(${project})`, () => {
 
         expect(values.color).to.eql('rgb(255, 0, 0)');
         // tslint:disable-next-line:max-line-length
-        expect(values.content).to.match(/"class extending component '\.root => o\d+--root' in stylesheet 'index\.st\.css' was set on a node that does not extend '\.root => o\d+--root' from stylesheet 'other\.st\.css'"/);
+        expect(values.content).to.match(/"class extending component '\.root => index\d+--root' in stylesheet 'index\.st\.css' was set on a node that does not extend '\.root => other\d+--root' from stylesheet 'other\.st\.css'"/);
     });
 });

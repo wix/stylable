@@ -128,6 +128,16 @@ export class ProjectRunner {
     return this.stats!.compilation.assets[normalize(assetPath)].source();
   }
 
+  public evalAssetModule(source: string, publicPath = ''): any {
+    const _module = { exports: {} };
+    const moduleFactory = new Function(
+      'module', 'exports', '__webpack_public_path__',
+      source
+    );
+    moduleFactory(_module, _module.exports, publicPath);
+    return _module.exports;
+  }
+
   public async closeAllPages() {
     for (const page of this.pages) {
       await page.close();

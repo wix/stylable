@@ -9,7 +9,6 @@ export class StylableProjectRunner extends ProjectRunner {
       );
       if (plugin) {
         plugin.userOptions.optimize = plugin.userOptions.optimize || {};
-        plugin.userOptions.optimize.shortNamespaces = true;
       }
     }
     return config;
