@@ -1,9 +1,13 @@
-import * as React from 'react';
-import {Header} from './header';
-import {Content} from './content';
+import React from 'react';
 import style from './app.st.css';
+import { Content } from './content';
+import { Header } from './header';
 
-export const App: React.SFC<{className?: string}> = (props) => (
+export interface IAppProps {
+    className?: string;
+}
+
+export const App: React.SFC<IAppProps> = props => (
     <div {...style('root', {}, props)}>
         <Header message="Welcome to React with Stylable" />
         <Content mainFile="src/index.tsx" />

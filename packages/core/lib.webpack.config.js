@@ -25,12 +25,7 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'ts-loader',
-                options: {
-                    compilerOptions: {
-                        declaration: false
-                    }
-                }
+                loader: '@ts-tools/webpack-loader'
             }
         ]
     },
