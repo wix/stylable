@@ -1,8 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
+import hash from 'murmurhash';
 import { join } from 'path';
-
-const hash = require('murmurhash');
 
 const project = 'namespace-generation-project';
 
@@ -30,8 +29,8 @@ describe(`(${project})`, () => {
             version: externalPackageVersion
         } = require('./projects/namespace-generation-project/node_modules/test-package/package.json');
         // tslint:disable:max-line-length
-        const expectedLocalClassname = 'index' + hash.v3(localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css');
-        const expectedImportedClassname = 'index' + hash.v3(externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css');
+        const expectedLocalClassname = 'index' + hash.v3(localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css', 0);
+        const expectedImportedClassname = 'index' + hash.v3(externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css', 0);
         // tslint:enable:max-line-length
 
         const source: string = projectRunner.getBuildAsset('main.js');
