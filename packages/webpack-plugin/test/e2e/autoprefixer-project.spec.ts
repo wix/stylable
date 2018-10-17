@@ -22,7 +22,10 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
 
-        // tslint:disable-next-line:max-line-length
-        expect(styleElements).to.eql([{ id: './src/index.st.css', depth: '1', css: `::-webkit-input-placeholder {\n  color: gray;\n}\n::-ms-input-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}` }]);
+        // tslint:disable:max-line-length
+        expect(styleElements).to.eql([{ id: './src/index.st.css', depth: '1',
+            css: '::-webkit-input-placeholder {\n  color: gray;\n}\n:-ms-input-placeholder {\n  color: gray;\n}\n::-ms-input-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}'
+        }]);
+        // tslint:enable:max-line-length
     });
 });
