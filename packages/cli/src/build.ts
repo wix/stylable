@@ -1,6 +1,7 @@
 import { isAsset, Stylable, StylableResults } from '@stylable/core';
 import { generateModuleSource } from '@stylable/node';
-import { basename, dirname, join, relative, resolve } from 'path';
+import { dirname, join, relative, resolve } from 'path';
+import { Generator } from './default-generator';
 import { FileSystem, findFiles } from './find-files';
 
 // const StylableWebpackPlugin = require('@stylable/webpack-plugin');
@@ -17,6 +18,7 @@ export interface BuildOptions {
     log: (...args: string[]) => void;
     indexFile?: string;
     diagnostics?: (...args: string[]) => void;
+    generatorPath?: string;
 }
 
 export async function build({
@@ -28,8 +30,12 @@ export async function build({
     outDir,
     log,
     diagnostics,
-    indexFile
+    indexFile,
+    generatorPath
 }: BuildOptions) {
+
+    const generatorModule = generatorPath ? require(resolve(generatorPath)) : require('./default-generator');
+    const generator: Generator = new generatorModule.Generator();
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
@@ -46,7 +52,7 @@ export async function build({
     }
     filesToBuild.forEach(filePath => {
         indexFile
-            ? generateFileIndexEntry(filePath, nameMapping, log, indexFileOutput, fullOutDir)
+            ? generateFileIndexEntry(filePath, nameMapping, log, indexFileOutput, fullOutDir, generator)
             : buildSingleFile(
                   fullOutDir,
                   filePath,
@@ -85,6 +91,8 @@ function generateIndexFile(
         .join('\n');
     const indexFileTargetPath = join(fullOutDir, indexFile);
     log('[Build]', 'creating index file: ' + indexFileTargetPath);
+
+    ensureDirectory(fullOutDir, fs);
     tryRun(
         () => fs.writeFileSync(indexFileTargetPath, '\n' + indexFileContent + '\n'),
         'Write Index File Error'
@@ -183,9 +191,11 @@ function generateFileIndexEntry(
     nameMapping: { [key: string]: string },
     log: (...args: string[]) => void,
     indexFileOutput: Array<{ from: string; name: string }>,
-    fullOutDir: string
+    fullOutDir: string,
+    generator: Generator
 ) {
-    const name = filename2varname(basename(filePath));
+    const name = generator.generateImport(filePath).default;
+
     if (nameMapping[name]) {
         // prettier-ignore
         throw new Error(`Name Collision Error: ${nameMapping[name]} and ${filePath} has the same filename`);
@@ -204,9 +214,13 @@ function handleDiagnostics(
     diagnosticsMsg: string[],
     filePath: string
 ) {
-    if (diagnostics && res.meta.diagnostics.reports.length) {
+    const reports = res.meta.transformDiagnostics ?
+        res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports) :
+        res.meta.diagnostics.reports;
+
+    if (diagnostics && reports.length) {
         diagnosticsMsg.push(`Errors in file: ${filePath}`);
-        res.meta.diagnostics.reports.forEach(report => {
+        reports.forEach(report => {
             const err = report.node.error(report.message, report.options);
             diagnosticsMsg.push([report.message, err.showSourceCode()].join('\n'));
         });
@@ -231,19 +245,6 @@ function createImportForComponent(from: string, defaultName: string) {
 function addDotSlash(p: string) {
     p = p.replace(/\\/g, '/');
     return p.charAt(0) === '.' ? p : './' + p;
-}
-
-function filename2varname(filename: string) {
-    return string2varname(filename.replace(/(?=.*)\.\w+$/, '').replace(/\.st$/, '')).replace(
-        /^[a-z]/,
-        (x: string) => {
-            return x.toUpperCase();
-        }
-    );
-}
-
-function string2varname(str: string) {
-    return str.replace(/[^0-9a-zA-Z_]/gm, '').replace(/^[^a-zA-Z_]+/gm, '');
 }
 
 function ensureDirectory(dir: string, fs: FileSystem) {
