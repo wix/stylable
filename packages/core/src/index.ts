@@ -13,7 +13,7 @@ export {
     removeSTDirective
 } from './stylable-transformer';
 export * from './stylable-utils';
-export { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
+export { CSSResolve, JSResolve, resolverWarnings, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';
 export { valueMapping, SBTypesParsers, stKeys } from './stylable-value-parsers';
