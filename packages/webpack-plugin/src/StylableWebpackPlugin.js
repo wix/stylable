@@ -1,6 +1,7 @@
 const { EOL } = require("os");
 const { RawSource } = require("webpack-sources");
 const { Stylable } = require("@stylable/core");
+const { resolveNamespace } = require("@stylable/node");
 const { StylableOptimizer } = require("@stylable/core/dist/src/optimizer/stylable-optimizer");
 const findConfig = require("find-config");
 const { connectChunkAndModule } = require("webpack/lib/GraphHelpers");
@@ -74,7 +75,8 @@ class StylableWebpackPlugin {
       this.options.transformHooks,
       compiler.options.resolve,
       this.options.optimizer || new StylableOptimizer(),
-      compiler.options.mode
+      compiler.options.mode,
+      resolveNamespace
     );
     this.stylable = stylable;
   }

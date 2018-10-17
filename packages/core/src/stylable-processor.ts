@@ -1,3 +1,4 @@
+import hash from 'murmurhash';
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import * as path from './path';
@@ -25,7 +26,6 @@ import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-
 import { SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
-const hash = require('murmurhash');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
@@ -460,7 +460,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
 }
 
 export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source); // .toString(36);
+    return namespace + hash.v3(source, 0); // .toString(36);
 }
 
 export function process(

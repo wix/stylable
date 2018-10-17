@@ -1,0 +1,7 @@
+:import {
+    -st-from: "test-package/index.st.css";
+    -st-default: Comp;
+}
+
+.root { background-color: red; }
+.Comp { background-color: red; }
