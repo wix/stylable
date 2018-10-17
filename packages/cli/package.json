@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "dist/build.js",
   "types": "dist/build.d.ts",
@@ -21,7 +21,7 @@
     "yargs": "^12.0.2"
   },
   "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.0.19"
+    "@stylable/e2e-test-kit": "^1.0.20"
   },
   "files": [
     "dist"
