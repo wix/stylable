@@ -460,7 +460,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
 }
 
 export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source, 0); // .toString(36);
+    return namespace + hash.v3(source); // .toString(36);
 }
 
 export function process(

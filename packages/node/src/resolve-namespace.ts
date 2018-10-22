@@ -7,5 +7,5 @@ export const resolveNamespace: typeof processNamespace = (namespace: string, sty
     const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
     const config = require(configPath);
     const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
-    return namespace + hash.v3(config.name + '@' + config.version + '/' + fromRoot, 0);
+    return namespace + hash.v3(config.name + '@' + config.version + '/' + fromRoot);
 };
