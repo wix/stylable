@@ -1,4 +1,4 @@
-import { Pojo, StylableMeta, valueMapping, StateParsedValue } from '@stylable/core';
+import { Pojo, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
 import { MappedStates } from '@stylable/core/dist/src/stylable-value-parsers'; // todo: move this type?
 
 export interface ExtractedSchema {
@@ -62,7 +62,7 @@ function convertMappedStateToSchema(state: StateParsedValue): SchemaStates {
         stateSchema.default = state.defaultValue;
     }
 
-    if (state.arguments) {
+    if (state.arguments.length) {
         stateSchema.enum = [];
         for (const arg of state.arguments) {
             if (typeof arg === 'string') { // enum options

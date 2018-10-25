@@ -61,17 +61,12 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta);
-            expect(res).to.eql({
-                $schema: 'http://json-schema.org/draft-06/schema#',
-                $id: 'src/...date-display.st.css',
-                $ref: 'stylable/module',
-                properties: {
-                    root: {
-                        type: 'class',
-                        states: {
-                            someState: {
-                                type: 'boolean'
-                            }
+            expect(res.properties).to.eql({
+                root: {
+                    type: 'class',
+                    states: {
+                        someState: {
+                            type: 'boolean'
                         }
                     }
                 }
@@ -92,25 +87,20 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta);
-            expect(res).to.eql({
-                $schema: 'http://json-schema.org/draft-06/schema#',
-                $id: 'src/...date-display.st.css',
-                $ref: 'stylable/module',
-                properties: {
-                    root: {
-                        type: 'class',
-                        states: {
-                            someState: {
-                                type: 'string',
-                                default: 'myState'
-                            }
+            expect(res.properties).to.eql({
+                root: {
+                    type: 'class',
+                    states: {
+                        someState: {
+                            type: 'string',
+                            default: 'myState'
                         }
                     }
                 }
             });
         });
 
-        it('extracts a class schema with a enum state', () => {
+        it('extracts a class schema with an enum state', () => {
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
                 files: {
@@ -124,25 +114,73 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta);
-            expect(res).to.eql({
-                $schema: 'http://json-schema.org/draft-06/schema#',
-                $id: 'src/...date-display.st.css',
-                $ref: 'stylable/module',
-                properties: {
-                    root: {
-                        type: 'class',
-                        states: {
-                            size: {
-                                type: 'enum',
-                                enum: ['small', 'medium', 'large']
-                            }
+            expect(res.properties).to.eql({
+                root: {
+                    type: 'class',
+                    states: {
+                        size: {
+                            type: 'enum',
+                            enum: ['small', 'medium', 'large']
                         }
                     }
                 }
             });
         });
 
-        xit('extracts a schema with an element', () => { // TODO: figure out whether to resolve Comp or ref (abs/rel)
+        it('extracts a class schema with a number state', () => {
+            const mock = generateStylableResult({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `.root{
+                            -st-states: size(number);
+                        }`
+                    }
+                }
+            });
+
+            const res = extractSchema(mock.meta);
+            expect(res.properties).to.eql({
+                root: {
+                    type: 'class',
+                    states: {
+                        size: {
+                            type: 'number'
+                        }
+                    }
+                }
+            });
+        });
+
+        it('extracts a class schema with a tags state', () => {
+            const mock = generateStylableResult({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `.root{
+                            -st-states: size(tag);
+                        }`
+                    }
+                }
+            });
+
+            const res = extractSchema(mock.meta);
+            expect(res.properties).to.eql({
+                root: {
+                    type: 'class',
+                    states: {
+                        size: {
+                            type: 'tag'
+                        }
+                    }
+                }
+            });
+        });
+
+        xit('extracts a schema with an element', () => {
+            // TODO: figure out whether to resolve Comp or ref (abs/rel)
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
                 files: {
