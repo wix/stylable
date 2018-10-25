@@ -1,0 +1,29 @@
+{
+  "name": "@stylable/json-schema",
+  "version": "0.1.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs ./esm",
+    "build": "run-p build:cjs build:esm",
+    "build:cjs": "tsc -p src --outDir cjs --module commonjs",
+    "build:esm": "tsc -p src --outDir esm --module esnext",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p src",
+    "lint:test": "tslint -p test",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+  },
+  "dependencies": {
+    "@stylable/core": "^0.1.11"
+  },
+  "files": [
+    "cjs",
+    "esm",
+    "src"
+  ],
+  "license": "BSD-3-Clause",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/json-schema",
+  "sideEffects": false,
+  "private": true
+}
