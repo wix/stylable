@@ -168,10 +168,11 @@ export function validateStateDefinition(
                 if (selectorChunk.length === 1 && selectorChunk[0].type === 'class') {
                     const className = selectorChunk[0].name;
                     const classMeta = meta.classes[className];
+                    const states = classMeta[valueMapping.states];
 
-                    if (classMeta && classMeta._kind === 'class') {
-                        for (const stateName in classMeta[valueMapping.states]) {
-                            const state = classMeta[valueMapping.states][stateName];
+                    if (classMeta && classMeta._kind === 'class' && states) {
+                        for (const stateName in states) { // TODO: Sort out types
+                            const state = states[stateName];
                             if (state && typeof state === 'object') {
                                 const res = validateStateArgument(
                                     state,
@@ -310,7 +311,7 @@ export function transformPseudoStateSelector(
 }
 
 export function setStateToNode(
-    states: Pojo<StateParsedValue>,
+    states: MappedStates,
     meta: StylableMeta,
     name: string,
     node: SelectorAstNode,
