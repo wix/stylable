@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Test your Stylable React components using Jest",
   "main": "dist/jest.js",
   "types": "dist/jest.d.ts",
@@ -11,7 +11,7 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/node": "^0.1.13",
+    "@stylable/node": "^0.1.14",
     "@stylable/runtime": "^0.1.9"
   },
   "files": [
