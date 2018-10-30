@@ -1,9 +1,10 @@
 language: node_js
-sudo: required # needed for headless chrome's sandbox
+sudo: required # needed for headless chrome (puppeteer)
 
-notifications:
-    slack: wixc3:xUUjwQ3EV68OhBqh6LRdngEr
-    
+os:
+  - linux
+  - osx
+
 node_js:
   - 10 # current
   - 8  # lts
@@ -15,3 +16,6 @@ cache:
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.1
   - export PATH=$HOME/.yarn/bin:$PATH
+
+notifications:
+    slack: wixc3:xUUjwQ3EV68OhBqh6LRdngEr
