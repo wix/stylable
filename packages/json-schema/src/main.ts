@@ -9,7 +9,7 @@ export interface ExtractedSchema {
 }
 
 export interface SchemaEntry {
-    $ref?: string;
+    extends?: { $ref?: string };
     type?: string;
     states?: Pojo<SchemaStates>;
 }
@@ -23,24 +23,32 @@ export interface SchemaStates {
 export function extractSchema(meta: StylableMeta, basePath: string): ExtractedSchema {
     const schema: ExtractedSchema = {
         $schema: 'http://json-schema.org/draft-06/schema#',
-        $id: 'src/...date-display.st.css',
+        $id: meta.source,
         $ref: 'stylable/module',
         properties: {}
     };
 
-    for (const entry in meta.mappedSymbols) {
+    for (const entry of Object.keys(meta.mappedSymbols)) {
         const symbol = meta.mappedSymbols[entry];
         schema.properties[entry] = {};
 
         if (symbol._kind === 'class' || symbol._kind === 'element') {
+            const schemaEntry = schema.properties[entry];
             const states = symbol[valueMapping.states];
-            schema.properties[entry].type = symbol._kind;
+            const extended = symbol[valueMapping.extends];
+            schemaEntry.type = symbol._kind;
 
             if (states) {
-                schema.properties[entry].states = getStatesForSymbol(states);
+                schemaEntry.states = getStatesForSymbol(states);
             }
-        } else if (symbol._kind === 'import') {
-            schema.properties[entry].$ref = getImportedRef(symbol, basePath);
+
+            if (extended) {
+                if (extended._kind === 'import' && extended.import) {
+                    schemaEntry.extends = { $ref: getImportedRef(extended, basePath) };
+                } else {
+                    schemaEntry.extends = { $ref: extended.name };
+                }
+            }
         } else if (symbol._kind === 'var') {
             schema.properties[entry].type = symbol._kind;
         }
@@ -91,7 +99,7 @@ function getImportedRef(symbol: ImportSymbol, basePath: string): string {
     const refPath = is3rdParty
         ? `${symbol.import.from}`
         : `./${symbol.import.from.slice(basePath.length)}`;
-    const suffix = symbol.type === 'default' ? 'default' : symbol.import.named[symbol.name];
+    const suffix = symbol.type === 'default' ? 'root' : `${symbol.name}`;
 
     return `${refPath}#${suffix}`;
 }

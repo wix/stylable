@@ -1,9 +1,12 @@
 import { generateStylableResult } from '@stylable/core/test-utils';
-import { expect } from 'chai';
+import { flatMatch } from '@stylable/core/tests/matchers/flat-match';
+import { expect, use } from 'chai';
 import { extractSchema } from '../src';
 
+use(flatMatch);
+
 describe('Stylable JSON Schema Extractor', () => {
-    describe('extract local symbols', () => {
+    describe('local symbols', () => {
         it('schema with a class', () => {
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
@@ -18,7 +21,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res).to.eql({
                 $schema: 'http://json-schema.org/draft-06/schema#',
-                $id: 'src/...date-display.st.css',
+                $id: '/entry.st.css',
                 $ref: 'stylable/module',
                 properties: {
                     root: {
@@ -40,7 +43,7 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta, '/');
-            expect(res.properties.Comp).to.contain({
+            expect(res.properties.Comp).to.flatMatch({
                 type: 'element'
             });
         });
@@ -57,13 +60,13 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta, '/');
-            expect(res.properties.myVar).to.contain({
+            expect(res.properties.myVar).to.flatMatch({
                 type: 'var'
             });
         });
     });
 
-    describe('extract states', () => {
+    describe('states', () => {
         it('schema with a boolean state', () => {
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
@@ -86,6 +89,27 @@ describe('Stylable JSON Schema Extractor', () => {
                             type: 'boolean'
                         }
                     }
+                }
+            });
+        });
+
+        it('schema with a boolean stateX', () => {
+            const mock = generateStylableResult({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `Comp{
+                            -st-states: someState;
+                        }`
+                    }
+                }
+            });
+
+            const res = extractSchema(mock.meta, '/');
+            expect(res.properties).to.flatMatch({
+                Comp: {
+                    type: 'element'
                 }
             });
         });
@@ -195,25 +219,28 @@ describe('Stylable JSON Schema Extractor', () => {
                 }
             });
         });
+
+        it.skip('mapped states', () => {
+            /**/
+        });
+        it.skip('state validators', () => {
+            /**/
+        });
     });
 
-    describe('imported', () => {
-        it('with an imported default element', () => {
+    describe('extends', () => {
+        it('with an extended local class', () => {
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                                    :import{
-                                        -st-from: './imported.st.css';
-                                        -st-default: Comp;
+                                    .extended {}
+                                    .root {
+                                        -st-extends: extended;
                                     }
                                 `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'entry',
-                        content: `.root{}`
                     }
                 }
             });
@@ -222,31 +249,27 @@ describe('Stylable JSON Schema Extractor', () => {
             expect(res.properties)
                 .to.be.an('object')
                 .that.deep.include({
-                    Comp: {
-                        $ref: './imported.st.css#default'
+                    root: {
+                        type: 'class',
+                        extends: {
+                            $ref: 'extended'
+                        }
                     }
                 });
         });
 
-        it('with an imported named class', () => {
+        it('with an extended local element', () => {
             const mock = generateStylableResult({
                 entry: '/entry.st.css',
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                                    :import{
-                                        -st-from: './imported.st.css';
-                                        -st-named: part;
+                                    Element {}
+                                    .root {
+                                        -st-extends: Element;
                                     }
                                 `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'entry',
-                        content: `
-                            .root{}
-                            .part{}
-                        `
                     }
                 }
             });
@@ -255,130 +278,231 @@ describe('Stylable JSON Schema Extractor', () => {
             expect(res.properties)
                 .to.be.an('object')
                 .that.deep.include({
-                    part: {
-                        $ref: './imported.st.css#part'
+                    root: {
+                        type: 'class',
+                        extends: {
+                            $ref: 'Element'
+                        }
                     }
                 });
         });
 
-        it('with an imported named element', () => {
-            const mock = generateStylableResult({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                                    :import{
-                                        -st-from: './imported.st.css';
-                                        -st-named: Comp;
-                                    }
-                                `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'entry',
-                        content: `Comp{}`
-                    }
-                }
-            });
-
-            const res = extractSchema(mock.meta, '/');
-            expect(res.properties)
-                .to.be.an('object')
-                .that.deep.include({
-                    Comp: {
-                        $ref: './imported.st.css#Comp'
-                    }
-                });
+        describe.skip('native elements', () => {
+            /**/
         });
 
-        it('with an imported default element from 3rd-party', () => {
-            const mock = generateStylableResult({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                                    :import{
-                                        -st-from: 'mock-package/imported.st.css';
-                                        -st-default: Comp;
-                                    }
-                                `
-                    },
-                    '/node_modules/mock-package/imported.st.css': {
-                        namespace: 'entry',
-                        content: `Comp{}`
-                    }
-                }
-            });
-
-            const res = extractSchema(mock.meta, '/');
-            expect(res.properties)
-                .to.be.an('object')
-                .that.deep.include({
-                    Comp: {
-                        $ref: 'mock-package/imported.st.css#default'
+        describe('imported', () => {
+            it('with an extended default import', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: './imported.st.css';
+                                            -st-default: Comp;
+                                        }
+                                        .root {
+                                            -st-extends: Comp;
+                                        }
+                                    `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.root{}`
+                        }
                     }
                 });
-        });
 
-        it('with an imported named class from 3rd-party', () => {
-            const mock = generateStylableResult({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                                    :import{
-                                        -st-from: 'mock-package/imported.st.css';
-                                        -st-named: part;
-                                    }
-                                `
-                    },
-                    '/node_modules/mock-package/imported.st.css': {
-                        namespace: 'entry',
-                        content: `.part{}`
-                    }
-                }
-            });
-
-            const res = extractSchema(mock.meta, '/');
-            expect(res.properties)
-                .to.be.an('object')
-                .that.deep.include({
-                    part: {
-                        $ref: 'mock-package/imported.st.css#part'
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties).to.flatMatch({
+                    root: {
+                        type: 'class',
+                        extends: {
+                            $ref: './imported.st.css#root'
+                        }
                     }
                 });
-        });
-
-        it('with an imported named element from 3rd-party', () => {
-            const mock = generateStylableResult({
-                entry: '/entry.st.css',
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                                    :import{
-                                        -st-from: 'mock-package/imported.st.css';
-                                        -st-named: Comp;
-                                    }
-                                `
-                    },
-                    '/node_modules/mock-package/imported.st.css': {
-                        namespace: 'entry',
-                        content: `.root{}`
-                    }
-                }
             });
 
-            const res = extractSchema(mock.meta, '/');
-            expect(res.properties)
-                .to.be.an('object')
-                .that.deep.include({
-                    Comp: {
-                        $ref: 'mock-package/imported.st.css#Comp'
+            it('with an extended named import', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: './imported.st.css';
+                                            -st-named: part;
+                                        }
+                                        .root {
+                                            -st-extends: part;
+                                        }
+                                    `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.part{}`
+                        }
                     }
                 });
+
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties)
+                    .to.be.an('object')
+                    .that.deep.include({
+                        root: {
+                            type: 'class',
+                            extends: {
+                                $ref: './imported.st.css#part'
+                            }
+                        }
+                    });
+            });
+
+            it('with an extended named import using an alias', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: './imported.st.css';
+                                            -st-named: part as myPart;
+                                        }
+                                        .root {
+                                            -st-extends: myPart;
+                                        }
+                                    `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.part{}`
+                        }
+                    }
+                });
+
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties)
+                    .to.be.an('object')
+                    .that.deep.include({
+                        root: {
+                            type: 'class',
+                            extends: {
+                                $ref: './imported.st.css#part'
+                            }
+                        }
+                    });
+            });
+
+            it('with an extended default import from a 3rd party', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: 'mock-package/imported.st.css';
+                                            -st-default: Comp;
+                                        }
+                                        .root {
+                                            -st-extends: Comp;
+                                        }
+                                    `
+                        },
+                        '/node_modules/mock-package/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.root{}`
+                        }
+                    }
+                });
+
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties).to.flatMatch({
+                    root: {
+                        type: 'class',
+                        extends: {
+                            $ref: 'mock-package/imported.st.css#root'
+                        }
+                    }
+                });
+            });
+
+            it('with an extended named import from a 3rd party', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: 'mock-package/imported.st.css';
+                                            -st-named: part;
+                                        }
+                                        .root {
+                                            -st-extends: part;
+                                        }
+                                    `
+                        },
+                        '/node_modules/mock-package/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.part{}`
+                        }
+                    }
+                });
+
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties)
+                    .to.be.an('object')
+                    .that.deep.include({
+                        root: {
+                            type: 'class',
+                            extends: {
+                                $ref: 'mock-package/imported.st.css#part'
+                            }
+                        }
+                    });
+            });
+
+            it('with an extended named import using an alias from a 3rd party', () => {
+                const mock = generateStylableResult({
+                    entry: '/entry.st.css',
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                        :import {
+                                            -st-from: 'mock-package/imported.st.css';
+                                            -st-named: part as myPart;
+                                        }
+                                        .root {
+                                            -st-extends: myPart;
+                                        }
+                                    `
+                        },
+                        '/node_modules/mock-package/imported.st.css': {
+                            namespace: 'entry',
+                            content: `.part{}`
+                        }
+                    }
+                });
+
+                const res = extractSchema(mock.meta, '/');
+                expect(res.properties)
+                    .to.be.an('object')
+                    .that.deep.include({
+                        root: {
+                            type: 'class',
+                            extends: {
+                                $ref: 'mock-package/imported.st.css#part'
+                            }
+                        }
+                    });
+            });
         });
     });
 });
