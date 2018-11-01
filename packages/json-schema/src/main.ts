@@ -1,5 +1,4 @@
-import { ImportSymbol, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
-import { MappedStates } from '@stylable/core/dist/src/stylable-value-parsers'; // todo: move this type?
+import { ImportSymbol, MappedStates, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
 import { JSONSchema7 } from 'json-schema';
 
 export type StateDict = { [stateName: string]: SchemaStates } & object;

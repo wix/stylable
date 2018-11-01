@@ -16,7 +16,7 @@ export * from './stylable-utils';
 export { CSSResolve, JSResolve, resolverWarnings, StylableResolver } from './stylable-resolver';
 export { Diagnostics, Diagnostic, DiagnosticType } from './diagnostics';
 export { createMinimalFS, File, MinimalFSSetup } from './memory-minimal-fs';
-export { valueMapping, SBTypesParsers, stKeys } from './stylable-value-parsers';
+export { MappedStates, valueMapping, SBTypesParsers, stKeys } from './stylable-value-parsers';
 export { createInfrastructure, StylableInfrastructure } from './create-infra-structure';
 export * from './stylable';
 export * from './types';
