@@ -21,7 +21,7 @@ describe('Stylable JSON Schema Extractor', () => {
 
             const res = extractSchema(mock.meta, normalize('/'));
             expect(res).to.eql({
-                $id: '/entry.st.css',
+                $id: normalize('/entry.st.css'),
                 $ref: 'stylable/module',
                 properties: {
                     root: {
