@@ -22,6 +22,12 @@
     "esm",
     "src"
   ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "BSD-3-Clause",
   "repository": "https://github.com/wix/stylable/tree/master/packages/json-schema",
   "sideEffects": false,
