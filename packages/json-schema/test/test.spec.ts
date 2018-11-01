@@ -20,12 +20,11 @@ describe('Stylable JSON Schema Extractor', () => {
 
             const res = extractSchema(mock.meta, '/');
             expect(res).to.eql({
-                $schema: 'http://json-schema.org/draft-06/schema#',
                 $id: '/entry.st.css',
                 $ref: 'stylable/module',
                 properties: {
                     root: {
-                        type: 'class'
+                        $ref: 'stylable/class'
                     }
                 }
             });
@@ -43,8 +42,8 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta, '/');
-            expect(res.properties.Comp).to.flatMatch({
-                type: 'element'
+            expect(res.properties!.Comp).to.flatMatch({
+                $ref: 'stylable/element'
             });
         });
 
@@ -60,8 +59,8 @@ describe('Stylable JSON Schema Extractor', () => {
             });
 
             const res = extractSchema(mock.meta, '/');
-            expect(res.properties.myVar).to.flatMatch({
-                type: 'var'
+            expect(res.properties!.myVar).to.flatMatch({
+                $ref: 'stylable/var'
             });
         });
     });
@@ -83,7 +82,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.eql({
                 root: {
-                    type: 'class',
+                    $ref: 'stylable/class',
                     states: {
                         someState: {
                             type: 'boolean'
@@ -109,7 +108,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.flatMatch({
                 Comp: {
-                    type: 'element'
+                    $ref: 'stylable/element'
                 }
             });
         });
@@ -130,7 +129,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.eql({
                 root: {
-                    type: 'class',
+                    $ref: 'stylable/class',
                     states: {
                         someState: {
                             type: 'string',
@@ -157,7 +156,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.eql({
                 root: {
-                    type: 'class',
+                    $ref: 'stylable/class',
                     states: {
                         size: {
                             type: 'enum',
@@ -184,7 +183,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.eql({
                 root: {
-                    type: 'class',
+                    $ref: 'stylable/class',
                     states: {
                         size: {
                             type: 'number'
@@ -210,7 +209,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(mock.meta, '/');
             expect(res.properties).to.eql({
                 root: {
-                    type: 'class',
+                    $ref: 'stylable/class',
                     states: {
                         size: {
                             type: 'tag'
@@ -220,11 +219,30 @@ describe('Stylable JSON Schema Extractor', () => {
             });
         });
 
-        it.skip('mapped states', () => {
-            /**/
-        });
-        it.skip('state validators', () => {
-            /**/
+        it('schema with mapped states', () => {
+            const mock = generateStylableResult({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `.root{
+                                -st-states: state("custom");
+                            }`
+                    }
+                }
+            });
+
+            const res = extractSchema(mock.meta, '/');
+            expect(res.properties).to.eql({
+                root: {
+                    $ref: 'stylable/class',
+                    states: {
+                        state: {
+                            type: 'mapped'
+                        }
+                    }
+                }
+            });
         });
     });
 
@@ -250,7 +268,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 .to.be.an('object')
                 .that.deep.include({
                     root: {
-                        type: 'class',
+                        $ref: 'stylable/class',
                         extends: {
                             $ref: 'extended'
                         }
@@ -279,7 +297,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 .to.be.an('object')
                 .that.deep.include({
                     root: {
-                        type: 'class',
+                        $ref: 'stylable/class',
                         extends: {
                             $ref: 'Element'
                         }
@@ -318,7 +336,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 const res = extractSchema(mock.meta, '/');
                 expect(res.properties).to.flatMatch({
                     root: {
-                        type: 'class',
+                        $ref: 'stylable/class',
                         extends: {
                             $ref: './imported.st.css#root'
                         }
@@ -354,7 +372,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     .to.be.an('object')
                     .that.deep.include({
                         root: {
-                            type: 'class',
+                            $ref: 'stylable/class',
                             extends: {
                                 $ref: './imported.st.css#part'
                             }
@@ -390,7 +408,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     .to.be.an('object')
                     .that.deep.include({
                         root: {
-                            type: 'class',
+                            $ref: 'stylable/class',
                             extends: {
                                 $ref: './imported.st.css#part'
                             }
@@ -424,7 +442,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 const res = extractSchema(mock.meta, '/');
                 expect(res.properties).to.flatMatch({
                     root: {
-                        type: 'class',
+                        $ref: 'stylable/class',
                         extends: {
                             $ref: 'mock-package/imported.st.css#root'
                         }
@@ -460,7 +478,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     .to.be.an('object')
                     .that.deep.include({
                         root: {
-                            type: 'class',
+                            $ref: 'stylable/class',
                             extends: {
                                 $ref: 'mock-package/imported.st.css#part'
                             }
@@ -496,7 +514,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     .to.be.an('object')
                     .that.deep.include({
                         root: {
-                            type: 'class',
+                            $ref: 'stylable/class',
                             extends: {
                                 $ref: 'mock-package/imported.st.css#part'
                             }

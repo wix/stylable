@@ -1,17 +1,15 @@
-import { ImportSymbol, Pojo, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
+import { ImportSymbol, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
 import { MappedStates } from '@stylable/core/dist/src/stylable-value-parsers'; // todo: move this type?
+import { JSONSchema7 } from 'json-schema';
 
-export interface ExtractedSchema {
-    $schema: 'http://json-schema.org/draft-06/schema#';
-    $id: string;
-    $ref: string;
-    properties: Pojo<SchemaEntry>;
-}
+export type StateDict = { [stateName: string]: SchemaStates } & object;
 
-export interface SchemaEntry {
-    extends?: { $ref?: string };
-    type?: string;
-    states?: Pojo<SchemaStates>;
+export interface ExtractedSchema extends JSONSchema7 {
+    states?: StateDict;
+    extends?: { $ref: string };
+    properties?: {
+        [key: string]: boolean | ExtractedSchema;
+    };
 }
 
 export interface SchemaStates {
@@ -22,52 +20,56 @@ export interface SchemaStates {
 
 export function extractSchema(meta: StylableMeta, basePath: string): ExtractedSchema {
     const schema: ExtractedSchema = {
-        $schema: 'http://json-schema.org/draft-06/schema#',
         $id: meta.source,
-        $ref: 'stylable/module',
-        properties: {}
+        $ref: 'stylable/module'
     };
 
     for (const entry of Object.keys(meta.mappedSymbols)) {
+        if (!schema.properties) {
+            schema.properties = {};
+        }
+
         const symbol = meta.mappedSymbols[entry];
         schema.properties[entry] = {};
 
-        if (symbol._kind === 'class' || symbol._kind === 'element') {
-            const schemaEntry = schema.properties[entry];
+        const schemaEntry = schema.properties[entry];
+
+        if (typeof schemaEntry === 'boolean') {
+            continue;
+        } else if (symbol._kind === 'class' || symbol._kind === 'element') {
             const states = symbol[valueMapping.states];
             const extended = symbol[valueMapping.extends];
-            schemaEntry.type = symbol._kind;
+            schemaEntry.$ref = `stylable/${symbol._kind}`;
 
             if (states) {
                 schemaEntry.states = getStatesForSymbol(states);
             }
 
             if (extended) {
-                if (extended._kind === 'import' && extended.import) {
-                    schemaEntry.extends = { $ref: getImportedRef(extended, basePath) };
-                } else {
-                    schemaEntry.extends = { $ref: extended.name };
-                }
+                schemaEntry.extends = (extended._kind === 'import' && extended.import) ?
+                    { $ref: getImportedRef(extended, basePath) } :
+                    { $ref: extended.name };
             }
-        } else if (symbol._kind === 'var') {
-            schema.properties[entry].type = symbol._kind;
+        } else if (symbol._kind === 'var' && typeof schemaEntry !== 'boolean') {
+            schemaEntry.$ref = `stylable/${symbol._kind}`;
         }
     }
 
     return schema;
 }
 
-function getStatesForSymbol(states: MappedStates): Pojo<SchemaStates> {
-    const res: Pojo<SchemaStates> = {};
+function getStatesForSymbol(states: MappedStates): StateDict {
+    const res: StateDict = {};
 
     for (const stateName of Object.keys(states)) {
         const stateDef = states[stateName];
-        if (stateDef === null) {
-            // handle boolean states
+        if (stateDef === null) { // handle boolean states
             res[stateName] = { type: 'boolean' };
-        } else if (typeof stateDef === 'object') {
-            // handle typed states
+        } else if (typeof stateDef === 'object') { // handle typed states
             res[stateName] = convertMappedStateToSchema(stateDef);
+        } else if (typeof stateDef === 'string') {
+            // handle mapped states
+            res[stateName] = { type: 'mapped' };
         }
     }
 
