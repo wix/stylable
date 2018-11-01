@@ -1,6 +1,7 @@
 import { generateStylableResult } from '@stylable/core/test-utils';
 import { flatMatch } from '@stylable/core/tests/matchers/flat-match';
 import { expect, use } from 'chai';
+import { normalize } from 'path';
 import { extractSchema } from '../src';
 
 use(flatMatch);
@@ -18,7 +19,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 }
             });
 
-            const res = extractSchema(mock.meta, '/');
+            const res = extractSchema(mock.meta, normalize('/'));
             expect(res).to.eql({
                 $id: '/entry.st.css',
                 $ref: 'stylable/module',
@@ -521,6 +522,65 @@ describe('Stylable JSON Schema Extractor', () => {
                         }
                     });
             });
+        });
+    });
+
+    it('complex example', () => {
+        const mock = generateStylableResult({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                                :import {
+                                    -st-from: './imported.st.css';
+                                    -st-default: Comp;
+                                    -st-named: part;
+                                }
+                                :vars {
+                                    myColor: red;
+                                }
+                                .root {
+                                    -st-extends: Comp;
+                                }
+                                .otherPart {
+                                    -st-extends: part;
+                                }
+                            `
+                },
+                '/imported.st.css': {
+                    namespace: 'entry',
+                    content: `
+                                .root{}
+                                .part{}
+                            `
+                }
+            }
+        });
+
+        const res = extractSchema(mock.meta, '/');
+        expect(res).to.eql({
+            $id: '/entry.st.css',
+            $ref: 'stylable/module',
+            properties: {
+                root: {
+                    $ref: 'stylable/class',
+                    extends: {
+                        $ref: './imported.st.css#root'
+                    }
+                },
+                Comp: {},
+                part: {},
+                myColor: {
+                    $ref: 'stylable/var'
+                },
+                otherPart: {
+                    $ref: 'stylable/class',
+                    extends: {
+                        $ref: './imported.st.css#part'
+                    }
+                }
+            }
         });
     });
 });
