@@ -1,4 +1,3 @@
-import { generateStylableResult } from '@stylable/core/test-utils';
 import { flatMatch } from '@stylable/core/tests/matchers/flat-match';
 import { expect, use } from 'chai';
 import * as path from 'path';
