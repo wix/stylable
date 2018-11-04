@@ -27,6 +27,76 @@ const schema = extractSchema(meta, './app/');
 |meta|[StylableMeta](../core/src/stylable-meta.ts)|Processed stylesheet to be converted|
 |basePath|string|generated paths will be relative to this path|
 
+## Example
+For the entry point `entry.st.css`, the following JSON will be generated.
+
+### Source
+```css
+/* ./entry.st.css */
+:import {
+    -st-from: '/imported.st.css';
+    -st-default: Comp;
+    -st-named: part;
+}
+:vars {
+    myColor: red;
+}
+.root {
+    -st-extends: Comp;
+}
+.otherPart {
+    -st-extends: part;
+}
+```
+
+```css
+/* ./imported.st.css */
+.root {}
+.part {}
+```
+
+### Target
+```JSON
+{
+    "$id": "/entry.st.css",
+    "$ref": "stylable/module",
+    "properties": {
+        "root": {
+            "$ref": "stylable/class",
+            "states": {
+                "userSelected": {
+                    "type": "boolean"
+                }
+            },
+            "extends": {
+                "$ref": "/imported.st.css#root"
+            }
+        },
+        "Comp": {},
+        "part": {},
+        "myColor": {
+            "$ref": "stylable/var"
+        },
+        "otherPart": {
+            "$ref": "stylable/class",
+            "states": {
+                "size": {
+                    "type": "enum",
+                    "enum": [
+                        "s",
+                        "m",
+                        "l"
+                    ]
+                }
+            },
+            "extends": {
+                "$ref": "/imported.st.css#part"
+            }
+        }
+    }
+}
+```
+
 <!-- ## License
 
 Copyright (c) 2018 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE). -->

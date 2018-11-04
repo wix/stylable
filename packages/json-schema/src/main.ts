@@ -1,4 +1,12 @@
-import { ImportSymbol, MappedStates, StateParsedValue, StylableMeta, valueMapping } from '@stylable/core';
+import {
+    ImportSymbol,
+    MappedStates,
+    safeParse,
+    StateParsedValue,
+    StylableMeta,
+    StylableProcessor,
+    valueMapping
+} from '@stylable/core';
 import { JSONSchema7 } from 'json-schema';
 
 export type StateDict = { [stateName: string]: SchemaStates } & object;
@@ -16,10 +24,22 @@ export interface SchemaStates {
     default?: string;
     enum?: string[];
 }
+type TODO = any;
 
-export function extractSchema(meta: StylableMeta, basePath: string): ExtractedSchema {
+export function extractSchema(css: string, filePath: string, root: string, path: any) { // TODO: fix path type
+    const processor = new StylableProcessor();
+    const meta = processor.process(safeParse(css, { from: filePath }));
+    return generateSchema(meta, filePath, root, path);
+}
+
+function generateSchema(
+    meta: StylableMeta,
+    filePath: string,
+    basePath: string,
+    path: TODO
+): ExtractedSchema {
     const schema: ExtractedSchema = {
-        $id: meta.source,
+        $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
         $ref: 'stylable/module'
     };
 
@@ -45,9 +65,10 @@ export function extractSchema(meta: StylableMeta, basePath: string): ExtractedSc
             }
 
             if (extended) {
-                schemaEntry.extends = (extended._kind === 'import' && extended.import) ?
-                    { $ref: getImportedRef(extended, basePath) } :
-                    { $ref: extended.name };
+                schemaEntry.extends =
+                    extended._kind === 'import' && extended.import
+                        ? { $ref: getImportedRef(filePath, extended, basePath, path) }
+                        : { $ref: extended.name };
             }
         } else if (symbol._kind === 'var' && typeof schemaEntry !== 'boolean') {
             schemaEntry.$ref = `stylable/${symbol._kind}`;
@@ -62,9 +83,11 @@ function getStatesForSymbol(states: MappedStates): StateDict {
 
     for (const stateName of Object.keys(states)) {
         const stateDef = states[stateName];
-        if (stateDef === null) { // handle boolean states
+        if (stateDef === null) {
+            // handle boolean states
             res[stateName] = { type: 'boolean' };
-        } else if (typeof stateDef === 'object') { // handle typed states
+        } else if (typeof stateDef === 'object') {
+            // handle typed states
             res[stateName] = convertMappedStateToSchema(stateDef);
         } else if (typeof stateDef === 'string') {
             // handle mapped states
@@ -95,12 +118,21 @@ function convertMappedStateToSchema(state: StateParsedValue): SchemaStates {
     return stateSchema;
 }
 
-function getImportedRef(symbol: ImportSymbol, basePath: string): string {
-    const is3rdParty = !symbol.import.from.startsWith(basePath);
-    const refPath = is3rdParty
-        ? `${symbol.import.from}`
-        : `./${symbol.import.from.slice(basePath.length)}`;
-    const suffix = symbol.type === 'default' ? 'root' : `${symbol.name}`;
+function getImportedRef(fileName: string, importSymbol: ImportSymbol, basePath: string, path: TODO): string {
+    const suffix = importSymbol.type === 'default' ? 'root' : `${importSymbol.name}`;
+    return `${normalizeImportPath(fileName, importSymbol.import.fromRelative, basePath, path)}#${suffix}`;
+}
 
-    return `${refPath}#${suffix}`;
+function normalizeImportPath(fileName: string, importString: string, basePath: string, path: TODO): string {
+    if (importString.startsWith('.')) {
+        // is relative
+        return '/' + path
+            .join(path.dirname(path.relative(basePath, fileName)), importString)
+            .replace(/\\/g, '/');
+    } else if (path.isAbsolute(importString)) {
+        return '/' + path.relative(basePath, importString).replace(/\\/g, '/');
+    } else {
+        // 3rd party
+        return importString.replace(/\\/g, '/');
+    }
 }
