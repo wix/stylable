@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/json-schema.svg)](https://www.npmjs.com/package/@stylable/json-schema)
 
-`@stylable/json-schema` is a utility that allows you to transform Stylable stylesheets into [JSON-Schema](https://json-schema.org/) compatible 
+`@stylable/json-schema` is a utility that allows you to transform Stylable stylesheets into [JSON-Schema](https://json-schema.org/) compatible format.
 
 ## Installation
 
@@ -13,24 +13,15 @@ yarn add @stylable/json-schema
 Import the `extractSchema` utility function from `@stylable/json-schema`, and invoke it.
 The `extractSchema` function receives four arguments, `css`, `filePath`, `rootPath` and `path`. 
 
-css: string, filePath: string, root: string, path: MinimalPath
-
-```ts
-import { extractSchema } from '@stylable/json-schema';
-import * as path from 'path';
-
-const schema = extractSchema('.root {}', '/src/stylesheet.st.css', '/src', path);
-```
-
 ### Arguments
 |Name|Type|Description|
 |-------------|----|-----------|
 |css|string|CSS content to be processed and extracted|
-|filePath|string|path to the file currently being extracted|
-|basePath|string|path to the root of the project. all generated paths will be absolute to this base path|
+|filePath|string|absolute path to the file currently being extracted|
+|basePath|string|absolute path to the root of the project. all generated paths will be absolute to this base path|
 |path|[MinimalPath](#MinimalPath)|`path` object containing a minimal set of required utility methods|
 
-#### MinimalPath
+#### MinimalPath interface
 
 ```ts
 export interface MinimalPath {
@@ -42,13 +33,29 @@ export interface MinimalPath {
 ```
 
 ## Example
-For the entry point `entry.st.css`, the following JSON will be generated.
+Usage example for `extractSchema`.
+
+```ts
+import fs from 'fs';
+import path from 'path';
+import { extractSchema } from '@stylable/json-schema';
+
+const filePath = path.join(__dirname, 'src/entry.st.css');
+const css = fs.readFileSync(filePath, 'utf8');
+
+const stylesheetSchema = extractSchema(
+    css,
+    filePath,
+    __dirname,
+    path
+);
+```
 
 ### Source
 ```css
-/* ./entry.st.css */
+/* ~/myproject/src/entry.st.css */
 :import {
-    -st-from: '/imported.st.css';
+    -st-from: './imported.st.css';
     -st-default: Comp;
     -st-named: part;
 }
@@ -61,15 +68,10 @@ For the entry point `entry.st.css`, the following JSON will be generated.
 .otherPart {
     -st-extends: part;
 }
+
 ```
 
-```css
-/* ./imported.st.css */
-.root {}
-.part {}
-```
-
-### Target
+### Result
 ```JSON
 {
     "$id": "/entry.st.css",
