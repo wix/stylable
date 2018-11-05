@@ -11,21 +11,35 @@ yarn add @stylable/json-schema
 ```
 ## Usage
 Import the `extractSchema` utility function from `@stylable/json-schema`, and invoke it.
-The `extractSchema` function receives two arguments, `meta` and `basePath`. 
+The `extractSchema` function receives four arguments, `css`, `filePath`, `rootPath` and `path`. 
+
+css: string, filePath: string, root: string, path: MinimalPath
 
 ```ts
 import { extractSchema } from '@stylable/json-schema';
+import * as path from 'path';
 
-const { meta } = stylable.transform(stylable.process(filePath));
-
-const schema = extractSchema(meta, './app/');
+const schema = extractSchema('.root {}', '/src/stylesheet.st.css', '/src', path);
 ```
 
 ### Arguments
 |Name|Type|Description|
 |-------------|----|-----------|
-|meta|[StylableMeta](../core/src/stylable-meta.ts)|Processed stylesheet to be converted|
-|basePath|string|generated paths will be relative to this path|
+|css|string|CSS content to be processed and extracted|
+|filePath|string|path to the file currently being extracted|
+|basePath|string|path to the root of the project. all generated paths will be absolute to this base path|
+|path|[MinimalPath](#MinimalPath)|`path` object containing a minimal set of required utility methods|
+
+#### MinimalPath
+
+```ts
+export interface MinimalPath {
+    dirname:    (p: string) => string;
+    join:       (...paths: string[]) => string;
+    isAbsolute: (path: string) => boolean;
+    relative:   (from: string, to: string) => string;
+}
+```
 
 ## Example
 For the entry point `entry.st.css`, the following JSON will be generated.
