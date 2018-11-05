@@ -24,9 +24,15 @@ export interface SchemaStates {
     default?: string;
     enum?: string[];
 }
-type TODO = any;
 
-export function extractSchema(css: string, filePath: string, root: string, path: any) { // TODO: fix path type
+export interface MinimalPath {
+    dirname: (p: string) => string;
+    join: (...paths: string[]) => string;
+    isAbsolute: (path: string) => boolean;
+    relative: (from: string, to: string) => string;
+}
+
+export function extractSchema(css: string, filePath: string, root: string, path: MinimalPath) {
     const processor = new StylableProcessor();
     const meta = processor.process(safeParse(css, { from: filePath }));
     return generateSchema(meta, filePath, root, path);
@@ -36,7 +42,7 @@ function generateSchema(
     meta: StylableMeta,
     filePath: string,
     basePath: string,
-    path: TODO
+    path: MinimalPath
 ): ExtractedSchema {
     const schema: ExtractedSchema = {
         $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
@@ -118,12 +124,12 @@ function convertMappedStateToSchema(state: StateParsedValue): SchemaStates {
     return stateSchema;
 }
 
-function getImportedRef(fileName: string, importSymbol: ImportSymbol, basePath: string, path: TODO): string {
+function getImportedRef(fileName: string, importSymbol: ImportSymbol, basePath: string, path: MinimalPath): string {
     const suffix = importSymbol.type === 'default' ? 'root' : `${importSymbol.name}`;
     return `${normalizeImportPath(fileName, importSymbol.import.fromRelative, basePath, path)}#${suffix}`;
 }
 
-function normalizeImportPath(fileName: string, importString: string, basePath: string, path: TODO): string {
+function normalizeImportPath(fileName: string, importString: string, basePath: string, path: MinimalPath): string {
     if (importString.startsWith('.')) {
         // is relative
         return '/' + path
