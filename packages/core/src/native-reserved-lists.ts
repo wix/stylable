@@ -140,7 +140,8 @@ export const nativeFunctionsDic = {
     'translateX': true,
     'translateY': true,
     'translateZ': true,
-    'url': true
+    'url': true,
+    'var': true
 };
 
 export type nativeFunctions = keyof typeof nativeFunctionsDic;
