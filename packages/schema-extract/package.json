@@ -1,6 +1,6 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -15,7 +15,7 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.11"
+    "@stylable/core": "^0.1.13"
   },
   "files": [
     "cjs",
