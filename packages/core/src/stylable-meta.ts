@@ -2,7 +2,7 @@ import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { SelectorAstNode } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
-import { MixinValue, valueMapping } from './stylable-value-parsers';
+import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 export const RESERVED_ROOT_NAME = 'root';
 
@@ -60,7 +60,7 @@ export interface Imported {
 
 export interface StylableDirectives {
     '-st-root'?: boolean;
-    '-st-states'?: any;
+    '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-global'?: SelectorAstNode[];
 }

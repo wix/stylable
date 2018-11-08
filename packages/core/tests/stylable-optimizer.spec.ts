@@ -97,5 +97,5 @@ describe('StylableOptimizer', () => {
         const { meta } = stylable.transform(files[index].content, index);
         const output = new StylableOptimizer().minifyCSS(meta.outputAst!.toString());
         expect(output).to.equal(`.${meta.namespace}--x{color:red}`);
-    });
+    }).timeout(5000);
 });
