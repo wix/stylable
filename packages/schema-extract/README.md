@@ -1,16 +1,16 @@
-# @stylable/json-schema
+# @stylable/schema-extract
 
-[![npm version](https://img.shields.io/npm/v/@stylable/json-schema.svg)](https://www.npmjs.com/package/@stylable/json-schema)
+[![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)
 
-`@stylable/json-schema` is a utility that allows you to transform Stylable stylesheets into [JSON-Schema](https://json-schema.org/) compatible format.
+`@stylable/schema-extract` is a utility that allows you to transform Stylable stylesheets into [JSON-Schema](https://json-schema.org/) compatible format.
 
 ## Installation
 
 ```sh
-yarn add @stylable/json-schema
+yarn add @stylable/schema-extract
 ```
 ## Usage
-Import the `extractSchema` utility function from `@stylable/json-schema`, and invoke it.
+Import the `extractSchema` utility function from `@stylable/schema-extract`, and invoke it.
 The `extractSchema` function receives four arguments, `css`, `filePath`, `rootPath` and `path`. 
 
 ### Arguments
@@ -38,7 +38,7 @@ Usage example for `extractSchema`.
 ```ts
 import fs from 'fs';
 import path from 'path';
-import { extractSchema } from '@stylable/json-schema';
+import { extractSchema } from '@stylable/schema-extract';
 
 const filePath = path.join(__dirname, 'src/entry.st.css');
 const css = fs.readFileSync(filePath, 'utf8');

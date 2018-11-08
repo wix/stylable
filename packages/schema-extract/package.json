@@ -1,5 +1,5 @@
 {
-  "name": "@stylable/json-schema",
+  "name": "@stylable/schema-extract",
   "version": "0.1.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -29,7 +29,7 @@
     "access": "public"
   },
   "license": "BSD-3-Clause",
-  "repository": "https://github.com/wix/stylable/tree/master/packages/json-schema",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
   "sideEffects": false,
   "private": true
 }
