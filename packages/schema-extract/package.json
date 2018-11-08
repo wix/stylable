@@ -30,6 +30,5 @@
   },
   "license": "BSD-3-Clause",
   "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
-  "sideEffects": false,
-  "private": true
+  "sideEffects": false
 }
