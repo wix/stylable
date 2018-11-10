@@ -6,7 +6,7 @@ export interface IContentProps {
     mainFile: string;
 }
 
-export const Content: React.SFC<IContentProps> = props => (
+export const Content: React.FunctionComponent<IContentProps> = props => (
     <p {...style('root', {}, props)}>
         To get started, edit <code>{props.mainFile}</code> and save to reload.
     </p>

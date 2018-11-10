@@ -8,10 +8,10 @@ export interface IHeaderProps {
     message: string;
 }
 
-export const Header: React.SFC<IHeaderProps> = props => (
+export const Header: React.FunctionComponent<IHeaderProps> = props => (
     <header {...style('root', {}, props)}>
-        <img src={reactLogo} className={style.reactLogo} alt="logo" />
-        <img src={stylableLogo} className={style.stylableLogo} alt="logo" />
+        <img src={reactLogo} className={style.reactLogo} alt='logo' />
+        <img src={stylableLogo} className={style.stylableLogo} alt='logo' />
         <h1 className={style.title}>{props.message}</h1>
     </header>
 );
