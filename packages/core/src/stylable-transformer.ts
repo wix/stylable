@@ -489,8 +489,7 @@ export class StylableTransformer {
             }
         });
     }
-    public scopeRule(
-        meta: StylableMeta, rule: postcss.Rule, metaExports?: Pojo<string>): string {
+    public scopeRule(meta: StylableMeta, rule: postcss.Rule, metaExports?: Pojo<string>): string {
         return this.scopeSelector(meta, rule.selector, metaExports, false, rule).selector;
     }
     public handleClass(

@@ -84,6 +84,17 @@ export class StylableProcessor {
             }, false);
         });
 
+        this.meta.scopes.forEach(atRule => {
+            const scopingSelector = createScopingSelector(atRule, this.meta);
+
+            this.handleRule(postcss.rule({selector: scopingSelector}) as SRule);
+
+            atRule.walkRules(rule => {
+                rule.replaceWith(rule.clone({ selector: `${scopingSelector} ${rule.selector}`}));
+            });
+
+            atRule.replaceWith(atRule.nodes || []);
+        });
         stubs.forEach(s => s && s.remove());
 
         return this.meta;
@@ -135,6 +146,9 @@ export class StylableProcessor {
                     } else {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
+                    break;
+                case 'st-scope':
+                    this.meta.scopes.push(atRule);
                     break;
             }
         });
@@ -452,6 +466,16 @@ export class StylableProcessor {
 
         return importObj;
     }
+}
+
+export function createScopingSelector(atRule: postcss.AtRule, meta: StylableMeta) {
+    return atRule.params.split(/\s+/g).map(scope => {
+        const symbol = meta.mappedSymbols[scope];
+        if (symbol && (symbol._kind === 'class' || !isCompRoot(symbol.name))) {
+            return `.${scope}`;
+        }
+        return scope;
+    }).join(' ');
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {

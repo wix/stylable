@@ -1,6 +1,6 @@
 import { expect, use } from 'chai';
 import chaiSubset = require('chai-subset');
-import { processorWarnings, valueMapping } from '../src/index';
+import { processorWarnings, valueMapping } from '../src';
 import { nativePseudoClasses } from '../src/native-reserved-lists';
 import { stateErrors } from '../src/pseudo-states';
 import { mediaQuery, styleRules } from './matchers/results';
