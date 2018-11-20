@@ -35,8 +35,8 @@ const parseExtends = SBTypesParsers[valueMapping.extends];
 
 /* tslint:disable:max-line-length */
 export const processorWarnings = {
-    UNSCOPED_CLASS(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
-    UNSCOPED_ELEMENT(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
+    UNSCOPED_CLASS(name: string) { return `unscoped class "${name}" will affect all elements of the same type in the document`; },
+    UNSCOPED_ELEMENT(name: string) { return `unscoped element "${name}" will affect all elements of the same type in the document`; },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) { return `cannot define "${name}" inside a complex selector`; },
     ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
     DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
