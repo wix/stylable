@@ -12,7 +12,9 @@ export function memoryFS() {
     wrap('statSync', stat);
     wrap('mkdir', mkdir);
 
-    function mkdir(fn: typeof mkdir, args: any[]) {
+    type UnknownFunction = (...args: Array<unknown>) => unknown;
+
+    function mkdir(fn: UnknownFunction, args: Array<unknown>) {
         // mfs doesn't support supplying the mode!
         if (typeof args[2] === 'function') {
             return fn.apply(mfs, [args[0], args[2]]);
@@ -21,21 +23,21 @@ export function memoryFS() {
         }
     }
 
-    function writeFile(fn: typeof writeFile, args: any[]) {
+    function writeFile(fn: UnknownFunction, args: Array<unknown>) {
         const filePath = args[0];
         const result = fn.apply(mfs, args);
-        lastModified[filePath] = new Date();
+        lastModified[filePath as string] = new Date();
         return result;
     }
 
-    function unlink(fn: typeof unlink, args: any[]) {
+    function unlink(fn: UnknownFunction, args: any) {
         const filePath = args[0];
         const result = fn.apply(mfs, args);
         delete lastModified[filePath];
         return result;
     }
 
-    function rmdir(fn: typeof rmdir, args: any[]) {
+    function rmdir(fn: UnknownFunction, args: any) {
         const dir = args[0];
         const result = fn.apply(mfs, args);
         Object.keys(lastModified).reduce<any>((memo, filePath) => {
@@ -48,14 +50,14 @@ export function memoryFS() {
         return result;
     }
 
-    function stat(fn: typeof stat, args: any[]) {
+    function stat(fn: UnknownFunction, args: any) {
         const filePath = args[0];
         const stats = fn.apply(mfs, args);
-        stats.mtime = lastModified[filePath];
+        (stats as { mtime: Date }).mtime = lastModified[filePath];
         return stats;
     }
 
-    function wrap(method: string, fn: (...args: any[]) => any) {
+    function wrap<T extends (...args: any[]) => any>(method: string, fn: T) {
         const oldFn = mfs[method];
         mfs[method] = (...args: any[]) => {
             return fn(oldFn, args);
