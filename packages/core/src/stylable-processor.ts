@@ -23,7 +23,7 @@ import {
     VarSymbol
 } from './stylable-meta';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
-import { SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
@@ -40,7 +40,7 @@ export const processorWarnings = {
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) { return `cannot define "${name}" inside a complex selector`; },
     ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
     DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
-    ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside :import block`; },
+    ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`; },
     STATE_DEFINITION_IN_ELEMENT() { return 'cannot define pseudo states inside element selectors'; },
     STATE_DEFINITION_IN_COMPLEX() { return 'cannot define pseudo states inside complex selectors'; },
     REDECLARE_SYMBOL(name: string) { return `redeclare symbol "${name}"`; },
@@ -49,11 +49,14 @@ export const processorWarnings = {
     UNKNOWN_MIXIN(name: string) { return `unknown mixin: "${name}"`; },
     OVERRIDE_MIXIN() { return `override mixin on same rule`; },
     OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; },
-    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
+    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`; },
     INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
     EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; },
     EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; },
-    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; }
+    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
+    NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
+    NO_IMPORT_IN_ST_SCOPE() { return 'cannot use "${rootValueMapping.import}" inside of "@st-scope"'; },
+    DISALLOWED_PARAM_IN_SCOPE() { return '"@st-scope" only accepts symbols for its parameters (no ".")'; }
 };
 /* tslint:enable:max-line-length */
 
@@ -85,9 +88,9 @@ export class StylableProcessor {
         });
 
         this.meta.scopes.forEach(atRule => {
-            const scopingSelector = createScopingSelector(atRule, this.meta);
+            const scopingSelector = createScopingSelector(atRule, this.meta, this.diagnostics);
 
-            this.handleRule(postcss.rule({selector: scopingSelector}) as SRule);
+            this.handleRule(postcss.rule({ selector: scopingSelector }) as SRule);
 
             atRule.walkRules(rule => {
                 rule.replaceWith(rule.clone({ selector: `${scopingSelector} ${rule.selector}`}));
@@ -171,20 +174,34 @@ export class StylableProcessor {
             const { name, type } = node;
             if (type === 'pseudo-class') {
                 if (name === 'import') {
-                    if (rule.selector === ':import') {
+                    if (rule.selector === rootValueMapping.import) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
+                            rule.remove();
+                            return false;
+                        }
+
                         const _import = this.handleImport(rule);
                         this.meta.imports.push(_import);
                         this.addImportSymbols(_import);
                         return false;
                     } else {
-                        this.diagnostics.warn(rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'));
+                        this.diagnostics.warn(
+                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.import));
                     }
                 } else if (name === 'vars') {
-                    if (rule.selector === ':vars') {
+                    if (rule.selector === rootValueMapping.vars) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            this.diagnostics.warn(rule, processorWarnings.NO_VARS_DEF_IN_ST_SCOPE());
+                            rule.remove();
+                            return false;
+                        }
+
                         this.addVarSymbols(rule);
                         return false;
                     } else {
-                        this.diagnostics.warn(rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':vars'));
+                        this.diagnostics.warn(
+                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.vars));
                     }
                 }
             } else if (type === 'class') {
@@ -468,8 +485,15 @@ export class StylableProcessor {
     }
 }
 
-export function createScopingSelector(atRule: postcss.AtRule, meta: StylableMeta) {
-    return atRule.params.split(/\s+/g).map(scope => {
+export function createScopingSelector(atRule: postcss.AtRule, meta: StylableMeta, diagnostics: Diagnostics) {
+    const params = atRule.params;
+    if (params.indexOf('.') !== -1) {
+        const match = params.match(/\.[\w-]*/g);
+        const word = match ? match[0] : undefined;
+        diagnostics.error(atRule, processorWarnings.DISALLOWED_PARAM_IN_SCOPE(), { word });
+    }
+
+    return params.split(/\s+/g).map(scope => {
         const symbol = meta.mappedSymbols[scope];
         if (symbol && (symbol._kind === 'class' || !isCompRoot(symbol.name))) {
             return `.${scope}`;

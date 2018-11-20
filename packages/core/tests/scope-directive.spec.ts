@@ -1,11 +1,13 @@
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
+import { processorWarnings } from '../src';
 import { flatMatch } from './matchers/flat-match';
+import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
 
 use(flatMatch);
 
-describe.only('@st-scope', () => {
+describe('@st-scope', () => {
     describe('processing scopes', () => {
         it('should parse "@st-scope" directives', () => {
             const meta = processSource(
@@ -235,5 +237,66 @@ describe.only('@st-scope', () => {
         });
     });
 
-    describe('diagnostics', () => {/**/});
+    describe('diagnostics', () => {
+        it('should warn about disallowed syntax as a scoping parameter (".")', () => {
+            const res = expectWarnings(`
+                |@st-scope $.root$ {
+                    .part {}
+                }|
+            `, [
+                { message: processorWarnings.DISALLOWED_PARAM_IN_SCOPE(), file: 'entry.st.css', severity: 'error' }
+            ]);
+        });
+
+        it('should warn about vars definition inside a scope', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope root {
+                            |:vars {
+                                myColor: red;
+                            }|
+
+                            .part {}
+                        }
+                    `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                { message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(), file: '/entry.st.css', severity: 'warning' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--root .entry--part');
+        });
+
+        it('should warn about import usage inside a scope', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope root {
+                            |:import {
+                                -st-from: "imported.st.css";
+                                -st-default: Comp;
+                            }|
+
+                            .part {}
+                        }
+                    `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                { message: processorWarnings.NO_IMPORT_IN_ST_SCOPE(), file: '/entry.st.css', severity: 'warning' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--root .entry--part');
+        });
+    });
 });

@@ -40,6 +40,13 @@ export interface ExtendsValue {
 
 type ReportWarning = (message: string, options?: { word: string }) => void;
 
+export const rootValueMapping = {
+    vars: ':vars' as ':vars',
+    import: ':import' as ':import',
+    stScope: 'st-scope' as 'st-scope',
+    namespace: 'namespace' as 'namespace'
+};
+
 export const valueMapping = {
     from: '-st-from' as '-st-from',
     named: '-st-named' as '-st-named',
