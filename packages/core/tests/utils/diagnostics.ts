@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Diagnostics, safeParse, StylableResults } from '../../src/index';
-import { process } from '../../src/stylable-processor';
+import { process, StylableMeta } from '../../src/stylable-processor';
 import { Config, generateFromMock } from './generate-test-util';
 const deindent = require('deindent');
 
@@ -104,4 +104,16 @@ export function expectWarningsFromTransform(config: Config, warnings: Diagnostic
     expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
 
     return result;
+}
+
+export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiagnostics = true) {
+    const processReports = meta.diagnostics.reports;
+
+    expect(processReports.length, `processing diagnostics: ${processReports.map(r => r.message)}`).to.equal(0);
+    if (meta.transformDiagnostics && checkTransformDiagnostics) {
+        const transformerReports = meta.transformDiagnostics.reports;
+
+        expect(transformerReports.length,
+            `transforming diagnostics: ${transformerReports.map(r => r.message)}`).to.equal(0);
+    }
 }
