@@ -1,8 +1,9 @@
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
 import { processorWarnings } from '../src';
+import { transformerWarnings } from '../src/stylable-transformer';
 import { flatMatch } from './matchers/flat-match';
-import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
+import { expectWarnings, expectWarningsFromTransform, shouldReportNoDiagnostics } from './utils/diagnostics';
 import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
 
 use(flatMatch);
@@ -10,28 +11,43 @@ use(flatMatch);
 describe('@st-scope', () => {
     describe('processing scopes', () => {
         it('should parse "@st-scope" directives', () => {
-            const meta = processSource(
-                `
-                .root {}
-                @st-scope root {
+            const meta = processSource(`
+                @st-scope .root{
                     .part {}
                 }
             `,
                 { from: 'path/to/style.css' }
             );
 
+            shouldReportNoDiagnostics(meta);
             expect(meta.scopes).to.flatMatch([{
                 type: 'atrule',
                 name: 'st-scope',
-                params: 'root'
+                params: '.root'
+            }]);
+        });
+
+        it('should parse "@st-scope" directives with a new class', () => {
+            const meta = processSource(`
+                @st-scope .newClass {
+                    .part {}
+                }
+            `,
+                { from: 'path/to/style.css' }
+            );
+
+            shouldReportNoDiagnostics(meta);
+            expect(meta.scopes).to.flatMatch([{
+                type: 'atrule',
+                name: 'st-scope',
+                params: '.newClass'
             }]);
         });
 
         it('should mark scope ref name on impacted rules', () => {
             const meta = processSource(
                 `
-                .root {}
-                @st-scope root {
+                @st-scope .root {
                     .part {}
                     .otherPart {}
                 }
@@ -40,22 +56,24 @@ describe('@st-scope', () => {
             );
 
             const rules = meta.ast.nodes!;
-            expect((rules[1] as Rule).selector).to.equal('.root .part');
-            expect((rules[2] as Rule).selector).to.equal('.root .otherPart');
-            expect(rules[3]).to.eql(undefined);
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((rules[0] as Rule).selector).to.equal('.root .part');
+            expect((rules[1] as Rule).selector).to.equal('.root .otherPart');
+            expect(rules[2]).to.eql(undefined);
         });
     });
 
     describe('transforming scoped selectors', () => {
         it('should scope "part" class to root', () => {
-            const res = generateStylableRoot({
+            const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        .root {}
-                        @st-scope root {
+                        @st-scope .root {
                             .part {}
                         }
                         `
@@ -63,16 +81,16 @@ describe('@st-scope', () => {
                 }
             });
 
-            expect(res.nodes).to.flatMatch([{
-                selector: '.entry--root'
-            }, {
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.outputAst!.nodes).to.flatMatch([{
                 selector: '.entry--root .entry--part'
             }
             ]);
         });
 
-        it('should scope part using a default import', () => {
-            const res = generateStylableRoot({
+        it('should scope "part" class using a default import', () => {
+            const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
@@ -94,7 +112,9 @@ describe('@st-scope', () => {
                 }
             });
 
-            expect(res.first).to.flatMatch({
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.outputAst!.first).to.flatMatch({
                 selector: '.imported--root .entry--part'
             });
         });
@@ -118,7 +138,7 @@ describe('@st-scope', () => {
                     '/imported.st.css': {
                         namespace: 'imported',
                         content: `
-                        @st-scope root {
+                        @st-scope .root {
                             .mymix {
                                 color: red;
                             }
@@ -126,6 +146,8 @@ describe('@st-scope', () => {
                     }
                 }
             });
+
+            shouldReportNoDiagnostics(meta);
 
             const rule: Rule = meta.outputAst!.first as Rule;
             const decl: Declaration = rule.first as Declaration;
@@ -154,7 +176,7 @@ describe('@st-scope', () => {
                     '/imported.st.css': {
                         namespace: 'imported',
                         content: `
-                        @st-scope root {
+                        @st-scope .root {
                             .mymix {
                                 -st-states: myState;
                             }
@@ -162,6 +184,8 @@ describe('@st-scope', () => {
                     }
                 }
             });
+
+            shouldReportNoDiagnostics(meta);
 
             const rule = meta.outputAst!.nodes![1] as Rule;
             expect(rule.selector).to.equal('.entry--root[data-imported-mystate]');
@@ -174,7 +198,7 @@ describe('@st-scope', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        @st-scope root {
+                        @st-scope .root {
                             @media screen (max-width: 100px) {
                                 .part {}
                             }
@@ -184,6 +208,8 @@ describe('@st-scope', () => {
                 }
             });
 
+            shouldReportNoDiagnostics(meta);
+
             const atRule = meta.outputAst!.nodes![0] as AtRule;
             const rule = atRule.nodes![0] as Rule;
             expect(rule.selector).to.equal('.entry--root .entry--part');
@@ -192,17 +218,6 @@ describe('@st-scope', () => {
 
     describe('diagnostics', () => {
         it('should warn about multiple params in scope', () => {
-            // const meta = processSource(
-            //     `
-            //     .root {}
-            //     .part {}
-            //     @st-scope root part {
-            //         .scopedPart {}
-            //     }
-            // `,
-            //     { from: 'path/to/style.css' }
-            // );
-
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -211,7 +226,7 @@ describe('@st-scope', () => {
                         content: `
                         .root {}
                         .part {}
-                        |@st-scope $root part$ {
+                        |@st-scope $.root .part$ {
                             .scopedPart {}
                         }|
                     `
@@ -220,27 +235,32 @@ describe('@st-scope', () => {
             };
 
             const { meta } = expectWarningsFromTransform(config, [
-                { message: processorWarnings.MULTIPLE_SCOPES_NOT_ALLOWED(), file: '/entry.st.css', severity: 'warning' }
+                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(),
+                    file: '/entry.st.css', severity: 'error' },
+                { message: transformerWarnings.UNKNOWN_SCOPING_PARAM('.root .part'),
+                    file: '/entry.st.css', severity: 'error' }
             ]);
+            // tslint:disable-next-line:max-line-length
+            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal('.entry--root .entry--part .entry--scopedPart');
             expect(meta.scopes).to.flatMatch([{
                 type: 'atrule',
                 name: 'st-scope',
-                params: 'root part'
+                params: '.root .part'
             }]);
-            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal('.entry--root .entry--scopedPart');
         });
 
-        it('should warn about disallowed syntax as a scoping parameter (".")', () => {
+        it('should warn about disallowed syntax as a scoping parameter', () => {
             expectWarnings(`
-                |@st-scope $.root$ {
+                |@st-scope $.root::before$ {
                     .part {}
                 }|
             `, [
-                { message: processorWarnings.DISALLOWED_PARAM_IN_SCOPE(), file: 'entry.st.css', severity: 'error' }
+                // tslint:disable-next-line:max-line-length
+                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(), file: 'entry.st.css', severity: 'error' }
             ]);
         });
 
-        it('should warn about scoping with a lower case symbol', () => {
+        it('should warn about scoping with a symbol that does not resolve to a stylesheet root', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -265,9 +285,43 @@ describe('@st-scope', () => {
 
             const { meta } = expectWarningsFromTransform(config, [
                 // tslint:disable-next-line:max-line-length
-                { message: processorWarnings.SCOPE_WITH_CLASS_NOT_ALLOWED(), file: '/entry.st.css', severity: 'warning' }
+                { message: transformerWarnings.SCOPE_PARAM_NOT_ROOT('importedPart'), file: '/entry.st.css', severity: 'error' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('importedPart .entry--part');
+        });
+
+        it('should warn about scoping with a symbol that originates from a JS file', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.js';
+                            -st-named: someVar;
+                        }
+                        |@st-scope $someVar$ {
+                            .part {}
+                        }|
+                        `
+                    },
+                    '/imported.js': {
+                        namespace: 'imported',
+                        content: `
+                            module.exports = {
+                                someVar: 'someValue'
+                            }
+                        `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                // tslint:disable-next-line:max-line-length
+                { message: transformerWarnings.SCOPE_PARAM_NOT_CSS('someVar'), file: '/entry.st.css', severity: 'error' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('someVar .entry--part');
         });
 
         it('should warn about a missing scoping parameter', () => {
@@ -305,12 +359,11 @@ describe('@st-scope', () => {
                     }
                 }
             };
-
             const { meta } = expectWarningsFromTransform(config, [
                 // tslint:disable-next-line:max-line-length
-                { message: processorWarnings.UNKNOWN_SCOPING_PARAM('unknown'), file: '/entry.st.css', severity: 'error' }
+                { message: transformerWarnings.UNKNOWN_SCOPING_PARAM('unknown'), file: '/entry.st.css', severity: 'error' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('unknown .entry--part');
         });
 
         it('should warn about vars definition inside a scope', () => {
@@ -320,7 +373,7 @@ describe('@st-scope', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        @st-scope root {
+                        @st-scope .root {
                             |:vars {
                                 myColor: red;
                             }|
@@ -345,7 +398,7 @@ describe('@st-scope', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        @st-scope root {
+                        @st-scope .root {
                             |:import {
                                 -st-from: "imported.st.css";
                                 -st-default: Comp;

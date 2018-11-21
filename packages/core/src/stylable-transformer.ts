@@ -103,7 +103,10 @@ export const transformerWarnings = {
     CANNOT_EXTEND_UNKNOWN_SYMBOL(name: string) { return `cannot extend unknown symbol "${name}"`; },
     CANNOT_EXTEND_JS() { return 'JS import is not extendable'; },
     KEYFRAME_NAME_RESERVED(name: string) { return `keyframes "${name}" is reserved`; },
-    UNKNOWN_IMPORT_ALIAS(name: string) { return `cannot use alias for unknown import "${name}"`; }
+    UNKNOWN_IMPORT_ALIAS(name: string) { return `cannot use alias for unknown import "${name}"`; },
+    SCOPE_PARAM_NOT_ROOT(name: string) { return `"@st-scope" parameter "${name}" does not resolve to a stylesheet root`; },
+    SCOPE_PARAM_NOT_CSS(name: string) { return `"@st-scope" parameter "${name}" must be a Stylable stylesheet, instead name originated from a JavaScript file`; },
+    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -145,6 +148,8 @@ export class StylableTransformer {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
         this.resolver.validateImports(meta, this.diagnostics);
+
+        validateScopes(meta, this.resolver, this.diagnostics);
 
         ast.walkRules((rule: SRule) => {
             if (isChildOfAtRule(rule, 'keyframes')) { return; }
@@ -734,4 +739,37 @@ export function removeSTDirective(root: postcss.Root) {
     toRemove.forEach(node => {
         removeRecursiveUpIfEmpty(node);
     });
+}
+
+function validateScopes(meta: StylableMeta, resolver: StylableResolver, diagnostics: Diagnostics) {
+    for (const scope of meta.scopes) {
+        const name = scope.params.startsWith('.') ? scope.params.slice(1) : scope.params;
+
+        if (!name) {
+            continue;
+        } else if (!meta.mappedSymbols[name]) {
+            diagnostics.error(
+                scope, transformerWarnings.UNKNOWN_SCOPING_PARAM(scope.params), { word: scope.params });
+            continue;
+        }
+
+        const resolvedScope = resolver.deepResolve(meta.mappedSymbols[name]);
+
+        if (resolvedScope && resolvedScope._kind === 'css') {
+            const { meta: scopingMeta, symbol: scopingSymbol } = resolvedScope;
+
+            if (scopingSymbol.name !== scopingMeta.root) {
+                diagnostics.error(
+                    scope, transformerWarnings.SCOPE_PARAM_NOT_ROOT(scope.params), { word: scope.params });
+                }
+        } else if (resolvedScope && resolvedScope._kind === 'js') {
+            diagnostics.error(
+                scope, transformerWarnings.SCOPE_PARAM_NOT_CSS(scope.params), { word: scope.params });
+        } else if (meta.classes[name] || meta.elements[scope.params] && meta.elements[scope.params].alias) {
+            // do nothing valid input
+        } else {
+            diagnostics.error(
+                scope, transformerWarnings.UNKNOWN_SCOPING_PARAM(scope.params), { word: scope.params });
+        }
+    }
 }
