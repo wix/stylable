@@ -1,5 +1,5 @@
 import { expect, use } from 'chai';
-import chaiSubset = require('chai-subset');
+import chaiSubset from 'chai-subset';
 import { processorWarnings, valueMapping } from '../src';
 import { nativePseudoClasses } from '../src/native-reserved-lists';
 import { stateErrors } from '../src/pseudo-states';
