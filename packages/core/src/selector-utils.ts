@@ -108,6 +108,19 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
 
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
 
+export function isSimpleSelector(selectorAst: SelectorAstNode) {
+    const checker = createSimpleSelectorChecker();
+    let isSimple = true;
+
+    traverseNode(selectorAst, node => {
+        if (!checker(node)) {
+            isSimple = false;
+        }
+    });
+
+    return isSimple;
+}
+
 export function isImport(ast: SelectorAstNode): boolean {
     const selectors = ast.nodes[0];
     const selector = selectors && selectors.nodes[0];
