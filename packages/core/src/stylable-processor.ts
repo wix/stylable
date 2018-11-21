@@ -56,7 +56,11 @@ export const processorWarnings = {
     MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
     NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
     NO_IMPORT_IN_ST_SCOPE() { return 'cannot use "${rootValueMapping.import}" inside of "@st-scope"'; },
-    DISALLOWED_PARAM_IN_SCOPE() { return '"@st-scope" only accepts symbols for its parameters (no ".")'; }
+    DISALLOWED_PARAM_IN_SCOPE() { return '"@st-scope" must receive a single Element as its scoping parameter (no ".")'; },
+    MULTIPLE_SCOPES_NOT_ALLOWED() { return '"@st-scope" must receive a single Element as its scoping parameter (no spaces)'; },
+    SCOPE_WITH_CLASS_NOT_ALLOWED() { return '"@st-scope" must receive a single Element or "root" as its scoping parameter'; },
+    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a single Element or "root" as its scoping parameter'; },
+    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -90,11 +94,12 @@ export class StylableProcessor {
         this.meta.scopes.forEach(atRule => {
             const scopingSelector = createScopingSelector(atRule, this.meta, this.diagnostics);
 
-            this.handleRule(postcss.rule({ selector: scopingSelector }) as SRule);
-
-            atRule.walkRules(rule => {
-                rule.replaceWith(rule.clone({ selector: `${scopingSelector} ${rule.selector}`}));
-            });
+            if (scopingSelector) {
+                this.handleRule(postcss.rule({ selector: scopingSelector }) as SRule);
+                atRule.walkRules(rule => {
+                    rule.replaceWith(rule.clone({ selector: `${scopingSelector} ${rule.selector}`}));
+                });
+            }
 
             atRule.replaceWith(atRule.nodes || []);
         });
@@ -485,21 +490,43 @@ export class StylableProcessor {
     }
 }
 
-export function createScopingSelector(atRule: postcss.AtRule, meta: StylableMeta, diagnostics: Diagnostics) {
+export function createScopingSelector(
+    atRule: postcss.AtRule,
+    meta: StylableMeta,
+    diagnostics: Diagnostics) {
+
     const params = atRule.params;
+    const words = params.match(/[\w-]*/g) || [];
+    const filteredWords = words.filter(w => w);
+    const scope = filteredWords[0];
+    const isRoot = scope === meta.root;
+    const symbol = meta.mappedSymbols[scope];
+
     if (params.indexOf('.') !== -1) {
         const match = params.match(/\.[\w-]*/g);
         const word = match ? match[0] : undefined;
         diagnostics.error(atRule, processorWarnings.DISALLOWED_PARAM_IN_SCOPE(), { word });
     }
+    if (!scope) {
+        diagnostics.error(atRule, processorWarnings.MISSING_SCOPING_PARAM());
+        return null;
+    }
+    if (!symbol) {
+        diagnostics.error(atRule, processorWarnings.UNKNOWN_SCOPING_PARAM(scope), { word: scope });
+        return null;
+    }
+    if (!isCompRoot(scope) && !isRoot) {
+        diagnostics.warn(atRule, processorWarnings.SCOPE_WITH_CLASS_NOT_ALLOWED(), { word: params });
+        return null;
+    }
+    if (filteredWords.length > 1) {
+        diagnostics.warn(atRule, processorWarnings.MULTIPLE_SCOPES_NOT_ALLOWED(), { word: params });
+    }
+    if (symbol) {
+        return isRoot ? `.${scope}` : scope;
+    }
 
-    return params.split(/\s+/g).map(scope => {
-        const symbol = meta.mappedSymbols[scope];
-        if (symbol && (symbol._kind === 'class' || !isCompRoot(symbol.name))) {
-            return `.${scope}`;
-        }
-        return scope;
-    }).join(' ');
+    return null;
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {

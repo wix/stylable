@@ -27,25 +27,6 @@ describe('@st-scope', () => {
             }]);
         });
 
-        it('handle multiple scopes', () => {
-            const meta = processSource(
-                `
-                .root {}
-                .part {}
-                @st-scope root part {
-                    .scopedPart {}
-                }
-            `,
-                { from: 'path/to/style.css' }
-            );
-
-            expect(meta.scopes).to.flatMatch([{
-                type: 'atrule',
-                name: 'st-scope',
-                params: 'root part'
-            }]);
-        });
-
         it('should mark scope ref name on impacted rules', () => {
             const meta = processSource(
                 `
@@ -113,36 +94,8 @@ describe('@st-scope', () => {
                 }
             });
 
-            expect(res.nodes![0]).to.flatMatch({
+            expect(res.first).to.flatMatch({
                 selector: '.imported--root .entry--part'
-            });
-        });
-
-        it('should scope part using a named import', () => {
-            const res = generateStylableRoot({
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        :import {
-                            -st-from: './imported.st.css';
-                            -st-named: importedPart;
-                        }
-                        @st-scope importedPart {
-                            .part {}
-                        }
-                        `
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `.importedPart {}`
-                    }
-                }
-            });
-
-            expect(res.nodes![0]).to.flatMatch({
-                selector: '.imported--importedPart .entry--part'
             });
         });
 
@@ -238,14 +191,126 @@ describe('@st-scope', () => {
     });
 
     describe('diagnostics', () => {
+        it('should warn about multiple params in scope', () => {
+            // const meta = processSource(
+            //     `
+            //     .root {}
+            //     .part {}
+            //     @st-scope root part {
+            //         .scopedPart {}
+            //     }
+            // `,
+            //     { from: 'path/to/style.css' }
+            // );
+
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {}
+                        .part {}
+                        |@st-scope $root part$ {
+                            .scopedPart {}
+                        }|
+                    `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                { message: processorWarnings.MULTIPLE_SCOPES_NOT_ALLOWED(), file: '/entry.st.css', severity: 'warning' }
+            ]);
+            expect(meta.scopes).to.flatMatch([{
+                type: 'atrule',
+                name: 'st-scope',
+                params: 'root part'
+            }]);
+            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal('.entry--root .entry--scopedPart');
+        });
+
         it('should warn about disallowed syntax as a scoping parameter (".")', () => {
-            const res = expectWarnings(`
+            expectWarnings(`
                 |@st-scope $.root$ {
                     .part {}
                 }|
             `, [
                 { message: processorWarnings.DISALLOWED_PARAM_IN_SCOPE(), file: 'entry.st.css', severity: 'error' }
             ]);
+        });
+
+        it('should warn about scoping with a lower case symbol', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: importedPart;
+                        }
+                        |@st-scope $importedPart$ {
+                            .part {}
+                        }|
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.importedPart {}`
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                // tslint:disable-next-line:max-line-length
+                { message: processorWarnings.SCOPE_WITH_CLASS_NOT_ALLOWED(), file: '/entry.st.css', severity: 'warning' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
+        });
+
+        it('should warn about a missing scoping parameter', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-scope {
+                            .part {}
+                        }|
+                        `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                { message: processorWarnings.MISSING_SCOPING_PARAM(), file: '/entry.st.css', severity: 'error' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
+        });
+
+        it('should warn about an unknown scoping parameter', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-scope $unknown$ {
+                            .part {}
+                        }|
+                        `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                // tslint:disable-next-line:max-line-length
+                { message: processorWarnings.UNKNOWN_SCOPING_PARAM('unknown'), file: '/entry.st.css', severity: 'error' }
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
         });
 
         it('should warn about vars definition inside a scope', () => {
