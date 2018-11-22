@@ -57,8 +57,8 @@ export const processorWarnings = {
     MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
     NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
     NO_IMPORT_IN_ST_SCOPE() { return 'cannot use "${rootValueMapping.import}" inside of "@st-scope"'; },
-    SCOPE_PARAM_NOT_SIMPLE_SELECTOR() { return '"@st-scope" must receive a simple selector'; },
-    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a single Element or "root" as its scoping parameter'; }
+    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
+    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; }
 };
 /* tslint:enable:max-line-length */
 
@@ -90,12 +90,13 @@ export class StylableProcessor {
         });
 
         this.meta.scopes.forEach(atRule => {
-            const scopingSelector = createScopingSelector(atRule, this.diagnostics);
+            const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
+            this.handleRule(scopingRule, true);
+            validateScopingSelector(atRule, scopingRule, this.diagnostics);
 
-            if (scopingSelector !== null) {
-                this.handleRule(postcss.rule({ selector: scopingSelector }) as SRule, true);
+            if (scopingRule.selector) {
                 atRule.walkRules(rule => {
-                    rule.replaceWith(rule.clone({ selector: `${scopingSelector} ${rule.selector}`}));
+                    rule.replaceWith(rule.clone({ selector: `${scopingRule.selector} ${rule.selector}`}));
                 });
             }
 
@@ -488,19 +489,16 @@ export class StylableProcessor {
     }
 }
 
-export function createScopingSelector(
+export function validateScopingSelector(
     atRule: postcss.AtRule,
+    {selector: scopingSelector, isSimpleSelector}: SRule,
     diagnostics: Diagnostics) {
-    const scope = atRule.params;
-
-    if (!scope) {
-        diagnostics.error(atRule, processorWarnings.MISSING_SCOPING_PARAM());
-        return null;
-    } else if (!isSimpleSelector(parseSelector(scope))) {
-        diagnostics.error(atRule, processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(), { word: scope });
+    if (!scopingSelector) {
+        diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
+    } else if (!isSimpleSelector) {
+        diagnostics.warn(atRule,
+            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector), { word: scopingSelector });
     }
-
-    return scope;
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {

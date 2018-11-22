@@ -235,8 +235,8 @@ describe('@st-scope', () => {
             };
 
             const { meta } = expectWarningsFromTransform(config, [
-                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(),
-                    file: '/entry.st.css', severity: 'error' },
+                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root .part'),
+                    file: '/entry.st.css', severity: 'warning' },
                 { message: transformerWarnings.UNKNOWN_SCOPING_PARAM('.root .part'),
                     file: '/entry.st.css', severity: 'error' }
             ]);
@@ -256,7 +256,7 @@ describe('@st-scope', () => {
                 }|
             `, [
                 // tslint:disable-next-line:max-line-length
-                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(), file: 'entry.st.css', severity: 'error' }
+                { message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root::before'), file: 'entry.st.css', severity: 'warning' }
             ]);
         });
 
@@ -340,7 +340,7 @@ describe('@st-scope', () => {
             };
 
             const { meta } = expectWarningsFromTransform(config, [
-                { message: processorWarnings.MISSING_SCOPING_PARAM(), file: '/entry.st.css', severity: 'error' }
+                { message: processorWarnings.MISSING_SCOPING_PARAM(), file: '/entry.st.css', severity: 'warning' }
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
         });
