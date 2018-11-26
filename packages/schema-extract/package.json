@@ -1,6 +1,7 @@
 {
   "name": "@stylable/schema-extract",
   "version": "0.1.1",
+  "description": "A utility for extracting JSON schema objects from Stylable stylesheets",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -30,5 +31,6 @@
   },
   "license": "BSD-3-Clause",
   "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
-  "sideEffects": false
+  "sideEffects": false,
+  "author": "Wix.com"
 }
