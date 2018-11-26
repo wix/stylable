@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -148,7 +150,7 @@
   <li>Optionally you can provide each state definition with a <code class="highlighter-rouge">default value</code>, enabling it to be used without providing a parameter argument.</li>
 </ul>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">stateX</span><span class="p">([</span><span class="n">type</span><span class="p">])</span> <span class="p">[</span><span class="nb">default</span> <span class="n">Value</span><span class="err">?</span><span class="p">],</span>
                 <span class="n">stateY</span><span class="p">([</span><span class="n">type</span><span class="p">])</span> <span class="p">[</span><span class="nb">default</span> <span class="n">Value</span><span class="err">?</span><span class="p">];</span>
 <span class="p">}</span>
@@ -160,8 +162,7 @@
     if no default value was provided,
     this will fail validation */</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong> <br />
@@ -172,7 +173,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 
 <p>You can define a custom state with a <strong>tags value</strong> (seperated by whitespace), and then target it using a pseudo-class selector with a matching <strong>tag argument</strong>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* define a custom state called "cart" */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">cart</span><span class="p">(</span> <span class="n">tag</span> <span class="p">)</span>
 <span class="p">}</span>
@@ -182,8 +183,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
     is a whitespace-separated list of tags, 
     one of which is exactly the tag argument "shirt" */</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setting the state <strong>tag values</strong> in the view <code class="highlighter-rouge">&lt;span {...style("root", {cart: "shirt pants"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span data-cart="shirt pants" /&gt;</code>.</p>
 
@@ -191,7 +191,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 
 <p>You can define a custom state with possible <strong>enum value</strong> options, and then target one of the options using a pseudo-class selector with a matching <strong>string argument</strong>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* define the custom state "size" */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">size</span><span class="p">(</span> <span class="n">enum</span><span class="p">(</span><span class="n">small</span><span class="p">,</span> <span class="nb">medium</span><span class="p">,</span> <span class="nb">large</span><span class="p">)</span> <span class="p">)</span>
 <span class="p">}</span>
@@ -204,8 +204,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
    <span class="c">/* invalid because "huge" is not a one of the possible 
    values defined for the state "size" */</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setting the state’s <strong>enum value</strong> in the view <code class="highlighter-rouge">&lt;span {...style("root", {size: "medium"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span data-size="medium" /&gt;</code>.</p>
 
@@ -213,7 +212,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 
 <p>You can define a custom state with a <strong>string value</strong>, and then target it using a pseudo-class selector with a matching <strong>string argument</strong>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* define the "selected" custom state with a string parameter type */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">selected</span><span class="p">(</span> <span class="n">string</span> <span class="p">);</span>
 <span class="p">}</span>
@@ -222,8 +221,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
     <span class="c">/* target an element with a state value that 
     is exactly the string argument "username" */</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setting the state <strong>string value</strong> in the view <code class="highlighter-rouge">&lt;span {...style("root", {selected: "username"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span data-selected="username" /&gt;</code>.</p>
 
@@ -234,7 +232,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 <p>You can optionally pass a regular expression function (<code class="highlighter-rouge">regex()</code>) to the string type to add regular expression validation for the pseudo-class selector. 
 This function accepts a single expression to be tested against the selector parameter. The expression must be within quotes.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* validates that the targeting string argument begins with "user" */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">selected</span><span class="p">(</span> <span class="n">string</span><span class="p">(</span><span class="n">regex</span><span class="p">(</span><span class="s1">"^user"</span><span class="p">))</span> <span class="p">);</span>
 <span class="p">}</span>
@@ -244,12 +242,11 @@ This function accepts a single expression to be tested against the selector para
 
 <span class="c">/* invalid because it doesn't match the regular expression "^user" */</span>
 <span class="nc">.root</span><span class="nd">:selected</span><span class="o">(</span><span class="nt">index</span><span class="o">)</span> <span class="p">{}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>String type can also accept several other validations, including <code class="highlighter-rouge">minLength(number)</code>, <code class="highlighter-rouge">maxLength(number)</code> and <code class="highlighter-rouge">contains(string)</code>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* validates the targeting string arguments with multiple validations */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">selected</span><span class="p">(</span> 
                     <span class="n">string</span><span class="p">(</span> 
@@ -265,18 +262,16 @@ This function accepts a single expression to be tested against the selector para
 
 <span class="c">/* invalid due to minLength(2) &amp; contains(user) */</span>
 <span class="nc">.root</span><span class="nd">:selected</span><span class="o">(</span><span class="nt">x</span><span class="o">)</span> <span class="p">{}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="number">Number</h2>
 
 <p>You can define a custom state with a <strong>number value</strong>, and then target it using a pseudo-class selector with a matching <strong>number argument</strong>.</p>
 
-<div class="language-html highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;span</span> <span class="na">data-column=</span><span class="s">"5"</span> <span class="nt">/&gt;</span>
-</code></pre>
-</div>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;span</span> <span class="na">data-column=</span><span class="s">"5"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* define the custom pseudo-class "column" */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">column</span><span class="p">(</span> <span class="n">number</span> <span class="p">)</span>
 <span class="p">}</span>
@@ -284,8 +279,7 @@ This function accepts a single expression to be tested against the selector para
 <span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">5</span><span class="o">)</span> <span class="p">{</span>
     <span class="c">/* target an element with a state value that is exactly the number argument "5" */</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setting the state <strong>number value</strong> in the view <code class="highlighter-rouge">&lt;span {...style("root", {column: 5})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span data-column="5" /&gt;</code>.</p>
 
@@ -293,7 +287,7 @@ This function accepts a single expression to be tested against the selector para
 
 <p>You can use several validators that the number type provides.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* validates the targeting number argument */</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">column</span><span class="p">(</span> <span class="n">number</span><span class="p">(</span> <span class="n">min</span><span class="p">(</span><span class="m">2</span><span class="p">),</span> <span class="n">max</span><span class="p">(</span><span class="m">6</span><span class="p">),</span> <span class="n">multipleOf</span><span class="p">(</span><span class="m">2</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
 <span class="p">}</span>
@@ -310,8 +304,7 @@ This function accepts a single expression to be tested against the selector para
 <span class="c">/* invalid because of "min(2)" and "max(6)" validations */</span>
 <span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">1</span><span class="o">),</span>
 <span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">7</span><span class="o">)</span> <span class="p">{}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="future-intent">Future intent</h2>
 

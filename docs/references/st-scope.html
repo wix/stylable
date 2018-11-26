@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scoping</title>
+
+	<!-— facebook open graph tags -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://stylable.io/">
+	<meta property="og:title" content="Stylable - scoped CSS for components">
+	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	 
+	<!-— twitter card tags additive with the og: tags -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:domain" content="stylable.io">
+	<meta name="twitter:title" content="Stylable - scoped CSS for components">
+	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	<meta name="twitter:url" content="https://stylable.io/">
+
+    <link rel="stylesheet" href="../../css/normalize.css">
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="../.."><span class="logo"></span></a>
+
+        <ul class="main-nav">
+            <li><a href="https://github.com/wix/stylable" target="_blank"><img src="/images/logo-git.svg" alt="Stylable on GitHub"></a></li>
+            <li><a href="https://twitter.com/stylableio" target="_blank"><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"></a></li>
+        </ul>
+    </div>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+       gtag('config', 'UA-109043375-1');
+    </script>
+</header>
+
+
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+                <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Specification Reference</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
+            
+                <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
+            
+                <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class="active"><a href="../../docs/references/st-scope" class="active docs-nav-item">Scoping</a></li>
+            
+                <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>Scoping</h1>
+    <p><strong>Stylable</strong> scope enables you to wrap several style-rules using a single directive.
+The scoping directive receives a single simple selector (<a href="./tag-selectors">Tag selector</a>, <a href="./class-selectors">Class selector</a> or <a href="./root">Component root</a>) to use for its scoping.</p>
+
+<p>Stylable scoping directive is similar in its behavior to CSS nesting, but can only be applied to a single level.</p>
+
+<h3 id="syntax-example">Syntax example</h3>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* entry.st.css */</span>
+<span class="k">@st-scope</span> <span class="p">.</span><span class="n">root</span> <span class="p">{</span>
+    <span class="nt">input</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span> <span class="p">}</span>  
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
+<span class="nc">.entry--root</span> <span class="nt">input</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span>
+<span class="p">}</span> 
+</code></pre></div></div>
+
+<h3 id="theming-with-scope">Theming with scope</h3>
+
+<p>There are many possible patterns that can be used to theme a site or application in CSS. Stylable scoping capability serves as syntax sugar to allow an easier theme implementation.</p>
+
+<p>Below are several examples for how theming can be done.</p>
+
+<h4 id="creating-a-theme">Creating a theme</h4>
+<p>In this example, we’re representing a dark theme as a stylesheet. Creating your overriding rules under that Stylesheet’s symbol and apply it to the relevant part of your DOM.</p>
+
+<p>In this theme implementation we are targeting three components and overriding their default look.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* dark-theme.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./index.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">App</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">Button</span><span class="p">,</span> <span class="n">DropDown</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">@st-scope</span> <span class="p">.</span><span class="n">root</span> <span class="p">{</span>
+    <span class="nt">App</span> <span class="p">{</span> <span class="nl">border-color</span><span class="p">:</span> <span class="n">darkgrey</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">Button</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">darkgreen</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">DropDown</span> <span class="p">{</span>
+        <span class="nl">background</span><span class="p">:</span> <span class="n">darkgrey</span><span class="p">;</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="no">beige</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h4 id="extending-a-theme">Extending a theme</h4>
+<p>In this example, we are extending our previously created dark theme, with a specific override for the Gallery component.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./gallery.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">Gallery</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./dark.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">DarkTheme</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">@st-scope</span> <span class="n">DarkTheme</span> <span class="p">{</span>
+    <span class="nt">DropDown</span> <span class="p">{</span>
+        <span class="nl">color</span><span class="p">:</span> <span class="no">yellow</span><span class="p">;</span> <span class="c">/* overriding DarkTheme color, perserving background */</span>
+    <span class="p">}</span>
+    <span class="nt">Gallery</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="n">darkgrey</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="theming-with-mixins">Theming with mixins</h4>
+<p>In this file, we are creating pre-designed flavors that uses Stylable variables to determine their styling.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* flavors.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./index.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">Button</span><span class="p">,</span> <span class="n">UserForm</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nd">:vars</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span>
+    <span class="py">text</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span>
+    <span class="py">borderColor</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.button-flavor</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">background</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="nb">text</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.userForm-flavor</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">UserForm</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">background</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="nb">text</span><span class="p">);</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="n">value</span><span class="p">(</span><span class="n">borderColor</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In this example, we use our existing flavors from above to customize our components look under the dark theme.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./index.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">UserForm</span><span class="p">,</span> <span class="n">Button</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./flavors.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">button-flavor</span><span class="p">,</span> <span class="n">userForm-flavor</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">@st-scope</span> <span class="p">.</span><span class="n">root</span> <span class="p">{</span>
+    <span class="nt">Button</span> <span class="p">{</span>
+        <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">button-flavor</span><span class="p">(</span><span class="n">background</span> <span class="no">black</span><span class="p">,</span> <span class="nb">text</span> <span class="no">white</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="nt">UserForm</span> <span class="p">{</span>
+        <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">userForm-flavor</span><span class="p">(</span><span class="n">background</span> <span class="no">black</span><span class="p">,</span> <span class="nb">text</span> <span class="no">white</span><span class="p">,</span> <span class="n">borderColor</span> <span class="m">#f4f4f4</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+</section>
+
+
+</div>
+
+
+<script src="../../js/vendor/prism/prism.js"></script>
+<script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
+
+<script src="https://static.parastorage.com/unpkg/react@16.2.0//umd/react.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/react-dom@16.2.0//umd/react-dom.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+</body>
+</html>

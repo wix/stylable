@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -142,24 +144,23 @@
 
 <p>To manualy integrate <strong>Stylable</strong> to a React component, you <strong>must</strong> first mark the root element of the component:</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Comp</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+<span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{</span> <span class="na">stateA</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="na">stateB</span><span class="p">:</span> <span class="kc">false</span> <span class="p">},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The result of the above generates and adds the props needed to define the root element for styling:</p>
 <ul>
   <li>Marks component root by setting the root target <code class="highlighter-rouge">className</code></li>
   <li>Sets component states using <code class="highlighter-rouge">data-*</code> attributes</li>
   <li>Appends <code class="highlighter-rouge">className</code> override from component props to the root <code class="highlighter-rouge">className</code></li>
-  <li>Custom or overriden component states are added from external <code class="highlighter-rouge">data-*</code> props</li>
+  <li>Custom or overridden component states are added from external <code class="highlighter-rouge">data-*</code> props</li>
 </ul>
 
 <blockquote>
@@ -169,9 +170,9 @@ To enable external styling, we recommend passing the props <code class="highligh
 
 <p>All nodes, other than <code class="highlighter-rouge">root</code>, can be marked directly with the class mapping and the <a href="../guides/runtime#custom-state-mapping">$cssStates</a> function:</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Comp</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+<span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;</span>
@@ -180,8 +181,7 @@ To enable external styling, we recommend passing the props <code class="highligh
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
 </section>

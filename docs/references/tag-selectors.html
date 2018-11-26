@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -146,33 +148,31 @@
 
 <p>To target <strong>all</strong> elements of a certain type in your project, use a <a href="./global-selectors"><code class="highlighter-rouge">global selector</code></a>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nd">:global</span><span class="o">(</span><span class="nt">span</span><span class="o">)</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output - form is not namespaced - affects any nested form */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output - form is not namespaced - affects any nested form */</span>
 <span class="nc">.Page__root</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span> 
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nt">form</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nt">span</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* this will affect *ALL* spans in your application */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
 The value <code class="highlighter-rouge">form</code> itself is not namespaced.</p>
 </blockquote>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">React</span> <span class="nx">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Comp</span> <span class="p">{</span>
-    <span class="nx">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kr">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+<span class="kd">class</span> <span class="nx">Comp</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
@@ -187,14 +187,13 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="component-element">Component element</h2>
 
 <p>When the value of a stylesheet is <a href="./imports">imported</a> with a <strong>capital first letter</strong>, it can be used as a component tag selector.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
 <span class="nd">:import</span><span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./toggle-button.st.css"</span><span class="p">;</span>
@@ -202,25 +201,23 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 <span class="p">}</span>
 <span class="nc">.root</span> <span class="nt">ToggleButton</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nt">ToggleButton</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */</span>
 <span class="nc">.Page__root</span> <span class="nc">.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.sideBar</span><span class="nd">:hover</span> <span class="nc">.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">React</span> <span class="nx">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
 
 <span class="cm">/* React implementation - button component implements toggle-button.css */</span>
-<span class="kr">import</span> <span class="nx">ToggleButton</span> <span class="nx">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Comp</span> <span class="p">{</span>
-    <span class="nx">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kr">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+<span class="kd">class</span> <span class="nx">Comp</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
@@ -234,8 +231,7 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </section>
 

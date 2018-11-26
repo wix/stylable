@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -150,11 +152,10 @@
 
 <p>The types described below are the provided arguments <strong>Stylable</strong> provides for the plugins. For example:</p>
 
-<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="err">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="err">:</span> <span class="nx">stColor</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="p">:</span> <span class="nx">stColor</span><span class="p">)</span> <span class="p">{</span>
     <span class="p">...</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="stylable-types">Stylable types</h2>
 
@@ -272,7 +273,7 @@
 
 <p>For example the following CSS code:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"../my-formatter.js"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">lighten</span><span class="p">;</span>
@@ -283,12 +284,11 @@
     <span class="nl">color</span><span class="p">:</span> <span class="n">lighten</span><span class="p">(</span><span class="m">30</span><span class="p">,</span> <span class="m">#ff0000</span><span class="p">);</span>
 <span class="p">}</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Uses the following TypeScript code:</p>
 
-<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="cm">/*my-formatter.ts*/</span>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*my-formatter.ts*/</span>
 
 <span class="k">import</span> <span class="p">{</span><span class="nx">darken</span> <span class="k">as</span> <span class="nx">polishedDarken</span><span class="p">,</span> <span class="nx">lighten</span> <span class="k">as</span> <span class="nx">polishedLighten</span><span class="p">}</span> <span class="k">from</span> <span class="s1">'polished'</span><span class="p">;</span>
 <span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
@@ -297,18 +297,17 @@
 <span class="cm">/**
  * Lighten - lightens a color by a percentage.
 */</span>
-<span class="k">export</span> <span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="err">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="err">:</span> <span class="nx">stColor</span><span class="p">)</span><span class="err">:</span> <span class="nx">stColor</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">:</span> <span class="nx">stNumber</span><span class="p">,</span> <span class="nx">color</span><span class="p">:</span> <span class="nx">stColor</span><span class="p">):</span> <span class="nx">stColor</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">polishedLighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">,</span> <span class="nx">color</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="extending-through-mixins">Extending through mixins</h2>
 
 <p>In many cases its useful to generate bigger chunks of css through js.
 Here’s an example creating and using an expandOnHover mixin:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="nd">:import</span><span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span><span class="s1">"../my-mixins.js"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span><span class="n">expandOnHover</span><span class="p">;</span>
@@ -318,17 +317,16 @@ Here’s an example creating and using an expandOnHover mixin:</p>
     <span class="py">-st-mixin</span><span class="p">:</span><span class="n">expandOnHover</span><span class="p">(</span><span class="m">200</span><span class="p">,</span><span class="m">2</span><span class="p">);</span>
 <span class="p">}</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-ts highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">,</span> <span class="nx">stCurves</span><span class="p">,</span> <span class="nx">stCssFragment</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">,</span> <span class="nx">stCurves</span><span class="p">,</span> <span class="nx">stCssFragment</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
 
 <span class="cm">/**
 * Expand
 */</span>
-<span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span> <span class="nx">durationMS</span><span class="err">:</span><span class="nx">stNumber</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
-                               <span class="nx">increaseBy</span><span class="err">:</span><span class="nx">stNumber</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
-                               <span class="nx">animationCurve</span><span class="err">:</span><span class="nx">stCurves</span> <span class="o">=</span> <span class="s1">'easeIn'</span><span class="p">)</span><span class="err">:</span><span class="nx">stCssFragment</span><span class="p">{</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span> <span class="nx">durationMS</span><span class="p">:</span><span class="nx">stNumber</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+                               <span class="nx">increaseBy</span><span class="p">:</span><span class="nx">stNumber</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+                               <span class="nx">animationCurve</span><span class="p">:</span><span class="nx">stCurves</span> <span class="o">=</span> <span class="s1">'easeIn'</span><span class="p">):</span><span class="nx">stCssFragment</span><span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="na">transition</span><span class="p">:</span><span class="s2">"all "</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="s2">"ms "</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
         <span class="s2">":hover"</span><span class="p">:{</span>
@@ -337,15 +335,14 @@ Here’s an example creating and using an expandOnHover mixin:</p>
     <span class="p">}</span>
 <span class="p">}</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="declaring-types-through-js-docs">Declaring types through JS docs</h2>
 
 <p>You can also declare your parameters using JS docs.
 Here is a the same formatter and mixin from above, written in js with JS docs.</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="cm">/**
  * Lighten - lightens a color by a percentage.
 */</span>
@@ -355,7 +352,7 @@ Here is a the same formatter and mixin from above, written in js with JS docs.</
  * @param {string} amount - Amount to lighten
  * @param {string} color - Color to be lightened
 */</span>
-<span class="kr">export</span> <span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">,</span> <span class="nx">color</span><span class="p">)</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">lighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">,</span> <span class="nx">color</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nx">polishedLighten</span><span class="p">(</span><span class="nx">amount</span><span class="p">,</span> <span class="nx">color</span><span class="p">);</span>
 <span class="p">}</span>
 
@@ -366,7 +363,7 @@ Here is a the same formatter and mixin from above, written in js with JS docs.</
 * @param {stCurves} [animationCurve=cubicEaseIn] - animation change over time curve
 * @returns {stCssFragment}
 */</span>
-<span class="kr">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span><span class="nx">durationMS</span><span class="p">,</span><span class="nx">increaseBy</span><span class="p">,</span><span class="nx">animationCurve</span><span class="p">){</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span><span class="nx">durationMS</span><span class="p">,</span><span class="nx">increaseBy</span><span class="p">,</span><span class="nx">animationCurve</span><span class="p">){</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="na">transition</span><span class="p">:</span><span class="s2">"all "</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="s2">"ms "</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
         <span class="s2">":hover"</span><span class="p">:{</span>
@@ -375,8 +372,7 @@ Here is a the same formatter and mixin from above, written in js with JS docs.</
     <span class="p">}</span>
 <span class="p">}</span>
 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
 </section>

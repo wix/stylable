@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -147,7 +149,7 @@
   <li>Extend the component on the class you just defined.</li>
 </ol>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"project"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./button.st.css"</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span> 
@@ -157,14 +159,13 @@
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
     <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="use-component-variants-in-components">Use component variants in components</h2>
 
 <p>A component <strong>Stylable</strong> stylesheet can use and extend component variants:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./project.st.css'</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">cancelButton</span><span class="p">;</span>
@@ -181,8 +182,7 @@ js value: "comp__cancel project__cancelButton"
 <span class="nc">.cancel</span> <span class="p">{</span>
     <span class="py">-st-extends</span><span class="p">:</span> <span class="n">cancelButton</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>: <br />

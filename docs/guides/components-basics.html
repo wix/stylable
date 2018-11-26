@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -138,7 +140,7 @@
     <h1>Component Basics</h1>
     <p>This guide walks you through the basics of how to style and work with components using <strong>Stylable</strong>.</p>
 
-<p>You use <strong>Stylable</strong> with a component file (for example using React), along with a <strong>Stylable</strong> CSS file that has the extention <code class="highlighter-rouge">.st.css</code>.</p>
+<p>You use <strong>Stylable</strong> with a component file (for example using React), along with a <strong>Stylable</strong> CSS file that has the extension <code class="highlighter-rouge">.st.css</code>.</p>
 
 <blockquote>
   <p><strong>Note</strong>:<br />
@@ -153,13 +155,13 @@ This guide shows the <code class="highlighter-rouge">JSX</code> side of our <a h
 
 <p>Let’s say you have a <code class="highlighter-rouge">Button</code> component with a render function per this example. You can style its JSX using the <code class="highlighter-rouge">className</code> property straight from the style object, or by executing and then <a href="https://reactjs.org/docs/jsx-in-depth.html#spread-attributes" target="_blank">spreading</a> the style <a href="./runtime">runtime function</a> (see the <code class="highlighter-rouge">root</code> node as an example).</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* button.jsx */</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">React</span> <span class="nx">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./button.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* button.jsx */</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./button.st.css'</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Button</span> <span class="p">{</span>
-    <span class="nx">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kr">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+<span class="kd">class</span> <span class="nx">Button</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
     <span class="p">}</span>
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
@@ -171,12 +173,11 @@ This guide shows the <code class="highlighter-rouge">JSX</code> side of our <a h
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Now in the component’s <strong>Stylable</strong> CSS file called <code class="highlighter-rouge">button.st.css</code>, you can declare each of the classes as a ruleset as follows:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
 
 <span class="c">/* 
 note that all of these classes are placed manually on the DOM using the Stylable integration in the component logic, in this case, button.tsx
@@ -194,8 +195,7 @@ note that all of these classes are placed manually on the DOM using the Stylable
     <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="2-expose-the-components-stylable-api">2. Expose the component’s Stylable API</h2>
 
@@ -222,22 +222,21 @@ note that all of these classes are placed manually on the DOM using the Stylable
 
 <p>Let’s take the <code class="highlighter-rouge">Button</code> component and import it into the JSX file, and also add it to the render:</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* panel.jsx */</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">React</span> <span class="nx">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="p">{</span> <span class="nx">Button</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">'../button'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./panel.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* panel.jsx */</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Button</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'../button'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./panel.st.css'</span><span class="p">;</span>
 
-<span class="kr">export</span> <span class="kr">const</span> <span class="nx">Panel</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">(</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">Panel</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">(</span>
     <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="p">}</span> <span class="o">&gt;</span>
         <span class="o">&lt;</span><span class="nx">Button</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">cancelBtn</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
 </span>    <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span><span class="p">);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Let’s also import <code class="highlighter-rouge">Button</code>’s stylesheet into the <code class="highlighter-rouge">Panel</code> stylesheet. You can then target the internal parts of the component that you imported:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">Button</span><span class="p">;</span>
@@ -255,8 +254,7 @@ note that all of these classes are placed manually on the DOM using the Stylable
     <span class="nl">color</span><span class="p">:</span> <span class="no">honeydew</span><span class="p">;</span>
     <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">bold</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="b-create-and-expose-states">B. Create and expose states</h3>
 
@@ -264,13 +262,13 @@ note that all of these classes are placed manually on the DOM using the Stylable
 
 <p>A custom pseudo-class can be used to reflect any logical state of your component. For example, your <code class="highlighter-rouge">Button</code> has a state called <code class="highlighter-rouge">on</code>. In this example, it is toggled when the button is clicked.</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* button.jsx */</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="nx">as</span> <span class="nx">React</span> <span class="nx">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./button.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* button.jsx */</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./button.st.css'</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">Button</span> <span class="p">{</span>
-    <span class="nx">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kr">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+<span class="kd">class</span> <span class="nx">Button</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
 
         <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
             <span class="na">on</span><span class="p">:</span> <span class="kc">false</span>
@@ -286,10 +284,9 @@ note that all of these classes are placed manually on the DOM using the Stylable
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* button.st.css */</span>
 <span class="nc">.root</span> <span class="p">{</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">on</span><span class="p">;</span>
     <span class="nl">background</span><span class="p">:</span> <span class="m">#b0e0e6</span><span class="p">;</span>
@@ -305,20 +302,18 @@ note that all of these classes are placed manually on the DOM using the Stylable
     <span class="nl">font-size</span><span class="p">:</span> <span class="m">1.2em</span><span class="p">;</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">rgba</span><span class="p">(</span><span class="m">81</span><span class="p">,</span> <span class="m">12</span><span class="p">,</span> <span class="m">68</span><span class="p">,</span> <span class="m">1.0</span><span class="p">)</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>You can then target <code class="highlighter-rouge">Button</code>’s <code class="highlighter-rouge">on</code> state in your <code class="highlighter-rouge">panel</code> component as follows:</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* panel.st.css */</span>
 <span class="nc">.cancelBtn</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">cornflowerblue</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="nc">.cancelBtn</span><span class="nd">:on</span> <span class="p">{</span>
     <span class="nl">box-shadow</span><span class="p">:</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">2px</span> <span class="m">1px</span> <span class="no">indigo</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="see-also">See also:</h2>
 

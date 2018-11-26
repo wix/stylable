@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -150,7 +152,7 @@
 
 <p>To define custom pseudo-classes, or states, without parameters, you tell <strong>Stylable</strong> the list of possible custom states that the CSS declaration may be given. You can then target the states in the context of the selector. In this example <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are added to the <code class="highlighter-rouge">root</code> selector and then targeted with different colors.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example1.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* example1.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Example1"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="p">{</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">toggled</span><span class="p">,</span> <span class="n">loading</span><span class="p">;</span>
@@ -158,15 +160,13 @@
 <span class="nc">.root</span><span class="nd">:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.root</span><span class="nd">:loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.root</span><span class="nd">:loading:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">][</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="custom-pseudo-classes-with-parameters">Custom pseudo-classes with parameters</h2>
 
@@ -174,7 +174,7 @@
 
 <p>For example, a cell in a grid can be marked and later targeted using <code class="highlighter-rouge">column</code> and <code class="highlighter-rouge">row</code> pseudo-classes.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.cell</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.cell</span> <span class="p">{</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">column</span><span class="p">(</span><span class="n">number</span><span class="p">),</span> 
                 <span class="n">row</span><span class="p">(</span><span class="n">number</span><span class="p">);</span>
 <span class="p">}</span>
@@ -182,8 +182,7 @@
 <span class="nc">.cell</span><span class="nd">:column</span><span class="o">(</span><span class="nt">1</span><span class="o">)</span><span class="nd">:row</span><span class="o">(</span><span class="nt">4</span><span class="o">)</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span><span class="no">red</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p><strong>Stylable</strong> offers a built-in system of <a href="./state-parameter-types">state types</a> that provide a better development experience when targeting pseudo-classes.</p>
 
 <h2 id="mapped-states">Mapped states</h2>
@@ -194,32 +193,30 @@
 
 <p>In this example, <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">loading</code> are defined on the root class with their custom implementation.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example-custom.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* example-custom.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"ExampleCustom"</span><span class="p">;</span>
 <span class="nc">.root</span> <span class="p">{</span>
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">toggled</span><span class="p">(</span><span class="s1">".on"</span><span class="p">),</span> <span class="n">loading</span><span class="p">(</span><span class="s1">"[dataSpinner]"</span><span class="p">);</span>
 <span class="p">}</span>
 <span class="nc">.root</span><span class="nd">:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.root</span><span class="nd">:loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.ExampleCustom__root.on</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.ExampleCustom__root</span><span class="o">[</span><span class="nt">dataSpinner</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
-When writing custom mappping, ensure your custom selector targets a simple selector, and not a CSS child selector.</p>
+When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS child selector.</p>
 </blockquote>
 
 <h2 id="state-inheritance">State inheritance</h2>
 
 <p>You can extend another imported stylesheet and inherit its custom pseudo-classes. In this example the value <code class="highlighter-rouge">Comp1</code> is imported from the <code class="highlighter-rouge">example1.css</code> stylesheet and extended by <code class="highlighter-rouge">.mediaButton</code>. The custom pseudo-classes <code class="highlighter-rouge">toggled</code> and <code class="highlighter-rouge">selected</code> are defined to be used on the <code class="highlighter-rouge">mediaButton</code> component.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* example2.st.css */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* example2.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Example2"</span><span class="p">;</span>
 <span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./example1.st.css"</span><span class="p">;</span>
@@ -233,18 +230,16 @@ When writing custom mappping, ensure your custom selector targets a simple selec
 <span class="nc">.mediaButton</span><span class="nd">:loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* from Example1 */</span>
 <span class="nc">.mediaButton</span><span class="nd">:selected</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">salmon</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* from Example2 */</span>
 <span class="nc">.mediaButton</span><span class="nd">:toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* included in Example1 but overridden by Example2 */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Example2__mediaButton</span><span class="nd">:hover</span> <span class="p">{</span> <span class="nl">border</span><span class="p">:</span> <span class="m">0.2em</span> <span class="nb">solid</span> <span class="no">black</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* native hover - not declared */</span>
 <span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* loading scoped to Example1 - only one to declare */</span>
 <span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example2-selected</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">salmon</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* selected scoped to Example2 - only one to declare */</span>
 <span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example2-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;}</span> <span class="c">/* toggled scoped to Example2 - last to declare */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
@@ -257,10 +252,10 @@ You can override the behavior of native pseudo-classes. This can enable you to w
 
 <p><strong>Stylable</strong> offers <a href="../getting-started/react-integration">React CSS state integration</a> to help components manage custom pseudo-classes easily.</p>
 
-<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="cm">/* sample of a stylable component */</span>
-<span class="kr">import</span> <span class="nx">style</span> <span class="nx">from</span> <span class="s1">'./stylesheet.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* sample of a stylable component */</span>
+<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./stylesheet.st.css'</span><span class="p">;</span>
 
-<span class="kr">class</span> <span class="nx">MyComponent</span> <span class="p">{</span>
+<span class="kd">class</span> <span class="nx">MyComponent</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{</span> 
                 <span class="na">toggled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
@@ -269,8 +264,7 @@ You can override the behavior of native pseudo-classes. This can enable you to w
         <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>    <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 
 </section>

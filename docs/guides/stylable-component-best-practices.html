@@ -127,6 +127,8 @@
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
             
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
                 <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
             
         </ul>
@@ -152,16 +154,14 @@
 
 <p>Use camelCase and avoid hyphens (-) and capital letters at the beginning.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* good */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* good */</span>
 <span class="nt">Gallery</span><span class="nd">::navBtn::label</span> <span class="p">{}</span> <span class="c">/* camelCase with clear pseudo-element names  */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="c">/* bad */</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* bad */</span>
 <span class="nt">Gallery</span><span class="nd">::galleryNavBtn</span> <span class="p">{}</span> <span class="c">/* it is better to reuse the generic component id */</span>
 <span class="nt">Gallery</span><span class="nd">::nav-btn</span> <span class="p">{}</span> <span class="c">/* don't use kebab-case - stylable exports JS */</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="avoid-global-settings-in-your-stylesheet">Avoid global settings in your stylesheet</h2>
 
@@ -179,12 +179,11 @@
 
 <p>The best practice is to make sure every color used for a text across the project has a sufficiently contrasting background.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.options</span> <span class="p">{</span> 
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.options</span> <span class="p">{</span> 
     <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span> 
     <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span> 
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="keep-browser-defaults-intact">Keep browser defaults intact</h2>
 
@@ -206,24 +205,22 @@
 
 <p>Styling pseudo-elements in a component creates a selector that takes more specificity to override</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"comp"</span><span class="p">;</span>
 <span class="c">/* 
 &gt; directly style navBtn - a type of button
 selector: .comp__gallery .gallery__navBtn
 specificity: 0,0,4,0 
 */</span>
 <span class="nc">.gallery</span><span class="nd">::navBtn</span> <span class="p">{}</span> 
-</code></pre>
-</div>
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"page"</span><span class="p">;</span>
+</code></pre></div></div>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@namespace</span> <span class="s1">"page"</span><span class="p">;</span>
 <span class="c">/* 
 &gt; less specific than component override 
 selector: .page__root button
 specificity: 0,0,1,1
 */</span>
 <span class="nc">.root</span> <span class="nt">button</span> <span class="p">{}</span> 
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong>:
@@ -234,14 +231,13 @@ For the <code class="highlighter-rouge">button</code> selector, we manually adde
 
 <p>A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify each of them with a comment per this example.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nc">.link</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.link</span> <span class="p">{</span>
     <span class="c">/* override default anchor color */</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">currentColor</span><span class="p">;</span>
     <span class="c">/* cover entire line */</span>
     <span class="nl">display</span><span class="p">:</span> <span class="nb">block</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This helps with maintenance and development since we don’t test CSS as thoroughly as other code.</p>
 
@@ -249,15 +245,14 @@ For the <code class="highlighter-rouge">button</code> selector, we manually adde
 
 <p>Import variables from the <a href="../guides/project-commons">project commons stylesheet</a>.</p>
 
-<div class="language-css highlighter-rouge"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./project.st.css"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="nc">.item</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="keep-svg-and-images-overridable">Keep SVG and images overridable</h2>
 
