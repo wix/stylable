@@ -56,7 +56,8 @@ export const processorWarnings = {
     EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; },
     MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
     NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
-    NO_IMPORT_IN_ST_SCOPE() { return 'cannot use "${rootValueMapping.import}" inside of "@st-scope"'; },
+    NO_IMPORT_IN_ST_SCOPE() { return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`; },
+    NO_KEYFRAMES_IN_ST_SCOPE() { return `cannot use "@keyframes" inside of "@st-scope"`; },
     SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
     MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; }
 };
@@ -142,7 +143,11 @@ export class StylableProcessor {
                     }
                     break;
                 case 'keyframes':
-                    this.meta.keyframes.push(atRule);
+                    if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
+                        this.meta.keyframes.push(atRule);
+                    } else {
+                        this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
+                    }
                     break;
                 case 'custom-selector':
                     const params = atRule.params.split(/\s/);
