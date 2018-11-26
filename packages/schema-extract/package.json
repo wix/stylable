@@ -1,7 +1,7 @@
 {
   "name": "@stylable/schema-extract",
   "version": "0.1.2",
-  "description": "A utility for extracting JSON schema objects from Stylable stylesheets",
+  "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
