@@ -62,5 +62,7 @@
     title: Formatters
   - id: references/variables
     title: Variables
+  - id: references/st-scope
+    title: Scoping
   - id: references/namespace
     title: Namespace

@@ -46,9 +46,6 @@ export function traverseNode(node: SelectorAstNode,
     if (cNodes) {
         for (let i = 0; i < node.nodes.length; i++) {
             doNext = traverseNode(node.nodes[i], visitor, i, node.nodes);
-            if (doNext === true) {
-                continue;
-            }
             if (doNext === false) {
                 return false;
             }
@@ -107,6 +104,15 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
 }
 
 export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
+
+export function isSimpleSelector(selectorAst: SelectorAstNode) {
+    const isSimpleSelectorASTNode = createSimpleSelectorChecker();
+    const isSimple = traverseNode(selectorAst, node => (
+        isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
+    ));
+
+    return isSimple;
+}
 
 export function isImport(ast: SelectorAstNode): boolean {
     const selectors = ast.nodes[0];
@@ -253,8 +259,8 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
     });
 }
 
-export function isChildOfAtRule(rule: postcss.Rule, atRuleName: string) {
-    return rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
+export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
+    return !!rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
 }
 
 export function isCompRoot(name: string) {

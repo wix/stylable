@@ -9,7 +9,7 @@ import { resolve } from '../src/path';
 import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
-import { valueParserWarnings } from '../src/stylable-value-parsers';
+import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
 import {
     expectWarnings,
     expectWarningsFromTransform,
@@ -470,7 +470,9 @@ describe('diagnostics: warnings and errors', () => {
                     myColor:red;
                 }
 
-                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':vars'), file: 'main.css' }]);
+                `,
+                // tslint:disable-next-line:max-line-length
+                [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.vars), file: 'main.css' }]);
             });
         });
 

@@ -1,8 +1,9 @@
 import { expect, use } from 'chai';
-import chaiSubset = require('chai-subset');
-import { processorWarnings, valueMapping } from '../src/index';
+import chaiSubset from 'chai-subset';
+import { processorWarnings, valueMapping } from '../src';
 import { nativePseudoClasses } from '../src/native-reserved-lists';
 import { stateErrors } from '../src/pseudo-states';
+import { flatMatch } from './matchers/flat-match';
 import { mediaQuery, styleRules } from './matchers/results';
 import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableResult, processSource } from './utils/generate-test-util';
@@ -10,6 +11,7 @@ import { generateStylableResult, processSource } from './utils/generate-test-uti
 use(chaiSubset); // move all of these to a central place
 use(styleRules);
 use(mediaQuery);
+use(flatMatch);
 
 // testing concerns for feature
 // - states belonging to an extended class (multi level)
@@ -68,7 +70,7 @@ describe('pseudo-states', () => {
                         |-st-states: $state1(string, number(x))$|;
                     }
                 `, [{
-                        message: 'pseudo-state "state1(string, number(x))" definition must be of a single type',
+                        message: stateErrors.TOO_MANY_STATE_TYPES('state1', ['string', 'number(x)']),
                         file: 'main.css'
                     }]);
             });
@@ -79,7 +81,7 @@ describe('pseudo-states', () => {
                         |-st-states: $state1()$|;
                     }
                 `, [{
-                        message: 'pseudo-state "state1" expected a definition of a single type, but received none',
+                        message: stateErrors.NO_STATE_TYPE_GIVEN('state1'),
                         file: 'main.css'
                     }]);
             });
@@ -90,8 +92,7 @@ describe('pseudo-states', () => {
                         |-st-states: $state1( string( contains(one, two) ) )$|;
                     }
                 `, [{
-                        // tslint:disable-next-line:max-line-length
-                        message: 'pseudo-state "state1" expected "contains" validator to receive a single argument, but it received "one, two"',
+                        message: stateErrors.TOO_MANY_ARGS_IN_VALIDATOR('state1', 'contains', ['one', 'two']),
                         file: 'main.css'
                     }]);
             });
@@ -102,7 +103,7 @@ describe('pseudo-states', () => {
                         |-st-states: state1( $unknown$ )|;
                     }
                 `, [{
-                        message: 'pseudo-state "state1" defined with unknown type: "unknown"',
+                        message: stateErrors.UNKNOWN_STATE_TYPE('state1', 'unknown'),
                         file: 'main.css'
                     }]);
             });
@@ -1763,7 +1764,7 @@ describe('pseudo-states', () => {
             };
 
             const res = expectWarningsFromTransform(config, [
-                { message: 'unknown pseudo-state "unknownState"', file: '/entry.st.css' }
+                { message: stateErrors.UNKNOWN_STATE_USAGE('unknownState'), file: '/entry.st.css' }
             ]);
             expect(res, 'keep unknown state').to.have.styleRules([`.entry--root:unknownState{}`]);
         });

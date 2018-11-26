@@ -7,6 +7,7 @@ import {
     isChildOfAtRule,
     isCompRoot,
     isRootValid,
+    isSimpleSelector,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -23,7 +24,7 @@ import {
     VarSymbol
 } from './stylable-meta';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
-import { SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
@@ -35,12 +36,12 @@ const parseExtends = SBTypesParsers[valueMapping.extends];
 
 /* tslint:disable:max-line-length */
 export const processorWarnings = {
-    UNSCOPED_CLASS(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
-    UNSCOPED_ELEMENT(name: string) { return `unscoped native element "${name}" will affect all elements of the same type in the document`; },
+    UNSCOPED_CLASS(name: string) { return `unscoped class "${name}" will affect all elements of the same type in the document`; },
+    UNSCOPED_ELEMENT(name: string) { return `unscoped element "${name}" will affect all elements of the same type in the document`; },
     FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) { return `cannot define "${name}" inside a complex selector`; },
     ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
     DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
-    ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside :import block`; },
+    ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`; },
     STATE_DEFINITION_IN_ELEMENT() { return 'cannot define pseudo states inside element selectors'; },
     STATE_DEFINITION_IN_COMPLEX() { return 'cannot define pseudo states inside complex selectors'; },
     REDECLARE_SYMBOL(name: string) { return `redeclare symbol "${name}"`; },
@@ -49,11 +50,16 @@ export const processorWarnings = {
     UNKNOWN_MIXIN(name: string) { return `unknown mixin: "${name}"`; },
     OVERRIDE_MIXIN() { return `override mixin on same rule`; },
     OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; },
-    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in :import block`; },
+    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`; },
     INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
     EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; },
     EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; },
-    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; }
+    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
+    NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
+    NO_IMPORT_IN_ST_SCOPE() { return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`; },
+    NO_KEYFRAMES_IN_ST_SCOPE() { return `cannot use "@keyframes" inside of "@st-scope"`; },
+    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
+    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; }
 };
 /* tslint:enable:max-line-length */
 
@@ -71,7 +77,7 @@ export class StylableProcessor {
         root.walkRules((rule: SRule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
-                this.handleRule(rule);
+                this.handleRule(rule, isChildOfAtRule(rule, rootValueMapping.stScope));
             }
         });
 
@@ -84,6 +90,19 @@ export class StylableProcessor {
             }, false);
         });
 
+        this.meta.scopes.forEach(atRule => {
+            const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
+            this.handleRule(scopingRule, true);
+            validateScopingSelector(atRule, scopingRule, this.diagnostics);
+
+            if (scopingRule.selector) {
+                atRule.walkRules(rule => {
+                    rule.replaceWith(rule.clone({ selector: `${scopingRule.selector} ${rule.selector}`}));
+                });
+            }
+
+            atRule.replaceWith(atRule.nodes || []);
+        });
         stubs.forEach(s => s && s.remove());
 
         return this.meta;
@@ -124,7 +143,11 @@ export class StylableProcessor {
                     }
                     break;
                 case 'keyframes':
-                    this.meta.keyframes.push(atRule);
+                    if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
+                        this.meta.keyframes.push(atRule);
+                    } else {
+                        this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
+                    }
                     break;
                 case 'custom-selector':
                     const params = atRule.params.split(/\s/);
@@ -136,6 +159,9 @@ export class StylableProcessor {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
                     break;
+                case 'st-scope':
+                    this.meta.scopes.push(atRule);
+                    break;
             }
         });
         toRemove.forEach(node => node.remove());
@@ -143,7 +169,7 @@ export class StylableProcessor {
         this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
     }
 
-    protected handleRule(rule: SRule) {
+    protected handleRule(rule: SRule, inStScope: boolean = false) {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
@@ -157,20 +183,34 @@ export class StylableProcessor {
             const { name, type } = node;
             if (type === 'pseudo-class') {
                 if (name === 'import') {
-                    if (rule.selector === ':import') {
+                    if (rule.selector === rootValueMapping.import) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            this.diagnostics.warn(rule, processorWarnings.NO_IMPORT_IN_ST_SCOPE());
+                            rule.remove();
+                            return false;
+                        }
+
                         const _import = this.handleImport(rule);
                         this.meta.imports.push(_import);
                         this.addImportSymbols(_import);
                         return false;
                     } else {
-                        this.diagnostics.warn(rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'));
+                        this.diagnostics.warn(
+                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.import));
                     }
                 } else if (name === 'vars') {
-                    if (rule.selector === ':vars') {
+                    if (rule.selector === rootValueMapping.vars) {
+                        if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
+                            this.diagnostics.warn(rule, processorWarnings.NO_VARS_DEF_IN_ST_SCOPE());
+                            rule.remove();
+                            return false;
+                        }
+
                         this.addVarSymbols(rule);
                         return false;
                     } else {
-                        this.diagnostics.warn(rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':vars'));
+                        this.diagnostics.warn(
+                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.vars));
                     }
                 }
             } else if (type === 'class') {
@@ -186,7 +226,7 @@ export class StylableProcessor {
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
 
-                if (locallyScoped === false) {
+                if (locallyScoped === false && !inStScope) {
                     this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), { word: name });
                 }
             } else if (type === 'nested-pseudo-class' && name === 'global') {
@@ -451,6 +491,18 @@ export class StylableProcessor {
         rule.remove();
 
         return importObj;
+    }
+}
+
+export function validateScopingSelector(
+    atRule: postcss.AtRule,
+    {selector: scopingSelector, isSimpleSelector}: SRule,
+    diagnostics: Diagnostics) {
+    if (!scopingSelector) {
+        diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
+    } else if (!isSimpleSelector) {
+        diagnostics.warn(atRule,
+            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector), { word: scopingSelector });
     }
 }
 

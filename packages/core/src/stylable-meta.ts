@@ -22,6 +22,7 @@ export class StylableMeta {
     public outputAst?: postcss.Root;
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
+    public scopes: postcss.AtRule[];
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         const rootSymbol: ClassSymbol = {
             _kind: 'class',
@@ -45,6 +46,7 @@ export class StylableMeta {
         };
         this.customSelectors = {};
         this.urls = [];
+        this.scopes = [];
         this.transformDiagnostics = null;
     }
 }
