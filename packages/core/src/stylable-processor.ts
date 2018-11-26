@@ -77,7 +77,7 @@ export class StylableProcessor {
         root.walkRules((rule: SRule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
-                this.handleRule(rule);
+                this.handleRule(rule, isChildOfAtRule(rule, rootValueMapping.stScope));
             }
         });
 

@@ -119,6 +119,36 @@ describe('@st-scope', () => {
             });
         });
 
+        it('should scope "Comp" class using a default import', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-default: Comp;
+                        }
+                        @st-scope .root {
+                            Comp {}
+                        }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.root {}`
+                    }
+                }
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect(meta.outputAst!.first).to.flatMatch({
+                selector: '.entry--root .imported--root'
+            });
+        });
+
         it('scoped classes should not be mixable (into another class or element)', () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
