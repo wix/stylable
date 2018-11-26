@@ -16,7 +16,8 @@
     "murmurhash": "^0.0.2"
   },
   "files": [
-    "dist"
+    "dist",
+    "register.js"
   ],
   "engines": {
     "node": ">=8"
