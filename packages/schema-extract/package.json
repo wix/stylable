@@ -1,6 +1,6 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A utility for extracting JSON schema objects from Stylable stylesheets",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -16,7 +16,7 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.13"
+    "@stylable/core": "^0.1.14"
   },
   "files": [
     "cjs",
