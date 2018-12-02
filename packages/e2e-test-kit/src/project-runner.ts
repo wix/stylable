@@ -12,6 +12,7 @@ export interface Options {
   port: number;
   puppeteerOptions: puppeteer.LaunchOptions;
   throwOnBuildError?: boolean;
+  configName?: string;
 }
 
 const rimraf = promisify(rimrafCallback);
@@ -51,11 +52,12 @@ export class ProjectRunner {
     projectDir,
     port = 3000,
     puppeteerOptions = {},
-    throwOnBuildError = true
+    throwOnBuildError = true,
+    configName = 'webpack.config'
   }: Options) {
     this.projectDir = projectDir;
     this.outputDir = join(this.projectDir, 'dist');
-    this.webpackConfig = this.loadTestConfig();
+    this.webpackConfig = this.loadTestConfig(configName);
     this.port = port;
     this.serverUrl = `http://localhost:${this.port}`;
     this.puppeteerOptions = puppeteerOptions;
@@ -63,8 +65,8 @@ export class ProjectRunner {
     this.stats = null;
     this.throwOnBuildError = throwOnBuildError;
   }
-  public loadTestConfig() {
-    return require(join(this.projectDir, 'webpack.config'));
+  public loadTestConfig(configName?: string) {
+    return require(join(this.projectDir, configName || 'webpack.config'));
   }
   public async bundle() {
     const webpackConfig = this.webpackConfig;

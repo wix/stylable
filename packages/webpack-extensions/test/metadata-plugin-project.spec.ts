@@ -19,10 +19,8 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('contains metadata', async () => {
-        const s = projectRunner.getBuildAsset('test.metadata.json');
-
-        expect(nullContent(JSON.parse(s))).to.eql({
+    const expectMetadataJSON = (content: any) => {
+        expect(nullContent(content)).to.eql({
             version: '1.0.0',
             name: 'test',
             fs: {
@@ -86,6 +84,36 @@ describe(`(${project})`, () => {
                 ['test-components']: '/test/node_modules/test-components'
             }
         });
+    };
+
+    it('contains metadata', async () => {
+        const s = projectRunner.getBuildAsset('test.metadata.json');
+
+        expectMetadataJSON(JSON.parse(s));
+    });
+
+    describe('jsMode', () => {
+        const projectRunnerJs = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                port: 3003,
+                puppeteerOptions: {
+                    // headless: false
+                },
+                configName: 'webpack-js-mode.config'
+            },
+            before,
+            afterEach,
+            after
+        );
+
+        it('contains metadata as js', async () => {
+            const s = projectRunnerJs.getBuildAsset('test.metadata.js');
+            const e = projectRunnerJs.evalAssetModule(s);
+
+            expectMetadataJSON(e);
+        });
+
     });
 });
 
