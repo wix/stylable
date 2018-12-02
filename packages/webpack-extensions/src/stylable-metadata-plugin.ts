@@ -18,7 +18,7 @@ export interface MetadataOptions {
         component: any,
         componentConfig: ComponentConfig
     ) => string;
-    jsMode?: boolean
+    jsMode?: boolean;
 }
 
 export class StylableMetadataPlugin {
