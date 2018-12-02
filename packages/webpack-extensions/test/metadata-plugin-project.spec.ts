@@ -96,7 +96,7 @@ describe(`(${project})`, () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                port: 3001,
+                port: 3003,
                 puppeteerOptions: {
                     // headless: false
                 },
