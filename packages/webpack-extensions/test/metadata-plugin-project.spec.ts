@@ -19,8 +19,8 @@ describe(`(${project})`, () => {
         after
     );
 
-    const expectMetadataJSON = (content: string) => {
-        expect(nullContent(JSON.parse(content))).to.eql({
+    const expectMetadataJSON = (content: any) => {
+        expect(nullContent(content)).to.eql({
             version: '1.0.0',
             name: 'test',
             fs: {
@@ -89,7 +89,7 @@ describe(`(${project})`, () => {
     it('contains metadata', async () => {
         const s = projectRunner.getBuildAsset('test.metadata.json');
 
-        expectMetadataJSON(s);
+        expectMetadataJSON(JSON.parse(s));
     });
 
     describe('jsMode', () => {
@@ -109,9 +109,9 @@ describe(`(${project})`, () => {
 
         it('contains metadata as js', async () => {
             const s = projectRunnerJs.getBuildAsset('test.metadata.js');
+            const e = projectRunnerJs.evalAssetModule(s);
 
-            expect(s.startsWith('module.exports = {'), 'Exports JS').to.equal(true);
-            expectMetadataJSON(s.slice(17));
+            expectMetadataJSON(e);
         });
 
     });
