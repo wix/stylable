@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { Stylable } from '@stylable/core';
 import * as fs from 'fs';
 import { build } from './build';
