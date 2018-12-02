@@ -18,6 +18,7 @@ export interface MetadataOptions {
         component: any,
         componentConfig: ComponentConfig
     ) => string;
+    jsMode?: boolean
 }
 
 export class StylableMetadataPlugin {
@@ -111,9 +112,10 @@ export class StylableMetadataPlugin {
 
         if (builder.hasPackages()) {
             builder.createIndex();
-            compilation.assets[`${this.options.name}.metadata.json`] = new RawSource(
-                JSON.stringify(builder.build(), null, 2)
-            );
+            const jsonSource = JSON.stringify(builder.build(), null, 2);
+            const fileName = `${this.options.name}.metadata.${this.options.jsMode ? 'js' : 'json'}`;
+            const fileContent = this.options.jsMode ? `module.exports = ${jsonSource}` : jsonSource;
+            compilation.assets[fileName] = new RawSource(fileContent);
         }
     }
 
