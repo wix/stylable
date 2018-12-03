@@ -92,7 +92,7 @@ describe(`(${project})`, () => {
         expectMetadataJSON(JSON.parse(s));
     });
 
-    describe('jsMode', () => {
+    describe('cjs mode', () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
@@ -107,9 +107,57 @@ describe(`(${project})`, () => {
             after
         );
 
-        it('contains metadata as js', async () => {
-            const s = projectRunnerJs.getBuildAsset('test.metadata.js');
+        it('contains metadata as cjs export', async () => {
+            const s = projectRunnerJs.getBuildAsset('test.metadata.json.js');
             const e = projectRunnerJs.evalAssetModule(s);
+
+            expectMetadataJSON(e);
+        });
+
+    });
+
+    describe('amd static mode', () => {
+        const projectRunnerAmdStatic = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                port: 3004,
+                puppeteerOptions: {
+                    // headless: false
+                },
+                configName: 'webpack-amd-static-mode.config'
+            },
+            before,
+            afterEach,
+            after
+        );
+
+        it('contains metadata as static amd export', async () => {
+            const s = projectRunnerAmdStatic.getBuildAsset('test.metadata.json.js');
+            const e = projectRunnerAmdStatic.evalAssetModule(s);
+
+            expectMetadataJSON(e);
+        });
+
+    });
+
+    describe('amd factory mode', () => {
+        const projectRunnerAmdFactory = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                port: 3005,
+                puppeteerOptions: {
+                    // headless: false
+                },
+                configName: 'webpack-amd-factory-mode.config'
+            },
+            before,
+            afterEach,
+            after
+        );
+
+        it('contains metadata as factory amd export', async () => {
+            const s = projectRunnerAmdFactory.getBuildAsset('test.metadata.json.js');
+            const e = projectRunnerAmdFactory.evalAssetModule(s);
 
             expectMetadataJSON(e);
         });

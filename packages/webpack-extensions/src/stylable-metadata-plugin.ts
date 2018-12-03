@@ -18,7 +18,7 @@ export interface MetadataOptions {
         component: any,
         componentConfig: ComponentConfig
     ) => string;
-    jsMode?: boolean;
+    mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
 }
 
 export class StylableMetadataPlugin {
@@ -112,9 +112,15 @@ export class StylableMetadataPlugin {
 
         if (builder.hasPackages()) {
             builder.createIndex();
+            const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
-            const fileName = `${this.options.name}.metadata.${this.options.jsMode ? 'js' : 'json'}`;
-            const fileContent = this.options.jsMode ? `module.exports = ${jsonSource}` : jsonSource;
+            const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
+            let fileContent = jsonSource;
+            switch (this.options.mode) {
+                case 'cjs':         fileContent = `module.exports = ${fileContent}`; break;
+                case 'amd:static':  fileContent = `define(${fileContent});`; break;
+                case 'amd:factory': fileContent = `define(() => { return ${fileContent}; });`; break;
+            }
             compilation.assets[fileName] = new RawSource(fileContent);
         }
     }

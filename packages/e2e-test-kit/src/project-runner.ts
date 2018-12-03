@@ -133,10 +133,12 @@ export class ProjectRunner {
   public evalAssetModule(source: string, publicPath = ''): any {
     const _module = { exports: {} };
     const moduleFactory = new Function(
-      'module', 'exports', '__webpack_public_path__',
+      'module', 'exports', '__webpack_public_path__', 'define',
       source
     );
-    moduleFactory(_module, _module.exports, publicPath);
+    moduleFactory(_module, _module.exports, publicPath,
+      (factory: any) => _module.exports = (typeof factory === 'function' ? factory() : factory)
+    );
     return _module.exports;
   }
 
