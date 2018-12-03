@@ -19,7 +19,7 @@ module.exports = {
             renderSnapshot(_exp, res) {
                 return `<snapshot>${basename(res.resource)}</snapshot>`;
             },
-            mode: 'cjs'
+            mode: 'amd:static'
         }),
         new HtmlWebpackPlugin()
     ]
