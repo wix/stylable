@@ -2,7 +2,7 @@ import { Stylable } from '@stylable/core';
 import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import * as path from 'path';
-import { build } from '../src/build';
+import { build } from '../src';
 const log = () => {
     /**/
 };

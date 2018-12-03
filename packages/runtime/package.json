@@ -7,18 +7,17 @@
   "types": "esm/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
-    "build": "run-p build:cjs build:esm",
-    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
-    "build:esm": "tsc --project src --outDir esm --module esnext",
+    "build": "ts-build ./src --cjs --esm",
     "lint": "run-p lint:src lint:test",
-    "lint:src": "tslint --project src",
-    "lint:test": "tslint --project test",
+    "lint:src": "tslint -p src",
+    "lint:test": "tslint -p test",
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
     "prepack": "yarn build"
   },
   "files": [
     "cjs",
-    "esm"
+    "esm",
+    "src"
   ],
   "engines": {
     "node": ">=8"

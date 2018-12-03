@@ -2,16 +2,17 @@
   "name": "@stylable/cli",
   "version": "1.1.6",
   "description": "A low-level utility used for working with Stylable projects",
-  "main": "dist/build.js",
-  "types": "dist/build.d.ts",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
   "bin": {
-    "stc": "./dist/cli.js"
+    "stc": "cjs/cli.js"
   },
   "scripts": {
-    "clean": "rimraf ./dist",
-    "build": "tsc",
-    "lint": "tslint --project .",
-    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "clean": "rimraf ./cjs",
+    "build": "ts-build src --cjs",
+    "lint": "tslint -p src",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
+    "prepack": "yarn build"
   },
   "dependencies": {
     "@stylable/core": "^0.1.15",
@@ -24,7 +25,8 @@
     "@stylable/e2e-test-kit": "^1.0.24"
   },
   "files": [
-    "dist"
+    "cjs",
+    "src"
   ],
   "engines": {
     "node": ">=8"
