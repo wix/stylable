@@ -6,10 +6,12 @@
         return require(id);
       },
       transformHooks: undefined,
+      resolveNamespace: undefined,
       createRuntimeChunk: false,
       filename: "[name].bundle.css",
       outputCSS: isProd ? true : false,
       includeCSSInJS: isProd ? false : true,
+      useWeakDeps: false,
       bootstrap: {
         autoInit: true,
         ...options.bootstrap

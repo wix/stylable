@@ -13,9 +13,10 @@ const { isAsset, makeAbsolute } = require('@stylable/core');
 const stylableExtension = /\.st\.css$/;
 
 class StylableParser {
-    constructor(stylable, compilation) {
+    constructor(stylable, compilation, useWeakDeps) {
         this.stylable = stylable;
         this.compilation = compilation;
+        this.useWeakDeps = useWeakDeps;
     }
     parse(source, state) {
         if (
@@ -32,15 +33,17 @@ class StylableParser {
         const meta = this.stylable.process(state.module.resource);
         state.module.buildInfo.stylableMeta = meta;
         // state.module.buildMeta.exportsType = "namespace";
-        meta.urls.filter(url => isAsset(url)).forEach(asset => {
-            const absPath = makeAbsolute(
-                asset,
-                this.compilation.options.context,
-                path.dirname(state.module.resource)
-            );
-            state.module.buildInfo.fileDependencies.add(absPath);
-            state.module.addDependency(new StylableAssetDependency(absPath));
-        });
+        meta.urls
+            .filter(url => isAsset(url))
+            .forEach(asset => {
+                const absPath = makeAbsolute(
+                    asset,
+                    this.compilation.options.context,
+                    path.dirname(state.module.resource)
+                );
+                state.module.buildInfo.fileDependencies.add(absPath);
+                state.module.addDependency(new StylableAssetDependency(absPath));
+            });
 
         state.module.addDependency(new StylableExportsDependency(['default']));
         state.module.addDependency(stylesheetDependency());
@@ -49,12 +52,18 @@ class StylableParser {
         meta.imports.forEach(stylableImport => {
             state.module.buildInfo.fileDependencies.add(stylableImport.from);
             if (stylableImport.fromRelative.match(stylableExtension)) {
-                state.module.addDependency(
-                    new StylableImportDependency(stylableImport.fromRelative, {
-                        defaultImport: stylableImport.defaultExport,
-                        names: []
-                    })
-                );
+                const importRef = {
+                    defaultImport: stylableImport.defaultExport,
+                    names: []
+                };
+                const dep = this.useWeakDeps
+                    ? StylableImportDependency.createWeak(
+                          stylableImport.fromRelative,
+                          state.module,
+                          importRef
+                      )
+                    : new StylableImportDependency(stylableImport.fromRelative, importRef);
+                state.module.addDependency(dep);
                 this.addChildDeps(stylableImport);
             }
             //TODO: handle js dependencies?
