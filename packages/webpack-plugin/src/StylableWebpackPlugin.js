@@ -76,7 +76,7 @@ class StylableWebpackPlugin {
       compiler.options.resolve,
       this.options.optimizer || new StylableOptimizer(),
       compiler.options.mode,
-      resolveNamespace
+      this.options.resolveNamespace || resolveNamespace
     );
     this.stylable = stylable;
   }
@@ -299,7 +299,7 @@ class StylableWebpackPlugin {
         normalModuleFactory.hooks.createParser
           .for("stylable")
           .tap(StylableWebpackPlugin.name, () => {
-            return new StylableParser(this.stylable, compilation);
+            return new StylableParser(this.stylable, compilation, this.options.useWeakDeps);
           });
         normalModuleFactory.hooks.createGenerator
           .for("stylable")
