@@ -9,22 +9,16 @@ This package is still a work-in-progress within the Stylable mono-repo. Once it 
 
 ## Usage
 
-Use the `process` utility imported from `@stylable/jest` to configure your Jest setup to support Stylable stylesheets, turning them into resolvable modules.
-
-> Note: Jest should also be configured to ignore `.st.css` files in its transformations.
-
-```ts
-const { process } = require('@stylable/jest');
-
-const config = merge(jestProjectConfig, {
+Add the transformation to the `jest.config.js` file:
+```js
+module.exports = {
   transform: {
-    '\\.jsx?$': require.resolve('babel-jest'),
-    '\\.st.css?$': process,
+    '\\.st\\.css?$': require.resolve('@stylable/jest'),
   },
-});
-
-config.transformIgnorePatterns = (config.transformIgnorePatterns || [])
-  .concat(['/node_modules/(?!(.*?\\.st\\.css$))']);
+  transformIgnorePatterns: [
+    '/node_modules/(?!(.*?\\.st\\.css$))' // libraries publish .st.css files in their dist
+  ]
+};
 ```
 
 ## License
