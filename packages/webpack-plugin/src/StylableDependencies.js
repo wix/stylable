@@ -23,7 +23,7 @@ class StylableImportDependency extends ModuleDependency {
         const dep = new StylableImportDependency(request, importDef);
         dep.weak = true;
         dep.originModule = originModule;
-        return dep
+        return dep;
     }
     constructor(request, { defaultImport, names }) {
         super(request);
@@ -38,6 +38,11 @@ class StylableImportDependency extends ModuleDependency {
             module: this.module,
             importedNames: this.defaultImport ? ['default'].concat(this.names) : this.names.slice()
         };
+    }
+
+    updateHash(hash) {
+        super.updateHash(hash);
+        hash.update('stylable ' + this.module && this.module.hash);
     }
 
     get type() {

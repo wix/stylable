@@ -108,6 +108,14 @@ class StylableGenerator {
                 `);`,
                 this.options.includeCSSInJS
                     ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
+                    : '',
+                this.options.includeCSSInJS
+                    ? `
+                    // Webpack HMR
+                    if (module && module.hot) {
+                        module.hot.accept();
+                    }
+                    `
                     : ''
             ].join(EOL),
             module.resource
@@ -117,22 +125,18 @@ class StylableGenerator {
         const imports = [];
         for (const dependency of module.dependencies) {
             if (dependency instanceof StylableImportDependency) {
-                if(dependency.defaultImport === STYLESHEET_SYMBOL){
+                if (dependency.defaultImport === STYLESHEET_SYMBOL) {
                     const id = runtimeTemplate.moduleId({
                         module: dependency.module,
                         request: dependency.request
                     });
-                    imports.push(
-                        `var ${STYLESHEET_SYMBOL} = __webpack_require__(${id});`
-                    );
+                    imports.push(`var ${STYLESHEET_SYMBOL} = __webpack_require__(${id});`);
                 } else if (dependency.defaultImport === RENDERER_SYMBOL) {
                     const id = runtimeTemplate.moduleId({
                         module: dependency.module,
                         request: dependency.request
                     });
-                    imports.push(
-                        `var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`
-                    );
+                    imports.push(`var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`);
                 }
             }
         }
@@ -156,7 +160,7 @@ class StylableGenerator {
         };
         outputAst.walkDecls(decl => processDeclarationUrls(decl, onUrl, true));
         let targetCSS = outputAst.toString();
-        if(minify){
+        if (minify) {
             targetCSS = this.stylable.optimizer.minifyCSS(targetCSS);
         }
         const css = asJS ? JSON.stringify(targetCSS) : targetCSS;

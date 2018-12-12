@@ -43,7 +43,12 @@ export class StylableResolver {
 
             return { _kind: 'css', symbol, meta } as CSSResolve;
         } else {
-            const _module = this.requireModule(from);
+            let _module;
+            try {
+                _module = this.requireModule(from);
+            } catch {
+                return null;
+            }
             symbol = !name ?
                 _module.default || _module :
                 _module[name];
