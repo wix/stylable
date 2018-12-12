@@ -42,7 +42,7 @@ class StylableImportDependency extends ModuleDependency {
 
     updateHash(hash) {
         super.updateHash(hash);
-        hash.update('stylable ' + this.module && this.module.hash);
+        hash.update('stylable ' + (this.module && this.module.hash));
     }
 
     get type() {
