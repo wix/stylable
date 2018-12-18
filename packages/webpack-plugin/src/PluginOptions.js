@@ -32,6 +32,10 @@
         minify: isProd ? true : false,
         ...options.optimize
       },
+      unsafeMuteDiagnostics: {
+        DUPLICATE_MODULE_NAMESPACE: false,
+        ...options.unsafeMuteDiagnostics
+      },
       plugins: []
     };
 
