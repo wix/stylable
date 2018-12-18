@@ -1739,6 +1739,52 @@ describe('pseudo-states', () => {
 
             });
         });
+
+        describe('concatenated classes in a complex selector', () => {
+            it('should properly resolve states on any classes in a complex selector that have them defined', () => {
+                const result = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                :import {
+                                    -st-from: "./imported.st.css";
+                                    -st-default: Base;
+                                }
+
+                                .class { -st-extends: Base; }
+                                .modifier { -st-extends: Base; }
+
+                                .class:disabled.modifier {}
+                                .modifier.class:disabled {}
+
+                                .class.modifier:disabled {}
+                                .modifier:disabled.class {}
+                            `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'imported',
+                            content: `
+                                .root {
+                                    -st-states: disabled;
+                                }
+                            `
+                        }
+                    }
+                });
+
+                // tslint:disable-next-line:max-line-length
+                expect(result.meta.transformDiagnostics!.reports, 'no diagnostics reported').to.eql([]);
+                expect(result.meta.diagnostics.reports, 'no diagnostics reported').to.eql([]);
+                expect(result).to.have.styleRules({
+                    2: '.entry--class[data-imported-disabled].imported--modifier {}',
+                    3: '.imported--modifier.entry--class[data-imported-disabled] {}',
+                    4: '.entry--class.imported--modifier[data-imported-disabled] {}',
+                    5: '.imported--modifier[data-imported-disabled].entry--class {}'
+                });
+            });
+        });
     });
 
     describe('diagnostics', () => {
