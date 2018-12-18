@@ -17,6 +17,7 @@
                 "ban-single-arg-parens"
             ]
         },
+        "function-constructor": false,
         "variable-name": false,
         "forin": false,
         "quotemark": {
