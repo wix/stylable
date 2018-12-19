@@ -306,6 +306,7 @@ class StylableWebpackPlugin {
           .tap(StylableWebpackPlugin.name, () => {
             return new StylableGenerator(this.stylable, compilation, {
               includeCSSInJS: this.options.includeCSSInJS,
+              experimentalHMR: this.options.experimentalHMR,
               ...this.options.generate
             });
           });

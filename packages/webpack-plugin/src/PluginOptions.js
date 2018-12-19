@@ -45,6 +45,7 @@
       ...options,
       optimize: defaults.optimize,
       bootstrap: defaults.bootstrap,
-      generate: defaults.generate
+      generate: defaults.generate,
+      unsafeMuteDiagnostics: defaults.unsafeMuteDiagnostics
     };
   }
