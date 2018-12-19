@@ -126,6 +126,10 @@ export class ProjectRunner {
     return this.stats!.compilation.warnings.slice();
   }
 
+  public getBuildErrorMessages() {
+    return this.stats!.compilation.errors.slice();
+  }
+
   public getBuildAsset(assetPath: string) {
     return this.stats!.compilation.assets[normalize(assetPath)].source();
   }

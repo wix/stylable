@@ -29,7 +29,8 @@
         "no-console": false,
         "no-bitwise": false,
         "object-literal-sort-keys": false,
-        "no-shadowed-variable": false
+        "no-shadowed-variable": false,
+        "function-constructor": false
     },
     "rulesDirectory": []
 }

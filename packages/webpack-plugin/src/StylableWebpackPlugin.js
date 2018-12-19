@@ -132,7 +132,7 @@ class StylableWebpackPlugin {
               if (module.buildInfo.isImportedByNonStylable) {
                 used.push(module);
               }
-              if (usageMapping[module.buildInfo.stylableMeta.namespace]) {
+              if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE && usageMapping[module.buildInfo.stylableMeta.namespace]) {
                 compilation.errors.push(new Error(
                   `Duplicate module namespace: ${module.buildInfo.stylableMeta.namespace} from ${module.resource}`
                 ));
