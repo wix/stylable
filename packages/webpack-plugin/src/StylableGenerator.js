@@ -109,7 +109,7 @@ class StylableGenerator {
                 this.options.includeCSSInJS
                     ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
                     : '',
-                this.options.includeCSSInJS
+                this.options.experimentalHMR
                     ? `
                     // Webpack HMR
                     if (module && module.hot) {

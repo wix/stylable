@@ -36,6 +36,7 @@
         DUPLICATE_MODULE_NAMESPACE: false,
         ...options.unsafeMuteDiagnostics
       },
+      experimentalHMR: false,
       plugins: []
     };
 
