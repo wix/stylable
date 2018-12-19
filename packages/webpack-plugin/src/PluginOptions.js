@@ -36,6 +36,7 @@
         DUPLICATE_MODULE_NAMESPACE: false,
         ...options.unsafeMuteDiagnostics
       },
+      experimentalHMR: false,
       plugins: []
     };
 
@@ -44,6 +45,7 @@
       ...options,
       optimize: defaults.optimize,
       bootstrap: defaults.bootstrap,
-      generate: defaults.generate
+      generate: defaults.generate,
+      unsafeMuteDiagnostics: defaults.unsafeMuteDiagnostics
     };
   }
