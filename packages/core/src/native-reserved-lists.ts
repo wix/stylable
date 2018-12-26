@@ -14,6 +14,8 @@ export const nativePseudoClasses = [
     'first-of-type',
     'fullscreen',
     'focus',
+    'focus-within',
+    'focus-visible',
     'hover',
     'indeterminate',
     'in-range',
@@ -85,7 +87,8 @@ export const reservedKeyFrames = [
     'both',
     /* single-animation-play-state */
     'running',
-    'paused'
+    'paused',
+    'defined'
 ];
 
 export const nativeFunctionsDic = {
