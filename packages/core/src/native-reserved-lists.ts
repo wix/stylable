@@ -5,6 +5,7 @@ export const nativePseudoClasses = [
     'any-link',
     'checked',
     'default',
+    'defined',
     'dir',
     'disabled',
     'empty',
@@ -87,8 +88,7 @@ export const reservedKeyFrames = [
     'both',
     /* single-animation-play-state */
     'running',
-    'paused',
-    'defined'
+    'paused'
 ];
 
 export const nativeFunctionsDic = {
