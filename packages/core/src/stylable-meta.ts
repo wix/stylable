@@ -13,6 +13,7 @@ export class StylableMeta {
     public namespace: string;
     public imports: Imported[];
     public vars: VarSymbol[];
+    public cssVars: Pojo<CSSVarSymbol>;
     public keyframes: postcss.AtRule[];
     public classes: Pojo<ClassSymbol>;
     public elements: Pojo<ElementSymbol>;
@@ -36,6 +37,7 @@ export class StylableMeta {
         this.namespace = '';
         this.imports = [];
         this.vars = [];
+        this.cssVars = {};
         this.keyframes = [];
         this.elements = {};
         this.classes = {
@@ -95,6 +97,11 @@ export interface VarSymbol {
     text: string;
     valueType: string | null;
     node: postcss.Node;
+}
+
+export interface CSSVarSymbol {
+    _kind: 'cssVar';
+    name: string;
 }
 
 export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;

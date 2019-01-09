@@ -172,6 +172,8 @@ export class StylableTransformer {
         ast.walkDecls(decl => {
             getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
+            this.scopeCSSVars(decl, meta);
+
             switch (decl.prop) {
                 case valueMapping.mixin:
                     break;
@@ -343,6 +345,34 @@ export class StylableTransformer {
         });
 
         return keyframesExports;
+    }
+    public scopeCSSVars(decl: postcss.Declaration, meta: StylableMeta) {
+        const varName = decl.prop.slice(2);
+
+        // handle var assignment
+        if (decl.prop.startsWith('--') && meta.cssVars[varName]) {
+            decl.replaceWith(decl.clone({ prop: `--${meta.namespace}-${varName}`}));
+        }
+
+        // handle var usage
+        const hasVarUse = (decl.value.indexOf('var(--') !== -1);
+
+        if (hasVarUse) {
+            const parsedVal = valueParser(decl.value);
+
+            for (const val of parsedVal.nodes) {
+                if (val.type === 'function' && val.value === 'var') {
+                    const varName = val.nodes[0].value.slice(2);
+                    if (meta.cssVars[varName]) {
+                        val.nodes[0].value = `--${meta.namespace}-${varName}`;
+                    }
+                }
+            }
+
+            decl.value = parsedVal.toString();
+        } else {
+            //
+        }
     }
     public transformGlobals(ast: postcss.Root) {
         ast.walkRules(r => {

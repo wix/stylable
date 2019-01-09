@@ -84,7 +84,10 @@ export class StylableProcessor {
         root.walkDecls(decl => {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
+            } else if (decl.prop.startsWith('--')) {
+                this.addCSSVars(decl);
             }
+
             processDeclarationUrls(decl, node => {
                 this.meta.urls.push(node.url!);
             }, false);
@@ -326,6 +329,17 @@ export class StylableProcessor {
             this.meta.mappedSymbols[decl.prop] = varSymbol;
         });
         rule.remove();
+    }
+
+    protected addCSSVars(decl: postcss.Declaration) {
+        const varName = decl.prop.slice(2);
+
+        if (!this.meta.cssVars[varName]) {
+            this.meta.cssVars[varName] = {
+                _kind: 'cssVar',
+                name: varName
+            };
+        }
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
