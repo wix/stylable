@@ -14,6 +14,7 @@
       useWeakDeps: false,
       bootstrap: {
         autoInit: true,
+        getAutoInitModule: undefined,
         ...options.bootstrap
       },
       generate: {
@@ -36,6 +37,7 @@
         DUPLICATE_MODULE_NAMESPACE: false,
         ...options.unsafeMuteDiagnostics
       },
+      useEntryModuleInjection: false,
       experimentalHMR: false,
       plugins: []
     };

@@ -3,11 +3,10 @@
   "version": "0.1.13",
   "description": "Stylable runtime DOM integration",
   "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "types": "cjs/index.d.ts",
   "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "ts-build ./src --cjs --esm",
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint -p src",
     "lint:test": "tslint -p test",
@@ -16,7 +15,6 @@
   },
   "files": [
     "cjs",
-    "esm",
     "src"
   ],
   "engines": {
