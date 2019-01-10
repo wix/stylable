@@ -147,10 +147,14 @@ class StylableWebpackPlugin {
     }
     injectStylableRuntimeChunk(compiler) {
         compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
-            compilation.dependencyTemplates.set(
-                StyleableAutoInitDependency,
-                new StyleableAutoInitDependencyTemplate()
-            );
+            if (this.options.useEntryModuleInjection) {
+                compilation.dependencyTemplates.set(
+                    StyleableAutoInitDependency,
+                    new StyleableAutoInitDependencyTemplate()
+                );
+            } else {
+                this.injectRuntimeCodeToMainTemplate(compiler, compilation);
+            }
 
             compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
                 const runtimeRendererModule = compilation.getModule(cssRuntimeRendererRequest);
@@ -162,8 +166,6 @@ class StylableWebpackPlugin {
                     chunks.forEach(chunk => {
                         this.injectInitToEntryModule(chunk, compilation, runtimeRendererModule);
                     });
-                } else {
-                    this.injectRuntimeCodeToMainTemplate(compiler, compilation);
                 }
 
                 this.applyDeprecatedProcess(chunks, compiler, runtimeRendererModule, compilation);
