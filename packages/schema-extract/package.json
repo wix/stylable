@@ -1,6 +1,6 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "0.1.6",
+  "version": "0.1.7-alpha.0",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -15,7 +15,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^0.1.18"
+    "@stylable/core": "^0.1.19-alpha.0"
   },
   "files": [
     "cjs",
