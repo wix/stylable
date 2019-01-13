@@ -64,7 +64,7 @@ export class StylableResolver {
     }
     public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
-            if (maybeImport && maybeImport._kind !== 'var') {
+            if (maybeImport && maybeImport._kind !== 'var' && maybeImport._kind !== 'cssVar') {
                 if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
                     maybeImport = maybeImport.alias;
                 } else if (maybeImport[valueMapping.extends]) {

@@ -148,7 +148,6 @@ export class StylableTransformer {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
         this.resolver.validateImports(meta, this.diagnostics);
-
         validateScopes(meta, this.resolver, this.diagnostics);
 
         ast.walkRules((rule: SRule) => {
@@ -347,11 +346,10 @@ export class StylableTransformer {
         return keyframesExports;
     }
     public scopeCSSVars(decl: postcss.Declaration, meta: StylableMeta) {
-        const varName = decl.prop.slice(2);
-
         // handle var assignment
-        if (decl.prop.startsWith('--') && meta.cssVars[varName]) {
-            decl.replaceWith(decl.clone({ prop: `--${meta.namespace}-${varName}`}));
+        const varDeclProp = decl.prop;
+        if (decl.prop.startsWith('--') && meta.cssVars[varDeclProp]) {
+            decl.replaceWith(decl.clone({ prop: `--${meta.namespace}-${varDeclProp.slice(2)}`}));
         }
 
         // handle var usage
@@ -362,8 +360,17 @@ export class StylableTransformer {
 
             for (const val of parsedVal.nodes) {
                 if (val.type === 'function' && val.value === 'var') {
-                    const varName = val.nodes[0].value.slice(2);
-                    if (meta.cssVars[varName]) {
+                    const varWithPrefix = val.nodes[0].value;
+                    const varName = varWithPrefix.slice(2);
+                    const varSymbol = meta.mappedSymbols[varWithPrefix];
+
+                    if (varSymbol && varSymbol._kind === 'import') {
+                        const importedVar = this.resolver.resolveImport(varSymbol);
+
+                        if (importedVar && importedVar._kind === 'css') {
+                            val.nodes[0].value = `--${importedVar.meta.namespace}-${varName}`;
+                        }
+                    } else if (varSymbol && varSymbol._kind === 'cssVar') {
                         val.nodes[0].value = `--${meta.namespace}-${varName}`;
                     }
                 }

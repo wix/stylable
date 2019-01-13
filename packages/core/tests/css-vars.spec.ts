@@ -11,7 +11,7 @@ describe('css custom-properties (vars)', () => {
         // - locates all css var declarations, grouping them by name
         // - exposes defined vars as stylesheet exports
 
-        it('should process multiple different css var declarations', () => {
+        it('multiple different css var declarations', () => {
             const { cssVars, diagnostics, ast } = processSource(`
                 .root {
                     --myVar: blue;
@@ -21,18 +21,18 @@ describe('css custom-properties (vars)', () => {
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
             expect(cssVars).to.eql({
-                myVar: {
+                '--myVar': {
                     _kind: 'cssVar',
-                    name: 'myVar'
+                    name: '--myVar'
                 },
-                myOtherVar: {
+                '--myOtherVar': {
                     _kind: 'cssVar',
-                    name: 'myOtherVar'
+                    name: '--myOtherVar'
                 }
             });
         });
 
-        it('should process multiple css var declarations with the same name', () => {
+        it('multiple css var declarations with the same name', () => {
             const { cssVars, diagnostics, ast } = processSource(`
                 .root {
                     --myVar: blue;
@@ -44,9 +44,9 @@ describe('css custom-properties (vars)', () => {
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
             expect(cssVars).to.eql({
-                myVar: {
+                '--myVar': {
                     _kind: 'cssVar',
-                    name: 'myVar'
+                    name: '--myVar'
                 }
             });
         });
@@ -56,7 +56,7 @@ describe('css custom-properties (vars)', () => {
         // What does it do?
         // - generates namespace for var declarations
 
-        it('should transfrom css vars with their newly created namespace', () => {
+        it('css vars with their newly created namespace', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -78,7 +78,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('blue');
         });
 
-        it('should transfrom known css vars usage', () => {
+        it('known css vars usage', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -101,7 +101,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(--entry-myVar)');
         });
 
-        it('should transfrom multiple css vars usage in a single declaration', () => {
+        it('multiple css vars usage in a single declaration', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -145,6 +145,40 @@ describe('css custom-properties (vars)', () => {
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--myVar)');
+        });
+
+        it('imported css vars usage', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: --myVar;
+                        }
+                        .root {
+                            color: var(--myVar);
+                        }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .root {
+                            --myVar: blue;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.prop).to.equal('color');
+            expect(decl.value).to.equal('var(--imported-myVar)');
         });
     });
 

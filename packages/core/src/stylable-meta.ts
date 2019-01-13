@@ -104,7 +104,7 @@ export interface CSSVarSymbol {
     name: string;
 }
 
-export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol;
+export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol;
 
 export interface RefedMixin {
     mixin: MixinValue;

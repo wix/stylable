@@ -15,6 +15,7 @@ import {
 import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
+    CSSVarSymbol,
     ElementSymbol,
     Imported,
     ImportSymbol,
@@ -332,13 +333,15 @@ export class StylableProcessor {
     }
 
     protected addCSSVars(decl: postcss.Declaration) {
-        const varName = decl.prop.slice(2);
+        const varName = decl.prop.trim();
 
         if (!this.meta.cssVars[varName]) {
-            this.meta.cssVars[varName] = {
+            const cssVarSymbol: CSSVarSymbol = {
                 _kind: 'cssVar',
                 name: varName
             };
+            this.meta.cssVars[varName] = cssVarSymbol;
+            this.meta.mappedSymbols[varName] = cssVarSymbol;
         }
     }
 
