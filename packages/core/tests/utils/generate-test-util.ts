@@ -68,7 +68,7 @@ export function createTransformer(
 }
 
 export function processSource(
-    source: string, options: postcss.ProcessOptions = {}, resolveNamespace?: typeof processNamespace) {
+    source: string, options: { from?: string } = {}, resolveNamespace?: typeof processNamespace) {
     return process(postcss.parse(source, options), undefined, resolveNamespace);
 }
 
