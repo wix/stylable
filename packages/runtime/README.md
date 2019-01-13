@@ -59,5 +59,3 @@ Responsible for managing CSS files, linking to the `document` and maintaining th
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
-
-
