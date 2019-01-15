@@ -15,5 +15,6 @@ describe(`(${project})`, () => {
     it('should build a project with no errors (duplicate namespace) when muted', async () => {
         await projectRunner.bundle();
         expect(projectRunner.getBuildErrorMessages().length).to.equal(0);
+        expect(projectRunner.getBuildWarningMessages().length).to.equal(0);
     });
 });
