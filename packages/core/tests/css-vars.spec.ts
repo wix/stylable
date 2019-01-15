@@ -78,7 +78,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('blue');
         });
 
-        it('known css vars usage', () => {
+        it('local css var usage', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -99,6 +99,29 @@ describe('css custom-properties (vars)', () => {
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--entry-myVar)');
+        });
+
+        it('multiple local css vars usage in the same declaration', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {
+                            color: var(--var1) var(--var2);
+                            --var1: red;
+                            --var2: green;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.value).to.equal('var(--entry-var1) var(--entry-var2)');
         });
 
         it('multiple css vars usage in a single declaration', () => {
@@ -147,7 +170,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(--myVar)');
         });
 
-        it('imported css vars usage', () => {
+        it('imported usage', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -179,6 +202,178 @@ describe('css custom-properties (vars)', () => {
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--imported-myVar)');
+        });
+
+        it('mixed local and imports of re-exported definitions and usage', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./mid.st.css";
+                                -st-named: --baseVar;
+                            }
+                            .root {
+                                prop1: var(--baseVar);
+                            }
+                            `
+                    },
+                    '/mid.st.css': {
+                        namespace: 'mid',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-named: --baseVar;
+                            }
+                            `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                --baseVar: red;
+                            }
+                            `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const baseDecl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+
+            expect(baseDecl.prop).to.equal('prop1');
+            expect(baseDecl.value).to.equal('var(--base-baseVar)');
+        });
+
+        describe('global (unscoped)', () => {
+            it('does not scope css var declarations', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            @st-global-custom-property --myVar1, --myVar2;
+
+                            .root {
+                                --myVar1: green;
+                                --myVar2: red;
+                            }
+                            `
+                        }
+                    }
+                });
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+                const decl1 = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+                const decl2 = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
+                expect(decl1.prop).to.equal('--myVar1');
+                expect(decl1.value).to.equal('green');
+                expect(decl2.prop).to.equal('--myVar2');
+                expect(decl2.value).to.equal('red');
+            });
+
+            it('mixed global and scoped var declarations', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            @st-global-custom-property --myVar;
+
+                            .root {
+                                --myVar: blue;
+                                --myScopedVar: green;
+                            }
+                            `
+                        }
+                    }
+                });
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+                const globalDecl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+                const scopedDecl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
+                expect(globalDecl.prop).to.equal('--myVar');
+                expect(scopedDecl.prop).to.equal('--entry-myScopedVar');
+            });
+
+            it('should not scope global var usage', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            @st-global-custom-property --myVar;
+
+                            .root {
+                                --myVar: blue;
+                                color: var(--myVar);
+                            }
+                            `
+                        }
+                    }
+                });
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+                const globalDecl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
+                expect(globalDecl.value).to.equal('var(--myVar)');
+            });
+
+            it('complex usage with imported global and scoped vars', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --importedGlobal, --importedScoped;
+                            }
+
+                            @st-global-custom-property --localGlobal;
+
+                            .root {
+                                x1: var(--localScoped);
+                                x2: var(--localGlobal);
+                                x3: var(--importedScoped);
+                                x4: var(--importedGlobal);
+                                --localScoped: blue;
+                                --localGlobal: red;
+                            }
+                            `
+                        },
+                        '/imported.st.css': {
+                            namespace: 'imported',
+                            content: `
+                            @st-global-custom-property --importedGlobal;
+
+                            .root {
+                                --importedScoped: red;
+                                --importedGlobal: blue;
+                            }
+                            `
+                        }
+                    }
+                });
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+                const rule = (res.meta.outputAst!.nodes![0] as postcss.Rule);
+                const localScoped = (rule.nodes![0] as postcss.Declaration).value;
+                const localGlobal = (rule.nodes![1] as postcss.Declaration).value;
+                const importedScoped = (rule.nodes![2] as postcss.Declaration).value;
+                const importedGlobal = (rule.nodes![3] as postcss.Declaration).value;
+
+                expect(localScoped).to.equal('var(--entry-localScoped)');
+                expect(localGlobal).to.equal('var(--localGlobal)');
+                expect(importedScoped).to.equal('var(--imported-importedScoped)');
+                expect(importedGlobal).to.equal('var(--importedGlobal)');
+            });
         });
     });
 

@@ -346,3 +346,15 @@ export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
         ? symbol.alias
         : undefined;
 }
+
+export function generateScopedCSSVar(namespace: string, varName: string) {
+    return `--${namespace}-${varName}`;
+}
+
+export function isCSSVarProp(value: string) {
+    return value.startsWith('--');
+}
+
+export function isCSSVarUse(value: string) {
+    return value.startsWith('var(--');
+}

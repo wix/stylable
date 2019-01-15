@@ -127,6 +127,10 @@ export class StylableResolver {
             return isAliasOnly
                 ? this.resolveSymbolOrigin(symbol.alias, meta, path)
                 : { meta, symbol, _kind: 'css' };
+        } else if (symbol._kind === 'cssVar') {
+            if (path.indexOf(symbol) !== -1) {
+                return { meta, symbol, _kind: 'css' };
+            }
         } else if (symbol._kind === 'import') {
             const resolved = this.resolveImport(symbol);
             if (resolved && resolved.symbol && resolved._kind === 'css') {

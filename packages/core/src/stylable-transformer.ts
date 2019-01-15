@@ -28,7 +28,10 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
     findDeclaration,
     findRule,
-    getDeclStylable
+    generateScopedCSSVar,
+    getDeclStylable,
+    isCSSVarProp,
+    isCSSVarUse
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
@@ -147,6 +150,7 @@ export class StylableTransformer {
         path: string[] = []) {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
+        const cssVarsMapping = this.registerCSSVars(ast, meta);
         this.resolver.validateImports(meta, this.diagnostics);
         validateScopes(meta, this.resolver, this.diagnostics);
 
@@ -171,7 +175,7 @@ export class StylableTransformer {
         ast.walkDecls(decl => {
             getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
-            this.scopeCSSVars(decl, meta);
+            this.scopeCSSVars(decl, meta, cssVarsMapping);
 
             switch (decl.prop) {
                 case valueMapping.mixin:
@@ -199,6 +203,7 @@ export class StylableTransformer {
             this.exportRootClass(meta, metaExports);
             this.exportLocalVars(meta, metaExports, variableOverride);
             this.exportKeyframes(keyframeMapping, metaExports);
+            this.exportCSSVars(cssVarsMapping, metaExports);
         }
     }
     public exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>, variableOverride?: Pojo<string>) {
@@ -219,6 +224,11 @@ export class StylableTransformer {
                 );
             }
         });
+    }
+    public exportCSSVars(cssVarsMapping: Pojo<string>, metaExports: Pojo<string>) {
+        for (const varName of Object.keys(cssVarsMapping)) {
+            metaExports[varName] = cssVarsMapping[varName];
+        }
     }
     public exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach(name => {
@@ -345,40 +355,71 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    public scopeCSSVars(decl: postcss.Declaration, meta: StylableMeta) {
-        // handle var assignment
-        const varDeclProp = decl.prop;
-        if (decl.prop.startsWith('--') && meta.cssVars[varDeclProp]) {
-            decl.replaceWith(decl.clone({ prop: `--${meta.namespace}-${varDeclProp.slice(2)}`}));
+    public registerCSSVars(ast: postcss.Root, meta: StylableMeta) {
+        const cssVarsMapping: Pojo<string> = {};
+
+        // imported vars
+        for (const imported of meta.imports) {
+            for (const symbolName of Object.keys(imported.named)) {
+                if (isCSSVarProp(symbolName)) {
+                    const importedVar = this.resolver.deepResolve(meta.mappedSymbols[symbolName]);
+
+                    if (importedVar && importedVar._kind === 'css' && importedVar.symbol._kind === 'cssVar') {
+                        cssVarsMapping[symbolName] = importedVar.symbol.global ?
+                            symbolName :
+                            generateScopedCSSVar(importedVar.meta.namespace, symbolName.slice(2));
+                    }
+                }
+            }
         }
 
-        // handle var usage
-        const hasVarUse = (decl.value.indexOf('var(--') !== -1);
+        // locally defined vars
+        ast.walkDecls(/^--\w*/, decl => {
+            const varDeclProp = decl.prop;
+            if (meta.cssVars[varDeclProp] && isCSSVarProp(varDeclProp) && !cssVarsMapping[varDeclProp]) {
+                const prop = meta.cssVars[varDeclProp].global ?
+                    varDeclProp :
+                    generateScopedCSSVar(meta.namespace, varDeclProp.slice(2));
 
-        if (hasVarUse) {
-            const parsedVal = valueParser(decl.value);
+                cssVarsMapping[varDeclProp] = prop;
+            }
+        });
+
+        return cssVarsMapping;
+    }
+    public scopeCSSVars(decl: postcss.Declaration, meta: StylableMeta, cssVarsMapping: Pojo<string> ) {
+        let prop = decl.prop;
+        let value = decl.value;
+        let replaceDecl = false;
+
+        // resolve var declarations
+        if (meta.cssVars[prop] && isCSSVarProp(prop)) {
+            prop = cssVarsMapping[prop];
+            replaceDecl = true;
+        }
+
+        // resolve var usages
+        if (isCSSVarUse(value)) {
+            const parsedVal = valueParser(value);
 
             for (const val of parsedVal.nodes) {
                 if (val.type === 'function' && val.value === 'var') {
                     const varWithPrefix = val.nodes[0].value;
-                    const varName = varWithPrefix.slice(2);
-                    const varSymbol = meta.mappedSymbols[varWithPrefix];
 
-                    if (varSymbol && varSymbol._kind === 'import') {
-                        const importedVar = this.resolver.resolveImport(varSymbol);
-
-                        if (importedVar && importedVar._kind === 'css') {
-                            val.nodes[0].value = `--${importedVar.meta.namespace}-${varName}`;
-                        }
-                    } else if (varSymbol && varSymbol._kind === 'cssVar') {
-                        val.nodes[0].value = `--${meta.namespace}-${varName}`;
+                    if (cssVarsMapping[varWithPrefix]) {
+                        val.nodes[0].value = cssVarsMapping[varWithPrefix];
                     }
                 }
             }
 
-            decl.value = parsedVal.toString();
-        } else {
-            //
+            value = parsedVal.toString();
+            replaceDecl = true;
+        }
+
+        // replace decl with new namespaced values
+        if (replaceDecl) {
+            const namespacedDecl = decl.clone({ prop, value });
+            decl.replaceWith(namespacedDecl);
         }
     }
     public transformGlobals(ast: postcss.Root) {

@@ -24,7 +24,7 @@ import {
     StylableMeta,
     VarSymbol
 } from './stylable-meta';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, isCSSVarProp } from './stylable-utils';
 import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
@@ -165,6 +165,22 @@ export class StylableProcessor {
                     break;
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
+                    break;
+                case 'st-global-custom-property':
+                    const cssVars = atRule.params.split(',');
+
+                    for (const entry of cssVars) {
+                        const cssVar = entry.trim();
+                        if (!this.meta.cssVars[cssVar] && isCSSVarProp(cssVar)) {
+                            this.meta.cssVars[cssVar] = {
+                                _kind: 'cssVar',
+                                name: cssVar,
+                                global: true
+                            };
+                            this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
+                        }
+                    }
+                    toRemove.push(atRule);
                     break;
             }
         });
