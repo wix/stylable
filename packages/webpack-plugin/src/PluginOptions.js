@@ -37,6 +37,7 @@
         DUPLICATE_MODULE_NAMESPACE: false,
         ...options.unsafeMuteDiagnostics
       },
+      includeDynamicModulesInCSS: true,
       useEntryModuleInjection: false,
       experimentalHMR: false,
       plugins: []

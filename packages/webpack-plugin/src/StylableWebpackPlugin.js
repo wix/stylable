@@ -371,12 +371,9 @@ class StylableWebpackPlugin {
         compilation.mainTemplate.hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
             (source, chunk) => {
-                const stModules = getModuleInGraph(chunk, module => module.type === 'stylable');
-
-                if (stModules.size === 0) {
+                if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
-
                 return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
             }
         );
