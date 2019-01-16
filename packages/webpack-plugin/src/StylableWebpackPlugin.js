@@ -149,25 +149,23 @@ class StylableWebpackPlugin {
         });
     }
     injectStylableRuntimeChunk(compiler) {
-        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
+        compiler.hooks.compilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
             if (this.options.useEntryModuleInjection) {
                 compilation.dependencyTemplates.set(
                     StyleableAutoInitDependency,
                     new StyleableAutoInitDependencyTemplate()
                 );
+                compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
+                    chunks.forEach(chunk => this.injectInitToEntryModule(chunk, compilation));
+                });
             } else {
                 this.injectRuntimeCodeToMainTemplate(compiler, compilation);
             }
-
             this.injectRuntimeSource(compiler, compilation);
+        });
 
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
             compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
-                if (this.options.useEntryModuleInjection) {
-                    chunks.forEach(chunk => {
-                        this.injectInitToEntryModule(chunk, compilation);
-                    });
-                }
-
                 this.applyDeprecatedProcess(chunks, compiler, compilation);
             });
 
