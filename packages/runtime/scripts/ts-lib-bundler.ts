@@ -1,6 +1,5 @@
-// "build:lib": "node -r @ts-tools/node ./scripts/build-runtime.ts",
-
 import fs from 'fs';
+import { basename } from 'path';
 import ts from 'typescript';
 
 interface Options {
@@ -66,7 +65,7 @@ function bundleFiles(name: string, files: string[]) {
             });
 
             return res.outputText
-                ? `(function(){/*source: ${filePath}*/\n${res.outputText}}());`
+                ? `(function(){/*source: ${basename(filePath)}*/\n${res.outputText}}());`
                 : '';
         })
         .join('\n');
