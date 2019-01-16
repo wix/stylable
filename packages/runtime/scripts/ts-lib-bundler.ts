@@ -3,8 +3,14 @@
 import fs from 'fs';
 import ts from 'typescript';
 
-export function bundle(name: string, entry: string) {
-    const files = getBundleFilesFromEntry(entry);
+interface Options {
+    name: string;
+    entry: string;
+    includeEntry?: boolean;
+}
+
+export function bundle({ name, entry, includeEntry }: Options) {
+    const files = getBundleFilesFromEntry(entry, includeEntry);
     console.log('bundling files\n', files);
     const res = bundleFiles(name, files);
     console.log('done bundling.');
@@ -38,11 +44,11 @@ export function ensureWrite(filePath: string, source: string) {
     }
 }
 
-function getBundleFilesFromEntry(entry: string) {
+function getBundleFilesFromEntry(entry: string, includeEntry = true) {
     const program = ts.createProgram({ rootNames: [entry], options: {} });
 
     // TODO: remove exports * and allow indexes
-    const entryFile = program.getSourceFile(entry);
+    const entryFile = includeEntry ? undefined : program.getSourceFile(entry);
     const names = program
         .getSourceFiles()
         .filter(s => s !== entryFile)
