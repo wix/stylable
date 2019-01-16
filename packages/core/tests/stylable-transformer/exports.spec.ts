@@ -452,5 +452,56 @@ describe('Exports to js', () => {
                 '--topVar': '--entry-topVar'
             });
         });
+
+        it('exports from mixed local and imported stylesheets with scoped and global css vars', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --importedGlobal1, --importedGlobal2, --importedScoped1, --importedScoped2;
+                            }
+
+                            @st-global-custom-property --localGlobal1, --localGlobal2;
+
+                            .root {
+                                --localScoped1: 5;
+                                --localScoped2: 6;
+                                --localGlobal1: 7;
+                                --localGlobal2: 8;
+                            }
+                            `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @st-global-custom-property --importedGlobal1, --importedGlobal2;
+
+                            .root {
+                                --importedScoped1: 1;
+                                --importedScoped2: 2;
+                                --importedGlobal1: 3;
+                                --importedGlobal2: 4;
+                            }
+                            `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                '--localScoped1': '--entry-localScoped1',
+                '--localScoped2': '--entry-localScoped2',
+                '--localGlobal1': '--localGlobal1',
+                '--localGlobal2': '--localGlobal2',
+                '--importedScoped1': '--imported-importedScoped1',
+                '--importedScoped2': '--imported-importedScoped2',
+                '--importedGlobal1': '--importedGlobal1',
+                '--importedGlobal2': '--importedGlobal2'
+            });
+        });
     });
 });
