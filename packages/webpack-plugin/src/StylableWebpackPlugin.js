@@ -6,19 +6,22 @@ const { StylableOptimizer } = require('@stylable/core/dist/src/optimizer/stylabl
 const findConfig = require('find-config');
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const { isImportedByNonStylable } = require('./utils');
-const { calculateModuleDepthAndShallowStylableDependencies } = require('./stylable-module-helpers');
+const {
+    calculateModuleDepthAndShallowStylableDependencies,
+    renderStaticCSS
+} = require('./stylable-module-helpers');
 const { normalizeOptions } = require('./PluginOptions');
 const { StylableBootstrapModule } = require('./StylableBootstrapModule');
-const { cssRuntimeRendererRequest } = require('./runtime-dependencies');
 const StylableParser = require('./StylableParser');
 const StylableGenerator = require('./StylableGenerator');
-const { getModuleInGraph } = require('./getModuleInGraph');
+const { getModuleInGraph, hasStylableModuleInGraph } = require('./getModuleInGraph');
 const { StylableImportDependency, StylableAssetDependency } = require('./StylableDependencies');
 const {
     StyleableAutoInitDependency,
     StyleableAutoInitDependencyTemplate
 } = require('./StyleableAutoInitDependency');
 const MultiModule = require('webpack/lib/MultiModule');
+const { RUNTIME_SOURCE, WEBPACK_STYLABLE } = require('./runtime-dependencies');
 
 class StylableWebpackPlugin {
     constructor(options = {}) {
@@ -146,29 +149,24 @@ class StylableWebpackPlugin {
         });
     }
     injectStylableRuntimeChunk(compiler) {
-        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
+        compiler.hooks.compilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
             if (this.options.useEntryModuleInjection) {
                 compilation.dependencyTemplates.set(
                     StyleableAutoInitDependency,
                     new StyleableAutoInitDependencyTemplate()
                 );
+                compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
+                    chunks.forEach(chunk => this.injectInitToEntryModule(chunk, compilation));
+                });
             } else {
                 this.injectRuntimeCodeToMainTemplate(compiler, compilation);
             }
+            this.injectRuntimeSource(compiler, compilation);
+        });
 
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
             compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
-                const runtimeRendererModule = compilation.getModule(cssRuntimeRendererRequest);
-                if (!runtimeRendererModule) {
-                    return;
-                }
-
-                if (this.options.useEntryModuleInjection) {
-                    chunks.forEach(chunk => {
-                        this.injectInitToEntryModule(chunk, compilation, runtimeRendererModule);
-                    });
-                }
-
-                this.applyDeprecatedProcess(chunks, compiler, runtimeRendererModule, compilation);
+                this.applyDeprecatedProcess(chunks, compiler, compilation);
             });
 
             if (this.options.outputCSS) {
@@ -180,10 +178,13 @@ class StylableWebpackPlugin {
             }
         });
     }
-    applyDeprecatedProcess(chunks, compiler, runtimeRendererModule, compilation) {
-        const chunksBootstraps = chunks.map(chunk =>
-            this.createBootstrapModule(compiler, chunk, runtimeRendererModule)
-        );
+    applyDeprecatedProcess(chunks, compiler, compilation) {
+        const containStylableModules = chunks.some(chunk => hasStylableModuleInGraph(chunk));
+
+        if (!containStylableModules) {
+            return;
+        }
+        const chunksBootstraps = chunks.map(chunk => this.createBootstrapModule(compiler, chunk));
         if (chunksBootstraps.length === 0) {
             return;
         }
@@ -192,7 +193,7 @@ class StylableWebpackPlugin {
             const extractedBootstrap = new StylableBootstrapModule(
                 compiler.context,
                 extractedStylableChunk,
-                runtimeRendererModule,
+                null,
                 this.options.bootstrap
             );
             chunksBootstraps.forEach(bootstrap => {
@@ -238,25 +239,44 @@ class StylableWebpackPlugin {
         });
     }
     createChunkCSSBundle(chunk, compilation) {
-        const bootstrap = chunk.stylableBootstrap;
-        if (bootstrap) {
-            const cssSources = bootstrap.renderStaticCSS(
-                compilation.mainTemplate,
-                compilation.hash
-            );
-            const cssBundleFilename = compilation.getPath(this.options.filename, {
-                chunk,
-                hash: compilation.hash
-            });
-            compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL + EOL + EOL));
-            chunk.files.push(cssBundleFilename);
+        if (this.options.includeDynamicModulesInCSS) {
+            const stModules = getModuleInGraph(chunk, module => module.type === 'stylable');
+            if (stModules.size !== 0) {
+                const cssSources = renderStaticCSS(
+                    [...stModules],
+                    compilation.mainTemplate,
+                    chunk.hash || compilation.hash
+                );
+                const cssBundleFilename = compilation.getPath(this.options.filename, {
+                    chunk,
+                    hash: compilation.hash
+                });
+                compilation.assets[cssBundleFilename] = new RawSource(
+                    cssSources.join(EOL + EOL + EOL)
+                );
+                chunk.files.push(cssBundleFilename);
+            }
+        } else {
+            const bootstrap = chunk.stylableBootstrap;
+            if (bootstrap) {
+                const cssSources = bootstrap.renderStaticCSS(
+                    compilation.mainTemplate,
+                    compilation.hash
+                );
+                const cssBundleFilename = compilation.getPath(this.options.filename, {
+                    chunk,
+                    hash: compilation.hash
+                });
+                compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL));
+                chunk.files.push(cssBundleFilename);
+            }
         }
     }
-    createBootstrapModule(compiler, chunk, runtimeRendererModule) {
+    createBootstrapModule(compiler, chunk) {
         const bootstrap = new StylableBootstrapModule(
             compiler.context,
             chunk,
-            runtimeRendererModule,
+            null,
             this.options.bootstrap
         );
         for (const module of chunk.modulesIterable) {
@@ -314,12 +334,7 @@ class StylableWebpackPlugin {
         compilation.mainTemplate.hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
             (source, chunk) => {
-                const runtimeRendererModule = compilation.getModule(cssRuntimeRendererRequest);
-
-                if (
-                    !chunk.hasModuleInGraph(m => m === runtimeRendererModule) ||
-                    this.options.bootstrap.autoInit === false
-                ) {
+                if (!hasStylableModuleInGraph(chunk) || this.options.bootstrap.autoInit === false) {
                     return source;
                 }
 
@@ -334,13 +349,15 @@ class StylableWebpackPlugin {
                 const bootstrap = new StylableBootstrapModule(
                     compiler.context,
                     null,
-                    runtimeRendererModule,
+                    null,
                     this.options.bootstrap
                 );
 
-                for (const module of stModules) {
-                    if (module.type === 'stylable') {
-                        bootstrap.addStylableModuleDependency(module);
+                if (!compilation.options.optimization.runtimeChunk) {
+                    for (const module of stModules) {
+                        if (module.type === 'stylable') {
+                            bootstrap.addStylableModuleDependency(module);
+                        }
                     }
                 }
 
@@ -348,15 +365,29 @@ class StylableWebpackPlugin {
             }
         );
     }
-    injectInitToEntryModule(chunk, compilation, runtimeRendererModule) {
-        if (chunk.hasEntryModule() && this.options.bootstrap.autoInit) {
+    injectRuntimeSource(compiler, compilation) {
+        compilation.mainTemplate.hooks.beforeStartup.tap(
+            StylableWebpackPlugin.name,
+            (source, chunk) => {
+                if (!hasStylableModuleInGraph(chunk)) {
+                    return source;
+                }
+                return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+            }
+        );
+    }
+    injectInitToEntryModule(chunk, compilation) {
+        if (
+            chunk.hasEntryModule() &&
+            hasStylableModuleInGraph(chunk) &&
+            this.options.bootstrap.autoInit
+        ) {
             const last = _ => _[_.length - 1];
             const getEntryModule = () => {
                 return chunk.entryModule instanceof MultiModule
                     ? last(chunk.entryModule.dependencies).module
                     : chunk.entryModule;
             };
-
             const injectModule = this.options.bootstrap.getAutoInitModule
                 ? this.options.bootstrap.getAutoInitModule(chunk, compilation)
                 : getEntryModule();
@@ -367,13 +398,7 @@ class StylableWebpackPlugin {
             if (injected) {
                 return;
             }
-            injectModule.addDependency(
-                new StyleableAutoInitDependency(
-                    runtimeRendererModule,
-                    compilation.runtimeTemplate,
-                    injectModule
-                )
-            );
+            injectModule.addDependency(new StyleableAutoInitDependency(injectModule));
         }
     }
 }

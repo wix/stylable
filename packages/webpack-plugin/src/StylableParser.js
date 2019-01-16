@@ -2,7 +2,6 @@ const { isLoadedByLoaders } = require('./isLoadedByLoaders');
 const path = require('path');
 const CommonJsRequireDependency = require('webpack/lib/dependencies/CommonJsRequireDependency');
 const RequireHeaderDependency = require('webpack/lib/dependencies/RequireHeaderDependency');
-const { rendererDependency, stylesheetDependency } = require('./runtime-dependencies');
 const {
     StylableExportsDependency,
     StylableImportDependency,
@@ -46,8 +45,6 @@ class StylableParser {
             });
 
         state.module.addDependency(new StylableExportsDependency(['default']));
-        state.module.addDependency(stylesheetDependency());
-        state.module.addDependency(rendererDependency());
 
         meta.imports.forEach(stylableImport => {
             state.module.buildInfo.fileDependencies.add(stylableImport.from);

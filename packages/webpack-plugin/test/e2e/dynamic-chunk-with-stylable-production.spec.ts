@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'unsafe-mute-diagnostics';
+const project = 'dynamic-chunk-with-stylable-production';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
@@ -10,7 +10,8 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             port: 3001,
             puppeteerOptions: {
-                // headless: false
+                // headless: false,
+                // devtools: true
             }
         },
         before,
@@ -18,17 +19,12 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('should build a project with no errors (duplicate namespace) when muted', async () => {
-        expect(projectRunner.getBuildErrorMessages().length).to.equal(0);
-        expect(projectRunner.getBuildWarningMessages().length).to.equal(0);
-    });
-
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).backgroundColor;
+            return getComputedStyle(document.body).backgroundColor;
         });
 
-        expect(backgroundColor).to.eql('rgb(0, 128, 0)');
+        expect(backgroundColor).to.eql('rgb(255, 0, 0)');
     });
 });
