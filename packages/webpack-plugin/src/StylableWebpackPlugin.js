@@ -133,7 +133,7 @@ class StylableWebpackPlugin {
                             !this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE &&
                             usageMapping[module.buildInfo.stylableMeta.namespace]
                         ) {
-                            compilation.errors.push(
+                            compilation.warnings.push(
                                 new Error(
                                     `Duplicate module namespace: ${
                                         module.buildInfo.stylableMeta.namespace
