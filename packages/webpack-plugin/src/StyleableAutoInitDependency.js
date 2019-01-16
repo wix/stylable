@@ -1,30 +1,25 @@
 const Dependency = require('webpack/lib/Dependency');
+const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
 
 class StyleableAutoInitDependency extends Dependency {
-    constructor(runtimeRendererModule, runtimeTemplate, module) {
+    constructor(module) {
         super();
         this.module = module;
-        this.runtimeTemplate = runtimeTemplate;
-        this.runtimeRendererModule = runtimeRendererModule;
         this.type = 'StyleableAutoInitDependency';
         this.range = 0;
         this.requireWebpackRequire = true;
     }
     updateHash(hash) {
         hash.update(this.type + '');
-        hash.update(String((this.runtimeRendererModule && this.runtimeRendererModule.id) || ''));
     }
 }
 
 class StyleableAutoInitDependencyTemplate {
-    apply(dep, source) {
+    apply(dep, source, runtimeTemplate) {
         const renderingCode = [];
-        const id = dep.runtimeTemplate.moduleId({
-            module: dep.runtimeRendererModule,
-            request: dep.runtimeRendererModule.request
-        });
-        renderingCode.push(`var $renderer = __webpack_require__(${id}).$;`);
-        renderingCode.push(`if(typeof window !== 'undefined') { $renderer.init(window); }`);
+        renderingCode.push(
+            `if(typeof window !== 'undefined') { ${WEBPACK_STYLABLE}.$.init(window); }`
+        );
         source.insert(0, renderingCode.join('\n'));
     }
 }

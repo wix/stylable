@@ -6,8 +6,7 @@ const {
     renderStaticCSS,
     getStylableModulesFromDependencies
 } = require('./stylable-module-helpers');
-
-const { RENDERER_SYMBOL, STYLESHEET_SYMBOL } = require('./runtime-dependencies');
+const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
 
 class StylableBootstrapModule extends Module {
     constructor(
@@ -62,25 +61,18 @@ class StylableBootstrapModule extends Module {
         });
 
         let renderingCode = [];
-        if (this.runtimeRenderer) {
-            const id = runtimeTemplate.moduleId({
-                module: this.runtimeRenderer,
-                request: this.runtimeRenderer.request
-            });
-            renderingCode.push(`var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`);
+        if (this.options.autoInit) {
             if (this.options.globalInjection) {
-                renderingCode.push(this.options.globalInjection(RENDERER_SYMBOL));
+                renderingCode.push(this.options.globalInjection(`${WEBPACK_STYLABLE}.$`));
             }
 
             renderingCode.push(...imports);
 
-            if (this.options.autoInit) {
-                renderingCode.push(`if(typeof window !== 'undefined') { ${RENDERER_SYMBOL}.init(window); }`);
-            }
-            this.__source = new RawSource(renderingCode.join(EOL));
-        } else {
-            this.__source = new RawSource(imports.join(EOL));
+            renderingCode.push(
+                `if(typeof window !== 'undefined') { ${WEBPACK_STYLABLE}.$.init(window); }`
+            );
         }
+        this.__source = new RawSource(renderingCode.join(EOL));
 
         return this.__source;
     }

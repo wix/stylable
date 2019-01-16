@@ -1,33 +1,7 @@
-const { StylableImportDependency } = require("./StylableDependencies");
-const RENDERER_SYMBOL = "$renderer";
-const STYLESHEET_SYMBOL = "$stylesheet";
+const { readFileSync } = require('fs');
 
-const rendererDependency = () =>
-  new StylableImportDependency(
-    require.resolve("@stylable/runtime/cjs/css-runtime-renderer"),
-    {
-      defaultImport: "$renderer",
-      names: []
-    }
-  );
+const RUNTIME_SOURCE = readFileSync(require.resolve('@stylable/runtime/runtime.lib.js'), 'utf8');
+const WEBPACK_STYLABLE = '__webpack_require__.stylable';
 
-const stylesheetDependency = () =>
-  new StylableImportDependency(
-    require.resolve("@stylable/runtime/cjs/css-runtime-stylesheet"),
-    {
-      defaultImport: "$stylesheet",
-      names: []
-    }
-  );
-
-const cssRuntimeRendererRequest = {
-  identifier() {
-    return require.resolve("@stylable/runtime/cjs/css-runtime-renderer");
-  }
-};
-
-module.exports.cssRuntimeRendererRequest = cssRuntimeRendererRequest;
-module.exports.stylesheetDependency = stylesheetDependency;
-module.exports.rendererDependency = rendererDependency;
-module.exports.RENDERER_SYMBOL = RENDERER_SYMBOL;
-module.exports.STYLESHEET_SYMBOL = STYLESHEET_SYMBOL;
+exports.WEBPACK_STYLABLE = WEBPACK_STYLABLE;
+exports.RUNTIME_SOURCE = RUNTIME_SOURCE;

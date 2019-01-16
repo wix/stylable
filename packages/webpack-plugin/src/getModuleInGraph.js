@@ -1,5 +1,8 @@
+const earlyReturn = Symbol('earlyReturn');
+
 /**
  * Extracted from webpack 4.
+ * ADD EARLY BREAK WITH RETURN
  * @param {*} chunk
  * @param {*} filterFn
  * @param {*} filterChunkFn
@@ -15,8 +18,12 @@ function getModuleInGraph(chunk, filterFn, filterChunkFn) {
                 chunksProcessed.add(chunk);
                 if (!filterChunkFn || filterChunkFn(chunk)) {
                     for (const module of chunk.modulesIterable) {
-                        if (filterFn(module)) {
+                        const res = filterFn(module);
+                        if (res) {
                             modules.add(module);
+                            if (res === earlyReturn) {
+                                return modules;
+                            }
                         }
                     }
                 }
@@ -29,4 +36,9 @@ function getModuleInGraph(chunk, filterFn, filterChunkFn) {
     return modules;
 }
 
+function hasStylableModuleInGraph(chunk) {
+    return getModuleInGraph(chunk, m => (m.type === 'stylable' ? earlyReturn : false)).size !== 0;
+}
+
+exports.hasStylableModuleInGraph = hasStylableModuleInGraph;
 exports.getModuleInGraph = getModuleInGraph;

@@ -6,6 +6,4 @@
     -st-from: "lib2/index.st.css";
     -st-default: Lib2;
 }
-.root {
-    background-color: red; 
-}
+.root {}
