@@ -47,7 +47,6 @@ export function ensureWrite(filePath: string, source: string) {
 function getBundleFilesFromEntry(entry: string, includeEntry = true) {
     const program = ts.createProgram({ rootNames: [entry], options: {} });
 
-    // TODO: remove exports * and allow indexes
     const entryFile = includeEntry ? undefined : program.getSourceFile(entry);
     const names = program
         .getSourceFiles()
@@ -63,7 +62,7 @@ function bundleFiles(name: string, files: string[]) {
             const source = fs.readFileSync(filePath, 'utf8');
             const res = ts.transpileModule(source, {
                 fileName: filePath,
-                transformers: { before: [], after: [cleanup()] }
+                transformers: { after: [cleanup()] }
             });
 
             return res.outputText
