@@ -7,9 +7,11 @@
 End-users will usually not add this package directly as a dependency themselves, and would instead receive it as a dependency of their chosen integration (e.g. `@stylable/webpack-plugin`).
 
 ## Usage
+
 `@stylable/runtime` exposes two methods, `Stylesheet` and `Renderer`.
 
-### Stylesheet 
+### Stylesheet
+
 The stylesheet function is returned when importing a Stylable stylesheet. It is used for creating the DOM-attributes required for CSS to be applied.
 
 ```ts
@@ -53,7 +55,8 @@ style.root;
 // returns "local1211372639--root"
 ```
 
-### Renderer 
+### Renderer
+
 Responsible for managing CSS files, linking to the `document` and maintaining their correct order in your application.
 
 ## License
