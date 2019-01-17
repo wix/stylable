@@ -32,6 +32,24 @@ describe('css custom-properties (vars)', () => {
             });
         });
 
+        it('global (unscoped) declarations', () => {
+            const { cssVars, diagnostics, ast } = processSource(`
+                @st-global-custom-property --myVar;
+                .root {
+                    --myVar: blue;
+                }
+            `, { from: 'path/to/style.css' });
+
+            expect(diagnostics.reports.length, 'no reports').to.eql(0);
+            expect(cssVars).to.eql({
+                '--myVar': {
+                    _kind: 'cssVar',
+                    name: '--myVar',
+                    global: true
+                }
+            });
+        });
+
         it('multiple css var declarations with the same name', () => {
             const { cssVars, diagnostics, ast } = processSource(`
                 .root {
@@ -148,7 +166,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(--entry-size) var(--entry-type) var(--entry-color)');
         });
 
-        it('should NOT transfrom unknown css vars usage', () => {
+        it('should not transfrom unknown css vars usage', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
