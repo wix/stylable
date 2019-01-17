@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { processorWarnings } from '../src';
-import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
+import { processorWarnings, resolverWarnings } from '../src';
+import { transformerWarnings } from '../src/stylable-transformer';
+import { expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 describe('css custom-properties (vars)', () => {
@@ -119,6 +120,28 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(--entry-myVar)');
         });
 
+        it('css var usage with default, mid declaration value', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {
+                            --myVar: solid;
+                            border: 2px var(--myVar, black) black;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
+            expect(decl.value).to.equal('2px var(--entry-myVar, black) black');
+        });
+
         it('multiple local css vars usage in the same declaration', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -180,8 +203,6 @@ describe('css custom-properties (vars)', () => {
                     }
                 }
             });
-
-            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
 
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
             expect(decl.prop).to.equal('color');
@@ -395,24 +416,111 @@ describe('css custom-properties (vars)', () => {
         });
     });
 
-    xdescribe('diagnostics', () => {
-
-        // TODO: fill me
-        it('should trigger a warning when trying to target an unknown state and keep the state', () => {
+    describe('diagnostics', () => {
+        it('trying to use an unknown var and keep the source unchanged', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
-                        content: `|.root:$unknownState$|{}`
+                        content: `
+                        .root {
+                            |color: var($--unknownVar$)|;
+                        }
+                        `
                     }
                 }
             };
 
             const res = expectWarningsFromTransform(config, [
-                { message: '', file: '/entry.st.css' }
+                { message: transformerWarnings.UNKNOWN_CSS_VAR_USE('--unknownVar'), file: '/entry.st.css' }
             ]);
-            expect(res, 'keep unknown state').to.have.styleRules([`.entry--root:unknownState{}`]);
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.value).to.equal('var(--unknownVar)');
+        });
+
+        it('trying to use illegal css var syntax', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {
+                            |color: var($illegalVar$)|;
+                        }
+                        `
+                    }
+                }
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                { message: transformerWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'), file: '/entry.st.css' }
+            ]);
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.value).to.equal('var(illegalVar)');
+        });
+
+        it('trying to import unknown css var', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./imported.st.css";
+                            |-st-named: $--unknownVar$;|
+                        }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: ``
+                    }
+                }
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                // tslint:disable-next-line:max-line-length
+                { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('--unknownVar', './imported.st.css'), file: '/entry.st.css' }
+            ]);
+        });
+
+        it('global css var declarations must begin with "--"', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-global-custom-property $illegalVar$|;
+                        `
+                    }
+                }
+            };
+
+            expectWarningsFromTransform(config, [
+                { message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'), file: '/entry.st.css' }
+            ]);
+        });
+
+        it('global css vars must be separated by commas', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-global-custom-property $--var1 --var2$|;
+                        `
+                    }
+                }
+            };
+
+            expectWarningsFromTransform(config, [
+                { message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'), file: '/entry.st.css' }
+            ]);
         });
     });
 });

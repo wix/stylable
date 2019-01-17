@@ -30,8 +30,8 @@ import {
     findRule,
     generateScopedCSSVar,
     getDeclStylable,
-    isCSSVarProp,
-    isCSSVarUse
+    hasCSSVarUse,
+    isCSSVarProp
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
@@ -109,7 +109,9 @@ export const transformerWarnings = {
     UNKNOWN_IMPORT_ALIAS(name: string) { return `cannot use alias for unknown import "${name}"`; },
     SCOPE_PARAM_NOT_ROOT(name: string) { return `"@st-scope" parameter "${name}" does not resolve to a stylesheet root`; },
     SCOPE_PARAM_NOT_CSS(name: string) { return `"@st-scope" parameter "${name}" must be a Stylable stylesheet, instead name originated from a JavaScript file`; },
-    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; }
+    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; },
+    UNKNOWN_CSS_VAR_USE(name: string) { return `unknown custom property "${name}"`; },
+    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -150,7 +152,7 @@ export class StylableTransformer {
         path: string[] = []) {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
-        const cssVarsMapping = this.registerCSSVars(ast, meta);
+        const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
         this.resolver.validateImports(meta, this.diagnostics);
         validateScopes(meta, this.resolver, this.diagnostics);
 
@@ -355,7 +357,7 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    public registerCSSVars(ast: postcss.Root, meta: StylableMeta) {
+    public createCSSVarsMapping(ast: postcss.Root, meta: StylableMeta) {
         const cssVarsMapping: Pojo<string> = {};
 
         // imported vars
@@ -364,7 +366,8 @@ export class StylableTransformer {
                 if (isCSSVarProp(symbolName)) {
                     const importedVar = this.resolver.deepResolve(meta.mappedSymbols[symbolName]);
 
-                    if (importedVar && importedVar._kind === 'css' && importedVar.symbol._kind === 'cssVar') {
+                    if (importedVar && importedVar._kind === 'css' &&
+                        importedVar.symbol && importedVar.symbol._kind === 'cssVar') {
                         cssVarsMapping[symbolName] = importedVar.symbol.global ?
                             symbolName :
                             generateScopedCSSVar(importedVar.meta.namespace, symbolName.slice(2));
@@ -399,15 +402,23 @@ export class StylableTransformer {
         }
 
         // resolve var usages
-        if (isCSSVarUse(value)) {
+        if (hasCSSVarUse(value)) {
             const parsedVal = valueParser(value);
 
-            for (const val of parsedVal.nodes) {
-                if (val.type === 'function' && val.value === 'var') {
-                    const varWithPrefix = val.nodes[0].value;
+            for (const part of parsedVal.nodes) {
+                if (part.type === 'function' && part.value === 'var') {
+                    const varWithPrefix = part.nodes[0].value;
 
-                    if (cssVarsMapping[varWithPrefix]) {
-                        val.nodes[0].value = cssVarsMapping[varWithPrefix];
+                    if (isCSSVarProp(varWithPrefix)) {
+                        if (cssVarsMapping[varWithPrefix]) {
+                            part.nodes[0].value = cssVarsMapping[varWithPrefix];
+                        } else {
+                            this.diagnostics.warn(
+                                decl, transformerWarnings.UNKNOWN_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
+                        }
+                    } else {
+                        this.diagnostics.warn(
+                            decl, transformerWarnings.ILLEGAL_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
                     }
                 }
             }

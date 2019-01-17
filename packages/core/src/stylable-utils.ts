@@ -355,6 +355,6 @@ export function isCSSVarProp(value: string) {
     return value.startsWith('--');
 }
 
-export function isCSSVarUse(value: string) {
-    return value.startsWith('var(--');
+export function hasCSSVarUse(value: string) {
+    return value.includes('var(');
 }

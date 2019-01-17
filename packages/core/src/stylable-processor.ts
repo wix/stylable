@@ -60,7 +60,9 @@ export const processorWarnings = {
     NO_IMPORT_IN_ST_SCOPE() { return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`; },
     NO_KEYFRAMES_IN_ST_SCOPE() { return `cannot use "@keyframes" inside of "@st-scope"`; },
     SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
-    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; }
+    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; },
+    ILLEGAL_GLOBAL_CSS_VAR(name: string) { return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`; },
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma seperated`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -169,15 +171,29 @@ export class StylableProcessor {
                 case 'st-global-custom-property':
                     const cssVars = atRule.params.split(',');
 
+                    if (atRule.params.trim().split(/\s+/g).length > cssVars.length) {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+                            { word: atRule.params });
+                        break;
+                    }
+
                     for (const entry of cssVars) {
                         const cssVar = entry.trim();
-                        if (!this.meta.cssVars[cssVar] && isCSSVarProp(cssVar)) {
-                            this.meta.cssVars[cssVar] = {
-                                _kind: 'cssVar',
-                                name: cssVar,
-                                global: true
-                            };
-                            this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
+
+                        if (isCSSVarProp(cssVar)) {
+                            if (!this.meta.cssVars[cssVar]) {
+                                this.meta.cssVars[cssVar] = {
+                                    _kind: 'cssVar',
+                                    name: cssVar,
+                                    global: true
+                                };
+                                this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
+                            }
+                        } else {
+                            this.diagnostics.warn(
+                                atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), { word: cssVar });
                         }
                     }
                     toRemove.push(atRule);
