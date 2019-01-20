@@ -109,9 +109,7 @@ export const transformerWarnings = {
     UNKNOWN_IMPORT_ALIAS(name: string) { return `cannot use alias for unknown import "${name}"`; },
     SCOPE_PARAM_NOT_ROOT(name: string) { return `"@st-scope" parameter "${name}" does not resolve to a stylesheet root`; },
     SCOPE_PARAM_NOT_CSS(name: string) { return `"@st-scope" parameter "${name}" must be a Stylable stylesheet, instead name originated from a JavaScript file`; },
-    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; },
-    UNKNOWN_CSS_VAR_USE(name: string) { return `unknown custom property "${name}"`; },
-    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
+    UNKNOWN_SCOPING_PARAM(name: string) { return `"@st-scope" received an unknown symbol: "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -177,7 +175,9 @@ export class StylableTransformer {
         ast.walkDecls(decl => {
             getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
-            this.scopeCSSVars(decl, meta, cssVarsMapping);
+            if (isCSSVarProp(decl.prop)) {
+                decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);
+            }
 
             switch (decl.prop) {
                 case valueMapping.mixin:
@@ -194,7 +194,8 @@ export class StylableTransformer {
                         variableOverride,
                         this.replaceValueHook,
                         this.diagnostics,
-                        path.slice()
+                        path.slice(),
+                        cssVarsMapping
                     );
             }
         });
@@ -390,48 +391,17 @@ export class StylableTransformer {
 
         return cssVarsMapping;
     }
-    public scopeCSSVars(decl: postcss.Declaration, meta: StylableMeta, cssVarsMapping: Pojo<string> ) {
+    public getScopedCSSVar(
+        decl: postcss.Declaration,
+        meta: StylableMeta,
+        cssVarsMapping: Pojo<string>) {
         let prop = decl.prop;
-        let value = decl.value;
-        let replaceDecl = false;
 
-        // resolve var declarations
-        if (meta.cssVars[prop] && isCSSVarProp(prop)) {
+        if (meta.cssVars[prop]) {
             prop = cssVarsMapping[prop];
-            replaceDecl = true;
         }
 
-        // resolve var usages
-        if (hasCSSVarUse(value)) {
-            const parsedVal = valueParser(value);
-
-            for (const part of parsedVal.nodes) {
-                if (part.type === 'function' && part.value === 'var') {
-                    const varWithPrefix = part.nodes[0].value;
-
-                    if (isCSSVarProp(varWithPrefix)) {
-                        if (cssVarsMapping[varWithPrefix]) {
-                            part.nodes[0].value = cssVarsMapping[varWithPrefix];
-                        } else {
-                            this.diagnostics.warn(
-                                decl, transformerWarnings.UNKNOWN_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
-                        }
-                    } else {
-                        this.diagnostics.warn(
-                            decl, transformerWarnings.ILLEGAL_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
-                    }
-                }
-            }
-
-            value = parsedVal.toString();
-            replaceDecl = true;
-        }
-
-        // replace decl with new namespaced values
-        if (replaceDecl) {
-            const namespacedDecl = decl.clone({ prop, value });
-            decl.replaceWith(namespacedDecl);
-        }
+        return prop;
     }
     public transformGlobals(ast: postcss.Root) {
         ast.walkRules(r => {

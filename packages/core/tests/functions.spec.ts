@@ -6,6 +6,9 @@ import * as path from '../src/path';
 import { expectWarningsFromTransform } from './utils/diagnostics';
 import { generateStylableRoot } from './utils/generate-test-util';
 
+// var receives special handling and standalone testing
+export const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter(func => func !== 'var');
+
 describe('Stylable functions (native, formatter and variable)', () => {
     describe('transform', () => {
         it('apply simple js formatter with no arguments', () => {
@@ -165,7 +168,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         describe('native', () => {
-            Object.keys(nativeFunctionsDic).forEach(cssFunc => {
+            testedNativeFunctions.forEach(cssFunc => {
                 // cannot use formatter inside a url naitve function
                 if (cssFunc !== 'url') {
                     it(`should pass through native function (${cssFunc}) and resolve formatters`, () => {
@@ -800,7 +803,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         describe('native', () => {
-            Object.keys(nativeFunctionsDic).forEach(cssFunc => {
+            testedNativeFunctions.forEach(cssFunc => {
                 it(`should not return a warning for native ${cssFunc} pseudo class`, () => {
                     const config = {
                         entry: '/main.css',

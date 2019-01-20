@@ -7,6 +7,7 @@ import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
+import { isCSSVarProp } from './stylable-utils';
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
@@ -21,7 +22,9 @@ export const functionWarnings = {
     CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
     MULTI_ARGS_IN_VALUE: (args: string) => `value function accepts only a single argument: "value(${args})"`,
     UNKNOWN_FORMATTER: (name: string) => `cannot find native function or custom formatter called ${name}`,
-    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
+    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
+    UNKNOWN_CSS_VAR_USE(name: string) { return `unknown custom property "${name}"`; },
+    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -58,7 +61,8 @@ export function evalDeclarationValue(
     variableOverride?: Pojo<string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
-    passedThrough: string[] = []
+    passedThrough: string[] = [],
+    cssVarsMapping?: Pojo<string>
 ): string {
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -95,7 +99,8 @@ export function evalDeclarationValue(
                                 variableOverride,
                                 valueHook,
                                 diagnostics,
-                                passedThrough.concat(createUniqID(meta.source, varName))
+                                passedThrough.concat(createUniqID(meta.source, varName)),
+                                cssVarsMapping
                             );
 
                             parsedNode.resolvedValue = valueHook
@@ -116,7 +121,8 @@ export function evalDeclarationValue(
                                             variableOverride,
                                             valueHook,
                                             diagnostics,
-                                            passedThrough.concat(createUniqID(meta.source, varName))
+                                            passedThrough.concat(createUniqID(meta.source, varName)),
+                                            cssVarsMapping
                                         );
                                         parsedNode.resolvedValue = valueHook
                                             ? valueHook(
@@ -206,6 +212,25 @@ export function evalDeclarationValue(
                                     { word: (node as postcss.Declaration).value }
                                 );
                             }
+                        }
+                    } else if (value === 'var') {
+                        const varWithPrefix = parsedNode.nodes[0].value;
+
+                        if (isCSSVarProp(varWithPrefix)) {
+                            if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
+                                parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
+                            } else if (diagnostics) {
+                                diagnostics.warn(
+                                    node, functionWarnings.UNKNOWN_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
+                            }
+                        } else if (diagnostics) {
+                            diagnostics.warn(
+                                node, functionWarnings.ILLEGAL_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
+                        }
+
+                        // handle default values
+                        if (parsedNode.nodes.length > 2) {
+                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                         }
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);

@@ -10,6 +10,7 @@ import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
 import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
+import { testedNativeFunctions } from './functions.spec';
 import {
     expectWarnings,
     expectWarningsFromTransform,
@@ -1239,7 +1240,7 @@ describe('diagnostics: warnings and errors', () => {
         });
 
         describe('native', () => {
-            Object.keys(nativeFunctionsDic).forEach(cssFunc => {
+            testedNativeFunctions.forEach(cssFunc => {
                 it(`should not return a warning for native ${cssFunc} pseudo class`, () => {
                     const config: Config = {
                         entry: '/main.css',
