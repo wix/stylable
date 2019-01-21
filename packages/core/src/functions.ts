@@ -4,10 +4,10 @@ import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import { isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
-import { isCSSVarProp } from './stylable-utils';
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
