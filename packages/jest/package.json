@@ -8,7 +8,7 @@
     "clean": "rimraf ./dist",
     "build": "tsc",
     "lint": "tslint --project .",
-    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
     "@stylable/node": "^1.0.2",
