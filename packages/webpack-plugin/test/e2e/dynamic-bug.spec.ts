@@ -22,19 +22,11 @@ describe(`(${project})`, () => {
         const chunkByName = getNamedChunks(projectRunner);
 
         expect(getModulesNames(chunkByName.entryA)).to.eql([
-            'cjs/cached-node-renderer.js',
-            'cjs/css-runtime-renderer.js',
-            'cjs/css-runtime-stylesheet.js',
-            'cjs/keyed-list-renderer.js',
             'test-components/badge.js',
             'test-components/badge.st.css',
             'src/index-a.js'
         ]);
         expect(getModulesNames(chunkByName.entryB)).to.eql([
-            'cjs/cached-node-renderer.js',
-            'cjs/css-runtime-renderer.js',
-            'cjs/css-runtime-stylesheet.js',
-            'cjs/keyed-list-renderer.js',
             'test-components/badge.js',
             'test-components/badge.st.css',
             'src/index-b.js'

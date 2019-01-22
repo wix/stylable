@@ -5,6 +5,7 @@ cjs
 .idea
 .history
 .DS_Store
+runtime.lib.js
 
 # Created by the extension "VS Live Share"
 .vs

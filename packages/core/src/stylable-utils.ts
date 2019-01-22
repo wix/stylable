@@ -332,7 +332,7 @@ function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: Se
 }
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
-    const source = root.source.input.file || '';
+    const source = root.source && root.source.input.file || '';
     if (!source) {
         diagnostics.error(root, 'missing source filename');
     } else if (!isAbsolute(source)) {

@@ -1,6 +1,6 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "1.1.1",
+  "version": "1.1.5",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -13,13 +13,13 @@
     "lint": "tslint --project src"
   },
   "dependencies": {
-    "@stylable/runtime": "^0.1.13",
+    "@stylable/runtime": "^1.0.2",
     "express": "^4.16.4",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
     "puppeteer": "^1.11.0",
-    "rimraf": "^2.6.2",
-    "webpack": "^4.28.2"
+    "rimraf": "^2.6.3",
+    "webpack": "^4.28.4"
   },
   "files": [
     "cjs",

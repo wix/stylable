@@ -2,7 +2,7 @@ const { EOL } = require('os');
 const path = require('path');
 const { ReplaceSource, OriginalSource } = require('webpack-sources');
 const { StylableImportDependency } = require('./StylableDependencies');
-const { RENDERER_SYMBOL, STYLESHEET_SYMBOL } = require('./runtime-dependencies');
+const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
 const { processDeclarationUrls, makeAbsolute, isAsset } = require('@stylable/core');
 
 class StylableGenerator {
@@ -17,7 +17,7 @@ class StylableGenerator {
         }
         const { meta, exports } = this.transform(module);
         const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
-        const imports = this.generateImports(module, runtimeTemplate);
+        const imports = []
 
         const css = this.options.includeCSSInJS
             ? this.getCSSInJSWithAssets(
@@ -103,11 +103,11 @@ class StylableGenerator {
             [
                 `Object.defineProperty(${module.exportsArgument}, "__esModule", { value: true })`,
                 imports.join(EOL),
-                `${module.exportsArgument}.default = ${STYLESHEET_SYMBOL}.${createMethod}(`,
+                `${module.exportsArgument}.default = ${WEBPACK_STYLABLE}.create(`,
                 args.map(_ => '  ' + _).join(',' + EOL),
                 `);`,
                 this.options.includeCSSInJS
-                    ? `${RENDERER_SYMBOL}.register(${module.exportsArgument}.default)`
+                    ? `${WEBPACK_STYLABLE}.$.register(${module.exportsArgument}.default)`
                     : '',
                 this.options.experimentalHMR
                     ? `
@@ -120,27 +120,6 @@ class StylableGenerator {
             ].join(EOL),
             module.resource
         );
-    }
-    generateImports(module, runtimeTemplate) {
-        const imports = [];
-        for (const dependency of module.dependencies) {
-            if (dependency instanceof StylableImportDependency) {
-                if (dependency.defaultImport === STYLESHEET_SYMBOL) {
-                    const id = runtimeTemplate.moduleId({
-                        module: dependency.module,
-                        request: dependency.request
-                    });
-                    imports.push(`var ${STYLESHEET_SYMBOL} = __webpack_require__(${id});`);
-                } else if (dependency.defaultImport === RENDERER_SYMBOL) {
-                    const id = runtimeTemplate.moduleId({
-                        module: dependency.module,
-                        request: dependency.request
-                    });
-                    imports.push(`var ${RENDERER_SYMBOL} = __webpack_require__(${id}).$;`);
-                }
-            }
-        }
-        return imports;
     }
     getCSSInJSWithAssets(outputAst, onAsset, root, moduleResource, asJS, minify) {
         const replacements = [];

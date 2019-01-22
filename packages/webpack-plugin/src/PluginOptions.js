@@ -11,9 +11,10 @@
       filename: "[name].bundle.css",
       outputCSS: isProd ? true : false,
       includeCSSInJS: isProd ? false : true,
-      useWeakDeps: false,
+      useWeakDeps: true,
       bootstrap: {
         autoInit: true,
+        getAutoInitModule: undefined,
         ...options.bootstrap
       },
       generate: {
@@ -36,6 +37,8 @@
         DUPLICATE_MODULE_NAMESPACE: false,
         ...options.unsafeMuteDiagnostics
       },
+      includeDynamicModulesInCSS: true,
+      useEntryModuleInjection: false,
       experimentalHMR: false,
       plugins: []
     };

@@ -54,7 +54,7 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
         if (expectedWarning.skip) { return; }
 
         expect(report.message).to.equal(expectedWarning.message);
-        expect(report.node.source.start, 'start').to.eql(source.start);
+        expect(report.node.source!.start, 'start').to.eql(source.start);
         if (source.word !== null) {
             expect(report.options.word).to.equal(source.word);
         }
@@ -89,7 +89,7 @@ export function expectWarningsFromTransform(config: Config, warnings: Diagnostic
         const path = expectedWarning.file;
         expect(report.message).to.equal(expectedWarning.message);
         if (!expectedWarning.skipLocationCheck) {
-            expect(report.node.source.start).to.eql(locations[path].start);
+            expect(report.node.source!.start).to.eql(locations[path].start);
         }
         if (locations[path].word !== null) {
             expect(report.options.word).to.eql(locations[path].word);
