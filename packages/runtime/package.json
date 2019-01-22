@@ -16,6 +16,9 @@
     "test": "run-p test:unit test:e2e",
     "prepack": "yarn build"
   },
+  "devDependencies": {
+    "@stylable/e2e-test-kit": "^1.1.5"
+  },
   "files": [
     "cjs",
     "esm",
