@@ -35,7 +35,8 @@ export function resolveArgumentsValue(
     diagnostics: Diagnostics,
     node: postcss.Node,
     variableOverride?: Pojo<string>,
-    path?: string[]
+    path?: string[],
+    cssVarsMapping?: Pojo<string>
 ) {
     const resolvedArgs = {} as Pojo<string>;
     for (const k in options) {
@@ -47,7 +48,8 @@ export function resolveArgumentsValue(
             variableOverride,
             transformer.replaceValueHook,
             diagnostics,
-            path
+            path,
+            cssVarsMapping
         );
     }
     return resolvedArgs;

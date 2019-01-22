@@ -425,6 +425,44 @@ describe('css custom-properties (vars)', () => {
             expect(baseDecl.value).to.equal('var(--base-baseVar)');
         });
 
+        it('scoping var usages inside css mixin variable override', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-global-custom-property --myGlobal;
+
+                        :vars {
+                            arg1: red;
+                            arg2: blue;
+                        }
+
+                        .root {
+                            --myColor: green;
+                            -st-mixin: mixin(arg1 var(--myColor));
+                        }
+
+                        .mixin {
+                            color: value(arg1);
+                            background: var(--myGlobal, value(arg2));
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const rule = (res.meta.outputAst!.nodes![0] as postcss.Rule);
+            const decl1 = rule.nodes![1] as postcss.Declaration;
+            const decl2 = rule.nodes![2] as postcss.Declaration;
+            expect(decl1.prop).to.equal('color');
+            expect(decl1.value).to.equal('var(--entry-myColor)');
+            expect(decl2.value).to.equal('var(--myGlobal, blue)');
+        });
+
         describe('global (unscoped)', () => {
             it('does not scope css var declarations', () => {
                 const res = generateStylableResult({

@@ -87,7 +87,7 @@ export class StylableProcessor {
         root.walkDecls(decl => {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
-            } else if (decl.prop.startsWith('--')) {
+            } else if (isCSSVarProp(decl.prop)) {
                 this.addCSSVars(decl);
             }
 

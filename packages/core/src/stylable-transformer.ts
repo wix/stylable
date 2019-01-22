@@ -200,7 +200,7 @@ export class StylableTransformer {
             }
         });
 
-        ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride, path));
+        ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride || {}, cssVarsMapping, path));
 
         if (metaExports) {
             this.exportRootClass(meta, metaExports);
@@ -358,7 +358,7 @@ export class StylableTransformer {
 
         return keyframesExports;
     }
-    public createCSSVarsMapping(ast: postcss.Root, meta: StylableMeta) {
+    public createCSSVarsMapping(_ast: postcss.Root, meta: StylableMeta) {
         const cssVarsMapping: Pojo<string> = {};
 
         // imported vars
@@ -378,16 +378,12 @@ export class StylableTransformer {
         }
 
         // locally defined vars
-        ast.walkDecls(/^--\w*/, decl => {
-            const varDeclProp = decl.prop;
-            if (meta.cssVars[varDeclProp] && isCSSVarProp(varDeclProp) && !cssVarsMapping[varDeclProp]) {
-                const prop = meta.cssVars[varDeclProp].global ?
-                    varDeclProp :
-                    generateScopedCSSVar(meta.namespace, varDeclProp.slice(2));
-
-                cssVarsMapping[varDeclProp] = prop;
-            }
-        });
+        for (const localVarName of Object.keys(meta.cssVars)) {
+            const cssVar = meta.cssVars[localVarName];
+            cssVarsMapping[localVarName] = cssVar.global ?
+                localVarName :
+                generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+        }
 
         return cssVarsMapping;
     }
