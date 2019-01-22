@@ -1,85 +1,121 @@
-import { AttributeMap, InheritedAttributes, RuntimeStylesheet, StateMap } from './types';
+import {
+    AttributeMap,
+    CSSVarMap,
+    CSSVarMappingRuntimeType,
+    InheritedAttributes,
+    RuntimeStylesheet,
+    StateMap
+} from './types';
 
 export function create(
-  root: string,
-  namespace: string,
-  locals: Partial<RuntimeStylesheet>,
-  css: string,
-  depth: number,
-  id: string | number
+    root: string,
+    namespace: string,
+    locals: Partial<RuntimeStylesheet>,
+    css: string,
+    depth: number,
+    id: string | number
 ): RuntimeStylesheet {
+    const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
 
-  const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
+    function cssStates(stateMapping: StateMap) {
+        return stateMapping
+            ? Object.keys(stateMapping).reduce(
+                  (states, key) => {
+                      const stateValue = stateMapping[key];
 
-  function cssStates(stateMapping: StateMap) {
-    return stateMapping
-      ? Object.keys(stateMapping).reduce((states, key) => {
-        const stateValue = stateMapping[key];
+                      if (stateValue === undefined || stateValue === null || stateValue === false) {
+                          return states;
+                      }
 
-        if (
-          stateValue === undefined ||
-          stateValue === null ||
-          stateValue === false
-        ) {
-          return states;
-        }
+                      states[dataNamespace + key.toLowerCase()] = stateValue;
 
-        states[dataNamespace + key.toLowerCase()] = stateValue;
-
-        return states;
-      }, {} as StateMap)
-      : {};
-  }
-
-  function get(localName: string) {
-    return locals[localName];
-  }
-
-  function mapClasses(className: string) {
-    return className
-      .split(/\s+/g)
-      .map(className => get(className) || className)
-      .join(' ');
-  }
-
-  locals.$root = root;
-  locals.$namespace = namespace;
-  locals.$depth = depth;
-  locals.$id = id;
-  locals.$css = css;
-
-  locals.$get = get;
-  locals.$cssStates = cssStates;
-
-  function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: InheritedAttributes) {
-    className = className ? mapClasses(className) : '';
-
-    const base: AttributeMap = cssStates(states);
-
-    if (inheritedAttributes) {
-      for (const k in inheritedAttributes) {
-        if (k.match(/^data-/)) {
-          base[k] = inheritedAttributes[k];
-        }
-      }
-
-      if (inheritedAttributes.className) {
-        className += ' ' + inheritedAttributes.className;
-      }
+                      return states;
+                  }, {} as StateMap
+              )
+            : {};
     }
 
-    if (className) {
-      base.className = className;
+    function styleObjectToString(this: CSSVarMappingRuntimeType): string {
+        return Object.keys(this).reduce((res: string, cssVar: string) => {
+            if (cssVar.startsWith('--')) {
+                res += `${cssVar}: ${this[cssVar]}; `;
+            }
+
+            return res;
+        }, '');
     }
 
-    return base;
-  }
+    function cssVars(cssVarsMapping: CSSVarMap) {
+        const res: CSSVarMappingRuntimeType = {
+            toString: styleObjectToString
+        };
 
-  Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
+        return Object.keys(cssVarsMapping).reduce(
+            (res: CSSVarMap, cssVar: string) => {
+                if (cssVar.startsWith('--') && locals[cssVar]) {
+                    res[locals[cssVar] as string] = cssVarsMapping[cssVar];
+                }
 
-  return stylable_runtime_stylesheet as RuntimeStylesheet;
+                return res;
+            },
+            res as CSSVarMap
+        );
+    }
+
+    function get(localName: string) {
+        return locals[localName];
+    }
+
+    function mapClasses(className: string) {
+        return className
+            .split(/\s+/g)
+            .map(className => get(className) || className)
+            .join(' ');
+    }
+
+    locals.$root = root;
+    locals.$namespace = namespace;
+    locals.$depth = depth;
+    locals.$id = id;
+    locals.$css = css;
+
+    locals.$get = get;
+    locals.$cssStates = cssStates;
+    locals.$cssVars = cssVars;
+
+    function stylable_runtime_stylesheet(
+        className: string,
+        states: StateMap,
+        inheritedAttributes: InheritedAttributes
+    ) {
+        className = className ? mapClasses(className) : '';
+
+        const base: AttributeMap = cssStates(states);
+
+        if (inheritedAttributes) {
+            for (const k in inheritedAttributes) {
+                if (k.match(/^data-/)) {
+                    base[k] = inheritedAttributes[k];
+                }
+            }
+
+            if (inheritedAttributes.className) {
+                className += ' ' + inheritedAttributes.className;
+            }
+        }
+
+        if (className) {
+            base.className = className;
+        }
+
+        return base;
+    }
+
+    Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
+
+    return stylable_runtime_stylesheet as RuntimeStylesheet;
 }
 
 export function createTheme(css: string, depth: number | string, id: number | string) {
-  return { $css: css, $depth: depth, $id: id, $theme: true };
+    return { $css: css, $depth: depth, $id: id, $theme: true };
 }

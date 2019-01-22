@@ -4,6 +4,15 @@ export interface StateMap {
     [stateName: string]: StateValue;
 }
 
+export interface CSSVarMap {
+    [varName: string]: string;
+}
+
+export interface CSSVarMappingRuntimeType {
+    toString: () => string;
+    [name: string]: unknown;
+}
+
 export interface AttributeMap {
     className?: string;
     [attributeName: string]: StateValue | undefined;
@@ -15,15 +24,16 @@ export interface InheritedAttributes {
 }
 
 export type RuntimeStylesheet = {
-    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap
-    $root: string,
-    $namespace: string,
-    $depth: number,
-    $id: string | number,
-    $css?: string,
+    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap;
+    $root: string;
+    $namespace: string;
+    $depth: number;
+    $id: string | number;
+    $css?: string;
 
     $get(localName: string): string | undefined;
     $cssStates(stateMapping?: StateMap | null): StateMap;
+    $cssVars(cssVarMap?: CSSVarMap): CSSVarMap;
 } & { [localName: string]: string };
 
 export interface NodeRenderer<I, O extends Element> {

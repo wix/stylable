@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { JSDOM } = require('jsdom');
-import { RuntimeRenderer } from '../src/css-runtime-renderer';
+import { RuntimeRenderer } from '../../src/css-runtime-renderer';
 
 function assertStyle(node: Element, { $css, key }: { $css: string; key: string }) {
     expect(node.getAttribute('st-id')).to.equal(key);

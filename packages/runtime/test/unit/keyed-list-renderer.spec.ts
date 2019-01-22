@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { createDOMListRenderer, DOMListRenderer } from '../src/keyed-list-renderer';
-import { NodeRenderer } from '../src/types';
+import { createDOMListRenderer, DOMListRenderer } from '../../src/keyed-list-renderer';
+import { NodeRenderer } from '../../src/types';
 
 interface TestNode { key: string; value: string; }
 

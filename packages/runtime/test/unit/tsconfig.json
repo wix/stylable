@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.test.json",
+  "compilerOptions": {
+    "lib": [
+      "es2017",
+      "dom"
+    ], 
+    "types": [
+      "node",
+      "mocha"
+    ],
+  }
+}
