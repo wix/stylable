@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "yarn workspace @stylable/runtime bundle",
     "clean": "lerna run clean --stream --parallel",
     "build": "lerna run build --stream",
     "pretest": "yarn lint",
