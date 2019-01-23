@@ -1,3 +1,6 @@
+import webpack from 'webpack';
+import { StylableModule } from './types';
+
 const earlyReturn = Symbol('earlyReturn');
 
 /**
@@ -7,13 +10,17 @@ const earlyReturn = Symbol('earlyReturn');
  * @param {*} filterFn
  * @param {*} filterChunkFn
  */
-function getModuleInGraph(chunk, filterFn, filterChunkFn) {
-    const queue = new Set(chunk.groupsIterable);
-    const chunksProcessed = new Set();
-    const modules = new Set();
+export function getModuleInGraph(
+    chunk: webpack.compilation.Chunk,
+    filterFn: (m: StylableModule) => symbol | boolean,
+    filterChunkFn?: (c: webpack.compilation.Chunk) => boolean
+) {
+    const queue = new Set<webpack.compilation.ChunkGroup>(chunk.groupsIterable);
+    const chunksProcessed = new Set<webpack.compilation.Chunk>();
+    const modules = new Set<StylableModule>();
 
     for (const chunkGroup of queue) {
-        for (const chunk of chunkGroup.chunks) {
+        for (const chunk of (chunkGroup as any).chunks) {
             if (!chunksProcessed.has(chunk)) {
                 chunksProcessed.add(chunk);
                 if (!filterChunkFn || filterChunkFn(chunk)) {
@@ -29,16 +36,13 @@ function getModuleInGraph(chunk, filterFn, filterChunkFn) {
                 }
             }
         }
-        for (const child of chunkGroup.childrenIterable) {
+        for (const child of (chunkGroup as any).childrenIterable) {
             queue.add(child);
         }
     }
     return modules;
 }
 
-function hasStylableModuleInGraph(chunk) {
+export function hasStylableModuleInGraph(chunk: webpack.compilation.Chunk) {
     return getModuleInGraph(chunk, m => (m.type === 'stylable' ? earlyReturn : false)).size !== 0;
 }
-
-exports.hasStylableModuleInGraph = hasStylableModuleInGraph;
-exports.getModuleInGraph = getModuleInGraph;

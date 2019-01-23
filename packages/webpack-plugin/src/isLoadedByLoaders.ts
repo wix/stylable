@@ -1,4 +1,6 @@
-function isLoadedByLoaders(module, warn) {
+import { StylableModule } from './types';
+
+export function isLoadedByLoaders(module: StylableModule, warn: (m: StylableModule) => void) {
     let isRawOnly = false;
     if (module.loaders.length === 0) {
         return false;
@@ -14,4 +16,3 @@ function isLoadedByLoaders(module, warn) {
     module.type = 'stylable-raw';
     return true;
 }
-exports.isLoadedByLoaders = isLoadedByLoaders;

@@ -1,10 +1,13 @@
-const path = require('path');
+import path from 'path';
+import webpack from 'webpack';
+import { CalcResult, StylableModule } from './types';
 
-function calculateModuleDepthAndShallowStylableDependencies(
-    module,
-    cssDependencies = [],
-    path = [],
-    cache = new Map()
+
+export function calculateModuleDepthAndShallowStylableDependencies(
+    module: StylableModule,
+    cssDependencies: StylableModule[] = [],
+    path: StylableModule[] = [],
+    cache = new Map<StylableModule, CalcResult>()
 ) {
     const cachedResults = cache.get(module);
     if (cachedResults) {
@@ -23,10 +26,11 @@ function calculateModuleDepthAndShallowStylableDependencies(
 
     // max(CSS deep)
     if (dependencies) {
-        const stylableModulesDepth = dependencies
+        const stylableModulesDepth = (dependencies
             .map(dep => dep.module)
-            .filter(Boolean)
-            .map(getDependenciesModuleDepth(path, cssDependencies, module, cache));
+            .filter(Boolean) as StylableModule[]).map(
+            getDependenciesModuleDepth(path, cssDependencies, module, cache)
+        );
         cssDepth = stylableModulesDepth.length ? Math.max(...stylableModulesDepth) : 0;
     }
 
@@ -55,8 +59,13 @@ function calculateModuleDepthAndShallowStylableDependencies(
     return result;
 }
 
-function getDependenciesModuleDepth(path, cssDependencies, module, cache) {
-    return dependencyModule => {
+function getDependenciesModuleDepth(
+    path: StylableModule[] = [],
+    cssDependencies: StylableModule[] = [],
+    module: StylableModule,
+    cache = new Map<StylableModule, CalcResult>()
+) {
+    return (dependencyModule: StylableModule) => {
         if (path.includes(dependencyModule)) {
             return 0;
         }
@@ -74,7 +83,7 @@ function getDependenciesModuleDepth(path, cssDependencies, module, cache) {
     };
 }
 
-function getCSSComponentLogicModule(stylableModule) {
+export function getCSSComponentLogicModule(stylableModule: StylableModule) {
     const name = stylableModule.resource.replace(/\.st\.css$/, '');
 
     const views = stylableModule.reasons
@@ -83,7 +92,7 @@ function getCSSComponentLogicModule(stylableModule) {
                 _module &&
                 _module.type !== 'stylable' &&
                 _module.resource &&
-                _module.resource.slice(0, -path.extname(_module.resource).length) === name
+                _module.resource.slice(0, -1 * path.extname(_module.resource).length) === name
             );
         })
         .map(({ module }) => module);
@@ -98,12 +107,17 @@ function getCSSComponentLogicModule(stylableModule) {
     return views[0];
 }
 
-function getDeepCSSDependencies(m, onlyUsed = true, deps = new Set(), origin = m) {
+export function getDeepCSSDependencies(
+    m: StylableModule,
+    onlyUsed = true,
+    deps = new Set<StylableModule>(),
+    origin = m
+) {
     if (!deps.has(m)) {
         m.buildInfo.runtimeInfo.cssDependencies.forEach(dep => {
             if (origin !== dep) {
                 getDeepCSSDependencies(dep, onlyUsed, deps, origin);
-                if(onlyUsed && !dep.buildInfo.isImportedByNonStylable) {
+                if (onlyUsed && !dep.buildInfo.isImportedByNonStylable) {
                     return;
                 }
                 deps.add(dep);
@@ -113,9 +127,11 @@ function getDeepCSSDependencies(m, onlyUsed = true, deps = new Set(), origin = m
     return deps;
 }
 
-function getStylableModulesFromDependencies(dependencies) {
-    const modules = [];
-    dependencies.forEach(({module}) => {
+export function getStylableModulesFromDependencies(
+    dependencies: Array<{ module: StylableModule }>
+) {
+    const modules: StylableModule[] = [];
+    dependencies.forEach(({ module }) => {
         if (module.type === 'stylable') {
             modules.push(module);
         }
@@ -123,9 +139,9 @@ function getStylableModulesFromDependencies(dependencies) {
     return modules;
 }
 
-function getStylableModulesFromCompilation(compilation) {
-    const modules = [];
-    compilation.modules.forEach((module) => {
+export function getStylableModulesFromCompilation(compilation: webpack.compilation.Compilation) {
+    const modules: StylableModule[] = [];
+    compilation.modules.forEach(module => {
         if (module.type === 'stylable') {
             modules.push(module);
         }
@@ -133,29 +149,34 @@ function getStylableModulesFromCompilation(compilation) {
     return modules;
 }
 
-function findStylableComponents(stylableModules) {
+export function findStylableComponents(stylableModules: StylableModule[]) {
     return stylableModules
         .map(m => {
-            return {logicModule: getCSSComponentLogicModule(m), stylableModule: m};
+            return { logicModule: getCSSComponentLogicModule(m), stylableModule: m };
         })
-        .filter(({logicModule})=>logicModule);
+        .filter(({ logicModule }) => logicModule);
 }
 
-function sortedStylableModulesByDepth(modules) {
+export function sortedStylableModulesByDepth(modules: StylableModule[]) {
     modules.sort((a, b) => a.buildInfo.runtimeInfo.depth - b.buildInfo.runtimeInfo.depth);
     return modules;
 }
 
-function renderStaticCSS(modules, mainTemplate, hash, filter = Boolean) {
+export function renderStaticCSS(
+    modules: any,
+    mainTemplate: any,
+    hash: any,
+    filter: (item: any) => boolean = Boolean
+): string[] {
     const modulesByDepth = sortedStylableModulesByDepth(modules.filter(filter));
     const cssSources = modulesByDepth.map(module => {
         const publicPath = mainTemplate.getPublicPath({
             hash
         });
-        return module.generator.toCSS(module, assetModule => {
+        return (module as any).generator.toCSS(module, (assetModule: any) => {
             const source = assetModule.originalSource().source();
             const getStaticPath = new Function(
-                ['__webpack_public_path__'],
+                '__webpack_public_path__',
                 'var module = {}; return ' + source
             );
             return JSON.stringify(getStaticPath(publicPath));
@@ -163,12 +184,3 @@ function renderStaticCSS(modules, mainTemplate, hash, filter = Boolean) {
     });
     return cssSources;
 }
-
-exports.getDeepCSSDependencies = getDeepCSSDependencies;
-exports.findStylableComponents = findStylableComponents;
-exports.getStylableModulesFromCompilation = getStylableModulesFromCompilation;
-exports.renderStaticCSS = renderStaticCSS;
-exports.sortedStylableModulesByDepth = sortedStylableModulesByDepth;
-exports.getStylableModulesFromDependencies = getStylableModulesFromDependencies;
-exports.getCSSComponentLogicModule = getCSSComponentLogicModule;
-exports.calculateModuleDepthAndShallowStylableDependencies = calculateModuleDepthAndShallowStylableDependencies;
