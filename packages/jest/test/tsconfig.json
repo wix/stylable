@@ -1,8 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "include": [
-    "src"
-  ],
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
     "target": "es2017",

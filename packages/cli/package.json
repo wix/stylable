@@ -9,8 +9,10 @@
   },
   "scripts": {
     "clean": "rimraf ./cjs",
-    "build": "ts-build src --cjs",
-    "lint": "tslint -p src",
+    "build": "ts-build ./src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
     "prepack": "yarn build"
   },
@@ -26,7 +28,8 @@
   },
   "files": [
     "cjs",
-    "src"
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"
