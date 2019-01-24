@@ -1,36 +1,36 @@
-const { EOL } = require('os');
-const { RawSource } = require('webpack-sources');
-const { Stylable } = require('@stylable/core');
-const { resolveNamespace } = require('@stylable/node');
-const { StylableOptimizer } = require('@stylable/core/cjs/optimizer/stylable-optimizer');
-const findConfig = require('find-config');
-const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
-const { isImportedByNonStylable } = require('./utils');
-const {
-    calculateModuleDepthAndShallowStylableDependencies,
-    renderStaticCSS
-} = require('./stylable-module-helpers');
-const { normalizeOptions } = require('./PluginOptions');
-const { StylableBootstrapModule } = require('./StylableBootstrapModule');
-const StylableParser = require('./StylableParser');
-const StylableGenerator = require('./StylableGenerator');
-const { getModuleInGraph, hasStylableModuleInGraph } = require('./getModuleInGraph');
-const { StylableImportDependency, StylableAssetDependency } = require('./StylableDependencies');
-const {
-    StyleableAutoInitDependency,
-    StyleableAutoInitDependencyTemplate
-} = require('./StyleableAutoInitDependency');
-const MultiModule = require('webpack/lib/MultiModule');
-const { RUNTIME_SOURCE, WEBPACK_STYLABLE } = require('./runtime-dependencies');
+import { Stylable } from '@stylable/core';
+import { resolveNamespace } from '@stylable/node';
+import { StylableOptimizer } from '@stylable/optimizer';
+import { EOL } from 'os';
+import webpack from 'webpack';
+import { RawSource } from 'webpack-sources';
+import { getModuleInGraph, hasStylableModuleInGraph } from './getModuleInGraph';
+import { normalizeOptions } from './PluginOptions';
+import { RUNTIME_SOURCE, WEBPACK_STYLABLE } from './runtime-dependencies';
+import { calculateModuleDepthAndShallowStylableDependencies, renderStaticCSS } from './stylable-module-helpers';
+import { StylableBootstrapModule } from './StylableBootstrapModule';
+import { StylableAssetDependency, StylableImportDependency } from './StylableDependencies';
+import { StylableGenerator } from './StylableGenerator';
+import { StylableParser } from './StylableParser';
+import { StyleableAutoInitDependency, StyleableAutoInitDependencyTemplate } from './StyleableAutoInitDependency';
+import { CalcResult, ShallowPartial, StylableModule, StylableWebpackPluginOptions } from './types';
+import { isImportedByNonStylable } from './utils';
 
-class StylableWebpackPlugin {
-    constructor(options = {}) {
+const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
+const findConfig = require('find-config');
+const MultiModule = require('webpack/lib/MultiModule');
+
+export class StylableWebpackPlugin {
+    public stylable!: Stylable;
+    public options!: StylableWebpackPluginOptions;
+    private userOptions: ShallowPartial<StylableWebpackPluginOptions>;
+
+    constructor(options: ShallowPartial<StylableWebpackPluginOptions> = {}) {
         this.userOptions = options;
-        this.options = null;
     }
-    apply(compiler) {
+    public apply(compiler: webpack.Compiler) {
         this.normalizeOptions(compiler.options.mode);
-        this.overrideOptionsWithLocalConfig(compiler.context);
+        this.overrideOptionsWithLocalConfig((compiler as any).context);
         this.createStylable(compiler);
         this.injectStylableModuleRuleSet(compiler);
         this.injectStylableCompilation(compiler);
@@ -39,10 +39,10 @@ class StylableWebpackPlugin {
         this.injectChunkOptimizer(compiler);
         this.injectPlugins(compiler);
     }
-    normalizeOptions(mode) {
+    public normalizeOptions(mode?: webpack.Configuration['mode']) {
         this.options = normalizeOptions(this.userOptions, mode);
     }
-    overrideOptionsWithLocalConfig(context) {
+    public overrideOptionsWithLocalConfig(context: string) {
         let fullOptions = this.options;
         const localConfig = this.loadLocalStylableConfig(context);
         if (localConfig && localConfig.options) {
@@ -50,7 +50,9 @@ class StylableWebpackPlugin {
         }
         this.options = fullOptions;
     }
-    loadLocalStylableConfig(dir) {
+    public loadLocalStylableConfig(
+        dir: string
+    ): undefined | { options: (o: Partial<StylableWebpackPluginOptions>) => StylableWebpackPluginOptions } {
         let localConfigOverride;
         try {
             localConfigOverride = findConfig.require('stylable.config', { cwd: dir });
@@ -59,18 +61,18 @@ class StylableWebpackPlugin {
         }
         return localConfigOverride;
     }
-    createStylable(compiler) {
+    public createStylable(compiler: webpack.Compiler) {
         const stylable = new Stylable(
-            compiler.context,
-            compiler.inputFileSystem,
+            (compiler as any).context,
+            compiler.inputFileSystem as any,
             this.options.requireModule,
             '--',
             meta => {
                 // TODO: move to stylable as param.
                 if (this.options.optimize.shortNamespaces) {
-                    meta.namespace = stylable.optimizer.namespaceOptimizer.getNamespace(
+                    meta.namespace = stylable.optimizer!.namespaceOptimizer.getNamespace(
                         meta,
-                        compiler.context,
+                        (compiler as any).context,
                         stylable
                     );
                 }
@@ -80,19 +82,19 @@ class StylableWebpackPlugin {
             this.options.transformHooks,
             compiler.options.resolve,
             this.options.optimizer || new StylableOptimizer(),
-            compiler.options.mode,
+            compiler.options.mode as any,
             this.options.resolveNamespace || resolveNamespace
         );
         this.stylable = stylable;
     }
-    injectPlugins(compiler) {
-        this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
+    public injectPlugins(compiler: webpack.Compiler) {
+        this.options.plugins!.forEach(plugin => plugin.call(compiler, this));
     }
-    injectStylableRuntimeInfo(compiler) {
+    public injectStylableRuntimeInfo(compiler: webpack.Compiler) {
         compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
             compilation.hooks.optimizeModules.tap(StylableWebpackPlugin.name, modules => {
-                const cache = new WeakMap();
-                modules.forEach(module => {
+                const cache = new WeakMap<StylableModule, CalcResult>();
+                modules.forEach((module: any) => {
                     if (module.type === 'stylable') {
                         module.buildInfo.runtimeInfo = calculateModuleDepthAndShallowStylableDependencies(
                             module,
@@ -107,7 +109,7 @@ class StylableWebpackPlugin {
         });
         this.injectStylableCSSOptimizer(compiler);
     }
-    injectChunkOptimizer(compiler) {
+    public injectChunkOptimizer(compiler: webpack.Compiler) {
         if (this.options.optimizeStylableModulesPerChunks) {
             compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, compilation => {
                 compilation.hooks.afterOptimizeChunkIds.tap(StylableWebpackPlugin.name, chunks => {
@@ -116,12 +118,12 @@ class StylableWebpackPlugin {
             });
         }
     }
-    injectStylableCSSOptimizer(compiler) {
+    public injectStylableCSSOptimizer(compiler: webpack.Compiler) {
         compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
-            const used = [];
-            const usageMapping = {};
+            const used: StylableModule[] = [];
+            const usageMapping: Record<string, boolean> = {};
             compilation.hooks.optimizeModules.tap(StylableWebpackPlugin.name, modules => {
-                modules.forEach(module => {
+                (modules as StylableModule[]).forEach(module => {
                     if (module.type === 'stylable' && module.buildInfo.stylableMeta) {
                         module.buildInfo.optimize = this.options.optimize;
                         module.buildInfo.usageMapping = usageMapping;
@@ -136,7 +138,7 @@ class StylableWebpackPlugin {
                             compilation.warnings.push(
                                 new Error(
                                     `Duplicate module namespace: ${
-                                        module.buildInfo.stylableMeta.namespace
+                                    module.buildInfo.stylableMeta.namespace
                                     } from ${module.resource}`
                                 )
                             );
@@ -148,12 +150,12 @@ class StylableWebpackPlugin {
             });
         });
     }
-    injectStylableRuntimeChunk(compiler) {
-        compiler.hooks.compilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
+    public injectStylableRuntimeChunk(compiler: webpack.Compiler) {
+        compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
             if (this.options.useEntryModuleInjection) {
                 compilation.dependencyTemplates.set(
-                    StyleableAutoInitDependency,
-                    new StyleableAutoInitDependencyTemplate()
+                    StyleableAutoInitDependency as any,
+                    new StyleableAutoInitDependencyTemplate() as any
                 );
                 compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
                     chunks.forEach(chunk => this.injectInitToEntryModule(chunk, compilation));
@@ -164,7 +166,7 @@ class StylableWebpackPlugin {
             this.injectRuntimeSource(compiler, compilation);
         });
 
-        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation, data) => {
+        compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, compilation => {
             compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
                 this.applyDeprecatedProcess(chunks, compiler, compilation);
             });
@@ -178,7 +180,11 @@ class StylableWebpackPlugin {
             }
         });
     }
-    applyDeprecatedProcess(chunks, compiler, compilation) {
+    public applyDeprecatedProcess(
+        chunks: webpack.compilation.Chunk[],
+        compiler: webpack.Compiler,
+        compilation: webpack.compilation.Compilation
+    ) {
         const containStylableModules = chunks.some(chunk => hasStylableModuleInGraph(chunk));
 
         if (!containStylableModules) {
@@ -189,33 +195,33 @@ class StylableWebpackPlugin {
             return;
         }
         if (this.options.createRuntimeChunk) {
-            const extractedStylableChunk = compilation.addChunk('stylable-css-runtime');
+            const extractedStylableChunk = (compilation as any).addChunk('stylable-css-runtime');
             const extractedBootstrap = new StylableBootstrapModule(
-                compiler.context,
+                (compiler as any).context,
                 extractedStylableChunk,
                 null,
                 this.options.bootstrap
             );
             chunksBootstraps.forEach(bootstrap => {
-                bootstrap.chunk.split(extractedStylableChunk);
+                bootstrap.chunk!.split(extractedStylableChunk);
                 bootstrap.dependencies.forEach(dep => {
                     extractedBootstrap.dependencies.push(dep);
-                    bootstrap.chunk.moveModule(dep.module, extractedStylableChunk);
+                    bootstrap.chunk!.moveModule(dep.module, extractedStylableChunk);
                 });
             });
-            compilation.addModule(extractedBootstrap);
+            (compilation.addModule as any)(extractedBootstrap);
             connectChunkAndModule(extractedStylableChunk, extractedBootstrap);
             extractedStylableChunk.entryModule = extractedBootstrap;
             extractedStylableChunk.stylableBootstrap = extractedBootstrap;
         } else {
             chunksBootstraps.forEach(bootstrap => {
-                bootstrap.chunk.stylableBootstrap = bootstrap;
+                (bootstrap.chunk as any).stylableBootstrap = bootstrap;
             });
         }
     }
-    optimizeChunks(chunks) {
+    public optimizeChunks(chunks: webpack.compilation.Chunk[]) {
         chunks.forEach(chunk => {
-            const stModules = Array.from(chunk.modulesIterable).filter(m => {
+            const stModules: StylableModule[] = Array.from(chunk.modulesIterable).filter(m => {
                 return m.type === 'stylable';
             });
 
@@ -228,7 +234,7 @@ class StylableWebpackPlugin {
                     }
                 });
                 if (!shouldKeep) {
-                    if (m.chunksIterable.size === 1) {
+                    if ((m as any).chunksIterable.size === 1) {
                         if (m.buildInfo.isImportedByNonStylable) {
                             return;
                         }
@@ -238,7 +244,7 @@ class StylableWebpackPlugin {
             });
         });
     }
-    createChunkCSSBundle(chunk, compilation) {
+    public createChunkCSSBundle(chunk: webpack.compilation.Chunk, compilation: webpack.compilation.Compilation) {
         if (this.options.includeDynamicModulesInCSS) {
             const stModules = getModuleInGraph(chunk, module => module.type === 'stylable');
             if (stModules.size !== 0) {
@@ -257,7 +263,7 @@ class StylableWebpackPlugin {
                 chunk.files.push(cssBundleFilename);
             }
         } else {
-            const bootstrap = chunk.stylableBootstrap;
+            const bootstrap: StylableBootstrapModule = (chunk as any).stylableBootstrap;
             if (bootstrap) {
                 const cssSources = bootstrap.renderStaticCSS(
                     compilation.mainTemplate,
@@ -272,9 +278,9 @@ class StylableWebpackPlugin {
             }
         }
     }
-    createBootstrapModule(compiler, chunk) {
+    public createBootstrapModule(compiler: webpack.Compiler, chunk: webpack.compilation.Chunk) {
         const bootstrap = new StylableBootstrapModule(
-            compiler.context,
+            (compiler as any).context,
             chunk,
             null,
             this.options.bootstrap
@@ -286,12 +292,12 @@ class StylableWebpackPlugin {
         }
         return bootstrap;
     }
-    injectStylableCompilation(compiler) {
+    public injectStylableCompilation(compiler: webpack.Compiler) {
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
-                compilation.dependencyFactories.set(StylableImportDependency, normalModuleFactory);
-                compilation.dependencyFactories.set(StylableAssetDependency, normalModuleFactory);
+                compilation.dependencyFactories.set(StylableImportDependency as any, normalModuleFactory);
+                compilation.dependencyFactories.set(StylableAssetDependency as any, normalModuleFactory);
                 normalModuleFactory.hooks.createParser
                     .for('stylable')
                     .tap(StylableWebpackPlugin.name, () => {
@@ -313,8 +319,8 @@ class StylableWebpackPlugin {
             }
         );
     }
-    injectStylableModuleRuleSet(compiler) {
-        compiler.hooks.normalModuleFactory.tap(StylableWebpackPlugin.name, factory => {
+    public injectStylableModuleRuleSet(compiler: webpack.Compiler) {
+        compiler.hooks.normalModuleFactory.tap(StylableWebpackPlugin.name, (factory: any) => {
             factory.ruleSet.rules.push(
                 factory.ruleSet.constructor.normalizeRule(
                     {
@@ -330,10 +336,10 @@ class StylableWebpackPlugin {
             );
         });
     }
-    injectRuntimeCodeToMainTemplate(compiler, compilation) {
-        compilation.mainTemplate.hooks.beforeStartup.tap(
+    public injectRuntimeCodeToMainTemplate(compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
+        (compilation.mainTemplate as any).hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
-            (source, chunk) => {
+            (source: string, chunk: webpack.compilation.Chunk) => {
                 if (!hasStylableModuleInGraph(chunk) || this.options.bootstrap.autoInit === false) {
                     return source;
                 }
@@ -347,13 +353,13 @@ class StylableWebpackPlugin {
                 );
 
                 const bootstrap = new StylableBootstrapModule(
-                    compiler.context,
+                    (compiler as any).context,
                     null,
                     null,
                     this.options.bootstrap
                 );
 
-                if (!compilation.options.optimization.runtimeChunk) {
+                if (!(compilation as any).options.optimization.runtimeChunk) {
                     for (const module of stModules) {
                         if (module.type === 'stylable') {
                             bootstrap.addStylableModuleDependency(module);
@@ -365,10 +371,10 @@ class StylableWebpackPlugin {
             }
         );
     }
-    injectRuntimeSource(compiler, compilation) {
-        compilation.mainTemplate.hooks.beforeStartup.tap(
+    public injectRuntimeSource(_compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
+        (compilation.mainTemplate as any).hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
-            (source, chunk) => {
+            (source: string, chunk: webpack.compilation.Chunk) => {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
@@ -376,14 +382,14 @@ class StylableWebpackPlugin {
             }
         );
     }
-    injectInitToEntryModule(chunk, compilation) {
+    public injectInitToEntryModule(chunk: webpack.compilation.Chunk, compilation: webpack.compilation.Compilation) {
         if (
             chunk.hasEntryModule() &&
             hasStylableModuleInGraph(chunk) &&
             this.options.bootstrap.autoInit
         ) {
-            const last = _ => _[_.length - 1];
-            const getEntryModule = () => {
+            const last = <T>(_: T[]): any => _[_.length - 1];
+            const getEntryModule = (): webpack.Module => {
                 return chunk.entryModule instanceof MultiModule
                     ? last(chunk.entryModule.dependencies).module
                     : chunk.entryModule;
@@ -393,7 +399,7 @@ class StylableWebpackPlugin {
                 : getEntryModule();
 
             const injected = injectModule.dependencies.find(
-                dep => dep instanceof StyleableAutoInitDependency
+                (dep: webpack.compilation.Dependency) => dep instanceof StyleableAutoInitDependency
             );
             if (injected) {
                 return;
@@ -402,5 +408,3 @@ class StylableWebpackPlugin {
         }
     }
 }
-
-module.exports = StylableWebpackPlugin;

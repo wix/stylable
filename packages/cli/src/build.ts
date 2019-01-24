@@ -4,10 +4,6 @@ import { dirname, join, relative, resolve } from 'path';
 import { Generator } from './default-generator';
 import { FileSystem, findFiles } from './find-files';
 
-// const StylableWebpackPlugin = require('@stylable/webpack-plugin');
-// const dt = require('dependency-tree');
-// const webpack = require('webpack');
-
 export interface BuildOptions {
     extension: string;
     fs: FileSystem;

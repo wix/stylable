@@ -2,12 +2,13 @@ import path from 'path';
 import webpack from 'webpack';
 import { CalcResult, StylableModule } from './types';
 
+type MultiMap<K extends object, V> = Map<K, V> | WeakMap<K, V>;
 
 export function calculateModuleDepthAndShallowStylableDependencies(
     module: StylableModule,
     cssDependencies: StylableModule[] = [],
     path: StylableModule[] = [],
-    cache = new Map<StylableModule, CalcResult>()
+    cache: MultiMap<StylableModule, CalcResult> = new Map()
 ) {
     const cachedResults = cache.get(module);
     if (cachedResults) {
@@ -29,8 +30,8 @@ export function calculateModuleDepthAndShallowStylableDependencies(
         const stylableModulesDepth = (dependencies
             .map(dep => dep.module)
             .filter(Boolean) as StylableModule[]).map(
-            getDependenciesModuleDepth(path, cssDependencies, module, cache)
-        );
+                getDependenciesModuleDepth(path, cssDependencies, module, cache)
+            );
         cssDepth = stylableModulesDepth.length ? Math.max(...stylableModulesDepth) : 0;
     }
 
@@ -63,7 +64,7 @@ function getDependenciesModuleDepth(
     path: StylableModule[] = [],
     cssDependencies: StylableModule[] = [],
     module: StylableModule,
-    cache = new Map<StylableModule, CalcResult>()
+    cache: MultiMap<StylableModule, CalcResult> = new Map()
 ) {
     return (dependencyModule: StylableModule) => {
         if (path.includes(dependencyModule)) {
@@ -100,7 +101,7 @@ export function getCSSComponentLogicModule(stylableModule: StylableModule) {
     if (set.size > 1) {
         throw new Error(
             `Stylable Component Conflict:\n ${
-                stylableModule.resource
+            stylableModule.resource
             } has multiple components entries [${Array.from(set).map(m => m.resource)}] `
         );
     }

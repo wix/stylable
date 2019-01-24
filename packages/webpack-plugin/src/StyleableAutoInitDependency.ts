@@ -1,11 +1,13 @@
+import { WEBPACK_STYLABLE } from './runtime-dependencies';
+
 const Dependency = require('webpack/lib/Dependency');
-const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
 
 export class StyleableAutoInitDependency extends Dependency {
-    private range = 0;
-    private type = 'StyleableAutoInitDependency';
-    private requireWebpackRequire = true;
-    constructor(private module: any, private globalInjection: (code: string) => string) {
+    public range = 0;
+    public requireWebpackRequire = true;
+    public type = 'StyleableAutoInitDependency';
+
+    constructor(public module: any, public globalInjection?: (code: string) => string) {
         super();
     }
     public updateHash(hash: any) {

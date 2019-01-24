@@ -1,11 +1,12 @@
-import { StylableWebpackPluginOptions } from './types';
+import webpack from 'webpack';
+import { ShallowPartial, StylableWebpackPluginOptions } from './types';
 
 export function normalizeOptions(
-    options: StylableWebpackPluginOptions,
-    mode: 'development' | 'production'
-) {
+    options: ShallowPartial<StylableWebpackPluginOptions>,
+    mode: webpack.Configuration['mode']
+): StylableWebpackPluginOptions {
     const isProd = mode === 'production';
-    const defaults = {
+    const defaults: StylableWebpackPluginOptions = {
         requireModule: (id: string) => {
             delete require.cache[id];
             return require(id);
@@ -14,8 +15,8 @@ export function normalizeOptions(
         resolveNamespace: undefined,
         createRuntimeChunk: false,
         filename: '[name].bundle.css',
-        outputCSS: isProd ? true : false,
-        includeCSSInJS: isProd ? false : true,
+        outputCSS: isProd,
+        includeCSSInJS: !isProd,
         useWeakDeps: true,
         bootstrap: {
             autoInit: true,
@@ -30,12 +31,12 @@ export function normalizeOptions(
         optimizer: undefined,
         optimize: {
             removeUnusedComponents: true,
-            removeComments: isProd ? true : false,
+            removeComments: isProd,
             removeStylableDirectives: true,
-            classNameOptimizations: isProd ? true : false,
-            shortNamespaces: isProd ? true : false,
-            removeEmptyNodes: isProd ? true : false,
-            minify: isProd ? true : false,
+            classNameOptimizations: isProd,
+            shortNamespaces: isProd,
+            removeEmptyNodes: isProd,
+            minify: isProd,
             ...options.optimize
         },
         unsafeMuteDiagnostics: {
@@ -55,5 +56,5 @@ export function normalizeOptions(
         bootstrap: defaults.bootstrap,
         generate: defaults.generate,
         unsafeMuteDiagnostics: defaults.unsafeMuteDiagnostics
-    };
+    } as any;
 }

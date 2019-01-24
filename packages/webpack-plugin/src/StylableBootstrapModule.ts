@@ -1,34 +1,29 @@
-const { EOL } = require('os');
+import { EOL } from 'os';
+import webpack from 'webpack';
+import { RawSource } from 'webpack-sources';
+import { WEBPACK_STYLABLE } from './runtime-dependencies';
+import { getStylableModulesFromDependencies, renderStaticCSS } from './stylable-module-helpers';
+import { StylableImportDependency } from './StylableDependencies';
+import { StylableModule, StylableWebpackPluginOptions } from './types';
 const Module = require('webpack/lib/Module');
-const RawSource = require('webpack-sources').RawSource;
-const { StylableImportDependency } = require('./StylableDependencies');
-const {
-    renderStaticCSS,
-    getStylableModulesFromDependencies
-} = require('./stylable-module-helpers');
-const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
 
-class StylableBootstrapModule extends Module {
+export class StylableBootstrapModule extends Module {
     constructor(
-        context,
-        chunk,
-        runtimeRenderer,
-        options = {
+        context: any,
+        public chunk: webpack.compilation.Chunk | null,
+        public runtimeRenderer: any,
+        private options: StylableWebpackPluginOptions['bootstrap'] = {
             autoInit: true,
-            globalInjection(symbol) {
+            globalInjection(symbol: string) {
                 return `window.__stylable_renderer__ = ${symbol}`;
             }
         },
-        dependencies = [],
+        public dependencies: StylableImportDependency[] = [],
         name = 'stylable-bootstrap-module',
         type = 'stylable-bootstrap'
     ) {
         super('javascript/auto', context);
-        this.chunk = chunk;
-        this.runtimeRenderer = runtimeRenderer;
-        this.options = options;
         // from plugin
-        this.dependencies = dependencies;
         this.name = name;
         this.type = type;
         this.built = true;
@@ -38,20 +33,19 @@ class StylableBootstrapModule extends Module {
         this.usedExports = [];
     }
 
-    identifier() {
+    public identifier() {
         return `stylable-bootstrap ${this.name}`;
     }
 
-    readableIdentifier() {
+    public readableIdentifier() {
         return this.identifier();
     }
 
-    build(options, compilation, resolver, fs, callback) {
+    public build(_options: any, _compilation: any, _resolver: any, _fs: any, callback: any) {
         return callback();
     }
-    source(m, runtimeTemplate) {
-        const entry = [];
-        const imports = [];
+    public source(_m: any, runtimeTemplate: any) {
+        const imports: string[] = [];
         this.dependencies.forEach(dependency => {
             const id = runtimeTemplate.moduleId({
                 module: dependency.module,
@@ -60,7 +54,7 @@ class StylableBootstrapModule extends Module {
             imports.push(`__webpack_require__(${id});`);
         });
 
-        let renderingCode = [];
+        const renderingCode = [];
         if (this.options.autoInit) {
             if (this.options.globalInjection) {
                 renderingCode.push(this.options.globalInjection(`${WEBPACK_STYLABLE}.$`));
@@ -77,18 +71,18 @@ class StylableBootstrapModule extends Module {
         return this.__source;
     }
 
-    needRebuild() {
+    public needRebuild() {
         return false;
     }
 
-    size() {
+    public size() {
         return this.__source ? this.__source.size() : 1;
     }
-    updateHash(hash) {
+    public updateHash(hash: any) {
         hash.update(this.identifier());
         super.updateHash(hash || '');
     }
-    addStylableModuleDependency(module) {
+    public addStylableModuleDependency(module: StylableModule) {
         const dep = new StylableImportDependency(module.request, {
             defaultImport: `style_${this.dependencies.length}`,
             names: []
@@ -96,7 +90,7 @@ class StylableBootstrapModule extends Module {
         dep.module = module;
         this.dependencies.push(dep);
     }
-    renderStaticCSS(mainTemplate, hash, filter = Boolean) {
+    public renderStaticCSS(mainTemplate: any, hash: any, filter = Boolean) {
         return renderStaticCSS(
             getStylableModulesFromDependencies(this.dependencies),
             mainTemplate,
@@ -105,5 +99,3 @@ class StylableBootstrapModule extends Module {
         );
     }
 }
-
-module.exports.StylableBootstrapModule = StylableBootstrapModule;

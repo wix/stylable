@@ -1,37 +1,40 @@
-const { EOL } = require('os');
-const path = require('path');
-const { ReplaceSource, OriginalSource } = require('webpack-sources');
-const { StylableImportDependency } = require('./StylableDependencies');
-const { WEBPACK_STYLABLE } = require('./runtime-dependencies');
-const { processDeclarationUrls, makeAbsolute, isAsset } = require('@stylable/core');
+import { isAsset, makeAbsolute, processDeclarationUrls, Stylable, StylableMeta } from '@stylable/core';
+import { EOL } from 'os';
+import path from 'path';
+import postcss from 'postcss';
+import webpack from 'webpack';
+import { OriginalSource, ReplaceSource } from 'webpack-sources';
+import { WEBPACK_STYLABLE } from './runtime-dependencies';
+import { StylableModule, StylableWebpackPluginOptions } from './types';
 
-class StylableGenerator {
-    constructor(stylable, compilation, options) {
-        this.stylable = stylable;
-        this.compilation = compilation;
-        this.options = options;
-    }
-    generate(module, dependencyTemplates, runtimeTemplate) {
+export class StylableGenerator {
+    constructor(
+        private stylable: Stylable,
+        private compilation: webpack.compilation.Compilation,
+        private options: Partial<StylableWebpackPluginOptions>
+    ) { }
+
+    public generate(module: StylableModule, _dependencyTemplates: any, runtimeTemplate: any) {
         if (module.type === 'stylable-raw' || !module.buildInfo.stylableMeta) {
             return module.originalSource();
         }
         const { meta, exports } = this.transform(module);
         const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
-        const imports = []
+        const imports: string[] = [];
 
         const css = this.options.includeCSSInJS
             ? this.getCSSInJSWithAssets(
-                  meta.outputAst,
-                  module =>
-                      `" + __webpack_require__(${runtimeTemplate.moduleId({
-                          module,
-                          request: module.request
-                      })}) + "`,
-                  this.compilation.options.context,
-                  module.resource,
-                  true,
-                  module.buildInfo.optimize.minify
-              )
+                meta.outputAst!,
+                module =>
+                    `" + __webpack_require__(${runtimeTemplate.moduleId({
+                        module,
+                        request: module.request
+                    })}) + "`,
+                (this.compilation as any).options.context,
+                module.resource,
+                true,
+                module.buildInfo.optimize.minify
+            )
             : `""`;
 
         this.reportDiagnostics(meta);
@@ -44,27 +47,29 @@ class StylableGenerator {
 
         const originalSource = isImportedByNonStylable
             ? this.createModuleSource(module, imports, 'create', [
-                  JSON.stringify(meta.root),
-                  JSON.stringify(meta.namespace),
-                  JSON.stringify(exports),
-                  css,
-                  depth,
-                  id
-              ])
+                JSON.stringify(meta.root),
+                JSON.stringify(meta.namespace),
+                JSON.stringify(exports),
+                css,
+                depth,
+                id
+            ])
             : this.createModuleSource(module, imports, 'createTheme', [css, depth, id]);
         return new ReplaceSource(originalSource);
     }
-    transform(module) {
+    public transform(module: StylableModule) {
 
         const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
         const outputAst = results.meta.outputAst;
 
-        this.stylable.optimizer.optimize(
-            module.buildInfo.optimize,
-            results,
-            this.stylable.delimiter,
-            module.buildInfo.usageMapping
-        );
+        if (this.stylable.optimizer) {
+            this.stylable.optimizer.optimize(
+                module.buildInfo.optimize,
+                results,
+                this.stylable.delimiter,
+                module.buildInfo.usageMapping
+            );
+        }
 
         if (this.options.afterTransform) {
             this.options.afterTransform(results, module, this.stylable);
@@ -72,18 +77,18 @@ class StylableGenerator {
 
         return results;
     }
-    toCSS(module, onAsset) {
+    public toCSS(module: StylableModule, onAsset: (module: StylableModule) => string) {
         const { meta } = this.transform(module);
         return this.getCSSInJSWithAssets(
-            meta.outputAst,
+            meta.outputAst!,
             onAsset,
-            this.compilation.options.context,
+            (this.compilation as any).options.context,
             module.resource,
             false,
             module.buildInfo.optimize.minify
         );
     }
-    reportDiagnostics(meta) {
+    public reportDiagnostics(meta: StylableMeta) {
         const transformReports = meta.transformDiagnostics ? meta.transformDiagnostics.reports : [];
         meta.diagnostics.reports.concat(transformReports).forEach(report => {
             if (report.node) {
@@ -98,7 +103,7 @@ class StylableGenerator {
             }
         });
     }
-    createModuleSource(module, imports, createMethod, args) {
+    public createModuleSource(module: StylableModule, imports: string[], _createMethod: any, args: string[]) {
         return new OriginalSource(
             [
                 `Object.defineProperty(${module.exportsArgument}, "__esModule", { value: true })`,
@@ -121,10 +126,17 @@ class StylableGenerator {
             module.resource
         );
     }
-    getCSSInJSWithAssets(outputAst, onAsset, root, moduleResource, asJS, minify) {
-        const replacements = [];
+    public getCSSInJSWithAssets(
+        outputAst: postcss.Root,
+        onAsset: (module: StylableModule) => string,
+        root: string,
+        moduleResource: string,
+        asJS: boolean,
+        minify: boolean
+    ) {
+        const replacements: StylableModule[] = [];
         const moduleDir = path.dirname(moduleResource);
-        const onUrl = node => {
+        const onUrl = (node: any) => {
             if (isAsset(node.url)) {
                 const resourcePath = makeAbsolute(node.url, root, moduleDir);
                 const module = this.compilation.modules.find(_ => _.resource === resourcePath);
@@ -139,21 +151,20 @@ class StylableGenerator {
         };
         outputAst.walkDecls(decl => processDeclarationUrls(decl, onUrl, true));
         let targetCSS = outputAst.toString();
-        if (minify) {
+        if (minify && this.stylable.optimizer) {
             targetCSS = this.stylable.optimizer.minifyCSS(targetCSS);
         }
         const css = asJS ? JSON.stringify(targetCSS) : targetCSS;
 
-        return css.replace(/__css_asset_placeholder__(.*?)__/g, ($0, $1) => {
-            return onAsset(replacements[$1]); //`" + __webpack_require__(${replacements[$1]}) + "`;
+        return css.replace(/__css_asset_placeholder__(.*?)__/g, (_$0, $1) => {
+            return onAsset(replacements[$1]); // `" + __webpack_require__(${replacements[$1]}) + "`;
         });
     }
-    rewriteUrl(node, replacementIndex) {
+
+    public rewriteUrl(node: any, replacementIndex: number) {
         node.stringType = '';
         delete node.innerSpacingBefore;
         delete node.innerSpacingAfter;
         node.url = `__css_asset_placeholder__${replacementIndex}__`;
     }
 }
-
-module.exports = StylableGenerator;

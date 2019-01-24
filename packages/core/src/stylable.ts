@@ -63,7 +63,7 @@ export class Stylable {
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
         protected resolveOptions: any = {},
-        protected optimizer?: StylableOptimizer,
+        public optimizer?: StylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
