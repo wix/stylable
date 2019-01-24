@@ -30,9 +30,6 @@
     "postcss-value-parser": "^3.3.1",
     "url-regex": "^4.1.1"
   },
-  "devDependencies": {
-    "@stylable/runtime": "^1.0.2"
-  },
   "files": [
     "cjs",
     "src",

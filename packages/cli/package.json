@@ -23,9 +23,6 @@
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^12.0.5"
   },
-  "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.1.5"
-  },
   "files": [
     "cjs",
     "src",

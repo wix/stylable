@@ -23,9 +23,6 @@
     "find-config": "^1.0.0",
     "webpack-sources": "^1.3.0"
   },
-  "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.1.5"
-  },
   "files": [
     "src"
   ],
