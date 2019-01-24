@@ -1,11 +1,10 @@
+import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
 import { expect } from 'chai';
-import { Diagnostics, safeParse, StylableResults } from '../../src/index';
-import { process, StylableMeta } from '../../src/stylable-processor';
 import { Config, generateFromMock } from './generate-test-util';
 const deindent = require('deindent');
 
 export interface Diagnostic {
-    severity?: 'warning'|'error';
+    severity?: 'warning' | 'error';
     message: string;
     file: string;
     skipLocationCheck?: boolean;
@@ -51,7 +50,9 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
 
     res.diagnostics.reports.forEach((report, i) => {
         const expectedWarning = warnings[i];
-        if (expectedWarning.skip) { return; }
+        if (expectedWarning.skip) {
+            return;
+        }
 
         expect(report.message).to.equal(expectedWarning.message);
         expect(report.node.source!.start, 'start').to.eql(source.start);
@@ -62,15 +63,20 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
         if (expectedWarning.severity) {
             expect(
                 report.type,
-                `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`)
-            .to.equal(expectedWarning.severity);
+                `diagnostics severity mismatch, expected "${
+                    expectedWarning.severity
+                }" but received "${report.type}"`
+            ).to.equal(expectedWarning.severity);
         }
     });
 
     expect(res.diagnostics.reports.length, 'diagnostics reports match').to.equal(warnings.length);
 }
 
-export function expectWarningsFromTransform(config: Config, warnings: Diagnostic[]): StylableResults {
+export function expectWarningsFromTransform(
+    config: Config,
+    warnings: Diagnostic[]
+): StylableResults {
     config.trimWS = false;
 
     const locations: any = {};
@@ -97,8 +103,10 @@ export function expectWarningsFromTransform(config: Config, warnings: Diagnostic
         if (expectedWarning.severity) {
             expect(
                 report.type,
-                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`)
-            .to.equal(expectedWarning.severity);
+                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${
+                    report.type
+                }`
+            ).to.equal(expectedWarning.severity);
         }
     });
     expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
@@ -109,11 +117,16 @@ export function expectWarningsFromTransform(config: Config, warnings: Diagnostic
 export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiagnostics = true) {
     const processReports = meta.diagnostics.reports;
 
-    expect(processReports.length, `processing diagnostics: ${processReports.map(r => r.message)}`).to.equal(0);
+    expect(
+        processReports.length,
+        `processing diagnostics: ${processReports.map(r => r.message)}`
+    ).to.equal(0);
     if (meta.transformDiagnostics && checkTransformDiagnostics) {
         const transformerReports = meta.transformDiagnostics.reports;
 
-        expect(transformerReports.length,
-            `transforming diagnostics: ${transformerReports.map(r => r.message)}`).to.equal(0);
+        expect(
+            transformerReports.length,
+            `transforming diagnostics: ${transformerReports.map(r => r.message)}`
+        ).to.equal(0);
     }
 }

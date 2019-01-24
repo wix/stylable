@@ -1,6 +1,5 @@
+import { parseSelector, Pojo, stringifySelector, traverseNode } from '@stylable/core';
 import * as postcss from 'postcss';
-import { parseSelector, stringifySelector, traverseNode } from '../selector-utils';
-import { Pojo } from '../types';
 
 export class StylableClassNameOptimizer {
     public context: { names: Pojo<string> };

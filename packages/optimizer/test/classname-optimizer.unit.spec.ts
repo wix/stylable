@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { parse } from 'postcss';
-import { StylableClassNameOptimizer } from '../src/optimizer/classname-optimizer';
+import { StylableClassNameOptimizer } from '../src';
 
 describe('StylableClassNameOptimizer  Unit', () => {
     it('should give unique names to classes and rewrite exports', () => {

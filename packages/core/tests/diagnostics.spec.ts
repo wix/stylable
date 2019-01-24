@@ -1,3 +1,9 @@
+import {
+    expectWarnings,
+    expectWarningsFromTransform,
+    findTestLocations
+} from '@stylable/core-test-kit';
+import { Config } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
@@ -10,12 +16,6 @@ import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
 import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
-import {
-    expectWarnings,
-    expectWarningsFromTransform,
-    findTestLocations
-} from './utils/diagnostics';
-import { Config } from './utils/generate-test-util';
 
 describe('findTestLocations', () => {
 

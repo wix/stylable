@@ -1,5 +1,4 @@
-import { StylableMeta } from '../stylable-processor';
-import { Pojo } from '../types';
+import { Pojo, StylableMeta } from '@stylable/core';
 
 export class StylableNamespaceOptimizer {
     public index: number;

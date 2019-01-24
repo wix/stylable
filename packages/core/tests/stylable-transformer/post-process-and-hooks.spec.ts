@@ -1,7 +1,7 @@
+import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import * as path from '../../src/path';
-import { createTransformer } from '../utils/generate-test-util';
 
 describe('post-process-and-hooks', () => {
 

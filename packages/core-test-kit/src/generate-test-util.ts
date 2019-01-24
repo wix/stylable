@@ -1,14 +1,21 @@
+import {
+    cachedProcessFile,
+    createMinimalFS,
+    Diagnostics,
+    FileProcessor,
+    isAbsolute,
+    Pojo,
+    postProcessor,
+    process,
+    processNamespace,
+    replaceValueHook,
+    Stylable,
+    StylableMeta,
+    StylableResolver,
+    StylableResults,
+    StylableTransformer
+} from '@stylable/core';
 import * as postcss from 'postcss';
-import { cachedProcessFile, FileProcessor } from '../../src/cached-process-file';
-import { Diagnostics } from '../../src/diagnostics';
-import { createMinimalFS } from '../../src/memory-minimal-fs';
-import { isAbsolute } from '../../src/path';
-import { Stylable } from '../../src/stylable';
-import { process, processNamespace, StylableMeta } from '../../src/stylable-processor';
-import { StylableResolver } from '../../src/stylable-resolver';
-import { postProcessor, replaceValueHook, StylableResults, StylableTransformer } from '../../src/stylable-transformer';
-
-import { Pojo } from '../../src/types';
 
 export interface File {
     content: string;
@@ -33,16 +40,25 @@ export interface Config {
 
 export type RequireType = (path: string) => any;
 
-export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = new Diagnostics()): {
-    resolver: StylableResolver, requireModule: RequireType, fileProcessor: FileProcessor<StylableMeta>
+export function generateInfra(
+    config: InfraConfig,
+    diagnostics: Diagnostics = new Diagnostics()
+): {
+    resolver: StylableResolver;
+    requireModule: RequireType;
+    fileProcessor: FileProcessor<StylableMeta>;
 } {
     const { fs, requireModule } = createMinimalFS(config);
 
-    const fileProcessor = cachedProcessFile<StylableMeta>((from, content) => {
-        const meta = process(postcss.parse(content, { from }), diagnostics);
-        meta.namespace = config.files[from].namespace || meta.namespace;
-        return meta;
-    }, fs, x => x);
+    const fileProcessor = cachedProcessFile<StylableMeta>(
+        (from, content) => {
+            const meta = process(postcss.parse(content, { from }), diagnostics);
+            meta.namespace = config.files[from].namespace || meta.namespace;
+            return meta;
+        },
+        fs,
+        x => x
+    );
 
     const resolver = new StylableResolver(fileProcessor, requireModule);
 
@@ -52,8 +68,9 @@ export function generateInfra(config: InfraConfig, diagnostics: Diagnostics = ne
 export function createTransformer(
     config: Config,
     diagnostics: Diagnostics = new Diagnostics(),
-    replaceValueHook?: replaceValueHook, postProcessor?: postProcessor): StylableTransformer {
-
+    replaceValueHook?: replaceValueHook,
+    postProcessor?: postProcessor
+): StylableTransformer {
     const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
 
     return new StylableTransformer({
@@ -68,11 +85,17 @@ export function createTransformer(
 }
 
 export function processSource(
-    source: string, options: { from?: string } = {}, resolveNamespace?: typeof processNamespace) {
+    source: string,
+    options: { from?: string } = {},
+    resolveNamespace?: typeof processNamespace
+) {
     return process(postcss.parse(source, options), undefined, resolveNamespace);
 }
 
-export function generateFromMock(config: Config, diagnostics: Diagnostics = new Diagnostics()): StylableResults {
+export function generateFromMock(
+    config: Config,
+    diagnostics: Diagnostics = new Diagnostics()
+): StylableResults {
     if (!isAbsolute(config.entry || '')) {
         throw new Error('entry must be absolute path: ' + config.entry);
     }
@@ -85,13 +108,17 @@ export function generateFromMock(config: Config, diagnostics: Diagnostics = new 
     return result;
 }
 
-export function createProcess(fileProcessor: FileProcessor<StylableMeta>): (path: string) => StylableMeta {
+export function createProcess(
+    fileProcessor: FileProcessor<StylableMeta>
+): (path: string) => StylableMeta {
     return (path: string) => fileProcessor.process(path);
 }
 
 /* LEGACY */
 export function createTransform(
-    fileProcessor: FileProcessor<StylableMeta>, requireModule: RequireType): (meta: StylableMeta) => StylableMeta {
+    fileProcessor: FileProcessor<StylableMeta>,
+    requireModule: RequireType
+): (meta: StylableMeta) => StylableMeta {
     return (meta: StylableMeta) => {
         return new StylableTransformer({
             fileProcessor,
@@ -119,10 +146,19 @@ export function createStylableInstance(config: Config) {
 
     const { fs, requireModule } = createMinimalFS(config);
 
-    const stylable = new Stylable('/', fs as any, requireModule, '--', (meta, path) => {
-        meta.namespace = config.files[path].namespace || meta.namespace;
-        return meta;
-    }, undefined, undefined, config.resolve);
+    const stylable = new Stylable(
+        '/',
+        fs as any,
+        requireModule,
+        '--',
+        (meta, path) => {
+            meta.namespace = config.files[path].namespace || meta.namespace;
+            return meta;
+        },
+        undefined,
+        undefined,
+        config.resolve
+    );
 
     return stylable;
 }

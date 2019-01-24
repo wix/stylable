@@ -1,7 +1,7 @@
+import { createStylableInstance } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { removeCommentNodes, StylableOptimizer } from '../src/optimizer/stylable-optimizer';
-import { createStylableInstance } from './utils/generate-test-util';
+import { removeCommentNodes, StylableOptimizer } from '../src/';
 const deindent = require('deindent');
 describe('StylableOptimizer', () => {
     it('removeComments', () => {

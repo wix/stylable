@@ -1,4 +1,4 @@
-import { flatMatch } from '@stylable/core/tests/matchers/flat-match';
+import { flatMatch } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import * as path from 'path';
 import { extractSchema } from '../src';
