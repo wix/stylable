@@ -10,7 +10,7 @@
     "build": "lerna run build --stream",
     "pretest": "yarn lint",
     "lint": "lerna run lint --stream --parallel",
-    "test": "mocha -r @ts-tools/node/r \"packages/**/test?(s)/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors"
+    "test": "mocha -r @ts-tools/node/r \"packages/**/test?(s)/**/*.spec.ts?(x)\" --timeout 10000 --watch-extensions ts,tsx --colors"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.1.7",
