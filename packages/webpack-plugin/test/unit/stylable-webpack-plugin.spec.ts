@@ -8,7 +8,7 @@ describe('StylableWebpackPlugin Unit', () => {
             public loadLocalStylableConfig(context: string) {
                 expect(context, 'lookup context').to.equal('.');
                 return {
-                    options(options) {
+                    options(options: any) {
                         expect(options.test, 'top level option').to.equal(true);
                         return {...options, fromConfig: true};
                     }
