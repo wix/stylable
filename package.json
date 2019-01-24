@@ -8,7 +8,7 @@
     "prepare": "yarn workspace @stylable/runtime build",
     "clean": "lerna run clean --stream --parallel",
     "build": "lerna run build --stream",
-    "pretest2": "yarn lint",
+    "pretest": "yarn lint",
     "lint": "lerna run lint --stream --parallel",
     "test": "lerna run test --stream --parallel -- --colors"
   },
