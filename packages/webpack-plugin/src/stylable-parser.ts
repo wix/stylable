@@ -1,8 +1,8 @@
 import { Imported, isAsset, makeAbsolute, Stylable } from '@stylable/core';
 import path from 'path';
 import webpack from 'webpack';
-import { isLoadedByLoaders } from './isLoadedByLoaders';
-import { StylableAssetDependency, StylableExportsDependency, StylableImportDependency } from './StylableDependencies';
+import { isLoadedByLoaders } from './is-loaded-by-loaders';
+import { StylableAssetDependency, StylableExportsDependency, StylableImportDependency } from './stylable-dependencies';
 
 const stylableExtension = /\.st\.css$/;
 
