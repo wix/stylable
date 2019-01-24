@@ -10,7 +10,7 @@
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint -p ./src",
     "lint:test": "tslint -p ./test",
-    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 5000"
   },
   "dependencies": {
     "@stylable/core": "^1.0.2",
