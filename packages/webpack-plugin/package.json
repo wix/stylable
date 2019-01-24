@@ -2,9 +2,16 @@
   "name": "@stylable/webpack-plugin",
   "version": "1.0.5",
   "description": "Webpack (4.x) plugin for Stylable modules",
-  "main": "src/index.js",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
   "scripts": {
-    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.[tj]s?(x)\" --watch-extensions js,ts,tsx --timeout 10000"
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 10000",
+    "prepack": "yarn build"
   },
   "peerDependencies": {
     "@stylable/core": "^1.0.0",
