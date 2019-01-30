@@ -35,10 +35,11 @@ export function create(
             : {};
     }
 
-    function styleObjectToString(this: CSSVarMappingRuntimeType): string {
-        return Object.keys(this).reduce((res: string, cssVar: string) => {
-            if (cssVar.startsWith('--')) {
-                res += `${cssVar}: ${this[cssVar]}; `;
+    function declarationToString(this: CSSVarMappingRuntimeType): string {
+        return Object.keys(this).reduce((res: string, prop: string) => {
+            const value = this[prop];
+            if (typeof value === 'string') {
+                res += `${prop}: ${value}; `;
             }
 
             return res;
@@ -47,13 +48,15 @@ export function create(
 
     function cssVars(cssVarsMapping: CSSVarMap) {
         const res: CSSVarMappingRuntimeType = {
-            toString: styleObjectToString
+            toString: declarationToString
         };
 
         return Object.keys(cssVarsMapping).reduce(
-            (res: CSSVarMap, cssVar: string) => {
-                if (cssVar.startsWith('--') && locals[cssVar]) {
-                    res[locals[cssVar] as string] = cssVarsMapping[cssVar];
+            (res: CSSVarMap, propName: string) => {
+                if (propName.startsWith('--') && locals[propName]) {
+                    res[locals[propName] as string] = cssVarsMapping[propName];
+                } else {
+                    res[propName] = cssVarsMapping[propName];
                 }
 
                 return res;
