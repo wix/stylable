@@ -372,7 +372,17 @@ class StylableWebpackPlugin {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
-                return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                if (this.options.singleGlobalRuntime) {
+                    const { id, inject } = this.options.singleGlobalRuntime;
+                    const globalObj = compilation.outputOptions.globalObject;
+                    if (inject) {
+                        return `${RUNTIME_SOURCE};\n${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
+                    } else {
+                        return `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
+                    }
+                } else {
+                    return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                }
             }
         );
     }

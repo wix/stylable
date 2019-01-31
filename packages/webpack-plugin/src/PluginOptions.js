@@ -12,12 +12,14 @@
       outputCSS: isProd ? true : false,
       includeCSSInJS: isProd ? false : true,
       useWeakDeps: true,
+      singleGlobalRuntime: false,
       bootstrap: {
         autoInit: true,
         getAutoInitModule: undefined,
         ...options.bootstrap
       },
       generate: {
+        stylesheetId: 'module',
         afterTransform: null,
         ...options.generate
       },
