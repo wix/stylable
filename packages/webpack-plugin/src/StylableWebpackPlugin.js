@@ -372,16 +372,19 @@ class StylableWebpackPlugin {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
-                if (this.options.singleGlobalRuntime) {
-                    const { id, inject } = this.options.singleGlobalRuntime;
-                    const globalObj = compilation.outputOptions.globalObject;
-                    if (inject) {
-                        return `${RUNTIME_SOURCE};\n${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
-                    } else {
-                        return `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
-                    }
-                } else {
+
+                if (this.options.runtimeMode === 'isolated') {
                     return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                } else {
+                    const id = this.options.globalRuntimeId;
+                    const globalObj = compilation.outputOptions.globalObject;
+                    const injected = `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
+                    if (this.options.runtimeMode === 'shared') {
+                        return `${RUNTIME_SOURCE};\n${injected}`;
+                    } else {
+                        // external
+                        return injected;
+                    }
                 }
             }
         );

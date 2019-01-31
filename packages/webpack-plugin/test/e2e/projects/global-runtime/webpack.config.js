@@ -10,9 +10,6 @@ module.exports = {
     main2: './src/index2.js'
   },
   plugins: [new StylableWebpackPlugin({
-    singleGlobalRuntime: {
-      id: 'stylable',
-      inject: true
-    }
+    runtimeMode: 'shared'
   }), new HtmlWebpackPlugin()]
 };

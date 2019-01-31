@@ -12,14 +12,15 @@
       outputCSS: isProd ? true : false,
       includeCSSInJS: isProd ? false : true,
       useWeakDeps: true,
-      singleGlobalRuntime: false,
+      runtimeMode: 'isolated', // 'shared, external'
+      globalRuntimeId: '__stylable__',
       bootstrap: {
         autoInit: true,
         getAutoInitModule: undefined,
         ...options.bootstrap
       },
       generate: {
-        stylesheetId: 'module',
+        runtimeStylesheetId: 'module', // 'namespace'
         afterTransform: null,
         ...options.generate
       },

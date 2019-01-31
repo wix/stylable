@@ -38,7 +38,7 @@ class StylableGenerator {
 
         const depth = module.buildInfo.runtimeInfo.depth;
         const id =
-            this.options.stylesheetId === 'namespace'
+            this.options.runtimeStylesheetId === 'namespace'
                 ? JSON.stringify(module.buildInfo.stylableMeta.namespace)
                 : runtimeTemplate.moduleId({
                       module,

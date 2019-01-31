@@ -5,7 +5,7 @@ div.dataset.name = 'index'
 div.classList.add(index.root);
 
 div.textContent = JSON.stringify(
-    window.stylable.$.getStyles([index.$id]).map(x => x.__proto__),
+    window.__stylable__.$.getStyles([index.$id]).map(x => x.__proto__),
     null,
     4
 );
