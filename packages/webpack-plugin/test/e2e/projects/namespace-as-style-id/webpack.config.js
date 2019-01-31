@@ -8,7 +8,7 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             generate: {
-                stylesheetId: 'namespace'
+                runtimeStylesheetId: 'namespace'
             }
         }),
         new HtmlWebpackPlugin()
