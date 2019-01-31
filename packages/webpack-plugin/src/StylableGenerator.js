@@ -17,7 +17,7 @@ class StylableGenerator {
         }
         const { meta, exports } = this.transform(module);
         const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
-        const imports = []
+        const imports = [];
 
         const css = this.options.includeCSSInJS
             ? this.getCSSInJSWithAssets(
@@ -37,10 +37,13 @@ class StylableGenerator {
         this.reportDiagnostics(meta);
 
         const depth = module.buildInfo.runtimeInfo.depth;
-        const id = runtimeTemplate.moduleId({
-            module,
-            request: module.request
-        });
+        const id =
+            this.options.runtimeStylesheetId === 'namespace'
+                ? JSON.stringify(module.buildInfo.stylableMeta.namespace)
+                : runtimeTemplate.moduleId({
+                      module,
+                      request: module.request
+                  });
 
         const originalSource = isImportedByNonStylable
             ? this.createModuleSource(module, imports, 'create', [
@@ -55,7 +58,6 @@ class StylableGenerator {
         return new ReplaceSource(originalSource);
     }
     transform(module) {
-
         const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
         const outputAst = results.meta.outputAst;
 
