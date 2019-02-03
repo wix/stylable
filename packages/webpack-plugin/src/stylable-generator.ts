@@ -5,13 +5,13 @@ import postcss from 'postcss';
 import webpack from 'webpack';
 import { OriginalSource, ReplaceSource } from 'webpack-sources';
 import { WEBPACK_STYLABLE } from './runtime-dependencies';
-import { StylableModule, StylableWebpackPluginOptions } from './types';
+import { StylableGeneratorOptions, StylableModule } from './types';
 
 export class StylableGenerator {
     constructor(
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
-        private options: Partial<StylableWebpackPluginOptions>
+        private options: Partial<StylableGeneratorOptions>
     ) { }
 
     public generate(module: StylableModule, _dependencyTemplates: any, runtimeTemplate: any) {
@@ -40,10 +40,13 @@ export class StylableGenerator {
         this.reportDiagnostics(meta);
 
         const depth = module.buildInfo.runtimeInfo.depth;
-        const id = runtimeTemplate.moduleId({
-            module,
-            request: module.request
-        });
+        const id =
+            this.options.runtimeStylesheetId === 'namespace'
+                ? JSON.stringify(module.buildInfo.stylableMeta.namespace)
+                : runtimeTemplate.moduleId({
+                      module,
+                      request: module.request
+                  });
 
         const originalSource = isImportedByNonStylable
             ? this.createModuleSource(module, imports, 'create', [
@@ -149,7 +152,7 @@ export class StylableGenerator {
                 }
             }
         };
-        outputAst.walkDecls(decl => processDeclarationUrls(decl, onUrl, true));
+        outputAst.walkDecls((decl: postcss.Declaration) => processDeclarationUrls(decl, onUrl, true));
         let targetCSS = outputAst.toString();
         if (minify && this.stylable.optimizer) {
             targetCSS = this.stylable.optimizer.minifyCSS(targetCSS);

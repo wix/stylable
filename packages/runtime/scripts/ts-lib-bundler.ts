@@ -6,14 +6,15 @@ interface Options {
     name: string;
     entry: string;
     includeEntry?: boolean;
+    header?: string;
 }
 
-export function bundle({ name, entry, includeEntry }: Options) {
+export function bundle({ name, entry, includeEntry, header }: Options) {
     const files = getBundleFilesFromEntry(entry, includeEntry);
     console.log('bundling files\n', files);
     const res = bundleFiles(name, files);
     console.log('done bundling.');
-    return res;
+    return header ? `${header}\n${res}` : res;
 }
 
 export function useModule(outModule: string, libExports: string[]) {
@@ -65,7 +66,7 @@ function bundleFiles(name: string, files: string[]) {
             });
 
             return res.outputText
-                ? `(function(){/*source: ${basename(filePath)}*/\n${res.outputText}}());`
+                ? `(function(){/* source: ${basename(filePath)} */\n${res.outputText}}());`
                 : '';
         })
         .join('\n');

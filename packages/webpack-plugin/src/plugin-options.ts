@@ -18,12 +18,15 @@ export function normalizeOptions(
         outputCSS: isProd,
         includeCSSInJS: !isProd,
         useWeakDeps: true,
+        runtimeMode: 'isolated', // 'shared, external'
+        globalRuntimeId: '__stylable__',
         bootstrap: {
             autoInit: true,
             getAutoInitModule: undefined,
             ...options.bootstrap
         },
         generate: {
+            runtimeStylesheetId: 'module', // 'namespace'
             afterTransform: null,
             ...options.generate
         },

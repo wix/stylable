@@ -378,7 +378,21 @@ export class StylableWebpackPlugin {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
-                return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+
+                if (this.options.runtimeMode === 'isolated') {
+                    return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                } else {
+                    const id = this.options.globalRuntimeId;
+                    const globalObj = compilation.outputOptions.globalObject;
+                    // tslint:disable-next-line:max-line-length
+                    const injected = `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
+                    if (this.options.runtimeMode === 'shared') {
+                        return `${RUNTIME_SOURCE};\n${injected}`;
+                    } else {
+                        // external
+                        return injected;
+                    }
+                }
             }
         );
     }

@@ -10,7 +10,7 @@
     "@stylable/webpack-plugin": "^1.0.5",
     "@ts-tools/webpack-loader": "^0.8.4",
     "bfj": "^6.1.1",
-    "case-sensitive-paths-webpack-plugin": "^2.1.2",
+    "case-sensitive-paths-webpack-plugin": "^2.2.0",
     "chalk": "^2.4.2",
     "dotenv": "^6.2.0",
     "dotenv-expand": "^4.2.0",
@@ -29,7 +29,7 @@
     "workbox-webpack-plugin": "^3.6.3"
   },
   "optionalDependencies": {
-    "fsevents": "^2.0.1"
+    "fsevents": "^1.2.7"
   },
   "files": [
     "bin",

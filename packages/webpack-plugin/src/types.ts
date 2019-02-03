@@ -12,12 +12,15 @@ export interface StylableWebpackPluginOptions {
     useEntryModuleInjection: boolean;
     transformHooks?: TransformHooks;
     experimentalHMR: boolean;
+    runtimeMode: 'isolated' | 'shared' | 'external';
+    globalRuntimeId: string;
     bootstrap: {
         autoInit: boolean,
         getAutoInitModule?: any;
-        globalInjection?: (p: string) => string
+        globalInjection?: (p: string) => string;
     };
     generate: {
+        runtimeStylesheetId: 'module' | 'namespace';
         afterTransform: any;
     };
     optimizer?: StylableOptimizer;
@@ -38,6 +41,13 @@ export interface StylableWebpackPluginOptions {
     plugins?: Array<(this: webpack.Compiler, ...p: any[]) => void>;
     resolveNamespace?(): string;
     requireModule(path: string): any;
+}
+
+export interface StylableGeneratorOptions {
+    includeCSSInJS: boolean;
+    experimentalHMR: boolean;
+    runtimeStylesheetId: 'module' | 'namespace';
+    afterTransform: any;
 }
 
 export type ShallowPartial<T> = {[P in keyof T]?: T[P] extends new() => any ? T[P] : Partial<T[P]>};
