@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CSS for Components",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -30,7 +30,7 @@
     "url-regex": "^4.1.1"
   },
   "devDependencies": {
-    "@stylable/runtime": "^1.0.2"
+    "@stylable/runtime": "^1.0.3"
   },
   "files": [
     "dist",
