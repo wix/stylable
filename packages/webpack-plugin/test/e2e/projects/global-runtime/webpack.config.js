@@ -1,10 +1,15 @@
 const StylableWebpackPlugin = require("../../../../src");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-require('@ts-tools/node/r');
 
 module.exports = {
   mode: "development",
   context: __dirname,
   devtool: "source-map",
-  plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()]
+  entry: {
+    main: './src/index.js',
+    main2: './src/index2.js'
+  },
+  plugins: [new StylableWebpackPlugin({
+    runtimeMode: 'shared'
+  }), new HtmlWebpackPlugin()]
 };

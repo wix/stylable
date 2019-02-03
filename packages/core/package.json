@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CSS for Components",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -9,7 +9,7 @@
     "start": "webpack-dev-server --hot --inline",
     "clean": "rimraf ./dist",
     "test": "yarn test:node",
-    "test:node": "mocha -r @ts-tools/node \"./tests/**/*.spec.ts\" --watch-extensions ts",
+    "test:node": "mocha -r @ts-tools/node/r \"./tests/**/*.spec.ts\" --watch-extensions ts",
     "lint": "tslint --project ./tsconfig.json",
     "prepack": "yarn build"
   },
@@ -21,7 +21,7 @@
     "is-vendor-prefixed": "^1.0.0",
     "lodash.clonedeep": "^4.5.0",
     "murmurhash": "^0.0.2",
-    "postcss": "^7.0.11",
+    "postcss": "^7.0.14",
     "postcss-js": "^2.0.0",
     "postcss-nested": "^4.1.1",
     "postcss-safe-parser": "^4.0.1",
@@ -30,7 +30,7 @@
     "url-regex": "^4.1.1"
   },
   "devDependencies": {
-    "@stylable/runtime": "^1.0.2"
+    "@stylable/runtime": "^1.0.3"
   },
   "files": [
     "dist",

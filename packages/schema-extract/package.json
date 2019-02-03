@@ -1,6 +1,6 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -11,11 +11,11 @@
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint -p src",
     "lint:test": "tslint -p test",
-    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^1.0.2"
+    "@stylable/core": "^1.0.3"
   },
   "files": [
     "cjs",

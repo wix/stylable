@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,10 +8,10 @@
     "clean": "rimraf ./dist",
     "build": "tsc",
     "lint": "tslint --project .",
-    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/core": "^1.0.2",
+    "@stylable/core": "^1.0.3",
     "find-config": "^1.0.0",
     "murmurhash": "^0.0.2"
   },

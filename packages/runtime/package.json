@@ -1,13 +1,13 @@
 {
   "name": "@stylable/runtime",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Stylable runtime DOM integration",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs & yarn build:lib",
-    "build:lib": "node -r @ts-tools/node ./scripts/build-runtime.ts",
+    "build:lib": "node -r @ts-tools/node/r ./scripts/build-runtime.ts",
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint -p src",
     "lint:test": "tslint -p test",
