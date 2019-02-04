@@ -11,7 +11,7 @@
     "clean": "rimraf ./cjs",
     "build": "ts-build src --cjs",
     "lint": "tslint -p src",
-    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 10000",
     "prepack": "yarn build"
   },
   "dependencies": {
