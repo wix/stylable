@@ -3,7 +3,8 @@ language: node_js
 os:
   - linux
   - osx
-  - windows
+  # Windows on Travis gets stuck after running tests, even if they pass
+  # - windows
 
 node_js:
   - 11 # current

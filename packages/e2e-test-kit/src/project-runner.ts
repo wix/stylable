@@ -16,14 +16,15 @@ export interface Options {
   configName?: string;
 }
 
+type MochaHook = import('mocha').HookFunction;
 const rimraf = promisify(rimrafCallback);
 
 export class ProjectRunner {
-  // tslint:disable-next-line:ban-types
-  public static mochaSetup(runnerOptions: Options, before: Function, afterEach: Function, after: Function) {
+  public static mochaSetup(runnerOptions: Options, before: MochaHook, afterEach: MochaHook, after: MochaHook) {
     const projectRunner = new this(runnerOptions);
 
-    before('bundle and serve project', async () => {
+    before('bundle and serve project', async function() {
+      this.timeout(40000);
       await projectRunner.bundle();
       await projectRunner.serve();
     });
