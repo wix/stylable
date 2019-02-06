@@ -96,6 +96,7 @@ export class ProjectRunner {
     );
     const { httpServer, port } = await safeListeningHttpServer(this.port, app);
     this.port = port;
+    this.serverUrl = `http://localhost:${port}`;
     this.server = httpServer;
   }
 
