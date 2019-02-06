@@ -2,15 +2,16 @@
   "name": "@stylable/core",
   "version": "1.0.3",
   "description": "CSS for Components",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./tests",
+    "test": "mocha -r @ts-tools/node/r \"./tests/**/*.spec.ts\" --watch-extensions ts",
     "start": "webpack-dev-server --hot --inline",
-    "clean": "rimraf ./dist",
-    "test": "yarn test:node",
-    "test:node": "mocha -r @ts-tools/node/r \"./tests/**/*.spec.ts\" --watch-extensions ts",
-    "lint": "tslint --project ./tsconfig.json",
     "prepack": "yarn build"
   },
   "dependencies": {
@@ -29,12 +30,10 @@
     "postcss-value-parser": "^3.3.1",
     "url-regex": "^4.1.1"
   },
-  "devDependencies": {
-    "@stylable/runtime": "^1.0.3"
-  },
   "files": [
-    "dist",
+    "cjs",
     "src",
+    "!src/tsconfig.json",
     "test-utils.js",
     "test-utils.d.ts"
   ],

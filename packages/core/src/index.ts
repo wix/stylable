@@ -26,6 +26,7 @@ export * from './functions';
 export * from './state-validators';
 export * from './selector-utils';
 export * from './native-reserved-lists';
+export { isAbsolute } from './path';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

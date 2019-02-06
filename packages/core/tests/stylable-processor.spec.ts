@@ -1,8 +1,7 @@
+import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
 import { resolve } from '../src/path';
 import { ImportSymbol, processNamespace, processorWarnings } from '../src/stylable-processor';
-import { flatMatch } from './matchers/flat-match';
-import { processSource } from './utils/generate-test-util';
 
 const expect = chai.expect;
 chai.use(flatMatch);

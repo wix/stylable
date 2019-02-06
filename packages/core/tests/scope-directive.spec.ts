@@ -1,10 +1,16 @@
+import {
+    expectWarnings,
+    expectWarningsFromTransform,
+    flatMatch,
+    generateStylableResult,
+    processSource,
+    shouldReportNoDiagnostics
+    } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
 import { processorWarnings } from '../src';
 import { transformerWarnings } from '../src/stylable-transformer';
-import { flatMatch } from './matchers/flat-match';
-import { expectWarnings, expectWarningsFromTransform, shouldReportNoDiagnostics } from './utils/diagnostics';
-import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
+// import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 use(flatMatch);
 

@@ -1,12 +1,11 @@
+import { expectWarnings, expectWarningsFromTransform } from '@stylable/core-test-kit';
+import { generateStylableResult, processSource } from '@stylable/core-test-kit';
+import { flatMatch, mediaQuery, styleRules } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import chaiSubset from 'chai-subset';
 import { processorWarnings, valueMapping } from '../src';
 import { nativePseudoClasses } from '../src/native-reserved-lists';
 import { stateErrors } from '../src/pseudo-states';
-import { flatMatch } from './matchers/flat-match';
-import { mediaQuery, styleRules } from './matchers/results';
-import { expectWarnings, expectWarningsFromTransform } from './utils/diagnostics';
-import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 use(chaiSubset); // move all of these to a central place
 use(styleRules);

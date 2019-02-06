@@ -1,0 +1,36 @@
+{
+  "name": "@stylable/optimizer",
+  "version": "1.0.0",
+  "description": "Stylable core optimizer",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
+    "test": "mocha -r @ts-tools/node/r \"./test/**/*.spec.ts\" --watch-extensions ts",
+    "start": "webpack-dev-server --hot --inline",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@stylable/core": "^1.0.2",
+    "postcss": "^7.0.14"
+  },
+  "files": [
+    "cjs",
+    "src",
+    "!src/tsconfig.json"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/optimizer",
+  "homepage": "https://stylable.io",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

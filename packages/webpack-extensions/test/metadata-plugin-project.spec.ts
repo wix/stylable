@@ -9,7 +9,6 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            port: 3001,
             puppeteerOptions: {
                 // headless: false
             }
@@ -96,7 +95,6 @@ describe(`(${project})`, () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                port: 3003,
                 puppeteerOptions: {
                     // headless: false
                 },
@@ -120,7 +118,6 @@ describe(`(${project})`, () => {
         const projectRunnerAmdStatic = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                port: 3004,
                 puppeteerOptions: {
                     // headless: false
                 },
@@ -144,7 +141,6 @@ describe(`(${project})`, () => {
         const projectRunnerAmdFactory = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                port: 3005,
                 puppeteerOptions: {
                     // headless: false
                 },

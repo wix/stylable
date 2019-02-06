@@ -9,8 +9,10 @@
   },
   "scripts": {
     "clean": "rimraf ./cjs",
-    "build": "ts-build src --cjs",
-    "lint": "tslint -p src",
+    "build": "ts-build ./src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 10000",
     "prepack": "yarn build"
   },
@@ -21,12 +23,10 @@
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^12.0.5"
   },
-  "devDependencies": {
-    "@stylable/e2e-test-kit": "^1.1.6"
-  },
   "files": [
     "cjs",
-    "src"
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"

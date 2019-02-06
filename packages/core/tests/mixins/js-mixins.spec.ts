@@ -1,11 +1,11 @@
 /* tslint:disable:max-line-length */
-import { expect } from 'chai';
-import * as postcss from 'postcss';
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration
-} from '../utils/test-utils';
+} from '@stylable/core-test-kit';
+import { expect } from 'chai';
+import * as postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('simple mixin', () => {

@@ -1,10 +1,10 @@
+import { expectWarningsFromTransform } from '@stylable/core-test-kit';
+import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
 import * as path from '../src/path';
-import { expectWarningsFromTransform } from './utils/diagnostics';
-import { generateStylableRoot } from './utils/generate-test-util';
 
 describe('Stylable functions (native, formatter and variable)', () => {
     describe('transform', () => {

@@ -3,14 +3,11 @@
   "version": "1.1.6",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "types": "cjs/index.d.ts",
   "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "run-p build:cjs build:esm",
-    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
-    "build:esm": "tsc --project src --outDir esm --module esnext",
-    "lint": "tslint --project src"
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "lint": "tslint -p ./src"
   },
   "dependencies": {
     "@stylable/runtime": "^1.0.3",
@@ -23,7 +20,8 @@
   },
   "files": [
     "cjs",
-    "esm"
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"

@@ -1,10 +1,10 @@
+import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 import { resolve } from '../src/path';
 import { StylableMeta } from '../src/stylable-processor';
-import { createStylableInstance, generateInfra } from './utils/generate-test-util';
 
 function createResolveExtendsResults(
     fs: MinimalFS,

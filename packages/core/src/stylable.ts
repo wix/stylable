@@ -1,7 +1,7 @@
+import { StylableOptimizer } from '@stylable/optimizer';
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
-import { StylableOptimizer } from './optimizer/stylable-optimizer';
 import { safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
@@ -63,7 +63,7 @@ export class Stylable {
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
         protected resolveOptions: any = {},
-        protected optimizer?: StylableOptimizer,
+        public optimizer?: StylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
