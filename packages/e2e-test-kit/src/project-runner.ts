@@ -1,4 +1,5 @@
 /* tslint:disable:no-unused-expression */
+import { safeListeningHttpServer } from 'create-listening-server';
 import express from 'express';
 import http from 'http';
 import { join, normalize } from 'path';
@@ -9,20 +10,21 @@ import webpack from 'webpack';
 
 export interface Options {
   projectDir: string;
-  port: number;
+  port?: number;
   puppeteerOptions: puppeteer.LaunchOptions;
   throwOnBuildError?: boolean;
   configName?: string;
 }
 
+type MochaHook = import('mocha').HookFunction;
 const rimraf = promisify(rimrafCallback);
 
 export class ProjectRunner {
-  // tslint:disable-next-line:ban-types
-  public static mochaSetup(runnerOptions: Options, before: Function, afterEach: Function, after: Function) {
+  public static mochaSetup(runnerOptions: Options, before: MochaHook, afterEach: MochaHook, after: MochaHook) {
     const projectRunner = new this(runnerOptions);
 
-    before('bundle and serve project', async () => {
+    before('bundle and serve project', async function() {
+      this.timeout(40000);
       await projectRunner.bundle();
       await projectRunner.serve();
     });
@@ -88,22 +90,14 @@ export class ProjectRunner {
   }
 
   public async serve() {
-    if (this.server) {
-      throw new Error('project server is already running in port ' + this.port);
-    }
     const app = express();
     app.use(
       express.static(this.outputDir, { cacheControl: false, etag: false })
     );
-    return new Promise((res, rej) => {
-      this.server = app.listen(this.port, (err: Error) => {
-        if (err) {
-          return rej(err);
-        }
-        res();
-      });
-      (this.server as any).close = promisify(this.server!.close);
-    });
+    const { httpServer, port } = await safeListeningHttpServer(this.port, app);
+    this.port = port;
+    this.serverUrl = `http://localhost:${port}`;
+    this.server = httpServer;
   }
 
   public async openInBrowser() {

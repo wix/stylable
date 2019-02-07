@@ -9,8 +9,8 @@
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
     "lint": "run-p lint:src lint:test",
-    "lint:src": "tslint -p src",
-    "lint:test": "tslint -p test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx",
     "prepack": "yarn build"
   },
@@ -20,7 +20,8 @@
   "files": [
     "cjs",
     "esm",
-    "src"
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"

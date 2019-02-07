@@ -1,8 +1,7 @@
+import { expectWarningsFromTransform, generateStylableResult, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { functionWarnings, processorWarnings, resolverWarnings } from '../src';
-import { expectWarningsFromTransform } from './utils/diagnostics';
-import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 describe('css custom-properties (vars)', () => {
 

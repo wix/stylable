@@ -18,7 +18,7 @@ export function bundle({ name, entry, includeEntry, header }: Options) {
 }
 
 export function useModule(outModule: string, libExports: string[]) {
-    const exportErrors = [];
+    const exportErrors: Array<string | number | symbol> = [];
     const _exports: any = new Proxy(
         {},
         {

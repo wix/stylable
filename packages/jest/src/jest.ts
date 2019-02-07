@@ -1,5 +1,5 @@
 import { stylableModuleFactory } from '@stylable/node';
-import * as fs from 'fs';
+import fs from 'fs';
 
 export const process = stylableModuleFactory(
     {

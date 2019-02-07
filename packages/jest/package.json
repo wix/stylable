@@ -2,12 +2,14 @@
   "name": "@stylable/jest",
   "version": "1.0.3",
   "description": "Test your Stylable React components using Jest",
-  "main": "dist/jest.js",
-  "types": "dist/jest.d.ts",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
   "scripts": {
-    "clean": "rimraf ./dist",
-    "build": "tsc",
-    "lint": "tslint --project .",
+    "clean": "rimraf ./cjs",
+    "build": "ts-build src --cjs",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p ./src",
+    "lint:test": "tslint -p ./test",
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
@@ -15,7 +17,9 @@
     "@stylable/runtime": "^1.0.3"
   },
   "files": [
-    "dist"
+    "cjs",
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"
