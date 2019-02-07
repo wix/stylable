@@ -1,4 +1,4 @@
-const StylableWebpackPlugin = require("@stylable/webpack-plugin");
+const StylableWebpackPlugin = require("@stylable/webpack-plugin/src");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
