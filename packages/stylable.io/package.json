@@ -6,8 +6,7 @@
   "main": "N/A",
   "scripts": {
     "deploy": "bundle install && bundle exec jekyll build && gh-pages -d ./_site",
-    "dev": "bundle exec jekyll serve",
-    "postinstall": "bundle install"
+    "dev": "bundle exec jekyll serve"
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/stylable.io",
   "license": "UNLICENSED",
