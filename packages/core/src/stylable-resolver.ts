@@ -64,7 +64,7 @@ export class StylableResolver {
     }
     public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
-            if (maybeImport && maybeImport._kind !== 'var') {
+            if (maybeImport && maybeImport._kind !== 'var' && maybeImport._kind !== 'cssVar') {
                 if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
                     maybeImport = maybeImport.alias;
                 } else if (maybeImport[valueMapping.extends]) {
@@ -127,6 +127,10 @@ export class StylableResolver {
             return isAliasOnly
                 ? this.resolveSymbolOrigin(symbol.alias, meta, path)
                 : { meta, symbol, _kind: 'css' };
+        } else if (symbol._kind === 'cssVar') {
+            if (path.indexOf(symbol) !== -1) {
+                return { meta, symbol, _kind: 'css' };
+            }
         } else if (symbol._kind === 'import') {
             const resolved = this.resolveImport(symbol);
             if (resolved && resolved.symbol && resolved._kind === 'css') {

@@ -2,351 +2,506 @@ import { generateStylableExports } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe('Exports to js', () => {
+    describe('classes', () => {
+        it('contain root exports', () => {
 
-    it('contain root exports', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: ``
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: ``
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root'
-        });
+        it('contain local class exports', () => {
 
-    });
-
-    it('contain local class exports', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        .classA {}
-                        .classB {}
-                    `
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .classA {}
+                            .classB {}
+                        `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root',
+                classA: 'entry--classA',
+                classB: 'entry--classB'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root',
-            classA: 'entry--classA',
-            classB: 'entry--classB'
-        });
+        it('not contain global class exports', () => {
 
-    });
-
-    it('not contain global class exports', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :global(.classA) {}
-                    `
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :global(.classA) {}
+                        `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root'
-        });
+        it('not contain imported class', () => {
 
-    });
-
-    it('not contain imported class', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-named: my-class;
-                        }
-                    `
-                },
-                '/imported.st.css': {
-                    namespace: 'imported',
-                    content: `
-                        .my-class {}
-
-                    `
-                }
-            }
-        });
-
-        expect(cssExports).to.eql({
-            root: 'entry--root'
-        });
-
-    });
-
-    it('contain used imported class', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-named: my-class;
-                        }
-                        .my-class{}
-                    `
-                },
-                '/imported.st.css': {
-                    namespace: 'imported',
-                    content: `
-                        .my-class {}
-
-                    `
-                }
-            }
-        });
-
-        expect(cssExports).to.eql({
-            'root': 'entry--root',
-            'my-class': 'imported--my-class'
-        });
-
-    });
-
-    it('not contain imported class when only extended and compose it into the existing class', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-named: my-class;
-                        }
-                        .local-class {
-                            -st-extends: my-class;
-                        }
-                    `
-                },
-                '/imported.st.css': {
-                    namespace: 'imported',
-                    content: `
-                        .my-class {}
-
-                    `
-                }
-            }
-        });
-
-        expect(cssExports).to.eql({
-            'root': 'entry--root',
-            'local-class': 'entry--local-class imported--my-class'
-        });
-
-    });
-
-    it('contain local vars', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :vars {
-                            color1: red;
-                        }
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-class;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .my-class {}
 
                         `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root',
-            color1: 'red'
+        it('contain used imported class', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-class;
+                            }
+                            .my-class{}
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .my-class {}
+
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                'my-class': 'imported--my-class'
+            });
+
         });
 
+        it('not contain imported class when only extended and compose it into the existing class', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: my-class;
+                            }
+                            .local-class {
+                                -st-extends: my-class;
+                            }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .my-class {}
+
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                'local-class': 'entry--local-class imported--my-class'
+            });
+
+        });
     });
 
-    it('not contain imported vars', () => {
+    describe('vars', () => {
+        it('contain local vars', () => {
 
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-named: color1;
-                        }
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :vars {
+                                color1: red;
+                            }
 
-                    `
-                },
-                '/imported.st.css': {
-                    namespace: 'imported',
-                    content: `
-                        :vars {
-                            color1: red;
-                        }
-
-                    `
+                            `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root',
+                color1: 'red'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root'
+        it('not contain imported vars', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: color1;
+                            }
+
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :vars {
+                                color1: red;
+                            }
+
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root'
+            });
+
         });
 
+        it('not resolve imported vars value on exported var', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: color1;
+                            }
+                            :vars {
+                                color2: value(color1);
+                            }
+
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            :vars {
+                                color1: red;
+                            }
+
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root',
+                color2: 'red'
+            });
+
+        });
     });
 
-    it('not resolve imported vars value on exported var', () => {
+    describe('keyframes', () => {
+        it('contain local keyframe', () => {
 
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./imported.st.css";
-                            -st-named: color1;
-                        }
-                        :vars {
-                            color2: value(color1);
-                        }
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @keyframes name {
 
-                    `
-                },
-                '/imported.st.css': {
-                    namespace: 'imported',
-                    content: `
-                        :vars {
-                            color1: red;
-                        }
-
-                    `
+                            }
+                        `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                root: 'entry--root',
+                name: 'entry--name'
+            });
+
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root',
-            color2: 'red'
+        it('export alias imported from more then one level', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: my-class;
+                            }
+                            .my-class {}
+
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: "./project.st.css";
+                                -st-named: my-class;
+                            }
+                            .my-class {}
+
+                        `
+                    },
+                    '/project.st.css': {
+                        namespace: 'project',
+                        content: `
+                            .my-class {}
+
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports['my-class']).to.equal('project--my-class');
+
         });
 
+        it('should not export element', () => {
+
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: Elm;
+                            }
+                            Elm {}
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: "./elm.st.css";
+                                -st-default: Elm;
+                            }
+                            Elm {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.Elm).to.equal(undefined);
+
+        });
     });
 
-    it('contain local keyframe', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        @keyframes name {
-
-                        }
-                    `
+    describe('css vars', () => {
+        it('exports native css vars defined locally', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                --myVar: green;
+                            }
+                            `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                '--myVar': '--entry-myVar'
+            });
         });
 
-        expect(cssExports).to.eql({
-            root: 'entry--root',
-            name: 'entry--name'
-        });
-
-    });
-
-    it('export alias imported from more then one level', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./index.st.css";
-                            -st-named: my-class;
-                        }
-                        .my-class {}
-
-                    `
-                },
-                '/index.st.css': {
-                    namespace: 'index',
-                    content: `
-                        :import {
-                            -st-from: "./project.st.css";
-                            -st-named: my-class;
-                        }
-                        .my-class {}
-
-                    `
-                },
-                '/project.st.css': {
-                    namespace: 'project',
-                    content: `
-                        .my-class {}
-
-                    `
+        it('re-exports imported native css vars defined in a different stylesheet', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --myVar;
+                            }
+                            `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                --myVar: green;
+                            }
+                            `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                '--myVar': '--imported-myVar'
+            });
         });
 
-        expect(cssExports['my-class']).to.equal('project--my-class');
-
-    });
-
-    it('should not export element', () => {
-
-        const cssExports = generateStylableExports({
-            entry: '/entry.st.css',
-            files: {
-                '/entry.st.css': {
-                    namespace: 'entry',
-                    content: `
-                        :import {
-                            -st-from: "./index.st.css";
-                            -st-named: Elm;
-                        }
-                        Elm {}
-                    `
-                },
-                '/index.st.css': {
-                    namespace: 'index',
-                    content: `
-                        :import {
-                            -st-from: "./elm.st.css";
-                            -st-default: Elm;
-                        }
-                        Elm {}
-                    `
+        it('exports css vars from mixed local and imported stylesheets with multiple levels', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./mid.st.css";
+                                -st-named: --midVar, --baseVar;
+                            }
+                            .root {
+                                --topVar: blue;
+                            }
+                            `
+                    },
+                    '/mid.st.css': {
+                        namespace: 'mid',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-named: --baseVar;
+                            }
+                            .root {
+                                --midVar: green;
+                            }
+                            `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                --baseVar: red;
+                            }
+                            `
+                    }
                 }
-            }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                '--baseVar': '--base-baseVar',
+                '--midVar': '--mid-midVar',
+                '--topVar': '--entry-topVar'
+            });
         });
-        expect(cssExports.Elm).to.equal(undefined);
 
+        it('exports from mixed local and imported stylesheets with scoped and global css vars', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --importedGlobal1, --importedGlobal2, --importedScoped1, --importedScoped2;
+                            }
+
+                            @st-global-custom-property --localGlobal1, --localGlobal2;
+
+                            .root {
+                                --localScoped1: 5;
+                                --localScoped2: 6;
+                                --localGlobal1: 7;
+                                --localGlobal2: 8;
+                            }
+                            `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @st-global-custom-property --importedGlobal1, --importedGlobal2;
+
+                            .root {
+                                --importedScoped1: 1;
+                                --importedScoped2: 2;
+                                --importedGlobal1: 3;
+                                --importedGlobal2: 4;
+                            }
+                            `
+                    }
+                }
+            });
+
+            expect(cssExports).to.eql({
+                'root': 'entry--root',
+                '--localScoped1': '--entry-localScoped1',
+                '--localScoped2': '--entry-localScoped2',
+                '--localGlobal1': '--localGlobal1',
+                '--localGlobal2': '--localGlobal2',
+                '--importedScoped1': '--imported-importedScoped1',
+                '--importedScoped2': '--imported-importedScoped2',
+                '--importedGlobal1': '--importedGlobal1',
+                '--importedGlobal2': '--importedGlobal2'
+            });
+        });
     });
-
 });

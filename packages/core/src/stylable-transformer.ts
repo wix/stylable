@@ -28,7 +28,9 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
     findDeclaration,
     findRule,
-    getDeclStylable
+    generateScopedCSSVar,
+    getDeclStylable,
+    isCSSVarProp
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
@@ -147,8 +149,8 @@ export class StylableTransformer {
         path: string[] = []) {
 
         const keyframeMapping = this.scopeKeyframes(ast, meta);
+        const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
         this.resolver.validateImports(meta, this.diagnostics);
-
         validateScopes(meta, this.resolver, this.diagnostics);
 
         ast.walkRules((rule: SRule) => {
@@ -172,6 +174,10 @@ export class StylableTransformer {
         ast.walkDecls(decl => {
             getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
+            if (isCSSVarProp(decl.prop)) {
+                decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);
+            }
+
             switch (decl.prop) {
                 case valueMapping.mixin:
                     break;
@@ -187,17 +193,19 @@ export class StylableTransformer {
                         variableOverride,
                         this.replaceValueHook,
                         this.diagnostics,
-                        path.slice()
+                        path.slice(),
+                        cssVarsMapping
                     );
             }
         });
 
-        ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride, path));
+        ast.walkRules((rule: SRule) => appendMixins(this, rule, meta, variableOverride || {}, cssVarsMapping, path));
 
         if (metaExports) {
             this.exportRootClass(meta, metaExports);
             this.exportLocalVars(meta, metaExports, variableOverride);
             this.exportKeyframes(keyframeMapping, metaExports);
+            this.exportCSSVars(cssVarsMapping, metaExports);
         }
     }
     public exportLocalVars(meta: StylableMeta, metaExports: Pojo<string>, variableOverride?: Pojo<string>) {
@@ -218,6 +226,11 @@ export class StylableTransformer {
                 );
             }
         });
+    }
+    public exportCSSVars(cssVarsMapping: Pojo<string>, metaExports: Pojo<string>) {
+        for (const varName of Object.keys(cssVarsMapping)) {
+            metaExports[varName] = cssVarsMapping[varName];
+        }
     }
     public exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, metaExports: Pojo<string>) {
         Object.keys(keyframeMapping).forEach(name => {
@@ -343,6 +356,47 @@ export class StylableTransformer {
         });
 
         return keyframesExports;
+    }
+    public createCSSVarsMapping(_ast: postcss.Root, meta: StylableMeta) {
+        const cssVarsMapping: Pojo<string> = {};
+
+        // imported vars
+        for (const imported of meta.imports) {
+            for (const symbolName of Object.keys(imported.named)) {
+                if (isCSSVarProp(symbolName)) {
+                    const importedVar = this.resolver.deepResolve(meta.mappedSymbols[symbolName]);
+
+                    if (importedVar && importedVar._kind === 'css' &&
+                        importedVar.symbol && importedVar.symbol._kind === 'cssVar') {
+                        cssVarsMapping[symbolName] = importedVar.symbol.global ?
+                            symbolName :
+                            generateScopedCSSVar(importedVar.meta.namespace, symbolName.slice(2));
+                    }
+                }
+            }
+        }
+
+        // locally defined vars
+        for (const localVarName of Object.keys(meta.cssVars)) {
+            const cssVar = meta.cssVars[localVarName];
+            cssVarsMapping[localVarName] = cssVar.global ?
+                localVarName :
+                generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+        }
+
+        return cssVarsMapping;
+    }
+    public getScopedCSSVar(
+        decl: postcss.Declaration,
+        meta: StylableMeta,
+        cssVarsMapping: Pojo<string>) {
+        let prop = decl.prop;
+
+        if (meta.cssVars[prop]) {
+            prop = cssVarsMapping[prop];
+        }
+
+        return prop;
     }
     public transformGlobals(ast: postcss.Root) {
         ast.walkRules(r => {

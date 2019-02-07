@@ -7,7 +7,6 @@ import {
     isChildOfAtRule,
     isCompRoot,
     isRootValid,
-    isSimpleSelector,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -15,6 +14,7 @@ import {
 import { processDeclarationUrls } from './stylable-assets';
 import {
     ClassSymbol,
+    CSSVarSymbol,
     ElementSymbol,
     Imported,
     ImportSymbol,
@@ -23,7 +23,7 @@ import {
     StylableMeta,
     VarSymbol
 } from './stylable-meta';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, isCSSVarProp } from './stylable-utils';
 import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
@@ -59,7 +59,9 @@ export const processorWarnings = {
     NO_IMPORT_IN_ST_SCOPE() { return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`; },
     NO_KEYFRAMES_IN_ST_SCOPE() { return `cannot use "@keyframes" inside of "@st-scope"`; },
     SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
-    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; }
+    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; },
+    ILLEGAL_GLOBAL_CSS_VAR(name: string) { return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`; },
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma seperated`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -84,7 +86,10 @@ export class StylableProcessor {
         root.walkDecls(decl => {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
+            } else if (isCSSVarProp(decl.prop)) {
+                this.addCSSVars(decl);
             }
+
             processDeclarationUrls(decl, node => {
                 this.meta.urls.push(node.url!);
             }, false);
@@ -161,6 +166,36 @@ export class StylableProcessor {
                     break;
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
+                    break;
+                case 'st-global-custom-property':
+                    const cssVars = atRule.params.split(',');
+
+                    if (atRule.params.trim().split(/\s+/g).length > cssVars.length) {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
+                            { word: atRule.params });
+                        break;
+                    }
+
+                    for (const entry of cssVars) {
+                        const cssVar = entry.trim();
+
+                        if (isCSSVarProp(cssVar)) {
+                            if (!this.meta.cssVars[cssVar]) {
+                                this.meta.cssVars[cssVar] = {
+                                    _kind: 'cssVar',
+                                    name: cssVar,
+                                    global: true
+                                };
+                                this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
+                            }
+                        } else {
+                            this.diagnostics.warn(
+                                atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), { word: cssVar });
+                        }
+                    }
+                    toRemove.push(atRule);
                     break;
             }
         });
@@ -326,6 +361,19 @@ export class StylableProcessor {
             this.meta.mappedSymbols[decl.prop] = varSymbol;
         });
         rule.remove();
+    }
+
+    protected addCSSVars(decl: postcss.Declaration) {
+        const varName = decl.prop.trim();
+
+        if (!this.meta.cssVars[varName]) {
+            const cssVarSymbol: CSSVarSymbol = {
+                _kind: 'cssVar',
+                name: varName
+            };
+            this.meta.cssVars[varName] = cssVarSymbol;
+            this.meta.mappedSymbols[varName] = cssVarSymbol;
+        }
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
