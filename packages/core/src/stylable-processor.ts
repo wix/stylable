@@ -7,7 +7,6 @@ import {
     isChildOfAtRule,
     isCompRoot,
     isRootValid,
-    isSimpleSelector,
     parseSelector,
     SelectorAstNode,
     traverseNode

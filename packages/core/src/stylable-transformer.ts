@@ -30,7 +30,6 @@ import {
     findRule,
     generateScopedCSSVar,
     getDeclStylable,
-    hasCSSVarUse,
     isCSSVarProp
 } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';

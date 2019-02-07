@@ -6,9 +6,10 @@ import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
+import { isCSSVarProp } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo, StateParsedValue } from './types';
+import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
@@ -36,7 +37,7 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
 
-        if (stateDefinition.value.trim().startsWith('--')) {
+        if (isCSSVarProp(stateDefinition.value.trim())) {
             diagnostics.error(
                 decl,
                 stateErrors.STATE_VARIABLE_NAME_CLASH(stateDefinition.value),

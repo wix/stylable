@@ -354,7 +354,3 @@ export function generateScopedCSSVar(namespace: string, varName: string) {
 export function isCSSVarProp(value: string) {
     return value.startsWith('--');
 }
-
-export function hasCSSVarUse(value: string) {
-    return value.includes('var(');
-}
