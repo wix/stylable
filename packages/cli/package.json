@@ -19,7 +19,7 @@
     "@stylable/node": "^1.0.3",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
-    "yargs": "^13.1.0"
+    "yargs": "^13.2.0"
   },
   "devDependencies": {
     "@stylable/e2e-test-kit": "^1.1.6"
