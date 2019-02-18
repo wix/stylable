@@ -692,14 +692,14 @@
     url-template "^2.0.8"
 
 "@ts-tools/build@^0.1.9":
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.1.9.tgz#001e85aaae191f2f261fd9ff0900f5d8c8709db1"
-  integrity sha512-FSdtgysZ5Ng/xCe9FVbmDTL9SDkiHQ7/9iiZLXKuvuMCV2DOjLLsTh4qLfXBxnEJHEIR7sjSKdiRJPghdTMQsQ==
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.1.10.tgz#d8cb34f994e201c31a2d98307bc84cb1b709ea6a"
+  integrity sha512-C3G+vQpws8GrUy9mEmGJ46fUZHH8R3tkv9a7UMech2Vlb+ZGt38WPb8noGt2RMEHvUUiibKzPxl5jgUBSM0YTw==
   dependencies:
-    "@ts-tools/service" "^1.0.5"
+    "@ts-tools/service" "^2.0.0"
     chalk "^2.4.2"
     commander "^2.19.0"
-    proper-fs "^1.1.1"
+    proper-fs "^1.1.2"
 
 "@ts-tools/node@^0.9.2":
   version "0.9.2"
@@ -720,6 +720,11 @@
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-1.0.5.tgz#8708968107effca7ff85442ce391984ba8d23d2c"
   integrity sha512-BTrqftnSqeBdfBZhzgxcvaoleeeU2piHCON5gnnWe2NH7o22aGkfoUdcgycwU+vQk+CPVaqSc6wQ8q7r0GDlrg==
+
+"@ts-tools/service@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.0.tgz#61e7d45fdfa9b0f080bdd8a01ad7249b8cc0d1e2"
+  integrity sha512-gcpwqbODwZvbNSvzCFygjwq31WhmAiD6WMfs6nuknaGDnZFktjxq+PPegCTKDCKvEAgDjgvIe4dB8en+221Ytw==
 
 "@ts-tools/webpack-loader@^0.8.6":
   version "0.8.6"
@@ -6350,7 +6355,7 @@ prop-types@^15.6.2:
     object-assign "^4.1.1"
     react-is "^16.8.1"
 
-proper-fs@^1.1.1:
+proper-fs@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/proper-fs/-/proper-fs-1.1.2.tgz#f2e76615f16f6d12a7f4612504b091cee4196dd1"
   integrity sha512-0XLDXc0JVz8WYtMLDy5vi0GHAFuM9rzaQWaCMJ7+CWmxOaFNfkdVWqyuxbgb70slQm3Ji12z1oHophyradDN4Q==
