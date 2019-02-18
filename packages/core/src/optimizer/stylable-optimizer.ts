@@ -1,3 +1,4 @@
+import CleanCSS from 'clean-css';
 import * as postcss from 'postcss';
 import { parseSelector, SelectorAstNode, traverseNode } from '../selector-utils';
 import { StylableResults } from '../stylable-transformer';
@@ -19,8 +20,7 @@ export class StylableOptimizer {
         public namespaceOptimizer = new StylableNamespaceOptimizer()
     ) {}
 
-    public minifyCSS(css: string) {
-        const CleanCSS = require('clean-css');
+    public minifyCSS(css: string): string {
         return new CleanCSS({}).minify(css).styles;
     }
     public optimize(
