@@ -721,13 +721,18 @@
   resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-1.0.5.tgz#8708968107effca7ff85442ce391984ba8d23d2c"
   integrity sha512-BTrqftnSqeBdfBZhzgxcvaoleeeU2piHCON5gnnWe2NH7o22aGkfoUdcgycwU+vQk+CPVaqSc6wQ8q7r0GDlrg==
 
+"@ts-tools/service@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.0.tgz#61e7d45fdfa9b0f080bdd8a01ad7249b8cc0d1e2"
+  integrity sha512-gcpwqbODwZvbNSvzCFygjwq31WhmAiD6WMfs6nuknaGDnZFktjxq+PPegCTKDCKvEAgDjgvIe4dB8en+221Ytw==
+
 "@ts-tools/webpack-loader@^0.8.6":
-  version "0.8.6"
-  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-0.8.6.tgz#f70929959a832c62e480242f02ed1811f7920b45"
-  integrity sha512-zM4QlYGgbTtRdlBqUVttvvHTFEeTkQeTIHQeMMz1vyti2/P5TXE4fbdMjJNhbBjS+TVv/VMZA/rZct3yHNYc4A==
+  version "0.8.7"
+  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-0.8.7.tgz#fa68c45590c83ab592790c994004e62699f78cb9"
+  integrity sha512-mjuLYCZT6HWW3dOj+nNnG/lWjixl8lqCgS2T8I/xtxd2c+CW1Zgt7AVp/B3zaHjOpLpA/WELQg/MZ/IqglJq8g==
   dependencies:
     "@ts-tools/robotrix" "^0.7.4"
-    "@ts-tools/service" "^1.0.5"
+    "@ts-tools/service" "^2.0.0"
     loader-utils "^1.2.3"
 
 "@types/anymatch@*":
