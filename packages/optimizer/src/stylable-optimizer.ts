@@ -1,4 +1,5 @@
 import { parseSelector, Pojo, SelectorAstNode, StylableResults, traverseNode } from '@stylable/core';
+import CleanCSS from 'clean-css';
 import * as postcss from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
@@ -17,8 +18,7 @@ export class StylableOptimizer {
         public namespaceOptimizer = new StylableNamespaceOptimizer()
     ) {}
 
-    public minifyCSS(css: string) {
-        const CleanCSS = require('clean-css');
+    public minifyCSS(css: string): string {
         return new CleanCSS({}).minify(css).styles;
     }
     public optimize(
