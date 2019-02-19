@@ -1,5 +1,6 @@
 import { create } from '@stylable/runtime';
 import { expect } from 'chai';
+import { JSDOM } from 'jsdom';
 import { PartialElement, StylableDOMUtil } from '../src';
 
 describe('stylable-dom-utils', () => {
@@ -29,34 +30,44 @@ describe('stylable-dom-utils', () => {
     });
 
     it('scopeSelector handle local states', () => {
-        expect(util.scopeSelector('.x:loading')).to.equal(`.ns--x[data-ns-loading="true"]`);
+        expect(util.scopeSelector('.x:loading')).to.equal(`.ns--x.ns__loading`);
+    });
+
+    it('scopeSelector handles local state with a paramter', () => {
+        expect(util.scopeSelector('.x:loading(done)')).to.equal(`.ns--x.ns___loading4_done`);
     });
 
     it('scopeSelector handle class local states (multiple)', () => {
         expect(
             util.scopeSelector('.x:loading:thinking')
-        ).to.equal(`.ns--x[data-ns-loading="true"][data-ns-thinking="true"]`);
+        ).to.equal(`.ns--x.ns__loading.ns__thinking`);
     });
 
     describe('Style state', () => {
-        it('hasStyleState properly calls getAttribute with the requested style state', () => {
-            let state: string = '';
-            const getAttribute = (styleState: string) => {
-                state = styleState;
-                return 'true';
-            };
-            expect(util.hasStyleState(({ getAttribute } as PartialElement), 'loading')).to.equal(true);
-            expect(state).to.equal('data-ns-loading');
+        const { window } = new JSDOM(`<div id="container"></div>`);
+
+        it('hasStyleState returns true if the requested style state exists', () => {
+            const document = window.document;
+            const elem = document.createElement('a');
+            elem.classList.add(s.$cssStates({ loading: true }));
+
+            expect(util.hasStyleState(elem, 'loading')).to.equal(true);
         });
 
-        it('getStyleState properly calls getAttribute with the requested style state', () => {
-            let state: string = '';
-            const getAttribute = (styleState: string) => {
-                state = styleState;
-                return 'true';
-            };
-            expect(util.getStyleState(({ getAttribute } as PartialElement), 'loading')).to.equal('true');
-            expect(state).to.equal('data-ns-loading');
+        it('getStyleState returns the requested boolean style state value', () => {
+            const document = window.document;
+            const elem = document.createElement('a');
+            elem.classList.add(s.$cssStates({ loading: true }));
+
+            expect(util.getStyleState(elem, 'loading')).to.equal(true);
+        });
+
+        it('getStyleState returns the requested string style state value', () => {
+            const document = window.document;
+            const elem = document.createElement('a');
+            elem.classList.add(s.$cssStates({ loading: 'value' }));
+
+            expect(util.getStyleState(elem, 'loading')).to.equal('value');
         });
     });
 
