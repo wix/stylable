@@ -24,7 +24,11 @@ export interface InheritedAttributes {
 }
 
 export type RuntimeStylesheet = {
-    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap;
+    (
+        contextClassName: string,
+        statesOrClassName: StateMap | string,
+        ...classNames: string[]
+    ): string;
     $root: string;
     $namespace: string;
     $depth: number;
@@ -32,7 +36,7 @@ export type RuntimeStylesheet = {
     $css?: string;
 
     $get(localName: string): string | undefined;
-    $cssStates(stateMapping?: StateMap | null): StateMap;
+    $cssStates(stateMapping?: StateMap | null): string;
     $cssVars(cssVarMap?: CSSVarMap): CSSVarMap;
 } & { [localName: string]: string };
 
