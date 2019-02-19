@@ -1,6 +1,6 @@
 import { parseSelector, Pojo, SelectorAstNode, StylableResults, traverseNode } from '@stylable/core';
-import postcss from 'postcss';
 import CleanCSS from 'clean-css';
+import postcss from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
 
