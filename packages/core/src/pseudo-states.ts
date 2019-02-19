@@ -6,7 +6,6 @@ import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
-import { isCSSVarProp } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, StateParsedValue } from './types';
@@ -22,7 +21,7 @@ export const stateErrors = {
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
     NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`,
-    STATE_VARIABLE_NAME_CLASH: (name: string) => `state "${name}" definition cannot begin with "--"`
+    STATE_VARIABLE_NAME_CLASH: (name: string) => `state "${name}" declaration cannot begin with a "-" chararcter`
 };
 /* tslint:enable:max-line-length */
 
@@ -37,7 +36,7 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
 
-        if (isCSSVarProp(stateDefinition.value.trim())) {
+        if (stateDefinition.value.trim().startsWith('-')) {
             diagnostics.error(
                 decl,
                 stateErrors.STATE_VARIABLE_NAME_CLASH(stateDefinition.value),
@@ -324,8 +323,8 @@ export function setStateToNode(
     const stateDef = states[name];
 
     if (stateDef === null) {
-        node.type = 'attribute';
-        node.content = autoStateAttrName(name, namespace);
+        node.type = 'class';
+        node.name = autoStateClassName(name, namespace, false);
     } else if (typeof stateDef === 'string') {
         node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
         node.value = stateDef;
@@ -375,13 +374,17 @@ function resolveStateValue(
                 { word: actualParam });
         }
     }
-
-    node.type = 'attribute';
-
-    const selectorSuffix = stateDef.type === 'tag' ? '~' : undefined; // TODO: should be generic
+    const baseClassName = autoStateClassName(name, namespace, true);
 
     const strippedParam = stripQuotation(actualParam);
-    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}=${JSON.stringify(strippedParam)}`;
+    if (isValidClassName(strippedParam)) {
+        node.type = 'class';
+        node.name = `${baseClassName}${strippedParam.length}_${strippedParam}`;
+    } else {
+        node.type = 'attribute';
+        // tslint:disable-next-line:max-line-length
+        node.content = `class~="${baseClassName}${strippedParam.length}_${stripQuotation(JSON.stringify(strippedParam).replace(/\s/gm, '_'))}"`;
+    }
 }
 
 function resolveParam(
@@ -398,5 +401,14 @@ function resolveParam(
 }
 
 export function autoStateAttrName(stateName: string, namespace: string, suffix = '') {
-    return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}${suffix}`;
+    return `data-${namespace}-${stateName.toLowerCase()}${suffix}`;
+}
+
+export function autoStateClassName(stateName: string, namespace: string, withParam: boolean) {
+    return `${namespace}__${withParam ? '_' : ''}${stateName}`;
+}
+
+export function isValidClassName(value: string) {
+    const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
+    return !!value.match(test);
 }

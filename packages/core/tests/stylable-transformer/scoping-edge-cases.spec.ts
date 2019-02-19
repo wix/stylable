@@ -110,7 +110,7 @@ describe('scoping-edge-cases', () => {
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
-            '.style--x .comp--part .inner--inner, .style--x[data-style-test]'
+            '.style--x .comp--part .inner--inner, .style--x.style__test'
         );
 
     });
