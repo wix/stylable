@@ -9,7 +9,6 @@ import {
 } from './native-reserved-lists';
 import { basename } from './path';
 import {
-    autoStateAttrName,
     transformPseudoStateSelector,
     validateStateDefinition
 } from './pseudo-states';
@@ -745,14 +744,6 @@ export class StylableTransformer {
         }
 
         return { _kind: 'css', meta: current, symbol };
-    }
-    public cssStates(stateMapping: Pojo<boolean> | null | undefined, namespace: string) {
-        return stateMapping ? Object.keys(stateMapping).reduce((states: Pojo<boolean>, key) => {
-            if (stateMapping[key]) {
-                states[autoStateAttrName(key, namespace)] = true;
-            }
-            return states;
-        }, {}) : {};
     }
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
