@@ -1,6 +1,5 @@
-import { parseSelector, stringifySelector, traverseNode } from '@stylable/core';
+import { isValidClassName, parseSelector, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
-import { isValidClassName } from 'packages/core/src/pseudo-states';
 
 export interface PartialElement {
     querySelector: Element['querySelector'];
@@ -74,20 +73,33 @@ export class StylableDOMUtil {
             return true;
         }
 
-        const baseState = this.style.$cssStates({ [stateName]: '_' }).slice(0, -3);
+        const baseState = this.getBaseStateWithParam(stateName);
 
         let paramValue = '';
         element.classList.forEach(cls => {
-            if (!paramValue && cls.startsWith(baseState)) {
-                const param = cls.slice(baseState.length);
-                const paramIndex = param.indexOf('_');
-
-                if (paramIndex !== -1) {
-                    paramValue = param.slice(paramIndex + 1);
-                }
+            if (!paramValue) {
+                paramValue = this.getStateValueFromClassName(cls, baseState);
             }
         });
 
         return paramValue ? paramValue : null;
+    }
+
+    public getStateValueFromClassName(cls: string, baseState: string) {
+        if (cls.startsWith(baseState)) {
+            const param = cls.slice(baseState.length);
+            const paramIndex = param.indexOf(pseudoStates.stateDelimiter);
+
+            if (paramIndex !== -1) {
+                return param.slice(paramIndex + 1);
+            }
+        }
+
+        return '';
+    }
+
+    public getBaseStateWithParam(stateName: string) {
+        const singleCharState = 'x';
+        return this.style.$cssStates({ [stateName]: singleCharState }).slice(0, -3);
     }
 }
