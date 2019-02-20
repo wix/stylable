@@ -1,4 +1,4 @@
-import { parseSelector, Pojo, stringifySelector, traverseNode } from '@stylable/core';
+import { parseSelector, Pojo, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
 import * as postcss from 'postcss';
 
 export class StylableClassNameOptimizer {
@@ -12,7 +12,7 @@ export class StylableClassNameOptimizer {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
             if (node.type === 'class') {
-                if (!node.name.startsWith(`${namespace}__`)) {
+                if (!node.name.startsWith(`${namespace}${pseudoStates.stateDelimiter.repeat(2)}`)) {
                     // is not a state
                     if (!this.context.names[node.name]) {
                         this.generateName(node.name);

@@ -14,6 +14,8 @@ import { stripQuotation } from './utils';
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
+export const stateDelimiter = '_';
+
 /* tslint:disable:max-line-length */
 export const stateErrors = {
     UNKNOWN_STATE_USAGE: (name: string) => `unknown pseudo-state "${name}"`,
@@ -383,7 +385,7 @@ function resolveStateValue(
     } else {
         node.type = 'attribute';
         // tslint:disable-next-line:max-line-length
-        node.content = `class~="${baseClassName}${strippedParam.length}_${stripQuotation(JSON.stringify(strippedParam).replace(/\s/gm, '_'))}"`;
+        node.content = `class~="${baseClassName}${strippedParam.length}${stateDelimiter}${stripQuotation(JSON.stringify(strippedParam).replace(/\s/gm, '_'))}"`;
     }
 }
 
@@ -405,7 +407,7 @@ export function autoStateAttrName(stateName: string, namespace: string, suffix =
 }
 
 export function autoStateClassName(stateName: string, namespace: string, withParam: boolean) {
-    return `${namespace}__${withParam ? '_' : ''}${stateName}`;
+    return `${namespace}${stateDelimiter.repeat(2)}${withParam ? stateDelimiter : ''}${stateName}`;
 }
 
 export function isValidClassName(value: string) {
