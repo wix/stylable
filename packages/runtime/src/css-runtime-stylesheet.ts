@@ -73,14 +73,14 @@ export function create(
             return '';
         }
 
+        const baseState = createBaseState(stateName, namespace, stateValue === true ? false : true);
         if (stateValue === true) { // boolean state
-            return autoStateClassName(stateName, namespace, false);
+            return baseState;
         }
 
         const valueAsString = stateValue.toString();
 
-        // tslint:disable-next-line: max-line-length
-        return `${autoStateClassName(stateName, namespace, true)}${valueAsString.length}_${valueAsString.replace(/\s/gm, '_')}`;
+        return createStateWithParam(baseState, valueAsString);
     }
 
     stylesheet.$root = root;
@@ -124,6 +124,10 @@ export function createTheme(css: string, depth: number | string, id: number | st
     return { $css: css, $depth: depth, $id: id, $theme: true };
 }
 
-export function autoStateClassName(stateName: string, namespace: string, withParam: boolean) {
+function createBaseState(stateName: string, namespace: string, withParam: boolean) {
     return `${namespace.toLowerCase()}_${withParam ? '_' : ''}_${stateName}`;
+}
+
+function createStateWithParam(baseState: string, param: string) {
+    return `${baseState}${param.length}_${param.replace(/\s/gm, '_')}`;
 }
