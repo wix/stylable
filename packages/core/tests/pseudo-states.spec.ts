@@ -1756,7 +1756,7 @@ describe('pseudo-states', () => {
                     |-st-states: $-someState$|;
                 }
             `, [{
-                message: stateErrors.STATE_VARIABLE_NAME_CLASH('-someState'),
+                message: stateErrors.STATE_STARTS_WITH_HYPHEN('-someState'),
                 file: 'main.css',
                 severity: 'error'
             }]);

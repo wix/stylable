@@ -6,6 +6,7 @@ import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
+import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, StateParsedValue } from './types';
@@ -23,7 +24,7 @@ export const stateErrors = {
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
     NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`,
-    STATE_VARIABLE_NAME_CLASH: (name: string) => `state "${name}" declaration cannot begin with a "-" chararcter`
+    STATE_STARTS_WITH_HYPHEN: (name: string) => `state "${name}" declaration cannot begin with a "${stateDelimiter}" chararcter`
 };
 /* tslint:enable:max-line-length */
 
@@ -41,7 +42,7 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
         if (stateDefinition.value.trim().startsWith('-')) {
             diagnostics.error(
                 decl,
-                stateErrors.STATE_VARIABLE_NAME_CLASH(stateDefinition.value),
+                stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value),
                 { word: stateDefinition.value });
         }
 
@@ -326,7 +327,7 @@ export function setStateToNode(
 
     if (stateDef === null) {
         node.type = 'class';
-        node.name = autoStateClassName(name, namespace, false);
+        node.name = createBaseState(name, namespace, false);
     } else if (typeof stateDef === 'string') {
         node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
         node.value = stateDef;
@@ -376,16 +377,15 @@ function resolveStateValue(
                 { word: actualParam });
         }
     }
-    const baseClassName = autoStateClassName(name, namespace, true);
+    const baseState = createBaseState(name, namespace, true);
 
     const strippedParam = stripQuotation(actualParam);
     if (isValidClassName(strippedParam)) {
         node.type = 'class';
-        node.name = `${baseClassName}${strippedParam.length}_${strippedParam}`;
+        node.name = createClassNameState(baseState, strippedParam);
     } else {
         node.type = 'attribute';
-        // tslint:disable-next-line:max-line-length
-        node.content = `class~="${baseClassName}${strippedParam.length}${stateDelimiter}${stripQuotation(JSON.stringify(strippedParam).replace(/\s/gm, '_'))}"`;
+        node.content = createAttributeState(baseState, strippedParam);
     }
 }
 
@@ -402,15 +402,15 @@ function resolveParam(
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }
 
-export function autoStateAttrName(stateName: string, namespace: string, suffix = '') {
-    return `data-${namespace}-${stateName.toLowerCase()}${suffix}`;
-}
-
-export function autoStateClassName(stateName: string, namespace: string, withParam: boolean) {
+export function createBaseState(stateName: string, namespace: string, withParam: boolean) {
     return `${namespace}${stateDelimiter.repeat(2)}${withParam ? stateDelimiter : ''}${stateName}`;
 }
 
-export function isValidClassName(value: string) {
-    const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
-    return !!value.match(test);
+export function createClassNameState(baseState: string, param: string) {
+    return `${baseState}${param.length}_${param}`;
+}
+
+export function createAttributeState(baseState: string, param: string) {
+    // tslint:disable-next-line:max-line-length
+    return `class~="${baseState}${param.length}${stateDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
 }
