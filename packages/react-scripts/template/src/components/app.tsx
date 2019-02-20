@@ -8,8 +8,8 @@ export interface IAppProps {
 }
 
 export const App: React.FunctionComponent<IAppProps> = props => (
-    <div {...style('root', {}, props)}>
-        <Header message="Welcome to React with Stylable" />
-        <Content mainFile="src/index.tsx" />
+    <div className={style(style.root, props.className || '')} >
+        <Header className={style.header} message="Welcome to React with Stylable" />
+        <Content className={style.content} mainFile="src/index.tsx" />
     </div>
 );
