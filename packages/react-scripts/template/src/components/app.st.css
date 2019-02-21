@@ -1,12 +1,24 @@
+:import {
+  -st-from: "./header.st.css";
+  -st-default: Header;
+}
+
+:import {
+  -st-from: "./content.st.css";
+  -st-default: Content;
+}
+
 .root {
   text-align: center;
 }
 
 .header {
+  -st-extends: Header;
   background-color: #222;
   color: white;
 }
 
 .content {
+  -st-extends: Content;
   font-size: large;
 }
