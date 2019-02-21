@@ -1,6 +1,4 @@
 import {
-    CSSVarMap,
-    CSSVarMappingRuntimeType,
     RuntimeStylesheet,
     StateMap,
     StateValue
@@ -27,36 +25,6 @@ export function create(
         }
 
         return classNames.join(' ');
-    }
-
-    function declarationToString(this: CSSVarMappingRuntimeType): string {
-        return Object.keys(this).reduce((res: string, prop: string) => {
-            const value = this[prop];
-            if (typeof value === 'string') {
-                res += `${prop}: ${value}; `;
-            }
-
-            return res;
-        }, '');
-    }
-
-    function cssVars(cssVarsMapping: CSSVarMap) {
-        const res: CSSVarMappingRuntimeType = {
-            toString: declarationToString
-        };
-
-        return Object.keys(cssVarsMapping).reduce(
-            (res: CSSVarMap, propName: string) => {
-                if (propName.startsWith('--') && stylesheet[propName]) {
-                    res[stylesheet[propName] as string] = cssVarsMapping[propName];
-                } else {
-                    res[propName] = cssVarsMapping[propName];
-                }
-
-                return res;
-            },
-            res as CSSVarMap
-        );
     }
 
     function get(localName: string) {
@@ -91,7 +59,6 @@ export function create(
 
     stylesheet.$get = get;
     stylesheet.$cssStates = cssStates;
-    stylesheet.$cssVars = cssVars;
 
     function stylable_runtime_stylesheet(): string {
         const classNames = [];

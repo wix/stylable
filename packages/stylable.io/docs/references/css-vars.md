@@ -93,28 +93,6 @@ Output:
     style="--stylesheet-color: green; --stylesheet-border-size: 5px; background: gold;" />
 ```
 
-
-### Using the `$cssVars` utility function
-
-Use the `$cssVars` utility function exposed on the stylesheet for an easier way of defining multiple variables at once. 
-It will scope any variable passed to it that is defined in the stylesheet, and pass through any declarations it does not recognize.
-
-```js
-import sheet from './entry.st.css';
-
-<div {...sheet('root', {}, {})}
-    style={sheet.$cssVars({
-        '--color': 'green', 
-        '--border-size': '5px', 
-        background: 'grey' })/>
-```
-
-Output:
-```js
-<div className="stylesheet--root" 
-    style="--stylesheet-color: green; --stylesheet-border-size: 5px; background: grey;" />
-```
-
 ## Using global CSS variables
 
 In cases where you have no control over the name of the CSS variable used, use the `@st-global-custom-property` directive to define CSS variables that will not be scoped, and will maintain their exact given name.
