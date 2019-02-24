@@ -570,6 +570,29 @@ describe('pseudo-states', () => {
                 });
             });
 
+            // tslint:disable-next-line: max-line-length
+            it('should use an attribute selector for illegal param syntax (and replaces spaces with underscoes)', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .root {
+                                -st-states: state( string());
+                            }
+                            .root:state(user name) {}
+                            `
+                        }
+                    }
+                });
+
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry--root[class~="entry___state9_user_name"] {}'
+                });
+            });
+
             describe('string', () => {
 
                 it('should transform string type', () => {
