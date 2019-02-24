@@ -77,7 +77,11 @@ export function create(
 
   Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
 
+  // EDGE CACHE BUG FIX
+  (stylable_runtime_stylesheet as any)[locals.$root] = locals[locals.$root];
+
   return stylable_runtime_stylesheet as RuntimeStylesheet;
+
 }
 
 export function createTheme(css: string, depth: number | string, id: number | string) {
