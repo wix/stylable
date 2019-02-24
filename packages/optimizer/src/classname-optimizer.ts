@@ -12,7 +12,7 @@ export class StylableClassNameOptimizer {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
             if (node.type === 'class') {
-                if (!node.name.startsWith(`${namespace}${pseudoStates.stateDelimiter.repeat(2)}`)) {
+                if (!node.name.startsWith(`${namespace}${pseudoStates.booleanStateDelimiter}`)) {
                     // is not a state
                     if (!this.context.names[node.name]) {
                         this.generateName(node.name);

@@ -15,7 +15,9 @@ import { stripQuotation } from './utils';
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
-export const stateDelimiter = '_';
+export const stateMiddleDelimiter = '_';
+export const booleanStateDelimiter = '__';
+export const stateWithParamDelimiter = '___';
 
 /* tslint:disable:max-line-length */
 export const stateErrors = {
@@ -24,7 +26,7 @@ export const stateErrors = {
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
     NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`,
-    STATE_STARTS_WITH_HYPHEN: (name: string) => `state "${name}" declaration cannot begin with a "${stateDelimiter}" chararcter`
+    STATE_STARTS_WITH_HYPHEN: (name: string) => `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
 };
 /* tslint:enable:max-line-length */
 
@@ -39,7 +41,7 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
 
-        if (stateDefinition.value.trim().startsWith('-')) {
+        if (stateDefinition.value.startsWith('-')) {
             diagnostics.error(
                 decl,
                 stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value),
@@ -327,7 +329,7 @@ export function setStateToNode(
 
     if (stateDef === null) {
         node.type = 'class';
-        node.name = createBaseState(name, namespace, false);
+        node.name = createBooleanStateClassName(name, namespace);
     } else if (typeof stateDef === 'string') {
         node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
         node.value = stateDef;
@@ -377,15 +379,14 @@ function resolveStateValue(
                 { word: actualParam });
         }
     }
-    const baseState = createBaseState(name, namespace, true);
 
     const strippedParam = stripQuotation(actualParam);
     if (isValidClassName(strippedParam)) {
         node.type = 'class';
-        node.name = createClassNameState(baseState, strippedParam);
+        node.name = createStateWithParamClassName(name, namespace, strippedParam);
     } else {
         node.type = 'attribute';
-        node.content = createAttributeState(baseState, strippedParam);
+        node.content = createAttributeState(name, namespace, strippedParam);
     }
 }
 
@@ -402,15 +403,15 @@ function resolveParam(
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }
 
-export function createBaseState(stateName: string, namespace: string, withParam: boolean) {
-    return `${namespace}${stateDelimiter.repeat(2)}${withParam ? stateDelimiter : ''}${stateName}`;
+export function createBooleanStateClassName(stateName: string, namespace: string) {
+    return `${namespace}${booleanStateDelimiter}${stateName}`;
 }
 
-export function createClassNameState(baseState: string, param: string) {
-    return `${baseState}${param.length}_${param}`;
+export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
+    return `${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${param}`;
 }
 
-export function createAttributeState(baseState: string, param: string) {
+export function createAttributeState(stateName: string, namespace: string, param: string) {
     // tslint:disable-next-line:max-line-length
-    return `class~="${baseState}${param.length}${stateDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
+    return `class~="${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
 }

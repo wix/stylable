@@ -4,6 +4,10 @@ import {
     StateValue
 } from './types';
 
+const stateMiddleDelimiter = '_';
+const booleanStateDelimiter = '__';
+const stateWithParamDelimiter = '___';
+
 export function create(
     root: string,
     namespace: string,
@@ -31,6 +35,15 @@ export function create(
         return stylesheet[localName];
     }
 
+    function createBooleanStateClassName(stateName: string) {
+        return `${namespace}${booleanStateDelimiter}${stateName}`;
+    }
+
+    function createStateWithParamClassName(stateName: string, param: string) {
+        // tslint:disable-next-line: max-line-length
+        return `${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
+    }
+
     function createStateClass(stateName: string, stateValue: StateValue): string {
         if (
             stateValue === false ||
@@ -41,14 +54,13 @@ export function create(
             return '';
         }
 
-        const baseState = createBaseState(stateName, namespace, stateValue === true ? false : true);
         if (stateValue === true) { // boolean state
-            return baseState;
+            return createBooleanStateClassName(stateName);
         }
 
         const valueAsString = stateValue.toString();
 
-        return createStateWithParam(baseState, valueAsString);
+        return createStateWithParamClassName(stateName, valueAsString);
     }
 
     stylesheet.$root = root;
@@ -89,12 +101,4 @@ export function create(
 
 export function createTheme(css: string, depth: number | string, id: number | string) {
     return { $css: css, $depth: depth, $id: id, $theme: true };
-}
-
-function createBaseState(stateName: string, namespace: string, withParam: boolean) {
-    return `${namespace.toLowerCase()}_${withParam ? '_' : ''}_${stateName}`;
-}
-
-function createStateWithParam(baseState: string, param: string) {
-    return `${baseState}${param.length}_${param.replace(/\s/gm, '_')}`;
 }

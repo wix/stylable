@@ -88,7 +88,7 @@ export class StylableDOMUtil {
     public getStateValueFromClassName(cls: string, baseState: string) {
         if (cls.startsWith(baseState)) {
             const param = cls.slice(baseState.length);
-            const paramIndex = param.indexOf(pseudoStates.stateDelimiter);
+            const paramIndex = param.indexOf(pseudoStates.stateMiddleDelimiter);
 
             if (paramIndex !== -1) {
                 return param.slice(paramIndex + 1);
