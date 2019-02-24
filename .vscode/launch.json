@@ -12,8 +12,6 @@
             "args": [
                 "-r",
                 "@ts-tools/node/r",
-                "-u",
-                "tdd",
                 "--timeout",
                 "999999",
                 "--colors",
@@ -29,8 +27,6 @@
             "args": [
                 "-r",
                 "@ts-tools/node/r",
-                "-u",
-                "tdd",
                 "--timeout",
                 "999999",
                 "--colors",
@@ -45,8 +41,6 @@
             "args": [
                 "-r",
                 "@ts-tools/node/r",
-                "-u",
-                "tdd",
                 "--timeout",
                 "999999",
                 "--colors",
