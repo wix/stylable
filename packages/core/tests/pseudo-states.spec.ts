@@ -469,55 +469,6 @@ describe('pseudo-states', () => {
         });
 
         describe('boolean', () => {
-
-            it('should transfrom to lowercase stylable data-attribute selector [data-NS-state]', () => {
-                const res = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .my-class {
-                                -st-states: state1, State2;
-                            }
-                            .my-class:state1 {}
-                            .my-class:State2 {}
-                            `
-                        }
-                    }
-                });
-
-                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
-                expect(res).to.have.styleRules({
-                    1: '.entry--my-class[data-entry-state1] {}',
-                    2: '.entry--my-class[data-entry-state2] {}'
-                });
-            });
-
-            it('should transfrom to lowercase stylable data-attribute selector [data-NS-state]', () => {
-                const res = generateStylableResult({
-                    entry: `/entry.st.css`,
-                    files: {
-                        '/entry.st.css': {
-                            namespace: 'entry',
-                            content: `
-                            .my-class {
-                                -st-states: state1, State2;
-                            }
-                            .my-class:state1 {}
-                            .my-class:State2 {}
-                            `
-                        }
-                    }
-                });
-
-                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
-                expect(res).to.have.styleRules({
-                    1: '.entry--my-class[data-entry-state1] {}',
-                    2: '.entry--my-class[data-entry-state2] {}'
-                });
-            });
-
             it('should resolve nested pseudo-states', () => {
                 const res = generateStylableResult({
                     entry: '/entry.st.css',
@@ -539,7 +490,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry--root:not([data-entry-state1]) {}'
+                    1: '.entry--root:not(.entry__state1) {}'
                 });
             });
 
@@ -561,7 +512,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class[data-entry-state1] {}'
+                    1: '.entry--my-class.entry__state1 {}'
                 });
             });
         });
@@ -615,13 +566,36 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class[data-entry-state1="someString"] {}'
+                    1: '.entry--my-class.entry___state110_someString {}'
+                });
+            });
+
+            // tslint:disable-next-line: max-line-length
+            it('should use an attribute selector for illegal param syntax (and replaces spaces with underscoes)', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            .root {
+                                -st-states: state( string());
+                            }
+                            .root:state(user name) {}
+                            `
+                        }
+                    }
+                });
+
+                expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+                expect(res).to.have.styleRules({
+                    1: '.entry--root[class~="entry___state9_user_name"] {}'
                 });
             });
 
             describe('string', () => {
 
-                it('should transform string validator', () => {
+                it('should transform string type', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -639,11 +613,11 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="someString"] {}'
+                        1: '.entry--my-class.entry___state110_someString {}'
                     });
                 });
 
-                it('should support default values for string validator', () => {
+                it('should support default values for string type', () => {
                     const res = generateStylableResult({
                         entry: `/entry.st.css`,
                         files: {
@@ -661,7 +635,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-statewithdefault="myDefault String"] {}'
+                        1: '.entry--my-class[class~="entry___stateWithDefault16_myDefault_String"] {}'
                     });
                 });
 
@@ -687,7 +661,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-statewithdefault="username"] {}'
+                        1: '.entry--my-class.entry___stateWithDefault8_username {}'
                     });
                 });
 
@@ -710,7 +684,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                            1: '.entry--my-class.entry___state18_userName {}'
                         });
                     });
 
@@ -738,7 +712,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="failingParameter"] {}'
+                            1: '.entry--my-class.entry___state116_failingParameter {}'
                         });
                     });
 
@@ -760,7 +734,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                            1: '.entry--my-class.entry___state18_userName {}'
                         });
                     });
 
@@ -786,7 +760,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="userName"] {}'
+                            1: '.entry--my-class.entry___state18_userName {}'
                         });
                     });
 
@@ -815,7 +789,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="wrongState"] {}'
+                            1: '.entry--my-class.entry___state110_wrongState {}'
                         });
                     });
 
@@ -837,7 +811,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                            1: '.entry--my-class.entry___state14_user {}'
                         });
                     });
 
@@ -865,7 +839,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                            1: '.entry--my-class.entry___state14_user {}'
                         });
                     });
 
@@ -893,7 +867,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                            1: '.entry--my-class.entry___state14_user {}'
                         });
                     });
 
@@ -922,7 +896,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="user"] {}'
+                            1: '.entry--my-class.entry___state14_user {}'
                         });
                     });
 
@@ -971,7 +945,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="42"] {}'
+                        1: '.entry--my-class[class~="entry___state12_42"] {}'
                     });
                 });
 
@@ -1023,7 +997,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-state1="blah"] {}'
+                        1: '.entry--my-class.entry___state14_blah {}'
                     });
                 });
 
@@ -1077,7 +1051,7 @@ describe('pseudo-states', () => {
                         }
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="1"] {}'
+                            1: '.entry--my-class[class~="entry___state11_1"] {}'
                         });
                     });
 
@@ -1106,7 +1080,7 @@ describe('pseudo-states', () => {
                         }
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="42"] {}'
+                            1: '.entry--my-class[class~="entry___state12_42"] {}'
                         });
                     });
 
@@ -1134,7 +1108,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="42"] {}'
+                            1: '.entry--my-class[class~="entry___state12_42"] {}'
                         });
                     });
 
@@ -1156,7 +1130,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry--my-class[data-entry-state1="40"] {}'
+                            1: '.entry--my-class[class~="entry___state12_40"] {}'
                         });
                     });
                 });
@@ -1231,7 +1205,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-size="small"] {}'
+                        1: '.entry--my-class.entry___size5_small {}'
                     });
                 });
 
@@ -1257,7 +1231,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-size="small"] {}'
+                        1: '.entry--my-class.entry___size5_small {}'
                     });
                 });
 
@@ -1285,7 +1259,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-size="huge"] {}'
+                        1: '.entry--my-class.entry___size4_huge {}'
                     });
                 });
             });
@@ -1309,7 +1283,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-category~="movie"] {}'
+                        1: '.entry--my-class.entry___category5_movie {}'
                     });
                 });
 
@@ -1334,7 +1308,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-category~="disco"] {}'
+                        1: '.entry--my-class.entry___category5_disco {}'
                     });
                 });
 
@@ -1362,7 +1336,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry--my-class[data-entry-category~="one two"] {}'
+                        1: '.entry--my-class[class~="entry___category7_one_two"] {}'
                     });
                 });
             });
@@ -1447,7 +1421,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class[data-inner-my-state] {}'
+                    1: '.entry--my-class.inner__my-state {}'
                 });
             });
 
@@ -1502,8 +1476,8 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    2: '.entry--direct[data-entry-my-state] {}',
-                    3: '.entry--proxy[data-entry-my-state] {}'
+                    2: '.entry--direct.entry__my-state {}',
+                    3: '.entry--proxy.entry__my-state {}'
                 });
             });
 
@@ -1545,7 +1519,7 @@ describe('pseudo-states', () => {
 
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    0: '.entry--root .element--root[data-element-disabled]{}'
+                    0: '.entry--root .element--root.element__disabled{}'
                 });
 
             });
@@ -1580,8 +1554,8 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry--local .imported--inner[data-imported-my-state] {}',
-                    2: '.imported--root .imported--inner[data-imported-my-state] {}'
+                    1: '.entry--local .imported--inner.imported__my-state {}',
+                    2: '.imported--root .imported--inner.imported__my-state {}'
                 });
             });
 
@@ -1626,7 +1600,7 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry--my-class .type--element[data-withstate-my-state] {}'
+                    1: '.entry--my-class .type--element.withState__my-state {}'
                 });
             });
         });
@@ -1652,7 +1626,7 @@ describe('pseudo-states', () => {
                 });
 
                 expect(res).to.have.mediaQuery(0).with.styleRules({
-                    1: '.entry--my-class[data-entry-my-state] {}'
+                    1: '.entry--my-class.entry__my-state {}'
                 });
             });
 
@@ -1683,7 +1657,7 @@ describe('pseudo-states', () => {
 
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    2: '.entry--x[data-entry-disabled] {}'
+                    2: '.entry--x.entry__disabled {}'
                 });
 
             });
@@ -1733,7 +1707,7 @@ describe('pseudo-states', () => {
                 // result.meta.outputAst.toString();
                 expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
                 expect(result).to.have.styleRules({
-                    1: '.entry--menu1 .menu--button[data-menu-state] {}'
+                    1: '.entry--menu1 .menu--button.menu__state {}'
                 });
 
             });
@@ -1799,13 +1773,13 @@ describe('pseudo-states', () => {
             `, [{ message: 'override "-st-states" on typed rule "root"', file: 'main.css' }]);
         });
 
-        it('should warn when defining a state starting with "--"', () => {
+        it('should warn when defining a state starting with a "-"', () => {
             expectWarnings(`
                 .root {
-                    |-st-states: $--someState$|;
+                    |-st-states: $-someState$|;
                 }
             `, [{
-                message: stateErrors.STATE_VARIABLE_NAME_CLASH('--someState'),
+                message: stateErrors.STATE_STARTS_WITH_HYPHEN('-someState'),
                 file: 'main.css',
                 severity: 'error'
             }]);

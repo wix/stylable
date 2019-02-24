@@ -1,122 +1,102 @@
 import {
-    AttributeMap,
-    CSSVarMap,
-    CSSVarMappingRuntimeType,
-    InheritedAttributes,
     RuntimeStylesheet,
-    StateMap
+    StateMap,
+    StateValue
 } from './types';
+
+const stateMiddleDelimiter = '_';
+const booleanStateDelimiter = '__';
+const stateWithParamDelimiter = '___';
 
 export function create(
     root: string,
     namespace: string,
-    locals: Partial<RuntimeStylesheet>,
+    locals: Record<string, string>,
     css: string,
     depth: number,
     id: string | number
 ): RuntimeStylesheet {
-    const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
+    const stylesheet: Partial<RuntimeStylesheet> = locals;
 
-    function cssStates(stateMapping: StateMap) {
-        return stateMapping
-            ? Object.keys(stateMapping).reduce(
-                  (states, key) => {
-                      const stateValue = stateMapping[key];
-
-                      if (stateValue === undefined || stateValue === null || stateValue === false) {
-                          return states;
-                      }
-
-                      states[dataNamespace + key.toLowerCase()] = stateValue;
-
-                      return states;
-                  }, {} as StateMap
-              )
-            : {};
-    }
-
-    function declarationToString(this: CSSVarMappingRuntimeType): string {
-        return Object.keys(this).reduce((res: string, prop: string) => {
-            const value = this[prop];
-            if (typeof value === 'string') {
-                res += `${prop}: ${value}; `;
+    function cssStates(stateMapping?: StateMap | null): string {
+        const classNames = [];
+        for (const stateName in stateMapping) {
+            const stateValue = stateMapping[stateName];
+            const stateClass = createStateClass(stateName, stateValue);
+            if (stateClass) {
+                classNames.push(stateClass);
             }
+        }
 
-            return res;
-        }, '');
-    }
-
-    function cssVars(cssVarsMapping: CSSVarMap) {
-        const res: CSSVarMappingRuntimeType = {
-            toString: declarationToString
-        };
-
-        return Object.keys(cssVarsMapping).reduce(
-            (res: CSSVarMap, propName: string) => {
-                if (propName.startsWith('--') && locals[propName]) {
-                    res[locals[propName] as string] = cssVarsMapping[propName];
-                } else {
-                    res[propName] = cssVarsMapping[propName];
-                }
-
-                return res;
-            },
-            res as CSSVarMap
-        );
+        return classNames.join(' ');
     }
 
     function get(localName: string) {
-        return locals[localName];
+        return stylesheet[localName];
     }
 
-    function mapClasses(className: string) {
-        return className
-            .split(/\s+/g)
-            .map(className => get(className) || className)
-            .join(' ');
+    function createBooleanStateClassName(stateName: string) {
+        return `${namespace}${booleanStateDelimiter}${stateName}`;
     }
 
-    locals.$root = root;
-    locals.$namespace = namespace;
-    locals.$depth = depth;
-    locals.$id = id;
-    locals.$css = css;
+    function createStateWithParamClassName(stateName: string, param: string) {
+        // tslint:disable-next-line: max-line-length
+        return `${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
+    }
 
-    locals.$get = get;
-    locals.$cssStates = cssStates;
-    locals.$cssVars = cssVars;
+    function createStateClass(stateName: string, stateValue: StateValue): string {
+        if (
+            stateValue === false ||
+            stateValue === undefined ||
+            stateValue === null ||
+            stateValue !== stateValue // check NaN
+        ) {
+            return '';
+        }
 
-    function stylable_runtime_stylesheet(
-        className: string,
-        states: StateMap,
-        inheritedAttributes: InheritedAttributes
-    ) {
-        className = className ? mapClasses(className) : '';
+        if (stateValue === true) { // boolean state
+            return createBooleanStateClassName(stateName);
+        }
 
-        const base: AttributeMap = cssStates(states);
+        const valueAsString = stateValue.toString();
 
-        if (inheritedAttributes) {
-            for (const k in inheritedAttributes) {
-                if (k.match(/^data-/)) {
-                    base[k] = inheritedAttributes[k];
+        return createStateWithParamClassName(stateName, valueAsString);
+    }
+
+    stylesheet.$root = root;
+    stylesheet.$namespace = namespace;
+    stylesheet.$depth = depth;
+    stylesheet.$id = id;
+    stylesheet.$css = css;
+
+    stylesheet.$get = get;
+    stylesheet.$cssStates = cssStates;
+
+    function stylable_runtime_stylesheet(): string {
+        const classNames = [];
+
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < arguments.length; i++) {
+            const item = arguments[i];
+
+            if (typeof item === 'string') {
+                classNames.push(item);
+            } else if (i >= 1) {
+                for (const stateName in item) {
+                    const stateValue = item[stateName];
+                    const stateClass = createStateClass(stateName, stateValue);
+                    if (stateClass) {
+                        classNames.push(stateClass);
+                    }
                 }
             }
-
-            if (inheritedAttributes.className) {
-                className += ' ' + inheritedAttributes.className;
-            }
         }
-
-        if (className) {
-            base.className = className;
-        }
-
-        return base;
+        return classNames.join(' ');
     }
 
-    Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
+    Object.setPrototypeOf(stylable_runtime_stylesheet, stylesheet);
 
-    return stylable_runtime_stylesheet as RuntimeStylesheet;
+    return stylable_runtime_stylesheet as any;
 }
 
 export function createTheme(css: string, depth: number | string, id: number | string) {

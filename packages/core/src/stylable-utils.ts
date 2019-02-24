@@ -354,3 +354,8 @@ export function generateScopedCSSVar(namespace: string, varName: string) {
 export function isCSSVarProp(value: string) {
     return value.startsWith('--');
 }
+
+export function isValidClassName(className: string) {
+    const test = /^-?[_a-zA-Z]+[_a-zA-Z0-9-]*$/g; // checks valid classname
+    return !!className.match(test);
+}

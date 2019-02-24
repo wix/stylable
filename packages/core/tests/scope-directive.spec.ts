@@ -224,7 +224,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             const rule = meta.outputAst!.nodes![1] as Rule;
-            expect(rule.selector).to.equal('.entry--root[data-imported-mystate]');
+            expect(rule.selector).to.equal('.entry--root.imported__myState');
         });
 
         it('scope with media queries', () => {

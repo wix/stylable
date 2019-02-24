@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { JSDOM } = require('jsdom');
+import { JSDOM } from 'jsdom';
 import { RuntimeRenderer } from '../../src/css-runtime-renderer';
 
 function assertStyle(node: Element, { $css, key }: { $css: string; key: string }) {

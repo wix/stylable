@@ -69,7 +69,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--y[data-base-disabled]', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry--y.base__disabled', 'color: red');
     });
 
     it('transform state form extended root when used as mixin', () => {
@@ -112,7 +112,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--y[data-base-disabled]', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry--y.base__disabled', 'color: red');
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {

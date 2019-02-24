@@ -35,7 +35,7 @@ describe(`(${project})`, () => {
             {
                 id: './src/index.st.css',
                 depth: '3',
-                css: '.s0[data-o0-x]{font-family:MyFont}.s1{background:#00f}'
+                css: '.s0.o0__x{font-family:MyFont}.s1{background:#00f}'
             }
         ]);
     });

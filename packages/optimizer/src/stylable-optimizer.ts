@@ -1,6 +1,6 @@
 import { parseSelector, Pojo, SelectorAstNode, StylableResults, traverseNode } from '@stylable/core';
 import CleanCSS from 'clean-css';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
 
@@ -46,7 +46,8 @@ export class StylableOptimizer {
             this.classNameOptimizer.optimizeAstAndExports(
                 outputAst,
                 jsExports,
-                Object.keys(meta.classes)
+                Object.keys(meta.classes),
+                meta.namespace
             );
         }
     }

@@ -1,4 +1,4 @@
-import { parseSelector, Pojo, stringifySelector, traverseNode } from '@stylable/core';
+import { parseSelector, Pojo, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
 import * as postcss from 'postcss';
 
 export class StylableClassNameOptimizer {
@@ -8,14 +8,17 @@ export class StylableClassNameOptimizer {
             names: {}
         };
     }
-    public rewriteSelector(selector: string) {
+    public rewriteSelector(selector: string, namespace: string) {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
             if (node.type === 'class') {
-                if (!this.context.names[node.name]) {
-                    this.generateName(node.name);
+                if (!node.name.startsWith(`${namespace}${pseudoStates.booleanStateDelimiter}`)) {
+                    // is not a state
+                    if (!this.context.names[node.name]) {
+                        this.generateName(node.name);
+                    }
+                    node.name = this.context.names[node.name];
                 }
-                node.name = this.context.names[node.name];
             }
         });
         return stringifySelector(ast);
@@ -23,9 +26,14 @@ export class StylableClassNameOptimizer {
     public generateName(name: string) {
         return (this.context.names[name] = 's' + Object.keys(this.context.names).length);
     }
-    public optimizeAstAndExports(ast: postcss.Root, exported: Pojo<string>, classes = Object.keys(exported)) {
+    public optimizeAstAndExports(
+        ast: postcss.Root,
+        exported: Pojo<string>,
+        classes = Object.keys(exported),
+        namespace: string
+    ) {
         ast.walkRules(rule => {
-            rule.selector = this.rewriteSelector(rule.selector);
+            rule.selector = this.rewriteSelector(rule.selector, namespace);
         });
         classes.forEach(originName => {
             if (exported[originName]) {

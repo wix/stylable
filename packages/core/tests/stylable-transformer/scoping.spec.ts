@@ -556,9 +556,9 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![1] as postcss.Rule).selector)
-                .to.equal('.entry--root .Deep--x[data-comp-hovered]');
+                .to.equal('.entry--root .Deep--x.Comp__hovered');
             expect((result.nodes![2] as postcss.Rule).selector)
-                .to.equal('.entry--root .Deep--x .Comp--y[data-y-hovered]');
+                .to.equal('.entry--root .Deep--x .Comp--y.Y__hovered');
 
         });
 
