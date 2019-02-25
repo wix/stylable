@@ -12,9 +12,9 @@ export function memoryFS() {
     wrap('statSync', stat);
     wrap('mkdir', mkdir);
 
-    type UnknownFunction = (...args: Array<unknown>) => unknown;
+    type UnknownFunction = (...args: unknown[]) => unknown;
 
-    function mkdir(fn: UnknownFunction, args: Array<unknown>) {
+    function mkdir(fn: UnknownFunction, args: unknown[]) {
         // mfs doesn't support supplying the mode!
         if (typeof args[2] === 'function') {
             return fn.apply(mfs, [args[0], args[2]]);
@@ -23,7 +23,7 @@ export function memoryFS() {
         }
     }
 
-    function writeFile(fn: UnknownFunction, args: Array<unknown>) {
+    function writeFile(fn: UnknownFunction, args: unknown[]) {
         const filePath = args[0];
         const result = fn.apply(mfs, args);
         lastModified[filePath as string] = new Date();
