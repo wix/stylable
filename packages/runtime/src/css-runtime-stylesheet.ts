@@ -1,7 +1,9 @@
+import { RuntimeRenderer } from './css-runtime-renderer';
 import {
     RuntimeStylesheet,
     StateMap,
-    StateValue
+    StateValue,
+    StylableExports
 } from './types';
 
 const stateMiddleDelimiter = '_';
@@ -11,12 +13,30 @@ const stateWithParamDelimiter = '___';
 export function create(
     root: string,
     namespace: string,
-    locals: Record<string, string>,
+    exports: StylableExports,
     css: string,
     depth: number,
-    id: string | number
+    id: string | number,
+    renderer: RuntimeRenderer | null
 ): RuntimeStylesheet {
-    const stylesheet: Partial<RuntimeStylesheet> = locals;
+
+    const stylesheet: RuntimeStylesheet = {
+        root,
+        namespace,
+        classes: exports.classes,
+        keyframes: exports.keyframes,
+        vars: exports.vars,
+        stVars: exports.stVars,
+        cssStates,
+        style,
+        $id: id,
+        $depth: depth,
+        $css: css
+    };
+
+    if (renderer) {
+        renderer.register(stylesheet);
+    }
 
     function cssStates(stateMapping?: StateMap | null): string {
         const classNames = [];
@@ -27,12 +47,7 @@ export function create(
                 classNames.push(stateClass);
             }
         }
-
         return classNames.join(' ');
-    }
-
-    function get(localName: string) {
-        return stylesheet[localName];
     }
 
     function createBooleanStateClassName(stateName: string) {
@@ -63,16 +78,7 @@ export function create(
         return createStateWithParamClassName(stateName, valueAsString);
     }
 
-    stylesheet.$root = root;
-    stylesheet.$namespace = namespace;
-    stylesheet.$depth = depth;
-    stylesheet.$id = id;
-    stylesheet.$css = css;
-
-    stylesheet.$get = get;
-    stylesheet.$cssStates = cssStates;
-
-    function stylable_runtime_stylesheet(): string {
+    function style() {
         const classNames = [];
 
         // tslint:disable-next-line:prefer-for-of
@@ -94,11 +100,9 @@ export function create(
         return classNames.join(' ');
     }
 
-    Object.setPrototypeOf(stylable_runtime_stylesheet, stylesheet);
-
-    return stylable_runtime_stylesheet as any;
+    return stylesheet;
 }
 
-export function createTheme(css: string, depth: number | string, id: number | string) {
+export function createRenderable(css: string, depth: number | string, id: number | string) {
     return { $css: css, $depth: depth, $id: id, $theme: true };
 }

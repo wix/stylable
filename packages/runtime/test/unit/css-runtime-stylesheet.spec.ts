@@ -3,28 +3,40 @@ import { create } from '../../src/css-runtime-stylesheet';
 
 describe('Stylable runtime stylesheet', () => {
     it('creates stylesheet with mapping ', () => {
-        const style = create(
+        const stylesheet = create(
             'root',
             'entry',
-            { root: 'entry--root' },
+            {
+                classes: { root: 'entry--root' },
+                keyframes: {},
+                vars: {},
+                stVars: {}
+             },
             '',
             0,
-            'test-stylesheet.st.css'
+            'test-stylesheet.st.css',
+            null
         );
 
-        expect(style.root).to.equal('entry--root');
+        expect(stylesheet.classes.root).to.equal('entry--root');
     });
 
     it('creates stylesheet with css vars ', () => {
-        const style = create(
+        const stylesheet = create(
             'root',
             'entry',
-            { 'root': 'entry--root', '--myVar': '--entry-myVar' },
+            {
+                classes: { root: 'entry--root' },
+                keyframes: {},
+                vars: { '--myVar': '--entry-myVar' },
+                stVars: {}
+             },
             '',
             0,
-            'test-stylesheet.st.css'
+            'test-stylesheet.st.css',
+            null
         );
 
-        expect(style['--myVar']).to.equal('--entry-myVar');
+        expect(stylesheet.vars['--myVar']).to.equal('--entry-myVar');
     });
 });
