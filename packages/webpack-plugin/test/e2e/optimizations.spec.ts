@@ -42,19 +42,21 @@ describe(`(${project})`, () => {
 
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const { fontFamily, backgroundColor, exports } = await page.evaluate(() => {
+        const { fontFamily, backgroundColor, classes, stVars, $namespace } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
                 fontFamily: getComputedStyle(document.documentElement!).fontFamily,
-                exports: Object.getPrototypeOf((window as any).stylableIndex)
+                classes: (window as any).stylableClasses,
+                $namespace: (window as any).$namespace,
+                stVars: (window as any).stVars
             };
         });
 
-        expect(exports.$namespace).to.eql('o0');
-        expect(exports.myValue).to.eql('red');
-        expect(exports.root).to.eql('s0');
-        expect(exports.used).to.eql('s1');
-        expect(exports.empty).to.eql('s2');
+        expect($namespace).to.eql('o0');
+        expect(stVars.myValue).to.eql('red');
+        expect(classes.root).to.eql('s0');
+        expect(classes.used).to.eql('s1');
+        expect(classes.empty).to.eql('s2');
 
         expect(backgroundColor).to.eql('rgb(0, 0, 255)');
         expect(fontFamily).to.eql('MyFont');

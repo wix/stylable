@@ -1,8 +1,8 @@
-import index from "./index.st.css";
+import { classes } from "./index.st.css";
 (async () => {
-  const { style } = await import("lib");
-  document.documentElement.classList.add(index.root);
-  document.documentElement.classList.add(style.root);
+  const { classes: libClasses } = await import("lib");
+  document.documentElement.classList.add(classes.root);
+  document.documentElement.classList.add(libClasses.root);
 })();
 
 // document.documentElement.classList.add(getName());
