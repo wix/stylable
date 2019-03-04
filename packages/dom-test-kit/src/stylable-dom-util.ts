@@ -9,7 +9,7 @@ export interface PartialElement {
 }
 
 export class StylableDOMUtil {
-    constructor(private style: RuntimeStylesheet, private root?: Element) {}
+    constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
@@ -27,14 +27,14 @@ export class StylableDOMUtil {
         const ast = parseSelector(selector);
         traverseNode(ast, (node: any) => {
             if (node.type === 'class') {
-                node.name = this.style[node.name] || node.name;
+                node.name = this.stylesheet.classes[node.name] || node.name;
             } else if (node.type === 'pseudo-class') {
                 const param = node.content;
                 if (!param) {
                     node.type = 'class';
-                    node.name = this.style.$cssStates({ [node.name]: true });
+                    node.name = this.stylesheet.cssStates({ [node.name]: true });
                 } else {
-                    const state = this.style.$cssStates({ [node.name]: param });
+                    const state = this.stylesheet.cssStates({ [node.name]: param });
                     if (isValidClassName(param)) {
                         node.type = 'class';
                         node.name = state;
@@ -59,7 +59,7 @@ export class StylableDOMUtil {
         stateName: string,
         param: StateValue = true
     ): boolean {
-        const stateClass = this.style.$cssStates({ [stateName]: param });
+        const stateClass = this.stylesheet.cssStates({ [stateName]: param });
         return element.classList.contains(stateClass);
     }
 
@@ -68,7 +68,7 @@ export class StylableDOMUtil {
             return null;
         }
 
-        const booleanState = this.style.$cssStates({ [stateName]: true });
+        const booleanState = this.stylesheet.cssStates({ [stateName]: true });
         if (element.classList.contains(booleanState)) {
             return true;
         }
@@ -100,6 +100,6 @@ export class StylableDOMUtil {
 
     public getBaseStateWithParam(stateName: string) {
         const singleCharState = 'x';
-        return this.style.$cssStates({ [stateName]: singleCharState }).slice(0, -3);
+        return this.stylesheet.cssStates({ [stateName]: singleCharState }).slice(0, -3);
     }
 }
