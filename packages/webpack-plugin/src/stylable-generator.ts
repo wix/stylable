@@ -130,7 +130,7 @@ export class StylableGenerator {
             renderableOnly
         );
 
-         return new OriginalSource(moduleSource, module.resource);
+        return new OriginalSource(moduleSource, module.resource);
     }
     public getCSSInJSWithAssets(
         outputAst: postcss.Root,
