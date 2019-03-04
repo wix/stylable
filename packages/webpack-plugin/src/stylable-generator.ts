@@ -1,4 +1,12 @@
-import { isAsset, makeAbsolute, processDeclarationUrls, Stylable, StylableMeta } from '@stylable/core';
+import {
+    isAsset,
+    makeAbsolute,
+    processDeclarationUrls,
+    Stylable,
+    StylableMeta,
+    StylableResults
+} from '@stylable/core';
+import { generateModuleSource } from '@stylable/module-utils';
 import { EOL } from 'os';
 import path from 'path';
 import postcss from 'postcss';
@@ -12,29 +20,30 @@ export class StylableGenerator {
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
         private options: Partial<StylableGeneratorOptions>
-    ) { }
+    ) {}
 
     public generate(module: StylableModule, _dependencyTemplates: any, runtimeTemplate: any) {
         if (module.type === 'stylable-raw' || !module.buildInfo.stylableMeta) {
             return module.originalSource();
         }
-        const { meta, exports } = this.transform(module);
+        const stylableResult = this.transform(module);
+        const { meta, exports } = stylableResult;
         const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
         const imports: string[] = [];
 
         const css = this.options.includeCSSInJS
             ? this.getCSSInJSWithAssets(
-                meta.outputAst!,
-                module =>
-                    `" + __webpack_require__(${runtimeTemplate.moduleId({
-                        module,
-                        request: module.request
-                    })}) + "`,
-                (this.compilation as any).options.context,
-                module.resource,
-                true,
-                module.buildInfo.optimize.minify
-            )
+                  meta.outputAst!,
+                  module =>
+                      `" + __webpack_require__(${runtimeTemplate.moduleId({
+                          module,
+                          request: module.request
+                      })}) + "`,
+                  (this.compilation as any).options.context,
+                  module.resource,
+                  true,
+                  module.buildInfo.optimize.minify
+              )
             : `""`;
 
         this.reportDiagnostics(meta);
@@ -48,20 +57,11 @@ export class StylableGenerator {
                       request: module.request
                   });
 
-        const originalSource = isImportedByNonStylable
-            ? this.createModuleSource(module, imports, 'create', [
-                JSON.stringify(meta.root),
-                JSON.stringify(meta.namespace),
-                JSON.stringify(exports),
-                css,
-                depth,
-                id
-            ])
-            : this.createModuleSource(module, imports, 'createTheme', [css, depth, id]);
-        return new ReplaceSource(originalSource);
+        return new ReplaceSource(
+            this.createModuleSource(module, id, stylableResult, css, depth, !isImportedByNonStylable)
+        );
     }
     public transform(module: StylableModule) {
-
         const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
         const outputAst = results.meta.outputAst;
 
@@ -106,28 +106,31 @@ export class StylableGenerator {
             }
         });
     }
-    public createModuleSource(module: StylableModule, imports: string[], _createMethod: any, args: string[]) {
-        return new OriginalSource(
-            [
-                `Object.defineProperty(${module.exportsArgument}, "__esModule", { value: true })`,
-                imports.join(EOL),
-                `${module.exportsArgument}.default = ${WEBPACK_STYLABLE}.create(`,
-                args.map(_ => '  ' + _).join(',' + EOL),
-                `);`,
-                this.options.includeCSSInJS
-                    ? `${WEBPACK_STYLABLE}.$.register(${module.exportsArgument}.default)`
-                    : '',
-                this.options.experimentalHMR
-                    ? `
-                    // Webpack HMR
-                    if (module && module.hot) {
-                        module.hot.accept();
-                    }
-                    `
-                    : ''
-            ].join(EOL),
-            module.resource
+    public createModuleSource(
+        module: StylableModule,
+        moduleId: string,
+        stylableResult: StylableResults,
+        css: string,
+        depth: string | number,
+        renderableOnly = false
+    ) {
+
+        const moduleSource = generateModuleSource(
+            stylableResult,
+            moduleId,
+            [],
+            this.options.includeCSSInJS ? `${WEBPACK_STYLABLE}.$` : 'null',
+            `${WEBPACK_STYLABLE}`,
+            css,
+            typeof depth === 'number' ? depth.toString() : depth,
+            'module.' + module.exportsArgument,
+            this.options.experimentalHMR
+                ? ` // Webpack HMR if (module && module.hot) { module.hot.accept(); }`
+                : '',
+            renderableOnly
         );
+
+         return new OriginalSource(moduleSource, module.resource);
     }
     public getCSSInJSWithAssets(
         outputAst: postcss.Root,
@@ -152,7 +155,9 @@ export class StylableGenerator {
                 }
             }
         };
-        outputAst.walkDecls((decl: postcss.Declaration) => processDeclarationUrls(decl, onUrl, true));
+        outputAst.walkDecls((decl: postcss.Declaration) =>
+            processDeclarationUrls(decl, onUrl, true)
+        );
         let targetCSS = outputAst.toString();
         if (minify && this.stylable.optimizer) {
             targetCSS = this.stylable.optimizer.minifyCSS(targetCSS);

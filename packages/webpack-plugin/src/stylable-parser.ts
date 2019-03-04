@@ -28,7 +28,7 @@ export class StylableParser {
         }
         const meta = this.stylable.process(state.module.resource);
         state.module.buildInfo.stylableMeta = meta;
-        // state.module.buildMeta.exportsType = "namespace";
+        // state.module.buildMeta.exportsType = 'namespace';
         meta.urls
             .filter(url => isAsset(url))
             .forEach(asset => {
