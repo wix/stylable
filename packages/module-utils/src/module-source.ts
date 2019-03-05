@@ -3,13 +3,13 @@ import { StylableResults } from '@stylable/core';
 export function generateModuleSource(
     stylableResult: StylableResults,
     moduleId: string,
-    imports: string[],
+    beforeModule: string[],
     renderer: string,
     createFunction: string,
     css: string,
     depth: string,
     exportsArgument: string,
-    afterExports: string,
+    afterModule: string,
     renderableOnly: boolean = false
 ): string {
     const { exports, meta } = stylableResult;
@@ -20,7 +20,7 @@ export function generateModuleSource(
         return `${createFunction}.createRenderable(${css}, ${depth}, ${moduleId});`;
     }
     return `
-${imports.join('\n')}
+${beforeModule.join('\n')}
 ${exportsArgument} = ${createFunction}.create(
     ${root},
     ${namespace},
@@ -31,6 +31,6 @@ ${exportsArgument} = ${createFunction}.create(
     ${renderer}
 
 );
-${afterExports}
+${afterModule}
 `;
 }
