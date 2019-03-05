@@ -829,9 +829,9 @@
     "@types/lodash" "*"
 
 "@types/lodash.upperfirst@^4.3.5":
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/@types/lodash.upperfirst/-/lodash.upperfirst-4.3.5.tgz#0e7aa3d258abf675273229a8ff3139e2042cc900"
-  integrity sha512-Rj3ciHtEEWBPOhGolfSAvqNtj9b+6/q3C5RwopPHmapOi00nLzpsZkKsYM6mNSWzNf5GKiVK6BmeV/Z5zA37rg==
+  version "4.3.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.upperfirst/-/lodash.upperfirst-4.3.6.tgz#36234bc7006e37a4d2603a64f4ffd7aae79f9a18"
+  integrity sha512-op4ctKkT1eD/Nt8MCPlN7O2IQrYWIcH1rOPHM86SKzbliLG50eVXM6+qzkdxtBV7DZb3W/1Up2+k43WK9F0Bgg==
   dependencies:
     "@types/lodash" "*"
 
