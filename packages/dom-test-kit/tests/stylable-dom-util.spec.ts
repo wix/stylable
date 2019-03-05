@@ -6,7 +6,7 @@ import { StylableDOMUtil } from '../src';
 describe('stylable-dom-utils', () => {
 
     // tslint:disable-next-line: max-line-length
-    const s = create('root', 'ns', { classes: {root: 'ns-root', x: 'ns--x', y: 'ns--y'}, keyframes: {}, vars: {}, stVars: {} }, '', 0, '0', null);
+    const s = create('ns', { classes: {root: 'ns-root', x: 'ns--x', y: 'ns--y'}, keyframes: {}, vars: {}, stVars: {} }, '', 0, '0', null);
 
     const util = new StylableDOMUtil(s);
 

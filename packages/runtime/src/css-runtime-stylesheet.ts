@@ -11,7 +11,6 @@ const booleanStateDelimiter = '__';
 const stateWithParamDelimiter = '___';
 
 export function create(
-    root: string,
     namespace: string,
     exports: StylableExports,
     css: string,
@@ -21,7 +20,6 @@ export function create(
 ): RuntimeStylesheet {
 
     const stylesheet: RuntimeStylesheet = {
-        root,
         namespace,
         classes: exports.classes,
         keyframes: exports.keyframes,

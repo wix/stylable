@@ -4,7 +4,6 @@ import { create } from '../../src/css-runtime-stylesheet';
 describe('Stylable runtime stylesheet', () => {
     it('creates stylesheet with mapping ', () => {
         const stylesheet = create(
-            'root',
             'entry',
             {
                 classes: { root: 'entry--root' },
@@ -23,7 +22,6 @@ describe('Stylable runtime stylesheet', () => {
 
     it('creates stylesheet with css vars ', () => {
         const stylesheet = create(
-            'root',
             'entry',
             {
                 classes: { root: 'entry--root' },
