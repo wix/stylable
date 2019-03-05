@@ -40,18 +40,11 @@ describe('require hook', () => {
         }).to.throw('Unexpected token');
     });
 
-    // it('should mark the generated module as an esm module', () => {
-    //     attachHook();
-    //     const m = require('./fixtures/test.st.css');
-    //     expect(m.__esModule).to.equal(true);
-    // });
-
     it('should generate namespaces with resolveNamespace relative to package root, name, version', () => {
         attachHook();
         const fileName = 'test';
         const relativePathFromRoot = 'test.st.css';
         const { name, version } = require('./fixtures/package.json');
-        // tslint:disable-next-line:max-line-length
         const expectedNamespace = fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
         const m = require('./fixtures/test.st.css');
         expect(m.namespace).to.equal(expectedNamespace);
