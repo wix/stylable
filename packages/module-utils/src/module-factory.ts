@@ -15,7 +15,7 @@ export function stylableModuleFactory(
         runtimeStylesheetId = 'module',
         injectCSS = true,
         renderableOnly = false
-    }: Partial<Options>
+    }: Partial<Options> = {}
 ) {
     const stylable = Stylable.create(stylableOptions);
 
