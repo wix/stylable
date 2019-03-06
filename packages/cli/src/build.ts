@@ -1,5 +1,5 @@
 import { isAsset, Stylable, StylableResults } from '@stylable/core';
-import { generateModuleSource } from '@stylable/node';
+import { generateModuleSource } from '@stylable/module-utils';
 import { dirname, join, relative, resolve } from 'path';
 import { Generator } from './default-generator';
 import { FileSystem, findFiles } from './find-files';
@@ -132,7 +132,13 @@ function buildSingleFile(
         `Read File Error: ${filePath}`
     );
     const res = stylable.transform(content, filePath);
-    const code = tryRun(() => generateModuleSource(res, true), `Transform Error: ${filePath}`);
+
+    const code = tryRun(() => generateModuleSource(res, 'module.id',
+        [`const runtime = require(${JSON.stringify('@stylable/runtime')})`],
+        `runtime.$`, `runtime`,
+        '', '-1', // ToDo: calc depth for node as well
+        'module.exports', '', false
+        ), `Transform Error: ${filePath}`);
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
     tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);

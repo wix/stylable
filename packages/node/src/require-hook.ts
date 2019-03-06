@@ -1,7 +1,7 @@
 import { StylableConfig } from '@stylable/core';
+import { stylableModuleFactory } from '@stylable/module-utils';
 import * as fs from 'fs';
 import { resolveNamespace } from './resolve-namespace';
-import { stylableModuleFactory } from './stylable-module-factory';
 
 export interface Options {
     matcher: (filename: string) => boolean;
@@ -21,7 +21,7 @@ export function attachHook({ matcher, afterCompile, stylableConfig, runtimePath 
         requireModule: require,
         resolveNamespace,
         ...stylableConfig
-    }, runtimePath);
+    }, { runtimePath });
 
     if (!matcher) {
         matcher = defaultStylableMatcher;

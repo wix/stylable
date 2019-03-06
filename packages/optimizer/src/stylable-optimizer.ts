@@ -45,7 +45,7 @@ export class StylableOptimizer {
         if (config.classNameOptimizations) {
             this.classNameOptimizer.optimizeAstAndExports(
                 outputAst,
-                jsExports,
+                jsExports.classes,
                 Object.keys(meta.classes),
                 meta.namespace
             );

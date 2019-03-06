@@ -1,3 +1,3 @@
-import('./index.st.css').then(style => {
-    document.body.classList.add(style.default.root);
+import('./index.st.css').then(({ classes }) => {
+    document.body.classList.add(classes.root);
 });

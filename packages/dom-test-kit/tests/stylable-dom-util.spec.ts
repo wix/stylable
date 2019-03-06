@@ -1,11 +1,12 @@
 import { create } from '@stylable/runtime';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { PartialElement, StylableDOMUtil } from '../src';
+import { StylableDOMUtil } from '../src';
 
 describe('stylable-dom-utils', () => {
 
-    const s = create('root', 'ns', { root: 'ns-root', x: 'ns--x', y: 'ns--y' }, '', 0, '0');
+    // tslint:disable-next-line: max-line-length
+    const s = create('ns', { classes: {root: 'ns-root', x: 'ns--x', y: 'ns--y'}, keyframes: {}, vars: {}, stVars: {} }, '', 0, '0', null);
 
     const util = new StylableDOMUtil(s);
 
@@ -49,7 +50,7 @@ describe('stylable-dom-utils', () => {
         it('hasStyleState returns true if the requested style state exists', () => {
             const document = window.document;
             const elem = document.createElement('a');
-            elem.classList.add(s.$cssStates({ loading: true }));
+            elem.classList.add(s.cssStates({ loading: true }));
 
             expect(util.hasStyleState(elem, 'loading')).to.equal(true);
         });
@@ -57,7 +58,7 @@ describe('stylable-dom-utils', () => {
         it('getStyleState returns the requested boolean style state value', () => {
             const document = window.document;
             const elem = document.createElement('a');
-            elem.classList.add(s.$cssStates({ loading: true }));
+            elem.classList.add(s.cssStates({ loading: true }));
 
             expect(util.getStyleState(elem, 'loading')).to.equal(true);
         });
@@ -65,7 +66,7 @@ describe('stylable-dom-utils', () => {
         it('getStyleState returns the requested string style state value', () => {
             const document = window.document;
             const elem = document.createElement('a');
-            elem.classList.add(s.$cssStates({ loading: 'value' }));
+            elem.classList.add(s.cssStates({ loading: 'value' }));
 
             expect(util.getStyleState(elem, 'loading')).to.equal('value');
         });

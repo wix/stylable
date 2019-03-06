@@ -1,11 +1,11 @@
-import style from "./button.st.css";
+import { classes } from "./button.st.css";
 const render = (label = "Button") => {
   const btn = document.createElement("button");
   const text = document.createElement("span");
   text.textContent = label;
   btn.appendChild(text);
-  btn.classList.add(style.root);
-  text.classList.add(style.text);
+  btn.classList.add(classes.root);
+  text.classList.add(classes.text);
   return btn;
 };
-export { style, render };
+export { classes, render };

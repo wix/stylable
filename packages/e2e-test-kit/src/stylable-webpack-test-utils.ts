@@ -51,7 +51,7 @@ export function evalStylableModule(stylableModule: MinimalStylableModule, requir
     code
   );
   const customRequire = (id: string) => {
-    if (id.match(/css-runtime-renderer.js$/)) {
+    if (id.match(/@stylable\/runtime$/)) {
       return new RuntimeRenderer();
     }
     if (id.match(/css-runtime-stylesheet.js$/)) {

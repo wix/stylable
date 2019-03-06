@@ -892,24 +892,6 @@ describe('diagnostics: warnings and errors', () => {
     });
 
     describe('transforms', () => {
-        it('should return warning if @keyframe symbol is used', () => {
-            const config = {
-                entry: '/main.st.css',
-                files: {
-                    '/main.st.css': {
-                        content: `
-                        .name {}
-                        |@keyframes $name$| {
-                            from {}
-                            to {}
-                        }`
-                    }
-                }
-            };
-            expectWarningsFromTransform(config,
-                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.st.css' }]);
-        });
-
         it('should not allow @keyframe of reserved words', () => {
             reservedKeyFrames.map(key => {
                 const config = {

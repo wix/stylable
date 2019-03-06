@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'simplest-project';
+const project = 'runtime-var-override-project';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(

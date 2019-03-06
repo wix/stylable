@@ -1,6 +1,6 @@
 import { createElement as el } from 'react';
-import style from './index.st.css';
+import { classes } from './index.st.css';
 
 export function Index() {
-    return el('div', { className: style.root }, 'Hello World');
+    return el('div', { className: classes.root }, 'Hello World');
 }
