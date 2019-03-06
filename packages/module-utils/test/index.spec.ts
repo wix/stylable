@@ -1,9 +1,10 @@
 import { expect } from 'chai';
+import path from 'path';
 import { moduleFactoryTestKit } from './test-kit';
 
 describe('Module Factory', () => {
     it('should create a module for a single (no import/resolution) stylable file', () => {
-        const testFile = '/entry.st.css';
+        const testFile = path.join(path.resolve('/'), '/entry.st.css');
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: '.root {}'
         });
@@ -20,7 +21,9 @@ describe('Module Factory', () => {
     });
 
     it('should create a module with cross file use', () => {
-        const testFile = '/entry.st.css';
+        const rootPath = path.resolve('/');
+        const testFile = path.join(rootPath, '/entry.st.css');
+        const importedFile = path.join(rootPath, '/imported.st.css');
 
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: `
@@ -33,7 +36,7 @@ describe('Module Factory', () => {
                 color: green;
             }
             `,
-            '/imported.st.css': '.part {}'
+            [importedFile]: '.part {}'
         });
 
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
