@@ -9,10 +9,10 @@ export class StylableClassNameOptimizer {
             names: {}
         };
     }
-    public rewriteSelector(selector: string) {
+    public rewriteSelector(selector: string, globals: Pojo<boolean> = {}) {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
-            if (node.type === 'class') {
+            if (node.type === 'class' && !globals[node.name]) {
                 if (!this.context.names[node.name]) {
                     this.generateName(node.name);
                 }
@@ -24,9 +24,14 @@ export class StylableClassNameOptimizer {
     public generateName(name: string) {
         return (this.context.names[name] = 's' + Object.keys(this.context.names).length);
     }
-    public optimizeAstAndExports(ast: postcss.Root, exported: Pojo<string>, classes = Object.keys(exported)) {
+    public optimizeAstAndExports(
+        ast: postcss.Root,
+        exported: Pojo<string>,
+        classes = Object.keys(exported),
+        globals: Pojo<boolean> = {}
+    ) {
         ast.walkRules(rule => {
-            rule.selector = this.rewriteSelector(rule.selector);
+            rule.selector = this.rewriteSelector(rule.selector, globals);
         });
         classes.forEach(originName => {
             if (exported[originName]) {
