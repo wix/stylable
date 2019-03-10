@@ -443,7 +443,7 @@ export class StylableTransformer {
                         type: 'class',
                         nodes: [],
                         name: origin.name
-                    }, origin.name, undefined, undefined, originMeta.parent);
+                    }, origin.name, undefined, undefined, originMeta);
                     originSymbol = current.classes[origin.name];
                     symbol = next.symbol;
                     current = next.meta;

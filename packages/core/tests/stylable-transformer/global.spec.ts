@@ -108,13 +108,14 @@ describe('Stylable postcss transform (Global)', () => {
                     content: `
                         :import {
                             -st-from: "./mixin.st.css";
-                            -st-named: test;
+                            -st-named: test, mix;
                         }
                         .root {}
                         .test {}
                         .x { -st-global: '.a .b'; }
                         :global(.c .d) {}
                         :global(.e) {}
+                        .mixIntoMe { -st-mixin: mix; }
                     `
                 },
                 '/mixin.st.css': {
@@ -123,6 +124,8 @@ describe('Stylable postcss transform (Global)', () => {
                         .test {
                             -st-global: ".global-test";
                         }
+
+                        .mix :global(.global-test2) {}
                     `
                 }
             }
@@ -130,6 +133,7 @@ describe('Stylable postcss transform (Global)', () => {
 
         expect(meta.globals).to.eql({
             'global-test': true,
+            'global-test2': true,
             'a': true,
             'b': true,
             'c': true,
@@ -140,5 +144,7 @@ describe('Stylable postcss transform (Global)', () => {
         expect((meta.outputAst!.nodes![2] as postcss.Rule).selector).to.equal('.a .b');
         expect((meta.outputAst!.nodes![3] as postcss.Rule).selector).to.equal('.c .d');
         expect((meta.outputAst!.nodes![4] as postcss.Rule).selector).to.equal('.e');
+        expect((meta.outputAst!.nodes![5] as postcss.Rule).selector).to.equal('.style--mixIntoMe');
+        expect((meta.outputAst!.nodes![6] as postcss.Rule).selector).to.equal('.style--mixIntoMe .global-test2');
     });
 });
