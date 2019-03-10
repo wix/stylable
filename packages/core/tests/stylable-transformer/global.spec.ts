@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { generateStylableRoot } from '../utils/generate-test-util';
+import { generateStylableResult, generateStylableRoot } from '../utils/generate-test-util';
 
 describe('Stylable postcss transform (Global)', () => {
 
@@ -96,5 +96,55 @@ describe('Stylable postcss transform (Global)', () => {
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style--root');
 
+    });
+
+    it('should register to all global classes to "meta.globals"', () => {
+
+        const { meta } = generateStylableResult({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'style',
+                    content: `
+                        :import {
+                            -st-from: "./mixin.st.css";
+                            -st-named: test, mix;
+                        }
+                        .root {}
+                        .test {}
+                        .x { -st-global: '.a .b'; }
+                        :global(.c .d) {}
+                        :global(.e) {}
+                        .mixIntoMe { -st-mixin: mix; }
+                    `
+                },
+                '/mixin.st.css': {
+                    namespace: 'mixin',
+                    content: `
+                        .test {
+                            -st-global: ".global-test";
+                        }
+
+                        .mix :global(.global-test2) {}
+                    `
+                }
+            }
+        });
+
+        expect(meta.globals).to.eql({
+            'global-test': true,
+            'global-test2': true,
+            'a': true,
+            'b': true,
+            'c': true,
+            'd': true,
+            'e': true
+        });
+        expect((meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal('.global-test');
+        expect((meta.outputAst!.nodes![2] as postcss.Rule).selector).to.equal('.a .b');
+        expect((meta.outputAst!.nodes![3] as postcss.Rule).selector).to.equal('.c .d');
+        expect((meta.outputAst!.nodes![4] as postcss.Rule).selector).to.equal('.e');
+        expect((meta.outputAst!.nodes![5] as postcss.Rule).selector).to.equal('.style--mixIntoMe');
+        expect((meta.outputAst!.nodes![6] as postcss.Rule).selector).to.equal('.style--mixIntoMe .global-test2');
     });
 });

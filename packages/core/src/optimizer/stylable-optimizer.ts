@@ -48,7 +48,8 @@ export class StylableOptimizer {
             this.classNameOptimizer.optimizeAstAndExports(
                 outputAst,
                 jsExports,
-                Object.keys(meta.classes)
+                Object.keys(meta.classes),
+                meta.globals
             );
         }
     }
