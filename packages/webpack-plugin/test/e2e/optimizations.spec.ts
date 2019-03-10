@@ -35,24 +35,28 @@ describe(`(${project})`, () => {
             {
                 id: './src/index.st.css',
                 depth: '3',
-                css: '.s0.o0__x{font-family:MyFont}.s1{background:#00f}'
+                // tslint:disable-next-line: max-line-length
+                css: '.global1{background:grey}.global1 .global2{background-color:#e4e4e4}.s0.o0__x{font-family:MyFont}.s1{background:#00f}'
             }
         ]);
     });
 
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const { fontFamily, backgroundColor, classes, stVars, $namespace } = await page.evaluate(() => {
+        // tslint:disable-next-line: max-line-length
+        const { fontFamily, backgroundColor, classes, stVars, namespace, global1ClassColor, global2ClassColor } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
                 fontFamily: getComputedStyle(document.documentElement!).fontFamily,
                 classes: (window as any).stylableClasses,
-                $namespace: (window as any).$namespace,
-                stVars: (window as any).stVars
+                namespace: (window as any).namespace,
+                stVars: (window as any).stVars,
+                global1ClassColor: getComputedStyle(document.querySelector('.global1')!).backgroundColor,
+                global2ClassColor: getComputedStyle(document.querySelector('.global2')!).backgroundColor
             };
         });
 
-        expect($namespace).to.eql('o0');
+        expect(namespace).to.eql('o0');
         expect(stVars.myValue).to.eql('red');
         expect(classes.root).to.eql('s0');
         expect(classes.used).to.eql('s1');
@@ -60,5 +64,8 @@ describe(`(${project})`, () => {
 
         expect(backgroundColor).to.eql('rgb(0, 0, 255)');
         expect(fontFamily).to.eql('MyFont');
+
+        expect(global1ClassColor).to.eql('rgb(128, 128, 128)');
+        expect(global2ClassColor).to.eql('rgb(228, 228, 228)');
     });
 });

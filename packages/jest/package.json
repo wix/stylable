@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Test your Stylable React components using Jest",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",

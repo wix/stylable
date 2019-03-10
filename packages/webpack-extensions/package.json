@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Experimental Stylable webpack plugins",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -15,7 +15,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^1.0.4",
+    "@stylable/core": "^1.0.5",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",

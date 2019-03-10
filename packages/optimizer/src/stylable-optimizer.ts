@@ -47,7 +47,8 @@ export class StylableOptimizer {
                 outputAst,
                 jsExports.classes,
                 Object.keys(meta.classes),
-                meta.namespace
+                meta.namespace,
+                meta.globals
             );
         }
     }

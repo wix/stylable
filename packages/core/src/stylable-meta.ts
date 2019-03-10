@@ -24,6 +24,7 @@ export class StylableMeta {
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
+    public globals: Pojo<boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         const rootSymbol: ClassSymbol = {
             _kind: 'class',

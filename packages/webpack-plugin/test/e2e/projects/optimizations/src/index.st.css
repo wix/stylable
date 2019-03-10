@@ -7,6 +7,14 @@
     myValue: red;
 }
 
+:global(.global1) {
+    background: rgb(128, 128, 128);
+}
+
+:global(.global1 .global2) {
+    background-color: rgb(228, 228, 228);
+}
+
 .root {
     -st-states: /*x state*/ x;
 }

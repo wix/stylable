@@ -8,10 +8,10 @@ export class StylableClassNameOptimizer {
             names: {}
         };
     }
-    public rewriteSelector(selector: string, namespace: string) {
+    public rewriteSelector(selector: string, namespace: string, globals: Pojo<boolean> = {}) {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
-            if (node.type === 'class') {
+            if (node.type === 'class' && !globals[node.name]) {
                 if (!node.name.startsWith(`${namespace}${pseudoStates.booleanStateDelimiter}`)) {
                     // is not a state
                     if (!this.context.names[node.name]) {
@@ -30,10 +30,11 @@ export class StylableClassNameOptimizer {
         ast: postcss.Root,
         exported: Pojo<string>,
         classes = Object.keys(exported),
-        namespace: string
+        namespace: string,
+        globals?: Pojo<boolean>
     ) {
         ast.walkRules(rule => {
-            rule.selector = this.rewriteSelector(rule.selector, namespace);
+            rule.selector = this.rewriteSelector(rule.selector, namespace, globals);
         });
         classes.forEach(originName => {
             if (exported[originName]) {
