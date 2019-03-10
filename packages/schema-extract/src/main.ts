@@ -38,7 +38,7 @@ export function extractSchema(css: string, filePath: string, root: string, path:
     return generateSchema(meta, filePath, root, path);
 }
 
-function generateSchema(
+export function generateSchema(
     meta: StylableMeta,
     filePath: string,
     basePath: string,
