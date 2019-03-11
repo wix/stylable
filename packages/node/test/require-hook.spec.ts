@@ -15,8 +15,8 @@ describe('require hook', () => {
     it('should work on .st.css', () => {
         attachHook();
         const m = require('./fixtures/test.st.css');
-        expect(m.classes.root).to.equal(m.namespace + '--root');
-        expect(m.classes.test).to.equal(m.namespace + '--test');
+        expect(m.classes.root).to.equal(m.namespace + '__root');
+        expect(m.classes.test).to.equal(m.namespace + '__test');
     });
 
     it('should only catch .st.css files by default', () => {
