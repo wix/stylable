@@ -61,7 +61,7 @@ export const processorWarnings = {
     SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
     MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) { return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`; },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma seperated`; }
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`; }
 };
 /* tslint:enable:max-line-length */
 

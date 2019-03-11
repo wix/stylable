@@ -15,9 +15,9 @@ import { stripQuotation } from './utils';
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
-export const stateMiddleDelimiter = '_';
-export const booleanStateDelimiter = '__';
-export const stateWithParamDelimiter = '___';
+export const stateMiddleDelimiter = '-';
+export const booleanStateDelimiter = '--';
+export const stateWithParamDelimiter = '---';
 
 /* tslint:disable:max-line-length */
 export const stateErrors = {

@@ -6,9 +6,9 @@ import {
     StylableExports
 } from './types';
 
-const stateMiddleDelimiter = '_';
-const booleanStateDelimiter = '__';
-const stateWithParamDelimiter = '___';
+const stateMiddleDelimiter = '-';
+const booleanStateDelimiter = '--';
+const stateWithParamDelimiter = '---';
 
 export function create(
     namespace: string,

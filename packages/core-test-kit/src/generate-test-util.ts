@@ -150,7 +150,7 @@ export function createStylableInstance(config: Config) {
         '/',
         fs as any,
         requireModule,
-        '--',
+        '__',
         (meta, path) => {
             meta.namespace = config.files[path].namespace || meta.namespace;
             return meta;

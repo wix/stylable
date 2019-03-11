@@ -128,7 +128,7 @@ export class StylableTransformer {
     public mode: EnvMode;
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
-        this.delimiter = options.delimiter || '--';
+        this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;

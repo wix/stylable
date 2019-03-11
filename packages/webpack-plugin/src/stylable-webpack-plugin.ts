@@ -66,7 +66,7 @@ export class StylableWebpackPlugin {
             (compiler as any).context,
             compiler.inputFileSystem as any,
             this.options.requireModule,
-            '--',
+            '__',
             meta => {
                 // TODO: move to stylable as param.
                 if (this.options.optimize.shortNamespaces) {
