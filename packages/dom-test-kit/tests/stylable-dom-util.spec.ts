@@ -6,7 +6,7 @@ import { StylableDOMUtil } from '../src';
 describe('stylable-dom-utils', () => {
 
     // tslint:disable-next-line: max-line-length
-    const s = create('ns', { classes: {root: 'ns-root', x: 'ns--x', y: 'ns--y'}, keyframes: {}, vars: {}, stVars: {} }, '', 0, '0', null);
+    const s = create('ns', { classes: {root: 'ns-root', x: 'ns__x', y: 'ns__y'}, keyframes: {}, vars: {}, stVars: {} }, '', 0, '0', null);
 
     const util = new StylableDOMUtil(s);
 
@@ -15,11 +15,11 @@ describe('stylable-dom-utils', () => {
     });
 
     it('scopeSelector local class', () => {
-        expect(util.scopeSelector('.x')).to.equal(`.ns--x`);
+        expect(util.scopeSelector('.x')).to.equal(`.ns__x`);
     });
 
     it('scopeSelector handle multiple local classes', () => {
-        expect(util.scopeSelector('.x .y')).to.equal(`.ns--x .ns--y`);
+        expect(util.scopeSelector('.x .y')).to.equal(`.ns__x .ns__y`);
     });
 
     it('scopeSelector Error("pseudo-element")', () => {
@@ -31,17 +31,17 @@ describe('stylable-dom-utils', () => {
     });
 
     it('scopeSelector handle local states', () => {
-        expect(util.scopeSelector('.x:loading')).to.equal(`.ns--x.ns__loading`);
+        expect(util.scopeSelector('.x:loading')).to.equal(`.ns__x.ns--loading`);
     });
 
     it('scopeSelector handles local state with a paramter', () => {
-        expect(util.scopeSelector('.x:loading(done)')).to.equal(`.ns--x.ns___loading4_done`);
+        expect(util.scopeSelector('.x:loading(done)')).to.equal(`.ns__x.ns---loading4-done`);
     });
 
     it('scopeSelector handle class local states (multiple)', () => {
         expect(
             util.scopeSelector('.x:loading:thinking')
-        ).to.equal(`.ns--x.ns__loading.ns__thinking`);
+        ).to.equal(`.ns__x.ns--loading.ns--thinking`);
     });
 
     describe('Style state', () => {
