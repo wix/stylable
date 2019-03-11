@@ -15,7 +15,7 @@ describe('Module Factory', () => {
 
         expect(exports).to.deep.include({
             classes: {
-                root: 'entry--root'
+                root: 'entry__root'
             }
         });
     });
@@ -45,8 +45,8 @@ describe('Module Factory', () => {
 
         expect(exports).to.deep.include({
             classes: {
-                root: 'entry--root',
-                part: 'imported--part'
+                root: 'entry__root',
+                part: 'imported__part'
             }
         });
     });
