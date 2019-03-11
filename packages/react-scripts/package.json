@@ -18,7 +18,7 @@
     "fs-extra": "^7.0.1",
     "html-webpack-plugin": "next",
     "object-assign": "^4.1.1",
-    "react-dev-utils": "^7.0.3",
+    "react-dev-utils": "^8.0.0",
     "terser-webpack-plugin": "^1.2.3",
     "tslib": "^1.9.3",
     "typescript": "~3.3.3333",
