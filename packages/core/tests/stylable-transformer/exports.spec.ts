@@ -15,7 +15,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry--root'
+                root: 'entry__root'
             });
         });
 
@@ -34,9 +34,9 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry--root',
-                classA: 'entry--classA',
-                classB: 'entry--classB'
+                root: 'entry__root',
+                classA: 'entry__classA',
+                classB: 'entry__classB'
             });
         });
 
@@ -54,7 +54,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry--root'
+                root: 'entry__root'
             });
         });
 
@@ -81,7 +81,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry--root'
+                root: 'entry__root'
             });
         });
 
@@ -109,8 +109,8 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                'root': 'entry--root',
-                'my-class': 'imported--my-class'
+                'root': 'entry__root',
+                'my-class': 'imported__my-class'
             });
         });
 
@@ -140,8 +140,8 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                'root': 'entry--root',
-                'local-class': 'entry--local-class imported--my-class'
+                'root': 'entry__root',
+                'local-class': 'entry__local-class imported__my-class'
             });
         });
 
@@ -179,7 +179,7 @@ describe('Exports to js', () => {
                 }
             });
 
-            expect(cssExports.classes['my-class']).to.equal('project--my-class');
+            expect(cssExports.classes['my-class']).to.equal('project__my-class');
 
         });
 
@@ -313,7 +313,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.keyframes).to.eql({
-                name: 'entry--name'
+                name: 'entry__name'
             });
         });
     });
@@ -492,8 +492,8 @@ describe('Exports to js', () => {
 
             expect(cssExports).to.eql({
                 classes: {
-                    root: 'entry--root',
-                    part: 'entry--part'
+                    root: 'entry__root',
+                    part: 'entry__part'
                 },
                 vars: {
                     '--cssVar': '--entry-cssVar'
@@ -502,7 +502,7 @@ describe('Exports to js', () => {
                     stVar: 'green'
                 },
                 keyframes: {
-                    name: 'entry--name'
+                    name: 'entry__name'
                 }
             });
         });

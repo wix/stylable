@@ -20,9 +20,9 @@ describe('Stylable postcss transform (Global)', () => {
             }
         });
 
-        expect((result.nodes![0] as postcss.Rule).selector).to.equal('.style--root .btn');
+        expect((result.nodes![0] as postcss.Rule).selector).to.equal('.style__root .btn');
         expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn');
-        expect((result.nodes![2] as postcss.Rule).selector).to.equal('.btn .style--container');
+        expect((result.nodes![2] as postcss.Rule).selector).to.equal('.btn .style__container');
 
     });
 
@@ -52,7 +52,7 @@ describe('Stylable postcss transform (Global)', () => {
             }
         });
 
-        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style--root');
+        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style__root');
 
     });
 
@@ -94,7 +94,7 @@ describe('Stylable postcss transform (Global)', () => {
             }
         });
 
-        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style--root');
+        expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style__root');
 
     });
 
@@ -144,7 +144,7 @@ describe('Stylable postcss transform (Global)', () => {
         expect((meta.outputAst!.nodes![2] as postcss.Rule).selector).to.equal('.a .b');
         expect((meta.outputAst!.nodes![3] as postcss.Rule).selector).to.equal('.c .d');
         expect((meta.outputAst!.nodes![4] as postcss.Rule).selector).to.equal('.e');
-        expect((meta.outputAst!.nodes![5] as postcss.Rule).selector).to.equal('.style--mixIntoMe');
-        expect((meta.outputAst!.nodes![6] as postcss.Rule).selector).to.equal('.style--mixIntoMe .global-test2');
+        expect((meta.outputAst!.nodes![5] as postcss.Rule).selector).to.equal('.style__mixIntoMe');
+        expect((meta.outputAst!.nodes![6] as postcss.Rule).selector).to.equal('.style__mixIntoMe .global-test2');
     });
 });

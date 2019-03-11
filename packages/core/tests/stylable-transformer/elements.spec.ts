@@ -30,8 +30,8 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1--root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns--root .ns1--root');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__root');
 
         });
 
@@ -60,7 +60,7 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.inner--root .inner--part');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.inner__root .inner__part');
 
         });
 
@@ -98,7 +98,7 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns--x');
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__x');
 
         });
 
@@ -136,7 +136,7 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base--root');
+            expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base__root');
 
         });
     });
