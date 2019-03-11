@@ -27,7 +27,7 @@ describe(`(${project})`, () => {
         });
 
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-            /\.index\d+--root \{ background-color: hook_var_1; background-color: rgb\(1, 0, 0\); \}/
+            /\.index\d+__root \{ background-color: hook_var_1; background-color: rgb\(1, 0, 0\); \}/
         );
     });
 
