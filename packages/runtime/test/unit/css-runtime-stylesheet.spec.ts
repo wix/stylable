@@ -6,7 +6,7 @@ describe('Stylable runtime stylesheet', () => {
         const stylesheet = create(
             'entry',
             {
-                classes: { root: 'entry--root' },
+                classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
                 stVars: {}
@@ -17,14 +17,14 @@ describe('Stylable runtime stylesheet', () => {
             null
         );
 
-        expect(stylesheet.classes.root).to.equal('entry--root');
+        expect(stylesheet.classes.root).to.equal('entry__root');
     });
 
     it('creates stylesheet with css vars ', () => {
         const stylesheet = create(
             'entry',
             {
-                classes: { root: 'entry--root' },
+                classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: { '--myVar': '--entry-myVar' },
                 stVars: {}
