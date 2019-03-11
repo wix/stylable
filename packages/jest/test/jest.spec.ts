@@ -10,7 +10,7 @@ describe('jest process', () => {
         const content = fs.readFileSync(filename, 'utf8');
         const module = evalNode(process(content, filename), filename);
 
-        expect(module.classes.root).to.equal(`${module.namespace}--root`);
-        expect(module.classes.test).to.equal(`${module.namespace}--test`);
+        expect(module.classes.root).to.equal(`${module.namespace}__root`);
+        expect(module.classes.test).to.equal(`${module.namespace}__test`);
     });
 });
