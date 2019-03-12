@@ -1,6 +1,6 @@
 {
   "name": "@stylable/module-utils",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Stylable module creation utilities",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -14,7 +14,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^2.0.0"
+    "@stylable/core": "^2.0.1"
   },
   "files": [
     "cjs",
