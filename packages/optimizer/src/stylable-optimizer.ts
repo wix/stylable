@@ -1,4 +1,11 @@
-import { parseSelector, Pojo, SelectorAstNode, StylableResults, traverseNode } from '@stylable/core';
+import {
+    IStylableOptimizer,
+    parseSelector,
+    Pojo,
+    SelectorAstNode,
+    StylableResults,
+    traverseNode
+} from '@stylable/core';
 import CleanCSS from 'clean-css';
 import postcss from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
@@ -12,7 +19,7 @@ export interface OptimizeConfig {
     removeEmptyNodes?: boolean;
 }
 
-export class StylableOptimizer {
+export class StylableOptimizer implements IStylableOptimizer {
     constructor(
         public classNameOptimizer = new StylableClassNameOptimizer(),
         public namespaceOptimizer = new StylableNamespaceOptimizer()

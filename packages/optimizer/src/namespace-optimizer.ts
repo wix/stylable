@@ -1,6 +1,6 @@
-import { Pojo, StylableMeta } from '@stylable/core';
+import { IStylableNamespaceOptimizer, Pojo, StylableMeta } from '@stylable/core';
 
-export class StylableNamespaceOptimizer {
+export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
     public index: number;
     public namespacePrefix: string;
     public namespaceMapping: Pojo<string>;

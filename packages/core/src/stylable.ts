@@ -1,4 +1,3 @@
-import { StylableOptimizer } from '@stylable/optimizer';
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
@@ -11,6 +10,7 @@ import {
     StylableTransformer,
     TransformHooks
 } from './stylable-transformer';
+import { IStylableOptimizer } from './types';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -25,7 +25,7 @@ export interface StylableConfig {
         symlinks: boolean;
         [key: string]: any;
     };
-    optimizer?: StylableOptimizer;
+    optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
 }
@@ -63,7 +63,7 @@ export class Stylable {
         protected diagnostics = new Diagnostics(),
         protected hooks: TransformHooks = {},
         protected resolveOptions: any = {},
-        public optimizer?: StylableOptimizer,
+        public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {

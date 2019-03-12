@@ -1,7 +1,14 @@
-import { parseSelector, Pojo, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
+import {
+    IStylableClassNameOptimizer,
+    parseSelector,
+    Pojo,
+    pseudoStates,
+    stringifySelector,
+    traverseNode
+} from '@stylable/core';
 import * as postcss from 'postcss';
 
-export class StylableClassNameOptimizer {
+export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
     public context: { names: Pojo<string> };
     constructor() {
         this.context = {
