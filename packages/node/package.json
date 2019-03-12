@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Integrate Stylable into your node application",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@stylable/core": "^2.0.0",
-    "@stylable/module-utils": "^2.0.0",
+    "@stylable/module-utils": "^2.0.1",
     "find-config": "^1.0.0",
     "murmurhash": "^0.0.2"
   },
