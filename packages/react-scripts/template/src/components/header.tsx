@@ -1,5 +1,5 @@
 import React from 'react';
-import style from './header.st.css';
+import { classes, style } from './header.st.css';
 import reactLogo from './logos/react.svg';
 import stylableLogo from './logos/stylable.svg';
 
@@ -9,9 +9,9 @@ export interface IHeaderProps {
 }
 
 export const Header: React.FunctionComponent<IHeaderProps> = props => (
-    <header className={style(style.root, props.className)} >
-        <img src={reactLogo} className={style.reactLogo} alt='logo' />
-        <img src={stylableLogo} className={style.stylableLogo} alt='logo' />
-        <h1 className={style.title}>{props.message}</h1>
+    <header className={style(classes.root, props.className)} >
+        <img src={reactLogo} className={classes.reactLogo} alt='logo' />
+        <img src={stylableLogo} className={classes.stylableLogo} alt='logo' />
+        <h1 className={classes.title}>{props.message}</h1>
     </header>
 );
