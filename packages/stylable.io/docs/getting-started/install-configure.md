@@ -79,45 +79,53 @@ For more information on configuring the @stylable/webpack-plugin, see the [readm
 TypeScript requires to be made aware of Stylable in order to provide typings and module resolution for `*.st.css` files. To do this, create a `globals.d.ts` file in your `./src` directory and add the following declaration.
 
 ```js
+// globals.d.ts
 declare module '*.st.css' {
     const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
-    export default stylesheet;
+    export = stylesheet;
 }
 ```
 
 If your project TypeScript version is below `2.9` and does not support [import type](https://blogs.msdn.microsoft.com/typescript/2018/05/31/announcing-typescript-2-9/#import-types), copy the following snippet into your `globals.d.ts` file.
 
 ```js
-type StateValue = boolean | number | string;
+export type StateValue = boolean | number | string;
 
-interface StateMap {
+export interface StateMap {
     [stateName: string]: StateValue;
 }
 
-interface AttributeMap {
+export interface AttributeMap {
     className?: string;
     [attributeName: string]: StateValue | undefined;
 }
 
-interface InheritedAttributes {
+export interface InheritedAttributes {
     className?: string;
     [props: string]: any;
 }
 
-type RuntimeStylesheet = {
-    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap
-    $root: string,
-    $namespace: string,
-    $depth: number,
-    $id: string | number,
-    $css?: string,
+export interface StylableExports {
+    classes: Record<string, string>;
+    keyframes: Record<string, string>;
+    vars: Record<string, string>;
+    stVars: Record<string, string>;
+}
 
-    $get(localName: string): string | undefined;
-    $cssStates(stateMapping?: StateMap | null): StateMap;
-} & { [localName: string]: string };
+export interface RuntimeStylesheet extends StylableExports, RenderableStylesheet {
+    namespace: string;
+    cssStates: (stateMap: StateMap) => string;
+    style: (context: string, stateOrClass: string | StateMap, ...classes: string[]) => string;
+}
+
+export interface RenderableStylesheet {
+    $depth: number;
+    $id: string | number;
+    $css?: string;
+}
 
 declare module '*.st.css' {
-    const stylesheet: RuntimeStylesheet;
-    export default stylesheet;
+    const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
+    export = stylesheet;
 }
 ```

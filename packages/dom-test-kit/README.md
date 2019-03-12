@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/dom-test-kit.svg)](https://www.npmjs.com/package/stylable/dom-test-kit)
 
-`@stylable/dom-test-kit` is comprised of a single class named `StylableDOMUtil` which exposes several DOM related testing utilities.
+`@stylable/dom-test-kit` is comprised of a single class, `StylableDOMUtil`, which exposes several DOM related testing utilities.
 
 ## Example
 ```css
