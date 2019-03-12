@@ -17,6 +17,7 @@
     "@stylable/core": "^2.0.0"
   },
   "files": [
+    "cjs",
     "src",
     "!src/tsconfig.json"
   ],
