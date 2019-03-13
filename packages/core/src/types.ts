@@ -34,8 +34,8 @@ export interface IStylableOptimizer {
     optimize(
         config: object,
         stylableResult: StylableResults,
-        delimiter?: string,
-        usageMapping?: Pojo<boolean>
+        usageMapping: Pojo<boolean>,
+        delimiter?: string
     ): void;
     removeStylableDirectives(root: postcss.Root, shouldComment: boolean): void;
 }
@@ -44,13 +44,13 @@ export interface IStylableClassNameOptimizer {
     context: {
         names: Pojo<string>
     };
-    rewriteSelector(selector: string, namespace: string, globals: Pojo<boolean>): string;
+    rewriteSelector(selector: string, usageMapping: Pojo<boolean>, globals: Pojo<boolean>): string;
     generateName(name: string): string;
     optimizeAstAndExports(
         ast: postcss.Root,
         exported: Pojo<string>,
         classes: string[],
-        namespace: string,
+        usageMapping: Pojo<boolean>,
         globals?: Pojo<boolean>
     ): void;
 }

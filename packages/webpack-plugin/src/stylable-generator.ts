@@ -69,8 +69,8 @@ export class StylableGenerator {
             this.stylable.optimizer.optimize(
                 module.buildInfo.optimize,
                 results,
-                this.stylable.delimiter,
-                module.buildInfo.usageMapping
+                module.buildInfo.usageMapping,
+                this.stylable.delimiter
             );
         }
 

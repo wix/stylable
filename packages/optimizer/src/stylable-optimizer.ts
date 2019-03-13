@@ -31,8 +31,8 @@ export class StylableOptimizer implements IStylableOptimizer {
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
-        delimiter?: string,
-        usageMapping?: Pojo<boolean>
+        usageMapping: Pojo<boolean>,
+        delimiter?: string
     ) {
         const { meta, exports: jsExports } = stylableResults;
         const outputAst = meta.outputAst!;
@@ -54,7 +54,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                 outputAst,
                 jsExports.classes,
                 Object.keys(meta.classes),
-                meta.namespace,
+                usageMapping || {}, // used to determine namespaces and computed states
                 meta.globals
             );
         }

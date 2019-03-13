@@ -72,8 +72,8 @@ describe('StylableOptimizer', () => {
         new StylableOptimizer().optimize(
             { removeUnusedComponents: true },
             result,
-            stylable.delimiter,
-            usageMapping
+            usageMapping,
+            stylable.delimiter
         );
 
         expect(result.meta.outputAst!.toString().trim()).to.equal('');
