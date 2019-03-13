@@ -2857,10 +2857,10 @@ dot-prop@^4.2.0:
   dependencies:
     is-obj "^1.0.0"
 
-dotenv-expand@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-4.2.0.tgz#def1f1ca5d6059d24a766e587942c21106ce1275"
-  integrity sha1-3vHxyl1gWdJKdm5YeULCEQbOEnU=
+dotenv-expand@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.0.0.tgz#3951d7ee2e35371fe6cb8e4bcdcc39db134d4a95"
+  integrity sha512-swgyWu5S0U4rhthRAp2QJrBASkmM0yHyVpVZiOxO7DKG7zxePqyZmdOcoLC8MLRcVZ3aq7Hneqkgo09nM/Az0Q==
 
 dotenv@^6.2.0:
   version "6.2.0"
