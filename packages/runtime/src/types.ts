@@ -24,7 +24,11 @@ export interface StylableExports {
 export interface RuntimeStylesheet extends StylableExports, RenderableStylesheet {
     namespace: string;
     cssStates: (stateMap: StateMap) => string;
-    style: (context: string, stateOrClass: string | StateMap, ...classes: string[]) => string;
+    style: (
+        context: string,
+        stateOrClass: string | StateMap | undefined,
+        ...classes: Array<string | undefined>
+    ) => string;
 }
 
 export interface NodeRenderer<I, O extends Element> {

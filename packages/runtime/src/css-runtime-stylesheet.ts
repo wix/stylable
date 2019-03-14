@@ -83,14 +83,16 @@ export function create(
         for (let i = 0; i < arguments.length; i++) {
             const item = arguments[i];
 
-            if (typeof item === 'string') {
-                classNames.push(item);
-            } else if (i >= 1) {
-                for (const stateName in item) {
-                    const stateValue = item[stateName];
-                    const stateClass = createStateClass(stateName, stateValue);
-                    if (stateClass) {
-                        classNames.push(stateClass);
+            if (item) {
+                if (typeof item === 'string') {
+                    classNames[classNames.length] = item;
+                } else if (i === 1) {
+                    for (const stateName in item) {
+                        const stateValue = item[stateName];
+                        const stateClass = createStateClass(stateName, stateValue);
+                        if (stateClass) {
+                            classNames[classNames.length] = stateClass;
+                        }
                     }
                 }
             }
