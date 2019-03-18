@@ -114,6 +114,7 @@ export const nativeFunctionsDic = {
     'linear-gradient': true,
     'matrix': true,
     'matrix3d': true,
+    'minmax': true,
     'opacity': true,
     'perspective': true,
     'polygon': true,
