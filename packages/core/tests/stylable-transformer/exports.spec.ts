@@ -368,6 +368,35 @@ describe('Exports to js', () => {
             });
         });
 
+        it('re-exports imported native css vars imported using "named as"', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --myVar as --renamed;
+                            }
+                            `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                --myVar: green;
+                            }
+                            `
+                    }
+                }
+            });
+
+            expect(cssExports.vars).to.eql({
+                '--renamed': '--imported-myVar'
+            });
+        });
+
         it('exports css vars from mixed local and imported stylesheets with multiple levels', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',

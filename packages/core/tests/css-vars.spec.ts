@@ -1,7 +1,7 @@
 import { expectWarningsFromTransform, generateStylableResult, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { functionWarnings, processorWarnings, resolverWarnings } from '../src';
+import { processorWarnings, resolverWarnings } from '../src';
 
 describe('css custom-properties (vars)', () => {
 
@@ -279,7 +279,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('green');
         });
 
-        it('multiple local css vars usage in the same declaration', () => {
+        it('multiple local css vars usage in the same declaration (1)', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -302,7 +302,7 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(--entry-var1) var(--entry-var2)');
         });
 
-        it('multiple css vars usage in a single declaration', () => {
+        it('multiple local css vars usage in the same declaration (2)', () => {
             const res = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
@@ -313,7 +313,7 @@ describe('css custom-properties (vars)', () => {
                             --size: 5px;
                             --type: dashed;
                             --color: blue;
-                            border: var(--size) var(--type) var(--color);
+                            border: var(--size) var( --type ) var(--color);
                         }
                         `
                     }
@@ -323,27 +323,31 @@ describe('css custom-properties (vars)', () => {
             expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
 
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![3] as postcss.Declaration);
-            expect(decl.value).to.equal('var(--entry-size) var(--entry-type) var(--entry-color)');
+            expect(decl.value).to.equal('var(--entry-size) var( --entry-type ) var(--entry-color)');
         });
 
-        it('should not transfrom unknown css vars usage', () => {
-            const res = generateStylableResult({
+        it('should transfrom css vars usage with no declaration (local scope)', () => {
+            const {meta} = generateStylableResult({
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
                         .root {
-                            color: var(--myVar);
+                            color: var(--myVar, green);
                         }
                         `
                     }
                 }
             });
 
-            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            const decl = ((meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+
+            expect(meta.diagnostics.reports.length).to.equal(0);
+            expect(meta.transformDiagnostics!.reports.length).to.equal(0);
+
             expect(decl.prop).to.equal('color');
-            expect(decl.value).to.equal('var(--myVar)');
+            expect(decl.value).to.equal('var(--entry-myVar, green)');
         });
 
         it('imported usage', () => {
@@ -376,6 +380,75 @@ describe('css custom-properties (vars)', () => {
             expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
 
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.prop).to.equal('color');
+            expect(decl.value).to.equal('var(--imported-myVar)');
+        });
+
+        it('imported usage with named as', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: --myVar as --renamed;
+                        }
+                        .root {
+                            color: var(--renamed);
+                        }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .root {
+                            --myVar: blue;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+            expect(decl.prop).to.equal('color');
+            expect(decl.value).to.equal('var(--imported-myVar)');
+        });
+
+        it('imported usage with local override', () => {
+            const res = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: --myVar;
+                        }
+                        .root {
+                            --myVar: green;
+                            color: var(--myVar);
+                        }
+                        `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .root {
+                            --myVar: blue;
+                        }
+                        `
+                    }
+                }
+            });
+
+            expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
+
+            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![1] as postcss.Declaration);
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--imported-myVar)');
         });
@@ -592,28 +665,6 @@ describe('css custom-properties (vars)', () => {
     });
 
     describe('diagnostics', () => {
-        it('trying to use an unknown var and keep the source unchanged', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        .root {
-                            |color: var($--unknownVar$)|;
-                        }
-                        `
-                    }
-                }
-            };
-
-            const res = expectWarningsFromTransform(config, [
-                { message: functionWarnings.UNKNOWN_CSS_VAR_USE('--unknownVar'), file: '/entry.st.css' }
-            ]);
-            const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
-            expect(decl.value).to.equal('var(--unknownVar)');
-        });
-
         it('trying to use illegal css var syntax', () => {
             const config = {
                 entry: `/entry.st.css`,
@@ -630,7 +681,7 @@ describe('css custom-properties (vars)', () => {
             };
 
             const res = expectWarningsFromTransform(config, [
-                { message: functionWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'), file: '/entry.st.css' }
+                { message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'), file: '/entry.st.css' }
             ]);
             const decl = ((res.meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
             expect(decl.value).to.equal('var(illegalVar)');
@@ -696,6 +747,44 @@ describe('css custom-properties (vars)', () => {
             expectWarningsFromTransform(config, [
                 { message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'), file: '/entry.st.css' }
             ]);
+        });
+
+        it('clashing imported and global css var', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @st-global-custom-property --myVar;
+                            |:import {
+                                -st-from: "./imported.st.css";
+                                -st-named: --myVar;
+                            }|
+                            .root {
+                                prop1: var(--myVar);
+                            }
+                            `
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            .root {
+                                --myVar: red;
+                            }
+                            `
+                    }
+                }
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                { message: processorWarnings.REDECLARE_SYMBOL('--myVar'), file: '/entry.st.css' }
+            ]);
+
+            const baseDecl = ((meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration);
+
+            expect(baseDecl.prop).to.equal('prop1');
+            expect(baseDecl.value).to.equal('var(--imported-myVar)');
         });
     });
 });

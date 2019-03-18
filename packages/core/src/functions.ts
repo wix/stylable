@@ -22,9 +22,7 @@ export const functionWarnings = {
     CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
     MULTI_ARGS_IN_VALUE: (args: string) => `value function accepts only a single argument: "value(${args})"`,
     UNKNOWN_FORMATTER: (name: string) => `cannot find native function or custom formatter called ${name}`,
-    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
-    UNKNOWN_CSS_VAR_USE(name: string) { return `unknown custom property "${name}"`; },
-    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
+    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
 };
 /* tslint:enable:max-line-length */
 
@@ -221,13 +219,7 @@ export function evalDeclarationValue(
                         if (isCSSVarProp(varWithPrefix)) {
                             if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
                                 parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
-                            } else if (diagnostics) {
-                                diagnostics.warn(
-                                    node, functionWarnings.UNKNOWN_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
                             }
-                        } else if (diagnostics) {
-                            diagnostics.warn(
-                                node, functionWarnings.ILLEGAL_CSS_VAR_USE(varWithPrefix), { word: varWithPrefix });
                         }
 
                         // handle default values

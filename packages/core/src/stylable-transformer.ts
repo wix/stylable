@@ -364,8 +364,8 @@ export class StylableTransformer {
                     if (importedVar && importedVar._kind === 'css' &&
                         importedVar.symbol && importedVar.symbol._kind === 'cssVar') {
                         cssVarsMapping[symbolName] = importedVar.symbol.global ?
-                            symbolName :
-                            generateScopedCSSVar(importedVar.meta.namespace, symbolName.slice(2));
+                            importedVar.symbol.name :
+                            generateScopedCSSVar(importedVar.meta.namespace, importedVar.symbol.name.slice(2));
                     }
                 }
             }
@@ -374,9 +374,12 @@ export class StylableTransformer {
         // locally defined vars
         for (const localVarName of Object.keys(meta.cssVars)) {
             const cssVar = meta.cssVars[localVarName];
-            cssVarsMapping[localVarName] = cssVar.global ?
-                localVarName :
-                generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+
+            if (!cssVarsMapping[localVarName]) {
+                cssVarsMapping[localVarName] = cssVar.global ?
+                    localVarName :
+                    generateScopedCSSVar(meta.namespace, localVarName.slice(2));
+            }
         }
 
         return cssVarsMapping;

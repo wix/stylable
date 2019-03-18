@@ -187,7 +187,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 ? scopeSelector(selectorPrefix, node.selector, true).selectorAst
                 : parseSelector(node.selector);
 
-            const matchesSelectors = isRoot ? ast.nodes : ast.nodes.filter(containsPrefix);
+            const matchesSelectors = isRoot ? ast.nodes : ast.nodes.filter(node => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector({

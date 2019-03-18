@@ -24,9 +24,11 @@ import {
     VarSymbol
 } from './stylable-meta';
 import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, isCSSVarProp } from './stylable-utils';
-import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import { groupValues, rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import { ParsedValue } from './types';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
+const valueParser = require('postcss-value-parser');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
@@ -61,7 +63,8 @@ export const processorWarnings = {
     SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
     MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) { return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`; },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`; }
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`; },
+    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
 };
 /* tslint:enable:max-line-length */
 
@@ -87,7 +90,11 @@ export class StylableProcessor {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             } else if (isCSSVarProp(decl.prop)) {
-                this.addCSSVars(decl);
+                this.addCSSVarFromProp(decl);
+            }
+
+            if (decl.value.includes('var(')) {
+                this.handleCSSVarUse(decl);
             }
 
             processDeclarationUrls(decl, node => {
@@ -363,17 +370,37 @@ export class StylableProcessor {
         rule.remove();
     }
 
-    protected addCSSVars(decl: postcss.Declaration) {
-        const varName = decl.prop.trim();
+    protected handleCSSVarUse(decl: postcss.Declaration) {
+        const parsed = valueParser(decl.value);
+        parsed.walk((node: ParsedValue) => {
+            if (node.type === 'function' && node.value === 'var' && node.nodes) {
+                const varName = groupValues(node.nodes)[0];
+                this.addCSSVar(valueParser.stringify(varName).trim(), decl);
+            }
+        });
+    }
 
-        if (!this.meta.cssVars[varName]) {
-            const cssVarSymbol: CSSVarSymbol = {
-                _kind: 'cssVar',
-                name: varName
-            };
-            this.meta.cssVars[varName] = cssVarSymbol;
-            this.meta.mappedSymbols[varName] = cssVarSymbol;
+    protected addCSSVarFromProp(decl: postcss.Declaration) {
+        const varName = decl.prop.trim();
+        this.addCSSVar(varName, decl);
+    }
+
+    protected addCSSVar(varName: string, decl: postcss.Declaration) {
+        if (isCSSVarProp(varName)) {
+            if (!this.meta.cssVars[varName]) {
+                const cssVarSymbol: CSSVarSymbol = {
+                    _kind: 'cssVar',
+                    name: varName
+                };
+                this.meta.cssVars[varName] = cssVarSymbol;
+                if (!this.meta.mappedSymbols[varName]) {
+                    this.meta.mappedSymbols[varName] = cssVarSymbol;
+                }
+            }
+        } else {
+            this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), { word: varName });
         }
+
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
