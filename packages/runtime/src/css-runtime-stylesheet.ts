@@ -54,7 +54,7 @@ export function create(
 
     function createStateWithParamClassName(stateName: string, param: string) {
         // tslint:disable-next-line: max-line-length
-        return `${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
+        return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
     }
 
     function createStateClass(stateName: string, stateValue: StateValue): string {

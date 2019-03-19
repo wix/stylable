@@ -566,7 +566,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class.entry---state110-someString {}'
+                    1: '.entry__my-class.entry---state1-10-someString {}'
                 });
             });
 
@@ -589,7 +589,7 @@ describe('pseudo-states', () => {
 
                 expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__root[class~="entry---state9-user_name"] {}'
+                    1: '.entry__root[class~="entry---state-9-user_name"] {}'
                 });
             });
 
@@ -613,7 +613,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---state110-someString {}'
+                        1: '.entry__my-class.entry---state1-10-someString {}'
                     });
                 });
 
@@ -635,7 +635,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---stateWithDefault16-myDefault_String"] {}'
+                        1: '.entry__my-class[class~="entry---stateWithDefault-16-myDefault_String"] {}'
                     });
                 });
 
@@ -661,7 +661,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---stateWithDefault8-username {}'
+                        1: '.entry__my-class.entry---stateWithDefault-8-username {}'
                     });
                 });
 
@@ -684,7 +684,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state18-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}'
                         });
                     });
 
@@ -712,7 +712,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state116-failingParameter {}'
+                            1: '.entry__my-class.entry---state1-16-failingParameter {}'
                         });
                     });
 
@@ -734,7 +734,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state18-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}'
                         });
                     });
 
@@ -760,7 +760,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state18-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}'
                         });
                     });
 
@@ -789,7 +789,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state110-wrongState {}'
+                            1: '.entry__my-class.entry---state1-10-wrongState {}'
                         });
                     });
 
@@ -811,7 +811,7 @@ describe('pseudo-states', () => {
 
                         expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state14-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}'
                         });
                     });
 
@@ -839,7 +839,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state14-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}'
                         });
                     });
 
@@ -867,7 +867,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state14-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}'
                         });
                     });
 
@@ -896,7 +896,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state14-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}'
                         });
                     });
 
@@ -945,7 +945,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---state12-42"] {}'
+                        1: '.entry__my-class[class~="entry---state1-2-42"] {}'
                     });
                 });
 
@@ -997,7 +997,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---state14-blah {}'
+                        1: '.entry__my-class.entry---state1-4-blah {}'
                     });
                 });
 
@@ -1051,7 +1051,7 @@ describe('pseudo-states', () => {
                         }
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state11-1"] {}'
+                            1: '.entry__my-class[class~="entry---state1-1-1"] {}'
                         });
                     });
 
@@ -1080,7 +1080,7 @@ describe('pseudo-states', () => {
                         }
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state12-42"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-42"] {}'
                         });
                     });
 
@@ -1108,7 +1108,7 @@ describe('pseudo-states', () => {
                             file: '/entry.st.css'
                         }]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state12-42"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-42"] {}'
                         });
                     });
 
@@ -1130,7 +1130,7 @@ describe('pseudo-states', () => {
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state12-40"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-40"] {}'
                         });
                     });
                 });
@@ -1205,7 +1205,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size5-small {}'
+                        1: '.entry__my-class.entry---size-5-small {}'
                     });
                 });
 
@@ -1231,7 +1231,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size5-small {}'
+                        1: '.entry__my-class.entry---size-5-small {}'
                     });
                 });
 
@@ -1259,7 +1259,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size4-huge {}'
+                        1: '.entry__my-class.entry---size-4-huge {}'
                     });
                 });
             });
@@ -1283,7 +1283,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category5-movie {}'
+                        1: '.entry__my-class.entry---category-5-movie {}'
                     });
                 });
 
@@ -1308,7 +1308,7 @@ describe('pseudo-states', () => {
 
                     expect(res.meta.diagnostics.reports, 'no diagnostics reported for native states').to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category5-disco {}'
+                        1: '.entry__my-class.entry---category-5-disco {}'
                     });
                 });
 
@@ -1336,7 +1336,7 @@ describe('pseudo-states', () => {
                         file: '/entry.st.css'
                     }]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---category7-one_two"] {}'
+                        1: '.entry__my-class[class~="entry---category-7-one_two"] {}'
                     });
                 });
             });

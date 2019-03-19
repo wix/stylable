@@ -35,7 +35,7 @@ describe('stylable-dom-utils', () => {
     });
 
     it('scopeSelector handles local state with a paramter', () => {
-        expect(util.scopeSelector('.x:loading(done)')).to.equal(`.ns__x.ns---loading4-done`);
+        expect(util.scopeSelector('.x:loading(done)')).to.equal(`.ns__x.ns---loading-4-done`);
     });
 
     it('scopeSelector handle class local states (multiple)', () => {

@@ -408,10 +408,11 @@ export function createBooleanStateClassName(stateName: string, namespace: string
 }
 
 export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
-    return `${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${param}`;
+    // tslint:disable-next-line: max-line-length
+    return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
 }
 
 export function createAttributeState(stateName: string, namespace: string, param: string) {
     // tslint:disable-next-line:max-line-length
-    return `class~="${namespace}${stateWithParamDelimiter}${stateName}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
+    return `class~="${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
 }
