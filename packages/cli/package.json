@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@stylable/core": "^2.0.4",
-    "@stylable/node": "^2.0.5",
+    "@stylable/node": "^2.0.6",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^13.2.2"
