@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Test your Stylable React components using Jest",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -13,8 +13,8 @@
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@stylable/module-utils": "^2.0.4",
-    "@stylable/runtime": "^2.0.1"
+    "@stylable/module-utils": "^2.0.5",
+    "@stylable/runtime": "^2.0.2"
   },
   "files": [
     "cjs",
