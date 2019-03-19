@@ -335,7 +335,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.vars).to.eql({
-                '--myVar': '--entry-myVar'
+                myVar: '--entry-myVar'
             });
         });
 
@@ -364,7 +364,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.vars).to.eql({
-                '--myVar': '--imported-myVar'
+                myVar: '--imported-myVar'
             });
         });
 
@@ -393,7 +393,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.vars).to.eql({
-                '--renamed': '--imported-myVar'
+                renamed: '--imported-myVar'
             });
         });
 
@@ -437,9 +437,9 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.vars).to.eql({
-                '--baseVar': '--base-baseVar',
-                '--midVar': '--mid-midVar',
-                '--topVar': '--entry-topVar'
+                baseVar: '--base-baseVar',
+                midVar: '--mid-midVar',
+                topVar: '--entry-topVar'
             });
         });
 
@@ -482,14 +482,14 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.vars).to.eql({
-                '--localScoped1': '--entry-localScoped1',
-                '--localScoped2': '--entry-localScoped2',
-                '--localGlobal1': '--localGlobal1',
-                '--localGlobal2': '--localGlobal2',
-                '--importedScoped1': '--imported-importedScoped1',
-                '--importedScoped2': '--imported-importedScoped2',
-                '--importedGlobal1': '--importedGlobal1',
-                '--importedGlobal2': '--importedGlobal2'
+                localScoped1: '--entry-localScoped1',
+                localScoped2: '--entry-localScoped2',
+                localGlobal1: '--localGlobal1',
+                localGlobal2: '--localGlobal2',
+                importedScoped1: '--imported-importedScoped1',
+                importedScoped2: '--imported-importedScoped2',
+                importedGlobal1: '--importedGlobal1',
+                importedGlobal2: '--importedGlobal2'
             });
         });
     });
@@ -525,7 +525,7 @@ describe('Exports to js', () => {
                     part: 'entry__part'
                 },
                 vars: {
-                    '--cssVar': '--entry-cssVar'
+                    cssVar: '--entry-cssVar'
                 },
                 stVars: {
                     stVar: 'green'

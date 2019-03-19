@@ -231,7 +231,7 @@ export class StylableTransformer {
     }
     public exportCSSVars(cssVarsMapping: Pojo<string>, varsExport: Pojo<string>) {
         for (const varName of Object.keys(cssVarsMapping)) {
-            varsExport[varName] = cssVarsMapping[varName];
+            varsExport[varName.slice(2)] = cssVarsMapping[varName];
         }
     }
     public exportKeyframes(keyframeMapping: Pojo<KeyFrameWithNode>, keyframesExport: Pojo<string>) {

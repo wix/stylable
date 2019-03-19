@@ -48,7 +48,7 @@ describe('Stylable runtime stylesheet', () => {
             {
                 classes: { root: 'entry__root' },
                 keyframes: {},
-                vars: { '--myVar': '--entry-myVar' },
+                vars: { myVar: '--entry-myVar' },
                 stVars: {}
              },
             '',
@@ -57,6 +57,6 @@ describe('Stylable runtime stylesheet', () => {
             null
         );
 
-        expect(stylesheet.vars['--myVar']).to.equal('--entry-myVar');
+        expect(stylesheet.vars.myVar).to.equal('--entry-myVar');
     });
 });

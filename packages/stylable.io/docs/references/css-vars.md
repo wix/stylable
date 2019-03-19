@@ -77,13 +77,13 @@ Override any variable by redefining its value using an inline style attribute.
 
 {% raw %}
 ```js
-import sheet from 'entry.st.css';
+import { style, classes, vars } from 'entry.st.css';
 
-<div {...sheet('root', {}, {})}
-     style={ 
-        [sheet['--color']]: 'green', 
-        [sheet['--border-size']]: '5px', 
-        background: 'gold' } />
+<div className={classes.root}
+     style={{ 
+        [vars.color]: 'green', 
+        [vars['border-size']]: '5px', 
+        background: 'gold' }} />
 ```
 {% endraw %}
 
@@ -111,8 +111,10 @@ This is mostly useful when working with 3rd-party libraries, where you only atte
 ```js
 import sheet from './entry.st.css';
 
-<div {...sheet('root', {}, {})}
-     style="--color: red; --bg: yellow;"
+<div className={classes.root}
+     style={{ 
+         ['--color']: 'red', 
+         ['--bg']: 'yellow' }}
 />
 ```
 
