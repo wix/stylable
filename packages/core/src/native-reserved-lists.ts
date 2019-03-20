@@ -35,6 +35,7 @@ export const nativePseudoClasses = [
     'only-of-type',
     'optional',
     'out-of-range',
+    'placeholder-shown',
     'read-only',
     'read-write',
     'required',
