@@ -1,8 +1,6 @@
 import { expect } from 'chai';
-import * as fs from 'fs';
-import hash from 'murmurhash';
-import { resolveNamespaceFactory, resolveNamespace } from '../src';
 import * as path from 'path';
+import { resolveNamespace, resolveNamespaceFactory } from '../src';
 
 describe('resolve-namespace-factory deterministic behavior', () => {
     it('default behavior', () => {
