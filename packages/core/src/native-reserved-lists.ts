@@ -117,6 +117,7 @@ export const nativeFunctionsDic = {
     'matrix3d': true,
     'minmax': true,
     'opacity': true,
+    'paint': true,
     'perspective': true,
     'polygon': true,
     'radial-gradient': true,
