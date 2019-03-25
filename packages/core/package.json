@@ -18,7 +18,7 @@
     "css-selector-tokenizer": "^0.7.1",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^4.1.0",
-    "is-vendor-prefixed": "^1.0.0",
+    "is-vendor-prefixed": "^3.3.0",
     "lodash.clonedeep": "^4.5.0",
     "murmurhash": "^0.0.2",
     "postcss": "^7.0.14",

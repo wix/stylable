@@ -4561,10 +4561,10 @@ is-utf8@^0.2.0:
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
   integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
 
-is-vendor-prefixed@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/is-vendor-prefixed/-/is-vendor-prefixed-1.0.0.tgz#d1043053f4d14cd7807ebe288621a6a0ead1adf8"
-  integrity sha1-0QQwU/TRTNeAfr4ohiGmoOrRrfg=
+is-vendor-prefixed@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/is-vendor-prefixed/-/is-vendor-prefixed-3.3.0.tgz#01a4e904588629e4c35be7f7771a81e986013499"
+  integrity sha512-P8aQoDqlPI2E+zpqsKWf0+KBDNVdVYgfPXsIBDGDQ7oRaSEPsSEKkbHM8ZbKlsDZh8NgCWwjK6Ks4X7ONK7VpQ==
   dependencies:
     vendor-prefixes "1.0.0"
 
