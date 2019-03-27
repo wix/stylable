@@ -23,7 +23,8 @@
         "quotemark": {
             "options": [
                 "single",
-                "avoid-escape"
+                "avoid-escape",
+                "jsx-double"
             ]
         },
         "no-var-requires": false,

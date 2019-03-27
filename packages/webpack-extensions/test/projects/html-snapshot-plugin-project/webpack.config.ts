@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-import StylableWebpackPlugin from '@stylable/webpack-plugin';
+import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
 import { createElement as el } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { HTMLSnapshotPlugin } from '../../../src/stylable-html-snapshot';

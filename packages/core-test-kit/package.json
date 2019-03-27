@@ -7,7 +7,6 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "lint": "tslint -p ./src",
     "start": "webpack-dev-server --hot --inline",
     "prepack": "yarn build"
   },

@@ -1,6 +1,5 @@
 import {expect} from 'chai';
-import StylableWebpackPlugin from '../../src';
-import { StylableWebpackPluginOptions } from '../../src/types';
+import { StylableWebpackPlugin } from '../../src';
 
 describe('StylableWebpackPlugin Unit', () => {
     it('should try load local stylable.config and run options hook', () => {

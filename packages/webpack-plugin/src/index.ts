@@ -1,3 +1,2 @@
-import { StylableWebpackPlugin } from './stylable-webpack-plugin';
-
-export = StylableWebpackPlugin;
+export * from './stylable-webpack-plugin';
+export * from './stylable-module-helpers';

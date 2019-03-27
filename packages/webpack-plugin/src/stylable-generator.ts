@@ -7,7 +7,6 @@ import {
     StylableResults
 } from '@stylable/core';
 import { generateModuleSource } from '@stylable/module-utils';
-import { EOL } from 'os';
 import path from 'path';
 import postcss from 'postcss';
 import webpack from 'webpack';
@@ -27,9 +26,8 @@ export class StylableGenerator {
             return module.originalSource();
         }
         const stylableResult = this.transform(module);
-        const { meta, exports } = stylableResult;
+        const { meta } = stylableResult;
         const isImportedByNonStylable = module.buildInfo.isImportedByNonStylable;
-        const imports: string[] = [];
 
         const css = this.options.includeCSSInJS
             ? this.getCSSInJSWithAssets(
@@ -63,7 +61,6 @@ export class StylableGenerator {
     }
     public transform(module: StylableModule) {
         const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
-        const outputAst = results.meta.outputAst;
 
         if (this.stylable.optimizer) {
             this.stylable.optimizer.optimize(

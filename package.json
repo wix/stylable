@@ -9,8 +9,9 @@
     "clean": "lerna run clean --stream --parallel",
     "build": "lerna run build --stream",
     "pretest": "yarn lint",
-    "lint": "lerna run lint --stream --parallel",
-    "test": "lerna run test --stream --parallel"
+    "lint": "yarn tslint -p tsconfig.base.json",
+    "test": "lerna run test --stream --parallel",
+    "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.1.10",

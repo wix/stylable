@@ -48,7 +48,7 @@ Currently we support Webpack as our build system. To author a component library,
 Add **Stylable** to your Webpack configuration as follows: 
 
 ```js
-const StylableWebpackPlugin = require('@stylable/webpack-plugin');
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 ...
 {
     module: {

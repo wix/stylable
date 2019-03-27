@@ -11,7 +11,7 @@ describe('css custom-properties (vars)', () => {
         // - exposes defined vars as stylesheet exports
 
         it('multiple different css var declarations', () => {
-            const { cssVars, diagnostics, ast } = processSource(`
+            const { cssVars, diagnostics } = processSource(`
                 .root {
                     --myVar: blue;
                     --myOtherVar: green;
@@ -32,7 +32,7 @@ describe('css custom-properties (vars)', () => {
         });
 
         it('global (unscoped) declarations', () => {
-            const { cssVars, diagnostics, ast } = processSource(`
+            const { cssVars, diagnostics } = processSource(`
                 @st-global-custom-property --myVar;
                 .root {
                     --myVar: blue;
@@ -50,7 +50,7 @@ describe('css custom-properties (vars)', () => {
         });
 
         it('multiple css var declarations with the same name', () => {
-            const { cssVars, diagnostics, ast } = processSource(`
+            const { cssVars, diagnostics } = processSource(`
                 .root {
                     --myVar: blue;
                 }
@@ -707,7 +707,7 @@ describe('css custom-properties (vars)', () => {
                 }
             };
 
-            const res = expectWarningsFromTransform(config, [
+            expectWarningsFromTransform(config, [
                 // tslint:disable-next-line:max-line-length
                 { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('--unknownVar', './imported.st.css'), file: '/entry.st.css' }
             ]);

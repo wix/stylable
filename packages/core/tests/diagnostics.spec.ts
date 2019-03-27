@@ -7,7 +7,6 @@ import { Config } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
-    nativeFunctionsDic,
     nativePseudoElements,
     reservedKeyFrames
 } from '../src/native-reserved-lists';

@@ -3,13 +3,11 @@ import { basename, join } from 'path';
 // import * as path from 'path';
 // import { RawSource } from 'webpack-sources';
 // import { renderToStaticMarkup } from 'react-dom/server';
-import * as webpack from 'webpack';
+import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { compileAsEntry, exec } from './compile-as-entry';
 
-const {
-    getCSSComponentLogicModule
-} = require('@stylable/webpack-plugin/src/stylable-module-helpers');
+import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;

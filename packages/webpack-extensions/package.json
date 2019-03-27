@@ -8,14 +8,12 @@
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
-    "lint": "run-p lint:src lint:test",
-    "lint:src": "tslint -p ./src",
-    "lint:test": "tslint -p ./test",
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 20000",
     "prepack": "yarn build"
   },
   "dependencies": {
     "@stylable/core": "^2.0.4",
+    "@stylable/webpack-plugin": "^2.0.8",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.8.5",
     "react-dom": "^16.8.5",

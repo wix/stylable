@@ -58,6 +58,7 @@ export interface CalcResult {
 }
 
 export interface StylableModule extends webpack.Module {
+    context: string;
     dependencies?: StylableModule[];
     hash?: string;
     module?: StylableModule;

@@ -25,7 +25,6 @@ import {
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import {
-    findDeclaration,
     findRule,
     generateScopedCSSVar,
     getDeclStylable,
@@ -285,9 +284,6 @@ export class StylableTransformer {
                         }
                     } else if (found && resolved) {
                         if (!resolved.symbol) {
-                            const importNode = findDeclaration(
-                                extend.import, (node: any) => node.prop === valueMapping.named
-                            );
                             this.diagnostics.error(
                                 found,
                                 transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),

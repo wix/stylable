@@ -1,8 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2017",
+    "target": "es2018",
     "types": [
       "node"
     ]

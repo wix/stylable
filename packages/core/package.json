@@ -7,9 +7,6 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "lint": "run-p lint:src lint:test",
-    "lint:src": "tslint -p ./src",
-    "lint:test": "tslint -p ./tests",
     "test": "mocha -r @ts-tools/node/r \"./tests/**/*.spec.ts\" --watch-extensions ts",
     "start": "webpack-dev-server --hot --inline",
     "prepack": "yarn build"
