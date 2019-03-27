@@ -1,6 +1,6 @@
 {
   "name": "@stylable/jest",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Test your Stylable React components using Jest",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -11,8 +11,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/module-utils": "^2.0.5",
-    "@stylable/runtime": "^2.0.2"
+    "@stylable/module-utils": "^2.0.6",
+    "@stylable/runtime": "^2.0.3"
   },
   "files": [
     "cjs",
