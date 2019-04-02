@@ -26,7 +26,7 @@ export interface RuntimeStylesheet extends StylableExports, RenderableStylesheet
     cssStates: (stateMap: StateMap) => string;
     style: (
         context: string,
-        stateOrClass: string | StateMap | undefined,
+        stateOrClass?: string | StateMap | undefined,
         ...classes: Array<string | undefined>
     ) => string;
 }
