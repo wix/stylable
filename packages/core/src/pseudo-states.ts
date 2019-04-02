@@ -17,7 +17,7 @@ const valueParser = require('postcss-value-parser');
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
-export const stateWithParamDelimiter = '---';
+export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 /* tslint:disable:max-line-length */
 export const stateErrors = {
@@ -408,11 +408,18 @@ export function createBooleanStateClassName(stateName: string, namespace: string
 }
 
 export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
-    // tslint:disable-next-line: max-line-length
-    return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
+    return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
 }
 
 export function createAttributeState(stateName: string, namespace: string, param: string) {
-    // tslint:disable-next-line:max-line-length
-    return `class~="${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}"`;
+    return `class~="${createStateWithParamClassName(stateName, namespace, param)}"`;
+}
+
+export function resolveStateParam(param: string) {
+    if (isValidClassName(param)) {
+        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
+    } else {
+        // tslint:disable-next-line: max-line-length
+        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}`;
+    }
 }
