@@ -9,11 +9,20 @@ export function matchRuleAndDeclaration(
 ) {
     const rule = parent.nodes![selectorIndex] as postcss.Rule;
     if (rule.selector !== selector) {
-        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex}`);
+        throw new Error(
+            `${msg ? msg + ' ' : ''}selector ${selectorIndex}\nactual: ${
+                rule.selector
+            }\nexpected: ${selector}`
+        );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    if (rule.nodes!.map(x => x.toString()).join(';') !== decl) {
-        throw new Error(`${msg ? msg + ' ' : ''}selector ${selectorIndex} first declaration`);
+    const actualDecl = rule.nodes!.map(x => x.toString()).join(';');
+    if (actualDecl !== decl) {
+        throw new Error(
+            `${
+                msg ? msg + ' ' : ''
+            }selector ${selectorIndex} declaration\nactual: ${actualDecl}\nexpected: ${decl}`
+        );
     }
 }
 

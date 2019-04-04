@@ -352,6 +352,150 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 1, '.entry--container .imported--local', 'color: green');
     });
 
+    it('separate mixin roots', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./mixin.st.css";
+                    -st-named: a;
+                }
+                .b { -st-mixin: a; }
+            `
+                },
+                '/mixin.st.css': {
+                    namespace: 'mixin',
+                    content: `
+
+                .a { color: green; background: red; }
+
+                .a:hover { color: yellow; }
+
+                .a { color: black; }
+
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: green;background: red');
+        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: black');
+    });
+
+    it('re-exported mixin maintains original definitions', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./enriched.st.css";
+                    -st-named: a;
+                }
+                .b { -st-mixin: a; }
+            `
+                },
+                '/enriched.st.css': {
+                    namespace: 'enriched',
+                    content: `
+                :import {
+                    -st-from: "./base.st.css";
+                    -st-named: a;
+                }
+                .a { color: green; }
+            `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                .a { color: red; }
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry--b', 'color: green');
+    });
+
+    it('re-exported mixin maintains original definitions (with multiple selectors)', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./enriched.st.css";
+                    -st-named: a;
+                }
+                .b { -st-mixin: a; }
+            `
+                },
+                '/enriched.st.css': {
+                    namespace: 'enriched',
+                    content: `
+                :import {
+                    -st-from: "./base.st.css";
+                    -st-named: a;
+                }
+                .a { color: green; }
+                .a:hover {
+                    color: yellow;
+                }
+                .a { color: purple; }
+            `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                .a { color: red; }
+                .a:hover {
+                    color: gold;
+                }
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: gold');
+        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: green');
+        matchRuleAndDeclaration(result, 3, '.entry--b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 4, '.entry--b', 'color: purple');
+    });
+
+    it(`apply mixin from named "as" import to a target class sharing the mixin source name`, () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./base.st.css";
+                    -st-named: a as b;
+                }
+                .a { -st-mixin: b; }
+            `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                .a { color: red; }
+            `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry--a', 'color: red');
+    });
+
     it('apply mixin from local class with extends (scope class as root)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
