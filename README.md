@@ -1,6 +1,6 @@
 ![Stylable CSS for Components](./stylable.svg)
 
-[![Travis Build Status](https://travis-ci.org/wix/stylable.svg?branch=master)](https://travis-ci.org/wix/stylable)
+[![Build Status](https://travis-ci.com/wix/stylable.svg?branch=master)](https://travis-ci.com/wix/stylable)
 [![Build status](https://ci.appveyor.com/api/projects/status/v6ktujs5hmxydmkp/branch/master?svg=true)](https://ci.appveyor.com/project/AlexShemeshWix/stylable/branch/master)
 
 **Stylable** enables you to write reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.

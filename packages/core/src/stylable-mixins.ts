@@ -45,7 +45,7 @@ export function appendMixin(
 
     if (checkRecursive(transformer, meta, mix, rule, path)) { return; }
 
-    const local = meta.mappedSymbols[mix.ref.name];
+    const local = meta.mappedSymbols[mix.mixin.type];
     if (local && (local._kind === 'class' || local._kind === 'element')) {
         handleLocalClassMixin(mix, transformer, meta, variableOverride, cssVarsMapping, path, rule);
     } else {
@@ -89,9 +89,15 @@ function checkRecursive(
     rule: postcss.Rule,
     path: string[]) {
 
-    const isRecursive = path.indexOf(mix.ref.name + ' from ' + meta.source) !== -1;
+    const symbolName = mix.ref.name === meta.root ?
+        mix.ref._kind === 'class' ?
+            meta.root :
+            'default' :
+        mix.mixin.type;
+    const isRecursive = path.indexOf(symbolName + ' from ' + meta.source) !== -1;
     if (isRecursive) {
-        transformer.diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), { word: mix.ref.name });
+        // Todo: add test verifying word
+        transformer.diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), { word: symbolName });
         return true;
     }
     return false;
@@ -158,13 +164,16 @@ function createMixinRootFromCSSResolve(
     );
 
     const mixinMeta: StylableMeta = isRootMixin ? resolvedClass.meta : createInheritedMeta(resolvedClass);
+    const symbolName = isRootMixin ?
+        'default' :
+        mix.mixin.type;
 
     transformer.transformAst(
         mixinRoot,
         mixinMeta,
         undefined,
         resolvedArgs,
-        path.concat(mix.ref.name + ' from ' + meta.source)
+        path.concat(symbolName + ' from ' + meta.source)
     );
 
     fixRelativeUrls(mixinRoot, mix, meta);
@@ -204,8 +213,9 @@ function handleImportedCSSMixin(
             break;
         }
     }
-
-    if (roots.length) {
+    if (roots.length === 1) {
+        mergeRules(roots[0], rule);
+    } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
         roots.forEach(root => mixinRoot.prepend(...root.nodes!));
         mergeRules(mixinRoot, rule);
@@ -251,7 +261,7 @@ function handleLocalClassMixin(
         isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
         undefined,
         resolvedArgs,
-        path.concat(mix.ref.name + ' from ' + meta.source)
+        path.concat(mix.mixin.type + ' from ' + meta.source)
     );
     mergeRules(mixinRoot, rule);
 }
