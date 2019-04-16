@@ -381,9 +381,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: green;background: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: yellow');
-        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: black');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: green;background: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 2, '.entry__b', 'color: black');
     });
 
     it('re-exported mixin maintains original definitions', () => {
@@ -419,8 +419,8 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b', 'color: green');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b', 'color: green');
     });
 
     it('re-exported mixin maintains original definitions (with multiple selectors)', () => {
@@ -463,11 +463,11 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: gold');
-        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: green');
-        matchRuleAndDeclaration(result, 3, '.entry--b:hover', 'color: yellow');
-        matchRuleAndDeclaration(result, 4, '.entry--b', 'color: purple');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b:hover', 'color: gold');
+        matchRuleAndDeclaration(result, 2, '.entry__b', 'color: green');
+        matchRuleAndDeclaration(result, 3, '.entry__b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 4, '.entry__b', 'color: purple');
     });
 
     it(`apply mixin from named "as" import to a target class sharing the mixin source name`, () => {
@@ -493,7 +493,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--a', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__a', 'color: red');
     });
 
     it('apply mixin from local class with extends (scope class as root)', () => {
