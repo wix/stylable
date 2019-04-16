@@ -1,11 +1,11 @@
 /* tslint:disable:max-line-length */
-import { expect } from 'chai';
-import * as postcss from 'postcss';
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration
-} from '../utils/test-utils';
+} from '@stylable/core-test-kit';
+import { expect } from 'chai';
+import * as postcss from 'postcss';
 
 describe('CSS Mixins', () => {
     it('apply simple class mixins declarations', () => {
@@ -26,7 +26,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--container', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
     });
 
     it('transform state form imported element', () => {
@@ -69,7 +69,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--y[data-base-disabled]', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
     });
 
     it('transform state form extended root when used as mixin', () => {
@@ -112,7 +112,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--y[data-base-disabled]', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {
@@ -168,7 +168,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 2, '.entry--container', 'color: red');
+        matchRuleAndDeclaration(result, 2, '.entry__container', 'color: red');
     });
 
     it('apply simple class mixin with circular refs to the same selector', () => {
@@ -190,9 +190,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--x', 'color: red;color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--y', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__y', 'color: red');
     });
 
     it('apply simple class mixin with circular refs from multiple files', () => {
@@ -227,7 +227,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--x', 'color: red;color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
     });
 
     it('append complex selector that starts with the mixin name', () => {
@@ -252,12 +252,12 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 3, '.entry--container:hover', 'color: blue');
+        matchRuleAndDeclaration(result, 3, '.entry__container:hover', 'color: blue');
 
         matchRuleAndDeclaration(
             result,
             4,
-            '.entry--container .entry--my-other-class',
+            '.entry__container .entry__my-other-class',
             'color: green'
         );
     });
@@ -284,7 +284,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 2, '.entry--container', 'animation: entry--original 2s');
+        matchRuleAndDeclaration(result, 2, '.entry__container', 'animation: entry__original 2s');
     });
 
     it('apply class mixins from import', () => {
@@ -314,7 +314,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red');
     });
 
     it('apply mixin from named import (scope classes from mixin origin)', () => {
@@ -347,9 +347,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container .imported--local', 'color: green');
+        matchRuleAndDeclaration(result, 1, '.entry__container .imported__local', 'color: green');
     });
 
     it('separate mixin roots', () => {
@@ -381,9 +381,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: green;background: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: yellow');
-        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: black');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: green;background: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 2, '.entry__b', 'color: black');
     });
 
     it('re-exported mixin maintains original definitions', () => {
@@ -419,8 +419,8 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b', 'color: green');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b', 'color: green');
     });
 
     it('re-exported mixin maintains original definitions (with multiple selectors)', () => {
@@ -463,11 +463,11 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--b', 'color: red');
-        matchRuleAndDeclaration(result, 1, '.entry--b:hover', 'color: gold');
-        matchRuleAndDeclaration(result, 2, '.entry--b', 'color: green');
-        matchRuleAndDeclaration(result, 3, '.entry--b:hover', 'color: yellow');
-        matchRuleAndDeclaration(result, 4, '.entry--b', 'color: purple');
+        matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
+        matchRuleAndDeclaration(result, 1, '.entry__b:hover', 'color: gold');
+        matchRuleAndDeclaration(result, 2, '.entry__b', 'color: green');
+        matchRuleAndDeclaration(result, 3, '.entry__b:hover', 'color: yellow');
+        matchRuleAndDeclaration(result, 4, '.entry__b', 'color: purple');
     });
 
     it(`apply mixin from named "as" import to a target class sharing the mixin source name`, () => {
@@ -493,7 +493,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--a', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__a', 'color: red');
     });
 
     it('apply mixin from local class with extends (scope class as root)', () => {
@@ -528,9 +528,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', '-st-extends: Base;color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container .base--part', 'color: green');
+        matchRuleAndDeclaration(result, 1, '.entry__container .base__part', 'color: green');
     });
 
     it('apply mixin from named import with extends (scope classes from mixin origin)', () => {
@@ -572,9 +572,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', '-st-extends: Base;color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container .base--part', 'color: green');
+        matchRuleAndDeclaration(result, 1, '.entry__container .base__part', 'color: green');
     });
 
     it('should apply root mixin on child class (Root mixin mode)', () => {
@@ -597,13 +597,13 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', '');
+        matchRuleAndDeclaration(result, 0, '.entry__container', '');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container .entry--container', '');
+        matchRuleAndDeclaration(result, 1, '.entry__container .entry__container', '');
 
-        matchRuleAndDeclaration(result, 2, '.entry--container .entry--class', '');
+        matchRuleAndDeclaration(result, 2, '.entry__container .entry__class', '');
 
-        matchRuleAndDeclaration(result, 3, '.entry--class', '');
+        matchRuleAndDeclaration(result, 3, '.entry__class', '');
     });
 
     it('apply mixin from named import with extends (scope classes from mixin origin) !! with alias jump', () => {
@@ -656,9 +656,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', '-st-extends: Base;color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container .base--part', 'color: green');
+        matchRuleAndDeclaration(result, 1, '.entry__container .base__part', 'color: green');
     });
 
     it('apply mixin with two root replacements', () => {
@@ -688,7 +688,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry--x .entry--x.imported--y', 'color: yellow');
+        matchRuleAndDeclaration(result, 1, '.entry__x .entry__x.imported__y', 'color: yellow');
     });
 
     it('apply complex mixin on complex selector', () => {
@@ -717,9 +717,9 @@ describe('CSS Mixins', () => {
         matchAllRulesAndDeclarations(
             result,
             [
-                ['.entry--x:hover .entry--y', 'color: red'],
+                ['.entry__x:hover .entry__y', 'color: red'],
                 [
-                    '.entry--x:hover .entry--y:hover, .entry--x:hover .entry--y.entry--local:hover .entry--inner',
+                    '.entry__x:hover .entry__y:hover, .entry__x:hover .entry__y.entry__local:hover .entry__inner',
                     'color: green'
                 ]
             ],
@@ -760,18 +760,18 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--x', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red');
 
         const media = result.nodes![1] as postcss.AtRule;
         expect(media.params, 'media params').to.equal('(max-width: 300px)');
 
         matchAllRulesAndDeclarations(
             media,
-            [['.entry--x', 'color: yellow'], ['.entry--x:hover', 'color: red']],
+            [['.entry__x', 'color: yellow'], ['.entry__x:hover', 'color: red']],
             '@media'
         );
 
-        matchRuleAndDeclaration(result, 2, '.entry--x:hover', 'color: blue');
+        matchRuleAndDeclaration(result, 2, '.entry__x:hover', 'color: blue');
     });
 
     it('apply mixin from root style sheet', () => {
@@ -806,11 +806,11 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--x', 'color:red');
-        matchRuleAndDeclaration(result, 1, '.entry--x .imported--y', 'color:green');
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color:red');
+        matchRuleAndDeclaration(result, 1, '.entry__x .imported__y', 'color:green');
         const media = result.nodes![2] as postcss.AtRule;
-        matchRuleAndDeclaration(media, 0, '.entry--x', 'color:yellow', '@media');
-        matchRuleAndDeclaration(media, 1, '.entry--x .imported--y', 'color:gold', '@media');
+        matchRuleAndDeclaration(media, 0, '.entry__x', 'color:yellow', '@media');
+        matchRuleAndDeclaration(media, 1, '.entry__x .imported__y', 'color:gold', '@media');
     });
 
     it('apply named mixin with extends and conflicting pseudo-element class at mixin deceleration level', () => {
@@ -854,7 +854,7 @@ describe('CSS Mixins', () => {
                 }
             }
         });
-        matchRuleAndDeclaration(result, 1, '.entry--x .comp--part .imported--part', 'color: green');
+        matchRuleAndDeclaration(result, 1, '.entry__x .comp__part .imported__part', 'color: green');
     });
 
     it('apply mixin when rootScoping enabled', () => {
@@ -905,9 +905,9 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--root', '-st-extends:Base;color:yellow');
-        matchRuleAndDeclaration(result, 1, '.entry--root .look1--panel', 'color:gold');
-        matchRuleAndDeclaration(result, 2, '.entry--root .base--label', 'color:green');
+        matchRuleAndDeclaration(result, 0, '.entry__root', '-st-extends:Base;color:yellow');
+        matchRuleAndDeclaration(result, 1, '.entry__root .look1__panel', 'color:gold');
+        matchRuleAndDeclaration(result, 2, '.entry__root .base__label', 'color:green');
     });
 
     it('apply mixin from imported element', () => {
@@ -936,7 +936,7 @@ describe('CSS Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
     });
 
     it('apply nested mixins', () => {
@@ -980,7 +980,7 @@ describe('CSS Mixins', () => {
 
         matchAllRulesAndDeclarations(
             result,
-            [['.entry--x', ''], ['.entry--x .r--r', ''], ['.entry--x .r--r .y--y', '']],
+            [['.entry__x', ''], ['.entry__x .r__r', ''], ['.entry__x .r__r .y__y', '']],
             ''
         );
     });
@@ -1028,7 +1028,7 @@ describe('CSS Mixins', () => {
 
             matchAllRulesAndDeclarations(
                 result,
-                [['.entry--x', 'background: url(./a/asset.png);background: url(./a/b/asset.png)']],
+                [['.entry__x', 'background: url(./a/asset.png);background: url(./a/b/asset.png)']],
                 ''
             );
         });
@@ -1061,7 +1061,7 @@ describe('CSS Mixins', () => {
 
             matchAllRulesAndDeclarations(
                 result,
-                [['.entry--x', 'background: url(./asset.png)']],
+                [['.entry__x', 'background: url(./asset.png)']],
                 ''
             );
         });
@@ -1090,7 +1090,7 @@ describe('CSS Mixins', () => {
                 }
             });
 
-            matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
+            matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
         });
 
         it('apply mixin with :vars override with space in value', () => {
@@ -1115,7 +1115,7 @@ describe('CSS Mixins', () => {
                 }
             });
 
-            matchRuleAndDeclaration(result, 0, '.entry--x', 'border:1px solid red');
+            matchRuleAndDeclaration(result, 0, '.entry__x', 'border:1px solid red');
         });
 
         it('apply mixin with :vars override', () => {
@@ -1147,7 +1147,7 @@ describe('CSS Mixins', () => {
                 }
             });
 
-            matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green');
+            matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
         });
 
         it('apply mixin with :vars multiple override', () => {
@@ -1170,7 +1170,7 @@ describe('CSS Mixins', () => {
                 }
             });
 
-            matchRuleAndDeclaration(result, 0, '.entry--x', 'color:green;background:yellow');
+            matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green;background:yellow');
         });
 
         it('apply mixin with :vars multiple levels', () => {
@@ -1225,7 +1225,7 @@ describe('CSS Mixins', () => {
             matchRuleAndDeclaration(
                 result,
                 0,
-                '.entry--x',
+                '.entry__x',
                 'border: 1px solid green;background: yellow'
             );
         });

@@ -6,13 +6,18 @@ import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
 import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
+import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo, StateParsedValue } from './types';
+import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
+
+export const stateMiddleDelimiter = '-';
+export const booleanStateDelimiter = '--';
+export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
 /* tslint:disable:max-line-length */
 export const stateErrors = {
@@ -21,7 +26,7 @@ export const stateErrors = {
     TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
     NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
     TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`,
-    STATE_VARIABLE_NAME_CLASH: (name: string) => `state "${name}" definition cannot begin with "--"`
+    STATE_STARTS_WITH_HYPHEN: (name: string) => `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
 };
 /* tslint:enable:max-line-length */
 
@@ -36,10 +41,10 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
         const [stateDefinition, ...stateDefault] = workingState;
 
-        if (stateDefinition.value.trim().startsWith('--')) {
+        if (stateDefinition.value.startsWith('-')) {
             diagnostics.error(
                 decl,
-                stateErrors.STATE_VARIABLE_NAME_CLASH(stateDefinition.value),
+                stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value),
                 { word: stateDefinition.value });
         }
 
@@ -323,8 +328,8 @@ export function setStateToNode(
     const stateDef = states[name];
 
     if (stateDef === null) {
-        node.type = 'attribute';
-        node.content = autoStateAttrName(name, namespace);
+        node.type = 'class';
+        node.name = createBooleanStateClassName(name, namespace);
     } else if (typeof stateDef === 'string') {
         node.type = 'invalid'; // simply concat global mapped selector - ToDo: maybe change to 'selector'
         node.value = stateDef;
@@ -375,12 +380,14 @@ function resolveStateValue(
         }
     }
 
-    node.type = 'attribute';
-
-    const selectorSuffix = stateDef.type === 'tag' ? '~' : undefined; // TODO: should be generic
-
     const strippedParam = stripQuotation(actualParam);
-    node.content = `${autoStateAttrName(name, namespace, selectorSuffix)}=${JSON.stringify(strippedParam)}`;
+    if (isValidClassName(strippedParam)) {
+        node.type = 'class';
+        node.name = createStateWithParamClassName(name, namespace, strippedParam);
+    } else {
+        node.type = 'attribute';
+        node.content = createAttributeState(name, namespace, strippedParam);
+    }
 }
 
 function resolveParam(
@@ -396,6 +403,23 @@ function resolveParam(
     return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
 }
 
-export function autoStateAttrName(stateName: string, namespace: string, suffix = '') {
-    return `data-${namespace.toLowerCase()}-${stateName.toLowerCase()}${suffix}`;
+export function createBooleanStateClassName(stateName: string, namespace: string) {
+    return `${namespace}${booleanStateDelimiter}${stateName}`;
+}
+
+export function createStateWithParamClassName(stateName: string, namespace: string, param: string) {
+    return `${namespace}${stateWithParamDelimiter}${stateName}${resolveStateParam(param)}`;
+}
+
+export function createAttributeState(stateName: string, namespace: string, param: string) {
+    return `class~="${createStateWithParamClassName(stateName, namespace, param)}"`;
+}
+
+export function resolveStateParam(param: string) {
+    if (isValidClassName(param)) {
+        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
+    } else {
+        // tslint:disable-next-line: max-line-length
+        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}`;
+    }
 }

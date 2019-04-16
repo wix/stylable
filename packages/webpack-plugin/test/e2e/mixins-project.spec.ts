@@ -8,7 +8,6 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            port: 3001,
             puppeteerOptions: {
                 // headless: false
             }
@@ -27,7 +26,7 @@ describe(`(${project})`, () => {
             depth: '1'
         });
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-            /\.index\d+--root \{ arguments: \["1","2"\]; border: 1px solid rgb\(255, 0, 0\); z-index: 9; \}/
+            /\.index\d+__root \{ arguments: \["1","2"\]; border: 1px solid rgb\(255, 0, 0\); z-index: 9; \}/
         );
     });
 

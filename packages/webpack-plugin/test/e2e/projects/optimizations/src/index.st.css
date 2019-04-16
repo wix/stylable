@@ -8,11 +8,11 @@
 }
 
 :global(.global1) {
-    background: rgb(128,128,128)
+    background: rgb(128, 128, 128);
 }
 
 :global(.global1 .global2) {
-    font-size: 20px
+    background-color: rgb(228, 228, 228);
 }
 
 .root {

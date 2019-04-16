@@ -1,6 +1,6 @@
+import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { generateStylableRoot } from '../utils/generate-test-util';
 
 describe('scoping-edge-cases', () => {
 
@@ -51,7 +51,7 @@ describe('scoping-edge-cases', () => {
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
-            '.style--x .comp--part .inner--inner'
+            '.style__x .comp__part .inner__inner'
         );
 
     });
@@ -110,7 +110,7 @@ describe('scoping-edge-cases', () => {
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
-            '.style--x .comp--part .inner--inner, .style--x[data-style-test]'
+            '.style__x .comp__part .inner__inner, .style__x.style--test'
         );
 
     });

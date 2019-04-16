@@ -2,10 +2,10 @@ import postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
-import { ImportSymbol, RefedMixin, SRule, StylableMeta } from './stylable-processor';
+import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
-import { createSubsetAst, findDeclaration, isValidDeclaration, mergeRules } from './stylable-utils';
+import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { Pojo } from './types';
 
@@ -22,12 +22,13 @@ export function appendMixins(
     transformer: StylableTransformer,
     rule: SRule,
     meta: StylableMeta,
-    variableOverride?: Pojo<string>,
+    variableOverride: Pojo<string>,
+    cssVarsMapping: Pojo<string>,
     path: string[] = []) {
 
     if (!rule.mixins || rule.mixins.length === 0) { return; }
     rule.mixins.forEach(mix => {
-        appendMixin(mix, transformer, rule, meta, variableOverride, path);
+        appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
     rule.mixins.length = 0;
     rule.walkDecls(valueMapping.mixin, node => node.remove());
@@ -38,14 +39,15 @@ export function appendMixin(
     transformer: StylableTransformer,
     rule: SRule,
     meta: StylableMeta,
-    variableOverride?: Pojo<string>,
+    variableOverride: Pojo<string>,
+    cssVarsMapping: Pojo<string>,
     path: string[] = []) {
 
     if (checkRecursive(transformer, meta, mix, rule, path)) { return; }
 
     const local = meta.mappedSymbols[mix.mixin.type];
     if (local && (local._kind === 'class' || local._kind === 'element')) {
-        handleLocalClassMixin(mix, transformer, meta, variableOverride, path, rule);
+        handleLocalClassMixin(mix, transformer, meta, variableOverride, cssVarsMapping, path, rule);
     } else {
         const resolvedMixin = transformer.resolver.resolve(mix.ref);
         if (resolvedMixin) {
@@ -70,7 +72,8 @@ export function appendMixin(
                     rule,
                     meta,
                     path,
-                    variableOverride
+                    variableOverride,
+                    cssVarsMapping
                 );
             }
         } else {
@@ -137,7 +140,8 @@ function createMixinRootFromCSSResolve(
     resolvedClass: CSSResolve,
     path: string[],
     decl: postcss.Declaration,
-    variableOverride?: Pojo<string>) {
+    variableOverride: Pojo<string>,
+    cssVarsMapping: Pojo<string> ) {
 
     const isRootMixin = resolvedClass.symbol.name === resolvedClass.meta.root;
     const mixinRoot = createSubsetAst<postcss.Root>(
@@ -155,7 +159,8 @@ function createMixinRootFromCSSResolve(
         transformer.diagnostics,
         decl,
         variableOverride,
-        path
+        path,
+        cssVarsMapping
     );
 
     const mixinMeta: StylableMeta = isRootMixin ? resolvedClass.meta : createInheritedMeta(resolvedClass);
@@ -182,7 +187,8 @@ function handleImportedCSSMixin(
     rule: postcss.Rule,
     meta: StylableMeta,
     path: string[],
-    variableOverride?: Pojo<string>) {
+    variableOverride: Pojo<string>,
+    cssVarsMapping: Pojo<string> ) {
 
     let resolvedClass = transformer.resolver.resolve(mix.ref) as CSSResolve;
     const roots = [];
@@ -196,7 +202,8 @@ function handleImportedCSSMixin(
             resolvedClass,
             path,
             mixinDecl,
-            variableOverride));
+            variableOverride,
+            cssVarsMapping));
         if (
             (resolvedClass.symbol._kind === 'class' || resolvedClass.symbol._kind === 'element') &&
             !resolvedClass.symbol[valueMapping.extends]
@@ -230,6 +237,7 @@ function handleLocalClassMixin(
     transformer: StylableTransformer,
     meta: StylableMeta,
     variableOverride: ({ [key: string]: string; } & object) | undefined,
+    cssVarsMapping: Pojo<string>,
     path: string[],
     rule: SRule) {
 
@@ -242,7 +250,8 @@ function handleLocalClassMixin(
         transformer.diagnostics,
         mixinDecl,
         variableOverride,
-        path
+        path,
+        cssVarsMapping
     );
 
     const mixinRoot = createSubsetAst<postcss.Root>(meta.ast, '.' + mix.ref.name, undefined, isRootMixin);

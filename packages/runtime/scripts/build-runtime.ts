@@ -8,6 +8,6 @@ const outModule = bundle({
     header: `/* runtime version: ${require('../package.json').version} */`
 });
 
-useModule(outModule, ['$', 'create', 'RuntimeRenderer']);
+useModule(outModule, ['$', 'create', 'createRenderable', 'RuntimeRenderer']);
 
 ensureWrite(join(__dirname, '../runtime.lib.js'), outModule);

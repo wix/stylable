@@ -23,14 +23,16 @@
         "quotemark": {
             "options": [
                 "single",
-                "avoid-escape"
+                "avoid-escape",
+                "jsx-double"
             ]
         },
         "no-var-requires": false,
         "no-console": false,
         "no-bitwise": false,
         "object-literal-sort-keys": false,
-        "no-shadowed-variable": false
+        "no-shadowed-variable": false,
+        "max-classes-per-file": false
     },
     "rulesDirectory": []
 }

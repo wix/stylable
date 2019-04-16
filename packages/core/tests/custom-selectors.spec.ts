@@ -1,6 +1,6 @@
+import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { generateStylableRoot, processSource } from './utils/generate-test-util';
 
 describe('@custom-selector', () => {
 
@@ -71,7 +71,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp--root > .comp--icon');
+        expect(r.selector).to.equal('.comp__root > .comp__icon');
 
     });
 
@@ -122,7 +122,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp--root > .comp--icon .child--top');
+        expect(r.selector).to.equal('.comp__root > .comp__icon .child__top');
 
     });
 
@@ -154,7 +154,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp--root .comp--icon,.comp--root .comp--class');
+        expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
 
     });
 
@@ -199,7 +199,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.xxx .controls--root');
+        expect(r.selector).to.equal('.xxx .controls__root');
 
     });
 
@@ -246,7 +246,7 @@ describe('@custom-selector', () => {
         });
 
         const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.interface--root .controls--root cc');
+        expect(r.selector).to.equal('.interface__root .controls__root cc');
 
     });
 });

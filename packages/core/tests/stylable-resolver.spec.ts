@@ -1,10 +1,10 @@
+import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 import { resolve } from '../src/path';
 import { StylableMeta } from '../src/stylable-processor';
-import { createStylableInstance, generateInfra } from './utils/generate-test-util';
 
 function createResolveExtendsResults(
     fs: MinimalFS,
@@ -412,7 +412,7 @@ describe('stylable-resolver', () => {
 
         const {meta} = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
-        expect(rule.selector).to.equal('.A--root');
+        expect(rule.selector).to.equal('.A__root');
 
     });
 });

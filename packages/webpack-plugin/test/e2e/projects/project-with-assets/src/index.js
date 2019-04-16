@@ -1,4 +1,4 @@
-import assets from "./assets/assets.st.css";
+import { classes } from "./assets/assets.st.css";
 
-document.documentElement.classList.add(assets.root);
-document.body.classList.add(assets.bg);
+document.documentElement.classList.add(classes.root);
+document.body.classList.add(classes.bg);

@@ -1,7 +1,12 @@
+import {
+    expectWarnings,
+    expectWarningsFromTransform,
+    findTestLocations
+} from '@stylable/core-test-kit';
+import { Config } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
-    nativeFunctionsDic,
     nativePseudoElements,
     reservedKeyFrames
 } from '../src/native-reserved-lists';
@@ -10,12 +15,7 @@ import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
 import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
-import {
-    expectWarnings,
-    expectWarningsFromTransform,
-    findTestLocations
-} from './utils/diagnostics';
-import { Config } from './utils/generate-test-util';
+import { testedNativeFunctions } from './functions.spec';
 
 describe('findTestLocations', () => {
 
@@ -891,24 +891,6 @@ describe('diagnostics: warnings and errors', () => {
     });
 
     describe('transforms', () => {
-        it('should return warning if @keyframe symbol is used', () => {
-            const config = {
-                entry: '/main.st.css',
-                files: {
-                    '/main.st.css': {
-                        content: `
-                        .name {}
-                        |@keyframes $name$| {
-                            from {}
-                            to {}
-                        }`
-                    }
-                }
-            };
-            expectWarningsFromTransform(config,
-                [{ message: transformerWarnings.SYMBOL_IN_USE('name'), file: '/main.st.css' }]);
-        });
-
         it('should not allow @keyframe of reserved words', () => {
             reservedKeyFrames.map(key => {
                 const config = {
@@ -1239,7 +1221,7 @@ describe('diagnostics: warnings and errors', () => {
         });
 
         describe('native', () => {
-            Object.keys(nativeFunctionsDic).forEach(cssFunc => {
+            testedNativeFunctions.forEach(cssFunc => {
                 it(`should not return a warning for native ${cssFunc} pseudo class`, () => {
                     const config: Config = {
                         entry: '/main.css',

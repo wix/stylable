@@ -1,11 +1,11 @@
-import index from './index.st.css';
+import { classes, $id } from './index.st.css';
 
 const div = document.createElement('div');
 div.dataset.name = 'index'
-div.classList.add(index.root);
+div.classList.add(classes.root);
 
 div.textContent = JSON.stringify(
-    window.__stylable__.$.getStyles([index.$id]).map(x => x.__proto__),
+    window.__stylable__.$.getStyles([$id]).map(x => x.__proto__),
     null,
     4
 );

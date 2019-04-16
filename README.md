@@ -30,23 +30,23 @@ For details on both options, see [Install & Configure](https://stylable.io/docs/
 ## Repository Structure
 This repository is a `mono-repo` containing multiple `packages` that together comprise the Stylable ecosystem. It uses [Lerna](https://lernajs.io/) and [Yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) to manage the various packages and their dependencies.
 
-### Core
+### Core & Internals
 
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:-------:|-----------|
 |[core](./packages/core)|`@stylable/core`|[![npm version](https://img.shields.io/npm/v/@stylable/core.svg)](https://www.npmjs.com/package/@stylable/core)|Core CSS preprocessor|
 |[runtime](./packages/runtime)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
+|[optimizer](./packages/optimizer)|`@stylable/optimizer`|[![npm version](https://img.shields.io/npm/v/@stylable/optimizer.svg)](https://www.npmjs.com/package/@stylable/optimizer)|Production mode optimizer|
+|[module-utils](./packages/module-utils)|`@stylable/module-utils`|[![npm version](https://img.shields.io/npm/v/@stylable/module-utils.svg)](https://www.npmjs.com/package/@stylable/module-utils)|Stylable CommonJS module generator |
 
 ### Tooling & Utilities
 
 |Package Name|Published Name|Latest Version|Description|
 |------------|--------------|:------------:|-----------|
-|[e2e-test-kit](./packages/e2e-test-kit)|`@stylable/e2e-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)|`webpack` project runner used for `E2E` testing |
-|[dom-test-kit](./packages/dom-test-kit)|`@stylable/dom-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/dom-test-kit.svg)](https://www.npmjs.com/package/@stylable/dom-test-kit)|Stylable DOM related testing utils |
 |[cli](./packages/cli)|`@stylable/cli`|[![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)|Used for managing Stylable stylesheets in a project|
 |[react-scripts](./packages/react-scripts)|`@stylable/react-scripts`|[![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)|`create-react-app` boilerplate generator scripts|
-|[stylable.io](./packages/stylable.io)|unpublished to `npm`|-|source for [stylable.io](http://stylable.io)|
 |[schema-extract](./packages/schema-extract)|`@stylable/schema-extract`|[![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)|JSON Schema convertor for Stylable stylesheets|
+|[stylable.io](./packages/stylable.io)|-|-|source package for the [stylable.io](http://stylable.io) official website|
 
 ### Integrations
 
@@ -56,6 +56,15 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |[node](./packages/node)|`@stylable/node`|[![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)|`require` hook and Node module factory |
 |[webpack-extensions](./packages/webpack-extensions)|`@stylable/webpack-extensions`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)|Experimental features for `webpack` integration|
 |[webpack-plugin](./packages/webpack-plugin)|`@stylable/webpack-plugin`|[![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)|`webpack` (`v4.x`) integration plugin|
+
+### Test-kits
+
+|Package Name|Published Name|Latest Version|Description|
+|------------|--------------|:------------:|-----------|
+|[e2e-test-kit](./packages/e2e-test-kit)|`@stylable/e2e-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/e2e-test-kit.svg)](https://www.npmjs.com/package/@stylable/e2e-test-kit)|`webpack` project runner used for `E2E` testing |
+|[dom-test-kit](./packages/dom-test-kit)|`@stylable/dom-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/dom-test-kit.svg)](https://www.npmjs.com/package/@stylable/dom-test-kit)|Stylable DOM related testing utils |
+|[core-test-kit](./packages/core-test-kit)|`@stylable/core-test-kit`|[![npm version](https://img.shields.io/npm/v/@stylable/core-test-kit.svg)](https://www.npmjs.com/package/@stylable/core-test-kit)|Utilities used for testing core Stylable operations (processing and transformations) |
+
 
 ### External Packages
 |Package Name|Description|

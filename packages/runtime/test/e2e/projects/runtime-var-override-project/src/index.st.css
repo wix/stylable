@@ -1,0 +1,7 @@
+.root {
+    --bg: rgb(0, 255, 0);
+    --color: rgb(0, 255, 0);
+    background-color: var(--bg);
+    color: var(--color);
+    border-color: red;
+}

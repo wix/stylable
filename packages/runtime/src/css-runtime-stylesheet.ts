@@ -1,89 +1,108 @@
-import { AttributeMap, InheritedAttributes, RuntimeStylesheet, StateMap } from './types';
+import { RuntimeRenderer } from './css-runtime-renderer';
+import {
+    RuntimeStylesheet,
+    StateMap,
+    StateValue,
+    StylableExports
+} from './types';
+
+const stateMiddleDelimiter = '-';
+const booleanStateDelimiter = '--';
+const stateWithParamDelimiter = '---';
 
 export function create(
-  root: string,
-  namespace: string,
-  locals: Partial<RuntimeStylesheet>,
-  css: string,
-  depth: number,
-  id: string | number
+    namespace: string,
+    exports: StylableExports,
+    css: string,
+    depth: number,
+    id: string | number,
+    renderer: RuntimeRenderer | null
 ): RuntimeStylesheet {
 
-  const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
+    const stylesheet: RuntimeStylesheet = {
+        namespace,
+        classes: exports.classes,
+        keyframes: exports.keyframes,
+        vars: exports.vars,
+        stVars: exports.stVars,
+        cssStates,
+        style,
+        $id: id,
+        $depth: depth,
+        $css: css
+    };
 
-  function cssStates(stateMapping: StateMap) {
-    return stateMapping
-      ? Object.keys(stateMapping).reduce((states, key) => {
-        const stateValue = stateMapping[key];
+    if (renderer) {
+        renderer.register(stylesheet);
+    }
 
+    function cssStates(stateMapping?: StateMap | null): string {
+        const classNames = [];
+        for (const stateName in stateMapping) {
+            const stateValue = stateMapping[stateName];
+            const stateClass = createStateClass(stateName, stateValue);
+            if (stateClass) {
+                classNames.push(stateClass);
+            }
+        }
+        return classNames.join(' ');
+    }
+
+    function createBooleanStateClassName(stateName: string) {
+        return `${namespace}${booleanStateDelimiter}${stateName}`;
+    }
+
+    function createStateWithParamClassName(stateName: string, param: string) {
+        // tslint:disable-next-line: max-line-length
+        return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
+    }
+
+    function createStateClass(stateName: string, stateValue: StateValue): string {
         if (
-          stateValue === undefined ||
-          stateValue === null ||
-          stateValue === false
+            stateValue === false ||
+            stateValue === undefined ||
+            stateValue === null ||
+            stateValue !== stateValue // check NaN
         ) {
-          return states;
+            return '';
         }
 
-        states[dataNamespace + key.toLowerCase()] = stateValue;
-
-        return states;
-      }, {} as StateMap)
-      : {};
-  }
-
-  function get(localName: string) {
-    return locals[localName];
-  }
-
-  function mapClasses(className: string) {
-    return className
-      .split(/\s+/g)
-      .map(className => get(className) || className)
-      .join(' ');
-  }
-
-  locals.$root = root;
-  locals.$namespace = namespace;
-  locals.$depth = depth;
-  locals.$id = id;
-  locals.$css = css;
-
-  locals.$get = get;
-  locals.$cssStates = cssStates;
-
-  function stylable_runtime_stylesheet(className: string, states: StateMap, inheritedAttributes: InheritedAttributes) {
-    className = className ? mapClasses(className) : '';
-
-    const base: AttributeMap = cssStates(states);
-
-    if (inheritedAttributes) {
-      for (const k in inheritedAttributes) {
-        if (k.match(/^data-/)) {
-          base[k] = inheritedAttributes[k];
+        if (stateValue === true) { // boolean state
+            return createBooleanStateClassName(stateName);
         }
-      }
 
-      if (inheritedAttributes.className) {
-        className += ' ' + inheritedAttributes.className;
-      }
+        const valueAsString = stateValue.toString();
+
+        return createStateWithParamClassName(stateName, valueAsString);
     }
 
-    if (className) {
-      base.className = className;
+    function style() {
+        const classNames = [];
+
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < arguments.length; i++) {
+            const item = arguments[i];
+
+            if (item) {
+                if (typeof item === 'string') {
+                    classNames[classNames.length] = item;
+                } else if (i === 1) {
+                    for (const stateName in item) {
+                        const stateValue = item[stateName];
+                        const stateClass = createStateClass(stateName, stateValue);
+                        if (stateClass) {
+                            classNames[classNames.length] = stateClass;
+                        }
+                    }
+                }
+            }
+        }
+        return classNames.join(' ');
     }
 
-    return base;
-  }
-
-  Object.setPrototypeOf(stylable_runtime_stylesheet, locals);
-
-  // EDGE CACHE BUG FIX
-  (stylable_runtime_stylesheet as any)[locals.$root] = locals[locals.$root];
-
-  return stylable_runtime_stylesheet as RuntimeStylesheet;
-
+    return stylesheet;
 }
 
-export function createTheme(css: string, depth: number | string, id: number | string) {
-  return { $css: css, $depth: depth, $id: id, $theme: true };
+export function createRenderable(css: string, depth: number | string, id: number | string) {
+    return { $css: css, $depth: depth, $id: id, $theme: true };
 }

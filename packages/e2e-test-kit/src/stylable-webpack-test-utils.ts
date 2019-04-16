@@ -1,5 +1,5 @@
-import { RuntimeRenderer } from '@stylable/runtime/cjs/css-runtime-renderer';
-import * as stylesheet from '@stylable/runtime/cjs/css-runtime-stylesheet';
+import { RuntimeRenderer } from '@stylable/runtime';
+import * as stylesheet from '@stylable/runtime';
 
 export interface MinimalModule {
   type: string;
@@ -51,7 +51,7 @@ export function evalStylableModule(stylableModule: MinimalStylableModule, requir
     code
   );
   const customRequire = (id: string) => {
-    if (id.match(/css-runtime-renderer.js$/)) {
+    if (id.match(/@stylable\/runtime$/)) {
       return new RuntimeRenderer();
     }
     if (id.match(/css-runtime-stylesheet.js$/)) {

@@ -1,5 +1,5 @@
-import index from "./index.st.css";
+import { classes, $id, namespace } from "./index.st.css";
 
-document.documentElement.classList.add(index.root);
-window.$id = index.$id
-window.$namespace = index.$namespace
+document.documentElement.classList.add(classes.root);
+window.$id = $id
+window.$namespace = namespace

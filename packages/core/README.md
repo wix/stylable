@@ -10,10 +10,9 @@ Follow these instructions in order to run Stylable in development mode, this all
 1. Clone this repo
 2. `cd stylable`
 3. `yarn`
-4. `yarn build`
-5. `cd ./packages/stylable`
-6. `yarn start`
-7. Open your browser to [`http://localhost:8080/tests.bundle`](http://localhost:8080/tests.bundle)
+4. `cd ./packages/stylable`
+5. `yarn start`
+6. Open your browser to [`http://localhost:8080/tests.bundle`](http://localhost:8080/tests.bundle)
 
 ## How it works
 

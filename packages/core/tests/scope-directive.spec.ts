@@ -1,10 +1,16 @@
+import {
+    expectWarnings,
+    expectWarningsFromTransform,
+    flatMatch,
+    generateStylableResult,
+    processSource,
+    shouldReportNoDiagnostics
+    } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
 import { processorWarnings } from '../src';
 import { transformerWarnings } from '../src/stylable-transformer';
-import { flatMatch } from './matchers/flat-match';
-import { expectWarnings, expectWarningsFromTransform, shouldReportNoDiagnostics } from './utils/diagnostics';
-import { generateStylableResult, generateStylableRoot, processSource } from './utils/generate-test-util';
+// import { generateStylableResult, processSource } from './utils/generate-test-util';
 
 use(flatMatch);
 
@@ -84,7 +90,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(meta.outputAst!.nodes).to.flatMatch([{
-                selector: '.entry--root .entry--part'
+                selector: '.entry__root .entry__part'
             }
             ]);
         });
@@ -115,7 +121,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(meta.outputAst!.first).to.flatMatch({
-                selector: '.imported--root .entry--part'
+                selector: '.imported__root .entry__part'
             });
         });
 
@@ -145,7 +151,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             expect(meta.outputAst!.first).to.flatMatch({
-                selector: '.entry--root .imported--root'
+                selector: '.entry__root .imported__root'
             });
         });
 
@@ -218,7 +224,7 @@ describe('@st-scope', () => {
             shouldReportNoDiagnostics(meta);
 
             const rule = meta.outputAst!.nodes![1] as Rule;
-            expect(rule.selector).to.equal('.entry--root[data-imported-mystate]');
+            expect(rule.selector).to.equal('.entry__root.imported--myState');
         });
 
         it('scope with media queries', () => {
@@ -242,7 +248,7 @@ describe('@st-scope', () => {
 
             const atRule = meta.outputAst!.nodes![0] as AtRule;
             const rule = atRule.nodes![0] as Rule;
-            expect(rule.selector).to.equal('.entry--root .entry--part');
+            expect(rule.selector).to.equal('.entry__root .entry__part');
         });
     });
 
@@ -271,7 +277,7 @@ describe('@st-scope', () => {
                     file: '/entry.st.css', severity: 'error' }
             ]);
             // tslint:disable-next-line:max-line-length
-            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal('.entry--root .entry--part .entry--scopedPart');
+            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal('.entry__root .entry__part .entry__scopedPart');
             expect(meta.scopes).to.flatMatch([{
                 type: 'atrule',
                 name: 'st-scope',
@@ -317,7 +323,7 @@ describe('@st-scope', () => {
                 // tslint:disable-next-line:max-line-length
                 { message: transformerWarnings.SCOPE_PARAM_NOT_ROOT('importedPart'), file: '/entry.st.css', severity: 'error' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('importedPart .entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('importedPart .entry__part');
         });
 
         it('should warn about scoping with a symbol that originates from a JS file', () => {
@@ -351,7 +357,7 @@ describe('@st-scope', () => {
                 // tslint:disable-next-line:max-line-length
                 { message: transformerWarnings.SCOPE_PARAM_NOT_CSS('someVar'), file: '/entry.st.css', severity: 'error' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('someVar .entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('someVar .entry__part');
         });
 
         it('should warn about a missing scoping parameter', () => {
@@ -372,7 +378,7 @@ describe('@st-scope', () => {
             const { meta } = expectWarningsFromTransform(config, [
                 { message: processorWarnings.MISSING_SCOPING_PARAM(), file: '/entry.st.css', severity: 'warning' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
         });
 
         it('should warn about an unknown scoping parameter', () => {
@@ -393,7 +399,7 @@ describe('@st-scope', () => {
                 // tslint:disable-next-line:max-line-length
                 { message: transformerWarnings.UNKNOWN_SCOPING_PARAM('unknown'), file: '/entry.st.css', severity: 'error' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('unknown .entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('unknown .entry__part');
         });
 
         it('should warn about vars definition inside a scope', () => {
@@ -418,7 +424,7 @@ describe('@st-scope', () => {
             const { meta } = expectWarningsFromTransform(config, [
                 { message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(), file: '/entry.st.css', severity: 'warning' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--root .entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
         });
 
         it('should warn about import usage inside a scope', () => {
@@ -444,7 +450,7 @@ describe('@st-scope', () => {
             const { meta } = expectWarningsFromTransform(config, [
                 { message: processorWarnings.NO_IMPORT_IN_ST_SCOPE(), file: '/entry.st.css', severity: 'warning' }
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry--root .entry--part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
         });
 
         it('should warn about @keyframe usage inside a scope', () => {

@@ -8,7 +8,6 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            port: 3001,
             puppeteerOptions: {
                 // headless: false
             }
@@ -36,7 +35,7 @@ describe(`(${project})`, () => {
                 runtimes: (window as any).__stylable_renderer_global_counter,
                 index: getComputedStyle(document.querySelector('[data-name="index"]')!).backgroundColor,
                 index2: getComputedStyle(document.querySelector('[data-name="index2"]')!).backgroundColor
-            }
+            };
         });
 
         expect(res).to.eql({

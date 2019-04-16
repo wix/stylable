@@ -8,7 +8,6 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            port: 3002,
             puppeteerOptions: {
                 // headless: false
             }
@@ -37,35 +36,36 @@ describe(`(${project})`, () => {
                 id: './src/index.st.css',
                 depth: '3',
                 // tslint:disable-next-line: max-line-length
-                css: '.global1{background:grey}.global1 .global2{font-size:20px}.s0[data-o0-x]{font-family:MyFont}.s1{background:#00f}'
+                css: '.global1{background:grey}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}'
             }
         ]);
     });
 
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const { fontFamily, backgroundColor, exports, global1ClassColor, global2ClassColor } = await page.evaluate(
-            () => {
-                return {
-                    backgroundColor: getComputedStyle(document.body).backgroundColor,
-                    fontFamily: getComputedStyle(document.documentElement!).fontFamily,
-                    exports: Object.getPrototypeOf((window as any).stylableIndex),
-                    global1ClassColor: getComputedStyle(document.querySelector('.global1')!).backgroundColor,
-                    global2ClassColor: getComputedStyle(document.querySelector('.global2')!).fontSize
-                };
-            }
-        );
+        // tslint:disable-next-line: max-line-length
+        const { fontFamily, backgroundColor, classes, stVars, namespace, global1ClassColor, global2ClassColor } = await page.evaluate(() => {
+            return {
+                backgroundColor: getComputedStyle(document.body).backgroundColor,
+                fontFamily: getComputedStyle(document.documentElement!).fontFamily,
+                classes: (window as any).stylableClasses,
+                namespace: (window as any).namespace,
+                stVars: (window as any).stVars,
+                global1ClassColor: getComputedStyle(document.querySelector('.global1')!).backgroundColor,
+                global2ClassColor: getComputedStyle(document.querySelector('.global2')!).backgroundColor
+            };
+        });
 
-        expect(exports.$namespace).to.eql('o0');
-        expect(exports.myValue).to.eql('red');
-        expect(exports.root).to.eql('s0');
-        expect(exports.used).to.eql('s1');
-        expect(exports.empty).to.eql('s2');
+        expect(namespace).to.eql('o0');
+        expect(stVars.myValue).to.eql('red');
+        expect(classes.root).to.eql('s0');
+        expect(classes.used).to.eql('s1');
+        expect(classes.empty).to.eql('s2');
 
         expect(backgroundColor).to.eql('rgb(0, 0, 255)');
         expect(fontFamily).to.eql('MyFont');
 
         expect(global1ClassColor).to.eql('rgb(128, 128, 128)');
-        expect(global2ClassColor).to.eql('20px');
+        expect(global2ClassColor).to.eql('rgb(228, 228, 228)');
     });
 });

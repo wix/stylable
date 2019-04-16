@@ -1,18 +1,20 @@
-import index from "./index.st.css";
-window.stylableIndex = index;
-document.documentElement.classList.add(index.root);
-document.body.classList.add(index.used);
-const states = index.$cssStates({ x: true });
-Object.keys(states).forEach(attr => {
-    document.documentElement.setAttribute(attr, states[attr]);
-});
+import { classes, cssStates, namespace, stVars } from "./index.st.css";
+window.stylableClasses = classes;
+window.namespace = namespace;
+window.stVars = stVars;
 
-const div = document.createElement('div');
-div.className = 'global1';
+document.documentElement.classList.add(classes.root);
+document.body.classList.add(classes.used);
+
+const state = cssStates({ x: true });
+document.documentElement.classList.add(state);
+
+const global1 = document.createElement('div');
+global1.className = 'global1';
 
 const global2 = document.createElement('div');
 global2.className = 'global2';
 global2.textContent = 'Globals Here!!!';
-div.appendChild(global2);
+global1.appendChild(global2);
 
-document.body.appendChild(div);
+document.body.appendChild(global1);

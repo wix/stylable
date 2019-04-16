@@ -1,11 +1,11 @@
 /* tslint:disable:max-line-length */
-import { expect } from 'chai';
-import * as postcss from 'postcss';
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration
-} from '../utils/test-utils';
+} from '@stylable/core-test-kit';
+import { expect } from 'chai';
+import * as postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('simple mixin', () => {
@@ -115,21 +115,21 @@ describe('Javascript Mixins', () => {
         });
 
         const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.selector, 'rule 1 selector').to.equal('.entry--container');
+        expect(rule.selector, 'rule 1 selector').to.equal('.entry__container');
         expect(rule.nodes![0].toString(), 'rule 1 decl').to.equal('color: red');
 
         const rule2 = result.nodes![1] as postcss.Rule;
-        expect(rule2.selector, 'rule 2 selector').to.equal('.entry--container .entry--my-selector');
+        expect(rule2.selector, 'rule 2 selector').to.equal('.entry__container .entry__my-selector');
         expect(rule2.nodes![0].toString(), 'rule 2 decl').to.equal('color: green');
 
         const rule3 = result.nodes![2] as postcss.Rule;
         expect(rule3.selector, 'rule 3 selector').to.equal(
-            '.entry--container .entry--my-selector:hover'
+            '.entry__container .entry__my-selector:hover'
         );
         expect(rule3.nodes![0].toString(), 'rule 3 decl').to.equal('background: yellow');
 
         const rule4 = result.nodes![3] as postcss.Rule;
-        expect(rule4.selector, 'rule 4 selector').to.equal('.entry--container:hover');
+        expect(rule4.selector, 'rule 4 selector').to.equal('.entry__container:hover');
         expect(rule4.nodes![0].toString(), 'rule 4 decl').to.equal('color: gold');
     });
 
@@ -165,12 +165,12 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--containerA, .entry--containerB', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__containerA, .entry__containerB', 'color: red');
 
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry--containerA:hover, .entry--containerB:hover',
+            '.entry__containerA:hover, .entry__containerB:hover',
             'color: green'
         );
     });
@@ -208,7 +208,7 @@ describe('Javascript Mixins', () => {
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry--containerA:hover, .entry--containerA .entry--class',
+            '.entry__containerA:hover, .entry__containerA .entry__class',
             'color: green'
         );
     });
@@ -246,7 +246,7 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', 'color: red;background: blue');
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red;background: blue');
     });
 
     it('should not root scope js mixins', () => {
@@ -286,13 +286,13 @@ describe('Javascript Mixins', () => {
         matchRuleAndDeclaration(
             result,
             0,
-            '.entry--gaga',
+            '.entry__gaga',
             'color:red;background:green'
         );
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry--gaga .entry--child',
+            '.entry__gaga .entry__child',
             'color:yellow'
         );
     });
@@ -338,7 +338,7 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container', 'color: red;background: blue');
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red;background: blue');
     });
 
     it('multiple same mixin', () => {
@@ -372,9 +372,9 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry--container-a', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__container-a', 'color: red');
 
-        matchRuleAndDeclaration(result, 1, '.entry--container-b', 'color: blue');
+        matchRuleAndDeclaration(result, 1, '.entry__container-b', 'color: blue');
     });
 
     it('@keyframes mixin', () => {
@@ -413,7 +413,7 @@ describe('Javascript Mixins', () => {
         if (keyframes.type !== 'atrule') {
             throw new Error('expected 2nd rule to be the @keyframes');
         }
-        expect((keyframes as postcss.AtRule).params, 'keyframes id').to.equal('entry--abc');
+        expect((keyframes as postcss.AtRule).params, 'keyframes id').to.equal('entry__abc');
         expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
         expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
     });
@@ -449,7 +449,7 @@ describe('Javascript Mixins', () => {
 
             matchAllRulesAndDeclarations(
                 result,
-                [['.entry--x', 'background: url(./a/b/asset.png)']],
+                [['.entry__x', 'background: url(./a/b/asset.png)']],
                 ''
             );
         });
@@ -483,7 +483,7 @@ describe('Javascript Mixins', () => {
 
             matchAllRulesAndDeclarations(
                 result,
-                [['.entry--x', 'background: url(./asset.png)']],
+                [['.entry__x', 'background: url(./asset.png)']],
                 ''
             );
         });

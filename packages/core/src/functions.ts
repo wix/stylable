@@ -4,6 +4,7 @@ import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import { isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, Pojo } from './types';
 import { stripQuotation } from './utils';
@@ -32,7 +33,8 @@ export function resolveArgumentsValue(
     diagnostics: Diagnostics,
     node: postcss.Node,
     variableOverride?: Pojo<string>,
-    path?: string[]
+    path?: string[],
+    cssVarsMapping?: Pojo<string>
 ) {
     const resolvedArgs = {} as Pojo<string>;
     for (const k in options) {
@@ -44,7 +46,8 @@ export function resolveArgumentsValue(
             variableOverride,
             transformer.replaceValueHook,
             diagnostics,
-            path
+            path,
+            cssVarsMapping
         );
     }
     return resolvedArgs;
@@ -58,7 +61,8 @@ export function evalDeclarationValue(
     variableOverride?: Pojo<string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
-    passedThrough: string[] = []
+    passedThrough: string[] = [],
+    cssVarsMapping?: Pojo<string>
 ): string {
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -95,7 +99,8 @@ export function evalDeclarationValue(
                                 variableOverride,
                                 valueHook,
                                 diagnostics,
-                                passedThrough.concat(createUniqID(meta.source, varName))
+                                passedThrough.concat(createUniqID(meta.source, varName)),
+                                cssVarsMapping
                             );
 
                             parsedNode.resolvedValue = valueHook
@@ -116,7 +121,8 @@ export function evalDeclarationValue(
                                             variableOverride,
                                             valueHook,
                                             diagnostics,
-                                            passedThrough.concat(createUniqID(meta.source, varName))
+                                            passedThrough.concat(createUniqID(meta.source, varName)),
+                                            cssVarsMapping
                                         );
                                         parsedNode.resolvedValue = valueHook
                                             ? valueHook(
@@ -206,6 +212,19 @@ export function evalDeclarationValue(
                                     { word: (node as postcss.Declaration).value }
                                 );
                             }
+                        }
+                    } else if (value === 'var') {
+                        const varWithPrefix = parsedNode.nodes[0].value;
+
+                        if (isCSSVarProp(varWithPrefix)) {
+                            if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
+                                parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
+                            }
+                        }
+
+                        // handle default values
+                        if (parsedNode.nodes.length > 2) {
+                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                         }
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);

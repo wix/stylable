@@ -14,17 +14,22 @@ export interface InheritedAttributes {
     [props: string]: any;
 }
 
-export type RuntimeStylesheet = {
-    (className: string, states?: StateMap, inheritedAttributes?: InheritedAttributes): AttributeMap
-    $root: string,
-    $namespace: string,
-    $depth: number,
-    $id: string | number,
-    $css?: string,
+export interface StylableExports {
+    classes: Record<string, string>;
+    keyframes: Record<string, string>;
+    vars: Record<string, string>;
+    stVars: Record<string, string>;
+}
 
-    $get(localName: string): string | undefined;
-    $cssStates(stateMapping?: StateMap | null): StateMap;
-} & { [localName: string]: string };
+export interface RuntimeStylesheet extends StylableExports, RenderableStylesheet {
+    namespace: string;
+    cssStates: (stateMap: StateMap) => string;
+    style: (
+        context: string,
+        stateOrClass?: string | StateMap | undefined,
+        ...classes: Array<string | undefined>
+    ) => string;
+}
 
 export interface NodeRenderer<I, O extends Element> {
     update(stylesheet: I, node: O): O;

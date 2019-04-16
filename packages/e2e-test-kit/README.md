@@ -4,14 +4,15 @@
 
 `@stylable/e2e-test-kit` serves as a collection of tools to help test Stylable components and applications. It offers various capabilities to bundle, run and test your project in memory, or in the browser.
 
-## Installation
+### `StylableProjectRunner`
 
-This package is still a work-in-progress within the Stylable mono-repo. Once it matures, further details will be added here.
+Used to setup an E2E test project with `@stylable/webpack-plugin` and `puppeteer`. This allows testing an entire project setup, including stylable configuration, webpack configuration and the process of transpiling the project, performing your tests against a running browser.
 
-## Usage
+You can find a set of example configuration setups [here](./packages/webpack-plugin/test/e2e).
 
-You can find a set of example configurations setups [here](./packages/webpack-plugin/test/e2e).
+### `getStyleElementsMetadata`
+A puppeteer helper function aimed at extracting Stylable styling from the DOM for testing purposes.
 
-## License
+### License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

@@ -10,7 +10,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const StylableWebpackPlugin = require('@stylable/webpack-plugin');
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 const TerserPlugin = require('terser-webpack-plugin');

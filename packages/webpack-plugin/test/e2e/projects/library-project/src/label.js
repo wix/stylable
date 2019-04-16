@@ -1,8 +1,8 @@
-import style from "./button.st.css";
+import { classes } from "./button.st.css";
 const render = (label = "I am a Label") => {
   const text = document.createElement("span");
   text.textContent = label;
-  text.classList.add(style.root);
+  text.classList.add(classes.root);
   return text;
 };
-export { style, render };
+export { classes, render };

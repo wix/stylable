@@ -1,14 +1,3 @@
 {
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "lib": [
-      "es2017",
-      "dom"
-    ],  
-    "types": [
-      "mocha",
-      "chai",
-      "node"
-    ]
-  }
+  "extends": "../../../tsconfig.test.json"
 }
