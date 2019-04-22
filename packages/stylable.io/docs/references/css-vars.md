@@ -77,7 +77,7 @@ Override any variable by redefining its value using an inline style attribute.
 
 {% raw %}
 ```js
-import { style, classes, vars } from 'entry.st.css';
+import { style, classes, vars } from './entry.st.css';
 
 <div className={classes.root}
      style={{ 
@@ -89,8 +89,8 @@ import { style, classes, vars } from 'entry.st.css';
 
 Output:
 ```js
-<div className="stylesheet--root" 
-    style="--stylesheet-color: green; --stylesheet-border-size: 5px; background: gold;" />
+<div className="entry__root" 
+    style="--entry-color: green; --entry-border-size: 5px; background: gold;" />
 ```
 
 ## Using global CSS variables
@@ -109,12 +109,12 @@ This is mostly useful when working with 3rd-party libraries, where you only atte
 ```
 
 ```js
-import sheet from './entry.st.css';
+import { classes } from './entry.st.css';
 
 <div className={classes.root}
      style={{ 
-         ['--color']: 'red', 
-         ['--bg']: 'yellow' }}
+         '--color': 'red', 
+         '--bg': 'yellow' }}
 />
 ```
 

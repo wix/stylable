@@ -28,7 +28,7 @@ You should use camelCase to name class selectors. Avoid using hyphens (-) and ca
 ```js
 /* comp.jsx */
 import * as React from 'react';
-import style from './comp.st.css';
+import { style, classes } from './comp.st.css';
 
 class Comp {
     constructor(props) {
@@ -37,7 +37,7 @@ class Comp {
 
     render () {
         return (
-            <div { ...style('root', {}, this.props) }>
+            <div className={style(classes.root, {}, this.props)}>
                 <img className={style.thumbnail} />
             </div>
         )
