@@ -1,10 +1,11 @@
 import * as postcss from 'postcss';
+import urlRegex from 'url-regex';
 import * as path from './path';
 import { ImportSymbol, RefedMixin, StylableMeta } from './stylable-processor';
 import { ParsedValue } from './types';
 
 const { parseValues, stringifyValues } = require('css-selector-tokenizer');
-const isUrl = require('url-regex')({ exact: true, strict: true });
+const isUrl = urlRegex({ exact: true, strict: true });
 
 export type OnUrlCallback = (node: ParsedValue) => void;
 
