@@ -27,7 +27,7 @@ export function stylableModuleFactory(
             [`const runtime = require(${JSON.stringify(runtimePath)})`],
             `runtime.$`,
             `runtime`,
-            injectCSS ? JSON.stringify(res.meta.outputAst!.toString()) : '',
+            injectCSS ? JSON.stringify(res.meta.outputAst!.toString()) : '""',
             '-1', // ToDo: calc depth for node as well
             'module.exports',
             '',

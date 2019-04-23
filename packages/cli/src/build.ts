@@ -29,8 +29,9 @@ export async function build({
     indexFile,
     generatorPath
 }: BuildOptions) {
-
-    const generatorModule = generatorPath ? require(resolve(generatorPath)) : require('./default-generator');
+    const generatorModule = generatorPath
+        ? require(resolve(generatorPath))
+        : require('./default-generator');
     const generator: Generator = new generatorModule.Generator();
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
@@ -48,7 +49,14 @@ export async function build({
     }
     filesToBuild.forEach(filePath => {
         indexFile
-            ? generateFileIndexEntry(filePath, nameMapping, log, indexFileOutput, fullOutDir, generator)
+            ? generateFileIndexEntry(
+                  filePath,
+                  nameMapping,
+                  log,
+                  indexFileOutput,
+                  fullOutDir,
+                  generator
+              )
             : buildSingleFile(
                   fullOutDir,
                   filePath,
@@ -133,18 +141,30 @@ function buildSingleFile(
     );
     const res = stylable.transform(content, filePath);
 
-    const code = tryRun(() => generateModuleSource(res, 'module.id',
-        [`const runtime = require(${JSON.stringify('@stylable/runtime')})`],
-        `runtime.$`, `runtime`,
-        '', '-1', // ToDo: calc depth for node as well
-        'module.exports', '', false
-        ), `Transform Error: ${filePath}`);
+    const code = tryRun(
+        () =>
+            generateModuleSource(
+                res,
+                'module.id',
+                [`const runtime = require(${JSON.stringify('@stylable/runtime')})`],
+                `runtime.$`,
+                `runtime`,
+                '""',
+                '-1', // ToDo: calc depth for node as well
+                'module.exports',
+                '',
+                false
+            ),
+        `Transform Error: ${filePath}`
+    );
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
     tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     // st.css.js
     tryRun(() => fs.writeFileSync(outPath, code), `Write File Error: ${outPath}`);
-    projectAssets.push(...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri)));
+    projectAssets.push(
+        ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
+    );
 }
 
 // function testBuild(filePath: string, fullSrcDir: string, fs: any) {
@@ -216,9 +236,9 @@ function handleDiagnostics(
     diagnosticsMsg: string[],
     filePath: string
 ) {
-    const reports = res.meta.transformDiagnostics ?
-        res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports) :
-        res.meta.diagnostics.reports;
+    const reports = res.meta.transformDiagnostics
+        ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
+        : res.meta.diagnostics.reports;
 
     if (diagnostics && reports.length) {
         diagnosticsMsg.push(`Errors in file: ${filePath}`);
