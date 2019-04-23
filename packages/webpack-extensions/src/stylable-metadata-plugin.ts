@@ -112,7 +112,7 @@ export class StylableMetadataPlugin {
             builder.createIndex();
             const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
-            const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
+            const fileName = `${this.options.name}.metadata.json.bundle${!jsonMode ? '.js' : ''}`;
             let fileContent = jsonSource;
             switch (this.options.mode) {
                 case 'cjs':         fileContent = `module.exports = ${fileContent}`; break;
