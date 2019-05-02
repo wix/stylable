@@ -29,7 +29,7 @@
     "workbox-webpack-plugin": "^3.6.3"
   },
   "optionalDependencies": {
-    "fsevents": "^1.2.9"
+    "fsevents": "^2.0.6"
   },
   "files": [
     "bin",
