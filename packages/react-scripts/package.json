@@ -8,11 +8,11 @@
   "dependencies": {
     "@stylable/core": "^2.0.6",
     "@stylable/webpack-plugin": "^2.0.10",
-    "@ts-tools/webpack-loader": "^0.8.8",
+    "@ts-tools/webpack-loader": "^0.8.9",
     "bfj": "^6.1.1",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
     "chalk": "^2.4.2",
-    "dotenv": "^7.0.0",
+    "dotenv": "^8.0.0",
     "dotenv-expand": "^5.1.0",
     "file-loader": "^3.0.1",
     "fs-extra": "^7.0.1",
