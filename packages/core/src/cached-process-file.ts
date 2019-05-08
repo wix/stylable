@@ -1,5 +1,3 @@
-import { Pojo } from './types';
-
 export type processFn<T> = (fullpath: string, content: string) => T;
 
 export interface CacheItem<T> {
@@ -16,7 +14,7 @@ export interface FileProcessor<T> {
     process: (fullpath: string, ignoreCache?: boolean, context?: string) => T;
     add: (fullpath: string, value: T) => void;
     processContent: (content: string, fullpath: string) => T;
-    cache: Pojo<CacheItem<T>>;
+    cache: Record<string, CacheItem<T>>;
     postProcessors: Array<(value: T, path: string) => T>;
 }
 

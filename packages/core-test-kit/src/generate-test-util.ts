@@ -4,7 +4,6 @@ import {
     Diagnostics,
     FileProcessor,
     isAbsolute,
-    Pojo,
     postProcessor,
     process,
     processNamespace,
@@ -24,13 +23,13 @@ export interface File {
 }
 
 export interface InfraConfig {
-    files: Pojo<File>;
+    files: Record<string, File>;
     trimWS?: boolean;
 }
 
 export interface Config {
     entry?: string;
-    files: Pojo<File>;
+    files: Record<string, File>;
     usedFiles?: string[];
     trimWS?: boolean;
     optimize?: boolean;
