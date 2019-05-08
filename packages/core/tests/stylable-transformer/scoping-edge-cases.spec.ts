@@ -1,11 +1,9 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 describe('scoping-edge-cases', () => {
-
     it('root scoping always uses origin meta', () => {
-
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
@@ -53,11 +51,9 @@ describe('scoping-edge-cases', () => {
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
             '.style__x .comp__part .inner__inner'
         );
-
     });
 
     it('meta from pseudo-elements leak into the next selector', () => {
-
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
@@ -112,7 +108,5 @@ describe('scoping-edge-cases', () => {
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
             '.style__x .comp__part .inner__inner, .style__x.style--test'
         );
-
     });
-
 });

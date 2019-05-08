@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';

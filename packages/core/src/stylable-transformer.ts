@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';

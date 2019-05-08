@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';

@@ -1,5 +1,5 @@
 import hash from 'murmurhash';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import * as path from './path';
 import {
@@ -23,8 +23,19 @@ import {
     StylableMeta,
     VarSymbol
 } from './stylable-meta';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, isCSSVarProp } from './stylable-utils';
-import { groupValues, rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
+import {
+    CUSTOM_SELECTOR_RE,
+    expandCustomSelectors,
+    getAlias,
+    isCSSVarProp
+} from './stylable-utils';
+import {
+    groupValues,
+    rootValueMapping,
+    SBTypesParsers,
+    stValuesMap,
+    valueMapping
+} from './stylable-value-parsers';
 import { ParsedValue } from './types';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
@@ -38,41 +49,97 @@ const parseExtends = SBTypesParsers[valueMapping.extends];
 
 /* tslint:disable:max-line-length */
 export const processorWarnings = {
-    UNSCOPED_CLASS(name: string) { return `unscoped class "${name}" will affect all elements of the same type in the document`; },
-    UNSCOPED_ELEMENT(name: string) { return `unscoped element "${name}" will affect all elements of the same type in the document`; },
-    FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) { return `cannot define "${name}" inside a complex selector`; },
-    ROOT_AFTER_SPACING() { return '".root" class cannot be used after native elements or selectors external to the stylesheet'; },
-    DEFAULT_IMPORT_IS_LOWER_CASE() { return 'Default import of a Stylable stylesheet must start with an upper-case letter'; },
-    ILLEGAL_PROP_IN_IMPORT(propName: string) { return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`; },
-    STATE_DEFINITION_IN_ELEMENT() { return 'cannot define pseudo states inside element selectors'; },
-    STATE_DEFINITION_IN_COMPLEX() { return 'cannot define pseudo states inside complex selectors'; },
-    REDECLARE_SYMBOL(name: string) { return `redeclare symbol "${name}"`; },
-    CANNOT_RESOLVE_EXTEND(name: string) { return `cannot resolve '${valueMapping.extends}' type for '${name}'`; },
-    CANNOT_EXTEND_IN_COMPLEX() { return `cannot define "${valueMapping.extends}" inside a complex selector`; },
-    UNKNOWN_MIXIN(name: string) { return `unknown mixin: "${name}"`; },
-    OVERRIDE_MIXIN() { return `override mixin on same rule`; },
-    OVERRIDE_TYPED_RULE(key: string, name: string) { return `override "${key}" on typed rule "${name}"`; },
-    FROM_PROP_MISSING_IN_IMPORT() { return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`; },
-    INVALID_NAMESPACE_DEF() { return 'invalid @namespace'; },
-    EMPTY_NAMESPACE_DEF() { return '@namespace must contain at least one character or digit'; },
-    EMPTY_IMPORT_FROM() { return '"-st-from" cannot be empty'; },
-    MULTIPLE_FROM_IN_IMPORT() { return `cannot define multiple "${valueMapping.from}" declarations in a single import`; },
-    NO_VARS_DEF_IN_ST_SCOPE() { return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`; },
-    NO_IMPORT_IN_ST_SCOPE() { return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`; },
-    NO_KEYFRAMES_IN_ST_SCOPE() { return `cannot use "@keyframes" inside of "@st-scope"`; },
-    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) { return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`; },
-    MISSING_SCOPING_PARAM() { return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter'; },
-    ILLEGAL_GLOBAL_CSS_VAR(name: string) { return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`; },
-    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) { return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`; },
-    ILLEGAL_CSS_VAR_USE(name: string) { return `a custom css property must begin with "--" (double-dash), but received "${name}"`; }
+    UNSCOPED_CLASS(name: string) {
+        return `unscoped class "${name}" will affect all elements of the same type in the document`;
+    },
+    UNSCOPED_ELEMENT(name: string) {
+        return `unscoped element "${name}" will affect all elements of the same type in the document`;
+    },
+    FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(name: string) {
+        return `cannot define "${name}" inside a complex selector`;
+    },
+    ROOT_AFTER_SPACING() {
+        return '".root" class cannot be used after native elements or selectors external to the stylesheet';
+    },
+    DEFAULT_IMPORT_IS_LOWER_CASE() {
+        return 'Default import of a Stylable stylesheet must start with an upper-case letter';
+    },
+    ILLEGAL_PROP_IN_IMPORT(propName: string) {
+        return `"${propName}" css attribute cannot be used inside ${rootValueMapping.import} block`;
+    },
+    STATE_DEFINITION_IN_ELEMENT() {
+        return 'cannot define pseudo states inside element selectors';
+    },
+    STATE_DEFINITION_IN_COMPLEX() {
+        return 'cannot define pseudo states inside complex selectors';
+    },
+    REDECLARE_SYMBOL(name: string) {
+        return `redeclare symbol "${name}"`;
+    },
+    CANNOT_RESOLVE_EXTEND(name: string) {
+        return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
+    },
+    CANNOT_EXTEND_IN_COMPLEX() {
+        return `cannot define "${valueMapping.extends}" inside a complex selector`;
+    },
+    UNKNOWN_MIXIN(name: string) {
+        return `unknown mixin: "${name}"`;
+    },
+    OVERRIDE_MIXIN() {
+        return `override mixin on same rule`;
+    },
+    OVERRIDE_TYPED_RULE(key: string, name: string) {
+        return `override "${key}" on typed rule "${name}"`;
+    },
+    FROM_PROP_MISSING_IN_IMPORT() {
+        return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
+    },
+    INVALID_NAMESPACE_DEF() {
+        return 'invalid @namespace';
+    },
+    EMPTY_NAMESPACE_DEF() {
+        return '@namespace must contain at least one character or digit';
+    },
+    EMPTY_IMPORT_FROM() {
+        return '"-st-from" cannot be empty';
+    },
+    MULTIPLE_FROM_IN_IMPORT() {
+        return `cannot define multiple "${valueMapping.from}" declarations in a single import`;
+    },
+    NO_VARS_DEF_IN_ST_SCOPE() {
+        return `cannot define "${rootValueMapping.vars}" inside of "@st-scope"`;
+    },
+    NO_IMPORT_IN_ST_SCOPE() {
+        return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`;
+    },
+    NO_KEYFRAMES_IN_ST_SCOPE() {
+        return `cannot use "@keyframes" inside of "@st-scope"`;
+    },
+    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) {
+        return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`;
+    },
+    MISSING_SCOPING_PARAM() {
+        return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter';
+    },
+    ILLEGAL_GLOBAL_CSS_VAR(name: string) {
+        return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
+    },
+    GLOBAL_CSS_VAR_MISSING_COMMA(name: string) {
+        return `"@st-global-custom-property" received the value "${name}", but its values must be comma separated`;
+    },
+    ILLEGAL_CSS_VAR_USE(name: string) {
+        return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
+    }
 };
 /* tslint:enable:max-line-length */
 
 export class StylableProcessor {
     protected meta!: StylableMeta;
-    constructor(protected diagnostics = new Diagnostics(), private resolveNamespace = processNamespace) { }
+    constructor(
+        protected diagnostics = new Diagnostics(),
+        private resolveNamespace = processNamespace
+    ) {}
     public process(root: postcss.Root): StylableMeta {
-
         this.meta = new StylableMeta(root, this.diagnostics);
 
         this.handleAtRules(root);
@@ -97,9 +164,13 @@ export class StylableProcessor {
                 this.handleCSSVarUse(decl);
             }
 
-            processDeclarationUrls(decl, node => {
-                this.meta.urls.push(node.url!);
-            }, false);
+            processDeclarationUrls(
+                decl,
+                node => {
+                    this.meta.urls.push(node.url!);
+                },
+                false
+            );
         });
 
         this.meta.scopes.forEach(atRule => {
@@ -109,7 +180,9 @@ export class StylableProcessor {
 
             if (scopingRule.selector) {
                 atRule.walkRules(rule => {
-                    rule.replaceWith(rule.clone({ selector: `${scopingRule.selector} ${rule.selector}`}));
+                    rule.replaceWith(
+                        rule.clone({ selector: `${scopingRule.selector} ${rule.selector}` })
+                    );
                 });
             }
 
@@ -118,7 +191,6 @@ export class StylableProcessor {
         stubs.forEach(s => s && s.remove());
 
         return this.meta;
-
     }
 
     public insertCustomSelectorsStubs() {
@@ -166,7 +238,9 @@ export class StylableProcessor {
                     const customName = params.shift();
                     toRemove.push(atRule);
                     if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        this.meta.customSelectors[customName] = atRule.params.replace(customName, '').trim();
+                        this.meta.customSelectors[customName] = atRule.params
+                            .replace(customName, '')
+                            .trim();
                     } else {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
@@ -181,7 +255,8 @@ export class StylableProcessor {
                         this.diagnostics.warn(
                             atRule,
                             processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
-                            { word: atRule.params });
+                            { word: atRule.params }
+                        );
                         break;
                     }
 
@@ -199,7 +274,10 @@ export class StylableProcessor {
                             }
                         } else {
                             this.diagnostics.warn(
-                                atRule, processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar), { word: cssVar });
+                                atRule,
+                                processorWarnings.ILLEGAL_GLOBAL_CSS_VAR(cssVar),
+                                { word: cssVar }
+                            );
                         }
                     }
                     toRemove.push(atRule);
@@ -238,12 +316,19 @@ export class StylableProcessor {
                         return false;
                     } else {
                         this.diagnostics.warn(
-                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.import));
+                            rule,
+                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                rootValueMapping.import
+                            )
+                        );
                     }
                 } else if (name === 'vars') {
                     if (rule.selector === rootValueMapping.vars) {
                         if (isChildOfAtRule(rule, rootValueMapping.stScope)) {
-                            this.diagnostics.warn(rule, processorWarnings.NO_VARS_DEF_IN_ST_SCOPE());
+                            this.diagnostics.warn(
+                                rule,
+                                processorWarnings.NO_VARS_DEF_IN_ST_SCOPE()
+                            );
                             rule.remove();
                             return false;
                         }
@@ -252,7 +337,11 @@ export class StylableProcessor {
                         return false;
                     } else {
                         this.diagnostics.warn(
-                            rule, processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.vars));
+                            rule,
+                            processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                rootValueMapping.vars
+                            )
+                        );
                     }
                 }
             } else if (type === 'class') {
@@ -262,14 +351,18 @@ export class StylableProcessor {
                     if (!this.meta.classes[name].alias) {
                         locallyScoped = true;
                     } else if (locallyScoped === false) {
-                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), { word: name });
+                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
+                            word: name
+                        });
                     }
                 }
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
 
                 if (locallyScoped === false && !inStScope) {
-                    this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), { word: name });
+                    this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
+                        word: name
+                    });
                 }
             } else if (type === 'nested-pseudo-class' && name === 'global') {
                 return true;
@@ -287,13 +380,14 @@ export class StylableProcessor {
         if (!validRoot) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
-
     }
 
     protected checkRedeclareSymbol(symbolName: string, node: postcss.Node) {
         const symbol = this.meta.mappedSymbols[symbolName];
         if (symbol) {
-            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(symbolName), { word: symbolName });
+            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(symbolName), {
+                word: symbolName
+            });
         }
     }
 
@@ -304,7 +398,11 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.elements[name] = this.meta.mappedSymbols[name] = { _kind: 'element', name, alias };
+            this.meta.elements[name] = this.meta.mappedSymbols[name] = {
+                _kind: 'element',
+                name,
+                alias
+            };
         }
     }
 
@@ -315,12 +413,15 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
-            this.meta.classes[name] = this.meta.mappedSymbols[name] = { _kind: 'class', name, alias };
+            this.meta.classes[name] = this.meta.mappedSymbols[name] = {
+                _kind: 'class',
+                name,
+                alias
+            };
         }
     }
 
     protected addImportSymbols(importDef: Imported) {
-
         if (importDef.defaultExport) {
             this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
             this.meta.mappedSymbols[importDef.defaultExport] = {
@@ -398,9 +499,10 @@ export class StylableProcessor {
                 }
             }
         } else {
-            this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), { word: varName });
+            this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
+                word: varName
+            });
         }
-
     }
 
     protected handleDirectives(rule: SRule, decl: postcss.Declaration) {
@@ -426,12 +528,10 @@ export class StylableProcessor {
 
                 const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
                 if (
-                    extendsRefSymbol &&
-                    (
-                        extendsRefSymbol._kind === 'import' ||
-                        extendsRefSymbol._kind === 'class' ||
-                        extendsRefSymbol._kind === 'element'
-                    ) ||
+                    (extendsRefSymbol &&
+                        (extendsRefSymbol._kind === 'import' ||
+                            extendsRefSymbol._kind === 'class' ||
+                            extendsRefSymbol._kind === 'element')) ||
                     decl.value === this.meta.root
                 ) {
                     this.extendTypedRule(
@@ -450,25 +550,36 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-
         } else if (decl.prop === valueMapping.mixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(decl, type => {
-                const mixinRefSymbol = this.meta.mappedSymbols[type];
-                if (mixinRefSymbol && mixinRefSymbol._kind === 'import' && !mixinRefSymbol.import.from.match(/.css$/)) {
-                    return 'args';
-                }
-                return 'named';
-
-            }, this.diagnostics).forEach(mixin => {
+            parseMixin(
+                decl,
+                type => {
+                    const mixinRefSymbol = this.meta.mappedSymbols[type];
+                    if (
+                        mixinRefSymbol &&
+                        mixinRefSymbol._kind === 'import' &&
+                        !mixinRefSymbol.import.from.match(/.css$/)
+                    ) {
+                        return 'args';
+                    }
+                    return 'named';
+                },
+                this.diagnostics
+            ).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
-                if (mixinRefSymbol && (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')) {
+                if (
+                    mixinRefSymbol &&
+                    (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
+                ) {
                     mixins.push({
                         mixin,
                         ref: mixinRefSymbol
                     });
                 } else {
-                    this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), { word: mixin.type });
+                    this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
+                        word: mixin.type
+                    });
                 }
             });
 
@@ -484,7 +595,6 @@ export class StylableProcessor {
                 // TODO: diagnostics - scoped on none class
             }
         }
-
     }
 
     protected setClassGlobalMapping(decl: postcss.Declaration, rule: postcss.Rule) {
@@ -495,11 +605,18 @@ export class StylableProcessor {
         }
     }
 
-    protected extendTypedRule(node: postcss.Node, selector: string, key: keyof StylableDirectives, value: any) {
+    protected extendTypedRule(
+        node: postcss.Node,
+        selector: string,
+        key: keyof StylableDirectives,
+        value: any
+    ) {
         const name = selector.replace('.', '');
         const typedRule = this.meta.mappedSymbols[name] as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
-            this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), { word: name });
+            this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
+                word: name
+            });
         }
         if (typedRule) {
             typedRule[key] = value;
@@ -509,7 +626,12 @@ export class StylableProcessor {
     protected handleImport(rule: postcss.Rule) {
         let fromExists = false;
         const importObj: Imported = {
-            defaultExport: '', from: '', fromRelative: '', named: {}, rule, context: path.dirname(this.meta.source)
+            defaultExport: '',
+            from: '',
+            fromRelative: '',
+            named: {},
+            rule,
+            context: path.dirname(this.meta.source)
         };
 
         rule.walkDecls(decl => {
@@ -540,7 +662,8 @@ export class StylableProcessor {
                         this.diagnostics.warn(
                             decl,
                             processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
-                            { word: importObj.defaultExport });
+                            { word: importObj.defaultExport }
+                        );
                     }
                     break;
                 case valueMapping.named:
@@ -557,10 +680,7 @@ export class StylableProcessor {
         });
 
         if (!importObj.from) {
-            this.diagnostics.error(
-                rule,
-                processorWarnings.FROM_PROP_MISSING_IN_IMPORT()
-            );
+            this.diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
         }
 
         rule.remove();
@@ -571,18 +691,24 @@ export class StylableProcessor {
 
 export function validateScopingSelector(
     atRule: postcss.AtRule,
-    {selector: scopingSelector, isSimpleSelector}: SRule,
-    diagnostics: Diagnostics) {
+    { selector: scopingSelector, isSimpleSelector }: SRule,
+    diagnostics: Diagnostics
+) {
     if (!scopingSelector) {
         diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
     } else if (!isSimpleSelector) {
-        diagnostics.warn(atRule,
-            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector), { word: scopingSelector });
+        diagnostics.warn(
+            atRule,
+            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector),
+            { word: scopingSelector }
+        );
     }
 }
 
 export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): StylableMeta {
-    deprecated('createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"');
+    deprecated(
+        'createEmptyMeta is deprecated and will be removed in the next version. Use "new StylableMeta()"'
+    );
     return new StylableMeta(root, diagnostics);
 }
 
@@ -591,7 +717,10 @@ export function processNamespace(namespace: string, source: string) {
 }
 
 export function process(
-    root: postcss.Root, diagnostics = new Diagnostics(), resolveNamespace?: typeof processNamespace) {
+    root: postcss.Root,
+    diagnostics = new Diagnostics(),
+    resolveNamespace?: typeof processNamespace
+) {
     return new StylableProcessor(diagnostics, resolveNamespace).process(root);
 }
 

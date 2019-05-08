@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { SelectorAstNode } from './selector-utils';
 import { getSourcePath } from './stylable-utils';

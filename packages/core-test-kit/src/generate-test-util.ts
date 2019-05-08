@@ -14,7 +14,7 @@ import {
     StylableResults,
     StylableTransformer
 } from '@stylable/core';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 export interface File {
     content: string;

@@ -1,10 +1,16 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
-import { ClassSymbol, ElementSymbol, SRule, StylableMeta, StylableSymbol } from './stylable-processor';
+import {
+    ClassSymbol,
+    ElementSymbol,
+    SRule,
+    StylableMeta,
+    StylableSymbol
+} from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
@@ -22,18 +28,28 @@ export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimi
 /* tslint:disable:max-line-length */
 export const stateErrors = {
     UNKNOWN_STATE_USAGE: (name: string) => `unknown pseudo-state "${name}"`,
-    UNKNOWN_STATE_TYPE: (name: string, type: string) => `pseudo-state "${name}" defined with unknown type: "${type}"`,
-    TOO_MANY_STATE_TYPES: (name: string, types: string[]) => `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
-    NO_STATE_TYPE_GIVEN: (name: string) => `pseudo-state "${name}" expected a definition of a single type, but received none`,
-    TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) => `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(', ')}"`,
-    STATE_STARTS_WITH_HYPHEN: (name: string) => `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
+    UNKNOWN_STATE_TYPE: (name: string, type: string) =>
+        `pseudo-state "${name}" defined with unknown type: "${type}"`,
+    TOO_MANY_STATE_TYPES: (name: string, types: string[]) =>
+        `pseudo-state "${name}(${types.join(', ')})" definition must be of a single type`,
+    NO_STATE_TYPE_GIVEN: (name: string) =>
+        `pseudo-state "${name}" expected a definition of a single type, but received none`,
+    TOO_MANY_ARGS_IN_VALIDATOR: (name: string, validator: string, args: string[]) =>
+        `pseudo-state "${name}" expected "${validator}" validator to receive a single argument, but it received "${args.join(
+            ', '
+        )}"`,
+    STATE_STARTS_WITH_HYPHEN: (name: string) =>
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
 };
 /* tslint:enable:max-line-length */
 
 // PROCESS
 
-export function processPseudoStates(value: string, decl: postcss.Declaration, diagnostics: Diagnostics) {
-
+export function processPseudoStates(
+    value: string,
+    decl: postcss.Declaration,
+    diagnostics: Diagnostics
+) {
     const mappedStates: MappedStates = {};
     const ast = valueParser(value);
     const statesSplitByComma = groupValues(ast.nodes);
@@ -42,10 +58,9 @@ export function processPseudoStates(value: string, decl: postcss.Declaration, di
         const [stateDefinition, ...stateDefault] = workingState;
 
         if (stateDefinition.value.startsWith('-')) {
-            diagnostics.error(
-                decl,
-                stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value),
-                { word: stateDefinition.value });
+            diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
+                word: stateDefinition.value
+            });
         }
 
         if (stateDefinition.type === 'function') {
@@ -65,22 +80,24 @@ function resolveStateType(
     mappedStates: MappedStates,
     stateDefault: ParsedValue[],
     diagnostics: Diagnostics,
-    decl: postcss.Declaration) {
-
+    decl: postcss.Declaration
+) {
     if (stateDefinition.type === 'function' && stateDefinition.nodes.length === 0) {
         resolveBooleanState(mappedStates, stateDefinition);
 
-        diagnostics.warn(decl,
-            stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value),
-            { word: decl.value });
+        diagnostics.warn(decl, stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
+            word: decl.value
+        });
 
         return;
     }
 
     if (stateDefinition.nodes.length > 1) {
-        diagnostics.warn(decl,
+        diagnostics.warn(
+            decl,
             stateErrors.TOO_MANY_STATE_TYPES(stateDefinition.value, listOptions(stateDefinition)),
-            { word: decl.value });
+            { word: decl.value }
+        );
     }
 
     const paramType = stateDefinition.nodes[0];
@@ -103,8 +120,9 @@ function resolveStateType(
     } else if (stateType.type in systemValidators) {
         mappedStates[stateDefinition.value] = stateType;
     } else {
-        diagnostics.warn(decl, stateErrors.UNKNOWN_STATE_TYPE(
-            stateDefinition.value, paramType.value),
+        diagnostics.warn(
+            decl,
+            stateErrors.UNKNOWN_STATE_TYPE(stateDefinition.value, paramType.value),
             { word: paramType.value }
         );
     }
@@ -115,8 +133,8 @@ function resolveArguments(
     stateType: StateParsedValue,
     name: string,
     diagnostics: Diagnostics,
-    decl: postcss.Declaration) {
-
+    decl: postcss.Declaration
+) {
     const seperetedByComma = groupValues(paramType.nodes);
 
     seperetedByComma.forEach(group => {
@@ -160,8 +178,8 @@ export function validateStateDefinition(
     decl: postcss.Declaration,
     meta: StylableMeta,
     resolver: StylableResolver,
-    diagnostics: Diagnostics) {
-
+    diagnostics: Diagnostics
+) {
     if (decl.parent && decl.parent.type !== 'root') {
         const container = decl.parent;
         if (container.type !== 'atrule') {
@@ -176,7 +194,8 @@ export function validateStateDefinition(
                     const states = classMeta[valueMapping.states];
 
                     if (classMeta && classMeta._kind === 'class' && states) {
-                        for (const stateName in states) { // TODO: Sort out types
+                        for (const stateName in states) {
+                            // TODO: Sort out types
                             const state = states[stateName];
                             if (state && typeof state === 'object') {
                                 const res = validateStateArgument(
@@ -192,13 +211,16 @@ export function validateStateDefinition(
 
                                 if (res.errors) {
                                     // tslint:disable-next-line:max-line-length
-                                    res.errors.unshift(`pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`);
-                                    diagnostics.warn(decl,
-                                        res.errors.join('\n'),
-                                        { word: decl.value });
+                                    res.errors.unshift(
+                                        `pseudo-state "${stateName}" default value "${
+                                            state.defaultValue
+                                        }" failed validation:`
+                                    );
+                                    diagnostics.warn(decl, res.errors.join('\n'), {
+                                        word: decl.value
+                                    });
                                 }
                             }
-
                         }
                     } else {
                         // TODO: error state on non-class
@@ -217,8 +239,8 @@ export function validateStateArgument(
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
     validateDefinition?: boolean,
-    validateValue: boolean = true) {
-
+    validateValue: boolean = true
+) {
     const resolvedValidations: StateResult = {
         res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
         errors: null
@@ -229,7 +251,8 @@ export function validateStateArgument(
 
     try {
         if (resolvedValidations.res || validateDefinition) {
-            const { errors } = validator.validate(resolvedValidations.res,
+            const { errors } = validator.validate(
+                resolvedValidations.res,
                 stateAst.arguments,
                 resolveParam.bind(null, meta, resolver, diagnostics, rule),
                 !!validateDefinition,
@@ -253,8 +276,8 @@ export function transformPseudoStateSelector(
     originSymbol: ClassSymbol | ElementSymbol,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule) {
-
+    rule?: postcss.Rule
+) {
     let current = meta;
     let currentSymbol = symbol;
 
@@ -271,11 +294,21 @@ export function transformPseudoStateSelector(
             if (states && states.hasOwnProperty(name)) {
                 found = true;
                 setStateToNode(
-                    states, meta, name, node, current.namespace, resolver, diagnostics, rule
+                    states,
+                    meta,
+                    name,
+                    node,
+                    current.namespace,
+                    resolver,
+                    diagnostics,
+                    rule
                 );
                 break;
             } else if (extend) {
-                if (current.mappedSymbols[extend.name] && current.mappedSymbols[extend.name]._kind !== 'import') {
+                if (
+                    current.mappedSymbols[extend.name] &&
+                    current.mappedSymbols[extend.name]._kind !== 'import'
+                ) {
                     const nextCurrentSymbol = current.mappedSymbols[extend.name];
                     if (currentSymbol === nextCurrentSymbol) {
                         break;
@@ -323,8 +356,8 @@ export function setStateToNode(
     namespace: string,
     resolver: StylableResolver,
     diagnostics: Diagnostics,
-    rule?: postcss.Rule) {
-
+    rule?: postcss.Rule
+) {
     const stateDef = states[name];
 
     if (stateDef === null) {
@@ -346,15 +379,22 @@ function resolveStateValue(
     node: SelectorAstNode,
     stateDef: StateParsedValue,
     name: string,
-    namespace: string) {
-
-    let actualParam = resolveParam(meta, resolver, diagnostics, rule, node.content || stateDef.defaultValue);
+    namespace: string
+) {
+    let actualParam = resolveParam(
+        meta,
+        resolver,
+        diagnostics,
+        rule,
+        node.content || stateDef.defaultValue
+    );
 
     const validator = systemValidators[stateDef.type];
 
     let stateParamOutput;
     try {
-        stateParamOutput = validator.validate(actualParam,
+        stateParamOutput = validator.validate(
+            actualParam,
             stateDef.arguments,
             resolveParam.bind(null, meta, resolver, diagnostics, rule),
             false,
@@ -374,9 +414,7 @@ function resolveStateValue(
                 `pseudo-state "${name}" with parameter "${actualParam}" failed validation:`
             );
 
-            diagnostics.warn(rule,
-                stateParamOutput.errors.join('\n'),
-                { word: actualParam });
+            diagnostics.warn(rule, stateParamOutput.errors.join('\n'), { word: actualParam });
         }
     }
 
@@ -395,12 +433,14 @@ function resolveParam(
     resolver: StylableResolver,
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
-    nodeContent?: string) {
-
+    nodeContent?: string
+) {
     const defaultStringValue = '';
     const param = nodeContent || defaultStringValue;
 
-    return rule ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics) : param;
+    return rule
+        ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics)
+        : param;
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {
@@ -420,6 +460,8 @@ export function resolveStateParam(param: string) {
         return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
     } else {
         // tslint:disable-next-line: max-line-length
-        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(JSON.stringify(param).replace(/\s/gm, '_'))}`;
+        return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(
+            JSON.stringify(param).replace(/\s/gm, '_')
+        )}`;
     }
 }

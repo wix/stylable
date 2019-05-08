@@ -1,6 +1,6 @@
 import { StylableResults } from '@stylable/core';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 export function mediaQuery(chai: any, util: any) {
     const { flag } = util;
@@ -9,7 +9,11 @@ export function mediaQuery(chai: any, util: any) {
         const actual = flag(this, 'object') as StylableResults;
 
         if (!actual.meta || !actual.exports) {
-            throw new Error(`expected Stylable result {meta, exports}, but got: {${Object.keys(actual).join(', ')}}`);
+            throw new Error(
+                `expected Stylable result {meta, exports}, but got: {${Object.keys(actual).join(
+                    ', '
+                )}}`
+            );
         }
 
         const { outputAst } = actual.meta;
@@ -36,10 +40,17 @@ export function mediaQuery(chai: any, util: any) {
 export function styleRules(chai: any, util: any) {
     const { flag } = util;
 
-    chai.Assertion.addMethod('styleRules', function(this: any, styleRules: string[] | { [key: number]: string }) {
+    chai.Assertion.addMethod('styleRules', function(
+        this: any,
+        styleRules: string[] | { [key: number]: string }
+    ) {
         const actual = flag(this, 'object') as StylableResults;
         if (!actual.meta || !actual.exports) {
-            throw new Error(`expected Stylable result {meta, exports}, but got: {${Object.keys(actual).join(', ')}}`);
+            throw new Error(
+                `expected Stylable result {meta, exports}, but got: {${Object.keys(actual).join(
+                    ', '
+                )}}`
+            );
         }
 
         let scopeRule: postcss.Container | undefined = flag(this, 'actualRule');
@@ -62,9 +73,10 @@ export function styleRules(chai: any, util: any) {
             const nodes = scopeRule.nodes;
             for (const expectedIndex in styleRules) {
                 expect(nodes, `rules exist`).to.not.equal(undefined);
-                expect(nodes && nodes[expectedIndex].toString()).to.equal(styleRules[expectedIndex]);
+                expect(nodes && nodes[expectedIndex].toString()).to.equal(
+                    styleRules[expectedIndex]
+                );
             }
         }
-
     });
 }
