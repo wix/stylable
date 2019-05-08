@@ -1,7 +1,7 @@
 import postcss from 'postcss';
+import postcssNested from 'postcss-nested';
 import { CSSObject } from './types';
 const postcssJS = require('postcss-js');
-const postcssNested = require('postcss-nested');
 const safeParser = require('postcss-safe-parser');
 
 const postcssConfig = { parser: postcssJS };
@@ -11,6 +11,9 @@ export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
     return processor.process(cssObject, { from: sourceFile, ...postcssConfig });
 }
 
-export function safeParse(css: string, options: postcss.ProcessOptions = { from: 'style.css' }): postcss.Root {
+export function safeParse(
+    css: string,
+    options: postcss.ProcessOptions = { from: 'style.css' }
+): postcss.Root {
     return safeParser(css, options);
 }
