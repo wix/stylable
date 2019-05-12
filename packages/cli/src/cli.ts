@@ -17,6 +17,27 @@ const argv = require('yargs')
     .describe('outDir', 'target directory relative to root')
     .default('outDir', '.')
 
+    .option('esm')
+    .boolean('esm')
+    .describe('esm', 'output esm module format .mjs')
+    .default('esm', false)
+
+    .option('cjs')
+    .boolean('cjs')
+    .describe('cjs', 'output commonjs module .js')
+    .default('cjs', true)
+
+    .option('css')
+    .boolean('css')
+    .describe('css', 'output transpiled css file .css')
+    .default('css', false)
+
+    .option('cssInJs')
+    .boolean('cssInJs')
+    .describe('cssInJs', 'output transpiled css into the js module')
+    .default('cssInJs', false)
+
+
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
@@ -41,12 +62,12 @@ const argv = require('yargs')
 
 const log = createLogger('[Stylable]', argv.log);
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
-const { outDir, srcDir, rootDir, ext, indexFile, customGenerator: generatorPath } = argv;
+const { outDir, srcDir, rootDir, ext, indexFile, customGenerator: generatorPath, esm, cjs, css, cssInJs } = argv;
 
 log('[Arguments]', argv);
 
 const stylable = new Stylable(rootDir, fs, require);
-
+const formats: { [format: string]: boolean } = { esm, cjs };
 build({
     extension: ext,
     fs,
@@ -57,7 +78,10 @@ build({
     log,
     diagnostics,
     indexFile,
-    generatorPath
+    generatorPath,
+    moduleFormats: Object.keys(formats).filter(k => formats[k]),
+    outputCSS: css,
+    includeCSSInJS: cssInJs
 });
 
 function createLogger(prefix: string, shouldLog: boolean) {

@@ -6,6 +6,7 @@ export function generateModuleSource(
     beforeModule: string[],
     renderer: string,
     createFunction: string,
+    createRenderableFunction: string,
     css: string,
     depth: string,
     exportsArgument: string,
@@ -16,11 +17,11 @@ export function generateModuleSource(
     const localsExports = JSON.stringify(exports);
     const namespace = JSON.stringify(meta.namespace);
     if (renderableOnly) {
-        return `${createFunction}.createRenderable(${css}, ${depth}, ${moduleId});`;
+        return `${createRenderableFunction}(${css}, ${depth}, ${moduleId});`;
     }
     return `
 ${beforeModule.join('\n')}
-${exportsArgument} = ${createFunction}.create(
+${exportsArgument} = ${createFunction}(
     ${namespace},
     ${localsExports},
     ${css},
