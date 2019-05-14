@@ -10,7 +10,7 @@
     "build": "lerna run build --stream",
     "pretest": "yarn lint",
     "lint": "yarn tslint -p tsconfig.base.json",
-    "test": "lerna run test --stream --parallel",
+    "test": "lerna run test --stream",
     "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
   },
   "devDependencies": {
