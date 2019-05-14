@@ -1,7 +1,7 @@
 import { Stylable, StylableConfig } from '@stylable/core';
 import { generateModuleSource } from './module-source';
 
-interface Options {
+export interface Options {
     runtimePath: string;
     runtimeStylesheetId: 'module' | 'namespace';
     injectCSS: boolean;

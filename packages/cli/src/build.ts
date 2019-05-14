@@ -18,7 +18,7 @@ export interface BuildOptions {
     indexFile?: string;
     diagnostics?: (...args: string[]) => void;
     generatorPath?: string;
-    moduleFormats: string[];
+    moduleFormats?: Array<'cjs' | 'esm'>;
     includeCSSInJS?: boolean;
     outputCSS?: boolean;
 }
@@ -76,7 +76,7 @@ export async function build({
                   diagnostics,
                   diagnosticsMsg,
                   assets,
-                  moduleFormats,
+                  moduleFormats || [],
                   includeCSSInJS,
                   outputCSS
               );

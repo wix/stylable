@@ -32,3 +32,59 @@ ${exportsArgument} = ${createFunction}(
 ${afterModule}
 `;
 }
+
+export function createModuleSource(
+    stylableResult: StylableResults,
+    moduleFormat: string = 'cjs',
+    includeCSSInJS: boolean,
+    moduleId = JSON.stringify(stylableResult.meta.namespace),
+    renderableOnly = false,
+    depth: string | number = '-1'
+) {
+    // TODO: calc depth for node as well
+    depth = typeof depth === 'number' ? depth.toString() : depth;
+
+    if (renderableOnly && !includeCSSInJS) {
+        // TODO: better error
+        throw new Error('Configuration conflict (renderableOnly && !includeCSSInJS)');
+    }
+
+    switch (moduleFormat) {
+        case 'dts':
+            return generateTypescriptDefinition();
+        case 'esm':
+            const importKey = renderableOnly ? 'createRenderable' : 'create';
+            return generateModuleSource(
+                stylableResult,
+                moduleId,
+                [`import { $, ${importKey} } from ${JSON.stringify('@stylable/runtime')}`],
+                `$`,
+                `create`,
+                `createRenderable`,
+                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                depth,
+                'const { classes, keyframes, vars, stVars, cssStates, style, $depth, $id, $css }',
+                `export { classes, keyframes, vars, stVars, cssStates, style, $depth, $id, $css };`,
+                renderableOnly
+            );
+        case 'cjs':
+            return generateModuleSource(
+                stylableResult,
+                moduleId,
+                [`const runtime = require(${JSON.stringify('@stylable/runtime')})`],
+                `runtime.$`,
+                `runtime.create`,
+                `runtime.createRenderable`,
+                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                depth,
+                'module.exports',
+                '',
+                renderableOnly
+            );
+    }
+    throw new Error('Unknown module format ' + moduleFormat);
+}
+
+function generateTypescriptDefinition() {
+    throw new Error('Not implemented');
+}
