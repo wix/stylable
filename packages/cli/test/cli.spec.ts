@@ -7,17 +7,13 @@ import { spawnSync } from 'child_process';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join, relative } from 'path';
 
-function runCli(tempDir: ITempDirectory, cliArgs: string[] = []): { stderr: any; stdout: any } {
-    return spawnSync(
-        'node',
-        [
-            '-r',
-            require.resolve('@ts-tools/node/fast'),
-            join(__dirname, '../src/cli.ts'),
-            ...cliArgs
-        ],
-        { cwd: tempDir.path }
-    );
+function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
+    return spawnSync('node', [
+        '-r',
+        '@ts-tools/node/r',
+        join(__dirname, '../src/cli.ts'),
+        ...cliArgs
+    ]);
 }
 
 function loadDirSync(dirPath: string) {
@@ -54,7 +50,7 @@ describe('Stylable Cli', () => {
         });
 
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
-        const { stderr, stdout } = runCli(tempDir, [`--nsr=${nsr}`]);
+        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
         expect(stderr.toString('utf8')).equal('');
         expect(stdout.toString('utf8')).equal('');
@@ -75,7 +71,8 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`
         });
 
-        const { stderr, stdout } = runCli(tempDir);
+        const nsr = require.resolve('@stylable/node/src');
+        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
         expect(stderr.toString('utf8')).equal('');
         expect(stdout.toString('utf8')).equal('');

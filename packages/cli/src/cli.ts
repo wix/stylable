@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Stylable } from '@stylable/core';
-import * as fs from 'fs';
+import fs from 'fs';
 import { build } from './build';
 
 const argv = require('yargs')

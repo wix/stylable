@@ -40,7 +40,7 @@
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-r",
-                "@ts-tools/node/fast",
+                "@ts-tools/node/r",
                 "--timeout",
                 "999999",
                 "--colors",
