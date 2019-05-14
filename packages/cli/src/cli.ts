@@ -68,6 +68,7 @@ const argv = require('yargs')
     .help().argv;
 
 const log = createLogger('[Stylable]', argv.log);
+
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
 const {
     outDir,
@@ -80,7 +81,7 @@ const {
     cjs,
     css,
     cssInJs,
-    resolveNamespace
+    namespaceResolver
 } = argv;
 
 log('[Arguments]', argv);
@@ -89,7 +90,7 @@ const stylable = Stylable.create({
     fileSystem: fs,
     requireModule: require,
     projectRoot: rootDir,
-    resolveNamespace: require(resolveNamespace).resolveNamespace
+    resolveNamespace: require(namespaceResolver).resolveNamespace
 });
 
 build({

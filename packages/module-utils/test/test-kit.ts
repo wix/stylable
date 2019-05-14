@@ -15,22 +15,28 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
     return _module.exports;
 }
 
-export function moduleFactoryTestKit(files: Record<string, string>, options: Partial<Options> = {}) {
-    const fs = createMemoryFileSystemWithFiles(files);
-    const factory = stylableModuleFactory({
-        resolveNamespace: namespace => namespace,
-        fileSystem: fs,
-        projectRoot: '/'
-    }, options);
+export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
+    return evalModule(fullPath, source, id => {
+        if (id === '@stylable/runtime') {
+            return { create };
+        }
+        throw new Error(`Could not find module: ${id}`);
+    }) as T;
+}
 
-    function evalStylableModule(source: string, fullPath: string) {
-        return evalModule(fullPath, source, id => {
-            if (id === '@stylable/runtime') {
-                return { create };
-            }
-            throw new Error(`Could not find module: ${id}`);
-        });
-    }
+export function moduleFactoryTestKit(
+    files: Record<string, string>,
+    options: Partial<Options> = {}
+) {
+    const fs = createMemoryFileSystemWithFiles(files);
+    const factory = stylableModuleFactory(
+        {
+            resolveNamespace: namespace => namespace,
+            fileSystem: fs,
+            projectRoot: '/'
+        },
+        options
+    );
 
     return {
         fs,
