@@ -1,14 +1,11 @@
-import {generateStylableRoot} from '@stylable/core-test-kit';
-import {expect} from 'chai';
-import * as postcss from 'postcss';
+import { generateStylableRoot } from '@stylable/core-test-kit';
+import { expect } from 'chai';
+import postcss from 'postcss';
 
 describe('Stylable transform elements', () => {
-
     describe('scoped elements', () => {
-
         // tslint:disable-next-line:max-line-length
         it('component/tag selector with first Capital letter automatically extends reference with identical name', () => {
-
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -32,12 +29,10 @@ describe('Stylable transform elements', () => {
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root');
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__root');
-
         });
 
         // tslint:disable-next-line:max-line-length
         it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
-
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
@@ -60,12 +55,12 @@ describe('Stylable transform elements', () => {
                 }
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.inner__root .inner__part');
-
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal(
+                '.inner__root .inner__part'
+            );
         });
 
         it('resolve imported element that is also root', () => {
-
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -99,7 +94,6 @@ describe('Stylable transform elements', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__x');
-
         });
 
         it('should resolve imported named element type when used as element', () => {
@@ -137,8 +131,6 @@ describe('Stylable transform elements', () => {
             });
 
             expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base__root');
-
         });
     });
-
 });

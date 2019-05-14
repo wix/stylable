@@ -1,9 +1,8 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { SelectorAstNode } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
 export const RESERVED_ROOT_NAME = 'root';
 
 export class StylableMeta {
@@ -13,18 +12,18 @@ export class StylableMeta {
     public namespace: string;
     public imports: Imported[];
     public vars: VarSymbol[];
-    public cssVars: Pojo<CSSVarSymbol>;
+    public cssVars: Record<string, CSSVarSymbol>;
     public keyframes: postcss.AtRule[];
-    public classes: Pojo<ClassSymbol>;
-    public elements: Pojo<ElementSymbol>;
-    public mappedSymbols: Pojo<StylableSymbol>;
-    public customSelectors: Pojo<string>;
+    public classes: Record<string, ClassSymbol>;
+    public elements: Record<string, ElementSymbol>;
+    public mappedSymbols: Record<string, StylableSymbol>;
+    public customSelectors: Record<string, string>;
     public urls: string[];
     public outputAst?: postcss.Root;
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
-    public globals: Pojo<boolean> = {};
+    public globals: Record<string, boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         const rootSymbol: ClassSymbol = {
             _kind: 'class',
@@ -57,7 +56,7 @@ export class StylableMeta {
 export interface Imported {
     from: string;
     defaultExport: string;
-    named: Pojo<string>;
+    named: Record<string, string>;
     rule: postcss.Rule;
     fromRelative: string;
     context: string;

@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import urlRegex from 'url-regex';
 import * as path from './path';
 import { ImportSymbol, RefedMixin, StylableMeta } from './stylable-processor';

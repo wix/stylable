@@ -1,15 +1,14 @@
 import {
     IStylableClassNameOptimizer,
     parseSelector,
-    Pojo,
     pseudoStates,
     stringifySelector,
     traverseNode
 } from '@stylable/core';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
-    public context: { names: Pojo<string> };
+    public context: { names: Record<string, string> };
     constructor() {
         this.context = {
             names: {}
@@ -17,8 +16,8 @@ export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
     }
     public rewriteSelector(
         selector: string,
-        usageMapping: Pojo<boolean>,
-        globals: Pojo<boolean> = {}
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean> = {}
     ) {
         const ast = parseSelector(selector);
         traverseNode(ast, node => {
@@ -45,10 +44,10 @@ export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
     }
     public optimizeAstAndExports(
         ast: postcss.Root,
-        exported: Pojo<string>,
+        exported: Record<string, string>,
         classes = Object.keys(exported),
-        usageMapping: Pojo<boolean>,
-        globals?: Pojo<boolean>
+        usageMapping: Record<string, boolean>,
+        globals?: Record<string, boolean>
     ) {
         ast.walkRules(rule => {
             rule.selector = this.rewriteSelector(rule.selector, usageMapping, globals);

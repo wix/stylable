@@ -1,11 +1,9 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 describe('Generator variables interpolation', () => {
-
     it('should inline value() usage with and without quotes', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -29,11 +27,9 @@ describe('Generator variables interpolation', () => {
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
         expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
-
     });
 
     it('should resolve value inside @media', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -50,11 +46,9 @@ describe('Generator variables interpolation', () => {
         });
 
         expect((result.nodes![0] as postcss.AtRule).params).to.equal('(max-width: 301px)');
-
     });
 
     it('should resolve value() usage in variable declaration', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -76,11 +70,9 @@ describe('Generator variables interpolation', () => {
         const rule = result.nodes![0] as postcss.Rule;
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-
     });
 
     it('should resolve to recursive entry', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -103,11 +95,9 @@ describe('Generator variables interpolation', () => {
         const rule = result.nodes![0] as postcss.Rule;
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('value(param1)');
-
     });
 
     it('should support imported vars', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -142,11 +132,9 @@ describe('Generator variables interpolation', () => {
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
         expect((rule.nodes![1] as postcss.Declaration).value).to.equal('blue');
-
     });
 
     it('should support imported vars (deep)', () => {
-
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -193,7 +181,6 @@ describe('Generator variables interpolation', () => {
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
         expect((rule.nodes![1] as postcss.Declaration).value).to.equal('blue');
-
     });
 
     xit('should resolve value() usage in mixin call', () => {
@@ -227,12 +214,10 @@ describe('Generator variables interpolation', () => {
         //         }
         //     `)
         // ], {});
-
         // env.validate.output([
         //     '.Main__container {\n    background-color: blue\n}',
         //     '.Main__container {\n    border-color: orange\n}',
         //     '.Main__container {\n    color: red/*param*/\n}'
         // ]); // ToDo: fix order and combine into a single CSS ruleset
     });
-
 });

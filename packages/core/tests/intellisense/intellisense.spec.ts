@@ -1,12 +1,10 @@
 import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { expandCustomSelectors } from '../../src/stylable-utils';
 
 describe('Stylable intellisense selector meta data', () => {
-
     it('resolve single class element', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -36,11 +34,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolve pseudo-element', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -97,11 +93,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolves extends of named class', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -158,11 +152,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolves local custom selector', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -196,11 +188,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolves pseudo custom selector', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -232,10 +222,7 @@ describe('Stylable intellisense selector meta data', () => {
 
         const meta = t.fileProcessor.process('/entry.st.css');
         const otherMeta = t.fileProcessor.process('/comp.st.css');
-        const elements = t.resolveSelectorElements(
-            meta,
-            '.x::pongo'
-        );
+        const elements = t.resolveSelectorElements(meta, '.x::pongo');
 
         expect(elements[0]).to.eql([
             {
@@ -266,11 +253,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolve stylesheet root from default import', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -316,11 +301,9 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
 
     it('resolve complex selector with multiple inheritance of roots', () => {
-
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
@@ -387,7 +370,6 @@ describe('Stylable intellisense selector meta data', () => {
                     .root {}
                     `
                 }
-
             }
         });
 
@@ -397,7 +379,10 @@ describe('Stylable intellisense selector meta data', () => {
         const recursive0 = t.fileProcessor.process('/recursive-import-0.st.css');
         const last = t.fileProcessor.process('/recursive-import.st.css');
 
-        const elements = t.resolveSelectorElements(meta, '.gaga:lala::bobo:otherState:state::momo:anotherState');
+        const elements = t.resolveSelectorElements(
+            meta,
+            '.gaga:lala::bobo:otherState:state::momo:anotherState'
+        );
 
         expect(elements[0]).to.eql([
             {
@@ -454,7 +439,5 @@ describe('Stylable intellisense selector meta data', () => {
                 ]
             }
         ]);
-
     });
-
 });

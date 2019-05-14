@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { StylableMeta } from './stylable-processor';
@@ -6,37 +6,45 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo } from './types';
+import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
-export type ResolvedFormatter = Pojo<JSResolve | CSSResolve | ValueFormatter | null>;
+export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
 
 /* tslint:disable:max-line-length */
 export const functionWarnings = {
-    FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) => `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
-    CYCLIC_VALUE: (cyclicChain: string[]) => `Cyclic value definition detected: "${cyclicChain.map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s).join('\n')}"`,
-    CANNOT_USE_AS_VALUE: (type: string, varName: string) => `${type} "${varName}" cannot be used as a variable`,
-    CANNOT_USE_JS_AS_VALUE: (varName: string) => `JavaScript import "${varName}" cannot be used as a variable`,
+    FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) =>
+        `failed to execute formatter "${resolvedValue}" with error: "${message}"`,
+    CYCLIC_VALUE: (cyclicChain: string[]) =>
+        `Cyclic value definition detected: "${cyclicChain
+            .map((s, i) => (i === cyclicChain.length - 1 ? '↻ ' : i === 0 ? '→ ' : '↪ ') + s)
+            .join('\n')}"`,
+    CANNOT_USE_AS_VALUE: (type: string, varName: string) =>
+        `${type} "${varName}" cannot be used as a variable`,
+    CANNOT_USE_JS_AS_VALUE: (varName: string) =>
+        `JavaScript import "${varName}" cannot be used as a variable`,
     CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
-    MULTI_ARGS_IN_VALUE: (args: string) => `value function accepts only a single argument: "value(${args})"`,
-    UNKNOWN_FORMATTER: (name: string) => `cannot find native function or custom formatter called ${name}`,
+    MULTI_ARGS_IN_VALUE: (args: string) =>
+        `value function accepts only a single argument: "value(${args})"`,
+    UNKNOWN_FORMATTER: (name: string) =>
+        `cannot find native function or custom formatter called ${name}`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
 };
 /* tslint:enable:max-line-length */
 
 export function resolveArgumentsValue(
-    options: Pojo<string>,
+    options: Record<string, string>,
     transformer: StylableTransformer,
     meta: StylableMeta,
     diagnostics: Diagnostics,
     node: postcss.Node,
-    variableOverride?: Pojo<string>,
+    variableOverride?: Record<string, string>,
     path?: string[],
-    cssVarsMapping?: Pojo<string>
+    cssVarsMapping?: Record<string, string>
 ) {
-    const resolvedArgs = {} as Pojo<string>;
+    const resolvedArgs = {} as Record<string, string>;
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
             transformer.resolver,
@@ -58,11 +66,11 @@ export function evalDeclarationValue(
     value: string,
     meta: StylableMeta,
     node: postcss.Node,
-    variableOverride?: Pojo<string> | null,
+    variableOverride?: Record<string, string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
-    cssVarsMapping?: Pojo<string>
+    cssVarsMapping?: Record<string, string>
 ): string {
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -121,7 +129,9 @@ export function evalDeclarationValue(
                                             variableOverride,
                                             valueHook,
                                             diagnostics,
-                                            passedThrough.concat(createUniqID(meta.source, varName)),
+                                            passedThrough.concat(
+                                                createUniqID(meta.source, varName)
+                                            ),
                                             cssVarsMapping
                                         );
                                         parsedNode.resolvedValue = valueHook
@@ -135,23 +145,30 @@ export function evalDeclarationValue(
                                     } else {
                                         const errorKind =
                                             resolvedVarSymbol._kind === 'class' &&
-                                                resolvedVarSymbol[valueMapping.root]
+                                            resolvedVarSymbol[valueMapping.root]
                                                 ? 'stylesheet'
                                                 : resolvedVarSymbol._kind;
 
                                         if (diagnostics) {
                                             diagnostics.warn(
                                                 node,
-                                                functionWarnings.CANNOT_USE_AS_VALUE(errorKind, varName),
+                                                functionWarnings.CANNOT_USE_AS_VALUE(
+                                                    errorKind,
+                                                    varName
+                                                ),
                                                 { word: varName }
                                             );
                                         }
                                     }
                                 } else if (resolvedVar._kind === 'js' && diagnostics) {
                                     // ToDo: provide actual exported id (default/named as x)
-                                    diagnostics.warn(node, functionWarnings.CANNOT_USE_JS_AS_VALUE(varName), {
-                                        word: varName
-                                    });
+                                    diagnostics.warn(
+                                        node,
+                                        functionWarnings.CANNOT_USE_JS_AS_VALUE(varName),
+                                        {
+                                            word: varName
+                                        }
+                                    );
                                 }
                             } else {
                                 // TODO: move this to a seperate mechanism to check imports unrelated to usage
@@ -168,7 +185,9 @@ export function evalDeclarationValue(
                                 }
                             }
                         } else if (diagnostics) {
-                            diagnostics.warn(node, functionWarnings.UNKNOWN_VAR(varName), { word: varName });
+                            diagnostics.warn(node, functionWarnings.UNKNOWN_VAR(varName), {
+                                word: varName
+                            });
                         }
                     } else if (diagnostics) {
                         const argsAsString = args.filter((arg: string) => arg !== ', ').join(', ');
@@ -182,7 +201,6 @@ export function evalDeclarationValue(
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                 } else {
-
                     const formatterRef = meta.mappedSymbols[value];
                     const formatter = resolver.deepResolve(formatterRef);
                     const args = getFormatterArgs(parsedNode);
@@ -229,7 +247,9 @@ export function evalDeclarationValue(
                     } else if (isCssNativeFunction(value)) {
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                     } else if (diagnostics) {
-                        diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), { word: value });
+                        diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
+                            word: value
+                        });
                     }
                 }
                 break;

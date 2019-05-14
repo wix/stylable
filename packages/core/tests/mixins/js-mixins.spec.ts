@@ -5,7 +5,7 @@ import {
     matchRuleAndDeclaration
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('simple mixin', () => {
@@ -283,18 +283,8 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(
-            result,
-            0,
-            '.entry__gaga',
-            'color:red;background:green'
-        );
-        matchRuleAndDeclaration(
-            result,
-            1,
-            '.entry__gaga .entry__child',
-            'color:yellow'
-        );
+        matchRuleAndDeclaration(result, 0, '.entry__gaga', 'color:red;background:green');
+        matchRuleAndDeclaration(result, 1, '.entry__gaga .entry__child', 'color:yellow');
     });
 
     it('multiple mixins', () => {

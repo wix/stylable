@@ -1,7 +1,7 @@
 import { expectWarningsFromTransform } from '@stylable/core-test-kit';
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
 import * as path from '../src/path';

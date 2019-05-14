@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { isAbsolute, resolve } from './path';
 import {
@@ -21,7 +21,6 @@ import {
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
-import { Pojo } from './types';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
@@ -32,7 +31,7 @@ export function isValidDeclaration(decl: postcss.Declaration) {
 
 export function expandCustomSelectors(
     rule: postcss.Rule,
-    customSelectors: Pojo<string>,
+    customSelectors: Record<string, string>,
     diagnostics?: Diagnostics
 ): string {
     if (rule.selector.indexOf(':--') > -1) {
@@ -187,7 +186,9 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                 ? scopeSelector(selectorPrefix, node.selector, true).selectorAst
                 : parseSelector(node.selector);
 
-            const matchesSelectors = isRoot ? ast.nodes : ast.nodes.filter(node => containsPrefix(node));
+            const matchesSelectors = isRoot
+                ? ast.nodes
+                : ast.nodes.filter(node => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector({
@@ -332,7 +333,7 @@ function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: Se
 }
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
-    const source = root.source && root.source.input.file || '';
+    const source = (root.source && root.source.input.file) || '';
     if (!source) {
         diagnostics.error(root, 'missing source filename');
     } else if (!isAbsolute(source)) {

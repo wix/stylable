@@ -1,46 +1,50 @@
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 describe('@custom-selector', () => {
-
     it('collect custom-selectors', () => {
         const from = '/path/to/style.css';
-        const result = processSource(`
+        const result = processSource(
+            `
             @custom-selector :--icon .root > .icon;
-        `, { from });
+        `,
+            { from }
+        );
 
         expect(result.customSelectors[':--icon']).to.equal('.root > .icon');
-
     });
 
     it('expand custom-selector before process (reflect on ast)', () => {
         const from = '/path/to/style.css';
-        const result = processSource(`
+        const result = processSource(
+            `
             @custom-selector :--icon .root > .icon;
             :--icon, .class {
                 color: red;
             }
-        `, { from });
+        `,
+            { from }
+        );
 
         const r = result.ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.root > .icon, .class');
         expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
-
     });
 
     it('expand custom-selector before process (reflect on ast when not written)', () => {
         const from = '/path/to/style.css';
-        const result = processSource(`
+        const result = processSource(
+            `
             @custom-selector :--icon .root > .icon;
-        `, { from });
+        `,
+            { from }
+        );
 
         expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
-
     });
 
     it('expand pseudo-element custom-selector in the owner context', () => {
-
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -72,11 +76,9 @@ describe('@custom-selector', () => {
 
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root > .comp__icon');
-
     });
 
     it('expand custom-selector in pseudo-element in the owner context', () => {
-
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -123,11 +125,9 @@ describe('@custom-selector', () => {
 
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root > .comp__icon .child__top');
-
     });
 
     it('expand complex custom-selector in pseudo-element', () => {
-
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -155,11 +155,9 @@ describe('@custom-selector', () => {
 
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
-
     });
 
     it('expand custom-selector when there is global root', () => {
-
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -200,11 +198,9 @@ describe('@custom-selector', () => {
 
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.xxx .controls__root');
-
     });
 
     it('expand custom-selector that uses element in the same name', () => {
-
         const ast = generateStylableRoot({
             entry: '/entry.st.css',
             files: {
@@ -247,6 +243,5 @@ describe('@custom-selector', () => {
 
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.interface__root .controls__root cc');
-
     });
 });

@@ -1,6 +1,6 @@
 import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 import { resolve } from '../src/path';
@@ -12,12 +12,20 @@ function createResolveExtendsResults(
     classNameToLookup: string,
     isElement: boolean = false
 ) {
-    const processFile = cachedProcessFile<StylableMeta>((fullpath, content) => {
-        return process(safeParse(content, { from: fullpath }));
-    }, fs, x => x);
+    const processFile = cachedProcessFile<StylableMeta>(
+        (fullpath, content) => {
+            return process(safeParse(content, { from: fullpath }));
+        },
+        fs,
+        x => x
+    );
 
-    const resolver = new StylableResolver(processFile, (module: string) => (module && ''));
-    return resolver.resolveExtends(processFile.process(fileToProcess), classNameToLookup, isElement);
+    const resolver = new StylableResolver(processFile, (module: string) => module && '');
+    return resolver.resolveExtends(
+        processFile.process(fileToProcess),
+        classNameToLookup,
+        isElement
+    );
 }
 
 describe('stylable-resolver', () => {
@@ -51,7 +59,6 @@ describe('stylable-resolver', () => {
         expect(results[0].symbol.name).to.equal('myClass');
         expect(results[1].symbol.name).to.equal('root');
         expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
-
     });
 
     it('should resolve extend elements', () => {
@@ -83,7 +90,6 @@ describe('stylable-resolver', () => {
         expect(results[0].symbol!.name).to.equal('Button');
         expect(results[1].symbol!.name).to.equal('root');
         expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
-
     });
 
     it('should resolve extend classes on broken css', () => {
@@ -139,11 +145,9 @@ describe('stylable-resolver', () => {
         expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
         expect(results[1].meta.source).to.equal(resolve('/index.st.css'));
         expect(results[2].meta.source).to.equal(resolve('/button.st.css'));
-
     });
 
     it('should resolve classes', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -171,7 +175,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve elements', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -208,7 +211,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve elements deep', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -247,7 +249,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should handle circular "re-declare" (deepResolve)', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -271,7 +272,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should handle circular "re-declare" (resolveSymbolOrigin)', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -295,7 +295,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve alias origin', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -345,7 +344,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should not resolve extends on alias', () => {
-
         const { resolver, fileProcessor } = generateInfra({
             files: {
                 '/entry.st.css': {
@@ -373,7 +371,6 @@ describe('stylable-resolver', () => {
     });
 
     it('should resolve 4th party according to context', () => {
-
         const stylable = createStylableInstance({
             resolve: {
                 symlinks: false
@@ -410,9 +407,8 @@ describe('stylable-resolver', () => {
             }
         });
 
-        const {meta} = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
+        const { meta } = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
-
     });
 });

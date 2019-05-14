@@ -14,9 +14,9 @@
     "express": "^4.16.4",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
-    "puppeteer": "^1.14.0",
+    "puppeteer": "^1.15.0",
     "rimraf": "^2.6.3",
-    "webpack": "^4.30.0"
+    "webpack": "^4.31.0"
   },
   "files": [
     "cjs",

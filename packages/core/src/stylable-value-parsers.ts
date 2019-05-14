@@ -1,15 +1,19 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
-import { Pojo, StateParsedValue } from './types';
+import { StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
 /* tslint:disable:max-line-length */
 export const valueParserWarnings = {
-    VALUE_CANNOT_BE_STRING() { return 'value can not be a string (remove quotes?)'; },
-    CSS_MIXIN_FORCE_NAMED_PARAMS() { return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")'; }
+    VALUE_CANNOT_BE_STRING() {
+        return 'value can not be a string (remove quotes?)';
+    },
+    CSS_MIXIN_FORCE_NAMED_PARAMS() {
+        return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
+    }
 };
 /* tslint:enable:max-line-length */
 
@@ -26,7 +30,7 @@ export interface TypedClass {
 
 export interface MixinValue {
     type: string;
-    options: Array<{ value: string }> | Pojo<string>;
+    options: Array<{ value: string }> | Record<string, string>;
 }
 
 export interface ArgValue {
@@ -61,10 +65,13 @@ export const valueMapping = {
 export type stKeys = keyof typeof valueMapping;
 
 export const stValues: string[] = Object.keys(valueMapping).map(key => valueMapping[key as stKeys]);
-export const stValuesMap: Pojo<boolean> = Object.keys(valueMapping).reduce((acc, key) => {
-    acc[valueMapping[key as stKeys]] = true;
-    return acc;
-}, {} as Pojo<boolean>);
+export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce(
+    (acc, key) => {
+        acc[valueMapping[key as stKeys]] = true;
+        return acc;
+    },
+    {} as Record<string, boolean>
+);
 
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
@@ -90,7 +97,6 @@ export const SBTypesParsers = {
         const types: ExtendsValue[] = [];
 
         ast.walk((node: any) => {
-
             if (node.type === 'function') {
                 const args = getNamedArgs(node);
 
@@ -100,7 +106,6 @@ export const SBTypesParsers = {
                 });
 
                 return false;
-
             } else if (node.type === 'word') {
                 types.push({
                     symbolName: node.value,
@@ -131,11 +136,17 @@ export const SBTypesParsers = {
         return namedMap;
     },
     '-st-mixin'(
-        mixinNode: postcss.Declaration, strategy: (type: string) => 'named' | 'args', diagnostics?: Diagnostics) {
+        mixinNode: postcss.Declaration,
+        strategy: (type: string) => 'named' | 'args',
+        diagnostics?: Diagnostics
+    ) {
         const ast = valueParser(mixinNode.value);
-        const mixins: Array<{ type: string, options: Array<{ value: string }> | Pojo<string> }> = [];
+        const mixins: Array<{
+            type: string;
+            options: Array<{ value: string }> | Record<string, string>;
+        }> = [];
 
-        function reportWarning(message: string, options?: { word: string } ) {
+        function reportWarning(message: string, options?: { word: string }) {
             if (diagnostics) {
                 diagnostics.warn(mixinNode, message, options);
             }
@@ -154,11 +165,9 @@ export const SBTypesParsers = {
                     options: strat === 'named' ? {} : []
                 });
             } else if (node.type === 'string' && diagnostics) {
-                diagnostics.error(
-                    mixinNode,
-                    valueParserWarnings.VALUE_CANNOT_BE_STRING(),
-                    { word: mixinNode.value }
-                );
+                diagnostics.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
+                    word: mixinNode.value
+                });
             }
         });
 
@@ -197,7 +206,7 @@ export function groupValues(nodes: any[], divType = 'div') {
 
     const last = grouped[grouped.length - 1];
 
-    if ((last && last !== current && current.length) || !last && current.length) {
+    if ((last && last !== current && current.length) || (!last && current.length)) {
         grouped.push(current);
     }
     return grouped;
@@ -205,15 +214,15 @@ export function groupValues(nodes: any[], divType = 'div') {
 
 const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {
-        const named: Pojo<string> = {};
+        const named: Record<string, string> = {};
         getNamedArgs(node).forEach(mixinArgsGroup => {
             const argsDivider = mixinArgsGroup[1];
             if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
                 if (reportWarning) {
                     const argValue = mixinArgsGroup[0];
-                    reportWarning(
-                        valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
-                        { word: argValue.value });
+                    reportWarning(valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(), {
+                        word: argValue.value
+                    });
                 }
                 return;
             }
@@ -222,15 +231,20 @@ const strategies = {
         return named;
     },
     args: (node: any, _reportWarning?: ReportWarning) => {
-        return groupValues(node.nodes, 'div').map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
-            if (n.type === 'div') {
-                return null;
-            } else if (n.type === 'string') {
-                return n.value;
-            } else {
-                return undefined;
-            }
-        })).filter((x: string) => typeof x === 'string').map(value => ({ value }));
+        return groupValues(node.nodes, 'div')
+            .map((nodes: any) =>
+                valueParser.stringify(nodes, (n: any) => {
+                    if (n.type === 'div') {
+                        return null;
+                    } else if (n.type === 'string') {
+                        return n.value;
+                    } else {
+                        return undefined;
+                    }
+                })
+            )
+            .filter((x: string) => typeof x === 'string')
+            .map(value => ({ value }));
     }
 };
 
@@ -247,13 +261,17 @@ function stringifyParam(nodes: any) {
 }
 
 export function listOptions(node: any) {
-    return groupValues(node.nodes).map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
-        if (n.type === 'div') {
-            return null;
-        } else if (n.type === 'string') {
-            return n.value;
-        } else {
-            return undefined;
-        }
-    })).filter((x: string) => typeof x === 'string');
+    return groupValues(node.nodes)
+        .map((nodes: any) =>
+            valueParser.stringify(nodes, (n: any) => {
+                if (n.type === 'div') {
+                    return null;
+                } else if (n.type === 'string') {
+                    return n.value;
+                } else {
+                    return undefined;
+                }
+            })
+        )
+        .filter((x: string) => typeof x === 'string');
 }

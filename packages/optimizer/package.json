@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@stylable/core": "^2.0.6",
-    "postcss": "^7.0.14"
+    "postcss": "^7.0.16"
   },
   "files": [
     "cjs",
