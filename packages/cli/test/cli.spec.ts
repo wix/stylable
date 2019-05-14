@@ -1,10 +1,24 @@
 import { nodeFs } from '@file-services/node';
 import { IDirectoryContents } from '@file-services/types';
 import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
+import { resolveNamespace } from '@stylable/node';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join, relative } from 'path';
+
+function runCli(tempDir: ITempDirectory, cliArgs: string[] = []): { stderr: any; stdout: any } {
+    return spawnSync(
+        'node',
+        [
+            '-r',
+            require.resolve('@ts-tools/node/fast'),
+            join(__dirname, '../src/cli.ts'),
+            ...cliArgs
+        ],
+        { cwd: tempDir.path }
+    );
+}
 
 function loadDirSync(dirPath: string) {
     return nodeFs
@@ -33,25 +47,17 @@ describe('Stylable Cli', () => {
         await tempDir.remove();
     });
 
-    it('single file build', () => {
-        const files = {
+    it('single file build with test namespace-resolver', () => {
+        nodeFs.populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`
-        };
+        });
 
-        nodeFs.populateDirectorySync(tempDir.path, files);
-
-        const cli = join(__dirname, '../src/cli.ts');
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        const { stderr, stdout } = runCli(tempDir, [`--nsr=${nsr}`]);
 
-        const { stderr, stdout } = spawnSync(
-            'node',
-            ['-r', require.resolve('@ts-tools/node/fast'), cli, `--nsr=${nsr}`],
-            { cwd: tempDir.path }
-        );
-
-        console.log(stderr.toString('utf8'));
-        console.log(stdout.toString('utf8'));
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -61,5 +67,26 @@ describe('Stylable Cli', () => {
                 'style.st.css.js'
             ).namespace
         ).equal('test-ns-0');
+    });
+
+    it('single file build with default ns-resolver', () => {
+        nodeFs.populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`
+        });
+
+        const { stderr, stdout } = runCli(tempDir);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
+
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(
+            evalStylableModule<{ namespace: string }>(
+                dirContent['style.st.css.js'] as string,
+                'style.st.css.js'
+            ).namespace
+        ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
     });
 });
