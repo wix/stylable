@@ -18,26 +18,6 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@file-services/node@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-1.0.5.tgz#46343b5d5e510e5abeea1c8d8faee8efd15b5ac9"
-  integrity sha512-hNuqP0qbVqvWzfkVoriPcMTiq9Otp+NO+mwLFxETymZ+ygIvCGgdnV1q4ZMBhwx7lll0WnzCPmPKACNt47NUIQ==
-  dependencies:
-    "@file-services/types" "^1.0.4"
-    "@file-services/utils" "^1.0.4"
-
-"@file-services/types@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-1.0.4.tgz#adb59fd44adb28bd04eae1a225caab18ae860d64"
-  integrity sha512-t0u+YU3DRAEZzhIU4cKJetOdvsevrfBwKIStvmxNc3GvR0zoDkuhpAnfgqYrf6aRAvM22G6/CkaU7PKIwacvOw==
-
-"@file-services/utils@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-1.0.4.tgz#b9dfe61ba4538a13982afe3350487790f3f3cbd0"
-  integrity sha512-b2gf6TWcSacw5NuOR7UWqNK8iHpQU1hbhwFT0A+3k0oRMH1JA3vOeXIlxRaqAflCRYi4Qd4OQ5JBtTKDH4bSVA==
-  dependencies:
-    "@file-services/types" "^1.0.4"
-
 "@lerna/add@3.13.3":
   version "3.13.3"
   resolved "https://registry.yarnpkg.com/@lerna/add/-/add-3.13.3.tgz#f4c1674839780e458f0426d4f7b6d0a77b9a2ae9"

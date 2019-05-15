@@ -1,11 +1,10 @@
-import { nodeFs } from '@file-services/node';
-import { IDirectoryContents } from '@file-services/types';
 import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { join, relative } from 'path';
+import { writeFileSync, readFileSync, statSync, readdirSync } from 'fs';
 
 function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     return spawnSync('node', [
@@ -16,21 +15,31 @@ function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     ]);
 }
 
-function loadDirSync(dirPath: string) {
-    return nodeFs
-        .readdirSync(dirPath, { withFileTypes: true })
-        .reduce<IDirectoryContents>((acc, entry) => {
-            const fullPath = join(dirPath, entry.name);
-            const key = relative(dirPath, fullPath);
-            if (entry.isFile()) {
-                acc[key] = nodeFs.readFileSync(fullPath, 'utf8');
-            } else if (entry.isDirectory()) {
-                acc[key] = loadDirSync(fullPath);
-            } else {
-                throw new Error('Not Implemented');
-            }
-            return acc;
-        }, {});
+type Files = { [filepath: string]: string };
+
+function loadDirSync(dirPath: string): Files {
+    return readdirSync(dirPath).reduce<Files>((acc, entry) => {
+        const fullPath = join(dirPath, entry);
+        const key = relative(dirPath, fullPath);
+        const stat = statSync(fullPath);
+        if (stat.isFile()) {
+            acc[key] = readFileSync(fullPath, 'utf8');
+        } else if (stat.isDirectory()) {
+            return {
+                ...acc,
+                ...loadDirSync(fullPath)
+            };
+        } else {
+            throw new Error('Not Implemented');
+        }
+        return acc;
+    }, {});
+}
+
+function populateDirectorySync(rootDir: string, files: Files) {
+    for (let filePath in files) {
+        writeFileSync(join(rootDir, filePath), files[filePath]);
+    }
 }
 
 describe('Stylable Cli', () => {
@@ -44,7 +53,7 @@ describe('Stylable Cli', () => {
     });
 
     it('single file build with test namespace-resolver', () => {
-        nodeFs.populateDirectorySync(tempDir.path, {
+        populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`
         });
@@ -66,7 +75,7 @@ describe('Stylable Cli', () => {
     });
 
     it('single file build with default ns-resolver', () => {
-        nodeFs.populateDirectorySync(tempDir.path, {
+        populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`
         });
