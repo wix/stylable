@@ -2389,6 +2389,13 @@ create-listening-server@^0.1.2:
   resolved "https://registry.yarnpkg.com/create-listening-server/-/create-listening-server-0.1.2.tgz#bc4e1e0adf0ad17cb1d09599bb899b0c1e6aeea4"
   integrity sha512-74qqb84lbUM+lOI32TX9CY5pzijUwyB1urORGZlH6NTd3SQx18TWdUiQzzJd40ZiAqD5L2+AtlOSd8Gq5K78rQ==
 
+create-temp-directory@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/create-temp-directory/-/create-temp-directory-1.0.2.tgz#6d0517cbd2773fc37e5a270d0d3d2cf030f11d55"
+  integrity sha512-mlyDRfu6JrAsS6FmlHhLcrtNGu+uT2pqaq5lL6XoJcNrW5XsrtnIe3NLgVVbj6Gu2rgbq2iQU8lqyobxJAI7fw==
+  dependencies:
+    rimraf "^2.6.3"
+
 cross-spawn@6.0.5, cross-spawn@^6.0.0, cross-spawn@^6.0.5:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"
