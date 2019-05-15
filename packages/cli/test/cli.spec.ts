@@ -15,7 +15,7 @@ function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     ]);
 }
 
-type Files = { [filepath: string]: string };
+interface Files { [filepath: string]: string }
 
 function loadDirSync(dirPath: string): Files {
     return readdirSync(dirPath).reduce<Files>((acc, entry) => {
@@ -37,7 +37,7 @@ function loadDirSync(dirPath: string): Files {
 }
 
 function populateDirectorySync(rootDir: string, files: Files) {
-    for (let filePath in files) {
+    for (const filePath in files) {
         writeFileSync(join(rootDir, filePath), files[filePath]);
     }
 }
