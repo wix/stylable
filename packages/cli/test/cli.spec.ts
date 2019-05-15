@@ -86,7 +86,7 @@ describe('Stylable Cli', () => {
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
-            'dist/style.st.css.js',
+            join('dist', 'style.st.css.js'),
             'package.json',
             'style.st.css'
         ]);
@@ -116,10 +116,10 @@ describe('Stylable Cli', () => {
         expect(stderr.toString('utf8')).equal('');
         expect(stdout.toString('utf8')).equal('');
         expect(Object.keys(dirContent)).to.eql([
-            'dist/style.css',
-            'dist/style.st.css',
-            'dist/style.st.css.js',
-            'dist/style.st.css.mjs',
+            join('dist', 'style.css'),
+            join('dist', 'style.st.css'),
+            join('dist', 'style.st.css.js'),
+            join('dist', 'style.st.css.mjs'),
             'package.json',
             'style.st.css'
         ]);
