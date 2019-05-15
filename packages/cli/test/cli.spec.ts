@@ -3,8 +3,8 @@ import { resolveNamespace } from '@stylable/node';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
-import { writeFileSync, readFileSync, statSync, readdirSync } from 'fs';
 
 function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     return spawnSync('node', [
