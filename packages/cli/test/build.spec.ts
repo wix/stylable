@@ -39,7 +39,8 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: path.resolve('/'),
             log,
-            moduleFormats: ['cjs']
+            moduleFormats: ['cjs'],
+            outputSources: true
         });
 
         [

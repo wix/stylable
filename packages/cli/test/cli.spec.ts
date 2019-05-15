@@ -15,19 +15,21 @@ function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     ]);
 }
 
-interface Files { [filepath: string]: string }
+interface Files {
+    [filepath: string]: string;
+}
 
-function loadDirSync(dirPath: string): Files {
+function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
     return readdirSync(dirPath).reduce<Files>((acc, entry) => {
         const fullPath = join(dirPath, entry);
-        const key = relative(dirPath, fullPath);
+        const key = relative(rootPath, fullPath);
         const stat = statSync(fullPath);
         if (stat.isFile()) {
             acc[key] = readFileSync(fullPath, 'utf8');
         } else if (stat.isDirectory()) {
             return {
                 ...acc,
-                ...loadDirSync(fullPath)
+                ...loadDirSync(rootPath, fullPath)
             };
         } else {
             throw new Error('Not Implemented');
@@ -65,13 +67,62 @@ describe('Stylable Cli', () => {
         expect(stdout.toString('utf8')).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
-
         expect(
             evalStylableModule<{ namespace: string }>(
                 dirContent['style.st.css.js'] as string,
                 'style.st.css.js'
             ).namespace
         ).equal('test-ns-0');
+    });
+
+    it('single file build with outDir', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`
+        });
+
+        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        runCli(['--rootDir', tempDir.path, '--nsr', nsr, '--outDir', './dist']);
+
+        const dirContent = loadDirSync(tempDir.path);
+        expect(Object.keys(dirContent)).to.eql([
+            'dist/style.st.css.js',
+            'package.json',
+            'style.st.css'
+        ]);
+    });
+
+    it('single file build with all targets', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`
+        });
+
+        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        const { stderr, stdout } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            nsr,
+            '--outDir',
+            './dist',
+            '--stcss',
+            '--esm',
+            '--cjs',
+            '--css'
+        ]);
+        const dirContent = loadDirSync(tempDir.path);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
+        expect(Object.keys(dirContent)).to.eql([
+            'dist/style.css',
+            'dist/style.st.css',
+            'dist/style.st.css.js',
+            'dist/style.st.css.mjs',
+            'package.json',
+            'style.st.css'
+        ]);
     });
 
     it('single file build with default ns-resolver', () => {

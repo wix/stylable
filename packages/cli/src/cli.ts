@@ -24,13 +24,18 @@ const argv = require('yargs')
 
     .option('cjs')
     .boolean('cjs')
-    .describe('cjs', 'output commonjs module .js')
+    .describe('cjs', 'output commonjs module (.js)')
     .default('cjs', true)
 
     .option('css')
     .boolean('css')
-    .describe('css', 'output transpiled css file .css')
+    .describe('css', 'output transpiled css file (.css)')
     .default('css', false)
+
+    .option('stcss')
+    .boolean('stcss')
+    .describe('stcss', 'output stylable sources (.st.css)')
+    .default('stcss', false)
 
     .option('namespaceResolver')
     .alias('namespaceResolver', 'nsr')
@@ -80,6 +85,7 @@ const {
     esm,
     cjs,
     css,
+    stcss,
     cssInJs,
     namespaceResolver
 } = argv;
@@ -106,7 +112,8 @@ build({
     generatorPath,
     moduleFormats: getModuleFormats({ esm, cjs }),
     outputCSS: css,
-    includeCSSInJS: cssInJs
+    includeCSSInJS: cssInJs,
+    outputSources: stcss
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

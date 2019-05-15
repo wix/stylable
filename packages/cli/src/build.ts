@@ -21,6 +21,7 @@ export interface BuildOptions {
     moduleFormats?: Array<'cjs' | 'esm'>;
     includeCSSInJS?: boolean;
     outputCSS?: boolean;
+    outputSources?: boolean;
 }
 
 export async function build({
@@ -36,7 +37,8 @@ export async function build({
     generatorPath,
     moduleFormats,
     includeCSSInJS,
-    outputCSS
+    outputCSS,
+    outputSources
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -78,7 +80,8 @@ export async function build({
                   assets,
                   moduleFormats || [],
                   includeCSSInJS,
-                  outputCSS
+                  outputCSS,
+                  outputSources
               );
     });
 
@@ -107,7 +110,8 @@ function buildSingleFile(
     projectAssets: string[],
     moduleFormats: string[],
     includeCSSInJS: boolean = false,
-    outputCSS: boolean = false
+    outputCSS: boolean = false,
+    outputSources: boolean = false 
 ) {
     // testBuild(filePath, fullSrcDir, fs);
 
@@ -125,9 +129,13 @@ function buildSingleFile(
 
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
-    tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
+    if(outputSources) {
+        log('[Build]', 'output .st.css source');
+        tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
+    }    
     // st.css.js
     moduleFormats.forEach(format => {
+        log('[Build]', 'moduleFormat', format);
         const code = tryRun(
             () => createModuleSource(res, format, includeCSSInJS),
             `Transform Error: ${filePath}`
@@ -139,6 +147,7 @@ function buildSingleFile(
     });
     // .css
     if (outputCSS) {
+        log('[Build]', 'output transpiled css');
         tryRun(
             () =>
                 fs.writeFileSync(
@@ -149,7 +158,7 @@ function buildSingleFile(
         );
     }
     // .d.ts?
-
+    
     // copy assets
     projectAssets.push(
         ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
