@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
