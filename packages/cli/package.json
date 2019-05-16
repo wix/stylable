@@ -18,7 +18,7 @@
     "@stylable/node": "^2.0.9",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
-    "yargs": "^13.2.2"
+    "yargs": "^13.2.4"
   },
   "files": [
     "cjs",
