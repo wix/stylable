@@ -75,7 +75,7 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
 
 export function expectWarningsFromTransform(
     config: Config,
-    warnings: Diagnostic[]
+    expectedWarnings: Diagnostic[]
 ): StylableResults {
     config.trimWS = false;
 
@@ -87,11 +87,17 @@ export function expectWarningsFromTransform(
     }
     const diagnostics = new Diagnostics();
     const result = generateFromMock(config, diagnostics);
-    if (warnings.length === 0 && diagnostics.reports.length !== 0) {
-        expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
+    const warningMessages = diagnostics.reports.map(d => d.message);
+
+    if (expectedWarnings.length === 0 && diagnostics.reports.length !== 0) {
+        expect(
+            expectedWarnings.length,
+            `expected no diagnostics but received ${JSON.stringify(warningMessages, null, 2)}`
+        ).to.equal(diagnostics.reports.length);
     }
+
     diagnostics.reports.forEach((report, i) => {
-        const expectedWarning = warnings[i];
+        const expectedWarning = expectedWarnings[i];
         const path = expectedWarning.file;
         expect(report.message).to.equal(expectedWarning.message);
         if (!expectedWarning.skipLocationCheck) {
@@ -109,7 +115,15 @@ export function expectWarningsFromTransform(
             ).to.equal(expectedWarning.severity);
         }
     });
-    expect(warnings.length, 'diagnostics reports match').to.equal(diagnostics.reports.length);
+
+    expect(
+        expectedWarnings.length,
+        `expected diagnostics: ${JSON.stringify(
+            expectedWarnings.map(d => d.message),
+            null,
+            2
+        )}, but received ${JSON.stringify(warningMessages, null, 2)}`
+    ).to.equal(diagnostics.reports.length);
 
     return result;
 }
