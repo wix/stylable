@@ -1,5 +1,6 @@
 import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
+import { getFormatterArgs } from './functions';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { Pojo, StateParsedValue } from './types';
@@ -166,7 +167,7 @@ export const SBTypesParsers = {
     }
 };
 
-function getNamedArgs(node: any) {
+export function getNamedArgs(node: any) {
     const args: ArgValue[][] = [];
     if (node.nodes.length) {
         args.push([]);
@@ -203,7 +204,7 @@ export function groupValues(nodes: any[], divType = 'div') {
     return grouped;
 }
 
-const strategies = {
+export const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {
         const named: Pojo<string> = {};
         getNamedArgs(node).forEach(mixinArgsGroup => {
@@ -222,15 +223,7 @@ const strategies = {
         return named;
     },
     args: (node: any, _reportWarning?: ReportWarning) => {
-        return groupValues(node.nodes, 'div').map((nodes: any) => valueParser.stringify(nodes, (n: any) => {
-            if (n.type === 'div') {
-                return null;
-            } else if (n.type === 'string') {
-                return n.value;
-            } else {
-                return undefined;
-            }
-        })).filter((x: string) => typeof x === 'string').map(value => ({ value }));
+        return getFormatterArgs(node).map(value => ({ value }));
     }
 };
 
