@@ -20,10 +20,11 @@ export class StylableMeta {
     public mappedSymbols: Pojo<StylableSymbol>;
     public customSelectors: Pojo<string>;
     public urls: string[];
-    public outputAst?: postcss.Root;
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
+    // Generated during transform
+    public outputAst?: postcss.Root;
     public globals: Pojo<boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         const rootSymbol: ClassSymbol = {
