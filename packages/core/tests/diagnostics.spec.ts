@@ -1160,41 +1160,6 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarningsFromTransform(config,
                     [{ message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' }]);
             });
-
-            it('should warn a formatter throws an error', () => {
-                const config = {
-                    entry: `/main.st.css`,
-                    files: {
-                        '/main.st.css': {
-                            content: `
-                            :import {
-                                -st-from: "./formatter";
-                                -st-default: fail;
-                            }
-                            :vars {
-                                param1: red;
-                            }
-                            .some-class {
-                                |color: $fail(a, value(param1), c)$|;
-                            }
-                            `
-                        },
-                        '/formatter.js': {
-                            content: `
-                                module.exports = function fail() {
-                                    throw new Error("FAIL FAIL FAIL");
-                                }
-                            `
-                        }
-                    }
-                };
-
-                expectWarningsFromTransform(config,
-                    [{
-                        message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
-                        file: '/main.st.css'
-                    }]);
-            });
         });
 
         describe('native', () => {
