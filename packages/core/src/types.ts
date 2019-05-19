@@ -10,7 +10,7 @@ export interface ParsedValue {
     type: string;
     value: string;
     nodes?: any;
-    resolvedValue?: string;
+    resolvedValue?: string | {type: string, value: object | string};
     url?: string;
 }
 

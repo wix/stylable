@@ -23,6 +23,7 @@ export * from './types';
 export * from './stylable-mixins';
 export * from './stylable-assets';
 export * from './functions';
+export * from './custom-values';
 export * from './state-validators';
 export * from './selector-utils';
 export * from './native-reserved-lists';

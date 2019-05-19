@@ -1,9 +1,9 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { getFormatterArgs } from './functions';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
-import { Pojo, StateParsedValue } from './types';
+import { ParsedValue, Pojo, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
@@ -167,8 +167,8 @@ export const SBTypesParsers = {
     }
 };
 
-export function getNamedArgs(node: any) {
-    const args: ArgValue[][] = [];
+export function getNamedArgs(node: ParsedValue) {
+    const args: ParsedValue[][] = [];
     if (node.nodes.length) {
         args.push([]);
         node.nodes.forEach((node: any) => {
