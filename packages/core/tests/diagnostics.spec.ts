@@ -1028,29 +1028,6 @@ describe('diagnostics: warnings and errors', () => {
 
     describe('functions', () => {
         describe('value()', () => {
-            // TODO: Is there a difference in issuing warnings from process vs. transform?
-            it('should return warning when passing more than one argument to a value() function', () => {
-                expectWarningsFromTransform({
-                    entry: '/style.st.css',
-                    files: {
-                        '/style.st.css': {
-                            content: `
-                            :vars {
-                                color1: red;
-                                color2: gold;
-                            }
-                            .my-class {
-                                |color:value($color1, color2$)|;
-                            }
-                            `
-                        }
-                    }
-                }, [{
-                    message: 'value function accepts only a single argument: "value(color1, color2)"',
-                    file: '/style.st.css'
-                }]);
-            });
-
             it('should return warning for unknown var on transform', () => {
                 expectWarningsFromTransform({
                     entry: '/style.st.css',
