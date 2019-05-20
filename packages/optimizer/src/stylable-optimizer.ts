@@ -1,7 +1,6 @@
 import {
     IStylableOptimizer,
     parseSelector,
-    Pojo,
     SelectorAstNode,
     StylableResults,
     traverseNode
@@ -31,7 +30,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
-        usageMapping: Pojo<boolean>,
+        usageMapping: Record<string, boolean>,
         delimiter?: string
     ) {
         const { meta, exports: jsExports } = stylableResults;
@@ -85,7 +84,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     private removeUnusedComponents(
         delimiter: string,
         outputAst: postcss.Root,
-        usageMapping: Pojo<boolean>,
+        usageMapping: Record<string, boolean>,
         shouldComment: boolean = false
     ) {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
@@ -107,7 +106,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
     private isContainsUnusedParts(
         selectorAst: SelectorAstNode,
-        usageMapping: Pojo<boolean>,
+        usageMapping: Record<string, boolean>,
         matchNamespace: RegExp
     ) {
         // TODO: !!-!-!! last working point

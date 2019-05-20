@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Stylable } from '@stylable/core';
-import * as fs from 'fs';
+import fs from 'fs';
 import { build } from './build';
 
 const argv = require('yargs')
@@ -16,6 +16,39 @@ const argv = require('yargs')
     .option('outDir')
     .describe('outDir', 'target directory relative to root')
     .default('outDir', '.')
+
+    .option('esm')
+    .boolean('esm')
+    .describe('esm', 'output esm module format .mjs')
+    .default('esm', false)
+
+    .option('cjs')
+    .boolean('cjs')
+    .describe('cjs', 'output commonjs module (.js)')
+    .default('cjs', true)
+
+    .option('css')
+    .boolean('css')
+    .describe('css', 'output transpiled css file (.css)')
+    .default('css', false)
+
+    .option('stcss')
+    .boolean('stcss')
+    .describe('stcss', 'output stylable sources (.st.css)')
+    .default('stcss', false)
+
+    .option('namespaceResolver')
+    .alias('namespaceResolver', 'nsr')
+    .describe(
+        'namespaceResolver',
+        'node request to a module that exports a stylable resolveNamespace function'
+    )
+    .default('namespaceResolver', '@stylable/node')
+
+    .option('cssInJs')
+    .boolean('cssInJs')
+    .describe('cssInJs', 'output transpiled css into the js module')
+    .default('cssInJs', false)
 
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
@@ -40,12 +73,31 @@ const argv = require('yargs')
     .help().argv;
 
 const log = createLogger('[Stylable]', argv.log);
+
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
-const { outDir, srcDir, rootDir, ext, indexFile, customGenerator: generatorPath } = argv;
+const {
+    outDir,
+    srcDir,
+    rootDir,
+    ext,
+    indexFile,
+    customGenerator: generatorPath,
+    esm,
+    cjs,
+    css,
+    stcss,
+    cssInJs,
+    namespaceResolver
+} = argv;
 
 log('[Arguments]', argv);
 
-const stylable = new Stylable(rootDir, fs, require);
+const stylable = Stylable.create({
+    fileSystem: fs,
+    requireModule: require,
+    projectRoot: rootDir,
+    resolveNamespace: require(namespaceResolver).resolveNamespace
+});
 
 build({
     extension: ext,
@@ -57,8 +109,23 @@ build({
     log,
     diagnostics,
     indexFile,
-    generatorPath
+    generatorPath,
+    moduleFormats: getModuleFormats({ esm, cjs }),
+    outputCSS: css,
+    includeCSSInJS: cssInJs,
+    outputSources: stcss
 });
+
+function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
+    const formats: Array<'esm' | 'cjs'> = [];
+    if (esm) {
+        formats.push('esm');
+    }
+    if (cjs) {
+        formats.push('cjs');
+    }
+    return formats;
+}
 
 function createLogger(prefix: string, shouldLog: boolean) {
     return function log(...messages: string[]) {

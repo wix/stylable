@@ -21,6 +21,10 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |srcDir|source directory relative to root|`./`|
 |outDir|target directory relative to root|`./`|
 |indexFile|filename of the generated index|`false`|
+|cjs|output commonjs modules (`.js`)|`true`|
+|esm|output esm modules (`.mjs`)|`false`|
+|css|output transpiled css files (`.css`)|`false`|
+|stcss|output stylable source files (`.st.css`)|`false`|
 |customGenerator|path of a custom index file generator|-|
 |ext|extension of stylable css files|`.st.css`|
 |log|verbose log|`false`|

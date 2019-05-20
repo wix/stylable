@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { resolveCustomValues, stTypes } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
@@ -7,13 +7,13 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
 import { strategies, valueMapping } from './stylable-value-parsers';
-import { ParsedValue, Pojo } from './types';
+import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const valueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
-export type ResolvedFormatter = Pojo<JSResolve | CSSResolve | ValueFormatter | null>;
+export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
 
 export const functionWarnings = {
     FAIL_TO_EXECUTE_FORMATTER: (resolvedValue: string, message: string) =>
@@ -35,16 +35,16 @@ export const functionWarnings = {
 };
 
 export function resolveArgumentsValue(
-    options: Pojo<string>,
+    options: Record<string, string>,
     transformer: StylableTransformer,
     meta: StylableMeta,
     diagnostics: Diagnostics,
     node: postcss.Node,
-    variableOverride?: Pojo<string>,
+    variableOverride?: Record<string, string>,
     path?: string[],
-    cssVarsMapping?: Pojo<string>
+    cssVarsMapping?: Record<string, string>
 ) {
-    const resolvedArgs = {} as Pojo<string>;
+    const resolvedArgs = {} as Record<string, string>;
     for (const k in options) {
         resolvedArgs[k] = evalDeclarationValue(
             transformer.resolver,
@@ -66,11 +66,11 @@ export function evalDeclarationValue(
     value: string,
     meta: StylableMeta,
     node: postcss.Node,
-    variableOverride?: Pojo<string> | null,
+    variableOverride?: Record<string, string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
-    cssVarsMapping?: Pojo<string>,
+    cssVarsMapping?: Record<string, string>,
     args: string[] = []
 ): string {
     const customValues = resolveCustomValues(meta, resolver);

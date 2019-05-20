@@ -38,7 +38,9 @@ describe('build stand alone', () => {
             outDir: 'lib',
             srcDir: '.',
             rootDir: path.resolve('/'),
-            log
+            log,
+            moduleFormats: ['cjs'],
+            outputSources: true
         });
 
         [
@@ -80,7 +82,8 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: path.resolve('/'),
             log,
-            diagnostics: (...args: string[]) => ([reportedError] = args)
+            diagnostics: (...args: string[]) => ([reportedError] = args),
+            moduleFormats: ['cjs']
         });
 
         expect(reportedError).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));

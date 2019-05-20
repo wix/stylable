@@ -1,8 +1,7 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 import { StylableMeta } from './stylable-meta';
 import { StylableResults } from './stylable-transformer';
 
-export type Pojo<T = any> = { [key: string]: T } & object;
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;
 
@@ -34,7 +33,7 @@ export interface IStylableOptimizer {
     optimize(
         config: object,
         stylableResult: StylableResults,
-        usageMapping: Pojo<boolean>,
+        usageMapping: Record<string, boolean>,
         delimiter?: string
     ): void;
     removeStylableDirectives(root: postcss.Root, shouldComment: boolean): void;
@@ -42,22 +41,26 @@ export interface IStylableOptimizer {
 
 export interface IStylableClassNameOptimizer {
     context: {
-        names: Pojo<string>
+        names: Record<string, string>;
     };
-    rewriteSelector(selector: string, usageMapping: Pojo<boolean>, globals: Pojo<boolean>): string;
+    rewriteSelector(
+        selector: string,
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean>
+    ): string;
     generateName(name: string): string;
     optimizeAstAndExports(
         ast: postcss.Root,
-        exported: Pojo<string>,
+        exported: Record<string, string>,
         classes: string[],
-        usageMapping: Pojo<boolean>,
-        globals?: Pojo<boolean>
+        usageMapping: Record<string, boolean>,
+        globals?: Record<string, boolean>
     ): void;
 }
 
 export interface IStylableNamespaceOptimizer {
     index: number;
     namespacePrefix: string;
-    namespaceMapping: Pojo<string>;
+    namespaceMapping: Record<string, string>;
     getNamespace(meta: StylableMeta, ..._env: any[]): string;
 }

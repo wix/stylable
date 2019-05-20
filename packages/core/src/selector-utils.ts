@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 const tokenizer = require('css-selector-tokenizer');
 
 export interface SelectorAstNode {
@@ -16,7 +16,11 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
     content: string;
 }
 
-export type Visitor = (node: SelectorAstNode, index: number, nodes: SelectorAstNode[]) => boolean | void;
+export type Visitor = (
+    node: SelectorAstNode,
+    index: number,
+    nodes: SelectorAstNode[]
+) => boolean | void;
 type nodeWithPseudo = Partial<SelectorAstNode> & { pseudo: Array<Partial<SelectorAstNode>> };
 
 export function parseSelector(selector: string): SelectorAstNode {
@@ -27,11 +31,12 @@ export function stringifySelector(ast: SelectorAstNode): string {
     return tokenizer.stringify(ast);
 }
 
-export function traverseNode(node: SelectorAstNode,
-                             visitor: Visitor,
-                             index: number = 0,
-                             nodes: SelectorAstNode[] = [node]): boolean | void {
-
+export function traverseNode(
+    node: SelectorAstNode,
+    visitor: Visitor,
+    index: number = 0,
+    nodes: SelectorAstNode[] = [node]
+): boolean | void {
     if (!node) {
         return;
     }
@@ -103,13 +108,18 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
     return isValid;
 }
 
-export const createSimpleSelectorChecker = createChecker(['selectors', 'selector', ['element', 'class']]);
+export const createSimpleSelectorChecker = createChecker([
+    'selectors',
+    'selector',
+    ['element', 'class']
+]);
 
 export function isSimpleSelector(selectorAst: SelectorAstNode) {
     const isSimpleSelectorASTNode = createSimpleSelectorChecker();
-    const isSimple = traverseNode(selectorAst, node => (
-        isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
-    ));
+    const isSimple = traverseNode(
+        selectorAst,
+        node => isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
+    );
 
     return isSimple;
 }
@@ -145,15 +155,13 @@ export function separateChunks(selectorNode: SelectorAstNode) {
         if (node.type === 'selectors') {
             // skip
         } else if (node.type === 'selector') {
-            selectors.push([
-                {type: 'selector', nodes: []}
-            ]);
+            selectors.push([{ type: 'selector', nodes: [] }]);
         } else if (node.type === 'operator') {
             const chunks = selectors[selectors.length - 1];
-            chunks.push({type: node.type, operator: node.operator, nodes: []});
+            chunks.push({ type: node.type, operator: node.operator, nodes: [] });
         } else if (node.type === 'spacing') {
             const chunks = selectors[selectors.length - 1];
-            chunks.push({type: node.type, nodes: []});
+            chunks.push({ type: node.type, nodes: [] });
         } else {
             const chunks = selectors[selectors.length - 1];
             chunks[chunks.length - 1].nodes.push(node);
@@ -166,7 +174,10 @@ function getLastChunk(selectorChunk: SelectorChunk[]): SelectorChunk {
     return selectorChunk[selectorChunk.length - 1];
 }
 
-export function filterChunkNodesByType(chunk: SelectorChunk, typeOptions: string[]): Array<Partial<SelectorAstNode>> {
+export function filterChunkNodesByType(
+    chunk: SelectorChunk,
+    typeOptions: string[]
+): Array<Partial<SelectorAstNode>> {
     return chunk.nodes.filter(node => {
         return node.type && typeOptions.indexOf(node.type) !== -1;
     });
@@ -186,9 +197,9 @@ function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): 
     const nodesWithPseudos: nodeWithPseudo[] = [];
     nodes.forEach(node => {
         if (node.type === 'class' || node.type === 'element') {
-            nodesWithPseudos.push({...node, pseudo: []});
+            nodesWithPseudos.push({ ...node, pseudo: [] });
         } else if (node.type === 'pseudo-element') {
-            nodesWithPseudos[nodesWithPseudos.length - 1].pseudo.push({...node});
+            nodesWithPseudos[nodesWithPseudos.length - 1].pseudo.push({ ...node });
         }
     });
 
@@ -201,8 +212,10 @@ function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): 
     return nodesNoDuplicates;
 }
 
-const containsInTheEnd = (originalElements: nodeWithPseudo[],
-                          currentMatchingElements: nodeWithPseudo[]) => {
+const containsInTheEnd = (
+    originalElements: nodeWithPseudo[],
+    currentMatchingElements: nodeWithPseudo[]
+) => {
     const offset = originalElements.length - currentMatchingElements.length;
     let arraysEqual: boolean = false;
     if (offset >= 0 && currentMatchingElements.length > 0) {
@@ -228,14 +241,18 @@ export function matchSelectorTarget(sourceSelector: string, targetSelector: stri
     }
     const lastChunkA = getLastChunk(a[0]);
     const relevantChunksA = groupClassesAndPseudoElements(
-        filterChunkNodesByType(lastChunkA, ['class', 'element', 'pseudo-element']));
+        filterChunkNodesByType(lastChunkA, ['class', 'element', 'pseudo-element'])
+    );
 
     return b.some(compoundSelector => {
         const lastChunkB = getLastChunk(compoundSelector);
-        let relevantChunksB =
-            groupClassesAndPseudoElements(filterChunkNodesByType(lastChunkB, ['class', 'element', 'pseudo-element']));
+        let relevantChunksB = groupClassesAndPseudoElements(
+            filterChunkNodesByType(lastChunkB, ['class', 'element', 'pseudo-element'])
+        );
 
-        relevantChunksB = relevantChunksB.filter(nodeB => relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB)));
+        relevantChunksB = relevantChunksB.filter(nodeB =>
+            relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB))
+        );
         return containsInTheEnd(relevantChunksA, relevantChunksB);
     });
 }
@@ -273,7 +290,8 @@ export function createWarningRule(
     extendedFile: string,
     extendingNode: string,
     scopedExtendingNode: string,
-    extendingFile: string) {
+    extendingFile: string
+) {
     // tslint:disable-next-line:max-line-length
     const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({

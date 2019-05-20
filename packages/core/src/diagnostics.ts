@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 export type DiagnosticType = 'error' | 'warning';
 
@@ -11,8 +11,13 @@ export interface Diagnostic {
 
 export class Diagnostics {
     constructor(public reports: Diagnostic[] = []) {}
-    public add(type: DiagnosticType, node: postcss.Node, message: string, options: postcss.NodeErrorOptions = {}) {
-        this.reports.push({type, node, message, options});
+    public add(
+        type: DiagnosticType,
+        node: postcss.Node,
+        message: string,
+        options: postcss.NodeErrorOptions = {}
+    ) {
+        this.reports.push({ type, node, message, options });
     }
     public error(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
         this.add('error', node, message, options);

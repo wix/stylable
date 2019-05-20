@@ -20,6 +20,24 @@ describe('Module Factory', () => {
         });
     });
 
+    it('should create a module with injectCSS=false', () => {
+        const testFile = path.join(path.resolve('/'), '/entry.st.css');
+        const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
+            [testFile]: '.root {}'
+        }, {injectCSS: false});
+
+        const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
+
+        const exports = evalStylableModule(moduleSource, testFile);
+
+        expect(exports).to.deep.include({
+            $css: '',
+            classes: {
+                root: 'entry__root'
+            }
+        });
+    });
+
     it('should create a module with cross file use', () => {
         const rootPath = path.resolve('/');
         const testFile = path.join(rootPath, '/entry.st.css');

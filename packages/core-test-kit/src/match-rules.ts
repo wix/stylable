@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 export function matchRuleAndDeclaration(
     parent: postcss.Container,

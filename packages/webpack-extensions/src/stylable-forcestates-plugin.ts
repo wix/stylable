@@ -1,7 +1,6 @@
 import {
     nativePseudoClasses,
     parseSelector,
-    Pojo,
     pseudoStates,
     SelectorAstNode,
     stringifySelector,
@@ -13,10 +12,13 @@ import postcss from 'postcss';
 // This transformation is applied on target AST code
 // Not Stylable source AST
 
-const nativePseudoClassesMap = nativePseudoClasses.reduce<Pojo<boolean>>((acc, name: string) => {
-    acc[name] = true;
-    return acc;
-}, {});
+const nativePseudoClassesMap = nativePseudoClasses.reduce(
+    (acc, name: string) => {
+        acc[name] = true;
+        return acc;
+    },
+    {} as Record<string, boolean>
+);
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
@@ -31,10 +33,10 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
 
 export function applyStylableForceStateSelectors(
     outputAst: postcss.Root,
-    namespaceMapping = {} as Pojo<boolean>,
+    namespaceMapping = {} as Record<string, boolean>,
     dataPrefix = OVERRIDE_STATE_PREFIX
 ) {
-    const mapping: Pojo<string> = {};
+    const mapping: Record<string, string> = {};
     addForceStateSelectors(outputAst, {
         getForceStateAttrContentFromNative(name) {
             return this.getForceStateAttrContent(name);

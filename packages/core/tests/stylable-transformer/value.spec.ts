@@ -1,7 +1,7 @@
 import { box, CustomValueExtension, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import postcss from 'postcss';
 
 const valueParser = require('postcss-value-parser');
 
