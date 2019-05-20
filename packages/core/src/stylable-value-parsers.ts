@@ -1,6 +1,5 @@
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import { getFormatterArgs } from './functions';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { ParsedValue, StateParsedValue } from './types';
@@ -232,7 +231,20 @@ export const strategies = {
         return named;
     },
     args: (node: any, _reportWarning?: ReportWarning) => {
-        return getFormatterArgs(node).map(value => ({ value }));
+        return groupValues(node.nodes, 'div')
+            .map((nodes: any) =>
+                valueParser.stringify(nodes, (n: any) => {
+                    if (n.type === 'div') {
+                        return null;
+                    } else if (n.type === 'string') {
+                        return n.value;
+                    } else {
+                        return undefined;
+                    }
+                })
+            )
+            .filter((x: string) => typeof x === 'string')
+            .map(value => ({ value }));
     }
 };
 
