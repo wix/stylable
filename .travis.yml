@@ -7,7 +7,7 @@ os:
   # - windows
 
 node_js:
-  - 11 # current
+  - 12 # current
   - 10 # lts
   - 8
 
