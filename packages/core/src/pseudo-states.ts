@@ -135,9 +135,9 @@ function resolveArguments(
     diagnostics: Diagnostics,
     decl: postcss.Declaration
 ) {
-    const seperetedByComma = groupValues(paramType.nodes);
+    const separatedByComma = groupValues(paramType.nodes);
 
-    seperetedByComma.forEach(group => {
+    separatedByComma.forEach(group => {
         const validator = group[0];
         if (validator.type === 'function') {
             const args = listOptions(validator);
