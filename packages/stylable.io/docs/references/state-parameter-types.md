@@ -49,7 +49,7 @@ You can define a custom state with a **tags value** (seperated by whitespace), a
 }
 ```
 
-Setting the state **tag values** in the view `<span className={style(classes.root, {cart: "shirt pants"})}>` resolves to `<span className="style__root style---cart-5-shirt style---cart-pants" />`.
+Setting the state **tag values** in the view `<span className={style(classes.root, {cart: "shirt"})}>` resolves to `<span className="style__root style---cart-5-shirt" />`.
 
 
 ## Enum
