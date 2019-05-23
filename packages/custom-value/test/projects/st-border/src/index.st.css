@@ -1,0 +1,13 @@
+:import {
+    -st-from: "../../../../src";
+    -st-named: stBorder;
+}
+
+:vars {
+    myBorder: stBorder(1px, solid, green);
+}
+
+.root {
+    border: value(myBorder); 
+    background-color: value(myBorder, color); 
+}

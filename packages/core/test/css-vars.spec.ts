@@ -772,6 +772,33 @@ describe('css custom-properties (vars)', () => {
             expect(decl.value).to.equal('var(illegalVar)');
         });
 
+        it('trying to use illegal css var syntax', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {
+                            |color: var($--value illegalHere, red$)|;
+                        }
+                        `
+                    }
+                }
+            };
+
+            const res = expectWarningsFromTransform(config, [
+                {
+                    message: processorWarnings.ILLEGAL_CSS_VAR_ARGS('--value illegalHere, red'),
+                    file: '/entry.st.css'
+                }
+            ]);
+
+            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
+                .nodes![0] as postcss.Declaration;
+            expect(decl.value).to.equal('var(--entry-value illegalHere, red)');
+        });
+
         it('trying to import unknown css var', () => {
             const config = {
                 entry: `/entry.st.css`,

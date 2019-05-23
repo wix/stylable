@@ -1,8 +1,9 @@
 import cloneDeep from 'lodash.clonedeep';
 import postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
+import { unbox } from './custom-values';
 import { Diagnostics } from './diagnostics';
-import { evalDeclarationValue } from './functions';
+import { evalDeclarationValue, processDeclarationValue } from './functions';
 import { nativePseudoElements, reservedKeyFrames } from './native-reserved-lists';
 import { basename } from './path';
 import { transformPseudoStateSelector, validateStateDefinition } from './pseudo-states';
@@ -240,13 +241,15 @@ export class StylableTransformer {
         variableOverride?: Record<string, string>
     ) {
         for (const varSymbol of meta.vars) {
-            stVarsExport[varSymbol.name] = evalDeclarationValue(
+            const { outputValue, topLevelType } = processDeclarationValue(
                 this.resolver,
                 varSymbol.text,
                 meta,
                 varSymbol.node,
                 variableOverride
             );
+
+            stVarsExport[varSymbol.name] = topLevelType ? unbox(topLevelType) : outputValue;
         }
     }
     public exportCSSVars(

@@ -40,6 +40,50 @@ describe('Stylable functions (native, formatter and variable)', () => {
             expect(rule.nodes![0].toString()).to.equal('background: green');
         });
 
+        it('apply simple js formatter with quote wrapped args', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        content: `
+                            :import {
+                                -st-from: "./formatter";
+                                -st-default: formatter;
+                            }
+                            :import {
+                                -st-from: "./mixin";
+                                -st-default: mixin;
+                            }
+                            .container {
+                                background: formatter(1, "2px solid red" 10px);
+                                -st-mixin: mixin(1, "2");
+                            }
+                        `
+                    },
+                    '/formatter.js': {
+                        content: `
+                            module.exports = function() {
+                                return [...arguments].join(' ');
+                            }
+                        `
+                    },
+                    '/mixin.js': {
+                        content: `
+                            module.exports = function(args) {
+                                return {
+                                    content: [...args].map((x)=>\`url(\${JSON.stringify(x)})\`).join(', ')
+                                };
+                            }
+                        `
+                    }
+                }
+            });
+
+            const rule = result.nodes![0] as postcss.Rule;
+            expect(rule.nodes![0].toString()).to.equal('background: 1 2px solid red 10px');
+            expect(rule.nodes![1].toString()).to.equal('content: url("1"), url("2")');
+        });
+
         it('apply simple js formatter with a single argument', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -581,8 +625,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                     [
                         {
-                            message:
-                                'value function accepts only a single argument: "value(color1, color2)"',
+                            message: functionWarnings.MULTI_ARGS_IN_VALUE('color1, color2'),
                             file: '/style.st.css'
                         }
                     ]
@@ -603,7 +646,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             }
                         }
                     },
-                    [{ message: 'unknown var "myColor"', file: '/style.st.css' }]
+                    [{ message: functionWarnings.UNKNOWN_VAR('myColor'), file: '/style.st.css' }]
                 );
             });
 
@@ -631,7 +674,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: 'class "my-class" cannot be used as a variable',
+                        message: functionWarnings.CANNOT_USE_AS_VALUE('class', 'my-class'),
                         file: '/main.st.css'
                     }
                 ]);
@@ -659,7 +702,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: 'stylesheet "Comp" cannot be used as a variable',
+                        message: functionWarnings.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
                         file: '/main.st.css'
                     }
                 ]);
@@ -687,13 +730,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 };
                 expectWarningsFromTransform(config, [
                     {
-                        message: 'JavaScript import "my-mixin" cannot be used as a variable',
+                        message: functionWarnings.CANNOT_USE_JS_AS_VALUE('my-mixin'),
                         file: '/main.st.css'
                     }
                 ]);
             });
 
-            it('should warn when encountering a cyclic dependecy in a var definition', () => {
+            it('should warn when encountering a cyclic dependency in a var definition', () => {
                 const config = {
                     entry: '/main.st.css',
                     files: {
@@ -712,9 +755,15 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     }
                 };
                 const mainPath = path.resolve('/main.st.css');
+                console.log(mainPath);
                 expectWarningsFromTransform(config, [
                     {
-                        message: `Cyclic value definition detected: "→ ${mainPath}: a\n↪ ${mainPath}: b\n↪ ${mainPath}: c\n↻ ${mainPath}: a"`, // tslint:disable-line:max-line-length
+                        message: functionWarnings.CYCLIC_VALUE([
+                            `${mainPath}: a`,
+                            `${mainPath}: b`,
+                            `${mainPath}: c`,
+                            `${mainPath}: a`
+                        ]),
                         file: '/main.st.css'
                     }
                 ]);
@@ -772,7 +821,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 expectWarningsFromTransform(config, [
                     {
-                        message: `failed to execute formatter "fail(a, red, c)" with error: "FAIL FAIL FAIL"`,
+                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER('fail(a, red, c)', 'FAIL FAIL FAIL'),
                         file: '/main.st.css'
                     }
                 ]);

@@ -1,19 +1,17 @@
 {
-  "name": "@stylable/dom-test-kit",
-  "version": "2.0.8",
-  "description": "Stylable DOM testing utilities",
+  "name": "@stylable/custom-value",
+  "version": "2.0.0",
+  "description": "Custom values (variables) for Stylable",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "test": "mocha -r @ts-tools/node/r \"./test/**/*.spec.ts\" --watch-extensions ts",
-    "start": "webpack-dev-server --hot --inline",
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 20000",
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^2.0.7",
-    "@stylable/runtime": "^2.0.5"
+    "@stylable/core": "^2.0.7"
   },
   "files": [
     "cjs",
@@ -26,7 +24,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "https://github.com/wix/stylable/tree/master/packages/dom-test-kit",
+  "repository": "https://github.com/wix/stylable/tree/master/packages/custom-value",
+  "homepage": "https://stylable.io",
   "author": "Wix.com",
   "license": "BSD-3-Clause"
 }

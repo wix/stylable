@@ -1,4 +1,5 @@
 import postcss from 'postcss';
+import { Box } from './custom-values';
 import { StylableMeta } from './stylable-meta';
 import { StylableResults } from './stylable-transformer';
 
@@ -9,7 +10,7 @@ export interface ParsedValue {
     type: string;
     value: string;
     nodes?: any;
-    resolvedValue?: string;
+    resolvedValue?: string | Box<string, unknown>;
     url?: string;
 }
 

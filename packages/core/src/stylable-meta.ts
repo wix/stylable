@@ -19,10 +19,11 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol>;
     public customSelectors: Record<string, string>;
     public urls: string[];
-    public outputAst?: postcss.Root;
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
+    // Generated during transform
+    public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
     constructor(public ast: postcss.Root, public diagnostics: Diagnostics) {
         const rootSymbol: ClassSymbol = {

@@ -109,7 +109,7 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                'root': 'entry__root',
+                root: 'entry__root',
                 'my-class': 'imported__my-class'
             });
         });
@@ -140,13 +140,12 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes).to.eql({
-                'root': 'entry__root',
+                root: 'entry__root',
                 'local-class': 'entry__local-class imported__my-class'
             });
         });
 
         it('export alias imported from more then one level', () => {
-
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -180,11 +179,9 @@ describe('Exports to js', () => {
             });
 
             expect(cssExports.classes['my-class']).to.equal('project__my-class');
-
         });
 
         it('should not export an element', () => {
-
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -211,12 +208,11 @@ describe('Exports to js', () => {
                 }
             });
             expect(cssExports.classes.Elm).to.equal(undefined);
-
         });
     });
 
     describe('stylable vars', () => {
-        it('contain local vars', () => {
+        it('contains local vars', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -236,7 +232,7 @@ describe('Exports to js', () => {
             });
         });
 
-        it('not contain imported vars', () => {
+        it('should not contain imported vars', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -263,7 +259,7 @@ describe('Exports to js', () => {
             expect(cssExports.stVars).to.eql({});
         });
 
-        it('not resolve imported vars value on exported var', () => {
+        it('should not resolve imported vars value on exported var', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -292,6 +288,34 @@ describe('Exports to js', () => {
 
             expect(cssExports.stVars).to.eql({
                 color2: 'red'
+            });
+        });
+
+        it('should export custom values using their data structure', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :vars {
+                                myArray: stArray(1, 2, 3);
+                                deepArray: stArray(1, stArray(2, 3), value(myArray));
+                                object: stMap(x 1, y 2);
+                                deepObject: stMap(x 1, y 2, z stMap(x 1, y 2));
+                                mixed: stMap(x 1, y stArray(2, 3, stArray(4, stMap(z 5))));
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect(cssExports.stVars).to.eql({
+                myArray: ['1', '2', '3'],
+                deepArray: ['1', ['2', '3'], ['1', '2', '3']],
+                object: { x: '1', y: '2' },
+                deepObject: { x: '1', y: '2', z: { x: '1', y: '2' } },
+                mixed: { x: '1', y: ['2', '3', ['4', { z: '5' }]] }
             });
         });
     });
