@@ -794,7 +794,6 @@ describe('css custom-properties (vars)', () => {
                 }
             ]);
 
-            console.log(res.meta.outputAst!.nodes);
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
                 .nodes![0] as postcss.Declaration;
             expect(decl.value).to.equal('var(--entry-value illegalHere, red)');
