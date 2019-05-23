@@ -31,9 +31,9 @@ To define custom pseudo-classes, or states, without parameters, you tell **Styla
 
 ```css
 /* CSS output*/
-.Example1__root[data-Example1-toggled] { color: red; }
-.Example1__root[data-Example1-loading] { color: green; }
-.Example1__root[data-Example1-loading][data-Example1-toggled] { color: blue; }
+.Example1__root.Example1--toggled { color: red; }
+.Example1__root.Example1--loading { color: green; }
+.Example1__root.Example1--loading.Example1--toggled { color: blue; }
 ```
 
 ## Custom pseudo-classes with parameters
@@ -56,7 +56,7 @@ For example, a cell in a grid can be marked and later targeted using `column` an
 
 ## Mapped states
 
-**Stylable** generates custom pseudo-classes using `data-*` attributes. When you are building your components with **Stylable** the standard DOM implementation is good, but you might want to target the state in a custom way. 
+**Stylable** generates custom pseudo-classes using `className` attributes. When you are building your components with **Stylable** the standard DOM implementation is handy, but you might want to target the state in a custom way. 
 
 You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on **Stylable**. 
 
@@ -79,7 +79,7 @@ In this example, `toggled` and `loading` are defined on the root class with thei
 ```
 
 > **Note**    
-> When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS child selector.
+> When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS complex selector.
 
 ## State inheritance
 
@@ -104,12 +104,12 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ```css
 /* CSS output*/
-.Example1__root[data-Example1-toggled] { color: red; }
-.Example1__root[data-Example1-loading] { color: green; }
+.Example1__root.Example1--toggled { color: red; }
+.Example1__root.Example1--loading { color: green; }
 .Example2__mediaButton:hover { border: 0.2em solid black; } /* native hover - not declared */
-.Example2__mediaButton[data-Example1-loading] { color: silver; } /* loading scoped to Example1 - only one to declare */
-.Example2__mediaButton[data-Example2-selected] { color: salmon; } /* selected scoped to Example2 - only one to declare */
-.Example2__mediaButton[data-Example2-toggled] { color: gold;} /* toggled scoped to Example2 - last to declare */
+.Example2__mediaButton.Example1--loading { color: silver; } /* loading scoped to Example1 - only one to declare */
+.Example2__mediaButton.Example2--selected { color: salmon; } /* selected scoped to Example2 - only one to declare */
+.Example2__mediaButton.Example2--toggled { color: gold;} /* toggled scoped to Example2 - last to declare */
 ```
 
 > **Note**    
@@ -117,25 +117,22 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 
 ## Enable custom pseudo-classes
 
-Custom pseudo-classes are implemented using `data-*` attributes and need additional runtime logic to control when they are on and off. 
+Custom pseudo-classes are implemented using `className` attributes and need additional runtime logic to control when they are on and off. 
 
 **Stylable** offers [React CSS state integration](../getting-started/react-integration.md) to help components manage custom pseudo-classes easily.
 
-{% raw %}
 
 ```js
 /* sample of a stylable component */
-import style from './stylesheet.st.css';
+import { style, classes } from './stylesheet.st.css';
 
 class MyComponent {
     render() {
-        return <div { ...style('root', { 
+        return <div className={style(classes.root, { 
                 toggled: true,
                 selected: false
-            }, this.props) }>
+            }, this.props.className) }>
         </div>
     }
 }
 ```
-
-{% endraw %}

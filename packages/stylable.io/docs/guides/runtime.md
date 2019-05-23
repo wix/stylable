@@ -16,18 +16,24 @@ Imported **Stylable** stylesheets contain minimal runtime code to help define th
 ```
 
 ```javascript
-/* index.jsx */
-import style from "style.st.css"; // import stylesheet's runtime API
+/* index.jsx - stylesheet's runtime api */
+import { 
+    style,    // runtime utility function 
+    classes,  // class names mapping
+    vars,     // css variables mapping
+    stVars,   // stylable build-time variable values
+    cssStates // utility function for setting stylable states
+}  from "style.st.css";
 ```
 
 ## Manual mapping
 
-CSS class names, defined in the stylesheet, are exposed directly on the import reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.
+CSS class names, defined in the stylesheet, are exposed on the imported `classes` reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.
 
 ```javascript
-style.root // "style__root"
-style.label // "style__label"
-style.icon // "style__icon"
+classes.root  // "style__root"
+classes.label // "style__label"
+classes.icon  // "style__icon"
 ```
 
 > **Note**  
@@ -35,19 +41,19 @@ style.icon // "style__icon"
 
 ## Custom state mapping
 
-[Custom states](../references/pseudo-classes.md), which can be targeted from the style, are generated using the `$cssStates` function. The function accepts a map of local state names and generates an object with `data-*` attributes used to mark the element state.
+[Custom states](../references/pseudo-classes.md), which can be targeted from the style, are generated using the `cssStates` function. The function accepts a map of local state names and generates string with concatenated class names used to mark the element state.
 
 ```javascript
 /* { 'data-style-selected':true } */
-style.$cssStates({ selected:true })
+cssStates({ selected:true })
 /* { 'data-style-unknownstate':true } */
-style.$cssStates({ unknownState:true })
+cssStates({ unknownState:true })
 
 /* { } */
-style.$cssStates({ selected:false }) // no states
+cssStates({ selected:false }) // no states
 
 /* { 'data-style-a':true, 'data-style-b':true } */
-style.$cssStates({ a:true, b:true }) // multiple
+cssStates({ a:true, b:true }) // multiple
 ```
 
 ## Generate element attributes
@@ -57,45 +63,49 @@ Calling the function returns an object describing the attributes of a node in th
 
 ### Element name
 
-The first argument represents the name of the element, and returns a `className` attribute to mark the element node.
+The first argument represents the scoped name of the element, and passes through the received class name.
 
 ```javascript
-/* { className:'style__root' } */
-style('root') 
-/* { className:'style__label' } */
-style('label') 
+/* 'style__root'  */
+style(classes.root) 
+/* 'style__label' */
+style(classes.label) 
 
-/* { className:'style__label style__icon' } */
-style('label icon') // multiple markings
+// multiple markings
+style(classes.label, classes.icon) 
+/* 'style__label style__icon' */
+
+// string pass-through
+style('root') 
+/* 'root' */
 ```
 
 > **Note**  
-> Any class name that is not found in the stylesheet is not namespaced and is treated as global.
+> Stylable no longer performs auto-scoping for classes, and strings are passed as-is. Use the `classes` mapping object to resolve to the scoped class name.
 
 ### Custom states
 
-The second argument represents the [custom state](#custom-state-mapping), and returns a `data-*` attribute to represent the custom state on the element.
+The second argument represents the [custom state](#custom-state-mapping) (or another class), and returns a class to represent every custom state on the element.
 
 ```javascript
-/* { className:'style__root', 'data-style-selected':true } */
-style('root', { selected:true })
-/* { className:'style__label', 'data-style-searched':true } */
-style('label', { searched:true })
+/* 'style__root style--selected' */
+style(classes.root, { selected:true })
+/* 'style__label style--searched' */
+style(classes.label, { searched:true })
 ```
 
 ### Merge props
 
-The third argument can be used as a base for the generated class name and states.
+The third argument (and any arguments after) can be used for any additional classes that need to be applied to the element. In a component root node, it is recommended to pass along the `className` prop received through your parent component as props.
 
-```javascript
-/*  { className:'style__root class-a' } */
-style('root', {}, { className:'class-a' })
-/*  { className:'style__root label icon' } */
-style('root', {}, { className:'label icon' }) // appended without namespacing
+```js
+// this.props.className = 'app__root app--selected'
+/*  'style__root app__root app--selected' */
+style(classes.root, this.props.className)
 
-/*  { className:'style__root', 'data-a':true } */
-style('root', {}, { 'data-a':true })
+/*  'style__root label icon' */
+style(classes.root, 'label', 'icon') // label and icon are global (un-scoped)
+
+/*  'style__root style--selected' */
+style(classes.root, 'style--selected')
 ```
-
-> **Note**  
-> Any `data-*` attribute passed in the base overrides its generated equivalent.

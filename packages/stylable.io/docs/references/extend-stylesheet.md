@@ -30,13 +30,13 @@ In this example, the stylesheet is extending the `toggle-button.st.css` styleshe
 /* CSS output*/
 .Page__checkBtn.ToggleButton__root { background: white; }
 .Page__checkBtn.ToggleButton__root .ToggleButton__label { color: green; }
-.Page__checkBtn.ToggleButton__root[data-ToggleButton-toggled] .ToggleButton__label { color: red; }
+.Page__checkBtn.ToggleButton__root.ToggleButton--toggled] .ToggleButton__label { color: red; }
 ```
 
 ```js
 /* page.jsx */
-import * as React from 'react';
-import style from './comp.st.css';
+import React from 'react';
+import { style, classes } from './comp.st.css';
 
 import ToggleButton from './toggle-button';
 
@@ -47,8 +47,8 @@ class Page {
 
     render () {
         return (
-            <div { ...style('root', {}, this.props) }>
-                <ToggleButton className={style.checkBtn} />
+            <div className={style(classes.root, this.props.className) }>
+                <ToggleButton className={classes.checkBtn} />
             </div>
         );
     }

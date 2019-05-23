@@ -15,7 +15,7 @@ Here are some examples of when you can use mixins:
 * Macros - use code to define the CSS macros you need
 
 >**Note**  
-> If you need to return only a single declaration value using code, we recommend **Stylable** [formatters](./formatters.md). 
+> If you need to return only a single declaration value using code, we recommend instead using [formatters](./formatters.md). 
 
 ## CSS mixins
 
@@ -253,6 +253,6 @@ They can also be used to include quotes or backslashes as part of the parameter.
 }
 ```
 ### Circular references 
-It is possible to reach a state where you have circular references between mixins. These cannot be resolved, and a diagnostics warning is issued in your **Stylable** code intelligence.
+It is possible to reach a state where you have circular references between mixins. These cannot be resolved, and a diagnostics warning is issued in your **Stylable** code intelligence and build process.
 
 

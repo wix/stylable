@@ -49,22 +49,6 @@ Using these types enables the consumers of the plugin to receive code hinting an
 | &nbsp;&nbsp;&nbsp; | multiplesOf&nbsp;&nbsp; | number |
 | stEnum&nbsp;&nbsp; | allowedValues&nbsp;&nbsp; | string[] |
 
-### Types that can be added to white and black lists
-
-The following types are native enums that can appear in native CSS. **Stylable** enables you to create custom white lists or black lists to indicate which of the enum values can or cannot be called/changed/used as a parameter (in a formatter/mixin). 
-
-* [lineStyle]()
-* [display](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
-* bezierCurves
-* [position](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
-* backgroundRepeat
-* lineStyle
-* box
-* geometryBox
-* transitionTimingFunctions (without cubic-bezzier variants)
-
-/* add code sample w/ "blackList" & "whiteList" */
-
 ## Extending through formatters
 
 Formatters are methods that manipulate parameters to produce a string that is returned as a single declaration value.

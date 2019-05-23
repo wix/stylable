@@ -49,7 +49,7 @@ You can define a custom state with a **tags value** (seperated by whitespace), a
 }
 ```
 
-Setting the state **tag values** in the view `<span {...style("root", {cart: "shirt pants"})}>` resolves to `<span data-cart="shirt pants" />`.
+Setting the state **tag values** in the view `<span className={style(classes.root, {cart: "shirt pants"})}>` resolves to `<span className="style__root style---cart-5-shirt style---cart-pants" />`.
 
 
 ## Enum
@@ -72,7 +72,7 @@ You can define a custom state with possible **enum value** options, and then tar
 }
 ```
 
-Setting the state's **enum value** in the view `<span {...style("root", {size: "medium"})}>` resolves to `<span data-size="medium" />`.
+Setting the state's **enum value** in the view `<span className={style(classes.root, {size: "medium"})}>` resolves to `<span className="style--size-medium" />`.
 
 ## String
 
@@ -90,7 +90,7 @@ You can define a custom state with a **string value**, and then target it using 
 }
 ```
 
-Setting the state **string value** in the view `<span {...style("root", {selected: "username"})}>` resolves to `<span data-selected="username" />`.
+Setting the state **string value** in the view `<span className={style(classes.root, {selected: "username"})}>` resolves to `<span className="style--selected-username" />`.
 
 ### String validation [optional]
 
@@ -153,7 +153,7 @@ You can define a custom state with a **number value**, and then target it using 
 }
 ```
 
-Setting the state **number value** in the view `<span {...style("root", {column: 5})}>` resolves to `<span data-column="5" />`.
+Setting the state **number value** in the view `<span className={style(classes.root, {column: 5})}>` resolves to `<span className="style--column-5" />`.
 
 ### Number validation [optional]
 
