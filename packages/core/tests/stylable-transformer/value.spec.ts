@@ -266,7 +266,9 @@ describe('Generator variables interpolation', () => {
             });
             const root = meta.outputAst!.nodes![0] as postcss.Rule;
 
-            expect((root.nodes![0] as postcss.Declaration).value).to.equal('my custom value CustomValue');
+            expect((root.nodes![0] as postcss.Declaration).value).to.equal(
+                'my custom value CustomValue'
+            );
         });
 
         describe('stMap', () => {
@@ -602,113 +604,113 @@ describe('Generator variables interpolation', () => {
                 expect((rule.nodes![1] as postcss.Declaration).value).to.equal('rgb(255, 0, 0)');
             });
         });
-    });
 
-    describe('Custom type contract', () => {
-        type GetCustomTypeExtensionValueType<T> = T extends CustomValueExtension<infer U>
-            ? U
-            : never;
+        describe('Custom type contract', () => {
+            type GetCustomTypeExtensionValueType<T> = T extends CustomValueExtension<infer U>
+                ? U
+                : never;
 
-        function contract<T>(
-            desc: string,
-            { typeDef, path }: { typeDef: string; path: string[] },
-            {
-                matchValue,
-                match
-            }: {
-                matchValue(value: GetCustomTypeExtensionValueType<T>): void;
-                match(value: string): void;
-            }
-        ) {
-            describe('Api Test: ' + desc, () => {
-                const valueAst = valueParser(typeDef).nodes[0];
-                const typeExtension = stTypes[valueAst.value];
+            function contract<T>(
+                desc: string,
+                { typeDef, path }: { typeDef: string; path: string[] },
+                {
+                    matchValue,
+                    match
+                }: {
+                    matchValue(value: GetCustomTypeExtensionValueType<T>): void;
+                    match(value: string): void;
+                }
+            ) {
+                describe('Api Test: ' + desc, () => {
+                    const valueAst = valueParser(typeDef).nodes[0];
+                    const typeExtension = stTypes[valueAst.value];
 
-                it('should create a runtime value from ast', () => {
-                    matchValue(typeExtension.evalVarAst(valueAst, stTypes).value);
+                    it('should create a runtime value from ast', () => {
+                        matchValue(typeExtension.evalVarAst(valueAst, stTypes).value);
+                    });
+                    it('should get a string value form path', () => {
+                        match(
+                            typeExtension.getValue(
+                                path,
+                                typeExtension.evalVarAst(valueAst, stTypes),
+                                valueAst,
+                                stTypes
+                            )
+                        );
+                    });
                 });
-                it('should get a string value form path', () => {
-                    match(
-                        typeExtension.getValue(
-                            path,
-                            typeExtension.evalVarAst(valueAst, stTypes),
-                            valueAst,
-                            stTypes
-                        )
-                    );
-                });
-            });
-        }
-
-        contract(
-            'basic stMap functionality',
-            { typeDef: 'stMap(k1 v1, k2 v2)', path: ['k1'] },
-            {
-                matchValue: map => expect(map).to.eql({ k1: 'v1', k2: 'v2' }),
-                match: value => expect(value).to.equal('v1')
             }
-        );
 
-        contract(
-            'nested stMap functionality',
-            {
-                typeDef: 'stMap(k1 v1, k2 stMap(k3 v3, k4 stMap(k5 v5) ))',
-                path: ['k2', 'k4', 'k5']
-            },
-            {
-                matchValue: map =>
-                    expect(map).to.deep.include({
-                        k1: 'v1',
-                        k2: box('stMap', {
-                            k3: 'v3',
-                            k4: box('stMap', {
-                                k5: 'v5'
+            contract(
+                'basic stMap functionality',
+                { typeDef: 'stMap(k1 v1, k2 v2)', path: ['k1'] },
+                {
+                    matchValue: map => expect(map).to.eql({ k1: 'v1', k2: 'v2' }),
+                    match: value => expect(value).to.equal('v1')
+                }
+            );
+
+            contract(
+                'nested stMap functionality',
+                {
+                    typeDef: 'stMap(k1 v1, k2 stMap(k3 v3, k4 stMap(k5 v5) ))',
+                    path: ['k2', 'k4', 'k5']
+                },
+                {
+                    matchValue: map =>
+                        expect(map).to.deep.include({
+                            k1: 'v1',
+                            k2: box('stMap', {
+                                k3: 'v3',
+                                k4: box('stMap', {
+                                    k5: 'v5'
+                                })
                             })
-                        })
-                    }),
-                match: value => expect(value).to.equal('v5')
-            }
-        );
+                        }),
+                    match: value => expect(value).to.equal('v5')
+                }
+            );
 
-        contract(
-            'basic stArray functionality',
-            { typeDef: 'stArray(v0, v1)', path: ['1'] },
-            {
-                matchValue: array => expect(array).to.eql(['v0', 'v1']),
-                match: value => expect(value).to.equal('v1')
-            }
-        );
+            contract(
+                'basic stArray functionality',
+                { typeDef: 'stArray(v0, v1)', path: ['1'] },
+                {
+                    matchValue: array => expect(array).to.eql(['v0', 'v1']),
+                    match: value => expect(value).to.equal('v1')
+                }
+            );
 
-        contract(
-            'nested stArray functionality',
-            { typeDef: 'stArray(v0, stArray(v1))', path: ['1', '0'] },
-            {
-                matchValue: array => expect(array).to.eql(['v0', box('stArray', ['v1'])]),
-                match: value => expect(value).to.equal('v1')
-            }
-        );
+            contract(
+                'nested stArray functionality',
+                { typeDef: 'stArray(v0, stArray(v1))', path: ['1', '0'] },
+                {
+                    matchValue: array => expect(array).to.eql(['v0', box('stArray', ['v1'])]),
+                    match: value => expect(value).to.equal('v1')
+                }
+            );
 
-        contract(
-            'complex nested stArray/stMap/stArray functionality',
-            { typeDef: 'stArray(v0, stMap(k2 stArray(v2))', path: ['1', 'k2', '0'] },
-            {
-                matchValue: array =>
-                    expect(array).to.eql(['v0', box('stMap', { k2: box('stArray', ['v2']) })]),
-                match: value => expect(value).to.equal('v2')
-            }
-        );
+            contract(
+                'complex nested stArray/stMap/stArray functionality',
+                { typeDef: 'stArray(v0, stMap(k2 stArray(v2))', path: ['1', 'k2', '0'] },
+                {
+                    matchValue: array =>
+                        expect(array).to.eql(['v0', box('stMap', { k2: box('stArray', ['v2']) })]),
+                    match: value => expect(value).to.equal('v2')
+                }
+            );
 
-        contract(
-            'complex nested stMap/stArray/stMap functionality',
-            { typeDef: 'stMap(k0 v0, k1 stArray(v2, stMap(k3 v3)))', path: ['k1', '1', 'k3'] },
-            {
-                matchValue: array =>
-                    expect(array).to.eql({
-                        k0: 'v0',
-                        k1: box('stArray', ['v2', box('stMap', {k3: 'v3'}) ])
-                    }),
-                match: value => expect(value).to.equal('v3')
-            }
-        );
+            contract(
+                'complex nested stMap/stArray/stMap functionality',
+                { typeDef: 'stMap(k0 v0, k1 stArray(v2, stMap(k3 v3)))', path: ['k1', '1', 'k3'] },
+                {
+                    matchValue: array =>
+                        expect(array).to.eql({
+                            k0: 'v0',
+                            k1: box('stArray', ['v2', box('stMap', { k3: 'v3' })])
+                        }),
+                    match: value => expect(value).to.equal('v3')
+                }
+            );
+        });
     });
 });

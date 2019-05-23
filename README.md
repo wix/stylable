@@ -38,6 +38,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 |[runtime](./packages/runtime)|`@stylable/runtime`|[![npm version](https://img.shields.io/npm/v/@stylable/runtime.svg)](https://www.npmjs.com/package/@stylable/runtime)|Runtime browser code|
 |[optimizer](./packages/optimizer)|`@stylable/optimizer`|[![npm version](https://img.shields.io/npm/v/@stylable/optimizer.svg)](https://www.npmjs.com/package/@stylable/optimizer)|Production mode optimizer|
 |[module-utils](./packages/module-utils)|`@stylable/module-utils`|[![npm version](https://img.shields.io/npm/v/@stylable/module-utils.svg)](https://www.npmjs.com/package/@stylable/module-utils)|Stylable CommonJS module generator |
+|[custom-value](./packages/custom-value)|`@stylable/custom-value`|[![npm version](https://img.shields.io/npm/v/@stylable/custom-value.svg)](https://www.npmjs.com/package/@stylable/custom-value)|Stylable custom build-time values |
 
 ### Tooling & Utilities
 

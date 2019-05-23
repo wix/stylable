@@ -6,7 +6,12 @@ import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
-import { strategies, valueMapping } from './stylable-value-parsers';
+import {
+    getFormatterArgs,
+    getStringValue,
+    strategies,
+    valueMapping
+} from './stylable-value-parsers';
 import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 
@@ -61,7 +66,7 @@ export function resolveArgumentsValue(
     return resolvedArgs;
 }
 
-export function evalDeclarationValue(
+export function processDeclarationValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
@@ -72,7 +77,7 @@ export function evalDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = []
-): string {
+): { topLevelType: any; outputValue: string } {
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -81,7 +86,6 @@ export function evalDeclarationValue(
             case 'function':
                 if (value === 'value') {
                     const parsedArgs = strategies.args(parsedNode).map(x => x.value);
-
                     if (parsedArgs.length >= 1) {
                         const varName = parsedArgs[0];
                         const getArgs = parsedArgs
@@ -114,7 +118,6 @@ export function evalDeclarationValue(
                                 parsedNode
                             );
                         }
-
                         const varSymbol = meta.mappedSymbols[varName];
                         if (varSymbol && varSymbol._kind === 'var') {
                             const resolvedValue = evalDeclarationValue(
@@ -129,7 +132,6 @@ export function evalDeclarationValue(
                                 cssVarsMapping,
                                 getArgs
                             );
-
                             parsedNode.resolvedValue = valueHook
                                 ? valueHook(resolvedValue, varName, true, passedThrough)
                                 : resolvedValue;
@@ -137,7 +139,6 @@ export function evalDeclarationValue(
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
                                 const resolvedVarSymbol = resolvedVar.symbol;
-
                                 if (resolvedVar._kind === 'css') {
                                     if (resolvedVarSymbol._kind === 'var') {
                                         const resolvedValue = evalDeclarationValue(
@@ -168,7 +169,6 @@ export function evalDeclarationValue(
                                             resolvedVarSymbol[valueMapping.root]
                                                 ? 'stylesheet'
                                                 : resolvedVarSymbol._kind;
-
                                         if (diagnostics) {
                                             diagnostics.warn(
                                                 node,
@@ -221,7 +221,6 @@ export function evalDeclarationValue(
                         const formatterRef = meta.mappedSymbols[value];
                         const formatter = resolver.deepResolve(formatterRef);
                         const formatterArgs = getFormatterArgs(parsedNode);
-
                         if (formatter && formatter._kind === 'js') {
                             try {
                                 parsedNode.resolvedValue = formatter.symbol.apply(
@@ -251,13 +250,11 @@ export function evalDeclarationValue(
                             }
                         } else if (value === 'var') {
                             const varWithPrefix = parsedNode.nodes[0].value;
-
                             if (isCSSVarProp(varWithPrefix)) {
                                 if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
                                     parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
                                 }
                             }
-
                             // handle default values
                             if (parsedNode.nodes.length > 2) {
                                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
@@ -279,17 +276,14 @@ export function evalDeclarationValue(
     }, true);
 
     let outputValue = '';
+    let topLevelType = null;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
             const matchingType = customValues[n.value as keyof typeof stTypes];
 
             if (matchingType) {
-                outputValue += matchingType.getValue(
-                    args,
-                    matchingType.evalVarAst(n, customValues),
-                    n,
-                    customValues
-                );
+                topLevelType = matchingType.evalVarAst(n, customValues);
+                outputValue += matchingType.getValue(args, topLevelType, n, customValues);
             } else {
                 outputValue += getStringValue([n]);
 
@@ -305,22 +299,37 @@ export function evalDeclarationValue(
             outputValue += getStringValue([n]);
         }
     }
-    return outputValue;
+    return { outputValue, topLevelType };
     // }
     // TODO: handle calc (parse internals but maintain expression)
     // TODO: check this thing. native function that accent our function dose not work
     // e.g: calc(getVarName())
 }
 
-export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
-    return valueParser.stringify(nodes, (node: ParsedValue) => {
-        if (node.resolvedValue !== undefined) {
-            return node.resolvedValue;
-        } else {
-            // TODO: warn
-            return undefined;
-        }
-    });
+export function evalDeclarationValue(
+    resolver: StylableResolver,
+    value: string,
+    meta: StylableMeta,
+    node: postcss.Node,
+    variableOverride?: Record<string, string> | null,
+    valueHook?: replaceValueHook,
+    diagnostics?: Diagnostics,
+    passedThrough: string[] = [],
+    cssVarsMapping?: Record<string, string>,
+    args: string[] = []
+): string {
+    return processDeclarationValue(
+        resolver,
+        value,
+        meta,
+        node,
+        variableOverride,
+        valueHook,
+        diagnostics,
+        passedThrough,
+        cssVarsMapping,
+        args
+    ).outputValue;
 }
 
 function handleCyclicValues(
@@ -339,25 +348,6 @@ function handleCyclicValues(
         });
     }
     return stringifyFunction(value, parsedNode);
-}
-
-export function getFormatterArgs(node: ParsedValue) {
-    // TODO: revisit arguments split!!! e.g: , ro SPACE
-    const argsResult = [];
-    let currentArg = '';
-    for (const currentNode of node.nodes) {
-        if (currentNode.type === 'div' && currentNode.value === ',') {
-            argsResult.push(currentArg.trim());
-            currentArg = '';
-        } else if (currentNode.type !== 'comment') {
-            currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
-        }
-    }
-
-    if (currentArg) {
-        argsResult.push(currentArg.trim());
-    }
-    return argsResult;
 }
 
 function stringifyFunction(name: string, parsedNode: ParsedValue) {

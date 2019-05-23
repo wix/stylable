@@ -1,9 +1,9 @@
-import { getFormatterArgs, getStringValue } from './functions';
 import { StylableMeta } from './stylable-meta';
 import { StylableResolver } from './stylable-resolver';
-import { getNamedArgs } from './stylable-value-parsers';
+import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import { ParsedValue } from './types';
 
+const cloneDeepWith = require('lodash.clonedeepwith');
 const valueParser = require('postcss-value-parser');
 
 interface Box<Type extends string, Value extends any> {
@@ -19,6 +19,14 @@ export function box<Type extends string, Value extends any>(
         type,
         value
     };
+}
+
+export function unbox<B extends Box<string, unknown>>(boxed: B) {
+    if (typeof boxed === 'string') {
+        return boxed;
+    } else if (typeof boxed === 'object' && boxed.type && boxed.hasOwnProperty('value')) {
+        return cloneDeepWith(boxed.value, unbox);
+    }
 }
 
 export interface BoxedValueMap {
@@ -65,7 +73,7 @@ export const stTypes: CustomTypes = {
     }).register('stMap')
 };
 
-const CustomValueStrategy = {
+export const CustomValueStrategy = {
     args: (fnNode: ParsedValue, customTypes: CustomTypes) => {
         const pathArgs = getFormatterArgs(fnNode);
         const outputArray = [];
@@ -93,6 +101,7 @@ const CustomValueStrategy = {
             } else if (valueNodes.length === 1) {
                 const valueNode = valueNodes[0] as ParsedValue;
                 resolvedValue = valueNode.resolvedValue;
+
                 if (!resolvedValue) {
                     const ct = customTypes[valueNode.value];
                     if (valueNode.type === 'function' && ct) {
@@ -113,7 +122,7 @@ const CustomValueStrategy = {
     }
 };
 
-interface JSValueExtension<Value> {
+export interface JSValueExtension<Value> {
     _kind: 'CustomValue';
     register(localTypeSymbol: string): CustomValueExtension<Value>;
 }
@@ -151,7 +160,7 @@ export function resolveCustomValues(meta: StylableMeta, resolver: StylableResolv
     return customValues;
 }
 
-function createCustomValue<Value, Args>({
+export function createCustomValue<Value, Args>({
     processArgs,
     createValue,
     flattenValue,
@@ -190,7 +199,7 @@ function createCustomValue<Value, Args>({
     };
 }
 
-function getBoxValue(
+export function getBoxValue(
     path: string[],
     value: string | Box<string, unknown>,
     node: ParsedValue,

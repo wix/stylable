@@ -30,10 +30,10 @@ import {
     isCSSVarProp
 } from './stylable-utils';
 import {
-    groupValues,
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
+    validateAllowedNodesUntil,
     valueMapping
 } from './stylable-value-parsers';
 import { ParsedValue } from './types';
@@ -47,7 +47,6 @@ const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
-/* tslint:disable:max-line-length */
 export const processorWarnings = {
     UNSCOPED_CLASS(name: string) {
         return `unscoped class "${name}" will affect all elements of the same type in the document`;
@@ -129,9 +128,11 @@ export const processorWarnings = {
     },
     ILLEGAL_CSS_VAR_USE(name: string) {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
+    },
+    ILLEGAL_CSS_VAR_ARGS(name: string) {
+        return `css variable "${name}" usage (var()) must receive comma separated values`;
     }
 };
-/* tslint:enable:max-line-length */
 
 export class StylableProcessor {
     protected meta!: StylableMeta;
@@ -475,7 +476,14 @@ export class StylableProcessor {
         const parsed = valueParser(decl.value);
         parsed.walk((node: ParsedValue) => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
-                const varName = groupValues(node.nodes)[0];
+                const varName = node.nodes[0];
+                if (!validateAllowedNodesUntil(node, 1)) {
+                    const args = valueParser.stringify(node.nodes);
+                    this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_ARGS(args), {
+                        word: args
+                    });
+                }
+
                 this.addCSSVar(valueParser.stringify(varName).trim(), decl);
             }
         });

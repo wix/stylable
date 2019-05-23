@@ -18,6 +18,7 @@
     "enhanced-resolve": "^4.1.0",
     "is-vendor-prefixed": "^3.3.0",
     "lodash.clonedeep": "^4.5.0",
+    "lodash.clonedeepwith": "^4.5.0",
     "murmurhash": "^0.0.2",
     "postcss": "^7.0.16",
     "postcss-js": "^2.0.1",
