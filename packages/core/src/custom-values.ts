@@ -6,7 +6,7 @@ import { ParsedValue } from './types';
 const cloneDeepWith = require('lodash.clonedeepwith');
 const valueParser = require('postcss-value-parser');
 
-interface Box<Type extends string, Value extends any> {
+export interface Box<Type extends string, Value extends any> {
     type: Type;
     value: Value;
 }
