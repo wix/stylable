@@ -5,7 +5,7 @@
 `@stylable/custom-value` serves as a package where various implementation for Stylable (build-time) variable custom types.
 Currently, this package only offers an `stBorder` type, with more to be added in the future.
 
-## Ussage example
+## Usage example
 
 ```css
 :import {
