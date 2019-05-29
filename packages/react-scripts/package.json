@@ -8,7 +8,7 @@
   "dependencies": {
     "@stylable/core": "^2.0.8",
     "@stylable/webpack-plugin": "^2.0.12",
-    "@ts-tools/webpack-loader": "^0.8.11",
+    "@ts-tools/webpack-loader": "^0.8.12",
     "bfj": "^6.1.1",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
     "chalk": "^2.4.2",
@@ -19,11 +19,11 @@
     "html-webpack-plugin": "next",
     "object-assign": "^4.1.1",
     "react-dev-utils": "^7.0.3",
-    "terser-webpack-plugin": "^1.2.4",
+    "terser-webpack-plugin": "^1.3.0",
     "tslib": "^1.9.3",
-    "typescript": "~3.4.5",
+    "typescript": "~3.5.1",
     "url-loader": "^1.1.2",
-    "webpack": "^4.32.0",
+    "webpack": "^4.32.2",
     "webpack-dev-server": "^3.4.1",
     "webpack-manifest-plugin": "^2.0.4",
     "workbox-webpack-plugin": "^3.6.3"

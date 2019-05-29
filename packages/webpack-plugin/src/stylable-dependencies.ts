@@ -30,13 +30,19 @@ export class StylableImportDependency extends ModuleDependency {
         return 'stylable import';
     }
 
-    public static createWeak(request: string, originModule: StylableModule, importDef: ImportDefinition) {
+    public static createWeak(
+        request: string,
+        originModule: StylableModule,
+        importDef: ImportDefinition
+    ) {
         const dep = new StylableImportDependency(request, importDef);
         dep.weak = true;
         dep.originModule = originModule;
         return dep;
     }
+
     public module!: StylableModule;
+    public defaultImport: string;
     private names: string[];
     private weak?: boolean;
 
@@ -47,7 +53,9 @@ export class StylableImportDependency extends ModuleDependency {
     }
 
     public getReference() {
-        if (!this.module) { return null; }
+        if (!this.module) {
+            return null;
+        }
         return {
             weak: this.weak,
             module: this.module,
