@@ -59,4 +59,22 @@ describe('Stylable runtime stylesheet', () => {
 
         expect(stylesheet.vars.myVar).to.equal('--entry-myVar');
     });
+    
+    it('style and st alias', () => {
+        const stylesheet = create(
+            'entry',
+            {
+                classes: { root: 'entry__root' },
+                keyframes: {},
+                vars: { myVar: '--entry-myVar' },
+                stVars: {}
+             },
+            '',
+            0,
+            'test-stylesheet.st.css',
+            null
+        );
+
+        expect(stylesheet.style).to.equal(stylesheet.st);
+    });
 });
