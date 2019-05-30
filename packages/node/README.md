@@ -21,6 +21,25 @@ attachHook();
 
 const { style, classes } = require('./stylesheet.st.css');
 ```
+
+## attachHook Options
+
+```ts 
+interface Options {
+    /* override .st.css file match */
+    matcher?: (filename: string) => boolean;
+    /* stylable instance configure */
+    stylableConfig?: Partial<StylableConfig>;
+    /* hook for after compile */
+    afterCompile?: (code: string, filename: string) => string;
+    /* request for the @stylable/runtime */
+    runtimePath?: string;
+    /* should ignore built .st.css.js files */
+    ignoreJSModules?: boolean;
+}
+`
+
+
 ## License
 
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
