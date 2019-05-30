@@ -27,6 +27,7 @@ export function create(
         stVars: exports.stVars,
         cssStates,
         style,
+        st: style,
         $id: id,
         $depth: depth,
         $css: css
