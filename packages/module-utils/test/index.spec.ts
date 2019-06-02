@@ -22,9 +22,12 @@ describe('Module Factory', () => {
 
     it('should create a module with injectCSS=false', () => {
         const testFile = path.join(path.resolve('/'), '/entry.st.css');
-        const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
-            [testFile]: '.root {}'
-        }, {injectCSS: false});
+        const { fs, factory, evalStylableModule } = moduleFactoryTestKit(
+            {
+                [testFile]: '.root {}'
+            },
+            { injectCSS: false }
+        );
 
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
 
@@ -67,5 +70,36 @@ describe('Module Factory', () => {
                 part: 'imported__part'
             }
         });
+    });
+
+    it('api check', () => {
+        const rootPath = path.resolve('/');
+        const testFile = path.join(rootPath, '/entry.st.css');
+
+        const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
+            [testFile]: `
+        
+            .part {
+                color: green;
+            }
+            `
+        });
+
+        const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
+
+        const exports = evalStylableModule(moduleSource, testFile);
+        expect(Object.keys(exports as {}).sort()).to.eql([
+            'namespace',
+            'classes',
+            'keyframes',
+            'vars',
+            'stVars',
+            'cssStates',
+            'style',
+            'st',
+            '$id',
+            '$depth',
+            '$css'
+        ].sort());
     });
 });

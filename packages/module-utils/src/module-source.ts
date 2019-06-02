@@ -63,8 +63,8 @@ export function createModuleSource(
                 `createRenderable`,
                 includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
                 depth,
-                'const { classes, keyframes, vars, stVars, cssStates, style, $depth, $id, $css }',
-                `export { classes, keyframes, vars, stVars, cssStates, style, $depth, $id, $css };`,
+                'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }',
+                `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
                 renderableOnly
             );
         case 'cjs':

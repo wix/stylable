@@ -21,14 +21,17 @@ export interface StylableExports {
     stVars: Record<string, string>;
 }
 
+export type STFunction = (
+    context: string,
+    stateOrClass?: string | StateMap | undefined,
+    ...classes: Array<string | undefined>
+) => string;
+
 export interface RuntimeStylesheet extends StylableExports, RenderableStylesheet {
     namespace: string;
     cssStates: (stateMap: StateMap) => string;
-    style: (
-        context: string,
-        stateOrClass?: string | StateMap | undefined,
-        ...classes: Array<string | undefined>
-    ) => string;
+    style: STFunction;
+    st: STFunction;
 }
 
 export interface NodeRenderer<I, O extends Element> {
