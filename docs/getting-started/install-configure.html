@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -177,7 +179,7 @@
 
 <p>Add <strong>Stylable</strong> to your Webpack configuration as follows:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">StylableWebpackPlugin</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'@stylable/webpack-plugin'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">{</span> <span class="nx">StylableWebpackPlugin</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'@stylable/webpack-plugin'</span><span class="p">);</span>
 <span class="p">...</span>
 <span class="p">{</span>
     <span class="nl">module</span><span class="p">:</span> <span class="p">{</span>
@@ -207,45 +209,53 @@
 
 <p>TypeScript requires to be made aware of Stylable in order to provide typings and module resolution for <code class="highlighter-rouge">*.st.css</code> files. To do this, create a <code class="highlighter-rouge">globals.d.ts</code> file in your <code class="highlighter-rouge">./src</code> directory and add the following declaration.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">declare</span> <span class="nx">module</span> <span class="s1">'*.st.css'</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// globals.d.ts</span>
+<span class="nx">declare</span> <span class="nx">module</span> <span class="s1">'*.st.css'</span> <span class="p">{</span>
     <span class="kd">const</span> <span class="nx">stylesheet</span><span class="p">:</span> <span class="k">import</span><span class="p">(</span><span class="s1">'@stylable/runtime'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
-    <span class="k">export</span> <span class="k">default</span> <span class="nx">stylesheet</span><span class="p">;</span>
+    <span class="k">export</span> <span class="o">=</span> <span class="nx">stylesheet</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
 <p>If your project TypeScript version is below <code class="highlighter-rouge">2.9</code> and does not support <a href="https://blogs.msdn.microsoft.com/typescript/2018/05/31/announcing-typescript-2-9/#import-types">import type</a>, copy the following snippet into your <code class="highlighter-rouge">globals.d.ts</code> file.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span> <span class="nx">StateValue</span> <span class="o">=</span> <span class="kr">boolean</span> <span class="o">|</span> <span class="nx">number</span> <span class="o">|</span> <span class="nx">string</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="nx">type</span> <span class="nx">StateValue</span> <span class="o">=</span> <span class="kr">boolean</span> <span class="o">|</span> <span class="nx">number</span> <span class="o">|</span> <span class="nx">string</span><span class="p">;</span>
 
-<span class="kr">interface</span> <span class="nx">StateMap</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">StateMap</span> <span class="p">{</span>
     <span class="p">[</span><span class="nx">stateName</span><span class="p">:</span> <span class="nx">string</span><span class="p">]:</span> <span class="nx">StateValue</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kr">interface</span> <span class="nx">AttributeMap</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">AttributeMap</span> <span class="p">{</span>
     <span class="nx">className</span><span class="p">?:</span> <span class="nx">string</span><span class="p">;</span>
     <span class="p">[</span><span class="nx">attributeName</span><span class="p">:</span> <span class="nx">string</span><span class="p">]:</span> <span class="nx">StateValue</span> <span class="o">|</span> <span class="kc">undefined</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kr">interface</span> <span class="nx">InheritedAttributes</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">InheritedAttributes</span> <span class="p">{</span>
     <span class="nx">className</span><span class="p">?:</span> <span class="nx">string</span><span class="p">;</span>
     <span class="p">[</span><span class="nx">props</span><span class="p">:</span> <span class="nx">string</span><span class="p">]:</span> <span class="nx">any</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="nx">type</span> <span class="nx">RuntimeStylesheet</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="p">(</span><span class="na">className</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span> <span class="nx">states</span><span class="p">?:</span> <span class="nx">StateMap</span><span class="p">,</span> <span class="nx">inheritedAttributes</span><span class="p">?:</span> <span class="nx">InheritedAttributes</span><span class="p">):</span> <span class="nx">AttributeMap</span>
-    <span class="na">$root</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span>
-    <span class="na">$namespace</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span>
-    <span class="na">$depth</span><span class="p">:</span> <span class="nx">number</span><span class="p">,</span>
-    <span class="na">$id</span><span class="p">:</span> <span class="nx">string</span> <span class="o">|</span> <span class="nx">number</span><span class="p">,</span>
-    <span class="nx">$css</span><span class="p">?:</span> <span class="nx">string</span><span class="p">,</span>
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">StylableExports</span> <span class="p">{</span>
+    <span class="nl">classes</span><span class="p">:</span> <span class="nx">Record</span><span class="o">&lt;</span><span class="nx">string</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="nl">keyframes</span><span class="p">:</span> <span class="nx">Record</span><span class="o">&lt;</span><span class="nx">string</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="nl">vars</span><span class="p">:</span> <span class="nx">Record</span><span class="o">&lt;</span><span class="nx">string</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="nl">stVars</span><span class="p">:</span> <span class="nx">Record</span><span class="o">&lt;</span><span class="nx">string</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nx">$get</span><span class="p">(</span><span class="na">localName</span><span class="p">:</span> <span class="nx">string</span><span class="p">):</span> <span class="nx">string</span> <span class="o">|</span> <span class="kc">undefined</span><span class="p">;</span>
-    <span class="nx">$cssStates</span><span class="p">(</span><span class="nx">stateMapping</span><span class="p">?:</span> <span class="nx">StateMap</span> <span class="o">|</span> <span class="kc">null</span><span class="p">):</span> <span class="nx">StateMap</span><span class="p">;</span>
-<span class="p">}</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="p">[</span><span class="na">localName</span><span class="p">:</span> <span class="nx">string</span><span class="p">]:</span> <span class="nx">string</span> <span class="p">};</span>
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">RuntimeStylesheet</span> <span class="kd">extends</span> <span class="nx">StylableExports</span><span class="p">,</span> <span class="nx">RenderableStylesheet</span> <span class="p">{</span>
+    <span class="nl">namespace</span><span class="p">:</span> <span class="nx">string</span><span class="p">;</span>
+    <span class="nl">cssStates</span><span class="p">:</span> <span class="p">(</span><span class="nx">stateMap</span><span class="p">:</span> <span class="nx">StateMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">string</span><span class="p">;</span>
+    <span class="nl">style</span><span class="p">:</span> <span class="p">(</span><span class="nx">context</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span> <span class="nx">stateOrClass</span><span class="p">:</span> <span class="nx">string</span> <span class="o">|</span> <span class="nx">StateMap</span><span class="p">,</span> <span class="p">...</span><span class="nx">classes</span><span class="p">:</span> <span class="nx">string</span><span class="p">[])</span> <span class="o">=&gt;</span> <span class="nx">string</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">export</span> <span class="kr">interface</span> <span class="nx">RenderableStylesheet</span> <span class="p">{</span>
+    <span class="nl">$depth</span><span class="p">:</span> <span class="nx">number</span><span class="p">;</span>
+    <span class="nl">$id</span><span class="p">:</span> <span class="nx">string</span> <span class="o">|</span> <span class="nx">number</span><span class="p">;</span>
+    <span class="nx">$css</span><span class="p">?:</span> <span class="nx">string</span><span class="p">;</span>
+<span class="p">}</span>
 
 <span class="nx">declare</span> <span class="nx">module</span> <span class="s1">'*.st.css'</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="na">stylesheet</span><span class="p">:</span> <span class="nx">RuntimeStylesheet</span><span class="p">;</span>
-    <span class="k">export</span> <span class="k">default</span> <span class="nx">stylesheet</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">stylesheet</span><span class="p">:</span> <span class="k">import</span><span class="p">(</span><span class="s1">'@stylable/runtime'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
+    <span class="k">export</span> <span class="o">=</span> <span class="nx">stylesheet</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 

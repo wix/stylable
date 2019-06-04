@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -151,7 +153,7 @@ The scoping directive receives a single simple selector (<a href="./tag-selector
 </code></pre></div></div>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
-<span class="nc">.entry--root</span> <span class="nt">input</span> <span class="p">{</span>
+<span class="nc">.entry__root</span> <span class="nt">input</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span>
 <span class="p">}</span> 
 </code></pre></div></div>
@@ -183,6 +185,7 @@ The scoping directive receives a single simple selector (<a href="./tag-selector
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
+
 <h4 id="extending-a-theme">Extending a theme</h4>
 <p>In this example, we are extending our previously created dark theme, with a specific override for the Gallery component.</p>
 

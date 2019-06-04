@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -163,9 +165,9 @@
 </code></pre></div></div>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">][</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Example1__root.Example1--toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Example1__root.Example1--loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Example1__root.Example1--loading.Example1--toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">blue</span><span class="p">;</span> <span class="p">}</span>
 </code></pre></div></div>
 
 <h2 id="custom-pseudo-classes-with-parameters">Custom pseudo-classes with parameters</h2>
@@ -187,7 +189,7 @@
 
 <h2 id="mapped-states">Mapped states</h2>
 
-<p><strong>Stylable</strong> generates custom pseudo-classes using <code class="highlighter-rouge">data-*</code> attributes. When you are building your components with <strong>Stylable</strong> the standard DOM implementation is good, but you might want to target the state in a custom way.</p>
+<p><strong>Stylable</strong> generates custom pseudo-classes using <code class="highlighter-rouge">className</code> attributes. When you are building your components with <strong>Stylable</strong> the standard DOM implementation is handy, but you might want to target the state in a custom way.</p>
 
 <p>You can use this feature to define custom pseudo-classes even if the existing components you are targeting are not based on <strong>Stylable</strong>.</p>
 
@@ -209,7 +211,7 @@
 
 <blockquote>
   <p><strong>Note</strong>  <br />
-When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS child selector.</p>
+When writing custom mapping, ensure your custom selector targets a simple selector, and not a CSS complex selector.</p>
 </blockquote>
 
 <h2 id="state-inheritance">State inheritance</h2>
@@ -233,12 +235,12 @@ When writing custom mapping, ensure your custom selector targets a simple select
 </code></pre></div></div>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Example1__root</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Example1__root.Example1--toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Example1__root.Example1--loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Example2__mediaButton</span><span class="nd">:hover</span> <span class="p">{</span> <span class="nl">border</span><span class="p">:</span> <span class="m">0.2em</span> <span class="nb">solid</span> <span class="no">black</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* native hover - not declared */</span>
-<span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example1-loading</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* loading scoped to Example1 - only one to declare */</span>
-<span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example2-selected</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">salmon</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* selected scoped to Example2 - only one to declare */</span>
-<span class="nc">.Example2__mediaButton</span><span class="o">[</span><span class="nt">data-Example2-toggled</span><span class="o">]</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;}</span> <span class="c">/* toggled scoped to Example2 - last to declare */</span>
+<span class="nc">.Example2__mediaButton.Example1--loading</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">silver</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* loading scoped to Example1 - only one to declare */</span>
+<span class="nc">.Example2__mediaButton.Example2--selected</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">salmon</span><span class="p">;</span> <span class="p">}</span> <span class="c">/* selected scoped to Example2 - only one to declare */</span>
+<span class="nc">.Example2__mediaButton.Example2--toggled</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;}</span> <span class="c">/* toggled scoped to Example2 - last to declare */</span>
 </code></pre></div></div>
 
 <blockquote>
@@ -248,24 +250,23 @@ You can override the behavior of native pseudo-classes. This can enable you to w
 
 <h2 id="enable-custom-pseudo-classes">Enable custom pseudo-classes</h2>
 
-<p>Custom pseudo-classes are implemented using <code class="highlighter-rouge">data-*</code> attributes and need additional runtime logic to control when they are on and off.</p>
+<p>Custom pseudo-classes are implemented using <code class="highlighter-rouge">className</code> attributes and need additional runtime logic to control when they are on and off.</p>
 
 <p><strong>Stylable</strong> offers <a href="../getting-started/react-integration">React CSS state integration</a> to help components manage custom pseudo-classes easily.</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* sample of a stylable component */</span>
-<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./stylesheet.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./stylesheet.st.css'</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">MyComponent</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{</span> 
+        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="p">{</span> 
                 <span class="na">toggled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
                 <span class="na">selected</span><span class="p">:</span> <span class="kc">false</span>
-            <span class="p">},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;</span>
+            <span class="p">},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;</span>
         <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>    <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>
-
 
 </section>
 

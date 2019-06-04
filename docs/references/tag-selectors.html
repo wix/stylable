@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -168,7 +170,7 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
 <span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Comp</span> <span class="p">{</span>
     <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
@@ -177,8 +179,8 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">sideBar</span><span class="p">}</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)}</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">sideBar</span><span class="p">}</span><span class="o">&gt;</span>
                     <span class="o">&lt;</span><span class="nx">form</span> <span class="o">/&gt;</span> <span class="cm">/* green background and red while hovering parent */</span>
                 <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>                <span class="o">&lt;</span><span class="nx">form</span> <span class="o">/&gt;</span> <span class="cm">/* green background */</span>
@@ -210,7 +212,7 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
 <span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
 
 <span class="cm">/* React implementation - button component implements toggle-button.css */</span>
 <span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
@@ -222,8 +224,8 @@ The value <code class="highlighter-rouge">form</code> itself is not namespaced.<
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">sideBar</span><span class="p">}</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)}</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">sideBar</span><span class="p">}</span><span class="o">&gt;</span>
                     <span class="o">&lt;</span><span class="nx">ToggleButton</span> <span class="o">/&gt;</span> <span class="cm">/* green background and red while hovering parent */</span>
                 <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>                <span class="o">&lt;</span><span class="nx">ToggleButton</span> <span class="o">/&gt;</span> <span class="cm">/* green background */</span>

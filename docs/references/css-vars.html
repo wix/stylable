@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Custom Properties (CSS vars)</title>
+
+	<!-— facebook open graph tags -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://stylable.io/">
+	<meta property="og:title" content="Stylable - scoped CSS for components">
+	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	 
+	<!-— twitter card tags additive with the og: tags -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:domain" content="stylable.io">
+	<meta name="twitter:title" content="Stylable - scoped CSS for components">
+	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	<meta name="twitter:url" content="https://stylable.io/">
+
+    <link rel="stylesheet" href="../../css/normalize.css">
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="../.."><span class="logo"></span></a>
+
+        <ul class="main-nav">
+            <li><a href="https://github.com/wix/stylable" target="_blank"><img src="/images/logo-git.svg" alt="Stylable on GitHub"></a></li>
+            <li><a href="https://twitter.com/stylableio" target="_blank"><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"></a></li>
+        </ul>
+    </div>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+       gtag('config', 'UA-109043375-1');
+    </script>
+</header>
+
+
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+                <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Specification Reference</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
+            
+                <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
+            
+                <li class="active"><a href="../../docs/references/css-vars" class="active docs-nav-item">CSS Custom Properties</a></li>
+            
+                <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
+            
+                <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
+                <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>CSS Custom Properties (CSS vars)</h1>
+    <p><code class="highlighter-rouge">CSS Custom Properties</code> is a new feature introduced to the CSS language, providing the ability to define and re-use variables across stylesheets.</p>
+
+<p>CSS Custom Properties are defined using the <code class="highlighter-rouge">--*</code> property syntax, and accessed using the <code class="highlighter-rouge">var(--*)</code> CSS function.</p>
+
+<p>To learn more about this language feature, check out the following resources</p>
+<ul>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" target="_blank">MDN - Custom properties</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables" target="_blank">MDN - Using CSS custom properties</a></li>
+  <li><a href="https://www.smashingmagazine.com/2017/04/start-using-css-custom-properties/" target="_blank">Smashing Magazine - It’s Time To Start Using CSS Custom Properties</a></li>
+</ul>
+
+<h2 id="stylable-variables-vs-css-custom-properties">Stylable variables vs. CSS custom properties</h2>
+<p><a href="./variables">Stylable variables</a> and CSS custom properties offer different capabilities, and as such serve different use-cases.</p>
+
+<p>Stylable variables exist only in your source code, and get replaced during transpilation to the final target code. They serve well for reducing code repetition, increasing readability and can benefit any static theme or styling without incurring any runtime performance cost.</p>
+
+<p>CSS custom properties on the other hand do incur a small runtime cost, but offer the ability to override their values during runtime, allowing dynamic styling through Stylable.</p>
+
+<h2 id="automatic-scoping-namespacing">Automatic scoping (namespacing)</h2>
+
+<p>Stylable automatically scopes any CSS custom property found in the stylesheet. It does so by generating a unique namespace for the stylesheet (similar to how classes are scoped), and replaces the variable with its scoped counterpart.</p>
+
+<p>Example:</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* entry.st.css */</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">--myVar</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--myVar</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Transpiled output:</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* entry.st.css */</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">--entry-myVar</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--entry-myVar</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="importing-css-variables">Importing CSS variables</h2>
+
+<p>Due to the fact Stylable provides scoping to CSS variables, it also provides the ability to import CSS variables defined in another stylesheet.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* entry.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./imported.st.css"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">--myVar</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--myVar</span><span class="p">);</span> <span class="c">/* green */</span>
+<span class="p">}</span>
+
+<span class="nc">.part</span> <span class="p">{</span>
+    <span class="c">/* this override will match the namespace of the imported stylesheet */</span>
+    <span class="py">--myVar</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
+    <span class="nl">background-color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--myVar</span><span class="p">);</span> <span class="c">/* gold */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* imported.st.css */</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">--myVar</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="overriding-css-variables-during-runtime">Overriding CSS variables during runtime</h2>
+
+<p>Override any variable by redefining its value using an inline style attribute.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">vars</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+
+<span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
+     <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> 
+        <span class="p">[</span><span class="nx">vars</span><span class="p">.</span><span class="nx">color</span><span class="p">]:</span> <span class="s1">'green'</span><span class="p">,</span> 
+        <span class="p">[</span><span class="nx">vars</span><span class="p">[</span><span class="s1">'border-size'</span><span class="p">]]:</span> <span class="s1">'5px'</span><span class="p">,</span> 
+        <span class="na">background</span><span class="p">:</span> <span class="s1">'gold'</span> <span class="p">}}</span> <span class="sr">/</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p>Output:</p>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"entry__root"</span> 
+    <span class="nx">style</span><span class="o">=</span><span class="s2">"--entry-color: green; --entry-border-size: 5px; background: gold;"</span> <span class="o">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="using-global-css-variables">Using global CSS variables</h2>
+
+<p>In cases where you have no control over the name of the CSS variable used, use the <code class="highlighter-rouge">@st-global-custom-property</code> directive to define CSS variables that will not be scoped, and will maintain their exact given name.</p>
+
+<p>This is mostly useful when working with 3rd-party libraries, where you only attempt to affect it externally.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@st-global-custom-property</span> <span class="n">--color</span><span class="p">,</span> <span class="n">--bg</span><span class="p">;</span>
+
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="py">--color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--color</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+
+<span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
+     <span class="nx">style</span><span class="o">=--</span><span class="nx">color</span>
+<span class="o">/&gt;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Accessing any globally defined variable on the stylesheet will return its global name (un-scoped).</p>
+</blockquote>
+
+
+</section>
+
+
+</div>
+
+
+<script src="../../js/vendor/prism/prism.js"></script>
+<script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
+
+<script src="https://static.parastorage.com/unpkg/react@16.2.0//umd/react.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/react-dom@16.2.0//umd/react-dom.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+</body>
+</html>

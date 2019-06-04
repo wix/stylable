@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -148,17 +150,23 @@
 <span class="nc">.icon</span> <span class="p">{}</span>
 </code></pre></div></div>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* index.jsx */</span>
-<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span> <span class="c1">// import stylesheet's runtime API</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* index.jsx - stylesheet's runtime api */</span>
+<span class="k">import</span> <span class="p">{</span> 
+    <span class="nx">style</span><span class="p">,</span>    <span class="c1">// runtime utility function </span>
+    <span class="nx">classes</span><span class="p">,</span>  <span class="c1">// class names mapping</span>
+    <span class="nx">vars</span><span class="p">,</span>     <span class="c1">// css variables mapping</span>
+    <span class="nx">stVars</span><span class="p">,</span>   <span class="c1">// stylable build-time variable values</span>
+    <span class="nx">cssStates</span> <span class="c1">// utility function for setting stylable states</span>
+<span class="p">}</span>  <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h2 id="manual-mapping">Manual mapping</h2>
 
-<p>CSS class names, defined in the stylesheet, are exposed directly on the import reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.</p>
+<p>CSS class names, defined in the stylesheet, are exposed on the imported <code class="highlighter-rouge">classes</code> reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">style</span><span class="p">.</span><span class="nx">root</span> <span class="c1">// "style__root"</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">label</span> <span class="c1">// "style__label"</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">icon</span> <span class="c1">// "style__icon"</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span>  <span class="c1">// "style__root"</span>
+<span class="nx">classes</span><span class="p">.</span><span class="nx">label</span> <span class="c1">// "style__label"</span>
+<span class="nx">classes</span><span class="p">.</span><span class="nx">icon</span>  <span class="c1">// "style__icon"</span>
 </code></pre></div></div>
 
 <blockquote>
@@ -168,18 +176,18 @@ The <a href="../references/root">root class</a> is available even when it is not
 
 <h2 id="custom-state-mapping">Custom state mapping</h2>
 
-<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="highlighter-rouge">$cssStates</code> function. The function accepts a map of local state names and generates an object with <code class="highlighter-rouge">data-*</code> attributes used to mark the element state.</p>
+<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="highlighter-rouge">cssStates</code> function. The function accepts a map of local state names and generates string with concatenated class names used to mark the element state.</p>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* { 'data-style-selected':true } */</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">$cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+<span class="nx">cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
 <span class="cm">/* { 'data-style-unknownstate':true } */</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">$cssStates</span><span class="p">({</span> <span class="na">unknownState</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+<span class="nx">cssStates</span><span class="p">({</span> <span class="na">unknownState</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
 
 <span class="cm">/* { } */</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">$cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">false</span> <span class="p">})</span> <span class="c1">// no states</span>
+<span class="nx">cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">false</span> <span class="p">})</span> <span class="c1">// no states</span>
 
 <span class="cm">/* { 'data-style-a':true, 'data-style-b':true } */</span>
-<span class="nx">style</span><span class="p">.</span><span class="nx">$cssStates</span><span class="p">({</span> <span class="na">a</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span> <span class="na">b</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span> <span class="c1">// multiple</span>
+<span class="nx">cssStates</span><span class="p">({</span> <span class="na">a</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span> <span class="na">b</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span> <span class="c1">// multiple</span>
 </code></pre></div></div>
 
 <h2 id="generate-element-attributes">Generate element attributes</h2>
@@ -189,49 +197,51 @@ Calling the function returns an object describing the attributes of a node in th
 
 <h3 id="element-name">Element name</h3>
 
-<p>The first argument represents the name of the element, and returns a <code class="highlighter-rouge">className</code> attribute to mark the element node.</p>
+<p>The first argument represents the scoped name of the element, and passes through the received class name.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* { className:'style__root' } */</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 'style__root'  */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">)</span> 
+<span class="cm">/* 'style__label' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">label</span><span class="p">)</span> 
+
+<span class="c1">// multiple markings</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="nx">classes</span><span class="p">.</span><span class="nx">icon</span><span class="p">)</span> 
+<span class="cm">/* 'style__label style__icon' */</span>
+
+<span class="c1">// string pass-through</span>
 <span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">)</span> 
-<span class="cm">/* { className:'style__label' } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'label'</span><span class="p">)</span> 
-
-<span class="cm">/* { className:'style__label style__icon' } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'label icon'</span><span class="p">)</span> <span class="c1">// multiple markings</span>
+<span class="cm">/* 'root' */</span>
 </code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong><br />
-Any class name that is not found in the stylesheet is not namespaced and is treated as global.</p>
+Stylable no longer performs auto-scoping for classes, and strings are passed as-is. Use the <code class="highlighter-rouge">classes</code> mapping object to resolve to the scoped class name.</p>
 </blockquote>
 
 <h3 id="custom-states">Custom states</h3>
 
-<p>The second argument represents the <a href="#custom-state-mapping">custom state</a>, and returns a <code class="highlighter-rouge">data-*</code> attribute to represent the custom state on the element.</p>
+<p>The second argument represents the <a href="#custom-state-mapping">custom state</a> (or another class), and returns a class to represent every custom state on the element.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* { className:'style__root', 'data-style-selected':true } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
-<span class="cm">/* { className:'style__label', 'data-style-searched':true } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'label'</span><span class="p">,</span> <span class="p">{</span> <span class="na">searched</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 'style__root style--selected' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="p">{</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+<span class="cm">/* 'style__label style--searched' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="p">{</span> <span class="na">searched</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
 </code></pre></div></div>
 
 <h3 id="merge-props">Merge props</h3>
 
-<p>The third argument can be used as a base for the generated class name and states.</p>
+<p>The third argument (and any arguments after) can be used for any additional classes that need to be applied to the element. In a component root node, it is recommended to pass along the <code class="highlighter-rouge">className</code> prop received through your parent component as props.</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*  { className:'style__root class-a' } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{</span> <span class="na">className</span><span class="p">:</span><span class="s1">'class-a'</span> <span class="p">})</span>
-<span class="cm">/*  { className:'style__root label icon' } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{</span> <span class="na">className</span><span class="p">:</span><span class="s1">'label icon'</span> <span class="p">})</span> <span class="c1">// appended without namespacing</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// this.props.className = 'app__root app--selected'</span>
+<span class="cm">/*  'style__root app__root app--selected' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span>
 
-<span class="cm">/*  { className:'style__root', 'data-a':true } */</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{</span> <span class="s1">'data-a'</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+<span class="cm">/*  'style__root label icon' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">,</span> <span class="s1">'icon'</span><span class="p">)</span> <span class="c1">// label and icon are global (un-scoped)</span>
+
+<span class="cm">/*  'style__root style--selected' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="s1">'style--selected'</span><span class="p">)</span>
 </code></pre></div></div>
-
-<blockquote>
-  <p><strong>Note</strong><br />
-Any <code class="highlighter-rouge">data-*</code> attribute passed in the base overrides its generated equivalent.</p>
-</blockquote>
 
 </section>
 

@@ -121,6 +121,8 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
@@ -164,12 +166,12 @@
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
 <span class="nc">.Page__checkBtn.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span> <span class="p">}</span>
 <span class="nc">.Page__checkBtn.ToggleButton__root</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Page__checkBtn.ToggleButton__root</span><span class="o">[</span><span class="nt">data-ToggleButton-toggled</span><span class="o">]</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Page__checkBtn.ToggleButton__root.ToggleButton--toggled</span><span class="o">]</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* page.jsx */</span>
-<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">style</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
 
 <span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
 
@@ -180,8 +182,8 @@
 
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{</span> <span class="p">...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">ToggleButton</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">.</span><span class="nx">checkBtn</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span> <span class="p">}</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">ToggleButton</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">checkBtn</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
 </span>            <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>        <span class="p">);</span>
     <span class="p">}</span>
