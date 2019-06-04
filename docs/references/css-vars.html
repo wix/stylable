@@ -240,9 +240,11 @@
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
 
 <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
-     <span class="nx">style</span><span class="o">=--</span><span class="nx">color</span>
-<span class="o">/&gt;</span>
-</code></pre></div></div>
+     <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> 
+         <span class="s1">'--color'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> 
+         <span class="s1">'--bg'</span><span class="p">:</span> <span class="s1">'yellow'</span> <span class="p">}}</span>
+<span class="sr">/</span><span class="err">&gt;
+</span></code></pre></div></div>
 
 <blockquote>
   <p>Accessing any globally defined variable on the stylesheet will return its global name (un-scoped).</p>
