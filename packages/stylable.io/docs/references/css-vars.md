@@ -108,6 +108,7 @@ This is mostly useful when working with 3rd-party libraries, where you only atte
 }
 ```
 
+{% raw %}
 ```js
 import { classes } from './entry.st.css';
 
@@ -117,6 +118,7 @@ import { classes } from './entry.st.css';
          '--bg': 'yellow' }}
 />
 ```
+{% endraw %}
 
 > Accessing any globally defined variable on the stylesheet will return its global name (un-scoped).
 
