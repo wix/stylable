@@ -35,7 +35,7 @@ span { background: blue; } /* this will affect *ALL* spans in your application *
 ```js
 /* comp.jsx */
 import * as React from 'react';
-import style from './comp.st.css';
+import { style, classes } from './comp.st.css';
 
 class Comp {
     constructor(props) {
@@ -44,8 +44,8 @@ class Comp {
 
     render () {
         return (
-            <div className={style.root}>
-                <div className={style.sideBar}>
+            <div className={style(classes.root, this.props.className)}>
+                <div className={classes.sideBar}>
                     <form /> /* green background and red while hovering parent */
                 </div>
                 <form /> /* green background */
@@ -81,7 +81,7 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 ```js
 /* comp.jsx */
 import * as React from 'react';
-import style from './comp.st.css';
+import { style, classes } from './comp.st.css';
 
 /* React implementation - button component implements toggle-button.css */
 import ToggleButton from './toggle-button';
@@ -93,8 +93,8 @@ class Comp {
 
     render () {
         return (
-            <div className={style.root}>
-                <div className={style.sideBar}>
+            <div className={style(classes.root, this.props.className)}>
+                <div className={classes.sideBar}>
                     <ToggleButton /> /* green background and red while hovering parent */
                 </div>
                 <ToggleButton /> /* green background */

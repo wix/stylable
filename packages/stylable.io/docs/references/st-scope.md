@@ -19,7 +19,7 @@ Stylable scoping directive is similar in its behavior to CSS nesting, but can on
 
 ```css
 /* output */
-.entry--root input {
+.entry__root input {
     color: purple;
 } 
 ```
@@ -52,6 +52,7 @@ In this theme implementation we are targeting three components and overriding th
     }
 }
 ```
+
 #### Extending a theme
 In this example, we are extending our previously created dark theme, with a specific override for the Gallery component.
 

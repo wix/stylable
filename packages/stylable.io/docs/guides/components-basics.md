@@ -23,7 +23,7 @@ Let's say you have a `Button` component with a render function per this example.
 ```js
 /* button.jsx */
 import * as React from 'react';
-import style from './button.st.css';
+import { style, classes } from './button.st.css';
 
 class Button {
     constructor(props) {
@@ -32,9 +32,9 @@ class Button {
 
     render () {
         return (
-            <button { ...style('root', {}, this.props) } >
-                <span className={style.icon} />
-                <span className={style.label} >Submit</span>
+            <button className={style(classes.root, this.props.className) } >
+                <span className={classes.icon} />
+                <span className={classes.label} >Submit</span>
             </button>
         );
     }
@@ -88,11 +88,11 @@ Let's take the `Button` component and import it into the JSX file, and also add 
 /* panel.jsx */
 import * as React from 'react';
 import { Button } from '../button';
-import style from './panel.st.css';
+import { style, classes } from './panel.st.css';
 
 export const Panel = () => (
-    <div { ...style('root', {}, this.props) } >
-        <Button className={style.cancelBtn} />
+    <div className={style(classes.root, this.props.className) } >
+        <Button className={classes.cancelBtn} />
     </div>
 );
 ```
@@ -129,7 +129,7 @@ A custom pseudo-class can be used to reflect any logical state of your component
 ```js
 /* button.jsx */
 import * as React from 'react';
-import style from './button.st.css';
+import { style, classes } from './button.st.css';
 
 class Button {
     constructor(props) {
@@ -141,10 +141,10 @@ class Button {
     }
     render () {
         return (
-            <button { ...style('root', { on: this.state.on }, this.props) } 
+            <button className={style(classes.root, { on: this.state.on }, this.props.className) } 
                     onClick={() => this.setState({ on: !this.state.on })} >
-                <span className={style.icon} />
-                <span className={style.label} >Submit</span>
+                <span className={classes.icon} />
+                <span className={classes.label} >Submit</span>
             </button>
         );
     }
