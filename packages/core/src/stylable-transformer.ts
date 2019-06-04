@@ -822,7 +822,7 @@ export class StylableTransformer {
             return { _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } };
         }
 
-        // find if the current symbol exsists in the initial meta;
+        // find if the current symbol exists in the initial meta;
 
         let symbol = meta.mappedSymbols[name];
         let current = meta;
