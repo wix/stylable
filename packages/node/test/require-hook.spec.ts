@@ -49,4 +49,17 @@ describe('require hook', () => {
         const m = require('./fixtures/test.st.css');
         expect(m.namespace).to.equal(expectedNamespace);
     });
+
+    it('should prefer *.st.css.js over st.css', () => {
+        attachHook();
+        const m = require('./fixtures/has-js.st.css');
+        expect(m.test).to.equal(true);
+    });
+
+    it('should ignoreJSModules', () => {
+        attachHook({ignoreJSModules: true});
+        const m = require('./fixtures/has-js.st.css');
+        expect(m.$id).to.contain('has-js.st.css');
+    });
+    
 });

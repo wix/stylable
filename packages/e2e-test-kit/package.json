@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@stylable/runtime": "^2.0.5",
-    "express": "^4.17.0",
+    "express": "^4.17.1",
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
-    "puppeteer": "^1.16.0",
+    "puppeteer": "^1.17.0",
     "rimraf": "^2.6.3",
-    "webpack": "^4.32.0"
+    "webpack": "^4.32.2"
   },
   "files": [
     "cjs",

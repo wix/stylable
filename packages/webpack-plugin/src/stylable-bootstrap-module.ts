@@ -8,6 +8,15 @@ import { StylableModule, StylableWebpackPluginOptions } from './types';
 const Module = require('webpack/lib/Module');
 
 export class StylableBootstrapModule extends Module {
+    public name: string;
+    public type: string;
+    public built: boolean;
+    public hash: string;
+    public buildMeta: object;
+    public buildInfo: object;
+    public usedExports: boolean | string[];
+    public __source?: RawSource;
+
     constructor(
         context: any,
         public chunk: webpack.compilation.Chunk | null,

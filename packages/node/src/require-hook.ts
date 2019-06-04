@@ -8,20 +8,30 @@ export interface Options {
     stylableConfig: Partial<StylableConfig>;
     afterCompile?: (code: string, filename: string) => string;
     runtimePath?: string;
+    ignoreJSModules?: boolean;
 }
 
 const HOOK_EXTENSION = '.css';
 
 const defaultStylableMatcher = (filename: string) => !!filename.match(/\.st\.css$/);
 
-export function attachHook({ matcher, afterCompile, stylableConfig, runtimePath }: Partial<Options> = {}) {
-    const stylableToModule = stylableModuleFactory({
-        projectRoot: 'root',
-        fileSystem: fs,
-        requireModule: require,
-        resolveNamespace,
-        ...stylableConfig
-    }, { runtimePath });
+export function attachHook({
+    matcher,
+    afterCompile,
+    stylableConfig,
+    runtimePath,
+    ignoreJSModules
+}: Partial<Options> = {}) {
+    const stylableToModule = stylableModuleFactory(
+        {
+            projectRoot: 'root',
+            fileSystem: fs,
+            requireModule: require,
+            resolveNamespace,
+            ...stylableConfig
+        },
+        { runtimePath }
+    );
 
     if (!matcher) {
         matcher = defaultStylableMatcher;
@@ -30,8 +40,9 @@ export function attachHook({ matcher, afterCompile, stylableConfig, runtimePath 
     const prevHook = require.extensions[HOOK_EXTENSION];
     require.extensions[HOOK_EXTENSION] = function cssModulesHook(m: any, filename: string) {
         if (matcher!(filename) || !prevHook) {
-            const source = fs.readFileSync(filename).toString();
-            const code = stylableToModule(source, filename);
+            const useJSModule = !ignoreJSModules && fs.existsSync(filename + '.js');
+            const source = fs.readFileSync(useJSModule ? filename + '.js' : filename).toString();
+            const code = useJSModule ? source : stylableToModule(source, filename);
             return m._compile(afterCompile ? afterCompile(code, filename) : code, filename);
         } else if (prevHook) {
             return prevHook(m, filename);
