@@ -25,7 +25,7 @@
     "postcss-nested": "^4.1.2",
     "postcss-safe-parser": "^4.0.1",
     "postcss-selector-matches": "^4.0.0",
-    "postcss-value-parser": "^3.3.1",
+    "postcss-value-parser": "^4.0.0",
     "url-regex": "^5.0.0"
   },
   "files": [
