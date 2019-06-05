@@ -6,6 +6,7 @@ export interface Options {
     runtimeStylesheetId: 'module' | 'namespace';
     injectCSS: boolean;
     renderableOnly: boolean;
+    legacyRuntime: boolean;
 }
 
 export function stylableModuleFactory(
@@ -14,11 +15,14 @@ export function stylableModuleFactory(
         runtimePath = '@stylable/runtime',
         runtimeStylesheetId = 'module',
         injectCSS = true,
-        renderableOnly = false
+        renderableOnly = false,
+        legacyRuntime
     }: Partial<Options> = {}
 ) {
     const stylable = Stylable.create(stylableOptions);
-
+    if (legacyRuntime && runtimePath === '@stylable/runtime') {
+        runtimePath = '@stylable/runtime/cjs/index-legacy.js';
+    }
     return function stylableToModule(source: string, path: string) {
         const res = stylable.transform(source, path);
         return generateModuleSource(

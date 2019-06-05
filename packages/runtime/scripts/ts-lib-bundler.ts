@@ -7,6 +7,7 @@ interface Options {
     entry: string;
     includeEntry?: boolean;
     header?: string;
+    allowOverride?: string[];
 }
 
 export function bundle({ name, entry, includeEntry, header }: Options) {
@@ -17,8 +18,8 @@ export function bundle({ name, entry, includeEntry, header }: Options) {
     return header ? `${header}\n${res}` : res;
 }
 
-export function useModule(outModule: string, libExports: string[]) {
-    const exportErrors: Array<string | number | symbol> = [];
+export function useModule(outModule: string, libExports: string[], allowOverride: string[] = []) {
+    let exportErrors: Array<string | number | symbol> = [];
     const _exports: any = new Proxy(
         {},
         {
@@ -32,6 +33,9 @@ export function useModule(outModule: string, libExports: string[]) {
     if (missing.length) {
         throw new Error(`missing lib exports ["${missing.join('", "')}"]`);
     }
+    
+    exportErrors = exportErrors.filter(k => !allowOverride.some(o => o === k));
+    
     if (exportErrors.length) {
         throw new Error(`duplicate export ["${exportErrors.join('", "')}"]`);
     }
