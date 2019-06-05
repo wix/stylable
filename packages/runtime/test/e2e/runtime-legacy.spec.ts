@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('css runtime variable overrides', async () => {
+    it('css renders with legacy runtime', async () => {
         const { page } = await projectRunner.openInBrowser();
         const { backgroundColor } = await page.evaluate(() => {
             const computedStyle = getComputedStyle(document.documentElement!);
