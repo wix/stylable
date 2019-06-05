@@ -962,15 +962,10 @@
   resolved "https://registry.yarnpkg.com/@types/murmurhash/-/murmurhash-0.0.1.tgz#564a85100cb16eeec43218a09b08cd87da076afc"
   integrity sha512-jiYuTCJ60WxEDOkJFs2192G/nH0PY8mtyHeZkv5fOQQ5DkSkmEgY7YLzCxyM8Y8jibd8Dprb9bGth4EO34mAjw==
 
-"@types/node@*":
+"@types/node@*", "@types/node@12":
   version "12.0.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.0.4.tgz#46832183115c904410c275e34cf9403992999c32"
   integrity sha512-j8YL2C0fXq7IONwl/Ud5Kt0PeXw22zGERt+HSSnwbKOJVsAGkEz3sFCYwaF9IOuoG1HOtE0vKCj6sXF7Q0+Vaw==
-
-"@types/node@8":
-  version "8.10.49"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.49.tgz#f331afc5efed0796798e5591d6e0ece636969b7b"
-  integrity sha512-YX30JVx0PvSmJ3Eqr74fYLGeBxD+C7vIL20ek+GGGLJeUbVYRUW3EzyAXpIRA0K8c8o0UWqR/GwEFYiFoz1T8w==
 
 "@types/postcss-nested@^4.1.0":
   version "4.1.0"
