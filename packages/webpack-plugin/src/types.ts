@@ -16,7 +16,7 @@ export interface StylableWebpackPluginOptions {
     runtimeMode: 'isolated' | 'shared' | 'external';
     globalRuntimeId: string;
     bootstrap: {
-        autoInit: boolean,
+        autoInit: boolean;
         getAutoInitModule?: any;
         globalInjection?: (p: string) => string;
     };
@@ -38,8 +38,10 @@ export interface StylableWebpackPluginOptions {
     unsafeMuteDiagnostics: {
         DUPLICATE_MODULE_NAMESPACE: boolean;
     };
-    afterTransform?: ((results: StylableResults, module: StylableModule, stylable: Stylable) => void) | null;
-    plugins?: Array<(this: webpack.Compiler, ...p: any[]) => void>;
+    afterTransform?:
+        | ((results: StylableResults, module: StylableModule, stylable: Stylable) => void)
+        | null;
+    plugins?: Array<{ apply: (compiler: webpack.Compiler, stylablePlugin: any) => void }>;
     resolveNamespace?(): string;
     requireModule(path: string): any;
 }
@@ -51,7 +53,9 @@ export interface StylableGeneratorOptions {
     afterTransform: any;
 }
 
-export type ShallowPartial<T> = {[P in keyof T]?: T[P] extends new() => any ? T[P] : Partial<T[P]>};
+export type ShallowPartial<T> = {
+    [P in keyof T]?: T[P] extends new () => any ? T[P] : Partial<T[P]>
+};
 
 export interface CalcResult {
     depth: number;
@@ -70,12 +74,12 @@ export interface StylableModule extends webpack.Module {
     request: string;
     loaders: webpack.NewLoader[];
     buildInfo: {
-        optimize: StylableWebpackPluginOptions['optimize']
+        optimize: StylableWebpackPluginOptions['optimize'];
         isImportedByNonStylable: boolean;
         runtimeInfo: CalcResult;
         stylableMeta: StylableMeta;
-        usageMapping: Record<string, boolean>
-        usedStylableModules: StylableModule[]
+        usageMapping: Record<string, boolean>;
+        usedStylableModules: StylableModule[];
     };
     originalSource(): string;
 }

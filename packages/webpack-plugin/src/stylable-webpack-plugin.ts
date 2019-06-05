@@ -88,7 +88,9 @@ export class StylableWebpackPlugin {
         this.stylable = stylable;
     }
     public injectPlugins(compiler: webpack.Compiler) {
-        this.options.plugins!.forEach(plugin => plugin.apply(compiler));
+        if(this.options.plugins) {
+            this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
+        }
     }
     public injectStylableRuntimeInfo(compiler: webpack.Compiler) {
         compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
