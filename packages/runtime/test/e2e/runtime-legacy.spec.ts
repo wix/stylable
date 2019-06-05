@@ -9,8 +9,8 @@ describe(`(${project})`, () => {
         {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
-                headless: false,
-                devtools: true
+                // headless: false,
+                // devtools: true
             }
         },
         before,
