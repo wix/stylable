@@ -17,32 +17,24 @@ export function create(
     renderer: RuntimeRenderer | null
 ) {
     const stylesheet = newCreate(namespace, exports, css, depth, id, renderer);
-    const dataNamespace = 'data-' + namespace.toLowerCase() + '-';
+
     function $cssStates(stateMapping: StateMap) {
-        // TODO: legacy states does not compatible with class based states
-        return stateMapping
-            ? Object.keys(stateMapping).reduce(
-                  (states, key) => {
-                      const stateValue = stateMapping[key];
-                      if (stateValue === undefined || stateValue === null || stateValue === false) {
-                          return states;
-                      }
-                      states[dataNamespace + key.toLowerCase()] = stateValue;
-                      return states;
-                  },
-                  {} as StateMap
-              )
-            : {};
+        return {
+            className: stylesheet.cssStates(stateMapping)
+        };
     }
+
     function $get(localName: string) {
         return stylesheet.classes[localName];
     }
+
     function $mapClasses(className: string) {
         return className
             .split(/\s+/g)
             .map(className => stylesheet.classes[className] || className)
             .join(' ');
     }
+
     function stylable_runtime_stylesheet(
         className: string,
         states?: StateMap,
@@ -75,6 +67,7 @@ export function create(
         }
         return base;
     }
+
     Object.setPrototypeOf(stylable_runtime_stylesheet, {
         $root: 'root',
         ...stylesheet.stVars,
