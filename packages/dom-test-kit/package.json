@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@stylable/core": "^2.0.9",
-    "@stylable/runtime": "^2.0.6"
+    "@stylable/runtime": "^2.0.6",
+    "@unidriver/core": "^1.1.2"
   },
   "files": [
     "cjs",
