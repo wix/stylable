@@ -1,28 +1,22 @@
-import { pseudoStates } from '@stylable/core';
-import { StylableDOMUtil } from '@stylable/dom-test-kit';
-import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
-import { UniDriver } from '@unidriver/core';
+import { ElementRemoteApi, MinimalStylesheet, StateValue } from './types';
 
-export type MiniUniDriver = Pick<UniDriver, 'hasClass' | 'attr'>
-/**
- * This is an implementation of StylableDOMUtil for Unidriver.
- * Work-In-Progress: Not all methods are implemented yet !
- */
+const stateMiddleDelimiter = '-';
+
 export class StylableUnidriverUtil {
-    constructor(private stylesheet: RuntimeStylesheet) {}
+    constructor(private stylesheet: MinimalStylesheet) {}
 
     public async hasStyleState(
-        base: MiniUniDriver,
+        base: ElementRemoteApi,
         stateName: string,
         param: StateValue = true
     ): Promise<boolean> {
         const stateClass = this.stylesheet.cssStates({ [stateName]: param });
         return base.hasClass(stateClass);
     }
-    public scopeSelector(selector?: string): string {
-        return StylableDOMUtil.prototype.scopeSelector.call(this, selector);
-    }
-    public async getStyleState(base: MiniUniDriver, stateName: string): Promise<string | boolean | null> {
+    public async getStyleState(
+        base: ElementRemoteApi,
+        stateName: string
+    ): Promise<string | boolean | null> {
         const className = (await base.attr('class')) || '';
         if (!className.includes(stateName)) {
             return null;
@@ -49,7 +43,7 @@ export class StylableUnidriverUtil {
     public getStateValueFromClassName(cls: string, baseState: string) {
         if (cls.startsWith(baseState)) {
             const param = cls.slice(baseState.length);
-            const paramIndex = param.indexOf(pseudoStates.stateMiddleDelimiter);
+            const paramIndex = param.indexOf(stateMiddleDelimiter);
 
             if (paramIndex !== -1) {
                 return param.slice(paramIndex + 1);

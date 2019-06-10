@@ -11,12 +11,6 @@
     "start": "webpack-dev-server --hot --inline",
     "prepack": "yarn build"
   },
-  "dependencies": {
-    "@stylable/dom-test-kit": "^2.0.10",
-    "@stylable/core": "^2.0.9",
-    "@stylable/runtime": "^2.0.6",
-    "@unidriver/core": "^1.1.2"
-  },
   "files": [
     "cjs",
     "src",
