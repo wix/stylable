@@ -21,7 +21,7 @@ export function evalStylableModule<T = unknown>(source: string, fullPath: string
         if (id === '@stylable/runtime') {
             return { create };
         }
-        if (id === '@stylable/runtime/cjs/index-legacy.js') {
+        if (id === '@stylable/runtime/cjs/index-legacy') {
             return { create: legacyCreate };
         }
         throw new Error(`Could not find module: ${id}`);

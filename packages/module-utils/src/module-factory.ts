@@ -21,7 +21,7 @@ export function stylableModuleFactory(
 ) {
     const stylable = Stylable.create(stylableOptions);
     if (legacyRuntime && runtimePath === '@stylable/runtime') {
-        runtimePath = '@stylable/runtime/cjs/index-legacy.js';
+        runtimePath = '@stylable/runtime/cjs/index-legacy';
     }
     return function stylableToModule(source: string, path: string) {
         const res = stylable.transform(source, path);
