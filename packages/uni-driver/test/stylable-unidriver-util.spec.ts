@@ -1,5 +1,5 @@
+import { contractTest } from '@stylable/dom-test-kit/test/contract-test';
 import { MiniUniDriver, StylableUnidriverUtil } from '../src';
-import { contractTest } from './contract-test';
 
 function wrapWithMiniUni(el: HTMLElement): MiniUniDriver {
     return {

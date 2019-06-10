@@ -1,8 +1,7 @@
 import { pseudoStates } from '@stylable/core';
+import { StylableDOMUtil } from '@stylable/dom-test-kit';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 import { UniDriver } from '@unidriver/core';
-import { StylableDOMUtil } from './stylable-dom-util';
-
 
 export type MiniUniDriver = Pick<UniDriver, 'hasClass' | 'attr'>
 /**

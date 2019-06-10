@@ -1,0 +1,34 @@
+{
+  "name": "@stylable/uni-driver",
+  "version": "2.0.0",
+  "description": "Stylable UniDriver testing utilities",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "test": "mocha -r @ts-tools/node/r \"./test/**/*.spec.ts\" --watch-extensions ts",
+    "start": "webpack-dev-server --hot --inline",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@stylable/dom-test-kit": "^2.0.10",
+    "@stylable/core": "^2.0.9",
+    "@stylable/runtime": "^2.0.6",
+    "@unidriver/core": "^1.1.2"
+  },
+  "files": [
+    "cjs",
+    "src",
+    "!src/tsconfig.json"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/uni-driver",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}
