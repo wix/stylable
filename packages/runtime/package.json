@@ -17,7 +17,8 @@
     "cjs",
     "src",
     "!src/tsconfig.json",
-    "runtime.lib.js"
+    "runtime.lib.js",
+    "runtime-legacy.lib.js"
   ],
   "engines": {
     "node": ">=8"

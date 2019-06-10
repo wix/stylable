@@ -6,7 +6,7 @@ import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { getModuleInGraph, hasStylableModuleInGraph } from './get-module-in-graph';
 import { normalizeOptions } from './plugin-options';
-import { RUNTIME_SOURCE, WEBPACK_STYLABLE } from './runtime-dependencies';
+import { RUNTIME_SOURCE, RUNTIME_SOURCE_LEGACY, WEBPACK_STYLABLE } from './runtime-dependencies';
 import { StylableBootstrapModule } from './stylable-bootstrap-module';
 import { StylableAssetDependency, StylableImportDependency } from './stylable-dependencies';
 import { StylableGenerator } from './stylable-generator';
@@ -380,16 +380,18 @@ export class StylableWebpackPlugin {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
+                
+                const runtimeSource = this.options.legacyRuntime ? RUNTIME_SOURCE_LEGACY : RUNTIME_SOURCE;
 
                 if (this.options.runtimeMode === 'isolated') {
-                    return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                    return `${runtimeSource};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
                 } else {
                     const id = this.options.globalRuntimeId;
                     const globalObj = compilation.outputOptions.globalObject;
                     // tslint:disable-next-line:max-line-length
                     const injected = `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
                     if (this.options.runtimeMode === 'shared') {
-                        return `${RUNTIME_SOURCE};\n${injected}`;
+                        return `${runtimeSource};\n${injected}`;
                     } else {
                         // external
                         return injected;
