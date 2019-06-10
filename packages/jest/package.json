@@ -11,6 +11,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
+    "@stylable/core": "^2.0.9",
     "@stylable/module-utils": "^2.0.10",
     "@stylable/runtime": "^2.0.6"
   },
