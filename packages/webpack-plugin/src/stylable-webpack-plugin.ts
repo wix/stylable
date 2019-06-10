@@ -381,7 +381,7 @@ export class StylableWebpackPlugin {
                     return source;
                 }
                 
-                const runtimeSource = this.options.legacyRuntime ? 'debugger;'+RUNTIME_SOURCE_LEGACY : RUNTIME_SOURCE;
+                const runtimeSource = this.options.legacyRuntime ? RUNTIME_SOURCE_LEGACY : RUNTIME_SOURCE;
 
                 if (this.options.runtimeMode === 'isolated') {
                     return `${runtimeSource};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
