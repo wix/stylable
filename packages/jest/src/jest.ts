@@ -6,7 +6,7 @@ export function processFactory(
     stylableConfig?: Partial<StylableConfig>,
     factoryOptions?: Partial<Options>
 ) {
-    stylableModuleFactory(
+    return stylableModuleFactory(
         {
             fileSystem: fs,
             requireModule: require,
