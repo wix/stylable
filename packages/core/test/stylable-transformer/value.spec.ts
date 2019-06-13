@@ -1,4 +1,4 @@
-import { box, CustomValueExtension, stTypes, functionWarnings } from '@stylable/core';
+import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
