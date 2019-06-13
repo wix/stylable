@@ -1,4 +1,4 @@
-import { box, CustomValueExtension, stTypes } from '@stylable/core';
+import { box, CustomValueExtension, stTypes, functionWarnings } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
@@ -184,6 +184,30 @@ describe('Generator variables interpolation', () => {
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
         expect((rule.nodes![1] as postcss.Declaration).value).to.equal('blue');
+    });
+
+    it('should resolve a variable inside unknown functions', () => {
+        const { meta } = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :vars {
+                            param: green;
+                        }
+                        .container {
+                            color: xxx(value(param));
+                        }
+                        `
+                }
+            }
+        });
+
+        const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+
+        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('xxx(green)');
+        expect(meta.transformDiagnostics!.reports[0].message).to.equal(functionWarnings.UNKNOWN_FORMATTER('xxx'));
     });
 
     xit('should resolve value() usage in mixin call', () => {
