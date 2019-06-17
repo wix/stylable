@@ -71,7 +71,7 @@ const argv = require('yargs')
     .option('minify')
     .alias('minify', 'm')
     .boolean('minify')
-    .describe('minify', 'minify css')
+    .describe('minify', 'minify generated css')
     .default('minify', false)
 
 

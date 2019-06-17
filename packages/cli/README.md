@@ -31,6 +31,8 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |cssFilename|pattern of the generated css file|`[filename].css`|
 |injectCSSRequest|add a static import for the generated css in the js module output|`false`|
 |namespaceResolver|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
+|optimize|minimal css optimizations|`false`|
+|minify|minify generated css|`false`|
 |log|verbose log|`false`|
 |diagnostics|verbose diagnostics|`false`|
 |help|Show help|`boolean`|
