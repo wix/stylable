@@ -45,6 +45,16 @@ const argv = require('yargs')
     )
     .default('namespaceResolver', '@stylable/node')
 
+    .option('injectCSSRequest')
+    .alias('injectCSSRequest', 'icr')
+    .boolean('injectCSSRequest')
+    .describe('injectCSSRequest', 'add static import of the generated css to the js module output')
+    .default('injectCSSRequest', false)
+
+    .option('cssFilename')
+    .describe('cssFilename', 'name of the generated css file')
+    .default('cssFilename', '[filename].css')
+
     .option('cssInJs')
     .boolean('cssInJs')
     .describe('cssInJs', 'output transpiled css into the js module')
@@ -87,7 +97,9 @@ const {
     css,
     stcss,
     cssInJs,
-    namespaceResolver
+    namespaceResolver,
+    injectCSSRequest,
+    cssFilename
 } = argv;
 
 log('[Arguments]', argv);
@@ -113,7 +125,9 @@ build({
     moduleFormats: getModuleFormats({ esm, cjs }),
     outputCSS: css,
     includeCSSInJS: cssInJs,
-    outputSources: stcss
+    outputSources: stcss,
+    injectCSSRequest,
+    outputCSSNameTemplate: cssFilename
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

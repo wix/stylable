@@ -7,6 +7,7 @@ export interface Options {
     injectCSS: boolean;
     renderableOnly: boolean;
     legacyRuntime: boolean;
+    staticImports: string[];
 }
 
 export function stylableModuleFactory(
@@ -16,7 +17,8 @@ export function stylableModuleFactory(
         runtimeStylesheetId = 'module',
         injectCSS = true,
         renderableOnly = false,
-        legacyRuntime
+        legacyRuntime,
+        staticImports = []
     }: Partial<Options> = {}
 ) {
     const stylable = Stylable.create(stylableOptions);
@@ -28,7 +30,10 @@ export function stylableModuleFactory(
         return generateModuleSource(
             res,
             runtimeStylesheetId === 'module' ? 'module.id' : res.meta.namespace,
-            [`const runtime = require(${JSON.stringify(runtimePath)})`],
+            [
+                ...staticImports.map(request => `import ${JSON.stringify(request)}`),
+                `const runtime = require(${JSON.stringify(runtimePath)})`
+            ],
             `runtime.$`,
             `runtime.create`,
             `runtime.createRenderable`,
