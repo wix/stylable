@@ -27,6 +27,10 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |stcss|output stylable source files (`.st.css`)|`false`|
 |customGenerator|path of a custom index file generator|-|
 |ext|extension of stylable css files|`.st.css`|
+|cssInJs|output transpiled css into the js module|`false`|
+|cssFilename|pattern of the generated css file|`[filename].css`|
+|injectCSSRequest|add a static import for the generated css in the js module output|`false`|
+|namespaceResolver|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
 |log|verbose log|`false`|
 |diagnostics|verbose diagnostics|`false`|
 |help|Show help|`boolean`|
