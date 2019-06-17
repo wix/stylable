@@ -39,7 +39,8 @@ export function createModuleSource(
     includeCSSInJS: boolean,
     moduleId = JSON.stringify(stylableResult.meta.namespace),
     renderableOnly = false,
-    depth: string | number = '-1'
+    depth: string | number = '-1',
+    staticRequests: string[] = []
 ) {
     // TODO: calc depth for node as well
     depth = typeof depth === 'number' ? depth.toString() : depth;
@@ -57,7 +58,10 @@ export function createModuleSource(
             return generateModuleSource(
                 stylableResult,
                 moduleId,
-                [`import { $, ${importKey} } from ${JSON.stringify('@stylable/runtime')}`],
+                [
+                    ...staticRequests.map(request => `import ${JSON.stringify(request)}`),
+                    `import { $, ${importKey} } from ${JSON.stringify('@stylable/runtime')}`
+                ],
                 `$`,
                 `create`,
                 `createRenderable`,
@@ -71,7 +75,10 @@ export function createModuleSource(
             return generateModuleSource(
                 stylableResult,
                 moduleId,
-                [`const runtime = require(${JSON.stringify('@stylable/runtime')})`],
+                [
+                    ...staticRequests.map(request => `require(${JSON.stringify(request)})`),
+                    `const runtime = require(${JSON.stringify('@stylable/runtime')})`
+                ],
                 `runtime.$`,
                 `runtime.create`,
                 `runtime.createRenderable`,
@@ -85,6 +92,6 @@ export function createModuleSource(
     throw new Error('Unknown module format ' + moduleFormat);
 }
 
-function generateTypescriptDefinition() {
+function generateTypescriptDefinition(): string {
     throw new Error('Not implemented');
 }
