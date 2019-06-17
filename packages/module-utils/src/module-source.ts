@@ -92,6 +92,6 @@ export function createModuleSource(
     throw new Error('Unknown module format ' + moduleFormat);
 }
 
-function generateTypescriptDefinition() {
+function generateTypescriptDefinition(): string {
     throw new Error('Not implemented');
 }
