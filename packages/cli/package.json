@@ -16,6 +16,7 @@
   "dependencies": {
     "@stylable/core": "^2.1.0",
     "@stylable/node": "^2.1.1",
+    "@stylable/optimizer": "2.1.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^13.2.4"
