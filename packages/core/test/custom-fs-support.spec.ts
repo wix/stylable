@@ -27,6 +27,6 @@ describe(`@stylable/core support for custom fs`, () => {
 
         expect(diagnostics.reports, 'reports').to.have.lengthOf(0);
         expect(transformDiagnostics, 'transformDiagnostics').to.not.equal(null);
-        expect(transformDiagnostics!.reports, 'transformDiagnostics.reports').to.have.lengthOf(0);
+        expect(transformDiagnostics!.reports, 'transformDiagnostics.reports').to.eql([]);
     });
 });
