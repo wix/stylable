@@ -23,6 +23,7 @@ export function createInfrastructure(
     });
 
     const resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
+        console.log('resolvePath', context, moduleId);
         if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
             moduleId = eResolver.resolveSync({}, context, moduleId);
         }
@@ -31,7 +32,11 @@ export function createInfrastructure(
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
-            return process(safeParse(content, { from: resolvePath(projectRoot, from) }), undefined, resolveNamespace);
+            return process(
+                safeParse(content, { from: resolvePath(projectRoot, from) }),
+                undefined,
+                resolveNamespace
+            );
         },
         {
             readFileSync(resolvedPath: string) {
