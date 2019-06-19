@@ -14,6 +14,7 @@
     "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
   },
   "devDependencies": {
+    "@file-services/memory": "^2.0.0",
     "@ts-tools/build": "^0.1.14",
     "@ts-tools/node": "^0.9.8",
     "@ts-tools/webpack-loader": "^0.8.12",
