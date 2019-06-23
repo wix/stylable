@@ -262,6 +262,7 @@ export function processDeclarationValue(
                         } else if (isCssNativeFunction(value)) {
                             parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                         } else if (diagnostics) {
+                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                             diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
                                 word: value
                             });
