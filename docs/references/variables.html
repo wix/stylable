@@ -121,13 +121,13 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
-                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
-            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
             
                 <li class="active"><a href="../../docs/references/variables" class="active docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
             
                 <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
             
@@ -140,7 +140,10 @@
 
 <section class="docs-content">
     <h1>Variables</h1>
-    <p>Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.</p>
+    <p>Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.
+These variables are used only during build-time and have no impact on the resulting runtime code.</p>
+
+<p>If you wish to use dynamic variables, and to change their values during runtime, see <a href="./css-vars">css custom properties (vars)</a> for further details.</p>
 
 <blockquote>
   <p><strong>Note</strong>  <br />
@@ -199,7 +202,7 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 
 <blockquote>
   <p><strong>Note</strong><br />
-Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.</p>
+Imported variables are not exported from the stylesheet that has imported them. They can be imported only from the stylesheet in which they are declared.</p>
 </blockquote>
 
 <h2 id="compose-variables">Compose variables</h2>

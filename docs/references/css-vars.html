@@ -121,13 +121,13 @@
             
                 <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
             
-                <li class="active"><a href="../../docs/references/css-vars" class="active docs-nav-item">CSS Custom Properties</a></li>
-            
                 <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
             
                 <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
             
                 <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class="active"><a href="../../docs/references/css-vars" class="active docs-nav-item">CSS Custom Properties</a></li>
             
                 <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
             
@@ -189,7 +189,8 @@
 <span class="p">}</span>
 
 <span class="nc">.root</span> <span class="p">{</span>
-    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--myVar</span><span class="p">);</span> <span class="c">/* green */</span>
+    <span class="c">/* value determined by the nearest property assignment up the DOM tree */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--myVar</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="nc">.part</span> <span class="p">{</span>
@@ -209,13 +210,13 @@
 
 <p>Override any variable by redefining its value using an inline style attribute.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">vars</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">vars</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
 
 <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
      <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> 
-        <span class="p">[</span><span class="nx">vars</span><span class="p">.</span><span class="nx">color</span><span class="p">]:</span> <span class="s1">'green'</span><span class="p">,</span> 
-        <span class="p">[</span><span class="nx">vars</span><span class="p">[</span><span class="s1">'border-size'</span><span class="p">]]:</span> <span class="s1">'5px'</span><span class="p">,</span> 
-        <span class="na">background</span><span class="p">:</span> <span class="s1">'gold'</span> <span class="p">}}</span> <span class="sr">/</span><span class="err">&gt;
+        <span class="p">[</span><span class="nx">vars</span><span class="p">.</span><span class="nx">myVar</span><span class="p">]:</span> <span class="s1">'pink'</span><span class="p">,</span>  
+        <span class="na">background</span><span class="p">:</span> <span class="s1">'gold'</span> <span class="p">}}</span> 
+<span class="sr">/</span><span class="err">&gt;
 </span></code></pre></div></div>
 
 <p>Output:</p>
