@@ -54,7 +54,8 @@ Due to the fact Stylable provides scoping to CSS variables, it also provides the
 }
 
 .root {
-    color: var(--myVar); /* green */
+    /* value determined by the nearest property assignment up the DOM tree */
+    color: var(--myVar);
 }
 
 .part {
@@ -77,13 +78,13 @@ Override any variable by redefining its value using an inline style attribute.
 
 {% raw %}
 ```js
-import { style, classes, vars } from './entry.st.css';
+import { classes, vars } from './entry.st.css';
 
 <div className={classes.root}
      style={{ 
-        [vars.color]: 'green', 
-        [vars['border-size']]: '5px', 
-        background: 'gold' }} />
+        [vars.myVar]: 'pink',  
+        background: 'gold' }} 
+/>
 ```
 {% endraw %}
 

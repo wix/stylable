@@ -5,6 +5,9 @@ layout: docs
 ---
 
 Use variables to define common values to be used across the stylesheet and so they can be exposed for sharing and theming.
+These variables are used only during build-time and have no impact on the resulting runtime code.
+
+If you wish to use dynamic variables, and to change their values during runtime, see [css custom properties (vars)](./css-vars.md) for further details.
 
 > **Note**    
 > Variables are scoped to the specific stylesheet and do not conflict with variables from another stylesheet.
@@ -64,7 +67,7 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 ```
 
 > **Note**  
->Imported variables are not exported from the stylesheet that has imported them. They can be exported only from the stylesheet where they are declared.
+> Imported variables are not exported from the stylesheet that has imported them. They can be imported only from the stylesheet in which they are declared.
 
 
 ## Compose variables
