@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { Stylable } from '../src';
 
 describe(`@stylable/core support for custom fs`, () => {
-    xit('allows providing a custom fs and resolves imports across its files', () => {
+    it.only('allows providing a custom fs and resolves imports across its files', () => {
         const filePathA = '/a.st.css';
         const filePathB = '/b.st.css';
         const fs = createMemoryFs({
