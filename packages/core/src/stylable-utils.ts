@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import { isAbsolute, resolve } from 'path';
+import { isAbsolute } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import {
@@ -333,13 +333,13 @@ function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: Se
 }
 
 export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
-    const source = (root.source && root.source.input.file) || '';
-    if (!source) {
+    const filePath = (root.source && root.source.input.file) || '';
+    if (!filePath) {
         diagnostics.error(root, 'missing source filename');
-    } else if (!isAbsolute(source)) {
-        throw new Error('source filename is not absolute path: "' + source + '"');
+    } else if (!isAbsolute(filePath)) {
+        throw new Error('source filename is not absolute path: "' + filePath + '"');
     }
-    return source ? resolve(source) : source;
+    return filePath;
 }
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {

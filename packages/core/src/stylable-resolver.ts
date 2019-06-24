@@ -32,7 +32,7 @@ export class StylableResolver {
     public resolveImported(imported: Imported, name: string) {
         const { context, from } = imported;
         let symbol: StylableSymbol;
-        if (from.match(/\.css$/)) {
+        if (from.endsWith('.css')) {
             let meta;
             try {
                 meta = this.fileProcessor.process(from, false, context);
