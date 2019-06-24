@@ -1,4 +1,4 @@
-import { isAbsolute } from 'path';
+// import { isAbsolute } from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
@@ -22,21 +22,16 @@ export function createInfrastructure(
         ...resolveOptions
     });
 
-    const resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        console.log('resolvePath', context, moduleId);
-        if (!isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
-            moduleId = eResolver.resolveSync({}, context, moduleId);
-        }
-        return moduleId;
+    const resolveFrom = (directoryPath: string | undefined = projectRoot, moduleId: string) => {
+        const resolveId = eResolver.resolveSync({}, directoryPath, moduleId);
+        // console.log('resolvePath', directoryPath, moduleId, resolveId);
+        return resolveId;
     };
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
-            return process(
-                safeParse(content, { from: resolvePath(projectRoot, from) }),
-                undefined,
-                resolveNamespace
-            );
+            const parsedAST = safeParse(content, { from });
+            return process(parsedAST, undefined, resolveNamespace);
         },
         {
             readFileSync(resolvedPath: string) {
@@ -52,7 +47,7 @@ export function createInfrastructure(
                 return stat;
             }
         },
-        (path, context) => resolvePath(context || projectRoot, path)
+        (path, context) => resolveFrom(context || projectRoot, path)
     );
 
     if (onProcess) {
@@ -60,7 +55,7 @@ export function createInfrastructure(
     }
 
     return {
-        resolvePath,
+        resolvePath: resolveFrom,
         fileProcessor
     };
 }
