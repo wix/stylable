@@ -17,7 +17,7 @@ function createResolveExtendsResults(
             return process(safeParse(content, { from: fullpath }));
         },
         fs,
-        x => x
+        (_, x) => x
     );
 
     const resolver = new StylableResolver(processFile, (module: string) => module && '');

@@ -21,13 +21,13 @@ export interface FileProcessor<T> {
 export function cachedProcessFile<T = any>(
     processor: processFn<T>,
     fs: MinimalFS,
-    resolvePath: (path: string, context?: string) => string
+    resolvePath: (context: string | undefined, path: string) => string
 ): FileProcessor<T> {
     const cache: { [key: string]: CacheItem<T> } = {};
     const postProcessors: Array<(value: T, path: string) => T> = [];
 
     function process(fullpath: string, ignoreCache: boolean = false, context?: string) {
-        const resolvedPath = resolvePath(fullpath, context);
+        const resolvedPath = resolvePath(context, fullpath);
         const stat = fs.statSync(resolvedPath);
         const cached = cache[resolvedPath];
         if (

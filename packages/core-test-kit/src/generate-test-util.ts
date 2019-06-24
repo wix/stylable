@@ -57,7 +57,7 @@ export function generateInfra(
             return meta;
         },
         fs,
-        x => x
+        (_, x) => x
     );
 
     const resolver = new StylableResolver(fileProcessor, requireModule);

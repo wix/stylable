@@ -21,7 +21,7 @@ describe('cachedProcessFile', () => {
 
         const p = cachedProcessFile((_fullpath, content) => {
             return content + '!';
-        }, fs, x => x);
+        }, fs, (_, x) => x);
 
         expect(p.process(file)).to.equal('content!');
 
@@ -48,7 +48,7 @@ describe('cachedProcessFile', () => {
             const processed = { content, fullpath };
             res = res ? res : processed;
             return processed;
-        }, fs, x => x);
+        }, fs, (_, x) => x);
 
         expect(p.process(file)).to.equal(p.process(file));
 
@@ -71,7 +71,7 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile(() => null, fs, x => x);
+        const p = cachedProcessFile(() => null, fs, (_, x) => x);
         p.process(file);
         p.process(file);
         p.process(file);
@@ -100,7 +100,7 @@ describe('cachedProcessFile', () => {
         const p = cachedProcessFile(() => {
             processCount++;
             return null;
-        }, fs, x => x);
+        }, fs, (_, x) => x);
 
         p.process(file);
         p.process(file);
@@ -131,7 +131,7 @@ describe('cachedProcessFile', () => {
         const p = cachedProcessFile(() => {
             processCount++;
             return null;
-        }, fs, x => x);
+        }, fs, (_, x) => x);
 
         p.process(file);
         p.process(file);

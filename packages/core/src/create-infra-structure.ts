@@ -31,15 +31,23 @@ export function createInfrastructure(
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
             const parsedAST = safeParse(content, { from });
+            if (parsedAST.source) {
+                const { input } = parsedAST.source;
+
+                // postcss runs path.resolve, which messes up posix style paths when running on windows
+                Object.defineProperty(input, 'from', { value: from });
+                parsedAST.source.input.file = from;
+            }
             return process(parsedAST, undefined, resolveNamespace);
         },
         {
-            readFileSync(resolvedPath: string) {
-                return fileSystem.readFileSync(resolvedPath, 'utf8');
+            readFileSync(filePath: string) {
+                return fileSystem.readFileSync(filePath, 'utf8');
             },
-            statSync(resolvedPath: string) {
-                const stat = fileSystem.statSync(resolvedPath);
+            statSync(filePath: string) {
+                const stat = fileSystem.statSync(filePath);
                 if (!stat.mtime) {
+                    // for memory-fs of webpack which is missing the fields sometimes
                     return {
                         mtime: new Date(0)
                     };
@@ -47,7 +55,7 @@ export function createInfrastructure(
                 return stat;
             }
         },
-        (path, context) => resolveFrom(context || projectRoot, path)
+        resolveFrom
     );
 
     if (onProcess) {
