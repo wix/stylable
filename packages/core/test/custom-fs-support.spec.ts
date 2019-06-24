@@ -2,6 +2,8 @@ import { createMemoryFs } from '@file-services/memory';
 import { expect } from 'chai';
 import { Stylable } from '../src';
 
+const noopRequire = () => undefined;
+
 describe(`@stylable/core support for custom fs`, () => {
     it.only('allows providing a custom fs and resolves imports across its files', () => {
         const filePathA = '/a.st.css';
@@ -19,7 +21,7 @@ describe(`@stylable/core support for custom fs`, () => {
                 }
             `
         });
-        const stylable = new Stylable(fs.cwd(), fs, () => undefined);
+        const stylable = new Stylable(fs.cwd(), fs, noopRequire);
 
         const {
             meta: { diagnostics, transformDiagnostics }

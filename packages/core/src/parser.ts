@@ -13,7 +13,17 @@ export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
 
 export function safeParse(
     css: string,
-    options: postcss.ProcessOptions = { from: 'style.css' }
+    options: postcss.ProcessOptions = { from: '/style.css' }
 ): postcss.Root {
-    return safeParser(css, options);
+    const parsedAST = safeParser(css, options);
+    const { from } = options;
+
+    if (from && parsedAST.source) {
+        const { input } = parsedAST.source;
+
+        // postcss runs path.resolve, which messes up posix style paths when running on windows
+        Object.defineProperty(input, 'from', { value: from });
+        parsedAST.source.input.file = from;
+    }
+    return parsedAST;
 }

@@ -31,13 +31,6 @@ export function createInfrastructure(
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
             const parsedAST = safeParse(content, { from });
-            if (parsedAST.source) {
-                const { input } = parsedAST.source;
-
-                // postcss runs path.resolve, which messes up posix style paths when running on windows
-                Object.defineProperty(input, 'from', { value: from });
-                parsedAST.source.input.file = from;
-            }
             return process(parsedAST, undefined, resolveNamespace);
         },
         {
