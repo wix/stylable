@@ -2,10 +2,10 @@ import { createMemoryFs } from '@file-services/memory';
 import { expect } from 'chai';
 import { Stylable } from '../src';
 
-const noopRequire = () => undefined;
+const noopRequire = () => ({});
 
 describe(`@stylable/core support for custom fs`, () => {
-    it.only('allows providing a custom fs and resolves imports across its files', () => {
+    it('allows providing a custom fs and resolves imports across its files', () => {
         const filePathA = '/a.st.css';
         const filePathB = '/b.st.css';
         const fs = createMemoryFs({

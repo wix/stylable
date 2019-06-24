@@ -1,5 +1,5 @@
 import hash from 'murmurhash';
-import { basename, dirname, isAbsolute, resolve } from 'path';
+import { basename, dirname } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import {
@@ -654,13 +654,13 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    if (!isAbsolute(importPath) && !importPath.startsWith('.')) {
-                        importObj.fromRelative = importPath;
-                        importObj.from = importPath;
-                    } else {
-                        importObj.fromRelative = importPath;
-                        importObj.from = resolve(dirname(this.meta.source), importPath);
-                    }
+                    // if (!isAbsolute(importPath) && !importPath.startsWith('.')) {
+                    //     importObj.fromRelative = importPath;
+                    //     importObj.from = importPath;
+                    // } else {
+                    importObj.fromRelative = importPath;
+                    importObj.from = dirname(this.meta.source);
+                    // }
                     fromExists = true;
                     break;
                 case valueMapping.default:
