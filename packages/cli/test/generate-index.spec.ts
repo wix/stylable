@@ -1,7 +1,7 @@
 import { Stylable } from '@stylable/core';
 import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import * as path from 'path';
+import { resolve } from 'path';
 import { build } from '../src';
 const log = () => {
     /**/
@@ -27,11 +27,11 @@ describe('build index', () => {
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: path.resolve('/'),
+            rootDir: resolve('/'),
             log
         });
 
-        const res = fs.readFileSync(path.resolve('/index.st.css')).toString();
+        const res = fs.readFileSync(resolve('/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
             [
@@ -61,11 +61,11 @@ describe('build index', () => {
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: path.resolve('/'),
+            rootDir: resolve('/'),
             log
         });
 
-        const res = fs.readFileSync(path.resolve('/index.st.css')).toString();
+        const res = fs.readFileSync(resolve('/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
             [
@@ -95,12 +95,12 @@ describe('build index', () => {
             outDir: '.',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: path.resolve('/'),
+            rootDir: resolve('/'),
             log,
             generatorPath: require.resolve('./fixtures/test-generator')
         });
 
-        const res = fs.readFileSync(path.resolve('/index.st.css')).toString();
+        const res = fs.readFileSync(resolve('/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
             [
@@ -126,11 +126,11 @@ describe('build index', () => {
             outDir: './some-dir/other-dir/',
             srcDir: '.',
             indexFile: 'index.st.css',
-            rootDir: path.resolve('/'),
+            rootDir: resolve('/'),
             log
         });
 
-        const res = fs.readFileSync(path.resolve('/some-dir/other-dir/index.st.css')).toString();
+        const res = fs.readFileSync(resolve('/some-dir/other-dir/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
             [
@@ -158,12 +158,12 @@ describe('build index', () => {
                 outDir: '.',
                 srcDir: '.',
                 indexFile: 'index.st.css',
-                rootDir: path.resolve('/'),
+                rootDir: resolve('/'),
                 log
             });
         } catch (error) {
             expect(error.message).to.equal(
-                `Name Collision Error: ${path.resolve('/comp.st.css')} and ${path.resolve(
+                `Name Collision Error: ${resolve('/comp.st.css')} and ${resolve(
                     '/a/comp.st.css'
                 )} has the same filename`
             );

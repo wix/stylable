@@ -1,6 +1,6 @@
+import { dirname, isAbsolute, join, relative } from 'path';
 import postcss from 'postcss';
 import urlRegex from 'url-regex';
-import * as path from './path';
 import { ImportSymbol, RefedMixin, StylableMeta } from './stylable-processor';
 import { ParsedValue } from './types';
 
@@ -27,16 +27,16 @@ export function isAsset(url: string) {
 }
 
 export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
-    const isAbs = path.isAbsolute(resourcePath);
+    const isAbs = isAbsolute(resourcePath);
     let abs: string;
     if (isExternal(resourcePath)) {
         abs = resourcePath;
     } else if (isAbs && resourcePath[0] === '/') {
-        abs = path.join(rootContext, resourcePath);
+        abs = join(rootContext, resourcePath);
     } else if (isAbs) {
         abs = resourcePath;
     } else {
-        abs = path.join(moduleContext, resourcePath);
+        abs = join(moduleContext, resourcePath);
     }
     return abs;
 }
@@ -79,11 +79,10 @@ export function fixRelativeUrls(ast: postcss.Root, mix: RefedMixin, targetMeta: 
                     if (node.url![0] === '.') {
                         node.url =
                             './' +
-                            path
-                                .join(
-                                    path.relative(
-                                        path.dirname(targetMeta.source),
-                                        path.dirname((mix.ref as ImportSymbol).import.from)
+                            join(
+                                    relative(
+                                        dirname(targetMeta.source),
+                                        dirname((mix.ref as ImportSymbol).import.from)
                                     ),
                                     node.url!
                                 )

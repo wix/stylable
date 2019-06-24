@@ -1,10 +1,10 @@
 import { expect } from 'chai';
-import path from 'path';
+import { join, resolve } from 'path';
 import { moduleFactoryTestKit } from './test-kit';
 
 describe('Module Factory', () => {
     it('should create a module for a single (no import/resolution) stylable file', () => {
-        const testFile = path.join(path.resolve('/'), '/entry.st.css');
+        const testFile = join(resolve('/'), '/entry.st.css');
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: '.root {}'
         });
@@ -21,7 +21,7 @@ describe('Module Factory', () => {
     });
 
     it('should create a module with injectCSS=false', () => {
-        const testFile = path.join(path.resolve('/'), '/entry.st.css');
+        const testFile = join(resolve('/'), '/entry.st.css');
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit(
             {
                 [testFile]: '.root {}'
@@ -41,7 +41,7 @@ describe('Module Factory', () => {
         });
     });
     it('should create a module with legacy runtime', () => {
-        const testFile = path.join(path.resolve('/'), '/entry.st.css');
+        const testFile = join(resolve('/'), '/entry.st.css');
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit(
             {
                 [testFile]: '.root {}'
@@ -58,9 +58,9 @@ describe('Module Factory', () => {
         });
     });
     it('should create a module with cross file use', () => {
-        const rootPath = path.resolve('/');
-        const testFile = path.join(rootPath, '/entry.st.css');
-        const importedFile = path.join(rootPath, '/imported.st.css');
+        const rootPath = resolve('/');
+        const testFile = join(rootPath, '/entry.st.css');
+        const importedFile = join(rootPath, '/imported.st.css');
 
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: `
@@ -89,8 +89,8 @@ describe('Module Factory', () => {
     });
 
     it('api check', () => {
-        const rootPath = path.resolve('/');
-        const testFile = path.join(rootPath, '/entry.st.css');
+        const rootPath = resolve('/');
+        const testFile = join(rootPath, '/entry.st.css');
 
         const { fs, factory, evalStylableModule } = moduleFactoryTestKit({
             [testFile]: `

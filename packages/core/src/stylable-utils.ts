@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
+import { isAbsolute, resolve } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import { isAbsolute, resolve } from './path';
 import {
     DeclStylableProps,
     Imported,

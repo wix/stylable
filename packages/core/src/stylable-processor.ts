@@ -1,7 +1,7 @@
 import hash from 'murmurhash';
+import { basename, dirname, isAbsolute, resolve } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import * as path from './path';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
@@ -286,7 +286,7 @@ export class StylableProcessor {
             }
         });
         toRemove.forEach(node => node.remove());
-        namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
+        namespace = namespace || filename2varname(basename(this.meta.source)) || 's';
         this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
     }
 
@@ -430,7 +430,7 @@ export class StylableProcessor {
                 type: 'default',
                 name: 'default',
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: dirname(this.meta.source)
             };
         }
         Object.keys(importDef.named).forEach(name => {
@@ -440,7 +440,7 @@ export class StylableProcessor {
                 type: 'named',
                 name: importDef.named[name],
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: dirname(this.meta.source)
             };
         });
     }
@@ -639,7 +639,7 @@ export class StylableProcessor {
             fromRelative: '',
             named: {},
             rule,
-            context: path.dirname(this.meta.source)
+            context: dirname(this.meta.source)
         };
 
         rule.walkDecls(decl => {
@@ -654,12 +654,12 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+                    if (!isAbsolute(importPath) && !importPath.startsWith('.')) {
                         importObj.fromRelative = importPath;
                         importObj.from = importPath;
                     } else {
                         importObj.fromRelative = importPath;
-                        importObj.from = path.resolve(path.dirname(this.meta.source), importPath);
+                        importObj.from = resolve(dirname(this.meta.source), importPath);
                     }
                     fromExists = true;
                     break;

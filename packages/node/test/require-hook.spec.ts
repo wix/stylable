@@ -1,14 +1,14 @@
 import { expect } from 'chai';
-import * as fs from 'fs';
+import { readdirSync } from 'fs';
 import hash from 'murmurhash';
-import * as path from 'path';
+import { join } from 'path';
 import { attachHook } from '../src';
 
 describe('require hook', () => {
     afterEach(() => {
         delete require.extensions['.css'];
-        fs.readdirSync(path.join(__dirname, 'fixtures')).forEach(name => {
-            delete require.cache[path.join(__dirname, 'fixtures', name)];
+        readdirSync(join(__dirname, 'fixtures')).forEach(name => {
+            delete require.cache[join(__dirname, 'fixtures', name)];
         });
     });
 

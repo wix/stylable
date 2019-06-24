@@ -1,6 +1,6 @@
+import { isAbsolute } from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
-import * as path from './path';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
 
@@ -24,7 +24,7 @@ export function createInfrastructure(
 
     const resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         console.log('resolvePath', context, moduleId);
-        if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
+        if (!isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
             moduleId = eResolver.resolveSync({}, context, moduleId);
         }
         return moduleId;

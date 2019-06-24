@@ -4,12 +4,12 @@ import {
     findTestLocations
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import { resolve } from 'path';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import {
     nativePseudoElements,
     reservedKeyFrames
 } from '../src/native-reserved-lists';
-import { resolve } from '../src/path';
 import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
