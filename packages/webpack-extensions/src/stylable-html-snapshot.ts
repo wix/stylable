@@ -1,8 +1,4 @@
 import { basename, join } from 'path';
-// import { createElement } from 'react';
-// import * as path from 'path';
-// import { RawSource } from 'webpack-sources';
-// import { renderToStaticMarkup } from 'react-dom/server';
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { compileAsEntry, exec } from './compile-as-entry';

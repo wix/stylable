@@ -1,6 +1,6 @@
+import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
-import * as path from './path';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
 
@@ -31,7 +31,11 @@ export function createInfrastructure(
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
-            return process(safeParse(content, { from: resolvePath(projectRoot, from) }), undefined, resolveNamespace);
+            return process(
+                safeParse(content, { from: resolvePath(projectRoot, from) }),
+                undefined,
+                resolveNamespace
+            );
         },
         {
             readFileSync(resolvedPath: string) {

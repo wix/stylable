@@ -1,14 +1,14 @@
 import { expect } from 'chai';
-import * as fs from 'fs';
+import { readdirSync } from 'fs';
 import hash from 'murmurhash';
-import * as path from 'path';
+import { join } from 'path';
 import { attachHook } from '../src';
 
 describe('require hook', () => {
     afterEach(() => {
         delete require.extensions['.css'];
-        fs.readdirSync(path.join(__dirname, 'fixtures')).forEach(name => {
-            delete require.cache[path.join(__dirname, 'fixtures', name)];
+        readdirSync(join(__dirname, 'fixtures')).forEach(name => {
+            delete require.cache[join(__dirname, 'fixtures', name)];
         });
     });
 
@@ -45,7 +45,8 @@ describe('require hook', () => {
         const fileName = 'test';
         const relativePathFromRoot = 'test.st.css';
         const { name, version } = require('./fixtures/package.json');
-        const expectedNamespace = fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
+        const expectedNamespace =
+            fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
         const m = require('./fixtures/test.st.css');
         expect(m.namespace).to.equal(expectedNamespace);
     });
@@ -57,9 +58,8 @@ describe('require hook', () => {
     });
 
     it('should ignoreJSModules', () => {
-        attachHook({ignoreJSModules: true});
+        attachHook({ ignoreJSModules: true });
         const m = require('./fixtures/has-js.st.css');
         expect(m.$id).to.contain('has-js.st.css');
     });
-    
 });

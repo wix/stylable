@@ -1,10 +1,10 @@
 import { expectWarningsFromTransform } from '@stylable/core-test-kit';
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import { resolve } from 'path';
 import postcss from 'postcss';
 import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
-import * as path from '../src/path';
 
 // var receives special handling and standalone testing
 export const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter(func => func !== 'var');
@@ -754,7 +754,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                const mainPath = path.resolve('/main.st.css');
+                const mainPath = resolve('/main.st.css');
                 console.log(mainPath);
                 expectWarningsFromTransform(config, [
                     {
@@ -821,7 +821,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 expectWarningsFromTransform(config, [
                     {
-                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER('fail(a, red, c)', 'FAIL FAIL FAIL'),
+                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                            'fail(a, red, c)',
+                            'FAIL FAIL FAIL'
+                        ),
                         file: '/main.st.css'
                     }
                 ]);

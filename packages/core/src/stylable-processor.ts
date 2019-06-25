@@ -1,7 +1,7 @@
 import hash from 'murmurhash';
+import path from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
-import * as path from './path';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
