@@ -1,6 +1,6 @@
 import { StylableConfig } from '@stylable/core';
 import { stylableModuleFactory } from '@stylable/module-utils';
-import * as fs from 'fs';
+import fs from 'fs';
 import { resolveNamespace } from './resolve-namespace';
 
 export interface Options {
@@ -42,7 +42,8 @@ export function attachHook({
     const prevHook = require.extensions[HOOK_EXTENSION];
     require.extensions[HOOK_EXTENSION] = function cssModulesHook(m: any, filename: string) {
         if (matcher!(filename) || !prevHook) {
-            const useJSModule = !legacyRuntime && !ignoreJSModules && fs.existsSync(filename + '.js');
+            const useJSModule =
+                !legacyRuntime && !ignoreJSModules && fs.existsSync(filename + '.js');
             const source = fs.readFileSync(useJSModule ? filename + '.js' : filename).toString();
             const code = useJSModule ? source : stylableToModule(source, filename);
             return m._compile(afterCompile ? afterCompile(code, filename) : code, filename);

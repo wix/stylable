@@ -1,12 +1,12 @@
 import { readdirSync, readFileSync } from 'fs';
-import * as path from 'path';
+import { dirname, join, resolve } from 'path';
 import { memoryFS } from './mem-fs';
 const webpack = require('webpack');
 const _eval = require('node-eval');
 
-const runtimeDir = path.dirname(require.resolve('@stylable/runtime/cjs'));
+const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
 const content = readdirSync(runtimeDir).map(f => {
-    const fullpath = path.join(runtimeDir, f);
+    const fullpath = join(runtimeDir, f);
     return {
         content: readFileSync(fullpath, 'utf-8'),
         fullpath
@@ -17,13 +17,13 @@ export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: str
     const memfs = memoryFS();
 
     for (const k in files) {
-        const r = path.resolve(k);
-        memfs.mkdirpSync(path.dirname(r));
+        const r = resolve(k);
+        memfs.mkdirpSync(dirname(r));
         memfs.writeFileSync(r, files[k] || '\n');
     }
 
     for (const k in content) {
-        memfs.mkdirpSync(path.dirname(content[k].fullpath));
+        memfs.mkdirpSync(dirname(content[k].fullpath));
         memfs.writeFileSync(content[k].fullpath, content[k].content || '\n');
     }
 
@@ -32,7 +32,7 @@ export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: str
 
 export function webpackTest({ files, config }: any) {
     const memfs = createMemoryFileSystemWithFiles(files);
-    config.context = path.resolve('/');
+    config.context = resolve('/');
 
     config.plugins.unshift({
         apply(compiler: any) {
