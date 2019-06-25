@@ -45,7 +45,8 @@ describe('require hook', () => {
         const fileName = 'test';
         const relativePathFromRoot = 'test.st.css';
         const { name, version } = require('./fixtures/package.json');
-        const expectedNamespace = fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
+        const expectedNamespace =
+            fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
         const m = require('./fixtures/test.st.css');
         expect(m.namespace).to.equal(expectedNamespace);
     });
@@ -57,9 +58,8 @@ describe('require hook', () => {
     });
 
     it('should ignoreJSModules', () => {
-        attachHook({ignoreJSModules: true});
+        attachHook({ ignoreJSModules: true });
         const m = require('./fixtures/has-js.st.css');
         expect(m.$id).to.contain('has-js.st.css');
     });
-    
 });

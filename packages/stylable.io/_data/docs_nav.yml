@@ -56,14 +56,14 @@
     title: Global Selectors
   - id: references/custom-selectors
     title: Custom Selectors
-  - id: references/css-vars
-    title: CSS Custom Properties
   - id: references/mixins
     title: Mixins
   - id: references/formatters
     title: Formatters
   - id: references/variables
     title: Variables
+  - id: references/css-vars
+    title: CSS Custom Properties
   - id: references/st-scope
     title: Scoping
   - id: references/namespace

@@ -821,7 +821,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 expectWarningsFromTransform(config, [
                     {
-                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER('fail(a, red, c)', 'FAIL FAIL FAIL'),
+                        message: functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
+                            'fail(a, red, c)',
+                            'FAIL FAIL FAIL'
+                        ),
                         file: '/main.st.css'
                     }
                 ]);

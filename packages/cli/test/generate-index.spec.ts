@@ -133,10 +133,7 @@ describe('build index', () => {
         const res = fs.readFileSync(resolve('/some-dir/other-dir/index.st.css')).toString();
 
         expect(res.trim()).to.equal(
-            [
-                ':import {-st-from: "../../comp.st.css";-st-default:Comp;}',
-                '.root Comp{}'
-            ].join('\n')
+            [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join('\n')
         );
     });
     it('should handle name collisions by failing', async () => {
