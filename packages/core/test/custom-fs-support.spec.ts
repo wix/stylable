@@ -21,7 +21,7 @@ describe(`@stylable/core support for custom fs`, () => {
                 }
             `
         });
-        const stylable = new Stylable(fs.cwd(), fs, noopRequire);
+        const stylable = new Stylable('/', fs, noopRequire);
 
         const {
             meta: { diagnostics, transformDiagnostics }

@@ -4,7 +4,7 @@ export * from './stylable-processor';
 export {
     StylableTransformer,
     StylableResults,
-    Options as TransformerOptions,
+    TransformerOptions,
     postProcessor,
     replaceValueHook,
     TransformHooks,

@@ -654,13 +654,8 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    // if (!isAbsolute(importPath) && !importPath.startsWith('.')) {
-                    //     importObj.fromRelative = importPath;
-                    //     importObj.from = importPath;
-                    // } else {
                     importObj.fromRelative = importPath;
-                    importObj.from = dirname(this.meta.source);
-                    // }
+                    importObj.from = importPath;
                     fromExists = true;
                     break;
                 case valueMapping.default:

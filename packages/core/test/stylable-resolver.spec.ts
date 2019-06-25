@@ -1,13 +1,15 @@
+import { createRequestResolver } from '@file-services/resolve';
+import { IFileSystemSync } from '@file-services/types';
 import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { resolve } from 'path';
 import postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
-import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
+import { cachedProcessFile } from '../src/cached-process-file';
 import { StylableMeta } from '../src/stylable-processor';
 
 function createResolveExtendsResults(
-    fs: MinimalFS,
+    fs: IFileSystemSync,
     fileToProcess: string,
     classNameToLookup: string,
     isElement: boolean = false
@@ -20,7 +22,16 @@ function createResolveExtendsResults(
         (_, x) => x
     );
 
-    const resolver = new StylableResolver(processFile, (module: string) => module && '');
+    const resolveRequest = createRequestResolver({ fs });
+
+    const resolver = new StylableResolver(
+        processFile,
+        (module: string) => module && '',
+        (context, request) => {
+            const resolved = resolveRequest(context || fs.cwd(), request);
+            return resolved === undefined ? request : resolved.resolvedFile;
+        }
+    );
     return resolver.resolveExtends(
         processFile.process(fileToProcess),
         classNameToLookup,

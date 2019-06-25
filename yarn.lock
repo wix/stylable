@@ -111,6 +111,11 @@
   resolved "https://registry.yarnpkg.com/@file-services/posix-path/-/posix-path-1.0.3.tgz#d176afbbb6fe284f055217f06fd51d5a0475bbb8"
   integrity sha512-m6WuGAyIku8jVXr2DP0TTZnaBXCjAobk1YS+EciVRUQvbjxswPqpV7L3yqmYFfYuExHLNcoA+puKYL556nbW0Q==
 
+"@file-services/resolve@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@file-services/resolve/-/resolve-2.0.0.tgz#113474af870be55ff34cba3aae50da7925c3e4f6"
+  integrity sha512-1jXRLmfoRcX8ShfkSudZ9QUN09OArQ/QaCEMnsRpAc8YSz6VkAzQSAoNEHeyEpqsGsvzom8hjyGRqmjRYSEQBg==
+
 "@file-services/types@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.0.0.tgz#396f375f209de5fc800b45ab12998f964471d2aa"

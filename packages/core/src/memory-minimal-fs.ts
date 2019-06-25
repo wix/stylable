@@ -1,7 +1,5 @@
-const deindent = require('deindent');
-import { resolve, sep } from 'path';
-
-import { MinimalFS } from './cached-process-file';
+import { createMemoryFs } from '@file-services/memory';
+import { createRequestResolver } from '@file-services/resolve';
 
 export interface File {
     content: string;
@@ -15,44 +13,12 @@ export interface MinimalFSSetup {
 export function createMinimalFS(config: MinimalFSSetup) {
     const files = config.files;
 
-    for (const file in files) {
-        if (files[file].mtime === undefined) {
-            files[file].mtime = new Date();
-            files[resolve(file)] = files[file];
-        }
+    const fs = createMemoryFs();
+    for (const [filePath, { content }] of Object.entries(files)) {
+        fs.ensureDirectorySync(fs.dirname(filePath));
+        fs.writeFileSync(filePath, content);
     }
-    function isDir(path: string) {
-        return Object.keys(files).some(p => {
-            return p.startsWith(path[path.length - 1] === sep ? path : path + sep);
-        });
-    }
-    const fs: MinimalFS = {
-        readFileSync(path: string) {
-            if (!files[path]) {
-                throw new Error('Cannot find file: ' + path);
-            }
-            if (config.trimWS) {
-                return deindent(files[path].content).trim();
-            }
-            return files[path].content;
-        },
-        statSync(path: string) {
-            const isDirectory = isDir(path);
-            if (!files[path] && !isDirectory) {
-                throw new Error('Cannot find file: ' + path);
-            }
 
-            return {
-                isDirectory() {
-                    return isDirectory;
-                },
-                isFile() {
-                    return true;
-                },
-                mtime: isDirectory ? new Date() : files[path].mtime!
-            };
-        }
-    };
 
     const requireModule = function require(id: string): any {
         const _module = {
@@ -71,13 +37,14 @@ export function createMinimalFS(config: MinimalFSSetup) {
         return _module.exports;
     };
 
-    function resolvePath(_ctx: string, path: string) {
-        return path;
-    }
+    const resolveRequest = createRequestResolver({ fs });
 
     return {
         fs,
         requireModule,
-        resolvePath
+        resolveFrom: (context: string | undefined, request: string) => {
+            const resolved = resolveRequest(context || fs.cwd(), request);
+            return resolved === undefined ? request : resolved.resolvedFile;
+        }
     };
 }

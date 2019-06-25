@@ -27,15 +27,17 @@ export interface JSResolve {
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
-        protected requireModule: (modulePath: string) => any
+        protected requireModule: (modulePath: string) => any,
+        protected resolveFrom: (directoryPath: string | undefined, moduleId: string) => string
     ) {}
     public resolveImported(imported: Imported, name: string) {
+        const { fs, process } = this.fileProcessor;
         const { context, from } = imported;
         let symbol: StylableSymbol;
         if (from.endsWith('.css')) {
             let meta;
             try {
-                meta = this.fileProcessor.process(from, false, context);
+                meta = process(this.resolveFrom(context, from), false, context);
                 symbol = !name ? meta.mappedSymbols[meta.root] : meta.mappedSymbols[name];
             } catch (e) {
                 return null;
@@ -45,7 +47,7 @@ export class StylableResolver {
         } else {
             let _module;
             try {
-                _module = this.requireModule(from);
+                _module = this.requireModule((fs as any).resolve(from));
             } catch {
                 return null;
             }

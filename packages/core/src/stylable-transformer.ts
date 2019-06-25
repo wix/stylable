@@ -81,9 +81,10 @@ export interface TransformHooks {
 
 type EnvMode = 'production' | 'development';
 
-export interface Options {
+export interface TransformerOptions {
     fileProcessor: FileProcessor<StylableMeta>;
     requireModule: (modulePath: string) => any;
+    resolver: StylableResolver;
     diagnostics: Diagnostics;
     delimiter?: string;
     keepValues?: boolean;
@@ -139,14 +140,14 @@ export class StylableTransformer {
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
-    constructor(options: Options) {
+    constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
+        this.resolver = options.resolver;
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {

@@ -5,9 +5,9 @@ import { safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
-    Options,
     StylableResults,
     StylableTransformer,
+    TransformerOptions,
     TransformHooks
 } from './stylable-transformer';
 import { IStylableOptimizer } from './types';
@@ -53,7 +53,7 @@ export class Stylable {
     }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
-    public resolvePath: (ctx: string | undefined, path: string) => string;
+    public resolveFrom: (ctx: string | undefined, path: string) => string;
     constructor(
         public projectRoot: string,
         protected fileSystem: MinimalFS,
@@ -67,18 +67,18 @@ export class Stylable {
         protected mode: 'production' | 'development' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
-        const { fileProcessor, resolvePath } = createInfrastructure(
+        const { fileProcessor, resolveFrom } = createInfrastructure(
             projectRoot,
             fileSystem,
             onProcess,
             resolveOptions,
             this.resolveNamespace
         );
-        this.resolvePath = resolvePath;
+        this.resolveFrom = resolveFrom;
         this.fileProcessor = fileProcessor;
-        this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
+        this.resolver = new StylableResolver(this.fileProcessor, this.requireModule, resolveFrom);
     }
-    public createTransformer(options: Partial<Options> = {}) {
+    public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
             diagnostics: new Diagnostics(),
@@ -87,6 +87,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             mode: this.mode,
+            resolver: this.resolver,
             ...options
         });
     }
@@ -95,7 +96,7 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<Options> = {}
+        options: Partial<TransformerOptions> = {}
     ): StylableResults {
         if (typeof meta === 'string') {
             // TODO: refactor to use fileProcessor

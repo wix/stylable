@@ -78,11 +78,11 @@ export function fixRelativeUrls(ast: postcss.Root, mix: RefedMixin, targetMeta: 
                 if (isAsset(node.url!)) {
                     if (node.url![0] === '.') {
                         node.url =
-                            './' +
+                            './' + // TODO: fix this, add test
                             join(
                                     relative(
                                         dirname(targetMeta.source),
-                                        dirname((mix.ref as ImportSymbol).import.from)
+                                        dirname(join((mix.ref as ImportSymbol).import.context, (mix.ref as ImportSymbol).import.from))
                                     ),
                                     node.url!
                                 )

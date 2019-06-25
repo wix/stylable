@@ -48,7 +48,7 @@ export function generateInfra(
     requireModule: RequireType;
     fileProcessor: FileProcessor<StylableMeta>;
 } {
-    const { fs, requireModule } = createMinimalFS(config);
+    const { fs, requireModule, resolveFrom } = createMinimalFS(config);
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
@@ -60,7 +60,7 @@ export function generateInfra(
         (_, x) => x
     );
 
-    const resolver = new StylableResolver(fileProcessor, requireModule);
+    const resolver = new StylableResolver(fileProcessor, requireModule, resolveFrom);
 
     return { resolver, requireModule, fileProcessor };
 }
@@ -71,7 +71,7 @@ export function createTransformer(
     replaceValueHook?: replaceValueHook,
     postProcessor?: postProcessor
 ): StylableTransformer {
-    const { requireModule, fileProcessor } = generateInfra(config, diagnostics);
+    const { requireModule, fileProcessor, resolver } = generateInfra(config, diagnostics);
 
     return new StylableTransformer({
         fileProcessor,
@@ -80,7 +80,8 @@ export function createTransformer(
         keepValues: false,
         replaceValueHook,
         postProcessor,
-        mode: config.mode
+        mode: config.mode,
+        resolver
     });
 }
 
@@ -112,21 +113,6 @@ export function createProcess(
     fileProcessor: FileProcessor<StylableMeta>
 ): (path: string) => StylableMeta {
     return (path: string) => fileProcessor.process(path);
-}
-
-/* LEGACY */
-export function createTransform(
-    fileProcessor: FileProcessor<StylableMeta>,
-    requireModule: RequireType
-): (meta: StylableMeta) => StylableMeta {
-    return (meta: StylableMeta) => {
-        return new StylableTransformer({
-            fileProcessor,
-            requireModule,
-            diagnostics: new Diagnostics(),
-            keepValues: false
-        }).transform(meta).meta;
-    };
 }
 
 export function generateStylableResult(config: Config) {
