@@ -29,7 +29,7 @@ describe('pseudo-states', () => {
                     .root {
                         -st-states: state1, state2;
                     }
-                `, { from: 'path/to/style.css' });
+                `, { from: '/path/to/style.css' });
 
                 expect(diagnostics.reports.length, 'no reports').to.eql(0);
                 expect(classes).to.flatMatch({
@@ -47,7 +47,7 @@ describe('pseudo-states', () => {
                     .root {
                         -st-states: state1(boolean);
                     }
-                `, { from: 'path/to/style.css' });
+                `, { from: '/path/to/style.css' });
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -114,7 +114,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string);
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -135,7 +135,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string());
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -155,7 +155,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string) some Default String;
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
                     expect(res.classes).to.containSubset({
@@ -175,7 +175,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1( string( regex("^user") ));
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -199,7 +199,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string(minLength(2)));
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -226,7 +226,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string(minLength(2), maxLength("7")));
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -256,7 +256,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(string( regex("^user"), contains(user) ));
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -288,7 +288,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(number), state2(number());
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -311,7 +311,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: state1(number) 7;
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
                     expect(res.classes).to.containSubset({
@@ -333,7 +333,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: size(enum(small, medium, large)), color(enum(red, green, blue));
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -358,7 +358,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: size(enum(small, large)) small;
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
                     expect(res.classes).to.containSubset({
@@ -381,7 +381,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: category(tag);
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
 
@@ -401,7 +401,7 @@ describe('pseudo-states', () => {
                         .root {
                             -st-states: category(tag) movie;
                         }
-                    `, { from: 'path/to/style.css' });
+                    `, { from: '/path/to/style.css' });
 
                     expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
                     expect(res.classes).to.containSubset({
@@ -425,7 +425,7 @@ describe('pseudo-states', () => {
                     .root {
                         -st-states: state1, state2("[data-mapped]");
                     }
-                `, { from: 'path/to/style.css' });
+                `, { from: '/path/to/style.css' });
 
                 expect(res.diagnostics.reports.length, 'no reports').to.eql(0);
                 expect(res.classes).to.flatMatch({

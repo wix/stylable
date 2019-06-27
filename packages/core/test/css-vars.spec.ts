@@ -21,7 +21,7 @@ describe('css custom-properties (vars)', () => {
                     --myOtherVar: green;
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
@@ -45,7 +45,7 @@ describe('css custom-properties (vars)', () => {
                     --myVar: blue;
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);
@@ -68,7 +68,7 @@ describe('css custom-properties (vars)', () => {
                     --myVar: green;
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             expect(diagnostics.reports.length, 'no reports').to.eql(0);

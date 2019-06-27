@@ -52,7 +52,19 @@ export function generateInfra(
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
-            const meta = process(postcss.parse(content, { from }), diagnostics);
+
+            
+            const parsedAST = postcss.parse(content, { from });
+
+            if (from && parsedAST.source) {
+                const { input } = parsedAST.source;
+        
+                // postcss runs path.resolve, which messes up posix style paths when running on windows
+                Object.defineProperty(input, 'from', { value: from });
+                parsedAST.source.input.file = from;
+            }
+            
+            const meta = process(parsedAST, diagnostics);
             meta.namespace = config.files[from].namespace || meta.namespace;
             return meta;
         },
@@ -87,10 +99,19 @@ export function createTransformer(
 
 export function processSource(
     source: string,
-    options: { from?: string } = {},
+    options: { from: string } = { from: '/entry.st.css' },
     resolveNamespace?: typeof processNamespace
 ) {
-    return process(postcss.parse(source, options), undefined, resolveNamespace);
+    const parsedAST = postcss.parse(source, options);
+    if (options.from && parsedAST.source) {
+        const { input } = parsedAST.source;
+
+        // postcss runs path.resolve, which messes up posix style paths when running on windows
+        Object.defineProperty(input, 'from', { value: options.from });
+        parsedAST.source.input.file = options.from;
+    }
+
+    return process(parsedAST, undefined, resolveNamespace);
 }
 
 export function generateFromMock(

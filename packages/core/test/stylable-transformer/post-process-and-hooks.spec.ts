@@ -1,6 +1,5 @@
 import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { resolve } from 'path';
 import postcss from 'postcss';
 
 describe('post-process-and-hooks', () => {
@@ -179,8 +178,8 @@ describe('post-process-and-hooks', () => {
         const expected = [
             ['red', 'myColor', true, []],
             ['green', 'myBG', true, []],
-            ['Ariel', 'param2', true, [`default from ${resolve('/entry.st.css')}`]],
-            ['Ariel', 'param2', true, [`default from ${resolve('/entry.st.css')}`]]
+            ['Ariel', 'param2', true, [`default from ${'/entry.st.css'}`]],
+            ['Ariel', 'param2', true, [`default from ${'/entry.st.css'}`]]
         ];
 
         t.transform(t.fileProcessor.process('/entry.st.css'));

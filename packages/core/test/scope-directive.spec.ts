@@ -22,7 +22,7 @@ describe('@st-scope', () => {
                     .part {}
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             shouldReportNoDiagnostics(meta);
@@ -39,7 +39,7 @@ describe('@st-scope', () => {
                     .part {}
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             shouldReportNoDiagnostics(meta);
@@ -58,7 +58,7 @@ describe('@st-scope', () => {
                     .otherPart {}
                 }
             `,
-                { from: 'path/to/style.css' }
+                { from: '/path/to/style.css' }
             );
 
             const rules = meta.ast.nodes!;

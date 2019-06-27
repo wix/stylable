@@ -2,7 +2,6 @@ import { createRequestResolver } from '@file-services/resolve';
 import { IFileSystemSync } from '@file-services/types';
 import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { resolve } from 'path';
 import postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile } from '../src/cached-process-file';
@@ -69,7 +68,7 @@ describe('stylable-resolver', () => {
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
         expect(results[0].symbol.name).to.equal('myClass');
         expect(results[1].symbol.name).to.equal('root');
-        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
+        expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
     it('should resolve extend elements', () => {
@@ -100,7 +99,7 @@ describe('stylable-resolver', () => {
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
         expect(results[0].symbol!.name).to.equal('Button');
         expect(results[1].symbol!.name).to.equal('root');
-        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
+        expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
     it('should resolve extend classes on broken css', () => {
@@ -113,7 +112,7 @@ describe('stylable-resolver', () => {
                 }
             }
         });
-        const results = createResolveExtendsResults(fs, resolve('/button.st.css'), 'gaga');
+        const results = createResolveExtendsResults(fs, '/button.st.css', 'gaga');
         expect(results).to.eql([]);
     });
 
@@ -147,15 +146,15 @@ describe('stylable-resolver', () => {
                 }
             }
         });
-        const results = createResolveExtendsResults(fs, resolve('/entry.st.css'), 'root');
+        const results = createResolveExtendsResults(fs, '/entry.st.css', 'root');
 
         expect(results[0].symbol!.name).to.equal('root');
         expect(results[1].symbol!.name).to.equal('Comp');
         expect(results[2].symbol!.name).to.equal('root');
 
-        expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
-        expect(results[1].meta.source).to.equal(resolve('/index.st.css'));
-        expect(results[2].meta.source).to.equal(resolve('/button.st.css'));
+        expect(results[0].meta.source).to.equal('/entry.st.css');
+        expect(results[1].meta.source).to.equal('/index.st.css');
+        expect(results[2].meta.source).to.equal('/button.st.css');
     });
 
     it('should resolve classes', () => {
