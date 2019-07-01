@@ -64,7 +64,7 @@ export class Stylable {
         protected hooks: TransformHooks = {},
         protected resolveOptions: any = {},
         public optimizer?: IStylableOptimizer,
-        protected mode: 'production' | 'development' = 'production',
+        protected mode: 'production' | 'development' | 'none' = 'production',
         protected resolveNamespace?: typeof processNamespace
     ) {
         const { fileProcessor, resolveFrom } = createInfrastructure(

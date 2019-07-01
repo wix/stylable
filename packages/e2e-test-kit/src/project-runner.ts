@@ -81,11 +81,14 @@ export class ProjectRunner {
       };
     }
     const compiler = webpack(webpackConfig);
-    compiler.run = compiler.run.bind(compiler);
-    const promisedRun = promisify(compiler.run);
-    this.stats = await promisedRun();
-    if (this.throwOnBuildError && this.stats.compilation.errors.length) {
-      throw new Error(this.stats.compilation.errors.join('\n'));
+    this.stats = await new Promise<webpack.Stats>((res, rej) => compiler.run((e, stats) => e ? rej(e) : res(stats)));
+
+    
+    if (this.throwOnBuildError && this.stats.hasErrors()) {
+      throw new Error(this.stats.toString({ colors: false }));
+    } else if (this.stats.hasWarnings()) {
+      // TODO: useful for debugging, can be turned on after tests are sanitized
+      // console.log(this.stats.toString({ colors: false }));
     }
   }
 

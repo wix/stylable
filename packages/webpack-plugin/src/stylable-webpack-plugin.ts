@@ -63,8 +63,8 @@ export class StylableWebpackPlugin {
     }
     public createStylable(compiler: webpack.Compiler) {
         const stylable = new Stylable(
-            (compiler as any).context,
-            compiler.inputFileSystem as any,
+            compiler.context,
+            compiler.inputFileSystem,
             this.options.requireModule,
             '__',
             meta => {
@@ -72,7 +72,7 @@ export class StylableWebpackPlugin {
                 if (this.options.optimize.shortNamespaces) {
                     meta.namespace = stylable.optimizer!.namespaceOptimizer.getNamespace(
                         meta,
-                        (compiler as any).context,
+                        compiler.context,
                         stylable
                     );
                 }
@@ -82,7 +82,7 @@ export class StylableWebpackPlugin {
             this.options.transformHooks,
             compiler.options.resolve,
             this.options.optimizer || new StylableOptimizer(),
-            compiler.options.mode as any,
+            compiler.options.mode,
             this.options.resolveNamespace || resolveNamespace
         );
         this.stylable = stylable;

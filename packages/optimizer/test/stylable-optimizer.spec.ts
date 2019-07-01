@@ -54,7 +54,7 @@ describe('StylableOptimizer', () => {
     });
 
     it('removeUnusedComponents', () => {
-        const index = 'index.st.css';
+        const index = '/index.st.css';
         const files = {
             [index]: {
                 content: `
@@ -80,7 +80,7 @@ describe('StylableOptimizer', () => {
     });
 
     it('minifyCSS', () => {
-        const index = 'index.st.css';
+        const index = '/index.st.css';
         const files = {
             [index]: {
                 content: `

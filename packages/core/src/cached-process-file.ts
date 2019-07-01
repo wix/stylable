@@ -6,8 +6,8 @@ export interface CacheItem<T> {
 }
 
 export interface MinimalFS {
-    statSync: (fullpath: string) => { mtime: Date };
-    readFileSync: (fullpath: string, encoding: 'utf8') => string;
+    statSync(fullpath: string): { mtime: Date };
+    readFileSync(fullpath: string): { toString(encoding?: 'utf8'): string };
 }
 
 export interface FileProcessor<T> {
@@ -36,7 +36,7 @@ export function cachedProcessFile<T = any>(
             !cached ||
             (cached && cached.stat.mtime.valueOf() !== stat.mtime.valueOf())
         ) {
-            const content = fs.readFileSync(resolvedPath, 'utf8');
+            const content = fs.readFileSync(resolvedPath).toString('utf8');
             const value = processContent(content, resolvedPath);
 
             cache[resolvedPath] = { value, stat: { mtime: stat.mtime } };

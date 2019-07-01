@@ -79,7 +79,6 @@ export interface TransformHooks {
     replaceValueHook?: replaceValueHook;
 }
 
-type EnvMode = 'production' | 'development';
 
 export interface TransformerOptions {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -90,7 +89,7 @@ export interface TransformerOptions {
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
-    mode?: EnvMode;
+    mode?: 'production' | 'development' | 'none';
 }
 
 export interface AdditionalSelector {
@@ -139,7 +138,7 @@ export class StylableTransformer {
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
-    public mode: EnvMode;
+    public mode: 'production' | 'development' | 'none';
     constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '__';

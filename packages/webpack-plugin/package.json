@@ -7,7 +7,9 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 20000",
+    "test": "yarn test:unit && yarn test:e2e",
+    "test:unit": "mocha -r @ts-tools/node/r \"test/unit/*.spec.ts?(x)\" --watch-extensions ts,tsx",
+    "test:e2e": "mocha -r @ts-tools/node/r \"test/e2e/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 20000",
     "prepack": "yarn build"
   },
   "peerDependencies": {
