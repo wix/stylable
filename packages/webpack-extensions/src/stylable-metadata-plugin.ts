@@ -6,7 +6,7 @@ import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-
 
 import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
 
-export interface MetadataOptions {
+export interface StylableMetadataPluginOptions {
     name: string;
     version: string;
     configExtension?: string;
@@ -20,9 +20,7 @@ export interface MetadataOptions {
 }
 
 export class StylableMetadataPlugin {
-    constructor(
-        private options: MetadataOptions
-    ) {}
+    constructor(private options: StylableMetadataPluginOptions) {}
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
             compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
@@ -39,10 +37,7 @@ export class StylableMetadataPlugin {
             )
         );
     }
-    private loadJSON<T>(
-        fs: { readFileSync(path: string): Buffer },
-        resource: string
-    ): T | null {
+    private loadJSON<T>(fs: { readFileSync(path: string): Buffer }, resource: string): T | null {
         try {
             return JSON.parse(fs.readFileSync(resource).toString());
         } catch (e) {
@@ -115,9 +110,15 @@ export class StylableMetadataPlugin {
             const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
             let fileContent = jsonSource;
             switch (this.options.mode) {
-                case 'cjs':         fileContent = `module.exports = ${fileContent}`; break;
-                case 'amd:static':  fileContent = `define(${fileContent});`; break;
-                case 'amd:factory': fileContent = `define(() => { return ${fileContent}; });`; break;
+                case 'cjs':
+                    fileContent = `module.exports = ${fileContent}`;
+                    break;
+                case 'amd:static':
+                    fileContent = `define(${fileContent});`;
+                    break;
+                case 'amd:factory':
+                    fileContent = `define(() => { return ${fileContent}; });`;
+                    break;
             }
             compilation.assets[fileName] = new RawSource(fileContent);
         }
@@ -139,9 +140,7 @@ export class StylableMetadataPlugin {
                 variants = compilation.inputFileSystem.readdirSync(variantsDir);
             } catch (e) {
                 throw new Error(
-                    `Error while reading variants for: ${
-                        componentConfig.id
-                    } in ${variantsDir}\nOriginal Error:\n${e}`
+                    `Error while reading variants for: ${componentConfig.id} in ${variantsDir}\nOriginal Error:\n${e}`
                 );
             }
 

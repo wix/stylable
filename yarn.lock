@@ -128,6 +128,13 @@
   dependencies:
     "@file-services/types" "^2.0.0"
 
+"@file-services/webpack@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@file-services/webpack/-/webpack-2.0.0.tgz#2e43e3422f94a68a24761558a7eb000db78b2e7e"
+  integrity sha512-weO9j/GD7XhOkX4F//63o0LaSPmKXBkt1m9RrQmAMlf9P72rjlsI9ypTFzRJCtRfyzsEsUm0Ml8XJmsjvOdiXg==
+  dependencies:
+    "@file-services/types" "^2.0.0"
+
 "@hapi/address@2.x.x":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-2.0.0.tgz#9f05469c88cb2fd3dcd624776b54ee95c312126a"
