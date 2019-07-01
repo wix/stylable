@@ -33,13 +33,12 @@ export class StylableResolver {
     public resolveImported(imported: Imported, name: string) {
         const { process } = this.fileProcessor;
         const { context, from } = imported;
-        const resolvedPath = this.resolveFrom(context, from);
         let symbol: StylableSymbol;
 
         if (from.endsWith('.css')) {
             let meta;
             try {
-                meta = process(resolvedPath, false, context);
+                meta = process(this.resolveFrom(context, from), false, context);
                 symbol = !name ? meta.mappedSymbols[meta.root] : meta.mappedSymbols[name];
             } catch (e) {
                 return null;
@@ -49,7 +48,7 @@ export class StylableResolver {
         } else {
             let _module;
             try {
-                _module = this.requireModule(resolvedPath);
+                _module = this.requireModule(this.resolveFrom(context, from));
             } catch {
                 return null;
             }
