@@ -64,7 +64,7 @@ const argv = require('yargs')
     .option('optimize')
     .alias('optimize', 'o')
     .boolean('optimize')
-    .describe('optimize', 'minimal css optimizations')
+    .describe('optimize', 'removes: empty nodes, stylable directives, comments')
     .default('optimize', false)
 
     

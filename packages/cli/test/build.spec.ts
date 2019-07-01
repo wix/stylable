@@ -95,6 +95,37 @@ describe('build stand alone', () => {
         );
     });
 
+    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
+        const fs = createFS({
+            '/comp.st.css': `
+                .root {
+                    color: red;
+                }
+                /* comment */
+                .x {
+                    
+                }
+            `
+        });
+
+        const stylable = new Stylable('/', fs as any, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs: fs as any,
+            stylable,
+            outDir: './dist',
+            srcDir: '.',
+            rootDir: path.resolve('/'),
+            log,
+            moduleFormats: ['cjs'],
+            outputCSS: true,
+            outputCSSNameTemplate: '[filename].global.css'
+        });
+
+        expect(fs.readFileSync(path.resolve('/dist/comp.global.css'), 'utf8')).not.contains(`.x`);
+    });
+
     it('should inject request to output module', async () => {
         const fs = createFS({
             '/comp.st.css': `
@@ -120,7 +151,9 @@ describe('build stand alone', () => {
             outputCSSNameTemplate: '[filename].global.css'
         });
 
-        expect(fs.readFileSync(path.resolve('/dist/comp.st.css.js'), 'utf8')).contains(`require("./comp.global.css")`)
+        expect(fs.readFileSync(path.resolve('/dist/comp.st.css.js'), 'utf8')).contains(
+            `require("./comp.global.css")`
+        );
         expect(fs.existsSync(path.resolve('/dist/comp.global.css'))).to.equal(true);
     });
 });

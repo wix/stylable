@@ -31,7 +31,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |cssFilename|pattern of the generated css file|`[filename].css`|
 |injectCSSRequest|add a static import for the generated css in the js module output|`false`|
 |namespaceResolver|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
-|optimize|minimal css optimizations|`false`|
+|optimize|removes: empty nodes, stylable directives, comments|`false`|
 |minify|minify generated css|`false`|
 |log|verbose log|`false`|
 |diagnostics|verbose diagnostics|`false`|
@@ -45,7 +45,7 @@ $ stc --srcDir="./src" --outDir="./dist" --indexFile="index.st.css"
 ```
 
 ### Build source stylesheets to JavaScript modules
-To transform your project stylesheets to target JavaScript modules containing the transformed source files, you must provide the `indexFile` paramter with an empty string.
+To transform your project stylesheets to target JavaScript modules containing the transformed source files, you must provide the `indexFile` parameter with an empty string.
 
 ```sh
 $ stc --srcDir="./src" --outDir="./dist"
