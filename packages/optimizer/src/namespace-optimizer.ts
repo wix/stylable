@@ -10,6 +10,8 @@ export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
         this.namespaceMapping = {};
     }
     public getNamespace(meta: StylableMeta, ..._env: any[]) {
+        console.log(`getNamespace`, meta.source, this.index);
+
         return (
             this.namespaceMapping[meta.source] ||
             (this.namespaceMapping[meta.source] = this.namespacePrefix + this.index++)

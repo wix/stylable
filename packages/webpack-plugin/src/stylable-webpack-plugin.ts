@@ -355,7 +355,7 @@ export class StylableWebpackPlugin {
                 );
 
                 const bootstrap = new StylableBootstrapModule(
-                    (compiler as any).context,
+                    compiler.context,
                     null,
                     null,
                     this.options.bootstrap
