@@ -1,4 +1,5 @@
 import { IStylableNamespaceOptimizer, StylableMeta } from '@stylable/core';
+import { basename } from 'path';
 
 export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
     public index: number;
@@ -10,7 +11,12 @@ export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
         this.namespaceMapping = {};
     }
     public getNamespace(meta: StylableMeta, ..._env: any[]) {
-        console.log(`getNamespace`, meta.source, this.index);
+        if (basename(meta.source) === 'gallery.st.css' && this.index === 2) {
+            console.log(meta.source, this.index, new Error().stack)
+        }
+        if (basename(meta.source) === 'button.st.css' && this.index === 3) {
+            console.log(meta.source, this.index, new Error().stack)
+        }
 
         return (
             this.namespaceMapping[meta.source] ||
