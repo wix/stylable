@@ -107,7 +107,7 @@ export class ProjectRunner {
     if (!this.browser) {
       this.browser = await puppeteer.launch(this.puppeteerOptions);
     }
-    const page = await this.browser!.newPage();
+    const page = await this.browser.newPage();
     this.pages.push(page);
 
     await page.setCacheEnabled(false);

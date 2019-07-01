@@ -6,18 +6,6 @@ import { join } from 'path';
 const project = 'metadata-plugin-project';
 
 describe(`(${project})`, () => {
-    const projectRunner = StylableProjectRunner.mochaSetup(
-        {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
-                // headless: false
-            }
-        },
-        before,
-        afterEach,
-        after
-    );
-
     const expectMetadataJSON = (content: any) => {
         expect(nullContent(content)).to.eql({
             version: '1.0.0',
@@ -85,10 +73,24 @@ describe(`(${project})`, () => {
         });
     };
 
-    it('contains metadata', async () => {
-        const s = projectRunner.getBuildAsset('test.metadata.json');
-
-        expectMetadataJSON(JSON.parse(s));
+    describe('snapshotting', () => {
+        const projectRunner = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                puppeteerOptions: {
+                    // headless: false
+                }
+            },
+            before,
+            afterEach,
+            after
+        );
+    
+        it('contains metadata', async () => {
+            const s = projectRunner.getBuildAsset('test.metadata.json');
+    
+            expectMetadataJSON(JSON.parse(s));
+        });
     });
 
     describe('cjs mode', () => {

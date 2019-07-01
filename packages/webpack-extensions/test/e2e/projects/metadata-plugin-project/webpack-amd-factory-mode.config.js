@@ -1,6 +1,6 @@
-import { StylableMetadataPlugin } from '@stylable/webpack-extensions';
-import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
-import { basename } from 'path';
+const { basename } = require('path');
+const { StylableMetadataPlugin } = require('@stylable/webpack-extensions/src');
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin/src');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {

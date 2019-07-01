@@ -45,18 +45,18 @@ export class StylableParser {
 
         meta.imports.forEach(stylableImport => {
             state.module.buildInfo.fileDependencies.add(stylableImport.from);
-            if (stylableImport.fromRelative.match(stylableExtension)) {
+            if (stylableImport.from.match(stylableExtension)) {
                 const importRef = {
                     defaultImport: stylableImport.defaultExport,
                     names: []
                 };
                 const dep = this.useWeakDeps
                     ? StylableImportDependency.createWeak(
-                        stylableImport.fromRelative,
+                        stylableImport.from,
                         state.module,
                         importRef
                     )
-                    : new StylableImportDependency(stylableImport.fromRelative, importRef);
+                    : new StylableImportDependency(stylableImport.from, importRef);
                 state.module.addDependency(dep);
                 this.addChildDeps(stylableImport);
             }
