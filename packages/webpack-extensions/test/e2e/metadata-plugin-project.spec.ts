@@ -73,25 +73,25 @@ describe(`(${project})`, () => {
         });
     };
 
-    describe('snapshotting', () => {
-        const projectRunner = StylableProjectRunner.mochaSetup(
-            {
-                projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
-                    // headless: false
-                }
-            },
-            before,
-            afterEach,
-            after
-        );
+    // describe('snapshotting', () => {
+    //     const projectRunner = StylableProjectRunner.mochaSetup(
+    //         {
+    //             projectDir: join(__dirname, 'projects', project),
+    //             puppeteerOptions: {
+    //                 // headless: false
+    //             }
+    //         },
+    //         before,
+    //         afterEach,
+    //         after
+    //     );
     
-        it('contains metadata', async () => {
-            const s = projectRunner.getBuildAsset('test.metadata.json');
+    //     it('contains metadata', async () => {
+    //         const s = projectRunner.getBuildAsset('test.metadata.json');
     
-            expectMetadataJSON(JSON.parse(s));
-        });
-    });
+    //         expectMetadataJSON(JSON.parse(s));
+    //     });
+    // });
 
     describe('cjs mode', () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
@@ -116,51 +116,50 @@ describe(`(${project})`, () => {
 
     });
 
-    describe('amd static mode', () => {
-        const projectRunnerAmdStatic = StylableProjectRunner.mochaSetup(
-            {
-                projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
-                    // headless: false
-                },
-                configName: 'webpack-amd-static-mode.config'
-            },
-            before,
-            afterEach,
-            after
-        );
+    // describe('amd static mode', () => {
+    //     const projectRunnerAmdStatic = StylableProjectRunner.mochaSetup(
+    //         {
+    //             projectDir: join(__dirname, 'projects', project),
+    //             puppeteerOptions: {
+    //                 // headless: false
+    //             },
+    //             configName: 'webpack-amd-static-mode.config'
+    //         },
+    //         before,
+    //         afterEach,
+    //         after
+    //     );
 
-        it('contains metadata as static amd export', async () => {
-            const s = projectRunnerAmdStatic.getBuildAsset('test.metadata.json.js');
-            const e = projectRunnerAmdStatic.evalAssetModule(s);
+    //     it('contains metadata as static amd export', async () => {
+    //         const s = projectRunnerAmdStatic.getBuildAsset('test.metadata.json.js');
+    //         const e = projectRunnerAmdStatic.evalAssetModule(s);
 
-            expectMetadataJSON(e);
-        });
+    //         expectMetadataJSON(e);
+    //     });
 
-    });
+    // });
 
-    describe('amd factory mode', () => {
-        const projectRunnerAmdFactory = StylableProjectRunner.mochaSetup(
-            {
-                projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
-                    // headless: false
-                },
-                configName: 'webpack-amd-factory-mode.config'
-            },
-            before,
-            afterEach,
-            after
-        );
+    // describe('amd factory mode', () => {
+    //     const projectRunnerAmdFactory = StylableProjectRunner.mochaSetup(
+    //         {
+    //             projectDir: join(__dirname, 'projects', project),
+    //             puppeteerOptions: {
+    //                 // headless: false
+    //             },
+    //             configName: 'webpack-amd-factory-mode.config'
+    //         },
+    //         before,
+    //         afterEach,
+    //         after
+    //     );
 
-        it('contains metadata as factory amd export', async () => {
-            const s = projectRunnerAmdFactory.getBuildAsset('test.metadata.json.js');
-            const e = projectRunnerAmdFactory.evalAssetModule(s);
+    //     it('contains metadata as factory amd export', async () => {
+    //         const s = projectRunnerAmdFactory.getBuildAsset('test.metadata.json.js');
+    //         const e = projectRunnerAmdFactory.evalAssetModule(s);
 
-            expectMetadataJSON(e);
-        });
-
-    });
+    //         expectMetadataJSON(e);
+    //     });
+    // });
 });
 
 function nullContent(o: any) {
