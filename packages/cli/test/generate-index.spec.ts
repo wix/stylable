@@ -18,11 +18,11 @@ describe('build index', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: '.',
             srcDir: '.',
@@ -52,11 +52,11 @@ describe('build index', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: '.',
             srcDir: '.',
@@ -86,11 +86,11 @@ describe('build index', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: '.',
             srcDir: '.',
@@ -118,10 +118,10 @@ describe('build index', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: './some-dir/other-dir/',
             srcDir: '.',
@@ -146,11 +146,11 @@ describe('build index', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
         try {
             await build({
                 extension: '.st.css',
-                fs: fs as any,
+                fs,
                 stylable,
                 outDir: '.',
                 srcDir: '.',

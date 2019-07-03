@@ -29,11 +29,11 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: 'lib',
             srcDir: '.',
@@ -71,12 +71,12 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
         let reportedError = '';
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: '.',
             srcDir: '.',
@@ -106,11 +106,11 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: './dist',
             srcDir: '.',
@@ -137,11 +137,11 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: './dist',
             srcDir: '.',
