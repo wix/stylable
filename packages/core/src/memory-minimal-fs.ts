@@ -1,5 +1,5 @@
+import { resolve, sep } from 'path';
 const deindent = require('deindent');
-import { resolve, sep } from './path';
 
 import { MinimalFS } from './cached-process-file';
 

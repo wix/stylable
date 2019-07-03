@@ -1,11 +1,11 @@
 import cloneDeep from 'lodash.clonedeep';
+import { basename } from 'path';
 import postcss from 'postcss';
 import { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue, processDeclarationValue } from './functions';
 import { nativePseudoElements, reservedKeyFrames } from './native-reserved-lists';
-import { basename } from './path';
 import { transformPseudoStateSelector, validateStateDefinition } from './pseudo-states';
 import {
     createWarningRule,

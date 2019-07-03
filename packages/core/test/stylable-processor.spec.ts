@@ -1,13 +1,12 @@
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
-import { resolve } from '../src/path';
+import { resolve } from 'path';
 import { ImportSymbol, processNamespace, processorWarnings } from '../src/stylable-processor';
 
 const expect = chai.expect;
 chai.use(flatMatch);
 
 describe('Stylable postcss process', () => {
-
     it('report if missing filename', () => {
         const { diagnostics, namespace } = processSource(``);
         expect(namespace).to.equal('s0');
@@ -18,11 +17,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('report on invalid namespace', () => {
-
-        const { diagnostics } = processSource(
-            `@namespace App;`,
-            { from: '/path/to/source' }
-        );
+        const { diagnostics } = processSource(`@namespace App;`, { from: '/path/to/source' });
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
@@ -31,11 +26,7 @@ describe('Stylable postcss process', () => {
     });
 
     it('warn on empty-ish namespace', () => {
-
-        const { diagnostics } = processSource(
-            `@namespace '   ';`,
-            { from: '/path/to/source' }
-        );
+        const { diagnostics } = processSource(`@namespace '   ';`, { from: '/path/to/source' });
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
@@ -45,39 +36,46 @@ describe('Stylable postcss process', () => {
 
     it('collect namespace', () => {
         const from = resolve('/path/to/style.css');
-        const result = processSource(`
+        const result = processSource(
+            `
             @namespace "name";
             @namespace 'anther-name';
-        `, { from });
+        `,
+            { from }
+        );
 
         expect(result.namespace).to.equal(processNamespace('anther-name', from));
-
     });
 
     it('resolve namespace hook', () => {
         const from = resolve('/path/to/style.css');
-        const result = processSource(`
+        const result = processSource(
+            `
             @namespace "name";
-        `, { from }, s => 'Test-' + s);
+        `,
+            { from },
+            s => 'Test-' + s
+        );
 
         expect(result.namespace).to.equal('Test-name');
-
     });
 
     it('use filename as default namespace prefix', () => {
         const from = resolve('/path/to/style.css');
 
-        const result = processSource(`
+        const result = processSource(
+            `
 
-        `, { from });
+        `,
+            { from }
+        );
 
         expect(result.namespace).to.eql(processNamespace('style', from));
-
     });
 
     it('collect :import', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             :import {
                 -st-from: "./some/path";
             }
@@ -89,7 +87,9 @@ describe('Stylable postcss process', () => {
                 -st-from: "../some/global/path";
                 -st-default: name;
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.imports.length).to.eql(3);
 
@@ -128,12 +128,11 @@ describe('Stylable postcss process', () => {
             defaultExport: 'name',
             named: {}
         });
-
     });
 
     it('collect :vars', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             :vars {
                 name: value;
             }
@@ -141,30 +140,33 @@ describe('Stylable postcss process', () => {
                 name: value;
                 name1: value1;
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.vars.length).to.eql(3);
-
     });
 
     it('collect :vars types', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             :vars {
                 /*@type VALUE_INLINE*/name: inline;
                 /*@type VALUE_LINE_BEFORE*/
                 name1: line before;
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.vars[0].valueType).to.eql('VALUE_INLINE');
         expect(result.vars[1].valueType).to.eql('VALUE_LINE_BEFORE');
-
     });
 
     it('resolve local :vars (dont warn if name is imported)', () => {
         // ToDo: check if test is needed
-        const result = processSource(`
+        const result = processSource(
+            `
             :import {
                 -st-from: "./file.css";
                 -st-named: name;
@@ -172,15 +174,16 @@ describe('Stylable postcss process', () => {
             :vars {
                 myname: value(name);
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
-
     });
 
     it('collect typed classes extends', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             :import {
                 -st-from: './file.css';
                 -st-default: Style;
@@ -188,13 +191,14 @@ describe('Stylable postcss process', () => {
             .myclass {
                 -st-extends: Style;
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
 
         expect(result.classes).to.flatMatch({
             myclass: {
-
                 '-st-extends': {
                     _kind: 'import',
                     type: 'default',
@@ -206,57 +210,59 @@ describe('Stylable postcss process', () => {
                 }
             }
         });
-
     });
 
     it('collect typed elements', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             Element {
 
             }
             div {
 
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(Object.keys(result.elements).length).to.eql(1);
-
     });
 
     it('always contain root class', () => {
+        const result = processSource(
+            `
 
-        const result = processSource(`
-
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.classes).to.eql({
             root: {
-                '_kind': 'class',
-                'name': 'root',
+                _kind: 'class',
+                name: 'root',
                 '-st-root': true
             }
         });
-
     });
 
     it('collect classes', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             .root{}
             .classA{}
             .classB, .classC, .classA{}
             :not(.classD){}
             .classE:hover{}
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(Object.keys(result.classes).length).to.eql(6);
-
     });
 
     it('collect classes in @media', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             @media (max-width: 300px) {
                 .root{}
                 .classA{}
@@ -264,15 +270,16 @@ describe('Stylable postcss process', () => {
                 :not(.classD){}
                 .classE:hover{}
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(Object.keys(result.classes).length).to.eql(6);
-
     });
 
     it('collect @keyframes', () => {
-
-        const result = processSource(`
+        const result = processSource(
+            `
             @keyframes name {
                 from{}
                 to{}
@@ -281,7 +288,9 @@ describe('Stylable postcss process', () => {
                 from{}
                 to{}
             }
-        `, { from: 'path/to/style.css' });
+        `,
+            { from: 'path/to/style.css' }
+        );
 
         expect(result.keyframes.length).to.eql(2);
     });

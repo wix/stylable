@@ -3,7 +3,6 @@ import {
     createMinimalFS,
     Diagnostics,
     FileProcessor,
-    isAbsolute,
     postProcessor,
     process,
     processNamespace,
@@ -14,6 +13,7 @@ import {
     StylableResults,
     StylableTransformer
 } from '@stylable/core';
+import { isAbsolute } from 'path';
 import postcss from 'postcss';
 
 export interface File {

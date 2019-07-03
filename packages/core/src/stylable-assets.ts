@@ -1,6 +1,6 @@
+import path from 'path';
 import postcss from 'postcss';
 import urlRegex from 'url-regex';
-import * as path from './path';
 import { ImportSymbol, RefedMixin, StylableMeta } from './stylable-processor';
 import { ParsedValue } from './types';
 
