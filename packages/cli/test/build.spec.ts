@@ -121,7 +121,11 @@ describe('build stand alone', () => {
             outputCSSNameTemplate: '[filename].global.css'
         });
 
-        expect(fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8')).not.contains(`.x`);
+        const builtFile = fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8');
+
+        expect(builtFile).to.contain(`root {`);
+        expect(builtFile).to.contain(`color: red;`);
+        expect(builtFile).to.not.contain(`.x`);
     });
 
     it('should inject request to output module', async () => {
