@@ -7,30 +7,7 @@ import {
     StylableProcessor,
     valueMapping
 } from '@stylable/core';
-import { JSONSchema7 } from 'json-schema';
-
-export type StateDict = { [stateName: string]: SchemaStates } & object;
-
-export interface ExtractedSchema extends JSONSchema7 {
-    states?: StateDict;
-    extends?: { $ref: string };
-    properties?: {
-        [key: string]: boolean | ExtractedSchema;
-    };
-}
-
-export interface SchemaStates {
-    type: string;
-    default?: string;
-    enum?: string[];
-}
-
-export interface MinimalPath {
-    dirname: (p: string) => string;
-    join: (...paths: string[]) => string;
-    isAbsolute: (path: string) => boolean;
-    relative: (from: string, to: string) => string;
-}
+import { ExtractedSchema, MinimalPath, SchemaStates, StateDict } from './types';
 
 export function extractSchema(css: string, filePath: string, root: string, path: MinimalPath) {
     const processor = new StylableProcessor();
@@ -76,7 +53,9 @@ export function generateSchema(
                         ? { $ref: getImportedRef(filePath, extended, basePath, path) }
                         : { $ref: extended.name };
             }
-        } else if (symbol._kind === 'var' && typeof schemaEntry !== 'boolean') {
+        } else if (symbol._kind === 'var') {
+            schemaEntry.$ref = `stylable/${symbol._kind}`;
+        } else if (symbol._kind === 'cssVar') {
             schemaEntry.$ref = `stylable/${symbol._kind}`;
         }
     }
