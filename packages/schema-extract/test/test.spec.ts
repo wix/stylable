@@ -1,7 +1,14 @@
 import { flatMatch } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import path from 'path';
-import { extractSchema, stylableClass, stylableElement, stylableModule, stylableVar, stylableCssVar } from '../src';
+import {
+    extractSchema,
+    stylableClass,
+    stylableCssVar,
+    stylableElement,
+    stylableModule,
+    stylableVar
+} from '../src';
 
 use(flatMatch);
 
