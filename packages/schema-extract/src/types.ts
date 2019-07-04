@@ -4,6 +4,7 @@ export const stylableModule = 'stylable/module';
 export const stylableClass = 'stylable/class';
 export const stylableElement = 'stylable/element';
 export const stylableVar = 'stylable/var';
+export const stylableCssVar = 'stylable/cssVar';
 
 export type StateDict = { [stateName: string]: SchemaStates } & object;
 
