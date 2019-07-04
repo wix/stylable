@@ -12,14 +12,19 @@ import {
 
 use(flatMatch);
 
+function mockNamespace(namespace: string, _source: string) {
+    return namespace;
+}
+
 describe('Stylable JSON Schema Extractor', () => {
     describe('local symbols', () => {
         it('schema with a class', () => {
-            const res = extractSchema('.root{}', '/entry.st.css', '/', path);
+            const res = extractSchema('.root{}', '/entry.st.css', '/', path, mockNamespace);
 
             expect(res).to.eql({
                 $id: '/entry.st.css',
                 $ref: stylableModule,
+                namespace: 'entry',
                 properties: {
                     root: {
                         $ref: stylableClass
@@ -102,7 +107,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         size: {
-                            type: 'enum',
+                            type: 'string',
                             enum: ['small', 'medium', 'large']
                         }
                     }
@@ -375,11 +380,12 @@ describe('Stylable JSON Schema Extractor', () => {
             }
         `;
 
-        const res = extractSchema(css, '/entry.st.css', '/', path);
+        const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
 
         expect(res).to.eql({
             $id: '/entry.st.css',
             $ref: stylableModule,
+            namespace: 'entry',
             properties: {
                 root: {
                     $ref: stylableClass,
@@ -401,7 +407,7 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         size: {
-                            type: 'enum',
+                            type: 'string',
                             enum: ['s', 'm', 'l']
                         }
                     },

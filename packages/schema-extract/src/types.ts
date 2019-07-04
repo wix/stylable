@@ -6,15 +6,23 @@ export const stylableElement = 'stylable/element';
 export const stylableVar = 'stylable/var';
 export const stylableCssVar = 'stylable/cssVar';
 
-export type StateDict = { [stateName: string]: SchemaStates } & object;
+export function isStylableModuleSchema(schema: any): schema is StylableModuleSchema {
+    return schema.$ref === stylableModule;
+}
 
-export interface ExtractedSchema extends JSONSchema7 {
-    states?: StateDict;
-    extends?: { $ref: string };
+export interface StylableModuleSchema extends JSONSchema7 {
+    namespace: string;
     properties?: {
-        [key: string]: boolean | ExtractedSchema;
+        [key: string]: boolean | StylableSymbolSchema;
     };
 }
+
+export interface StylableSymbolSchema extends JSONSchema7 {
+    states?: StateDict;
+    extends?: { $ref: string };
+}
+
+export type StateDict = { [stateName: string]: SchemaStates } & object;
 
 export interface SchemaStates {
     type: string;
