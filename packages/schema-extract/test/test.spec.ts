@@ -58,6 +58,132 @@ describe('Stylable JSON Schema Extractor', () => {
         });
     });
 
+    describe('imported', () => {
+        it('multiple uses of the same default import return a single module dependency', () => {
+            const css = `
+                :import {
+                    -st-from: './imported.st.css';
+                    -st-default: Comp;
+                }
+                .root {
+                    -st-extends: Comp;
+                }
+                Comp {}
+            `;
+
+            const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
+
+            expect(res).to.eql({
+                $id: '/entry.st.css',
+                $ref: stylableModule,
+                namespace: 'entry',
+                moduleDependencies: ['/imported.st.css'],
+                properties: {
+                    root: {
+                        $ref: stylableClass,
+                        extends: {
+                            $ref: '/imported.st.css#root'
+                        }
+                    },
+                    Comp: {
+                        $ref: '/imported.st.css#root'
+                    }
+                }
+            });
+        });
+
+        it('multiple uses of the same named import return a single module dependency', () => {
+            const css = `
+                :import {
+                    -st-from: './imported.st.css';
+                    -st-named: part;
+                }
+                .part {
+                    -st-extends: part;
+                }
+            `;
+
+            const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
+
+            expect(res).to.eql({
+                $id: '/entry.st.css',
+                $ref: stylableModule,
+                namespace: 'entry',
+                moduleDependencies: ['/imported.st.css'],
+                properties: {
+                    root: {
+                        $ref: stylableClass
+                    },
+                    part: {
+                        $ref: '/imported.st.css#part',
+                        extends: {
+                            $ref: '/imported.st.css#part'
+                        }
+                    }
+                }
+            });
+        });
+
+        it('unused imports are omitted', () => {
+            const css = `
+                :import {
+                    -st-from: './imported.st.css';
+                    -st-named: part;
+                }
+                .root {}
+            `;
+
+            const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
+
+            expect(res).to.eql({
+                $id: '/entry.st.css',
+                $ref: stylableModule,
+                namespace: 'entry',
+                properties: {
+                    root: {
+                        $ref: stylableClass
+                    }
+                }
+            });
+        });
+
+        it('multiple imports being used', () => {
+            const css = `
+                :import {
+                    -st-from: './imported1.st.css';
+                    -st-default: Comp1;
+                }
+                :import {
+                    -st-from: './imported2.st.css';
+                    -st-default: Comp2;
+                }
+                .root {}
+                Comp1 {}
+                Comp2 {}
+            `;
+
+            const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
+
+            expect(res).to.eql({
+                $id: '/entry.st.css',
+                $ref: stylableModule,
+                namespace: 'entry',
+                moduleDependencies: ['/imported1.st.css', '/imported2.st.css'],
+                properties: {
+                    root: {
+                        $ref: stylableClass
+                    },
+                    Comp1: {
+                        $ref: '/imported1.st.css#root'
+                    },
+                    Comp2: {
+                        $ref: '/imported2.st.css#root'
+                    }
+                }
+            });
+        });
+    });
+
     describe('states', () => {
         it('schema with a boolean state', () => {
             const css = `.root{
@@ -365,7 +491,7 @@ describe('Stylable JSON Schema Extractor', () => {
             :import {
                 -st-from: './imported.st.css';
                 -st-default: Comp;
-                -st-named: part;
+                -st-named: part1, part2;
             }
             :vars {
                 myColor: red;
@@ -376,8 +502,9 @@ describe('Stylable JSON Schema Extractor', () => {
             }
             .otherPart {
                 -st-states: size( enum(s, m, l) );
-                -st-extends: part;
+                -st-extends: part1;
             }
+            .part2 {}
         `;
 
         const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
@@ -386,6 +513,7 @@ describe('Stylable JSON Schema Extractor', () => {
             $id: '/entry.st.css',
             $ref: stylableModule,
             namespace: 'entry',
+            moduleDependencies: ['/imported.st.css'],
             properties: {
                 root: {
                     $ref: stylableClass,
@@ -398,8 +526,9 @@ describe('Stylable JSON Schema Extractor', () => {
                         $ref: '/imported.st.css#root'
                     }
                 },
-                Comp: {},
-                part: {},
+                part2: {
+                    $ref: '/imported.st.css#part2'
+                },
                 myColor: {
                     $ref: stylableVar
                 },
@@ -412,7 +541,7 @@ describe('Stylable JSON Schema Extractor', () => {
                         }
                     },
                     extends: {
-                        $ref: '/imported.st.css#part'
+                        $ref: '/imported.st.css#part1'
                     }
                 }
             }

@@ -7,7 +7,14 @@ import {
     StylableProcessor,
     valueMapping
 } from '@stylable/core';
-import { MinimalPath, SchemaStates, StateDict, StylableModuleSchema } from './types';
+import { JSONSchema7 } from 'json-schema';
+import {
+    MinimalPath,
+    SchemaStates,
+    StateDict,
+    StylableModuleSchema,
+    StylableSymbolSchema
+} from './types';
 
 export function extractSchema(
     css: string,
@@ -39,35 +46,60 @@ export function generateSchema(
         }
 
         const symbol = meta.mappedSymbols[entry];
-        schema.properties[entry] = {};
 
-        const schemaEntry = schema.properties[entry];
-
-        if (typeof schemaEntry === 'boolean') {
+        if (typeof schema.properties[entry] === 'boolean') {
             continue;
-        } else if (symbol._kind === 'class' || symbol._kind === 'element') {
-            const states = symbol[valueMapping.states];
-            const extended = symbol[valueMapping.extends];
-            schemaEntry.$ref = `stylable/${symbol._kind}`;
+        } else {
+            if (symbol._kind === 'class' || symbol._kind === 'element') {
+                schema.properties[entry] = {};
+                const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
+                const states = symbol[valueMapping.states];
+                const extended = symbol[valueMapping.extends];
 
-            if (states) {
-                schemaEntry.states = getStatesForSymbol(states);
-            }
+                if (symbol.alias && symbol.alias.import) {
+                    addModuleDependency(schema, filePath, symbol.alias.import.from, basePath, path);
 
-            if (extended) {
-                schemaEntry.extends =
-                    extended._kind === 'import' && extended.import
-                        ? { $ref: getImportedRef(filePath, extended, basePath, path) }
-                        : { $ref: extended.name };
+                    schemaEntry.$ref = getImportedRef(filePath, symbol.alias, basePath, path);
+                } else {
+                    schemaEntry.$ref = `stylable/${symbol._kind}`;
+                }
+
+                if (states) {
+                    schemaEntry.states = getStatesForSymbol(states);
+                }
+
+                if (extended) {
+                    schemaEntry.extends =
+                        extended._kind === 'import' && extended.import
+                            ? { $ref: getImportedRef(filePath, extended, basePath, path) }
+                            : { $ref: extended.name };
+                }
+            } else if (symbol._kind === 'var' || symbol._kind === 'cssVar') {
+                schema.properties[entry] = {};
+                const schemaEntry = schema.properties[entry] as JSONSchema7;
+
+                schemaEntry.$ref = `stylable/${symbol._kind}`;
             }
-        } else if (symbol._kind === 'var') {
-            schemaEntry.$ref = `stylable/${symbol._kind}`;
-        } else if (symbol._kind === 'cssVar') {
-            schemaEntry.$ref = `stylable/${symbol._kind}`;
         }
     }
 
     return schema;
+}
+
+function addModuleDependency(
+    schema: StylableModuleSchema,
+    filePath: string,
+    importPath: string,
+    basePath: string,
+    path: MinimalPath
+) {
+    if (!schema.moduleDependencies) {
+        schema.moduleDependencies = [];
+    }
+    const importedPath = normalizeImportPath(filePath, importPath, basePath, path);
+    if (schema.moduleDependencies.indexOf(importedPath) === -1) {
+        schema.moduleDependencies.push(importedPath);
+    }
 }
 
 function getStatesForSymbol(states: MappedStates): StateDict {

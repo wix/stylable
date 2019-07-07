@@ -7,11 +7,12 @@ export const stylableVar = 'stylable/var';
 export const stylableCssVar = 'stylable/cssVar';
 
 export function isStylableModuleSchema(schema: any): schema is StylableModuleSchema {
-    return schema.$ref === stylableModule;
+    return !!schema && !!schema.$ref && schema.$ref === stylableModule;
 }
 
 export interface StylableModuleSchema extends JSONSchema7 {
     namespace: string;
+    moduleDependencies?: string[];
     properties?: {
         [key: string]: boolean | StylableSymbolSchema;
     };
