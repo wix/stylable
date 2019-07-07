@@ -8,32 +8,22 @@ import {
     valueMapping
 } from '@stylable/core';
 import { JSONSchema7 } from 'json-schema';
+import {
+    MinimalPath,
+    SchemaStates,
+    StateDict,
+    StylableModuleSchema,
+    StylableSymbolSchema
+} from './types';
 
-export type StateDict = { [stateName: string]: SchemaStates } & object;
-
-export interface ExtractedSchema extends JSONSchema7 {
-    states?: StateDict;
-    extends?: { $ref: string };
-    properties?: {
-        [key: string]: boolean | ExtractedSchema;
-    };
-}
-
-export interface SchemaStates {
-    type: string;
-    default?: string;
-    enum?: string[];
-}
-
-export interface MinimalPath {
-    dirname: (p: string) => string;
-    join: (...paths: string[]) => string;
-    isAbsolute: (path: string) => boolean;
-    relative: (from: string, to: string) => string;
-}
-
-export function extractSchema(css: string, filePath: string, root: string, path: MinimalPath) {
-    const processor = new StylableProcessor();
+export function extractSchema(
+    css: string,
+    filePath: string,
+    root: string,
+    path: MinimalPath,
+    resolveNamespace?: (namespace: string, source: string) => string
+) {
+    const processor = new StylableProcessor(undefined, resolveNamespace);
     const meta = processor.process(safeParse(css, { from: filePath }));
     return generateSchema(meta, filePath, root, path);
 }
@@ -43,10 +33,11 @@ export function generateSchema(
     filePath: string,
     basePath: string,
     path: MinimalPath
-): ExtractedSchema {
-    const schema: ExtractedSchema = {
+): StylableModuleSchema {
+    const schema: StylableModuleSchema = {
         $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
-        $ref: 'stylable/module'
+        $ref: 'stylable/module',
+        namespace: meta.namespace
     };
 
     for (const entry of Object.keys(meta.mappedSymbols)) {
@@ -55,33 +46,60 @@ export function generateSchema(
         }
 
         const symbol = meta.mappedSymbols[entry];
-        schema.properties[entry] = {};
 
-        const schemaEntry = schema.properties[entry];
-
-        if (typeof schemaEntry === 'boolean') {
+        if (typeof schema.properties[entry] === 'boolean') {
             continue;
-        } else if (symbol._kind === 'class' || symbol._kind === 'element') {
-            const states = symbol[valueMapping.states];
-            const extended = symbol[valueMapping.extends];
-            schemaEntry.$ref = `stylable/${symbol._kind}`;
+        } else {
+            if (symbol._kind === 'class' || symbol._kind === 'element') {
+                schema.properties[entry] = {};
+                const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
+                const states = symbol[valueMapping.states];
+                const extended = symbol[valueMapping.extends];
 
-            if (states) {
-                schemaEntry.states = getStatesForSymbol(states);
-            }
+                if (symbol.alias && symbol.alias.import) {
+                    addModuleDependency(schema, filePath, symbol.alias.import.from, basePath, path);
 
-            if (extended) {
-                schemaEntry.extends =
-                    extended._kind === 'import' && extended.import
-                        ? { $ref: getImportedRef(filePath, extended, basePath, path) }
-                        : { $ref: extended.name };
+                    schemaEntry.$ref = getImportedRef(filePath, symbol.alias, basePath, path);
+                } else {
+                    schemaEntry.$ref = `stylable/${symbol._kind}`;
+                }
+
+                if (states) {
+                    schemaEntry.states = getStatesForSymbol(states);
+                }
+
+                if (extended) {
+                    schemaEntry.extends =
+                        extended._kind === 'import' && extended.import
+                            ? { $ref: getImportedRef(filePath, extended, basePath, path) }
+                            : { $ref: extended.name };
+                }
+            } else if (symbol._kind === 'var' || symbol._kind === 'cssVar') {
+                schema.properties[entry] = {};
+                const schemaEntry = schema.properties[entry] as JSONSchema7;
+
+                schemaEntry.$ref = `stylable/${symbol._kind}`;
             }
-        } else if (symbol._kind === 'var' && typeof schemaEntry !== 'boolean') {
-            schemaEntry.$ref = `stylable/${symbol._kind}`;
         }
     }
 
     return schema;
+}
+
+function addModuleDependency(
+    schema: StylableModuleSchema,
+    filePath: string,
+    importPath: string,
+    basePath: string,
+    path: MinimalPath
+) {
+    if (!schema.moduleDependencies) {
+        schema.moduleDependencies = [];
+    }
+    const importedPath = normalizeImportPath(filePath, importPath, basePath, path);
+    if (schema.moduleDependencies.indexOf(importedPath) === -1) {
+        schema.moduleDependencies.push(importedPath);
+    }
 }
 
 function getStatesForSymbol(states: MappedStates): StateDict {
@@ -113,6 +131,7 @@ function convertMappedStateToSchema(state: StateParsedValue): SchemaStates {
 
     if (state.arguments.length) {
         stateSchema.enum = [];
+        stateSchema.type = 'string';
         for (const arg of state.arguments) {
             if (typeof arg === 'string') {
                 // enum options
@@ -124,17 +143,35 @@ function convertMappedStateToSchema(state: StateParsedValue): SchemaStates {
     return stateSchema;
 }
 
-function getImportedRef(fileName: string, importSymbol: ImportSymbol, basePath: string, path: MinimalPath): string {
+function getImportedRef(
+    fileName: string,
+    importSymbol: ImportSymbol,
+    basePath: string,
+    path: MinimalPath
+): string {
     const suffix = importSymbol.type === 'default' ? 'root' : `${importSymbol.name}`;
-    return `${normalizeImportPath(fileName, importSymbol.import.fromRelative, basePath, path)}#${suffix}`;
+    return `${normalizeImportPath(
+        fileName,
+        importSymbol.import.fromRelative,
+        basePath,
+        path
+    )}#${suffix}`;
 }
 
-function normalizeImportPath(fileName: string, importString: string, basePath: string, path: MinimalPath): string {
+function normalizeImportPath(
+    fileName: string,
+    importString: string,
+    basePath: string,
+    path: MinimalPath
+): string {
     if (importString.startsWith('.')) {
         // is relative
-        return '/' + path
-            .join(path.dirname(path.relative(basePath, fileName)), importString)
-            .replace(/\\/g, '/');
+        return (
+            '/' +
+            path
+                .join(path.dirname(path.relative(basePath, fileName)), importString)
+                .replace(/\\/g, '/')
+        );
     } else if (path.isAbsolute(importString)) {
         return '/' + path.relative(basePath, importString).replace(/\\/g, '/');
     } else {
