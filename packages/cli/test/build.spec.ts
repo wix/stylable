@@ -29,11 +29,11 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: 'lib',
             srcDir: '.',
@@ -71,12 +71,12 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
         let reportedError = '';
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: '.',
             srcDir: '.',
@@ -93,6 +93,41 @@ describe('build stand alone', () => {
         );
     });
 
+    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
+        const fs = createFS({
+            '/comp.st.css': `
+                .root {
+                    color: red;
+                }
+                /* comment */
+                .x {
+                    
+                }
+            `
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: './dist',
+            srcDir: '.',
+            rootDir: resolve('/'),
+            log,
+            moduleFormats: ['cjs'],
+            outputCSS: true,
+            outputCSSNameTemplate: '[filename].global.css'
+        });
+
+        const builtFile = fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8');
+
+        expect(builtFile).to.contain(`root {`);
+        expect(builtFile).to.contain(`color: red;`);
+        expect(builtFile).to.not.contain(`.x`);
+    });
+
     it('should inject request to output module', async () => {
         const fs = createFS({
             '/comp.st.css': `
@@ -102,11 +137,11 @@ describe('build stand alone', () => {
             `
         });
 
-        const stylable = new Stylable('/', fs as any, () => ({}));
+        const stylable = new Stylable('/', fs, () => ({}));
 
         await build({
             extension: '.st.css',
-            fs: fs as any,
+            fs,
             stylable,
             outDir: './dist',
             srcDir: '.',

@@ -48,7 +48,10 @@ const argv = require('yargs')
     .option('injectCSSRequest')
     .alias('injectCSSRequest', 'icr')
     .boolean('injectCSSRequest')
-    .describe('injectCSSRequest', 'add a static import for the generated css in the js module output')
+    .describe(
+        'injectCSSRequest',
+        'add a static import for the generated css in the js module output'
+    )
     .default('injectCSSRequest', false)
 
     .option('cssFilename')
@@ -59,6 +62,18 @@ const argv = require('yargs')
     .boolean('cssInJs')
     .describe('cssInJs', 'output transpiled css into the js module')
     .default('cssInJs', false)
+
+    .option('optimize')
+    .alias('optimize', 'o')
+    .boolean('optimize')
+    .describe('optimize', 'removes: empty nodes, stylable directives, comments')
+    .default('optimize', false)
+
+    .option('minify')
+    .alias('minify', 'm')
+    .boolean('minify')
+    .describe('minify', 'minify generated css')
+    .default('minify', false)
 
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
@@ -99,7 +114,8 @@ const {
     cssInJs,
     namespaceResolver,
     injectCSSRequest,
-    cssFilename
+    cssFilename,
+    optimize
 } = argv;
 
 log('[Arguments]', argv);
@@ -127,7 +143,8 @@ build({
     includeCSSInJS: cssInJs,
     outputSources: stcss,
     injectCSSRequest,
-    outputCSSNameTemplate: cssFilename
+    outputCSSNameTemplate: cssFilename,
+    optimize
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
