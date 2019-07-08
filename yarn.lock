@@ -1751,10 +1751,10 @@ before-after-hook@^1.4.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-1.4.0.tgz#2b6bf23dca4f32e628fd2747c10a37c74a4b484d"
   integrity sha512-l5r9ir56nda3qu14nAXIlyq1MmUSs0meCIaFAh8HwkFwP1F8eToOuS3ah2VAHHcY04jaYD7FpJC5JTXHYRbkzg==
 
-bfj@^6.1.2:
-  version "6.1.2"
-  resolved "https://registry.yarnpkg.com/bfj/-/bfj-6.1.2.tgz#325c861a822bcb358a41c78a33b8e6e2086dde7f"
-  integrity sha512-BmBJa4Lip6BPRINSZ0BPEIfB1wUY/9rwbwvIHQA1KjX9om29B6id0wnWXq7m3bn5JrUVjeOTnVuhPT1FiHwPGw==
+bfj@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/bfj/-/bfj-7.0.0.tgz#8cd88f775e754170e8342ffb13480bc9c6f847c4"
+  integrity sha512-Oqnqegu1MksqyUx7I6cDB4Mj4zcSXOwOtyywm00YDG5SqPQrnLcl1KEDAWSO05RhsSO7hTuxvsOHj93QzknWpA==
   dependencies:
     bluebird "^3.5.5"
     check-types "^8.0.3"
