@@ -95,3 +95,67 @@ You can set the value of a variable using another variable.
     border: 10px solid red; /* 10px solid {color1} */
 }
 ```
+
+## Advanced variable types
+Stylable offers the ability to use a custom type when defining a variable, so that when you consume it - new capabilities are exposed making it easier to use in some cases. 
+
+This is achieved by utilizing a type function in the variable definition and passing additional arguments to the `value()` function.
+
+### Stylable native variable types
+By default, Stylable exposes two types of variables `stMap` and `stArray`. Both of these functions are available globally and do not require a special import.
+
+#### stMap
+Defined by using the `stMap` function, it provides an interface similar to a map to allow grouping variables by context and to retrieve them by key.
+
+Its definition is comprised of key/value pairs with a space as a delimiter between them, and a comma as a separator between pairs.
+
+```css
+:vars {
+    colors: stMap(
+        bg green,
+        text red
+    );
+}
+
+.root {
+    background-color: value(colors, bg); /* green */
+}
+```
+
+#### stArray
+Defined by using the `stArray` function, it provides an interface similar to an array to allow grouping variables by context and to retrieve them by their index. This array is zero-based and comma separated.
+
+```css
+:vars {
+    colors: stArray(red, green);
+}
+
+.root {
+    background-color: value(colors, 1); /* green */
+}
+```
+
+### Custom variable types
+Beyond the available `stMap` and `stArray` types, Stylable provides the option to create custom types of your own. 
+You can then import these types to your code and use them like any other.
+
+At the moment, we offer a single example of this custom type behavior in `stBorder`, available from our package `@stylable/custom-value`.
+
+This custom type accepts three arguments, `size`, `style` and `color` (in that order). When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.
+
+```css
+:import {
+    -st-from: "@stylable/custom-value";
+    -st-named: stBorder;
+}
+
+:vars {
+    /* order of arguments: size style color */
+    myBorder: stBorder(1px, solid, green);
+}
+
+.root {
+    border: value(myBorder); /* 1px solid green */
+    background-color: value(myBorder, color); /* green */
+}
+```
