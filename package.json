@@ -61,7 +61,7 @@
     "rimraf": "^2.6.3",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "~3.5.2",
+    "typescript": "~3.5.3",
     "url-loader": "^2.0.1",
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.5",
