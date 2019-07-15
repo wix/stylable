@@ -97,7 +97,7 @@ You can set the value of a variable using another variable.
 ```
 
 ## Advanced variable types
-You can use Stylable custom types when defining a variable. When the variable is consumed, new capabilities are exposed including being able to provide multiple values to the one variable. 
+You can use Stylable custom types when defining a variable to group multiple values under a shared context. This gives you a better way to define and manage variables in your stylesheet. 
 
 Stylable does this by utilizing a type function in the variable definition and passing additional arguments to the `value()` function.
 
@@ -107,7 +107,7 @@ By default, Stylable exposes two types of variables that are available globally 
 * `stArray`
 
 #### stMap
-Use the `stMap` function to provide an interface similar to a map so you can group variables by context and retrieve them by key.
+Use the `stMap` function to provide an interface similar to a map. You can group variables by context and retrieve them by key.
 
 Its definition is comprised of key/value pairs with a space as a delimiter between them, and a comma as a separator between pairs.
 
@@ -125,9 +125,9 @@ Its definition is comprised of key/value pairs with a space as a delimiter betwe
 ```
 
 #### stArray
-Use the `stArray` function to provide an interface similar to an array so you can group variables by context and retrieve them by their index. 
+Use the `stArray` function to provide an interface which is similar to an array. This enables you to group variables by context and retrieve them by their index. 
 
-When using the `stArray` function, the array value is zero-based and comma separated.
+Its definition is comprised of values that are zero-based and comma separated.
 
 ```css
 :vars {
@@ -161,3 +161,4 @@ Stylable also offers a custom variable type, `stBorder`, that must be imported f
     background-color: value(myBorder, color); /* green */
 }
 ```
+> Note: `stBorder` is just the first of future custom variable types that will be available in Stylable.
