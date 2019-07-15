@@ -97,15 +97,17 @@ You can set the value of a variable using another variable.
 ```
 
 ## Advanced variable types
-Stylable offers the ability to use a custom type when defining a variable, so that when you consume it - new capabilities are exposed making it easier to use in some cases. 
+You can use Stylable custom types when defining a variable. When the variable is consumed, new capabilities are exposed including being able to provide multiple values to the one variable. 
 
-This is achieved by utilizing a type function in the variable definition and passing additional arguments to the `value()` function.
+Stylable does this by utilizing a type function in the variable definition and passing additional arguments to the `value()` function.
 
 ### Stylable native variable types
-By default, Stylable exposes two types of variables `stMap` and `stArray`. Both of these functions are available globally and do not require a special import.
+By default, Stylable exposes two types of variables that are available globally and do not require a special import:
+* `stMap`  
+* `stArray`
 
 #### stMap
-Defined by using the `stMap` function, it provides an interface similar to a map to allow grouping variables by context and to retrieve them by key.
+Use the `stMap` function to provide an interface similar to a map so you can group variables by context and retrieve them by key.
 
 Its definition is comprised of key/value pairs with a space as a delimiter between them, and a comma as a separator between pairs.
 
@@ -123,7 +125,9 @@ Its definition is comprised of key/value pairs with a space as a delimiter betwe
 ```
 
 #### stArray
-Defined by using the `stArray` function, it provides an interface similar to an array to allow grouping variables by context and to retrieve them by their index. This array is zero-based and comma separated.
+Use the `stArray` function to provide an interface similar to an array so you can group variables by context and retrieve them by their index. 
+
+When using the `stArray` function, the array value is zero-based and comma separated.
 
 ```css
 :vars {
@@ -135,13 +139,11 @@ Defined by using the `stArray` function, it provides an interface similar to an 
 }
 ```
 
-### Custom variable types
-Beyond the available `stMap` and `stArray` types, Stylable provides the option to create custom types of your own. 
-You can then import these types to your code and use them like any other.
+### Custom variable type
 
-At the moment, we offer a single example of this custom type behavior in `stBorder`, available from our package `@stylable/custom-value`.
+Stylable also offers a custom variable type, `stBorder`, that must be imported from the `@stylable/custom-value` [package](https://github.com/wix/stylable/tree/master/packages/custom-value).
 
-This custom type accepts three arguments, `size`, `style` and `color` (in that order). When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.
+`stBorder` accepts three arguments, `size`, `style` and `color` in that order. When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.
 
 ```css
 :import {
