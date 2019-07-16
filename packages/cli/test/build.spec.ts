@@ -128,6 +128,42 @@ describe('build stand alone', () => {
         expect(builtFile).to.not.contain(`.x`);
     });
 
+    it('should minify', async () => {
+        const fs = createFS({
+            '/comp.st.css': `
+                .root {
+                    color: rgb(255,0,0);
+                }
+            `
+        });
+
+        const stylable = Stylable.create({
+            projectRoot: '/',
+            fileSystem: fs,
+            resolveNamespace() {
+                return 'test';
+            }
+        });
+
+        await build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: './dist',
+            srcDir: '.',
+            minify: true,
+            rootDir: resolve('/'),
+            log,
+            moduleFormats: ['cjs'],
+            outputCSS: true,
+            outputCSSNameTemplate: '[filename].global.css'
+        });
+
+        const builtFile = fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8');
+
+        expect(builtFile).to.contain(`.test__root{color:red}`);
+    });
+
     it('should inject request to output module', async () => {
         const fs = createFS({
             '/comp.st.css': `

@@ -37,6 +37,11 @@ const argv = require('yargs')
     .describe('stcss', 'output stylable sources (.st.css)')
     .default('stcss', false)
 
+    .option('compat')
+    .boolean('compat')
+    .describe('compat', 'use legacy v1 runtime api')
+    .default('compat', false)
+
     .option('namespaceResolver')
     .alias('namespaceResolver', 'nsr')
     .describe(
@@ -115,7 +120,9 @@ const {
     namespaceResolver,
     injectCSSRequest,
     cssFilename,
-    optimize
+    optimize,
+    compat,
+    minify
 } = argv;
 
 log('[Arguments]', argv);
@@ -144,7 +151,9 @@ build({
     outputSources: stcss,
     injectCSSRequest,
     outputCSSNameTemplate: cssFilename,
-    optimize
+    optimize,
+    compat,
+    minify
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
