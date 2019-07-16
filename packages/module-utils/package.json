@@ -1,6 +1,6 @@
 {
   "name": "@stylable/module-utils",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Stylable module creation utilities",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
