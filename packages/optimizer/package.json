@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Stylable core optimizer",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
