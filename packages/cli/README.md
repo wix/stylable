@@ -14,28 +14,29 @@ This package is currently a work-in-progress and is set to `private`. Once it ma
 
 After installing `@stylable/cli`, a new `stc` command will be available, running `stc --help` will provide a brief description for the options available.
 
-|Option|Description|Default Value|
-|------|-----------|-------------|
-|version|show CLI version number|`boolean`|
-|rootDir|root directory of project|`cwd`|
-|srcDir|source directory relative to root|`./`|
-|outDir|target directory relative to root|`./`|
-|indexFile|filename of the generated index|`false`|
-|cjs|output commonjs modules (`.js`)|`true`|
-|esm|output esm modules (`.mjs`)|`false`|
-|css|output transpiled css files (`.css`)|`false`|
-|stcss|output stylable source files (`.st.css`)|`false`|
-|customGenerator|path of a custom index file generator|-|
-|ext|extension of stylable css files|`.st.css`|
-|cssInJs|output transpiled css into the js module|`false`|
-|cssFilename|pattern of the generated css file|`[filename].css`|
-|injectCSSRequest|add a static import for the generated css in the js module output|`false`|
-|namespaceResolver|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
-|optimize|removes: empty nodes, stylable directives, comments|`false`|
-|minify|minify generated css|`false`|
-|log|verbose log|`false`|
-|diagnostics|verbose diagnostics|`false`|
-|help|Show help|`boolean`|
+|Option|Alias|Description|Default Value|
+|------|-----|-----------|-------------|
+|version||show CLI version number|`boolean`|
+|rootDir||root directory of project|`cwd`|
+|srcDir||source directory relative to root|`./`|
+|outDir||target directory relative to root|`./`|
+|indexFile||filename of the generated index|`false`|
+|cjs||output commonjs modules (`.js`)|`true`|
+|esm||output esm modules (`.mjs`)|`false`|
+|css||output transpiled css files (`.css`)|`false`|
+|stcss||output stylable source files (`.st.css`)|`false`|
+|customGenerator||path of a custom index file generator|-|
+|ext||extension of stylable css files|`.st.css`|
+|cssInJs||output transpiled css into the js module|`false`|
+|cssFilename||pattern of the generated css file|`[filename].css`|
+|injectCSSRequest|icr|add a static import for the generated css in the js module output|`false`|
+|namespaceResolver|nsr|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
+|optimize|o|removes: empty nodes, stylable directives, comments|`false`|
+|minify|m|minify generated css|`false`|
+|log||verbose log|`false`|
+|diagnostics||verbose diagnostics|`false`|
+|compat||use legacy v1 runtime api|`false`|
+|help|h|Show help|`boolean`|
 
 ### Generate an index file
 This generates an `index.st.css` file that acts as an export entry from every stylesheet in the provided `srcDir`.

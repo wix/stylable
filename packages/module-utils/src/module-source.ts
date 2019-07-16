@@ -40,7 +40,8 @@ export function createModuleSource(
     moduleId = JSON.stringify(stylableResult.meta.namespace),
     renderableOnly = false,
     depth: string | number = '-1',
-    staticRequests: string[] = []
+    staticRequests: string[] = [],
+    runtimeRequest: string = '@stylable/runtime'
 ) {
     // TODO: calc depth for node as well
     depth = typeof depth === 'number' ? depth.toString() : depth;
@@ -60,7 +61,7 @@ export function createModuleSource(
                 moduleId,
                 [
                     ...staticRequests.map(request => `import ${JSON.stringify(request)}`),
-                    `import { $, ${importKey} } from ${JSON.stringify('@stylable/runtime')}`
+                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`
                 ],
                 `$`,
                 `create`,
@@ -77,7 +78,7 @@ export function createModuleSource(
                 moduleId,
                 [
                     ...staticRequests.map(request => `require(${JSON.stringify(request)})`),
-                    `const runtime = require(${JSON.stringify('@stylable/runtime')})`
+                    `const runtime = require(${JSON.stringify(runtimeRequest)})`
                 ],
                 `runtime.$`,
                 `runtime.create`,

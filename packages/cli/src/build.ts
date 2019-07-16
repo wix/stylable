@@ -28,6 +28,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
+    compat?: boolean
 }
 
 export async function build({
@@ -48,7 +49,8 @@ export async function build({
     outputSources,
     injectCSSRequest,
     optimize,
-    minify
+    minify,
+    compat
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -95,7 +97,8 @@ export async function build({
                   outputSources,
                   injectCSSRequest,
                   optimize,
-                  minify
+                  minify,
+                  compat
               );
     });
 
@@ -129,7 +132,8 @@ function buildSingleFile(
     outputSources: boolean = false,
     injectCSSRequest: boolean = false,
     optimize: boolean = false,
-    minify: boolean = false
+    minify: boolean = false,
+    compat: boolean = false
 ) {
     // testBuild(filePath, fullSrcDir, fs);
 
@@ -181,7 +185,8 @@ function buildSingleFile(
                     undefined,
                     undefined,
                     undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : []
+                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
+                    compat ? '@stylable/runtime/cjs/index-legacy': '@stylable/runtime'
                 ),
             `Transform Error: ${filePath}`
         );
@@ -201,7 +206,7 @@ function buildSingleFile(
     }
     // .d.ts?
 
-    // copy assets
+    // copy assets?
     projectAssets.push(
         ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
     );
