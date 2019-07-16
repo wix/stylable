@@ -25,7 +25,8 @@ export class StylableOptimizer implements IStylableOptimizer {
     ) {}
 
     public minifyCSS(css: string): string {
-        return csso.minify(css).css;
+        // disabling restructuring as it breaks production mode by disappearing classes
+        return csso.minify(css, { restructure: false }).css;
     }
     public optimize(
         config: OptimizeConfig,
