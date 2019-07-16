@@ -5,8 +5,8 @@ import { stylableModuleFactory } from '../src';
 import { Options } from '../src/module-factory';
 
 function evalModule(id: string, source: string, requireModule: (s: string) => any) {
-    if(!source) {
-        throw "No source is provided to evalModule";
+    if (!source) {
+        throw new Error('No source is provided to evalModule');
     }
     const _module = {
         id,
