@@ -2,8 +2,8 @@ import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { getCssDocsForSymbol } from '../src';
 
-describe('css docs comments metadata', () => {
-    it('should return null when extracting cssdocs from a meta without no definitions', () => {
+describe('cssDocs comments metadata', () => {
+    it('should return null when extracting cssDocs from a meta without no definitions', () => {
         const { meta } = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
