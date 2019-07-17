@@ -5,6 +5,13 @@ import { getSourcePath } from './stylable-utils';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';
 
+function findNodeInAst(ast: postcss.Root, nodeName: string) {
+    let root = null;
+    ast.walkRules(`.${nodeName}`, rule => (root = rule));
+
+    return root;
+}
+
 export class StylableMeta {
     public rawAst: postcss.Root;
     public root: 'root';
@@ -29,7 +36,8 @@ export class StylableMeta {
         const rootSymbol: ClassSymbol = {
             _kind: 'class',
             name: RESERVED_ROOT_NAME,
-            [valueMapping.root]: true
+            [valueMapping.root]: true,
+            node: findNodeInAst(ast, RESERVED_ROOT_NAME) || postcss.rule()
         };
 
         this.rawAst = ast.clone();
@@ -73,6 +81,7 @@ export interface StylableDirectives {
 export interface ClassSymbol extends StylableDirectives {
     _kind: 'class';
     name: string;
+    node: postcss.Rule | postcss.Root;
     alias?: ImportSymbol;
     scoped?: string;
 }
@@ -80,6 +89,7 @@ export interface ClassSymbol extends StylableDirectives {
 export interface ElementSymbol extends StylableDirectives {
     _kind: 'element';
     name: string;
+    node: postcss.Rule | postcss.Root;
     alias?: ImportSymbol;
 }
 

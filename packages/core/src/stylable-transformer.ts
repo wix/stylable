@@ -819,7 +819,11 @@ export class StylableTransformer {
             }
 
             // this is an error mode fallback
-            return { _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } };
+            return {
+                _kind: 'css',
+                meta,
+                symbol: { _kind: 'element', name: '*', node: postcss.rule({ selector: '*' }) }
+            };
         }
 
         // find if the current symbol exists in the initial meta;

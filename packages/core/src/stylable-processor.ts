@@ -402,7 +402,8 @@ export class StylableProcessor {
             this.meta.elements[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'element',
                 name,
-                alias
+                alias,
+                node: rule
             };
         }
     }
@@ -417,7 +418,8 @@ export class StylableProcessor {
             this.meta.classes[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'class',
                 name,
-                alias
+                alias,
+                node: rule
             };
         }
     }
