@@ -9,12 +9,9 @@ import {
     stylableModule,
     stylableVar
 } from '../src';
+import { mockNamespace } from './mock-namespace';
 
 use(flatMatch);
-
-function mockNamespace(namespace: string, _source: string) {
-    return namespace;
-}
 
 describe('Stylable JSON Schema Extractor', () => {
     describe('local symbols', () => {

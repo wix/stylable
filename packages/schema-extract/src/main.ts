@@ -1,4 +1,5 @@
 import {
+    getCssDocsForSymbol,
     ImportSymbol,
     MappedStates,
     safeParse,
@@ -53,8 +54,7 @@ export function generateSchema(
             if (symbol._kind === 'class' || symbol._kind === 'element') {
                 schema.properties[entry] = {};
                 const schemaEntry = schema.properties[entry] as StylableSymbolSchema;
-                const states = symbol[valueMapping.states];
-                const extended = symbol[valueMapping.extends];
+                const { [valueMapping.states]: states, [valueMapping.extends]: extended } = symbol;
 
                 if (symbol.alias && symbol.alias.import) {
                     addModuleDependency(schema, filePath, symbol.alias.import.from, basePath, path);
@@ -73,6 +73,18 @@ export function generateSchema(
                         extended._kind === 'import' && extended.import
                             ? { $ref: getImportedRef(filePath, extended, basePath, path) }
                             : { $ref: extended.name };
+                }
+
+                const cssDoc = getCssDocsForSymbol(symbol);
+
+                if (cssDoc) {
+                    if (cssDoc.description) {
+                        schemaEntry.description = cssDoc.description;
+                    }
+
+                    if (Object.keys(cssDoc.tags).length) {
+                        schemaEntry.tags = cssDoc.tags;
+                    }
                 }
             } else if (symbol._kind === 'var' || symbol._kind === 'cssVar') {
                 schema.properties[entry] = {};
