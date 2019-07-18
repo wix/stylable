@@ -11,7 +11,6 @@ export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol):
     
     if (symbol._kind === 'class' || symbol._kind === 'element') {
         commentNode = meta.mappedSimpleSelectors[symbol.name] && meta.mappedSimpleSelectors[symbol.name].node.prev();
-        
     } else if (symbol._kind === 'var') {
         commentNode = symbol.node.prev();
     }
