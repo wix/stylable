@@ -8,7 +8,9 @@ export interface CssDoc {
 
 export function getCssDocsForSymbol(symbol: StylableSymbol): CssDoc | null {
     const commentNode =
-        (symbol._kind === 'class' || symbol._kind === 'element') && symbol.node.prev();
+        (symbol._kind === 'class' || symbol._kind === 'element') &&
+        symbol.getNode &&
+        symbol.getNode().prev();
 
     if (commentNode && commentNode.type === 'comment') {
         const { comments, pragmas } = parseWithComments(extract(commentNode.toString()));

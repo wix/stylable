@@ -403,7 +403,7 @@ export class StylableProcessor {
                 _kind: 'element',
                 name,
                 alias,
-                node: rule
+                getNode: () => rule
             };
         }
     }
@@ -419,8 +419,12 @@ export class StylableProcessor {
                 _kind: 'class',
                 name,
                 alias,
-                node: rule
+                getNode: () => rule
             };
+        } else if (name === this.meta.root && !this.meta.classes[name].getNode) {
+            // adding a getter to the node for later cssDocs extraction
+            (this.meta.mappedSymbols[name] as ClassSymbol).getNode = () => rule;
+            this.meta.classes[name].getNode = () => rule;
         }
     }
 

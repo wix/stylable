@@ -822,7 +822,7 @@ export class StylableTransformer {
             return {
                 _kind: 'css',
                 meta,
-                symbol: { _kind: 'element', name: '*', node: postcss.rule({ selector: '*' }) }
+                symbol: { _kind: 'element', name: '*' }
             };
         }
 
