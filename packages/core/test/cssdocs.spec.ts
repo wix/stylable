@@ -16,7 +16,7 @@ describe('cssDocs comments metadata', () => {
             }
         });
 
-        const cssDoc = getCssDocsForSymbol(meta.mappedSymbols.root);
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
 
         expect(cssDoc).to.eql(null);
     });
@@ -37,7 +37,7 @@ describe('cssDocs comments metadata', () => {
             }
         });
 
-        const cssDoc = getCssDocsForSymbol(meta.mappedSymbols.root);
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
 
         expect(cssDoc).to.eql({ description: 'this is my description', tags: {} });
     });
@@ -62,7 +62,7 @@ describe('cssDocs comments metadata', () => {
             }
         });
 
-        const cssDoc = getCssDocsForSymbol(meta.mappedSymbols.root);
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
 
         expect(cssDoc).to.eql({
             description: '',
@@ -92,7 +92,7 @@ describe('cssDocs comments metadata', () => {
             }
         });
 
-        const cssDoc = getCssDocsForSymbol(meta.mappedSymbols.root);
+        const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',

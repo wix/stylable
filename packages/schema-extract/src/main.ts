@@ -75,7 +75,7 @@ export function generateSchema(
                             : { $ref: extended.name };
                 }
 
-                const cssDoc = getCssDocsForSymbol(symbol);
+                const cssDoc = getCssDocsForSymbol(meta, symbol);
 
                 if (cssDoc) {
                     if (cssDoc.description) {

@@ -399,11 +399,16 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
+
             this.meta.elements[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'element',
                 name,
-                alias,
-                getNode: () => rule
+                alias
+            };
+
+            this.meta.mappedSimpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.elements[name]
             };
         }
     }
@@ -415,16 +420,23 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
+
             this.meta.classes[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'class',
                 name,
-                alias,
-                getNode: () => rule
+                alias
             };
-        } else if (name === this.meta.root && !this.meta.classes[name].getNode) {
-            // adding a getter to the node for later cssDocs extraction
-            (this.meta.mappedSymbols[name] as ClassSymbol).getNode = () => rule;
-            this.meta.classes[name].getNode = () => rule;
+
+            this.meta.mappedSimpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.mappedSymbols[name] as ClassSymbol
+            };
+        } else if (name === this.meta.root && !this.meta.mappedSimpleSelectors[name]) {
+            // special handling for registering "root" node comments
+            this.meta.mappedSimpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.classes[name]
+            };
         }
     }
 
