@@ -491,8 +491,16 @@ describe('Stylable JSON Schema Extractor', () => {
                 -st-named: part1, part2;
             }
             :vars {
+                /**
+                 * a var description
+                 * @tag a var tag
+                 */
                 myColor: red;
             }
+            /**
+             * a description for root
+             * @tag a tag for root
+             */
             .root {
                 -st-states: userSelected;
                 -st-extends: Comp;
@@ -501,6 +509,10 @@ describe('Stylable JSON Schema Extractor', () => {
                 -st-states: size( enum(s, m, l) );
                 -st-extends: part1;
             }
+            /**
+             * a description for part2
+             * @tag a tag for part2
+             */
             .part2 {}
         `;
 
@@ -521,13 +533,19 @@ describe('Stylable JSON Schema Extractor', () => {
                     },
                     extends: {
                         $ref: '/imported.st.css#root'
-                    }
+                    },
+                    description: 'a description for root',
+                    tags: { tag: 'a tag for root' }
                 },
                 part2: {
-                    $ref: '/imported.st.css#part2'
+                    $ref: '/imported.st.css#part2',
+                    description: 'a description for part2',
+                    tags: { tag: 'a tag for part2' }
                 },
                 myColor: {
-                    $ref: stylableVar
+                    $ref: stylableVar,
+                    description: 'a var description',
+                    tags: { tag: 'a var tag' }
                 },
                 otherPart: {
                     $ref: stylableClass,

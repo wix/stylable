@@ -1,4 +1,6 @@
 import {
+    ClassSymbol,
+    ElementSymbol,
     getCssDocsForSymbol,
     ImportSymbol,
     MappedStates,
@@ -6,15 +8,17 @@ import {
     StateParsedValue,
     StylableMeta,
     StylableProcessor,
-    valueMapping
+    valueMapping,
+    VarSymbol
 } from '@stylable/core';
-import { JSONSchema7 } from 'json-schema';
 import {
     MinimalPath,
     SchemaStates,
     StateDict,
+    stylableCssVar,
     StylableModuleSchema,
-    StylableSymbolSchema
+    StylableSymbolSchema,
+    stylableVar
 } from './types';
 
 export function extractSchema(
@@ -75,27 +79,34 @@ export function generateSchema(
                             : { $ref: extended.name };
                 }
 
-                const cssDoc = getCssDocsForSymbol(meta, symbol);
-
-                if (cssDoc) {
-                    if (cssDoc.description) {
-                        schemaEntry.description = cssDoc.description;
-                    }
-
-                    if (Object.keys(cssDoc.tags).length) {
-                        schemaEntry.tags = cssDoc.tags;
-                    }
-                }
-            } else if (symbol._kind === 'var' || symbol._kind === 'cssVar') {
-                schema.properties[entry] = {};
-                const schemaEntry = schema.properties[entry] as JSONSchema7;
-
-                schemaEntry.$ref = `stylable/${symbol._kind}`;
+                generateCssDocs(meta, symbol, schemaEntry);
+            } else if (symbol._kind === 'var') {
+                schema.properties[entry] = {
+                    $ref: stylableVar
+                };
+                
+                generateCssDocs(meta, symbol, schema.properties[entry] as StylableSymbolSchema);
+            } else if (symbol._kind === 'cssVar') {
+                schema.properties[entry] = {
+                    $ref: stylableCssVar
+                };
             }
         }
     }
 
     return schema;
+}
+
+function generateCssDocs(meta: StylableMeta, symbol: ClassSymbol | ElementSymbol | VarSymbol, schemaEntry: StylableSymbolSchema) {
+    const cssDoc = getCssDocsForSymbol(meta, symbol);
+    if (cssDoc) {
+        if (cssDoc.description) {
+            schemaEntry.description = cssDoc.description;
+        }
+        if (Object.keys(cssDoc.tags).length) {
+            schemaEntry.tags = cssDoc.tags;
+        }
+    }
 }
 
 function addModuleDependency(

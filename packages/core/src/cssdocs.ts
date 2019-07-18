@@ -7,10 +7,14 @@ export interface CssDoc {
 }
 
 export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol): CssDoc | null {
-    const commentNode =
-        (symbol._kind === 'class' || symbol._kind === 'element') &&
-        meta.mappedSimpleSelectors[symbol.name] &&
-        meta.mappedSimpleSelectors[symbol.name].node.prev();
+    let commentNode;
+    
+    if (symbol._kind === 'class' || symbol._kind === 'element') {
+        commentNode = meta.mappedSimpleSelectors[symbol.name] && meta.mappedSimpleSelectors[symbol.name].node.prev();
+        
+    } else if (symbol._kind === 'var') {
+        commentNode = symbol.node.prev();
+    }
 
     if (commentNode && commentNode.type === 'comment') {
         const { comments, pragmas } = parseWithComments(extract(commentNode.toString()));
