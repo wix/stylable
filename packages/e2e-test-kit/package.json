@@ -16,7 +16,7 @@
     "node-eval": "^2.0.0",
     "puppeteer": "^1.18.1",
     "rimraf": "^2.6.3",
-    "webpack": "^4.35.3"
+    "webpack": "^4.36.1"
   },
   "files": [
     "cjs",
