@@ -399,10 +399,16 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
+
             this.meta.elements[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'element',
                 name,
                 alias
+            };
+
+            this.meta.simpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.elements[name]
             };
         }
     }
@@ -414,10 +420,22 @@ export class StylableProcessor {
                 this.checkRedeclareSymbol(name, rule);
                 alias = undefined;
             }
+
             this.meta.classes[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'class',
                 name,
                 alias
+            };
+
+            this.meta.simpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.mappedSymbols[name] as ClassSymbol
+            };
+        } else if (name === this.meta.root && !this.meta.simpleSelectors[name]) {
+            // special handling for registering "root" node comments
+            this.meta.simpleSelectors[name] = {
+                node: rule,
+                symbol: this.meta.classes[name]
             };
         }
     }

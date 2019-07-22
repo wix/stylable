@@ -7,14 +7,12 @@ import {
     stylableCssVar,
     stylableElement,
     stylableModule,
+    StylableModuleSchema,
     stylableVar
 } from '../src';
+import { mockNamespace } from './mock-namespace';
 
 use(flatMatch);
-
-function mockNamespace(namespace: string, _source: string) {
-    return namespace;
-}
 
 describe('Stylable JSON Schema Extractor', () => {
     describe('local symbols', () => {
@@ -494,8 +492,16 @@ describe('Stylable JSON Schema Extractor', () => {
                 -st-named: part1, part2;
             }
             :vars {
+                /**
+                 * a var description
+                 * @tag a var tag
+                 */
                 myColor: red;
             }
+            /**
+             * a description for root
+             * @tag a tag for root
+             */
             .root {
                 -st-states: userSelected;
                 -st-extends: Comp;
@@ -504,12 +510,15 @@ describe('Stylable JSON Schema Extractor', () => {
                 -st-states: size( enum(s, m, l) );
                 -st-extends: part1;
             }
+            /**
+             * a description for part2
+             * @tag a tag for part2
+             */
             .part2 {}
         `;
 
         const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
-
-        expect(res).to.eql({
+        const expected: StylableModuleSchema = {
             $id: '/entry.st.css',
             $ref: stylableModule,
             namespace: 'entry',
@@ -524,13 +533,19 @@ describe('Stylable JSON Schema Extractor', () => {
                     },
                     extends: {
                         $ref: '/imported.st.css#root'
-                    }
+                    },
+                    description: 'a description for root',
+                    docTags: { tag: 'a tag for root' }
                 },
                 part2: {
-                    $ref: '/imported.st.css#part2'
+                    $ref: '/imported.st.css#part2',
+                    description: 'a description for part2',
+                    docTags: { tag: 'a tag for part2' }
                 },
                 myColor: {
-                    $ref: stylableVar
+                    $ref: stylableVar,
+                    description: 'a var description',
+                    docTags: { tag: 'a var tag' }
                 },
                 otherPart: {
                     $ref: stylableClass,
@@ -545,6 +560,8 @@ describe('Stylable JSON Schema Extractor', () => {
                     }
                 }
             }
-        });
+        };
+
+        expect(res).to.eql(expected);
     });
 });
