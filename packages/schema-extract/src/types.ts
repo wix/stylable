@@ -21,7 +21,7 @@ export interface StylableModuleSchema extends JSONSchema7 {
 export interface StylableSymbolSchema extends JSONSchema7 {
     states?: StateDict;
     extends?: { $ref: string };
-    tags?: Record<string, string>;
+    docTags?: Record<string, string>;
 }
 
 export type StateDict = { [stateName: string]: SchemaStates } & object;

@@ -7,7 +7,8 @@ import {
     stylableCssVar,
     stylableElement,
     stylableModule,
-    stylableVar
+    stylableVar,
+    StylableModuleSchema
 } from '../src';
 import { mockNamespace } from './mock-namespace';
 
@@ -517,8 +518,7 @@ describe('Stylable JSON Schema Extractor', () => {
         `;
 
         const res = extractSchema(css, '/entry.st.css', '/', path, mockNamespace);
-
-        expect(res).to.eql({
+        const expected: StylableModuleSchema = {
             $id: '/entry.st.css',
             $ref: stylableModule,
             namespace: 'entry',
@@ -535,17 +535,17 @@ describe('Stylable JSON Schema Extractor', () => {
                         $ref: '/imported.st.css#root'
                     },
                     description: 'a description for root',
-                    tags: { tag: 'a tag for root' }
+                    docTags: { tag: 'a tag for root' }
                 },
                 part2: {
                     $ref: '/imported.st.css#part2',
                     description: 'a description for part2',
-                    tags: { tag: 'a tag for part2' }
+                    docTags: { tag: 'a tag for part2' }
                 },
                 myColor: {
                     $ref: stylableVar,
                     description: 'a var description',
-                    tags: { tag: 'a var tag' }
+                    docTags: { tag: 'a var tag' }
                 },
                 otherPart: {
                     $ref: stylableClass,
@@ -560,6 +560,8 @@ describe('Stylable JSON Schema Extractor', () => {
                     }
                 }
             }
-        });
+        };
+
+        expect(res).to.eql(expected);
     });
 });

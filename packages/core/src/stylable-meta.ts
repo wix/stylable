@@ -22,7 +22,7 @@ export class StylableMeta {
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
-    public mappedSimpleSelectors: Record<string, MappedComment>;
+    public simpleSelectors: Record<string, SimpleSelector>;
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -51,7 +51,7 @@ export class StylableMeta {
         this.customSelectors = {};
         this.urls = [];
         this.scopes = [];
-        this.mappedSimpleSelectors = {};
+        this.simpleSelectors = {};
         this.transformDiagnostics = null;
     }
 }
@@ -115,7 +115,7 @@ export interface RefedMixin {
     ref: ImportSymbol | ClassSymbol;
 }
 
-export interface MappedComment {
+export interface SimpleSelector {
     symbol: ClassSymbol | ElementSymbol;
     node: postcss.Rule | postcss.Root;
 }

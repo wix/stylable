@@ -34,7 +34,7 @@ describe('cssDocs extraction', () => {
                 root: {
                     $ref: stylableClass,
                     description: 'this is a description text',
-                    tags: {
+                    docTags: {
                         description: 'this is a description tag'
                     }
                 }
@@ -69,7 +69,7 @@ describe('cssDocs extraction', () => {
                 Comp: {
                     $ref: stylableElement,
                     description: 'this is a description text',
-                    tags: {
+                    docTags: {
                         description: 'this is a description tag'
                     }
                 }
@@ -106,7 +106,7 @@ describe('cssDocs extraction', () => {
                 myVar: {
                     $ref: stylableVar,
                     description: 'this is a var description text',
-                    tags: {
+                    docTags: {
                         description: 'this is a var description tag'
                     }
                 }

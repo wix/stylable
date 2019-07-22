@@ -104,7 +104,7 @@ function generateCssDocs(meta: StylableMeta, symbol: ClassSymbol | ElementSymbol
             schemaEntry.description = cssDoc.description;
         }
         if (Object.keys(cssDoc.tags).length) {
-            schemaEntry.tags = cssDoc.tags;
+            schemaEntry.docTags = cssDoc.tags;
         }
     }
 }

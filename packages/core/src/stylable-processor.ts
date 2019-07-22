@@ -406,7 +406,7 @@ export class StylableProcessor {
                 alias
             };
 
-            this.meta.mappedSimpleSelectors[name] = {
+            this.meta.simpleSelectors[name] = {
                 node: rule,
                 symbol: this.meta.elements[name]
             };
@@ -427,13 +427,13 @@ export class StylableProcessor {
                 alias
             };
 
-            this.meta.mappedSimpleSelectors[name] = {
+            this.meta.simpleSelectors[name] = {
                 node: rule,
                 symbol: this.meta.mappedSymbols[name] as ClassSymbol
             };
-        } else if (name === this.meta.root && !this.meta.mappedSimpleSelectors[name]) {
+        } else if (name === this.meta.root && !this.meta.simpleSelectors[name]) {
             // special handling for registering "root" node comments
-            this.meta.mappedSimpleSelectors[name] = {
+            this.meta.simpleSelectors[name] = {
                 node: rule,
                 symbol: this.meta.classes[name]
             };
