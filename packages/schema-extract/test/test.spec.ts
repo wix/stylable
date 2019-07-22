@@ -7,8 +7,8 @@ import {
     stylableCssVar,
     stylableElement,
     stylableModule,
-    stylableVar,
-    StylableModuleSchema
+    StylableModuleSchema,
+    stylableVar
 } from '../src';
 import { mockNamespace } from './mock-namespace';
 
