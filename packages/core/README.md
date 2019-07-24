@@ -22,5 +22,4 @@ Stylable's workflow contains two main parts that together perform the CSS transp
 - `stylable-transformer` - Processes each stylesheet using the previously created data including other file dependencies. Transforms our Stylable CSS into vanilla CSS.
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

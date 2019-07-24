@@ -26,7 +26,6 @@ Generate css that allow to force css state on dom node.
 Read our [contributing guidelines](../../CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
 
 

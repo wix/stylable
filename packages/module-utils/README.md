@@ -13,5 +13,4 @@ Creates a factory for creating multiple Stylable modules in a shared context, us
 Creates a single Stylable module source code, used by the node integration.
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).
