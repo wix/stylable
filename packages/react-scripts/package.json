@@ -23,7 +23,7 @@
     "tslib": "^1.10.0",
     "typescript": "~3.5.3",
     "url-loader": "^2.1.0",
-    "webpack": "^4.36.1",
+    "webpack": "^4.37.0",
     "webpack-dev-server": "^3.7.2",
     "webpack-manifest-plugin": "^2.0.4",
     "workbox-webpack-plugin": "^4.3.1"
