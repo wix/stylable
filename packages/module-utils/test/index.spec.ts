@@ -52,7 +52,7 @@ describe('Module Factory', () => {
         const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
 
         const exports: any = evalStylableModule(moduleSource, testFile);
-
+        expect(exports).to.equal(exports.default)
         expect(exports('root')).to.eql({
             className: 'entry__root'
         });

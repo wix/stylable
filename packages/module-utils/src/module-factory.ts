@@ -21,9 +21,11 @@ export function stylableModuleFactory(
         staticImports = []
     }: Partial<Options> = {}
 ) {
+    let afterModule = '';
     const stylable = Stylable.create(stylableOptions);
     if (legacyRuntime && runtimePath === '@stylable/runtime') {
         runtimePath = '@stylable/runtime/cjs/index-legacy';
+        afterModule += 'module.exports.default = module.exports'
     }
     return function stylableToModule(source: string, path: string) {
         const res = stylable.transform(source, path);
@@ -40,7 +42,7 @@ export function stylableModuleFactory(
             injectCSS ? JSON.stringify(res.meta.outputAst!.toString()) : '""',
             '-1', // ToDo: calc depth for node as well
             'module.exports',
-            '',
+            afterModule,
             renderableOnly
         );
     };
