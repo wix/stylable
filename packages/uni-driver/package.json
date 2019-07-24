@@ -1,6 +1,6 @@
 {
   "name": "@stylable/uni-driver",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Stylable UniDriver testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@stylable/custom-value",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Custom values (variables) for Stylable",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -11,7 +11,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^2.1.1"
+    "@stylable/core": "^2.1.2"
   },
   "files": [
     "cjs",
