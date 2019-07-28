@@ -8,6 +8,7 @@ import { FileSystem, findFiles } from './find-files';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
+import { generateManifest } from './generate-manifest';
 
 export interface BuildOptions {
     extension: string;
@@ -16,6 +17,7 @@ export interface BuildOptions {
     rootDir: string;
     srcDir: string;
     outDir: string;
+    manifest?: string;
     log: (...args: string[]) => void;
     indexFile?: string;
     diagnostics?: (...args: string[]) => void;
@@ -50,7 +52,8 @@ export async function build({
     injectCSSRequest,
     optimize,
     minify,
-    compat
+    compat,
+    manifest
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -112,24 +115,8 @@ export async function build({
 
     if (!indexFile) {
         handleAssets(assets, rootDir, srcDir, outDir, fs);
+        generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
     }
-
-    // const _generateManifest = function () {
-    //     function getBuildNamespace(stylable: Stylable, filePath: string): string {
-    //         return stylable.fileProcessor.process(filePath).namespace;
-    //     }
-    //     const buildManifest = true;
-    //     if (buildManifest && !indexFile) {
-    //         const manifest = filesToBuild.reduce<{
-    //             [key: string]: string;
-    //         }>((manifest, filePath) => {
-    //             manifest[filePath] = getBuildNamespace(stylable, filePath);
-    //             return manifest;
-    //         }, {});
-    //         log('[Build]', 'creating manifest file: ');
-    //         tryRun(() => fs.writeFileSync('manifestFile', JSON.stringify(manifest)), 'Write Index File Error');
-    //     }
-    // }
 }
 
 function buildSingleFile(
