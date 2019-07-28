@@ -171,12 +171,16 @@ describe('Stylable Cli', () => {
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'style.st.css.js')
-        const m = evalStylableModule<{ namespace: string }>(
+        const m = evalStylableModule<{ namespace: string, default: any }>(
             dirContent[file] as string,
             file
         )
         expect(
             typeof m
         ).equal('function');
+        
+        expect(
+            m
+        ).equal(m.default);
     });
 });

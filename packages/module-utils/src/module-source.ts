@@ -41,7 +41,8 @@ export function createModuleSource(
     renderableOnly = false,
     depth: string | number = '-1',
     staticRequests: string[] = [],
-    runtimeRequest: string = '@stylable/runtime'
+    runtimeRequest: string = '@stylable/runtime',
+    afterModule: string[] = []
 ) {
     // TODO: calc depth for node as well
     depth = typeof depth === 'number' ? depth.toString() : depth;
@@ -68,8 +69,8 @@ export function createModuleSource(
                 `createRenderable`,
                 includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
                 depth,
-                'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }',
-                `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
+                'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }', // = $
+                [`export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`, ...afterModule].join('\n'),
                 renderableOnly
             );
         case 'cjs':
@@ -86,7 +87,7 @@ export function createModuleSource(
                 includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
                 depth,
                 'module.exports',
-                '',
+                afterModule.join('\n'),
                 renderableOnly
             );
     }

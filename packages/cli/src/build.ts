@@ -28,7 +28,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
-    compat?: boolean
+    compat?: boolean;
 }
 
 export async function build({
@@ -113,6 +113,23 @@ export async function build({
     if (!indexFile) {
         handleAssets(assets, rootDir, srcDir, outDir, fs);
     }
+
+    // const _generateManifest = function () {
+    //     function getBuildNamespace(stylable: Stylable, filePath: string): string {
+    //         return stylable.fileProcessor.process(filePath).namespace;
+    //     }
+    //     const buildManifest = true;
+    //     if (buildManifest && !indexFile) {
+    //         const manifest = filesToBuild.reduce<{
+    //             [key: string]: string;
+    //         }>((manifest, filePath) => {
+    //             manifest[filePath] = getBuildNamespace(stylable, filePath);
+    //             return manifest;
+    //         }, {});
+    //         log('[Build]', 'creating manifest file: ');
+    //         tryRun(() => fs.writeFileSync('manifestFile', JSON.stringify(manifest)), 'Write Index File Error');
+    //     }
+    // }
 }
 
 function buildSingleFile(
@@ -186,7 +203,8 @@ function buildSingleFile(
                     undefined,
                     undefined,
                     injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    compat ? '@stylable/runtime/cjs/index-legacy': '@stylable/runtime'
+                    compat ? '@stylable/runtime/cjs/index-legacy' : '@stylable/runtime',
+                    compat ? ['module.exports.default = module.exports;'] : []
                 ),
             `Transform Error: ${filePath}`
         );
