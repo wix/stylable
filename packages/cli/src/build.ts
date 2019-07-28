@@ -6,9 +6,9 @@ import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { Generator } from './default-generator';
 import { FileSystem, findFiles } from './find-files';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
+import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
-import { generateManifest } from './generate-manifest';
 
 export interface BuildOptions {
     extension: string;
