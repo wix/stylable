@@ -29,6 +29,37 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
     });
 
+    it('should support trailing comma', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                    :vars {
+                        color1: green;
+                        color2: red;
+                    }
+                    
+                    .classToMixin {
+                        background: value(color1);
+                        color: value(color2);
+                    }
+                    
+                    .targetClass {
+                        -st-mixin: classToMixin(
+                            color1 orange, 
+                            color2 purple,
+                        );
+                    }
+                `
+                }
+            }
+        });
+
+        matchRuleAndDeclaration(result, 1, '.entry__targetClass', 'background: orange;color: purple');
+    });
+
     it('transform state form imported element', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,

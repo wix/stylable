@@ -188,7 +188,7 @@ export function getNamedArgs(node: ParsedValue) {
             }
         });
     }
-    return args;
+    return args.filter(argument => !!argument.length); // fixes issues with trailing comma see test
 }
 
 export function getFormatterArgs(

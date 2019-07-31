@@ -8,6 +8,7 @@
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
     "test": "mocha \"./test/**/*.spec.ts\"",
+    "test:watch": "npm run test -- --watch",
     "start": "webpack-dev-server --hot --inline",
     "prepack": "yarn build"
   },
