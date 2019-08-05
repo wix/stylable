@@ -898,19 +898,19 @@
     proper-fs "^1.1.2"
 
 "@ts-tools/node@^0.9.8":
-  version "0.9.8"
-  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.9.8.tgz#f13d2c8dfa3b1c2c88305d778c317956377fab12"
-  integrity sha512-vUklgBpgJxnoxGG5hwFHM+fhtLKUZblwbjIwyZQW3n8bxemE1evV3RGE/d0U0amZeE4dmEGTne8HwPFuEIBDTg==
+  version "0.9.9"
+  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.9.9.tgz#c4b03417a417c60edd9261962dd14950dec5d687"
+  integrity sha512-3DMVmtO3e+8g6HEXe5qp3H0PqbJEcEZbHGkhSWcl8nJ60qEW8zQEVvCZoeOL9KrJ3wOQKlCfjMlO0zUEjy9LmA==
   dependencies:
-    "@ts-tools/robotrix" "^0.7.5"
+    "@ts-tools/robotrix" "^0.7.6"
     "@ts-tools/service" "^2.0.4"
     is-ci "^2.0.0"
-    source-map-support "^0.5.12"
+    source-map-support "^0.5.13"
 
-"@ts-tools/robotrix@^0.7.5":
-  version "0.7.5"
-  resolved "https://registry.yarnpkg.com/@ts-tools/robotrix/-/robotrix-0.7.5.tgz#b7410643805b0f149b8106dba40472e2ea0d505e"
-  integrity sha512-x8JpibobUkOYbUYEOOLK01WRa7rzQwlrb2F/qNX26GSY+CWUgVEb5TJrC9nRJnqgaDeSutIMyvUqCN3WIdu7JA==
+"@ts-tools/robotrix@^0.7.5", "@ts-tools/robotrix@^0.7.6":
+  version "0.7.6"
+  resolved "https://registry.yarnpkg.com/@ts-tools/robotrix/-/robotrix-0.7.6.tgz#b3ca0f3b2aa3a7f52f8efba438193a1de5d25989"
+  integrity sha512-p46pQPeOg+Fu/Lz71TjhE/twlmpF6CERlM2MrLp/+pChI6qBJQzRSsJr5RCVriVu4UiOGefhejdK6BjPK22nHQ==
 
 "@ts-tools/service@^2.0.4":
   version "2.0.4"
@@ -7654,10 +7654,10 @@ source-map-resolve@^0.5.0:
     source-map-url "^0.4.0"
     urix "^0.1.0"
 
-source-map-support@^0.5.12, source-map-support@~0.5.12:
-  version "0.5.12"
-  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.12.tgz#b4f3b10d51857a5af0138d3ce8003b201613d599"
-  integrity sha512-4h2Pbvyy15EE02G+JOZpUCmqWJuqrs+sEkzewTm++BPi7Hvn/HwcqLAcNxYAyI0x13CpPPn+kMjl+hplXMHITQ==
+source-map-support@^0.5.13, source-map-support@~0.5.12:
+  version "0.5.13"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.13.tgz#31b24a9c2e73c2de85066c0feb7d44767ed52932"
+  integrity sha512-SHSKFHadjVA5oR4PPqhtAVdcBWwRYVd6g6cAXnIbRiIwc2EhPrTuKUBdSLvlEKyIP3GCf89fltvcZiP9MMFA1w==
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
