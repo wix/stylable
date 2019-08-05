@@ -888,9 +888,9 @@
     url-template "^2.0.8"
 
 "@ts-tools/build@^0.1.14":
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.1.14.tgz#760a6c18695934898ecf35d1b6fdc6e49b8a857e"
-  integrity sha512-O/uNfVwwFA/j9fMRSeWTYoSN9Vr1DYfODqyuzDlJXaSGZFwzGLcugzgAlZxkRvtcmG+7oCRp6IaYtTdXDvAbiw==
+  version "0.1.15"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.1.15.tgz#371d270e1b99764697cc6b6ec2d7d42a2f60bada"
+  integrity sha512-vE+tCq/cbqhwHA9ef0ytCqzSTZ3OetOQj1BACPxtl2kc+LG12iUK44Nge06YhWJU5lNF2yx13jkNPImx+rP9TQ==
   dependencies:
     "@ts-tools/service" "^2.0.4"
     chalk "^2.4.2"
