@@ -1,1 +1,1 @@
-module.exports = require('./dist/src/lib/service');
+module.exports = require('./cjs/lib/service');

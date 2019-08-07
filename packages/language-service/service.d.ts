@@ -1,1 +1,1 @@
-export * from './dist/src/lib/service';
+export * from './cjs/lib/service';
