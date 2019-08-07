@@ -144,7 +144,7 @@ describe('Javascript Mixins', () => {
                         -st-from: "./mixin";
                         -st-default: mixin;
                     }
-                    .containerA, .containerB {
+                    .containerA,.containerB {
                         -st-mixin: mixin;
 
                     }
@@ -165,12 +165,12 @@ describe('Javascript Mixins', () => {
             }
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry__containerA, .entry__containerB', 'color: red');
+        matchRuleAndDeclaration(result, 0, '.entry__containerA,.entry__containerB', 'color: red');
 
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry__containerA:hover, .entry__containerB:hover',
+            '.entry__containerA:hover,.entry__containerB:hover',
             'color: green'
         );
     });
@@ -195,7 +195,7 @@ describe('Javascript Mixins', () => {
                     content: `
                     module.exports = function() {
                         return {
-                            "&:hover, .class": {
+                            "&:hover,.class": {
                                 color: "green"
                             }
                         }
@@ -208,7 +208,7 @@ describe('Javascript Mixins', () => {
         matchRuleAndDeclaration(
             result,
             1,
-            '.entry__containerA:hover, .entry__containerA .entry__class',
+            '.entry__containerA:hover,.entry__containerA .entry__class',
             'color: green'
         );
     });

@@ -437,10 +437,7 @@ function resolveParam(
 ) {
     const defaultStringValue = '';
     const param = nodeContent || defaultStringValue;
-
-    return rule
-        ? evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics)
-        : param;
+    return evalDeclarationValue(resolver, param, meta, rule, undefined, undefined, diagnostics);
 }
 
 export function createBooleanStateClassName(stateName: string, namespace: string) {

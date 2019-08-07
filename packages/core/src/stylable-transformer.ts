@@ -5,13 +5,26 @@ import { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue, processDeclarationValue } from './functions';
-import { nativePseudoElements, reservedKeyFrames } from './native-reserved-lists';
-import { transformPseudoStateSelector, validateStateDefinition } from './pseudo-states';
+import {
+    nativePseudoClasses,
+    nativePseudoElements,
+    reservedKeyFrames
+} from './native-reserved-lists';
+import {
+    setStateToNode,
+    stateErrors,
+    transformPseudoStateSelector,
+    validateStateDefinition
+} from './pseudo-states';
 import {
     createWarningRule,
+    getOriginDefinition,
     isChildOfAtRule,
+    mergeChunks,
     parseSelector,
     SelectorAstNode,
+    SelectorChunk2,
+    separateChunks2,
     stringifySelector,
     traverseNode
 } from './selector-utils';
@@ -28,13 +41,15 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
+const USE_SCOPE_SELECTOR_2 = true;
+
 const isVendorPrefixed = require('is-vendor-prefixed');
 const valueParser = require('postcss-value-parser');
 
 export interface ResolvedElement {
     name: string;
     type: string;
-    resolved: CSSResolve[];
+    resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
 }
 
 export interface KeyFrameWithNode {
@@ -139,6 +154,7 @@ export class StylableTransformer {
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
+    private metaParts = new WeakMap<StylableMeta, MetaParts>();
     constructor(options: Options) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '__';
@@ -223,13 +239,21 @@ export class StylableTransformer {
                     );
             }
         });
-
+        if (USE_SCOPE_SELECTOR_2) {
+            if (this.mode === 'development') {
+                this.addDevRules(meta);
+            }
+        }
         ast.walkRules((rule: SRule) =>
             appendMixins(this, rule, meta, variableOverride || {}, cssVarsMapping, path)
         );
 
         if (metaExports) {
-            this.exportRootClass(meta, metaExports.classes);
+            if (USE_SCOPE_SELECTOR_2) {
+                Object.assign(metaExports.classes, this.exportMetaParts(meta));
+            } else {
+                this.exportRootClass(meta, metaExports.classes);
+            }
             this.exportLocalVars(meta, metaExports.stVars, variableOverride);
             this.exportKeyframes(keyframeMapping, metaExports.keyframes);
             this.exportCSSVars(cssVarsMapping, metaExports.vars);
@@ -304,14 +328,14 @@ export class StylableTransformer {
                     finalMeta = meta;
                 } else if (extend._kind === 'import') {
                     const resolved = this.resolver.deepResolve(extend);
-                    const found = findRule(meta.ast, '.' + classSymbol.name);
                     if (resolved && resolved._kind === 'css' && resolved.symbol) {
                         if (resolved.symbol._kind === 'class') {
                             finalSymbol = resolved.symbol;
                             finalName = resolved.symbol.name;
                             finalMeta = resolved.meta;
                         } else {
-                            if (!!found) {
+                            const found = findRule(meta.ast, '.' + classSymbol.name);
+                            if (found) {
                                 this.diagnostics.error(
                                     found,
                                     transformerWarnings.IMPORT_ISNT_EXTENDABLE(),
@@ -319,17 +343,24 @@ export class StylableTransformer {
                                 );
                             }
                         }
-                    } else if (found && resolved) {
-                        if (!resolved.symbol) {
-                            this.diagnostics.error(
-                                found,
-                                transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),
-                                { word: found.value }
-                            );
-                        } else {
-                            this.diagnostics.error(found, transformerWarnings.CANNOT_EXTEND_JS(), {
-                                word: found.value
-                            });
+                    } else if (resolved) {
+                        const found = findRule(meta.ast, '.' + classSymbol.name);
+                        if (found) {
+                            if (!resolved.symbol) {
+                                this.diagnostics.error(
+                                    found,
+                                    transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(found.value),
+                                    { word: found.value }
+                                );
+                            } else {
+                                this.diagnostics.error(
+                                    found,
+                                    transformerWarnings.CANNOT_EXTEND_JS(),
+                                    {
+                                        word: found.value
+                                    }
+                                );
+                            }
                         }
                     }
                 }
@@ -653,9 +684,13 @@ export class StylableTransformer {
     public scopeRule(
         meta: StylableMeta,
         rule: postcss.Rule,
-        classesExport?: Record<string, string>
+        _classesExport?: Record<string, string>
     ): string {
-        return this.scopeSelector(meta, rule.selector, classesExport, false, rule).selector;
+        if (USE_SCOPE_SELECTOR_2) {
+            return this.scopeSelector2(meta, rule.selector, undefined, false, rule);
+        } else {
+            return this.scopeSelector(meta, rule.selector, _classesExport, false, rule).selector;
+        }
     }
     public handleClass(
         meta: StylableMeta,
@@ -882,6 +917,313 @@ export class StylableTransformer {
     public scope(name: string, namespace: string, delimiter: string = this.delimiter) {
         return namespace ? namespace + delimiter + name : name;
     }
+    public exportMetaParts(meta: StylableMeta) {
+        const locals: Record<string, string> = {};
+        const metaParts = this.resolveMetaParts(meta);
+        for (const [localName, resolved] of Object.entries(metaParts.class)) {
+            if (!locals[localName]) {
+                const exportedClasses = this.getPartExports(resolved);
+                locals[localName] = exportedClasses.join(' ');
+            }
+        }
+        return locals;
+    }
+    /* None alias symbol */
+    public getPartExports(resolved: any) {
+        const exportedClasses = [];
+        let first = true;
+        for (const { meta, symbol } of resolved) {
+            if (!first && symbol[valueMapping.root]) {
+                break;
+            }
+            first = false;
+            if (symbol.alias && !symbol[valueMapping.extends]) {
+                continue;
+            }
+            exportedClasses.push(this.scope(symbol.name, meta.namespace));
+        }
+        return exportedClasses;
+    }
+    public scopeSelector2(
+        originMeta: StylableMeta,
+        selector: string,
+        _classesExport?: Record<string, string>,
+        _calcPaths = false,
+        rule?: postcss.Rule
+    ): string {
+        return stringifySelector(
+            this.scopeSelectorAst({
+                originMeta,
+                selectorAst: parseSelector(selector),
+                rule: rule || postcss.rule({ selector })
+            })
+        );
+    }
+    public scopeSelectorAst(context: ScopeSelectorContext): SelectorAstNode {
+        const { originMeta, selectorAst } = context;
+        const selectorListChunks = separateChunks2(selectorAst);
+        context.metaParts = this.resolveMetaParts(originMeta);
+        context.currentAnchor = context.currentAnchor || {
+            type: 'class',
+            name: originMeta.root,
+            resolved: context.metaParts.class[originMeta.root]
+        };
+        context.selectorIndex = -1;
+        context.additionalSelectors = [];
+        for (const selectorChunks of selectorListChunks) {
+            context.selectorIndex++;
+            context.chunks = selectorChunks;
+            for (const chunk of selectorChunks) {
+                context.chunk = chunk;
+                // context.currentAnchor = null?
+                for (const node of chunk.nodes) {
+                    context.node = node;
+                    this.handleChunkNode(context as Required<ScopeSelectorContext>);
+                }
+            }
+        }
+        const outputAst = mergeChunks(selectorListChunks);
+        context.additionalSelectors.forEach(addSelector => outputAst.nodes.push(addSelector()));
+        return outputAst;
+    }
+    private handleChunkNode(context: Required<ScopeSelectorContext>) {
+        const { node, metaParts, originMeta, transformGlobals } = context;
+        const { type, name } = node;
+        if (type === 'class') {
+            const resolved = metaParts.class[name] || [
+                { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name } }
+            ];
+            context.currentAnchor = { type: 'class', name, resolved };
+            const { symbol, meta } = getOriginDefinition(resolved);
+            this.scopeClassNode(symbol, meta, node, originMeta);
+        } else if (type === 'element') {
+            const resolved = metaParts.element[name];
+            context.currentAnchor = { type: 'element', name, resolved };
+            if (resolved && resolved.length > 1) {
+                const { symbol, meta } = getOriginDefinition(resolved);
+                this.scopeClassNode(symbol, meta, node, originMeta);
+            }
+        } else if (type === 'pseudo-element') {
+            const len = context.currentAnchor.resolved.length;
+            const lookupStartingPoint = len === 1 /* no extends */ ? 0 : 1;
+
+            let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
+            for (let i = lookupStartingPoint; i < len; i++) {
+                const { symbol, meta } = context.currentAnchor.resolved[i] as CSSResolve;
+                if (symbol._kind === 'class' || symbol._kind === 'element') {
+                    const requestedPart = meta.classes[name];
+
+                    const customSelector = meta.customSelectors[':--' + name];
+                    if (customSelector) {
+                        const selectorListChunks = separateChunks2(parseSelector(customSelector));
+                        const hasMultipleSelectors = selectorListChunks.length === 1;
+                        removeFirstRootInEachSelectorChunk(selectorListChunks, meta);
+
+                        const internalContext: ScopeSelectorContext = {
+                            originMeta: meta,
+                            selectorAst: mergeChunks(selectorListChunks),
+                            rule: context.rule
+                        };
+
+                        const customAstSelectors = this.scopeSelectorAst(internalContext).nodes;
+                        customAstSelectors.forEach(trimLeftSelectorAst);
+
+                        if (hasMultipleSelectors && internalContext.currentAnchor) {
+                            context.currentAnchor = internalContext.currentAnchor;
+                        } else {
+                            // unknown context due to multiple selectors
+                            context.currentAnchor = anyElementAnchor(meta);
+                        }
+
+                        Object.assign(node, customAstSelectors[0]);
+
+                        /*start from second one*/
+                        for (let i = 1; i < customAstSelectors.length; i++) {
+                            const selectorNode = context.selectorAst.nodes[context.selectorIndex];
+                            const nodeIndex = selectorNode.nodes.indexOf(node);
+                            context.additionalSelectors.push(
+                                lazyCreateSelector(customAstSelectors[i], selectorNode, nodeIndex)
+                            );
+                        }
+
+                        return;
+                    }
+
+                    if (symbol.alias || !requestedPart) {
+                        // skip alias since thay cannot add parts
+                        continue;
+                    }
+
+                    resolved = this.resolveMetaParts(meta).class[requestedPart.name];
+
+                    // this is here beacuse we have found the first definition of a part in the extends/alias chain
+                    context.currentAnchor = {
+                        type: 'class',
+                        name: requestedPart.name,
+                        resolved
+                    };
+
+                    const resolvedPart = getOriginDefinition(resolved);
+
+                    if (resolvedPart.symbol._kind === 'class') {
+                        node.before = resolvedPart.symbol[valueMapping.root] ? '' : ' ';
+                        // TODO: handle local
+                        this.scopeClassNode(
+                            resolvedPart.symbol,
+                            resolvedPart.meta,
+                            node,
+                            originMeta
+                        );
+                    }
+
+                    break;
+                }
+            }
+
+            if (!resolved) {
+                if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+                    this.diagnostics.warn(
+                        context.rule,
+                        transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name),
+                        {
+                            word: name
+                        }
+                    );
+                }
+            }
+        } else if (type === 'pseudo-class') {
+            const r = context.currentAnchor.resolved;
+            let found = false;
+            for (const { symbol, meta } of r) {
+                if (symbol._kind === 'class' || symbol._kind === 'element') {
+                    const states = symbol[valueMapping.states];
+                    if (states && states.hasOwnProperty(name)) {
+                        found = true;
+
+                        setStateToNode(
+                            states,
+                            meta,
+                            name,
+                            node,
+                            meta.namespace, // TODO: talk about it
+                            this.resolver,
+                            this.diagnostics,
+                            context.rule
+                        );
+                        break;
+                    }
+                }
+            }
+            if (!found && nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+                this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(name), {
+                    word: name
+                });
+            }
+        } else if (type === 'nested-pseudo-class') {
+            if (name === 'global') {
+                // :global(.a) -> .a
+                if (transformGlobals) {
+                    node.type = 'selector';
+                }
+            } else {
+                this.scopeSelectorAst({
+                    ...context,
+                    selectorAst: {
+                        type: 'selectors',
+                        name: `${name}`,
+                        nodes: node.nodes
+                    }
+                });
+            }
+        } else if (type === 'invalid' && node.value === '&') {
+            if (/* maybe should be currentAnchor meta */ originMeta.parent) {
+                const origin = originMeta.mappedSymbols[originMeta.root] as ClassSymbol;
+                context.currentAnchor = {
+                    type: 'class',
+                    name: origin.name,
+                    resolved: context.metaParts.class[origin.name]
+                };
+            }
+        }
+    }
+    private scopeClassNode(symbol: any, meta: any, node: any, originMeta: any) {
+        if (symbol[valueMapping.global]) {
+            const globalMappedNodes = symbol[valueMapping.global];
+            node.type = 'selector';
+            node.nodes = globalMappedNodes;
+            this.addGlobalsToMeta(globalMappedNodes!, originMeta);
+        } else {
+            node.type = 'class';
+            node.name = this.scope(symbol.name, meta.namespace);
+        }
+    }
+    private resolveMetaParts(meta: StylableMeta): MetaParts {
+        let metaParts = this.metaParts.get(meta);
+        if (!metaParts) {
+            const resolvedClasses: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
+            for (const className of Object.keys(meta.classes)) {
+                
+                resolvedClasses[className] = this.resolver.resolveExtends(
+                    meta,
+                    className,
+                    false,
+                    this,
+                    res => {
+                        const found = findRule(meta.ast, '.' + className);
+                        if (found) {
+                            if (res && res._kind === 'js') {
+                                this.diagnostics.error(found, transformerWarnings.CANNOT_EXTEND_JS(), {
+                                    word: found.value
+                                });
+                            } else {
+                                this.diagnostics.error(
+                                    found,
+                                    transformerWarnings.IMPORT_ISNT_EXTENDABLE(),
+                                    { word: found.value }
+                                );
+                            }
+                        }
+                    }
+                );
+            }
+
+            const resolvedElements: Record<
+                string,
+                Array<CSSResolve<ClassSymbol | ElementSymbol>>
+            > = {};
+            for (const k of Object.keys(meta.elements)) {
+                resolvedElements[k] = this.resolver.resolveExtends(meta, k, true, this);
+            }
+            metaParts = { class: resolvedClasses, element: resolvedElements };
+            this.metaParts.set(meta, metaParts);
+        }
+        return metaParts!;
+    }
+    private addDevRules(meta: StylableMeta) {
+        const metaParts = this.resolveMetaParts(meta);
+        for (const [className, resolved] of Object.entries(metaParts.class)) {
+            if (resolved.length > 1) {
+                meta.outputAst!.walkRules('.' + this.scope(className, meta.namespace), rule => {
+                    const a = resolved[0];
+                    const b = resolved[1];
+                    rule.after(
+                        createWarningRule(
+                            b.symbol.name,
+                            this.scope(b.symbol.name, b.meta.namespace),
+                            basename(b.meta.source),
+                            a.symbol.name,
+                            this.scope(a.symbol.name, a.meta.namespace),
+                            basename(a.meta.source),
+                            true
+                        )
+                    );
+                });
+            }
+        }
+    }
     private resetTransformProperties(meta: StylableMeta) {
         meta.globals = {};
         return (meta.outputAst = meta.ast.clone());
@@ -962,4 +1304,76 @@ function validateScopes(meta: StylableMeta, resolver: StylableResolver, diagnost
             });
         }
     }
+}
+
+function removeFirstRootInEachSelectorChunk(
+    selectorListChunks: SelectorChunk2[][],
+    meta: StylableMeta
+) {
+    selectorListChunks.forEach(selectorChunks => {
+        selectorChunks[0].nodes = selectorChunks[0].nodes.filter(({ type, name }) => {
+            return !(type === 'class' && name === meta.root);
+        });
+    });
+}
+
+function trimLeftSelectorAst(n: SelectorAstNode, i = 0) {
+    if (n) {
+        if (n.type === 'spacing') {
+            n.value = '';
+        }
+        n.before = '';
+        trimLeftSelectorAst(n.nodes && n.nodes[0], i + 1);
+        if (i === 0) {
+            n.before = ' ';
+        }
+    }
+}
+
+function anyElementAnchor(
+    meta: StylableMeta
+): { type: 'class' | 'element'; name: string; resolved: CSSResolve[] } {
+    return {
+        type: 'element',
+        name: '*',
+        resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }]
+    };
+}
+
+function lazyCreateSelector(
+    customElementChunk: SelectorAstNode,
+    selectorNode: SelectorAstNode,
+    nodeIndex: number
+) {
+    if (nodeIndex === -1) {
+        throw new Error('not supported inside nested classes');
+    }
+    return () => {
+        const clone = cloneDeep(selectorNode);
+        clone.nodes[nodeIndex].nodes = customElementChunk.nodes;
+        return clone;
+    };
+}
+
+interface ScopeSelectorContext {
+    originMeta: StylableMeta;
+    selectorAst: SelectorAstNode;
+    rule: postcss.Rule;
+    additionalSelectors?: Array<() => void>;
+    selectorIndex?: number;
+    metaParts?: MetaParts;
+    chunks?: SelectorChunk2[];
+    chunk?: SelectorChunk2;
+    node?: SelectorAstNode;
+    currentAnchor?: {
+        type: 'class' | 'element';
+        name: string;
+        resolved: CSSResolve[];
+    };
+    transformGlobals?: boolean;
+}
+
+interface MetaParts {
+    class: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
+    element: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>>;
 }

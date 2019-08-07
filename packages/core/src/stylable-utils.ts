@@ -278,6 +278,7 @@ export function findDeclaration(importNode: Imported, test: any) {
     return importNode.rule.nodes![fromIndex] as postcss.Declaration;
 }
 
+// TODO: What is this?
 export function findRule(
     root: postcss.Root,
     selector: string,

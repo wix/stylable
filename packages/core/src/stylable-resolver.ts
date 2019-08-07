@@ -1,20 +1,24 @@
 import { FileProcessor } from './cached-process-file';
 import { Diagnostics } from './diagnostics';
-import { Imported } from './stylable-meta';
+import { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
 import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
 import { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 
 /* tslint:disable:max-line-length */
 export const resolverWarnings = {
-    UNKNOWN_IMPORTED_FILE(path: string) { return `cannot resolve imported file: "${path}"`; },
-    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) { return `cannot resolve imported symbol "${name}" in stylesheet "${path}"`; }
+    UNKNOWN_IMPORTED_FILE(path: string) {
+        return `cannot resolve imported file: "${path}"`;
+    },
+    UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
+        return `cannot resolve imported symbol "${name}" in stylesheet "${path}"`;
+    }
 };
 /* tslint:enable:max-line-length */
 
-export interface CSSResolve {
+export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     _kind: 'css';
-    symbol: StylableSymbol;
+    symbol: T;
     meta: StylableMeta;
 }
 
@@ -49,17 +53,13 @@ export class StylableResolver {
             } catch {
                 return null;
             }
-            symbol = !name ?
-                _module.default || _module :
-                _module[name];
+            symbol = !name ? _module.default || _module : _module[name];
 
             return { _kind: 'js', symbol, meta: null } as JSResolve;
         }
     }
     public resolveImport(importSymbol: ImportSymbol) {
-        const name = importSymbol.type === 'named' ?
-            importSymbol.name :
-            '';
+        const name = importSymbol.type === 'named' ? importSymbol.name : '';
         return this.resolveImported(importSymbol.import, name);
     }
     public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
@@ -189,8 +189,15 @@ export class StylableResolver {
         meta: StylableMeta,
         className: string,
         isElement: boolean = false,
-        transformer?: StylableTransformer
-    ): CSSResolve[] {
+        transformer?: StylableTransformer,
+        reportError?: (
+            res: CSSResolve | JSResolve | null,
+            extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
+            meta: StylableMeta,
+            className: string,
+            isElement: boolean
+        ) => void
+    ): Array<CSSResolve<ClassSymbol | ElementSymbol>> {
         const bucket = isElement ? meta.elements : meta.classes;
         const type = isElement ? 'element' : 'class';
 
@@ -209,7 +216,7 @@ export class StylableResolver {
             }
         }
 
-        const extendPath = [];
+        const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];
         const resolvedClass = this.resolveName(meta, bucket[className], isElement);
 
         if (
@@ -218,7 +225,7 @@ export class StylableResolver {
             resolvedClass.symbol &&
             resolvedClass.symbol._kind === type
         ) {
-            let current = resolvedClass;
+            let current = resolvedClass as CSSResolve<ClassSymbol | ElementSymbol>;
             let extend = resolvedClass.symbol[valueMapping.extends] || resolvedClass.symbol.alias;
 
             while (current) {
@@ -226,16 +233,19 @@ export class StylableResolver {
                 if (!extend) {
                     break;
                 }
-                const res = this.resolve(extend);
+                const res = this.resolve(extend) || { _kind: 'css', symbol: extend, meta };
                 if (
                     res &&
                     res._kind === 'css' &&
                     res.symbol &&
                     (res.symbol._kind === 'element' || res.symbol._kind === 'class')
                 ) {
-                    current = res;
+                    current = res as CSSResolve<ClassSymbol | ElementSymbol>;
                     extend = res.symbol[valueMapping.extends] || res.symbol.alias;
                 } else {
+                    if (reportError) {
+                        reportError(res, extendPath, meta, className, isElement);
+                    }
                     break;
                 }
             }
@@ -249,29 +259,39 @@ export class StylableResolver {
 
             if (!resolvedImport) {
                 // warn about unknown imported files
-                const fromDecl = importObj.rule.nodes &&
-                    importObj.rule.nodes.find(decl => decl.type === 'decl' && decl.prop === valueMapping.from);
+                const fromDecl =
+                    importObj.rule.nodes &&
+                    importObj.rule.nodes.find(
+                        decl => decl.type === 'decl' && decl.prop === valueMapping.from
+                    );
 
                 if (fromDecl) {
                     diagnostics.warn(
                         fromDecl,
                         resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.fromRelative),
-                        { word: importObj.fromRelative });
+                        { word: importObj.fromRelative }
+                    );
                 }
-
             } else if (resolvedImport._kind === 'css') {
                 // warn about unknown named imported symbols
                 for (const name in importObj.named) {
                     const origName = importObj.named[name];
                     const resolvedSymbol = this.resolveImported(importObj, origName);
-                    const namedDecl = importObj.rule.nodes &&
-                        importObj.rule.nodes.find(decl => decl.type === 'decl' && decl.prop === valueMapping.named);
+                    const namedDecl =
+                        importObj.rule.nodes &&
+                        importObj.rule.nodes.find(
+                            decl => decl.type === 'decl' && decl.prop === valueMapping.named
+                        );
 
                     if (!resolvedSymbol!.symbol && namedDecl) {
                         diagnostics.warn(
                             namedDecl,
-                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.fromRelative),
-                            { word: origName });
+                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                origName,
+                                importObj.fromRelative
+                            ),
+                            { word: origName }
+                        );
                     }
                 }
             }
