@@ -1,0 +1,10 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-default: Comp;
+ }
+
+Comp {
+    -st-states: localState;
+}
+
+Comp:state|

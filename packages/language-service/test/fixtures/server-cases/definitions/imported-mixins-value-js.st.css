@@ -1,0 +1,14 @@
+:import {
+    -st-from: "../mixins/my-mixins.ts";
+    -st-named: paramlessMixin, paramfulMixin, notARealMixin;
+}
+
+:import {
+    -st-from: "../mixins/js-mixins.js";
+    -st-named: aMixin, aBareMixin, aFormatter;
+}
+
+.local {
+    color: notARealMixin();
+    background-color: aForma|tter(a,b,45);
+}

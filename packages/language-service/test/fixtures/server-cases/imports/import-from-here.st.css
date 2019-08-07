@@ -1,0 +1,8 @@
+.shlomo {
+    color: black;
+}
+
+:vars {
+    oneVar: red;
+    twoVar: goldenrod;
+}

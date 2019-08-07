@@ -1,0 +1,8 @@
+:import{
+    -st-from: "./comp-to-import.st.css";
+    -st-default: Zag;
+}
+.root{
+    -st-extends:Zag;
+    -st-states:hoover;
+}

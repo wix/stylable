@@ -1,0 +1,11 @@
+:import{
+    -st-from:"./import.st.css";
+    -st-default:Comp;
+    -st-named:shlomo;
+}
+
+@custom-selector :--popo div > Comp;
+
+@custom-selector :--pongo div span Comp;
+
+div > span |

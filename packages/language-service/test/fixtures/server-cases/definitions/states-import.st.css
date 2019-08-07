@@ -1,0 +1,11 @@
+.root {
+    -st-states: rootState;
+}
+
+.one {
+    -st-states: topState;
+}
+
+.two {
+    -st-states: topState;
+}

@@ -1,0 +1,7 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-named: shlomo, momo;
+    -st-default: Compo;
+}
+
+.momo |

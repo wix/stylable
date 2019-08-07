@@ -1,0 +1,9 @@
+:import {
+    -st-from: "fake-stylable-package/stylesheet.st.css";
+    -st-named: color|1;
+}
+
+.local {
+    color: value(color1);
+}
+

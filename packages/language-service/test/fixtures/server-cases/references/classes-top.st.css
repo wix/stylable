@@ -1,0 +1,17 @@
+.root {
+    color: red;
+}
+
+.aaa {
+    color: green;
+}
+
+.bbb {
+    -st-extends: root;
+}
+
+.ccc {
+    -st-extends: aaa;
+}
+
+:global(.ccc) {}  /*Can't touch this*/

@@ -1,0 +1,8 @@
+:import {
+    -st-from: './top-import.st.css';
+    -st-default: Comp;
+}
+
+@custom-selector :--pongo div > Comp;
+
+@custom-selector :--mongo div span Comp, span Comp;

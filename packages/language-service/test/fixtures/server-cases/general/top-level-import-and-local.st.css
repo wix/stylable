@@ -1,0 +1,10 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-named: btn;
+}
+
+.btn:active {
+    border:2px dashed red;
+}
+
+|

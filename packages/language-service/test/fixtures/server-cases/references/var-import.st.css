@@ -1,0 +1,7 @@
+:vars {
+    someVar: blue;
+}
+
+.root {
+    color: value(someVar)
+}

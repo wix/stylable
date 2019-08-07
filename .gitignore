@@ -8,6 +8,13 @@ cjs
 runtime.lib.js
 runtime-legacy.lib.js
 
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# 3rd party testing fixtures (order matters!)
+!**/test/**/node_modules
+
 # Created by the extension "VS Live Share"
 .vs
 
@@ -47,10 +54,6 @@ bower_components
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
 
-# Dependency directories
-node_modules/
-jspm_packages/
-
 # TypeScript v1 declaration files
 typings/
 
@@ -74,7 +77,3 @@ typings/
 
 # next.js build output
 .next
-
-
-
-!**/test/**/node_modules

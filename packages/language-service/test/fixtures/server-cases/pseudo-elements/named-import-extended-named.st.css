@@ -1,0 +1,10 @@
+:import {
+    -st-from: "./other-mid-import.st.css";
+    -st-named: bobo;
+}
+
+.gaga {
+    -st-extends: bobo;
+}
+
+.gaga|

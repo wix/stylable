@@ -1,0 +1,18 @@
+:import {
+    -st-from: "./classes-top.st.css";
+    -st-default: Comp;
+}
+
+.root Comp {}
+
+.local {
+    -st-extends: Comp;
+}
+
+.local::aaa {}
+
+.local:not(::ccc) {}
+
+/*Deep inner elements*/
+
+.aaa {}

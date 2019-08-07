@@ -1,0 +1,11 @@
+:import {
+    -st-from: "./recursive-import-2.st.css";
+    -st-default: Comp;
+}
+
+.gaga {
+    -st-extends: Comp;
+    -st-states: lala;
+}
+
+.gaga::bobo::shlomo|

@@ -1,0 +1,7 @@
+:vars {
+    someVar: blue;
+}
+
+.baba {
+    color: value(someVar)
+}

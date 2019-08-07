@@ -1,0 +1,17 @@
+.momo{
+    -st-states: anotherState,oneMoreState;
+}
+
+.gaga {
+    -st-states : state,otherState;
+}
+
+.root {
+    -st-states: rootoo;
+}
+
+@custom-selector :--bongo .gaga;
+
+@custom-selector :--pongo .root;
+
+:--bongo|

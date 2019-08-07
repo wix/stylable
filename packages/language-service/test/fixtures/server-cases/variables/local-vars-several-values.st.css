@@ -1,0 +1,8 @@
+:vars {
+    color1: red;
+    color2: blue;
+}
+
+.local {
+    color: value(color1), |
+}

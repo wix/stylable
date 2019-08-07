@@ -1,0 +1,9 @@
+:vars {
+    jarjar: binks;
+    varvar: pink;
+}
+
+.local {
+    color: value(jarjar) value(varvar);
+}
+

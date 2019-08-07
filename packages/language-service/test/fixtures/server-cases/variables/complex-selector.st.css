@@ -1,0 +1,17 @@
+:import {
+    -st-from: './import.st.css';
+    -st-default: Comp;
+}
+
+:vars {
+    color1: red;
+    color2: blue;
+}
+
+.local {
+    st-extends: Comp;
+}
+
+.local::momo:anotherState {
+    color: |
+}

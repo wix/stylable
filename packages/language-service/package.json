@@ -1,0 +1,42 @@
+{
+  "name": "@stylable/language-service",
+  "version": "2.0.0",
+  "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "test": "yarn test:unit",
+    "test:unit": "mocha -r @ts-tools/node/r test/lib/**/*.spec.ts test/lib/*.spec.ts",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@file-services/node": "^2.0.0",
+    "@file-services/typescript": "^2.0.0",
+    "@stylable/core": "^2.1.3",
+    "css-selector-tokenizer": "^0.7.1",
+    "postcss": "^7.0.17",
+    "postcss-selector-parser": "^6.0.2",
+    "postcss-value-parser": "^4.0.0",
+    "typescript": "~3.5.3",
+    "vscode-css-languageservice": "^4.0.2",
+    "vscode-languageserver": "^5.2.1",
+    "vscode-uri": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "10"
+  },
+  "author": "Wix.com",
+  "files": [
+    "dist/src",
+    "service.js",
+    "service.d.ts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/language-service",
+  "homepage": "https://github.com/wix/stylable/tree/master/packages/language-service",
+  "license": "BSD-3-Clause" 
+}

@@ -1,0 +1,7 @@
+:vars {
+    color1: rgb(0, 255, 0, 0.8);
+}
+
+.root {
+    color: value(color1);
+}

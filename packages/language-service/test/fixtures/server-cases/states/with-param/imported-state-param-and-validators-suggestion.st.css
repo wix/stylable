@@ -1,0 +1,10 @@
+:import {
+    -st-from: "./comp-to-import-with-param-and-validators.st.css";
+    -st-default: Comp;
+}
+
+.gaga{
+    -st-extends: Comp;
+}
+
+.gaga:shmover(|)

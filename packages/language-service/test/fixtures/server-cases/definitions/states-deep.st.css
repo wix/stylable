@@ -1,0 +1,11 @@
+:import {
+    -st-from: "./states-default.st.css";
+    -st-named: local;
+}
+
+.deep {
+    -st-extends: local;
+    -st-states: deepState;
+}
+
+.deep:deepState:extendState:rootState {}

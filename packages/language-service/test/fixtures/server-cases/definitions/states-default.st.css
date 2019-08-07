@@ -1,0 +1,21 @@
+:import {
+    -st-from: "./states-import.st.css";
+    -st-default: Comp;
+}
+
+.root Comp:rootState {}
+
+.root Comp:rootState::one:topState {}
+
+.root Comp::two:topState {}
+
+.local {
+    -st-extends: Comp;
+    -st-states: extendState;
+}
+
+.local:rootState:extendState {}
+
+.local::one:topState {}
+
+.local:rootState::two:topState {}

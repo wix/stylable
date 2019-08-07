@@ -1,0 +1,18 @@
+@namespace "moshe";
+
+:import {
+    -st-from: "./import-from-here.st.css";
+    -st-named: shlomo;
+}
+
+:vars {
+    color1: red;
+}
+
+|
+
+.gaga {
+    color: red;
+}
+
+@custom-selector :--popo div > span;
