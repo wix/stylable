@@ -2,11 +2,11 @@
   "name": "@stylable/language-service",
   "version": "2.0.0",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
-  "main": "./dist/src/index.js",
-  "types": "./dist/src/index.d.ts",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
-    "build": "tsc",
+    "build": "ts-build ./src --cjs",
     "test": "yarn test:unit",
     "test:unit": "mocha -r @ts-tools/node/r test/lib/**/*.spec.ts test/lib/*.spec.ts",
     "prepack": "yarn build"
