@@ -3,8 +3,8 @@ import { evalDeclarationValue, Stylable, StylableMeta, valueMapping } from '@sty
 import { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import { ColorPresentationParams, TextDocument } from 'vscode-languageserver-protocol';
 import { URI } from 'vscode-uri';
-import { CssService } from '../../model/css-service';
 import { ProviderPosition, ProviderRange } from '../completion-providers';
+import { CssService } from '../css-service';
 import { fixAndProcess } from '../provider';
 
 export function resolveDocumentColors(

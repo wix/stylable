@@ -21,15 +21,16 @@ import {
     ParameterInformation,
     Position,
     TextDocument,
+    TextDocumentChangeEvent,
     TextEdit
 } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
 import { Provider } from './provider';
 
-import { CssService } from '../model/css-service';
 import { ProviderPosition, ProviderRange } from './completion-providers';
 import { Completion } from './completion-types';
+import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
@@ -128,6 +129,15 @@ export class StylableLanguageService {
         };
 
         return () => diagnose(diagnoseConfig);
+    }
+
+    public clearDiagnostics(connection: IConnection) {
+        return (event: TextDocumentChangeEvent) => {
+            connection.sendDiagnostics({
+                diagnostics: [],
+                uri: event.document.uri
+            });
+        };
     }
 
     public onCompletion(params: CompletionParams): CompletionItem[] {

@@ -10,7 +10,7 @@ import {
     Range
 } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { createMeta } from '../lib/provider';
+import { createMeta } from './provider';
 
 function readDocRange(doc: TextDocument, rng: Range): string {
     const lines = doc.getText().split('\n');
