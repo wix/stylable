@@ -1,49 +1,11 @@
-import {
-    createConnection,
-    DidChangeConfigurationNotification,
-    IConnection,
-    IPCMessageReader,
-    IPCMessageWriter,
-    TextDocuments
-} from 'vscode-languageserver';
-
-import fs from '@file-services/node';
-
-import { initializeResult } from '../capabilities';
-
+import { IConnection } from 'vscode-languageserver';
 import { StylableLanguageService } from './service';
 
-const connection: IConnection = createConnection(
-    new IPCMessageReader(process),
-    new IPCMessageWriter(process)
-);
-
-connection.listen();
-connection.onInitialize(params => {
-    const rootPath = params.rootPath || '';
-
-    const stylableLSP = new StylableLanguageService({
-        fs,
-        rootPath,
-        requireModule: require,
-        textDocuments: new TextDocuments()
-    });
-
-    connect(stylableLSP);
-
-    return initializeResult;
-});
-
-connection.onInitialized(() => {
-    connection.client.register(DidChangeConfigurationNotification.type, undefined);
-});
-
-export function connect(stylableLSP: StylableLanguageService, conn?: IConnection) {
-    conn = conn || connection;
-
+export function connectLSP(stylableLSP: StylableLanguageService, connection: IConnection) {
     const docsDispatcher = stylableLSP.getDocsDispatcher();
     docsDispatcher.listen(connection);
     docsDispatcher.onDidChangeContent(stylableLSP.diagnose(connection));
+    docsDispatcher.onDidClose(stylableLSP.clearDiagnostics(connection));
 
     connection.onCompletion(stylableLSP.onCompletion.bind(stylableLSP));
     connection.onDefinition(stylableLSP.onDefinition.bind(stylableLSP));

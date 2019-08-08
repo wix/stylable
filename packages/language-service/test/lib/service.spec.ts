@@ -12,7 +12,7 @@ import { Location } from 'vscode-languageserver-types';
 import { createConnection, IConnection, TextDocuments } from 'vscode-languageserver';
 import { URI } from 'vscode-uri';
 import { createRange } from '../../src/lib/completion-providers';
-import { connect } from '../../src/lib/server';
+import { connectLSP } from '../../src/lib/connect';
 import { StylableLanguageService } from '../../src/lib/service';
 import { TestConnection } from '../lsp-testkit/connection.spec';
 import { createExpectedDiagnosis, trimLiteral } from '../lsp-testkit/diagnostic-test-kit';
@@ -398,7 +398,7 @@ xdescribe('Service component test', () => {
                     rootPath: '/',
                     textDocuments: new TextDocuments()
                 });
-                connect(
+                connectLSP(
                     stylableLSP,
                     testCon.server
                 );
@@ -488,7 +488,7 @@ xdescribe('Service component test', () => {
                 rootPath: '/',
                 textDocuments: new TextDocuments()
             });
-            connect(
+            connectLSP(
                 stylableLSP,
                 testCon.server
             );
@@ -593,7 +593,7 @@ xdescribe('Service component test', () => {
                 rootPath: '/',
                 textDocuments: new TextDocuments()
             });
-            connect(
+            connectLSP(
                 stylableLSP,
                 testCon.server
             );
