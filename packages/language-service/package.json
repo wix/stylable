@@ -26,9 +26,9 @@
   },
   "author": "Wix.com",
   "files": [
-    "dist/src",
-    "service.js",
-    "service.d.ts"
+    "cjs",
+    "src",
+    "!src/tsconfig.json"
   ],
   "publishConfig": {
     "access": "public"
