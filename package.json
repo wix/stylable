@@ -14,9 +14,9 @@
     "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
   },
   "devDependencies": {
-    "@ts-tools/build": "^0.1.15",
-    "@ts-tools/node": "^0.9.9",
-    "@ts-tools/webpack-loader": "^0.8.13",
+    "@ts-tools/build": "^0.1.16",
+    "@ts-tools/node": "^0.9.10",
+    "@ts-tools/webpack-loader": "^0.8.14",
     "@types/chai": "^4.2.0",
     "@types/chai-subset": "^1.3.3",
     "@types/csso": "^3.5.1",
@@ -32,7 +32,7 @@
     "@types/node": "8",
     "@types/postcss-nested": "^4.1.0",
     "@types/puppeteer": "^1.19.0",
-    "@types/react": "^16.8.25",
+    "@types/react": "^16.9.1",
     "@types/react-dom": "^16.8.5",
     "@types/rimraf": "^2.0.2",
     "@types/tapable": "^1.0.4",
@@ -65,7 +65,7 @@
     "url-loader": "^2.1.0",
     "webpack": "^4.39.1",
     "webpack-cli": "^3.3.6",
-    "webpack-dev-server": "^3.7.2"
+    "webpack-dev-server": "^3.8.0"
   },
   "engines": {
     "node": ">=8"
