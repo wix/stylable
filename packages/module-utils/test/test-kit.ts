@@ -5,6 +5,9 @@ import { stylableModuleFactory } from '../src';
 import { Options } from '../src/module-factory';
 
 function evalModule(id: string, source: string, requireModule: (s: string) => any) {
+    if (!source) {
+        throw new Error('No source is provided to evalModule');
+    }
     const _module = {
         id,
         exports: {}
@@ -15,7 +18,9 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
 
     return _module.exports;
 }
-
+/**
+ * This function mocks the runtime and only provide the create function
+ */
 export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
     return evalModule(fullPath, source, id => {
         if (id === '@stylable/runtime') {

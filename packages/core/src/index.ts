@@ -27,6 +27,7 @@ export * from './custom-values';
 export * from './state-validators';
 export * from './selector-utils';
 export * from './native-reserved-lists';
+export * from './cssdocs';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

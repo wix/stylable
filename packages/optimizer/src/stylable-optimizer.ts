@@ -5,7 +5,7 @@ import {
     StylableResults,
     traverseNode
 } from '@stylable/core';
-import CleanCSS from 'clean-css';
+import csso from 'csso';
 import postcss from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
@@ -25,7 +25,8 @@ export class StylableOptimizer implements IStylableOptimizer {
     ) {}
 
     public minifyCSS(css: string): string {
-        return new CleanCSS({}).minify(css).styles;
+        // disabling restructuring as it breaks production mode by disappearing classes
+        return csso.minify(css, { restructure: false }).css;
     }
     public optimize(
         config: OptimizeConfig,

@@ -95,3 +95,70 @@ You can set the value of a variable using another variable.
     border: 10px solid red; /* 10px solid {color1} */
 }
 ```
+
+## Advanced variable types
+You can use Stylable custom types when defining a variable to group multiple values under a shared context. This gives you a better way to define and manage variables in your stylesheet. 
+
+Stylable does this by utilizing a type function in the variable definition and passing additional arguments to the `value()` function.
+
+### Stylable native variable types
+By default, Stylable exposes two types of variables that are available globally and do not require a special import:
+* `stMap`  
+* `stArray`
+
+#### stMap
+Use the `stMap` function to provide an interface similar to a map. You can group variables by context and retrieve them by key.
+
+Its definition is comprised of key/value pairs with a space as a delimiter between them, and a comma as a separator between pairs.
+
+```css
+:vars {
+    colors: stMap(
+        bg green,
+        text red
+    );
+}
+
+.root {
+    background-color: value(colors, bg); /* green */
+}
+```
+
+#### stArray
+Use the `stArray` function to provide an interface which is similar to an array. This enables you to group variables by context and retrieve them by their index. 
+
+Its definition is comprised of values that are zero-based and comma separated.
+
+```css
+:vars {
+    colors: stArray(red, green);
+}
+
+.root {
+    background-color: value(colors, 1); /* green */
+}
+```
+
+### Custom variable type
+
+Stylable also offers a custom variable type, `stBorder`, that must be imported from the `@stylable/custom-value` [package](https://github.com/wix/stylable/tree/master/packages/custom-value).
+
+`stBorder` accepts three arguments, `size`, `style` and `color` in that order. When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.
+
+```css
+:import {
+    -st-from: "@stylable/custom-value";
+    -st-named: stBorder;
+}
+
+:vars {
+    /* order of arguments: size style color */
+    myBorder: stBorder(1px, solid, green);
+}
+
+.root {
+    border: value(myBorder); /* 1px solid green */
+    background-color: value(myBorder, color); /* green */
+}
+```
+> Note: `stBorder` is just the first of future custom variable types that will be available in Stylable.

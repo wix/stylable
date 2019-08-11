@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 import { create } from '../../src/css-runtime-stylesheet-legacy';
 
-describe.only('Stylable runtime stylesheet (LEGACY)', () => {
+describe('Stylable runtime stylesheet (LEGACY)', () => {
     it('creates stylesheet with mapping ', () => {
         const stylesheet = create(
             'entry',

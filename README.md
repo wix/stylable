@@ -77,5 +77,4 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 Read our [contributing guidelines](./CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

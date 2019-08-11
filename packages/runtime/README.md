@@ -14,7 +14,7 @@ End-users will usually not add this package directly as a dependency themselves,
 
 When importing a Stylable stylesheet, there are multiple named exports that are exposed for usage.
 
-```ts
+```ts 
 import { 
     style, 
     classes, 
@@ -93,5 +93,4 @@ declare module '*.st.css' {
 ```
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

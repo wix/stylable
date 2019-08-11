@@ -23,5 +23,4 @@ Used for easily setting up Stylable instances (processor/transformer) and its in
 Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDeclarations`) used for testing Stylable generated AST representing CSS rules and declarations.
 
 ## License
-
 Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).  

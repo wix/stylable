@@ -13,6 +13,5 @@ You can find a set of example configuration setups [here](./packages/webpack-plu
 ### `getStyleElementsMetadata`
 A puppeteer helper function aimed at extracting Stylable styling from the DOM for testing purposes.
 
-### License
-
+## License
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

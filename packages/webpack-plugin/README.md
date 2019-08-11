@@ -95,5 +95,4 @@ The resulting renderer orders the CSS by the depth of each module, calculated fr
 **Runtime DOM renderer** The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
 
 ## License
-
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).

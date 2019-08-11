@@ -1,5 +1,6 @@
 import { isAsset, Stylable } from '@stylable/core';
 import { createModuleSource } from '@stylable/module-utils';
+import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { Generator } from './default-generator';
@@ -25,6 +26,9 @@ export interface BuildOptions {
     outputCSS?: boolean;
     outputSources?: boolean;
     injectCSSRequest?: boolean;
+    optimize?: boolean;
+    minify?: boolean;
+    compat?: boolean
 }
 
 export async function build({
@@ -43,7 +47,10 @@ export async function build({
     outputCSS,
     outputCSSNameTemplate,
     outputSources,
-    injectCSSRequest
+    injectCSSRequest,
+    optimize,
+    minify,
+    compat
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -88,7 +95,10 @@ export async function build({
                   outputCSS,
                   outputCSSNameTemplate,
                   outputSources,
-                  injectCSSRequest
+                  injectCSSRequest,
+                  optimize,
+                  minify,
+                  compat
               );
     });
 
@@ -120,7 +130,10 @@ function buildSingleFile(
     outputCSS: boolean = false,
     outputCSSNameTemplate: string = '[filename].css',
     outputSources: boolean = false,
-    injectCSSRequest: boolean = false
+    injectCSSRequest: boolean = false,
+    optimize: boolean = false,
+    minify: boolean = false,
+    compat: boolean = false
 ) {
     // testBuild(filePath, fullSrcDir, fs);
 
@@ -140,7 +153,20 @@ function buildSingleFile(
         `Read File Error: ${filePath}`
     );
     const res = stylable.transform(content, filePath);
-
+    const optimizer = new StylableOptimizer();
+    if (optimize) {
+        optimizer.optimize(
+            {
+                removeComments: true,
+                removeEmptyNodes: true,
+                removeStylableDirectives: true,
+                classNameOptimizations: false,
+                removeUnusedComponents: false
+            },
+            res,
+            {}
+        );
+    }
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
     if (outputSources) {
@@ -159,7 +185,8 @@ function buildSingleFile(
                     undefined,
                     undefined,
                     undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : []
+                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
+                    compat ? '@stylable/runtime/cjs/index-legacy': '@stylable/runtime'
                 ),
             `Transform Error: ${filePath}`
         );
@@ -170,15 +197,16 @@ function buildSingleFile(
     });
     // .css
     if (outputCSS) {
+        let cssCode = res.meta.outputAst!.toString();
+        if (minify) {
+            cssCode = optimizer.minifyCSS(cssCode);
+        }
         log('[Build]', 'output transpiled css');
-        tryRun(
-            () => fs.writeFileSync(cssAssetOutPath, res.meta.outputAst!.toString()),
-            `Write File Error: ${outPath}`
-        );
+        tryRun(() => fs.writeFileSync(cssAssetOutPath, cssCode), `Write File Error: ${outPath}`);
     }
     // .d.ts?
 
-    // copy assets
+    // copy assets?
     projectAssets.push(
         ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
     );

@@ -1,13 +1,13 @@
 {
   "name": "@stylable/uni-driver",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Stylable UniDriver testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "test": "mocha -r @ts-tools/node/r \"./test/**/*.spec.ts\" --watch-extensions ts",
+    "test": "mocha \"./test/**/*.spec.ts\"",
     "start": "webpack-dev-server --hot --inline",
     "prepack": "yarn build"
   },

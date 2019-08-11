@@ -7,45 +7,30 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Mocha Current",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": ["${file}", "--timeout", "999999", ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Plugin Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
-                "-r",
-                "@ts-tools/node/r",
+                "${workspaceFolder}/packages/webpack-plugin/test/**/**.spec.{ts,tsx}",
                 "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceFolder}/packages/webpack-plugin/test/**/**.spec.js"
+                "999999"
             ],
             "internalConsoleOptions": "openOnSessionStart"
-        },{
+        },
+        {
             "type": "node",
             "request": "launch",
-            "name": "Cli Mocha Tests",
+            "name": "CLI Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "cwd": "${workspaceFolder}/packages/cli",
-            "args": [
-                "-r",
-                "@ts-tools/node/r",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${workspaceFolder}/packages/cli/test/**/**.spec.ts"
-            ],
-            "internalConsoleOptions": "openOnSessionStart"
-        },{
-            "type": "node",
-            "request": "launch",
-            "name": "Mocha Current",
-            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-            "args": [
-                "-r",
-                "@ts-tools/node/r",
-                "--timeout",
-                "999999",
-                "--colors",
-                "${file}"
-            ],
+            "args": ["${workspaceFolder}/packages/cli/test/**/**.spec.{ts,tsx}", "--timeout", "999999"],
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

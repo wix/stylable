@@ -19,5 +19,4 @@ Optimizes class names based on usage to a shorter format, being careful not to a
 Optimizes namespaces to a shorter format.
 
 ## License
-
 Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).
