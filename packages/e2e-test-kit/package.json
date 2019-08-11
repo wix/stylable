@@ -1,6 +1,6 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
