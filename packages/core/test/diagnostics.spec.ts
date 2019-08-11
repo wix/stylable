@@ -844,6 +844,27 @@ describe('diagnostics: warnings and errors', () => {
                 ]);
             });
 
+            
+            it('should not warn when using imported elements (classes) without scoping', () => {
+                expectWarnings(`
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: someClass;
+                        -st-default: MyComp;
+                    }
+                    
+                    @st-scope Theme {
+                        .someClass {
+                            background: black;
+                        }
+                    }
+
+                `, [
+                    
+
+                ]);
+            });
+
             it('should warn regardless if using a global before the element', () => {
                 expectWarnings(`
                     |:global(div) $button$| {}

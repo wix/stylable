@@ -351,7 +351,7 @@ export class StylableProcessor {
                 if (this.meta.classes[name]) {
                     if (!this.meta.classes[name].alias) {
                         locallyScoped = true;
-                    } else if (locallyScoped === false) {
+                    } else if (locallyScoped === false && !inStScope) {
                         this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
                             word: name
                         });
