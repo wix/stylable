@@ -20,7 +20,7 @@
     "@stylable/optimizer": "^2.1.5",
     "@stylable/runtime": "^2.1.3",
     "find-config": "^1.0.0",
-    "webpack-sources": "^1.4.2"
+    "webpack-sources": "^1.4.3"
   },
   "files": [
     "cjs",
