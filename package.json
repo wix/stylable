@@ -13,7 +13,7 @@
     "test": "lerna run test --stream",
     "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
   },
-  "devDependencies": {
+  "devDependencies": { 
     "@file-services/commonjs": "^2.0.0",
     "@file-services/memory": "^2.0.0",
     "@file-services/webpack": "^2.0.0",
