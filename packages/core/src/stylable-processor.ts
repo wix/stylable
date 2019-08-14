@@ -11,7 +11,7 @@ import {
     SelectorAstNode,
     traverseNode
 } from './selector-utils';
-import { processDeclarationUrls } from './stylable-assets';
+import {processDeclarationFonts, processDeclarationUrls} from './stylable-assets';
 import {
     ClassSymbol,
     CSSVarSymbol,
@@ -172,6 +172,12 @@ export class StylableProcessor {
                 },
                 false
             );
+            processDeclarationFonts(
+                decl,
+                node => {
+                    this.meta.fonts.push(node.font!);
+                }
+            )
         });
 
         this.meta.scopes.forEach(atRule => {

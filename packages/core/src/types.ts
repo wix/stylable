@@ -12,6 +12,8 @@ export interface ParsedValue {
     nodes?: any;
     resolvedValue?: string | Box<string, unknown>;
     url?: string;
+    font?: string;
+    name?: string;
 }
 
 export interface StateTypeValidator {

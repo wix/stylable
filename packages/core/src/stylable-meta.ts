@@ -19,6 +19,7 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol>;
     public customSelectors: Record<string, string>;
     public urls: string[];
+    public fonts: string[];
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
@@ -50,6 +51,7 @@ export class StylableMeta {
         };
         this.customSelectors = {};
         this.urls = [];
+        this.fonts = [];
         this.scopes = [];
         this.simpleSelectors = {};
         this.transformDiagnostics = null;

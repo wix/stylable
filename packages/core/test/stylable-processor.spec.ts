@@ -294,4 +294,28 @@ describe('Stylable postcss process', () => {
 
         expect(result.keyframes.length).to.eql(2);
     });
+
+    it('should collect used fonts', () => {
+        const result = processSource(
+            `
+            .a{
+                font: 12px/14px sans-serif;
+                background: red;
+            }
+            .b{
+                font: italic 1.2em "Fira Sans", serif, Raleway;
+                border: 1px solid black;
+            }
+            .c{
+                font-family: Georgia, cursive;
+            }
+            .d{
+                font: 12px small-caption;
+            }
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.fonts).to.eql(['sans-serif', 'Fira Sans', 'serif', 'Raleway', 'Georgia', 'cursive', 'small-caption']);
+    });
 });
