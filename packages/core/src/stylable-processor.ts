@@ -674,6 +674,7 @@ export class StylableProcessor {
 
                     importObj.fromRelative = importPath;
                     importObj.from = importPath;
+
                     fromExists = true;
                     break;
                 case valueMapping.default:

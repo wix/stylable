@@ -13,23 +13,25 @@ function createResolveExtendsResults(
     classNameToLookup: string,
     isElement: boolean = false
 ) {
+
+    const resolveRequest = createRequestResolver({ fs });
+
     const processFile = cachedProcessFile<StylableMeta>(
         (fullpath, content) => {
             return process(safeParse(content, { from: fullpath }));
         },
         fs,
-        (_, x) => x
-    );
-
-    const resolveRequest = createRequestResolver({ fs });
-
-    const resolver = new StylableResolver(
-        processFile,
-        (module: string) => module && '',
         (context, request) => {
             const resolved = resolveRequest(context || fs.cwd(), request);
             return resolved === undefined ? request : resolved.resolvedFile;
         }
+    );
+
+    
+
+    const resolver = new StylableResolver(
+        processFile,
+        (module: string) => module && ''
     );
     return resolver.resolveExtends(
         processFile.process(fileToProcess),

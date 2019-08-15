@@ -17,6 +17,7 @@ export interface FileProcessor<T> {
     cache: Record<string, CacheItem<T>>;
     postProcessors: Array<(value: T, path: string) => T>;
     fs: MinimalFS;
+    resolvePath: (context: string | undefined, path: string) => string
 }
 
 export function cachedProcessFile<T = any>(
@@ -27,8 +28,8 @@ export function cachedProcessFile<T = any>(
     const cache: { [key: string]: CacheItem<T> } = {};
     const postProcessors: Array<(value: T, path: string) => T> = [];
 
-    function process(fullpath: string, ignoreCache: boolean = false, context?: string) {
-        const resolvedPath = resolvePath(context, fullpath);
+    function process(fullpath: string, ignoreCache: boolean = false, _context?: string) {
+        const resolvedPath = resolvePath(_context, fullpath);
         const stat = fs.statSync(resolvedPath);
         const cached = cache[resolvedPath];
         if (
@@ -51,20 +52,22 @@ export function cachedProcessFile<T = any>(
     }
 
     function add(fullpath: string, value: T) {
+        let mtime: Date;
         try {
-            const mtime = fs.statSync(fullpath).mtime;
-            cache[fullpath] = {
-                value,
-                stat: {
-                    mtime
-                }
-            };
+            mtime = fs.statSync(fullpath).mtime;
         } catch (e) {
-            // mtime = new Date();
+            mtime = new Date();
         }
+        cache[fullpath] = {
+            value,
+            stat: {
+                mtime
+            }
+        };
     }
 
     return {
+        resolvePath,
         processContent,
         postProcessors,
         cache,

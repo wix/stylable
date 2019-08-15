@@ -19,13 +19,12 @@ import { appendMixins } from './stylable-mixins';
 import {
     ClassSymbol,
     ElementSymbol,
-    SDecl,
     SRule,
     StylableMeta,
     StylableSymbol
 } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
-import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
+import { findRule, generateScopedCSSVar, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
@@ -83,7 +82,7 @@ export interface TransformHooks {
 export interface TransformerOptions {
     fileProcessor: FileProcessor<StylableMeta>;
     requireModule: (modulePath: string) => any;
-    resolver: StylableResolver;
+    resolver?: StylableResolver;
     diagnostics: Diagnostics;
     delimiter?: string;
     keepValues?: boolean;
@@ -146,7 +145,8 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.resolver = options.resolver;
+        
+        this.resolver = options.resolver || new StylableResolver(options.fileProcessor, options.requireModule);
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {
@@ -197,7 +197,6 @@ export class StylableTransformer {
         });
 
         ast.walkDecls(decl => {
-            getDeclStylable(decl as SDecl).sourceValue = decl.value;
 
             if (isCSSVarProp(decl.prop)) {
                 decl.prop = this.getScopedCSSVar(decl, meta, cssVarsMapping);

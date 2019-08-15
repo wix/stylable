@@ -69,10 +69,10 @@ export function generateInfra(
             return meta;
         },
         fs,
-        (_, x) => x
+        resolveFrom
     );
 
-    const resolver = new StylableResolver(fileProcessor, requireModule, resolveFrom);
+    const resolver = new StylableResolver(fileProcessor, requireModule);
 
     return { resolver, requireModule, fileProcessor };
 }

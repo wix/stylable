@@ -76,7 +76,7 @@ export class Stylable {
         );
         this.resolveFrom = resolveFrom;
         this.fileProcessor = fileProcessor;
-        this.resolver = new StylableResolver(this.fileProcessor, this.requireModule, resolveFrom);
+        this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
     public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({

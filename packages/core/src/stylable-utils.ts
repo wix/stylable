@@ -3,11 +3,7 @@ import { isAbsolute } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import {
-    DeclStylableProps,
-    Imported,
-    SDecl,
     SRule,
-    StylableMeta,
     StylableSymbol
 } from './stylable-processor';
 
@@ -232,52 +228,6 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     return mixinRoot as T;
 }
 
-export function removeUnusedRules(
-    ast: postcss.Root,
-    meta: StylableMeta,
-    _import: Imported,
-    usedFiles: string[],
-    resolvePath: (ctx: string, path: string) => string
-): void {
-    const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
-
-    if (isUnusedImport) {
-        const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
-        ast.walkRules((rule: SRule) => {
-            let shouldOutput = true;
-            traverseNode(rule.selectorAst, node => {
-                // TODO: remove.
-                if (symbols.indexOf(node.name) !== -1) {
-                    return (shouldOutput = false);
-                }
-                const symbol = meta.mappedSymbols[node.name];
-                if (symbol && (symbol._kind === 'class' || symbol._kind === 'element')) {
-                    let extend = symbol[valueMapping.extends] || symbol.alias;
-                    extend = extend && extend._kind !== 'import' ? extend.alias || extend : extend;
-
-                    if (
-                        extend &&
-                        extend._kind === 'import' &&
-                        usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1
-                    ) {
-                        return (shouldOutput = false);
-                    }
-                }
-                return undefined;
-            });
-            // TODO: optimize the multiple selectors
-            if (!shouldOutput && rule.selectorAst.nodes.length <= 1) {
-                rule.remove();
-            }
-        });
-    }
-}
-
-export function findDeclaration(importNode: Imported, test: any) {
-    const fromIndex = importNode.rule.nodes!.findIndex(test);
-    return importNode.rule.nodes![fromIndex] as postcss.Declaration;
-}
-
 export function findRule(
     root: postcss.Root,
     selector: string,
@@ -291,15 +241,6 @@ export function findRule(
         }
     });
     return found;
-}
-
-export function getDeclStylable(decl: SDecl): DeclStylableProps {
-    if (decl.stylable) {
-        return decl.stylable;
-    } else {
-        decl.stylable = decl.stylable ? decl.stylable : { sourceValue: '' };
-        return decl.stylable;
-    }
 }
 
 function destructiveReplaceNode(
