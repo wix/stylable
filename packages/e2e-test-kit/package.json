@@ -15,7 +15,7 @@
     "memory-fs": "^0.4.1",
     "node-eval": "^2.0.0",
     "puppeteer": "^1.19.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "webpack": "^4.39.1"
   },
   "files": [
