@@ -174,8 +174,8 @@ export class StylableProcessor {
             );
             processDeclarationFonts(
                 decl,
-                node => {
-                    this.meta.fonts.push(node.font!);
+                font => {
+                    this.meta.fonts.push(font);
                 }
             )
         });

@@ -7,7 +7,8 @@ import { ParsedValue } from './types';
 const { parseValues, stringifyValues } = require('css-selector-tokenizer');
 const isUrl = urlRegex({ exact: true, strict: true });
 
-export type OnUrlCallback = (node: ParsedValue) => void; // TODO rename to generic name
+export type OnUrlCallback = (node: ParsedValue) => void;
+export type OnFontCallback = (font: string) => void;
 
 export function collectAssets(ast: postcss.Root) {
     const assetDependencies: string[] = [];
@@ -70,35 +71,44 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
     }
 }
 
-export function processDeclarationFonts(
-    decl: postcss.Declaration,
-    onFont: OnUrlCallback
-) {
+function findFontsInAst(root: postcss.Root) {
+    const fonts = new Set();
+    root.walkDecls(decl => {
+        processDeclarationFonts(decl, font => {
+            fonts.add(font);
+        });
+    });
+    return Array.from(fonts);
+}
+
+export function processDeclarationFonts(decl: postcss.Declaration, onFont: OnFontCallback) {
     // Run only for font props:
     if (decl.prop !== 'font' && decl.prop !== 'font-family') {
         return;
     }
-
     const ast = parseValues(decl.value);
     ast.nodes.forEach((node: ParsedValue) => {
         const nodes = node.nodes;
-        findFonts(nodes[nodes.length-1], onFont); // font is always last. commas split to different nodes, so this assumption holds for multiple fonts as well
+        const lastChild = nodes[nodes.length - 1];
+        if (lastChild) {
+            // font is always last. commas split to different nodes, so this assumption holds for multiple fonts as well
+            const { type } = lastChild;
+            switch (type) {
+                case 'item':
+                    if (node.name) {
+                        onFont(node.name);
+                    }
+                    break;
+                case 'string':
+                    if (node.value && !(node.value === '""' || node.value === "''")) {
+                        onFont(node.value);
+                    }
+                    break;
+            }
+        }
     });
 }
 
-function findFonts(node: ParsedValue, onFont: OnUrlCallback) {
-    const { type } = node;
-    switch (type) {
-        case 'item':
-            node.font = node.name!;
-            onFont(node);
-            break;
-        case 'string':
-            node.font = node.value;
-            onFont(node);
-            break;
-    }
-}
 
 export function fixRelativeUrls(ast: postcss.Root, mix: RefedMixin, targetMeta: StylableMeta) {
     ast.walkDecls(decl =>

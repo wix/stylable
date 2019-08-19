@@ -312,10 +312,13 @@ describe('Stylable postcss process', () => {
             .d{
                 font: 12px small-caption;
             }
+            .e{
+                font: 12px "XXX", "", '', , , ,; /* check empty params */
+            }
         `,
             { from: 'path/to/style.css' }
         );
 
-        expect(result.fonts).to.eql(['sans-serif', 'Fira Sans', 'serif', 'Raleway', 'Georgia', 'cursive', 'small-caption']);
+        expect(result.fonts).to.eql(['sans-serif', 'Fira Sans', 'serif', 'Raleway', 'Georgia', 'cursive', 'small-caption', 'XXX']);
     });
 });
