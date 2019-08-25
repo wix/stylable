@@ -306,4 +306,40 @@ describe('Stylable scope-selector v2', () => {
         
         selfTest(result);
     });
+
+    
+    it('should properly scope states in nested-pseudo-classes222231241241242', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'style',
+                    content: `
+                        .root {
+                            
+                        }
+
+                        .local {
+                            -st-extends: root;
+                        }
+
+                        .y {}
+
+     
+                        /*
+                            @check .style__local .style__y
+                        */
+                        .local::y {
+
+                        }
+                     
+                    `
+                }
+                
+            }
+        });
+
+        
+        selfTest(result);
+    });
 });
