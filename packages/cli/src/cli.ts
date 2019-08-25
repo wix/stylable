@@ -2,6 +2,7 @@
 
 import { Stylable } from '@stylable/core';
 import fs from 'fs';
+import path from 'path';
 import { build } from './build';
 
 const argv = require('yargs')
@@ -79,10 +80,19 @@ const argv = require('yargs')
     .boolean('minify')
     .describe('minify', 'minify generated css')
     .default('minify', false)
-
+    
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
+    
+    .option('manifest')
+    .boolean('manifest')
+    .describe('manifest', 'should output manifest file')
+    .default('manifest', false)
+
+    .option('manifestFilepath')
+    .describe('manifestFilepath', 'manifest filepath relative to outDir')
+    .default('manifestFilepath', 'stylable.manifest.json')
 
     .option('customGenerator')
     .describe('customGenerator', 'path to file containing indexFile output override methods')
@@ -122,7 +132,9 @@ const {
     cssFilename,
     optimize,
     compat,
-    minify
+    minify,
+    manifestFilepath,
+    manifest
 } = argv;
 
 log('[Arguments]', argv);
@@ -153,7 +165,8 @@ build({
     outputCSSNameTemplate: cssFilename,
     optimize,
     compat,
-    minify
+    minify,
+    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

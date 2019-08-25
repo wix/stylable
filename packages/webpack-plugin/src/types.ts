@@ -38,6 +38,7 @@ export interface StylableWebpackPluginOptions {
     unsafeMuteDiagnostics: {
         DUPLICATE_MODULE_NAMESPACE: boolean;
     };
+    unsafeBuildNamespace?: boolean;
     afterTransform?:
         | ((results: StylableResults, module: StylableModule, stylable: Stylable) => void)
         | null;

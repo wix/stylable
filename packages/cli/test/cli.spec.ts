@@ -147,7 +147,6 @@ describe('Stylable Cli', () => {
         ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
     });
 
-    
     it('compat mode', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -170,13 +169,68 @@ describe('Stylable Cli', () => {
         expect(stdout.toString('utf8')).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
-        const file = join('dist', 'style.st.css.js')
-        const m = evalStylableModule<{ namespace: string }>(
+        const file = join('dist', 'style.st.css.js');
+        const m = evalStylableModule<{ namespace: string; default: any }>(
             dirContent[file] as string,
             file
-        )
-        expect(
-            typeof m
-        ).equal('function');
+        );
+        expect(typeof m).equal('function');
+
+        expect(m).equal(m.default);
     });
+
+    it('manifest', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`
+        });
+        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        const { stderr, stdout } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            nsr,
+            '--outDir',
+            './dist',
+            '--manifest'
+        ]);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
+
+        const dirContent = loadDirSync(tempDir.path);
+        const file = join('dist', 'stylable.manifest.json');
+
+        const m = JSON.parse(dirContent[file]);
+        expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
+    });
+    
+    it('manifestFilepath', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`
+        });
+        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        const { stderr, stdout } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            nsr,
+            '--outDir',
+            './dist',
+            '--manifest',
+            '--manifestFilepath',
+            '/x/y/m.json'
+        ]);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
+
+        const dirContent = loadDirSync(tempDir.path);
+        const file = join('dist', 'x/y/m.json');
+
+        const m = JSON.parse(dirContent[file]);
+        expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
+    });
+
 });

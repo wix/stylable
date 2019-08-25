@@ -68,6 +68,14 @@ export class StylableWebpackPlugin {
             this.options.requireModule,
             '__',
             meta => {
+
+                if(this.options.unsafeBuildNamespace) {
+                    try {
+                        meta.namespace = require(meta.source + '.js').namespace
+                    } catch{/* */}
+                }
+
+                // meta.namespace = getNamespaceFromBuiltStylsheet()
                 // TODO: move to stylable as param.
                 if (this.options.optimize.shortNamespaces) {
                     meta.namespace = stylable.optimizer!.namespaceOptimizer.getNamespace(
