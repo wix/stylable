@@ -17,7 +17,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "webpack": "^4.39.1",
+    "webpack": "^4.39.3",
     "webpack-sources": "^1.4.3"
   },
   "files": [
