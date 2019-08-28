@@ -1,6 +1,5 @@
-const flatten = require('flat');
-
 import { expect } from 'chai';
+import flatten from 'flat';
 
 export function flatMatch(chai: any, util: any) {
     const { flag } = util;
