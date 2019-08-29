@@ -8,9 +8,7 @@ import { join, relative } from 'path';
 
 function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
     return spawnSync('node', [
-        '-r',
-        '@ts-tools/node/r',
-        join(__dirname, '../src/cli.ts'),
+        join(__dirname, '../cli.js'),
         ...cliArgs
     ]);
 }
@@ -233,4 +231,20 @@ describe('Stylable Cli', () => {
         expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
     });
 
+    it('test require hook', () => {
+        populateDirectorySync(tempDir.path, {});
+        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+        const requireHook = join(__dirname, 'fixtures/test-require-hook.js');
+        const { stderr, stdout } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--nsr',
+            nsr,
+            '-r',
+            requireHook
+        ]);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).to.contain('I HAVE BEEN REQUIRED');
+    });
 });
