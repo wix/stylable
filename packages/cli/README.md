@@ -29,14 +29,15 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |ext||extension of stylable css files|`.st.css`|
 |cssInJs||output transpiled css into the js module|`false`|
 |cssFilename||pattern of the generated css file|`[filename].css`|
-|injectCSSRequest|icr|add a static import for the generated css in the js module output|`false`|
-|namespaceResolver|nsr|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
-|optimize|o|removes: empty nodes, stylable directives, comments|`false`|
-|minify|m|minify generated css|`false`|
+|injectCSSRequest|`icr`|add a static import for the generated css in the js module output|`false`|
+|namespaceResolver|`nsr`|node request to a module that exports a stylable resolveNamespace function|`@stylable/node`|
+|require|`r`|require hook to execture before running|`-`|
+|optimize|`o`|removes: empty nodes, stylable directives, comments|`false`|
+|minify|`m`|minify generated css|`false`|
 |log||verbose log|`false`|
 |diagnostics||verbose diagnostics|`false`|
 |compat||use legacy v1 runtime api|`false`|
-|help|h|Show help|`boolean`|
+|help|`h`|Show help|`boolean`|
 
 ### Generate an index file
 This generates an `index.st.css` file that acts as an export entry from every stylesheet in the provided `srcDir`.
