@@ -147,9 +147,9 @@ const {
 
 log('[Arguments]', argv);
 
-for (const r of requires) {
-    if (r) {
-        import(path.resolve(r));
+for (const request of requires) {
+    if (request) {
+        require(request);
     }
 }
 
