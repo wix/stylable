@@ -101,6 +101,12 @@ const argv = require('yargs')
     .describe('ext', 'extension of stylable css files')
     .default('ext', '.st.css')
 
+    .option('require')
+    .alias('require', 'r')
+    .array('require')
+    .describe('require', 'require hook ')
+    .default('require', [])
+
     .option('log')
     .describe('log', 'verbose log')
     .default('log', false)
@@ -115,6 +121,7 @@ const argv = require('yargs')
 const log = createLogger('[Stylable]', argv.log);
 
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
+
 const {
     outDir,
     srcDir,
@@ -134,10 +141,18 @@ const {
     compat,
     minify,
     manifestFilepath,
-    manifest
+    manifest,
+    require: requires
 } = argv;
 
 log('[Arguments]', argv);
+
+// execute all require hooks before running the CLI build
+for (const request of requires) {
+    if (request) {
+        require(request);
+    }
+}
 
 const stylable = Stylable.create({
     fileSystem: fs,

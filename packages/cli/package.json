@@ -5,7 +5,7 @@
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "bin": {
-    "stc": "cjs/cli.js"
+    "stc": "./cli.js"
   },
   "scripts": {
     "clean": "rimraf ./cjs",
@@ -24,6 +24,7 @@
   "files": [
     "cjs",
     "src",
+    "cli.js",
     "!src/tsconfig.json"
   ],
   "engines": {
