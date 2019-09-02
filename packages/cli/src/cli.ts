@@ -147,6 +147,7 @@ const {
 
 log('[Arguments]', argv);
 
+// execute all require hooks before running the CLI build
 for (const request of requires) {
     if (request) {
         require(request);
