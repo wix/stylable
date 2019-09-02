@@ -1,6 +1,6 @@
 import { StylableResults } from '@stylable/core';
+import { FileSystem } from '@stylable/node';
 import { dirname } from 'path';
-import { FileSystem } from './find-files';
 
 export function handleDiagnostics(
     diagnostics: ((...args: string[]) => void) | undefined,
