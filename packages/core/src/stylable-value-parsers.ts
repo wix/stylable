@@ -188,7 +188,11 @@ export function getNamedArgs(node: ParsedValue) {
             }
         });
     }
-    return args;
+
+    // handle trailing comma
+    return (args.length && args[args.length - 1].length === 0) ?
+        args.slice(0, -1) :
+        args;
 }
 
 export function getFormatterArgs(
