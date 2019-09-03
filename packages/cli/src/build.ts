@@ -115,7 +115,7 @@ export async function build({
 
     if (!indexFile) {
         handleAssets(assets, rootDir, srcDir, outDir, fs);
-        generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
+        generateManifest(rootDir, srcDir, outDir, filesToBuild, manifest, stylable, log, fs);
     }
 }
 

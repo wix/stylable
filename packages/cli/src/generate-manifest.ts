@@ -1,8 +1,10 @@
 import { Stylable } from '@stylable/core';
-import { dirname, relative } from 'path';
+import { dirname, join, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
 export function generateManifest(
     rootDir: string,
+    srcDir: string,
+    outDir: string,
     filesToBuild: string[],
     manifestOutputPath: string = '',
     stylable: Stylable,
@@ -19,10 +21,10 @@ export function generateManifest(
             };
         }>(
             (manifest, filePath) => {
-                manifest.namespaceMapping[relative(rootDir, filePath)] = getBuildNamespace(
-                    stylable,
-                    filePath
-                );
+                const outputFilePath = filePath.replace(join(rootDir, srcDir), join(rootDir, outDir));
+                manifest.namespaceMapping[
+                    relative(rootDir, outputFilePath).replace(/\\/g, '/')
+                ] = getBuildNamespace(stylable, filePath);
                 return manifest;
             },
             {

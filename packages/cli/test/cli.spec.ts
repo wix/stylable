@@ -200,7 +200,7 @@ describe('Stylable Cli', () => {
         const file = join('dist', 'stylable.manifest.json');
 
         const m = JSON.parse(dirContent[file]);
-        expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
+        expect(m.namespaceMapping).eql({ 'dist/style.st.css': 'test-ns-0' });
     });
     
     it('manifestFilepath', () => {
@@ -228,7 +228,7 @@ describe('Stylable Cli', () => {
         const file = join('dist', 'x/y/m.json');
 
         const m = JSON.parse(dirContent[file]);
-        expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
+        expect(m.namespaceMapping).eql({ 'dist/style.st.css': 'test-ns-0' });
     });
 
     it('test require hook', () => {
