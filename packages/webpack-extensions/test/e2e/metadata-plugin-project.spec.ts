@@ -38,6 +38,14 @@ describe(`(${project})`, () => {
                     },
                     content: null
                 },
+                '/test/src/variants/v1/v1.st.css': {
+                    metadata: {
+                        namespace: 'v1_v1-o0',
+                        variant: true,
+                        depth: 4
+                    },
+                    content: null
+                },
                 '/test/node_modules/test-components/index.st.css': {
                     metadata: {
                         namespace: 'o1',

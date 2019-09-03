@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@stylable/core": "^2.1.4",
+    "@stylable/node": "^2.1.7",
     "@stylable/webpack-plugin": "^2.1.8",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.9.0",
