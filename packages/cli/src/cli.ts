@@ -10,6 +10,10 @@ const argv = require('yargs')
     .describe('rootDir', 'root directory of project')
     .default('rootDir', process.cwd(), 'cwd')
 
+    .option('rootDirCWD')
+    .boolean('rootDirCWD')
+    .default('rootDirCWD', false)
+
     .option('srcDir')
     .describe('srcDir', 'source directory relative to root')
     .default('srcDir', '.')
@@ -80,11 +84,11 @@ const argv = require('yargs')
     .boolean('minify')
     .describe('minify', 'minify generated css')
     .default('minify', false)
-    
+
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
-    
+
     .option('manifest')
     .boolean('manifest')
     .describe('manifest', 'should output manifest file')
@@ -142,11 +146,15 @@ const {
     minify,
     manifestFilepath,
     manifest,
-    require: requires
+    require: requires,
+    rootDirCWD
 } = argv;
 
 log('[Arguments]', argv);
 
+if (rootDirCWD) {
+    process.chdir(rootDir);
+}
 // execute all require hooks before running the CLI build
 for (const request of requires) {
     if (request) {

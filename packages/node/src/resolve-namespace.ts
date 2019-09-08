@@ -6,15 +6,16 @@ const findConfig = require('find-config');
 export function resolveNamespaceFactory(
     hashSalt: string = '',
     prefix: string = '',
-    ignoreManifestInPackges = new Set<string>()
+    ignoreManifestInPackages = new Set<string>()
 ): typeof processNamespace {
     const projectConfig = findConfig.require('package.json', {});
-    ignoreManifestInPackges.add(projectConfig.name);
+    ignoreManifestInPackages.add(projectConfig.name);
     return (namespace: string, stylesheetPath: string) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
         const config = require(configPath);
         const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
-        if (!ignoreManifestInPackges.has(config.name)) {
+        if (!ignoreManifestInPackages.has(config.name)) {
+
             let manifest;
             if (config.stylable && config.stylable.manifest) {
                 try {

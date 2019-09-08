@@ -21,10 +21,15 @@ export function generateManifest(
             };
         }>(
             (manifest, filePath) => {
-                const outputFilePath = filePath.replace(join(rootDir, srcDir), join(rootDir, outDir));
+                const fullSrcDir = join(rootDir, srcDir);
+                const outputFilePath = filePath.replace(fullSrcDir, join(rootDir, outDir));
+                const buildNamespace = getBuildNamespace(stylable, filePath);
                 manifest.namespaceMapping[
                     relative(rootDir, outputFilePath).replace(/\\/g, '/')
-                ] = getBuildNamespace(stylable, filePath);
+                ] = buildNamespace;
+                manifest.namespaceMapping[
+                    relative(rootDir, filePath).replace(/\\/g, '/')
+                ] = buildNamespace;
                 return manifest;
             },
             {
