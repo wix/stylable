@@ -8,8 +8,6 @@ cjs
 runtime.lib.js
 runtime-legacy.lib.js
 
-# files in tests are all sources
-!**/test/**/node_modules
 
 # Created by the extension "VS Live Share"
 .vs
@@ -78,4 +76,5 @@ typings/
 # next.js build output
 .next
 
-
+# files in tests are all sources
+!**/test/**/node_modules
