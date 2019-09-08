@@ -7,10 +7,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
 
 function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
-    return spawnSync('node', [
-        join(__dirname, '../cli.js'),
-        ...cliArgs
-    ]);
+    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs]);
 }
 
 interface Files {
@@ -200,9 +197,12 @@ describe('Stylable Cli', () => {
         const file = join('dist', 'stylable.manifest.json');
 
         const m = JSON.parse(dirContent[file]);
-        expect(m.namespaceMapping).eql({ 'dist/style.st.css': 'test-ns-0' });
+        expect(m.namespaceMapping).eql({
+            'dist/style.st.css': 'test-ns-0',
+            'style.st.css': 'test-ns-0'
+        });
     });
-    
+
     it('manifestFilepath', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -228,7 +228,10 @@ describe('Stylable Cli', () => {
         const file = join('dist', 'x/y/m.json');
 
         const m = JSON.parse(dirContent[file]);
-        expect(m.namespaceMapping).eql({ 'dist/style.st.css': 'test-ns-0' });
+        expect(m.namespaceMapping).eql({
+            'dist/style.st.css': 'test-ns-0',
+            'style.st.css': 'test-ns-0'
+        });
     });
 
     it('test require hook', () => {
