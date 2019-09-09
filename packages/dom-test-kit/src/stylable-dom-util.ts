@@ -1,5 +1,13 @@
-import { isValidClassName, parseSelector, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
+import {
+    isValidClassName,
+    parseSelector,
+    pseudoStates,
+    stringifySelector,
+    traverseNode
+} from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
+import { getStylesheetMode } from './legacy-types';
+import { StylableDOMUtilLegacy } from './stylable-dom-util-legacy';
 
 export interface PartialElement {
     querySelector: Element['querySelector'];
@@ -101,5 +109,52 @@ export class StylableDOMUtil {
     public getBaseStateWithParam(stateName: string) {
         const singleCharState = 'x';
         return this.stylesheet.cssStates({ [stateName]: singleCharState }).slice(0, -3);
+    }
+}
+
+export class StylableDOMUtilCompat {
+    private internal: any;
+    constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {
+        const mode = getStylesheetMode(stylesheet);
+
+        if (mode === 'legacy') {
+            this.internal = new StylableDOMUtilLegacy(this.stylesheet, this.root);
+        } else if (mode === 'compat') {
+            this.internal = new StylableDOMUtil(
+                (this.stylesheet as any).originStylesheet,
+                this.root
+            );
+        } else {
+            this.internal = new StylableDOMUtil(this.stylesheet, this.root);
+        }
+    }
+    public select(selector?: string, element?: PartialElement): Element | null {
+        return this.internal.select(selector, element);
+    }
+    public selectAll(selector?: string, element?: PartialElement): Element[] | null {
+        return this.internal.selectAll(selector, element);
+    }
+    public scopeSelector(selector?: string): string {
+        return this.internal.scopeSelector(selector);
+    }
+
+    public hasStyleState(
+        element: PartialElement,
+        stateName: string,
+        param: StateValue = true
+    ): boolean {
+        return this.internal.hasStyleState(element, stateName, param);
+    }
+
+    public getStyleState(element: PartialElement, stateName: string): string | boolean | null {
+        return this.internal.getStyleState(element, stateName);
+    }
+
+    public getStateValueFromClassName(cls: string, baseState: string) {
+        return this.internal.getStateValueFromClassName(cls, baseState);
+    }
+
+    public getBaseStateWithParam(stateName: string) {
+        return this.internal.getBaseStateWithParam(stateName);
     }
 }

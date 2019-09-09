@@ -82,5 +82,7 @@ export function create(
     // EDGE CACHE BUG FIX
     (stylable_runtime_stylesheet as any).root = stylesheet.classes.root;
 
+    (stylable_runtime_stylesheet as any).originStylesheet = stylesheet;
+
     return stylable_runtime_stylesheet;
 }
