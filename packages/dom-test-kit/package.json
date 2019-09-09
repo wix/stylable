@@ -1,6 +1,6 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "2.1.5-alpha.0",
+  "version": "2.1.5-alpha.1",
   "description": "Stylable DOM testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@stylable/core": "^2.1.5-alpha.0",
-    "@stylable/runtime": "^2.1.4-alpha.0"
+    "@stylable/runtime": "^2.1.4-alpha.1"
   },
   "files": [
     "cjs",
