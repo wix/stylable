@@ -23,10 +23,14 @@ export function stylableModuleFactory(
 ) {
     let afterModule = '';
     const stylable = Stylable.create(stylableOptions);
-    if (legacyRuntime && runtimePath === '@stylable/runtime') {
-        runtimePath = '@stylable/runtime/cjs/index-legacy';
+
+    if (legacyRuntime) {
+        if (runtimePath === '@stylable/runtime') {
+            runtimePath = '@stylable/runtime/cjs/index-legacy';
+        }
         afterModule += 'module.exports.default = module.exports;'
     }
+
     return function stylableToModule(source: string, path: string) {
         const res = stylable.transform(source, path);
         return generateModuleSource(
