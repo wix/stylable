@@ -115,6 +115,7 @@ export class StylableDOMUtil {
 export class StylableDOMUtilCompat {
     private internal: any;
     constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {
+        // TODO: change stylesheet type here to union or any?
         const mode = getStylesheetMode(stylesheet);
 
         if (mode === 'legacy') {
