@@ -6,7 +6,7 @@ import {
     traverseNode
 } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
-import { getStylesheetMode, CommonStylesheet } from './legacy-types';
+import { CommonStylesheet, getStylesheetMode } from './legacy-types';
 import { StylableDOMUtilLegacy } from './stylable-dom-util-legacy';
 
 export interface PartialElement {
