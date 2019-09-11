@@ -6,7 +6,7 @@ import {
     traverseNode
 } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
-import { getStylesheetMode } from './legacy-types';
+import { getStylesheetMode, CommonStylesheet } from './legacy-types';
 import { StylableDOMUtilLegacy } from './stylable-dom-util-legacy';
 
 export interface PartialElement {
@@ -114,8 +114,7 @@ export class StylableDOMUtil {
 
 export class StylableDOMUtilCompat {
     private internal: any;
-    constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {
-        // TODO: change stylesheet type here to union or any?
+    constructor(private stylesheet: CommonStylesheet, private root?: Element) {
         const mode = getStylesheetMode(stylesheet);
 
         if (mode === 'legacy') {
@@ -126,7 +125,7 @@ export class StylableDOMUtilCompat {
                 this.root
             );
         } else {
-            this.internal = new StylableDOMUtil(this.stylesheet, this.root);
+            this.internal = new StylableDOMUtil(this.stylesheet as RuntimeStylesheet, this.root);
         }
     }
     public select(selector?: string, element?: PartialElement): Element | null {
