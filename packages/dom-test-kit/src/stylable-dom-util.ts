@@ -17,6 +17,54 @@ export interface PartialElement {
 }
 
 export class StylableDOMUtil {
+    // compat mode
+    private internal: any;
+    constructor(private stylesheet: CommonStylesheet, private root?: Element) {
+        const mode = getStylesheetMode(stylesheet);
+
+        if (mode === 'legacy') {
+            this.internal = new StylableDOMUtilLegacy(this.stylesheet, this.root);
+        } else if (mode === 'compat') {
+            this.internal = new StylableDOMUtilV2(
+                (this.stylesheet as any).originStylesheet,
+                this.root
+            );
+        } else {
+            this.internal = new StylableDOMUtilV2(this.stylesheet as RuntimeStylesheet, this.root);
+        }
+    }
+    public select(selector?: string, element?: PartialElement): Element | null {
+        return this.internal.select(selector, element);
+    }
+    public selectAll(selector?: string, element?: PartialElement): Element[] | null {
+        return this.internal.selectAll(selector, element);
+    }
+    public scopeSelector(selector?: string): string {
+        return this.internal.scopeSelector(selector);
+    }
+
+    public hasStyleState(
+        element: PartialElement,
+        stateName: string,
+        param: StateValue = true
+    ): boolean {
+        return this.internal.hasStyleState(element, stateName, param);
+    }
+
+    public getStyleState(element: PartialElement, stateName: string): string | boolean | null {
+        return this.internal.getStyleState(element, stateName);
+    }
+
+    public getStateValueFromClassName(cls: string, baseState: string) {
+        return this.internal.getStateValueFromClassName(cls, baseState);
+    }
+
+    public getBaseStateWithParam(stateName: string) {
+        return this.internal.getBaseStateWithParam(stateName);
+    }
+}
+
+export class StylableDOMUtilV2 {
     constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
@@ -112,49 +160,3 @@ export class StylableDOMUtil {
     }
 }
 
-export class StylableDOMUtilCompat {
-    private internal: any;
-    constructor(private stylesheet: CommonStylesheet, private root?: Element) {
-        const mode = getStylesheetMode(stylesheet);
-
-        if (mode === 'legacy') {
-            this.internal = new StylableDOMUtilLegacy(this.stylesheet, this.root);
-        } else if (mode === 'compat') {
-            this.internal = new StylableDOMUtil(
-                (this.stylesheet as any).originStylesheet,
-                this.root
-            );
-        } else {
-            this.internal = new StylableDOMUtil(this.stylesheet as RuntimeStylesheet, this.root);
-        }
-    }
-    public select(selector?: string, element?: PartialElement): Element | null {
-        return this.internal.select(selector, element);
-    }
-    public selectAll(selector?: string, element?: PartialElement): Element[] | null {
-        return this.internal.selectAll(selector, element);
-    }
-    public scopeSelector(selector?: string): string {
-        return this.internal.scopeSelector(selector);
-    }
-
-    public hasStyleState(
-        element: PartialElement,
-        stateName: string,
-        param: StateValue = true
-    ): boolean {
-        return this.internal.hasStyleState(element, stateName, param);
-    }
-
-    public getStyleState(element: PartialElement, stateName: string): string | boolean | null {
-        return this.internal.getStyleState(element, stateName);
-    }
-
-    public getStateValueFromClassName(cls: string, baseState: string) {
-        return this.internal.getStateValueFromClassName(cls, baseState);
-    }
-
-    public getBaseStateWithParam(stateName: string) {
-        return this.internal.getBaseStateWithParam(stateName);
-    }
-}
