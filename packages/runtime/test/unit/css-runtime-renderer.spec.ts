@@ -1,4 +1,4 @@
-const { expect } = require('chai');
+import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 import { RuntimeRenderer } from '../../src/css-runtime-renderer';
 
@@ -301,12 +301,6 @@ describe('css-runtime-renderer', () => {
                   <div id="container"></div>
               </body>
           `);
-
-            // const document = window.document;
-
-            // this.renderer = null;
-            // this.window = null;
-            // this.id = null;
 
             expect(api.renderer).to.equal(null);
             expect(api.window).to.equal(null);

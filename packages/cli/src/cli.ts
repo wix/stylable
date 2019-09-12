@@ -2,6 +2,7 @@
 
 import { Stylable } from '@stylable/core';
 import fs from 'fs';
+import path from 'path';
 import { build } from './build';
 
 const argv = require('yargs')
@@ -79,10 +80,19 @@ const argv = require('yargs')
     .boolean('minify')
     .describe('minify', 'minify generated css')
     .default('minify', false)
-
+    
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
+    
+    .option('manifest')
+    .boolean('manifest')
+    .describe('manifest', 'should output manifest file')
+    .default('manifest', false)
+
+    .option('manifestFilepath')
+    .describe('manifestFilepath', 'manifest filepath relative to outDir')
+    .default('manifestFilepath', 'stylable.manifest.json')
 
     .option('customGenerator')
     .describe('customGenerator', 'path to file containing indexFile output override methods')
@@ -90,6 +100,12 @@ const argv = require('yargs')
     .option('ext')
     .describe('ext', 'extension of stylable css files')
     .default('ext', '.st.css')
+
+    .option('require')
+    .alias('require', 'r')
+    .array('require')
+    .describe('require', 'require hook ')
+    .default('require', [])
 
     .option('log')
     .describe('log', 'verbose log')
@@ -105,6 +121,7 @@ const argv = require('yargs')
 const log = createLogger('[Stylable]', argv.log);
 
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
+
 const {
     outDir,
     srcDir,
@@ -122,10 +139,20 @@ const {
     cssFilename,
     optimize,
     compat,
-    minify
+    minify,
+    manifestFilepath,
+    manifest,
+    require: requires
 } = argv;
 
 log('[Arguments]', argv);
+
+// execute all require hooks before running the CLI build
+for (const request of requires) {
+    if (request) {
+        require(request);
+    }
+}
 
 const stylable = Stylable.create({
     fileSystem: fs,
@@ -153,7 +180,8 @@ build({
     outputCSSNameTemplate: cssFilename,
     optimize,
     compat,
-    minify
+    minify,
+    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

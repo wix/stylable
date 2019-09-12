@@ -1,3 +1,4 @@
+import { findFiles } from '@stylable/node';
 import { dirname, join } from 'path';
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
@@ -133,15 +134,13 @@ export class StylableMetadataPlugin {
     ) {
         if (componentConfig.variantsPath) {
             const variantsDir = join(componentDir, componentConfig.variantsPath);
-            let variants;
-
-            try {
-                variants = compilation.inputFileSystem.readdirSync(variantsDir);
-            } catch (e) {
+         
+            const { result: variants, errors } = findFiles(compilation.inputFileSystem, variantsDir, '.st.css', new Set(), true)
+            if(errors.length) {
                 throw new Error(
                     `Error while reading variants for: ${
                         componentConfig.id
-                    } in ${variantsDir}\nOriginal Error:\n${e}`
+                    } in ${variantsDir}\nOriginal Errors:\n${ errors }`
                 );
             }
 
@@ -158,8 +157,13 @@ export class StylableMetadataPlugin {
                         `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`
                     );
                 }
+                if(name.includes('_')){
+                    throw new Error(
+                        `Error variant name or folder cannot contain "_" found in: ${name}`
+                    );
+                }
                 builder.addSource(variantPath, content, {
-                    namespace: name.replace('.st.css', '') + '-' + namespace,
+                    namespace: name.replace(/\\/g, '/').replace(/\//g, '_').replace('.st.css', '') + '-' + namespace,
                     variant: true,
                     depth
                 });

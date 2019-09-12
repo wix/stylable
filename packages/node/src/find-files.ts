@@ -1,8 +1,8 @@
-import { join } from 'path';
+import { join, relative } from 'path';
 
 export type FileSystem = any;
 
-export function findFiles(fs: FileSystem, rootDirectory: string, ext: string, blacklist: Set<string>) {
+export function findFiles(fs: FileSystem, rootDirectory: string, ext: string, blacklist: Set<string>, useRelative = false) {
     const errors: Error[] = [];
     const result: string[] = [];
     const folders = [rootDirectory];
@@ -19,7 +19,7 @@ export function findFiles(fs: FileSystem, rootDirectory: string, ext: string, bl
                     if (status.isDirectory()) {
                         folders.push(itemFullPath);
                     } else if (status.isFile() && itemFullPath.endsWith(ext)) {
-                        result.push(itemFullPath);
+                        result.push(useRelative ? relative(rootDirectory, itemFullPath) : itemFullPath);
                     }
                 } catch (e) {
                     errors.push(e);
