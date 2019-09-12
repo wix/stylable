@@ -16,7 +16,7 @@ export interface PartialElement {
     classList: Element['classList'];
 }
 
-export class StylableDOMUtil {
+export class StylableDOMUtilCommon {
     // compat mode
     private internal: any;
     constructor(private stylesheet: CommonStylesheet, private root?: Element) {
@@ -25,12 +25,12 @@ export class StylableDOMUtil {
         if (mode === 'legacy') {
             this.internal = new StylableDOMUtilLegacy(this.stylesheet, this.root);
         } else if (mode === 'compat') {
-            this.internal = new StylableDOMUtilCompat(
+            this.internal = new StylableDOMUtil(
                 (this.stylesheet as any).originStylesheet,
                 this.root
             );
         } else {
-            this.internal = new StylableDOMUtilV2(this.stylesheet as RuntimeStylesheet, this.root);
+            this.internal = new StylableDOMUtil(this.stylesheet as RuntimeStylesheet, this.root);
         }
     }
     public select(selector?: string, element?: PartialElement): Element | null {
@@ -64,7 +64,7 @@ export class StylableDOMUtil {
     }
 }
 
-export class StylableDOMUtilV2 {
+export class StylableDOMUtil {
     constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
@@ -160,7 +160,7 @@ export class StylableDOMUtilV2 {
     }
 }
 
-export class StylableDOMUtilCompat extends StylableDOMUtilV2 {
+export class StylableDOMUtilCompat extends StylableDOMUtilCommon {
     public getStyleState(element: PartialElement, stateName: string): string | null {
         const state = super.getStyleState(element, stateName);
 
