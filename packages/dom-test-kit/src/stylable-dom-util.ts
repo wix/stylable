@@ -25,7 +25,7 @@ export class StylableDOMUtil {
         if (mode === 'legacy') {
             this.internal = new StylableDOMUtilLegacy(this.stylesheet, this.root);
         } else if (mode === 'compat') {
-            this.internal = new StylableDOMUtilV2(
+            this.internal = new StylableDOMUtilCompat(
                 (this.stylesheet as any).originStylesheet,
                 this.root
             );
@@ -160,3 +160,10 @@ export class StylableDOMUtilV2 {
     }
 }
 
+export class StylableDOMUtilCompat extends StylableDOMUtilV2 {
+    public getStyleState(element: PartialElement, stateName: string): string | null {
+        const state = super.getStyleState(element, stateName);
+
+        return state === null ? null : state.toString();
+    }
+}
