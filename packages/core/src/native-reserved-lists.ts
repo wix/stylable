@@ -104,6 +104,7 @@ export const nativeFunctionsDic = {
     'cubic-bezier': true,
     'drop-shadow': true,
     'ellipse': true,
+    'format': true,
     'grayscale': true,
     'hsl': true,
     'hsla': true,
