@@ -11,7 +11,7 @@
     "pretest": "yarn lint",
     "lint": "yarn tslint -p tsconfig.json",
     "test": "lerna run test --stream",
-    "typecheck": "tsc -p ./tsconfig.test.json --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.11.0",
