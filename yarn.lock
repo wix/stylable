@@ -884,14 +884,11 @@
     commander "^3.0.0"
     proper-fs "^1.1.2"
 
-"@ts-tools/node@^0.9.10":
-  version "0.9.10"
-  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.9.10.tgz#675c58d04b741662a05629493496bf60f51ce1f3"
-  integrity sha512-TTuPKlTbyKjO1XTXHDHJOwcG4oO+VE8OMvbN2xPdO3N6gsYTBR1bKxLkyGT+5gc7y8nYnzI/bclav77EPru1DQ==
+"@ts-tools/node@^0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.11.0.tgz#72f2a2d0bd2b65f153b3fcc81a9c1d335d68f6b5"
+  integrity sha512-O7m2CSxXaIwe+jWOH/Ha1Gjx/DmIHtXplvJ1wZ4X3xhhsXKHiTrQ8/r+TLIj0Enxn1YlbAnqZ5W+gk7u1ZMAXA==
   dependencies:
-    "@ts-tools/robotrix" "^0.7.7"
-    "@ts-tools/service" "^2.0.5"
-    is-ci "^2.0.0"
     source-map-support "^0.5.13"
 
 "@ts-tools/robotrix@^0.7.7":
