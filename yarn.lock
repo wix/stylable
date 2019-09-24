@@ -874,10 +874,10 @@
     once "^1.4.0"
     universal-user-agent "^4.0.0"
 
-"@ts-tools/build@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.11.0.tgz#18c3143760eca11f15cd88b714e297d8482d414a"
-  integrity sha512-owg43HHF2H3ga4brP3FxC5jZOXqHHuzzex6x6stV1SbZ5daTWV8WunYuXNSOTkzMCyhrCQ/7lqLPLdC+dzHbMw==
+"@ts-tools/build@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.11.2.tgz#f46e4b5c90ba8536388b62987e31a5781641c1cf"
+  integrity sha512-bFoAfWEruDMoxsXRgXMc4vuNDBSKOL/dEdS3es5TlVHziLV3G/VxrWBP9SvuXcdFTmL7Hr0aI98nSRkyNB3Xkw==
   dependencies:
     "@ts-tools/service" "^2.0.5"
     chalk "^2.4.2"
@@ -3193,9 +3193,9 @@ encoding@^0.1.11:
     iconv-lite "~0.4.13"
 
 end-of-stream@^1.0.0, end-of-stream@^1.1.0:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.2.tgz#080bf028edce8312b665ff18ea03cae0c3ac0ecb"
-  integrity sha512-gUSUszrsxlDnUbUwEI9Oygyrk4ZEWtVaHQc+uZHphVeNxl+qeqMV/jDWoTkjN1RmGlZ5QWAP7o458p/JMlikQg==
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.3.tgz#9db9861620e47283cd49513be9c344f339ec5153"
+  integrity sha512-cbNhPFS6MlYlWTGncSiDYbdqKhwWFy7kNeb1YSOG6K65i/wPTkLVCJQj0hXA4j0m5Da+hBWnqopEnu1FFelisQ==
   dependencies:
     once "^1.4.0"
 
@@ -8219,9 +8219,9 @@ terser-webpack-plugin@^2.1.0:
     webpack-sources "^1.4.3"
 
 terser@^4.1.2, terser@^4.3.1:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-4.3.1.tgz#09820bcb3398299c4b48d9a86aefc65127d0ed65"
-  integrity sha512-pnzH6dnFEsR2aa2SJaKb1uSCl3QmIsJ8dEkj0Fky+2AwMMcC9doMqLOQIH6wVTEKaVfKVvLSk5qxPBEZT9mywg==
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.3.2.tgz#ed830de484b0103652799063e605618e80f97f93"
+  integrity sha512-obxk4x19Zlzj9zY4QeXj9iPCb5W8YGn4v3pn4/fHj0Nw8+R7N02Kvwvz9VpOItCZZD8RC+vnYCDL0gP6FAJ7Xg==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
