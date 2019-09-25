@@ -16,7 +16,6 @@
   "files": [
     "cjs",
     "src",
-    "!src/tsconfig.json",
     "runtime.lib.js",
     "runtime-legacy.lib.js"
   ],

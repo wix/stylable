@@ -24,8 +24,7 @@
   },
   "files": [
     "cjs",
-    "src",
-    "!src/tsconfig.json"
+    "src"
   ],
   "publishConfig": {
     "access": "public"
