@@ -874,14 +874,14 @@
     once "^1.4.0"
     universal-user-agent "^4.0.0"
 
-"@ts-tools/build@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.1.16.tgz#84ddc3ad4c43d665fd5801889ccf93c5de872597"
-  integrity sha512-taq5b32P44tufu7lcZ0VW0DM9T7gvqlqZvvUXdzCAfcBMZZg0C+fjupn12lsRpsoyTOmztMT5h1BvIy3u08v8Q==
+"@ts-tools/build@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.11.2.tgz#f46e4b5c90ba8536388b62987e31a5781641c1cf"
+  integrity sha512-bFoAfWEruDMoxsXRgXMc4vuNDBSKOL/dEdS3es5TlVHziLV3G/VxrWBP9SvuXcdFTmL7Hr0aI98nSRkyNB3Xkw==
   dependencies:
     "@ts-tools/service" "^2.0.5"
     chalk "^2.4.2"
-    commander "^3.0.0"
+    commander "^3.0.1"
     proper-fs "^1.1.2"
 
 "@ts-tools/node@^0.9.10":
@@ -2308,7 +2308,7 @@ commander@^2.12.1, commander@^2.18.0, commander@^2.19.0, commander@^2.20.0, comm
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.0.tgz#d58bb2b5c1ee8f87b0d340027e9e94e222c5a422"
   integrity sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
 
-commander@^3.0.0:
+commander@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-3.0.1.tgz#4595aec3530525e671fb6f85fb173df8ff8bf57a"
   integrity sha512-UNgvDd+csKdc9GD4zjtkHKQbT8Aspt2jCBqNSPp53vAS0L1tS9sXB2TCEOPHJ7kt9bN/niWkYj8T3RQSoMXdSQ==
