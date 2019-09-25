@@ -18,8 +18,7 @@
   },
   "files": [
     "cjs",
-    "register.js",
-    "!src/tsconfig.json"
+    "register.js"
   ],
   "engines": {
     "node": ">=8"

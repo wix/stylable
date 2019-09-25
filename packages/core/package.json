@@ -32,7 +32,6 @@
   "files": [
     "cjs",
     "src",
-    "!src/tsconfig.json",
     "test-utils.js",
     "test-utils.d.ts"
   ],
