@@ -25,14 +25,10 @@ The `root` class name can be applied to a component node by using our [React int
 
 ```js
 /* comp.jsx */
-import * as React from 'react';
+import React from 'react';
 import { style, classes } from './comp.st.css';
 
-class Comp {
-    constructor(props) {
-        super(props);
-    }
-
+class Comp extends React.Component {
     render () {
         return (
             <div className={style(classes.root, {}, this.props.className)} />
