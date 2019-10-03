@@ -605,33 +605,6 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
     describe('diagnostics', () => {
         describe('value()', () => {
-            it('should return warning when passing more than one argument to a value() function', () => {
-                expectWarningsFromTransform(
-                    {
-                        entry: '/style.st.css',
-                        files: {
-                            '/style.st.css': {
-                                content: `
-                            :vars {
-                                color1: red;
-                                color2: gold;
-                            }
-                            .my-class {
-                                |color:value($color1, color2$)|;
-                            }
-                            `
-                            }
-                        }
-                    },
-                    [
-                        {
-                            message: functionWarnings.MULTI_ARGS_IN_VALUE('color1, color2'),
-                            file: '/style.st.css'
-                        }
-                    ]
-                );
-            });
-
             it('should return warning for unknown var on transform', () => {
                 expectWarningsFromTransform(
                     {

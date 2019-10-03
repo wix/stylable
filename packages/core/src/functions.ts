@@ -32,8 +32,6 @@ export const functionWarnings = {
     CANNOT_USE_JS_AS_VALUE: (varName: string) =>
         `JavaScript import "${varName}" cannot be used as a variable`,
     CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
-    MULTI_ARGS_IN_VALUE: (args: string) =>
-        `value function accepts only a single argument: "value(${args})"`,
     UNKNOWN_FORMATTER: (name: string) =>
         `cannot find native function or custom formatter called ${name}`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
@@ -287,14 +285,6 @@ export function processDeclarationValue(
                 outputValue += matchingType.getValue(args, topLevelType, n, customValues);
             } else {
                 outputValue += getStringValue([n]);
-
-                const parsedArgs = getFormatterArgs(n);
-                if (diagnostics && parsedArgs.length > 1 && n.value === 'value') {
-                    const argsAsString = parsedArgs.join(', ');
-                    diagnostics.warn(node, functionWarnings.MULTI_ARGS_IN_VALUE(argsAsString), {
-                        word: argsAsString
-                    });
-                }
             }
         } else {
             outputValue += getStringValue([n]);
