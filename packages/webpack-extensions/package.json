@@ -16,9 +16,9 @@
     "@stylable/node": "^2.3.1",
     "@stylable/webpack-plugin": "^2.3.1",
     "lodash.clonedeep": "^4.5.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "webpack": "^4.40.2",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "webpack": "^4.41.1",
     "webpack-sources": "^1.4.3"
   },
   "files": [
