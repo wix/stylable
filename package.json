@@ -8,10 +8,10 @@
     "prepare": "yarn workspace @stylable/runtime build",
     "clean": "lerna run clean --stream --parallel",
     "build": "lerna run build --stream",
-    "pretest": "yarn lint",
+    "typecheck": "tsc --noEmit",
     "lint": "yarn tslint -p tsconfig.json",
-    "test": "lerna run test --stream",
-    "typecheck": "tsc --noEmit"
+    "pretest": "yarn typecheck && yarn lint",
+    "test": "lerna run test --stream"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.11.2",
