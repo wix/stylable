@@ -867,11 +867,12 @@
     commander "^3.0.1"
     proper-fs "^1.1.2"
 
-"@ts-tools/node@^0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.11.0.tgz#72f2a2d0bd2b65f153b3fcc81a9c1d335d68f6b5"
-  integrity sha512-O7m2CSxXaIwe+jWOH/Ha1Gjx/DmIHtXplvJ1wZ4X3xhhsXKHiTrQ8/r+TLIj0Enxn1YlbAnqZ5W+gk7u1ZMAXA==
+"@ts-tools/node@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-1.1.1.tgz#3d126ce0478732934752a244f2371aeefcdf4ed7"
+  integrity sha512-56t4xHnVEB33eeVwkuZX90FN13XH1//aDbTVX2n6cfjEVVOZWapRcqTPYyRqR8U2lF4Hwz2ElLlXaO6g5rx6gw==
   dependencies:
+    "@ts-tools/transpile" "^2.0.0"
     source-map-support "^0.5.13"
 
 "@ts-tools/robotrix@^0.7.7":
@@ -883,6 +884,11 @@
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.5.tgz#6a35df0f584fce9b94d520f8243c4f9939bb7c96"
   integrity sha512-4nJXEdW5PoyS6+YS/A977LmKEnMdFfJLQ1fcIh/mmAffS3bYK/Q5BoWF0jfQykrvMObzO4e4hhmCNexq5+zgzQ==
+
+"@ts-tools/transpile@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.0.0.tgz#619c3bad28d050d579e7d6b71016e129aad3741d"
+  integrity sha512-Vv9SlCOMPF926iXErWg63zexwkjqfz3eQrgvLnkoyT3g01LG9XPScSEnYzIKJKu2gV2l1TxBMEAXjP1nHn85AA==
 
 "@ts-tools/webpack-loader@^0.8.14":
   version "0.8.14"
