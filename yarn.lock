@@ -857,14 +857,14 @@
     once "^1.4.0"
     universal-user-agent "^4.0.0"
 
-"@ts-tools/build@^0.11.2":
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-0.11.2.tgz#f46e4b5c90ba8536388b62987e31a5781641c1cf"
-  integrity sha512-bFoAfWEruDMoxsXRgXMc4vuNDBSKOL/dEdS3es5TlVHziLV3G/VxrWBP9SvuXcdFTmL7Hr0aI98nSRkyNB3Xkw==
+"@ts-tools/build@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.1.0.tgz#b8febbb2beb11d336478a0cd1ed711104b1c909e"
+  integrity sha512-RyIoH5HWvMCY0W3/KS4OPf8LpN5l+oLQDrQHjbGzrOumnJBms4f1AuTChhSjbcmNJgpIhOIlg3LDfTCO9LgNgQ==
   dependencies:
-    "@ts-tools/service" "^2.0.5"
+    "@ts-tools/service" "^2.0.6"
     chalk "^2.4.2"
-    commander "^3.0.1"
+    commander "^3.0.2"
     proper-fs "^1.1.2"
 
 "@ts-tools/node@^0.11.0":
@@ -879,10 +879,10 @@
   resolved "https://registry.yarnpkg.com/@ts-tools/robotrix/-/robotrix-0.7.7.tgz#44fde05c30fae27c72881c32b3b39b406492053b"
   integrity sha512-pnByh8Z1kpFxR0o2DoBqaHvgo7Dz4EZ0yKzZ96q61MeWFE1oVPGZS3v79YH5TuyoF+isbtxxy6IFLbF1gWXGKA==
 
-"@ts-tools/service@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.5.tgz#6a35df0f584fce9b94d520f8243c4f9939bb7c96"
-  integrity sha512-4nJXEdW5PoyS6+YS/A977LmKEnMdFfJLQ1fcIh/mmAffS3bYK/Q5BoWF0jfQykrvMObzO4e4hhmCNexq5+zgzQ==
+"@ts-tools/service@^2.0.5", "@ts-tools/service@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.6.tgz#e9abb8a554cee61f7b8df47a84189eecc81f07bc"
+  integrity sha512-42Cfqf47F5URsecZ9/r7O2UrQ7erXe2OLM/2NYEa4lFhKgTV1YI6/AYEISeWQsVR4pvs4yjiqUP+eOIPXmDgjg==
 
 "@ts-tools/webpack-loader@^0.8.14":
   version "0.8.14"
@@ -2335,7 +2335,7 @@ commander@^2.12.1, commander@^2.18.0, commander@^2.19.0, commander@^2.20.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
-commander@^3.0.1:
+commander@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/commander/-/commander-3.0.2.tgz#6837c3fb677ad9933d1cfba42dd14d5117d6b39e"
   integrity sha512-Gar0ASD4BDyKC4hl4DwHqDrmvjoxWKZigVnAbn5H1owvm4CxCPdb0HQDehwNYMJpla5+M2tPmPARzhtYuwpHow==
