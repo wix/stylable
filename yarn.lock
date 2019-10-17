@@ -860,14 +860,13 @@
     universal-user-agent "^4.0.0"
 
 "@ts-tools/build@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.1.0.tgz#b8febbb2beb11d336478a0cd1ed711104b1c909e"
-  integrity sha512-RyIoH5HWvMCY0W3/KS4OPf8LpN5l+oLQDrQHjbGzrOumnJBms4f1AuTChhSjbcmNJgpIhOIlg3LDfTCO9LgNgQ==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.0.tgz#2a173ba126baa081f9ab77dd91448aa984ec26e3"
+  integrity sha512-VRFzeb1YLZGdjl0Fb34PO7dIkpSlXKvaweLP5cTh+lCToHSlYLgGjyF+dXIJC38/xkLpQ/X/tXxZ0ZHgc3Tq4Q==
   dependencies:
-    "@ts-tools/service" "^2.0.6"
+    "@ts-tools/transpile" "^2.0.0"
     chalk "^2.4.2"
     commander "^3.0.2"
-    proper-fs "^1.1.2"
 
 "@ts-tools/node@^1.1.1":
   version "1.1.1"
@@ -876,11 +875,6 @@
   dependencies:
     "@ts-tools/transpile" "^2.0.0"
     source-map-support "^0.5.13"
-
-"@ts-tools/service@^2.0.6":
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/@ts-tools/service/-/service-2.0.6.tgz#e9abb8a554cee61f7b8df47a84189eecc81f07bc"
-  integrity sha512-42Cfqf47F5URsecZ9/r7O2UrQ7erXe2OLM/2NYEa4lFhKgTV1YI6/AYEISeWQsVR4pvs4yjiqUP+eOIPXmDgjg==
 
 "@ts-tools/transpile@^2.0.0":
   version "2.0.0"
@@ -6917,11 +6911,6 @@ prop-types@^15.6.2:
     loose-envify "^1.4.0"
     object-assign "^4.1.1"
     react-is "^16.8.1"
-
-proper-fs@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/proper-fs/-/proper-fs-1.1.2.tgz#f2e76615f16f6d12a7f4612504b091cee4196dd1"
-  integrity sha512-0XLDXc0JVz8WYtMLDy5vi0GHAFuM9rzaQWaCMJ7+CWmxOaFNfkdVWqyuxbgb70slQm3Ji12z1oHophyradDN4Q==
 
 proto-list@~1.2.1:
   version "1.2.4"
