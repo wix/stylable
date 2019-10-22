@@ -503,7 +503,11 @@ export class StylableTransformer {
         });
     }
     public resolveSelectorElements(meta: StylableMeta, selector: string): ResolvedElement[][] {
-        return this.scopeSelector(meta, selector, undefined, true).elements;
+        if (USE_SCOPE_SELECTOR_2) {
+            return this.scopeSelector2(meta, selector, undefined, true).elements;
+        } else {
+            return this.scopeSelector(meta, selector, undefined, true).elements;
+        }
     }
     public scopeSelector(
         originMeta: StylableMeta,
@@ -687,7 +691,7 @@ export class StylableTransformer {
         _classesExport?: Record<string, string>
     ): string {
         if (USE_SCOPE_SELECTOR_2) {
-            return this.scopeSelector2(meta, rule.selector, undefined, false, rule);
+            return this.scopeSelector2(meta, rule.selector, undefined, false, rule).selector;
         } else {
             return this.scopeSelector(meta, rule.selector, _classesExport, false, rule).selector;
         }
@@ -948,14 +952,27 @@ export class StylableTransformer {
         _classesExport?: Record<string, string>,
         _calcPaths = false,
         rule?: postcss.Rule
-    ): string {
-        return stringifySelector(
-            this.scopeSelectorAst({
-                originMeta,
-                selectorAst: parseSelector(selector),
-                rule: rule || postcss.rule({ selector })
-            })
-        );
+    ): { selector: string; elements: ResolvedElement[][] } {
+        const context: ScopeSelectorContext = {
+            originMeta,
+            selectorAst: parseSelector(selector),
+            rule: rule || postcss.rule({ selector }),
+            _currentAnchor: null,
+            elements: [],
+            get currentAnchor() {
+                return this._currentAnchor;
+            },
+            set currentAnchor(c) {
+                if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
+                    this.elements![this.selectorIndex!]!.push(c!);
+                }
+                this._currentAnchor = c;
+            }
+        };
+        return {
+            selector: stringifySelector(this.scopeSelectorAst(context)),
+            elements: context.elements!
+        };
     }
     public scopeSelectorAst(context: ScopeSelectorContext): SelectorAstNode {
         const { originMeta, selectorAst } = context;
@@ -966,17 +983,18 @@ export class StylableTransformer {
         context.metaParts = this.resolveMetaParts(originMeta);
         // set stylesheet root as the global anchor
         context.currentAnchor = context.currentAnchor || {
-            type: 'class',
             name: originMeta.root,
+            type: 'class',
             resolved: context.metaParts.class[originMeta.root]
         };
         context.selectorIndex = -1;
 
         // used to add additional selector (used in custom selector flow)
         context.additionalSelectors = [];
-
+        context.elements = [];
         // loop over selectors
         for (const selectorChunks of selectorListChunks) {
+            context.elements.push([]);
             context.selectorIndex++;
             context.chunks = selectorChunks;
             // loop over chunks
@@ -1002,12 +1020,12 @@ export class StylableTransformer {
                 // used to scope classes from js mixins
                 { _kind: 'css', meta: originMeta, symbol: { _kind: 'class', name } }
             ];
-            context.currentAnchor = { type: 'class', name, resolved };
+            context.currentAnchor = { name, type: 'class', resolved };
             const { symbol, meta } = getOriginDefinition(resolved);
             this.scopeClassNode(symbol, meta, node, originMeta);
         } else if (type === 'element') {
             const resolved = metaParts.element[name];
-            context.currentAnchor = { type: 'element', name, resolved };
+            context.currentAnchor = { name, type: 'element', resolved };
             // native node does not resolve e.g. div
             if (resolved && resolved.length > 1) {
                 const { symbol, meta } = getOriginDefinition(resolved);
@@ -1020,56 +1038,30 @@ export class StylableTransformer {
             let resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>> | undefined;
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = context.currentAnchor.resolved[i];
-
-                const requestedPart = meta.classes[name];
+                if (!symbol[valueMapping.root]) {
+                    // debugger
+                    continue;
+                }
 
                 const customSelector = meta.customSelectors[':--' + name];
                 if (customSelector) {
-                    const selectorListChunks = separateChunks2(parseSelector(customSelector));
-                    const hasMultipleSelectors = selectorListChunks.length === 1;
-                    removeFirstRootInEachSelectorChunk(selectorListChunks, meta);
-
-                    const internalContext: ScopeSelectorContext = {
-                        originMeta: meta,
-                        selectorAst: mergeChunks(selectorListChunks),
-                        rule: context.rule
-                    };
-
-                    const customAstSelectors = this.scopeSelectorAst(internalContext).nodes;
-                    customAstSelectors.forEach(trimLeftSelectorAst);
-
-                    if (hasMultipleSelectors && internalContext.currentAnchor) {
-                        context.currentAnchor = internalContext.currentAnchor;
-                    } else {
-                        // unknown context due to multiple selectors
-                        context.currentAnchor = anyElementAnchor(meta);
-                    }
-
-                    Object.assign(node, customAstSelectors[0]);
-
-                    // first one handled inline above
-                    for (let i = 1; i < customAstSelectors.length; i++) {
-                        const selectorNode = context.selectorAst.nodes[context.selectorIndex];
-                        const nodeIndex = selectorNode.nodes.indexOf(node);
-                        context.additionalSelectors.push(
-                            lazyCreateSelector(customAstSelectors[i], selectorNode, nodeIndex)
-                        );
-                    }
-
+                    this.handleCustomSelector(customSelector, meta, context, name, node);
                     return;
                 }
+
+                const requestedPart = meta.classes[name];
 
                 if (symbol.alias || !requestedPart) {
                     // skip alias since thay cannot add parts
                     continue;
                 }
 
-                resolved = this.resolveMetaParts(meta).class[requestedPart.name];
+                resolved = this.resolveMetaParts(meta).class[name];
 
                 // first definition of a part in the extends/alias chain
                 context.currentAnchor = {
-                    type: 'class',
-                    name: requestedPart.name,
+                    name,
+                    type: 'pseudo-element',
                     resolved
                 };
 
@@ -1082,6 +1074,13 @@ export class StylableTransformer {
             }
 
             if (!resolved) {
+                // first definition of a part in the extends/alias chain
+                context.currentAnchor = {
+                    name,
+                    type: 'pseudo-element',
+                    resolved: []
+                };
+
                 if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
                     this.diagnostics.warn(
                         context.rule,
@@ -1137,13 +1136,69 @@ export class StylableTransformer {
             if (/* maybe should be currentAnchor meta */ originMeta.parent) {
                 const origin = originMeta.mappedSymbols[originMeta.root] as ClassSymbol;
                 context.currentAnchor = {
-                    type: 'class',
                     name: origin.name,
+                    type: 'class',
                     resolved: context.metaParts.class[origin.name]
                 };
             }
         }
     }
+    private handleCustomSelector(
+        customSelector: string,
+        meta: StylableMeta,
+        context: Required<ScopeSelectorContext>,
+        name: string,
+        node: SelectorAstNode
+    ) {
+        const selectorListChunks = separateChunks2(parseSelector(customSelector));
+        const hasSingleSelector = selectorListChunks.length === 1;
+        removeFirstRootInEachSelectorChunk(selectorListChunks, meta);
+        const internalContext: ScopeSelectorContext = {
+            originMeta: meta,
+            selectorAst: mergeChunks(selectorListChunks),
+            rule: context.rule,
+            _currentAnchor: null,
+            elements: [],
+            get currentAnchor() {
+                return this._currentAnchor;
+            },
+            set currentAnchor(c) {
+                if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
+                    // context.currentAnchor = c
+                    this.elements![this.selectorIndex!]!.push(c!);
+                }
+                this._currentAnchor = c;
+            }
+        };
+        const customAstSelectors = this.scopeSelectorAst(internalContext).nodes;
+        customAstSelectors.forEach(trimLeftSelectorAst);
+        if (hasSingleSelector && internalContext.currentAnchor) {
+            // context.currentAnchor = internalContext.currentAnchor;
+            context.currentAnchor = {
+                name: name,
+                type: 'pseudo-element',
+                resolved: internalContext.currentAnchor.resolved
+            };
+        } else {
+            // unknown context due to multiple selectors
+            // context.currentAnchor = anyElementAnchor(meta);
+            context.currentAnchor = {
+                name: name,
+                type: 'pseudo-element',
+                resolved: anyElementAnchor(meta).resolved
+            };
+        }
+        Object.assign(node, customAstSelectors[0]);
+        // first one handled inline above
+        for (let i = 1; i < customAstSelectors.length; i++) {
+            const selectorNode = context.selectorAst.nodes[context.selectorIndex];
+            const nodeIndex = selectorNode.nodes.indexOf(node);
+            context.additionalSelectors.push(
+                lazyCreateSelector(customAstSelectors[i], selectorNode, nodeIndex)
+            );
+        }
+    }
+
     private scopeClassNode(symbol: any, meta: any, node: any, originMeta: any) {
         if (symbol[valueMapping.global]) {
             const globalMappedNodes = symbol[valueMapping.global];
@@ -1168,23 +1223,41 @@ export class StylableTransformer {
                     className,
                     false,
                     this,
-                    res => {
-                        const found = findRule(meta.ast, '.' + className);
-                        if (found) {
+                    (res, extend) => {
+                        const decl = findRule(meta.ast, '.' + className);
+                        if (decl) {
+                            debugger;
                             if (res && res._kind === 'js') {
                                 this.diagnostics.error(
-                                    found,
+                                    decl,
                                     transformerWarnings.CANNOT_EXTEND_JS(),
                                     {
-                                        word: found.value
+                                        word: decl.value
                                     }
+                                );
+                            } else if (res && !res.symbol) {
+                                this.diagnostics.error(
+                                    decl,
+                                    transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL(extend.name),
+                                    { word: decl.value }
                                 );
                             } else {
                                 this.diagnostics.error(
-                                    found,
+                                    decl,
                                     transformerWarnings.IMPORT_ISNT_EXTENDABLE(),
-                                    { word: found.value }
+                                    { word: decl.value }
                                 );
+                            }
+                        } else {
+                            if (meta.classes[className] && meta.classes[className].alias) {
+                                meta.ast.walkRules(new RegExp('\\.' + className), rule => {
+                                    this.diagnostics.error(
+                                        rule,
+                                        transformerWarnings.UNKNOWN_IMPORT_ALIAS(className),
+                                        { word: className }
+                                    );
+                                    return false;
+                                });
                             }
                         }
                     }
@@ -1366,8 +1439,12 @@ interface ScopeSelectorContext {
     chunks?: SelectorChunk2[];
     chunk?: SelectorChunk2;
     node?: SelectorAstNode;
+    // TODO: maybe collect elements with better api and not getter setter
+    elements?: any[];
+    _currentAnchor?: any;
+
     currentAnchor?: {
-        type: 'class' | 'element';
+        type: 'class' | 'element' | 'pseudo-element';
         name: string;
         resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
     };

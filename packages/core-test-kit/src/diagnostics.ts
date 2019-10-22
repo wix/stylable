@@ -63,9 +63,7 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
         if (expectedWarning.severity) {
             expect(
                 report.type,
-                `diagnostics severity mismatch, expected "${
-                    expectedWarning.severity
-                }" but received "${report.type}"`
+                `diagnostics severity mismatch, expected "${expectedWarning.severity}" but received "${report.type}"`
             ).to.equal(expectedWarning.severity);
         }
     });
@@ -98,20 +96,25 @@ export function expectWarningsFromTransform(
 
     diagnostics.reports.forEach((report, i) => {
         const expectedWarning = expectedWarnings[i];
+        if (!expectedWarning) {
+            return;
+        }
         const path = expectedWarning.file;
+
         expect(report.message).to.equal(expectedWarning.message);
+        
         if (!expectedWarning.skipLocationCheck) {
             expect(report.node.source!.start).to.eql(locations[path].start);
         }
+
         if (locations[path].word !== null) {
             expect(report.options.word).to.eql(locations[path].word);
         }
+
         if (expectedWarning.severity) {
             expect(
                 report.type,
-                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${
-                    report.type
-                }`
+                `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
             ).to.equal(expectedWarning.severity);
         }
     });

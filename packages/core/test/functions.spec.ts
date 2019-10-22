@@ -754,8 +754,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                const mainPath = resolve('/main.st.css');
-                console.log(mainPath);
+                 const mainPath = resolve('/main.st.css');
                 expectWarningsFromTransform(config, [
                     {
                         message: functionWarnings.CYCLIC_VALUE([

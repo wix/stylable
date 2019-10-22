@@ -187,9 +187,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: root1;
                             }
-                            .root::part {
-                                color: pink;
-                            }
                         `
                     },
                     '/inner.st.css': {
@@ -198,9 +195,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root1 {
                                 color: green;
                             }
-                            .part {
-                                color: yellow;
-                            }
                         `
                     }
                 },
@@ -208,8 +202,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__part');
-            expect(result.nodes!.length).to.equal(2);
+            expect(result.nodes!.length).to.equal(1);
         });
 
         it('class selector that extends root uses pseudo-element after pseudo-class', () => {
@@ -566,6 +559,89 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![2] as postcss.Rule).selector).to.equal(
                 '.entry__root .Deep__x .Comp__y.Y--hovered'
             );
+        });
+
+        it('should only lookup in the extedns chain', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns4',
+                        content: `
+                            :import {
+                                -st-from: "./inner3.st.css";
+                                -st-named: midClass;
+                            }
+                            .gaga {
+                                -st-extends: midClass;
+                            }
+                            .gaga::deep {
+                                color: gold;
+                            }
+                            .gaga::deep::deepest {
+                                color: gold;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner3.st.css': {
+                        namespace: 'ns3',
+                        content: `
+                            :import {
+                                -st-from: "./inner2.st.css";
+                                -st-named: deepClass;
+                            }
+                            .midClass {
+                                -st-extends: deepClass;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner2.st.css': {
+                        namespace: 'ns2',
+                        content: `
+                            :import {
+                                -st-from: "./inner1.st.css";
+                                -st-default: Comp;
+                            }
+                            .deepClass {
+                                -st-extends: Comp;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner1.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            :import {
+                                -st-from: "./inner0.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                
+                            }
+                            .deep {
+                                -st-extends: Comp;
+                                color: beige;
+                            }
+                        `
+                    },
+                    '/inner0.st.css': {
+                        namespace: 'ns0',
+                        content: `
+                            .deepest {
+                                color: red;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
+            // tslint:disable-next-line:max-line-length
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep .ns0__deepest');
+
         });
     });
 

@@ -95,6 +95,100 @@ describe('Stylable intellisense selector meta data', () => {
         ]);
     });
 
+    
+    it('resolves with neasted-pseudo-class (should not include inner parts)', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        .a {}
+                        .b {}
+                    `
+                }
+            }
+        });
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(meta, '.a:not(.b)');
+        expect(elements.length).to.equal(1);
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'a',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.a,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('resolves with globals???', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        .a {
+                            -st-states: x;
+                        }
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(meta, '.a:global(.y):x');
+        // const out = t.scopeSelector2(meta, '.a:global(.y):x', undefined, false, undefined).selector;
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'a',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.a,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+    });
+    
+    it('resolves native/unknown pseudo?', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        .a {}
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(meta, '.a::before');
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'a',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.a,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'before',
+                resolved: []
+            }
+        ]);
+    });
+
     it('resolves extends of named class', () => {
         const t = createTransformer({
             files: {
@@ -122,7 +216,6 @@ describe('Stylable intellisense selector meta data', () => {
         const meta = t.fileProcessor.process('/entry.st.css');
         const otherMeta = t.fileProcessor.process('/other.st.css');
         const elements = t.resolveSelectorElements(meta, '.a:b::c');
-
         expect(elements[0]).to.eql([
             {
                 type: 'class',
@@ -143,13 +236,7 @@ describe('Stylable intellisense selector meta data', () => {
             {
                 type: 'pseudo-element',
                 name: 'c',
-                resolved: [
-                    {
-                        meta: otherMeta,
-                        symbol: otherMeta.classes.c,
-                        _kind: 'css'
-                    }
-                ]
+                resolved: []
             }
         ]);
     });
@@ -251,6 +338,64 @@ describe('Stylable intellisense selector meta data', () => {
                         _kind: 'css'
                     }
                 ]
+            }
+        ]);
+    });
+
+    
+    it('resolves pseudo custom selector (multiple selectors)', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./comp.st.css";
+                        -st-default: Comp;
+                     }
+                    .x {
+                        -st-extends: Comp;
+                    }
+                    .x::pongo {}
+                    `
+                },
+                '/comp.st.css': {
+                    content: `
+                    .lala {
+                        -st-states: hello;
+                    }
+
+                    @custom-selector :--pongo .lala, .baba ;
+
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const otherMeta = t.fileProcessor.process('/comp.st.css');
+        const elements = t.resolveSelectorElements(meta, '.x::pongo');
+
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'x',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.x,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: otherMeta,
+                        symbol: otherMeta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'pongo',
+                resolved: [{ _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } }]
             }
         ]);
     });
@@ -434,6 +579,142 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: last,
                         symbol: last.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+    });
+
+    it('resolve pseudo-element imported through two levels ', () => {
+        const t = createTransformer({
+            entry: `/style.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: './mid.st.css';
+                            -st-default: ButtonPreset;
+                        }
+                        .root {
+                            -st-extends: ButtonPreset;
+                        }
+                        .root::base {}
+                        .root::mid::base {}
+                        `
+                },
+                '/mid.st.css': {
+                    namespace: 'mid',
+                    content: `
+                        :import {
+                            -st-from: './base.st.css';
+                            -st-default: Button;
+                        }
+                        .root {
+                            -st-extends: Button;
+                        }
+                        .mid {
+                            -st-extends: Button;
+                        }
+                        `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                        .root {}
+                        .base {}
+                        `
+                }
+            }
+        });
+
+        const entryMeta = t.fileProcessor.process('/entry.st.css');
+        const midMeta = t.fileProcessor.process('/mid.st.css');
+        const baseMeta = t.fileProcessor.process('/base.st.css');
+
+        const elements1 = t.resolveSelectorElements(entryMeta, '.root::base');
+        const elements2 = t.resolveSelectorElements(entryMeta, '.root::mid::base');
+
+        expect(elements1[0]).to.eql([
+            {
+                type: 'class',
+                name: 'root',
+                resolved: [
+                    {
+                        meta: entryMeta,
+                        symbol: entryMeta.classes.root,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: midMeta,
+                        symbol: midMeta.classes.root,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: baseMeta,
+                        symbol: baseMeta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'base',
+                resolved: [
+                    {
+                        meta: baseMeta,
+                        symbol: baseMeta.classes.base,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+        expect(elements2[0]).to.eql([
+            {
+                type: 'class',
+                name: 'root',
+                resolved: [
+                    {
+                        meta: entryMeta,
+                        symbol: entryMeta.classes.root,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: midMeta,
+                        symbol: midMeta.classes.root,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: baseMeta,
+                        symbol: baseMeta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'mid',
+                resolved: [
+                    {
+                        meta: midMeta,
+                        symbol: midMeta.classes.mid,
+                        _kind: 'css'
+                    },
+                    {
+                        meta: baseMeta,
+                        symbol: baseMeta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'base',
+                resolved: [
+                    {
+                        meta: baseMeta,
+                        symbol: baseMeta.classes.base,
                         _kind: 'css'
                     }
                 ]

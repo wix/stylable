@@ -283,7 +283,7 @@ export function findRule(
     root: postcss.Root,
     selector: string,
     test: any = (statement: any) => statement.prop === valueMapping.extends
-) {
+): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, rule => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;

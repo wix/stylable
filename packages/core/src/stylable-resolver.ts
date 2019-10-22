@@ -11,7 +11,7 @@ export const resolverWarnings = {
         return `cannot resolve imported file: "${path}"`;
     },
     UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
-        return `cannot resolve imported symbol "${name}" in stylesheet "${path}"`;
+        return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
     }
 };
 /* tslint:enable:max-line-length */
@@ -192,6 +192,7 @@ export class StylableResolver {
         transformer?: StylableTransformer,
         reportError?: (
             res: CSSResolve | JSResolve | null,
+            extend: ImportSymbol | ClassSymbol | ElementSymbol,
             extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
             meta: StylableMeta,
             className: string,
@@ -244,7 +245,7 @@ export class StylableResolver {
                     extend = res.symbol[valueMapping.extends] || res.symbol.alias;
                 } else {
                     if (reportError) {
-                        reportError(res, extendPath, meta, className, isElement);
+                        reportError(res, extend, extendPath, meta, className, isElement);
                     }
                     break;
                 }
