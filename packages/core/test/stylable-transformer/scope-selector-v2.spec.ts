@@ -224,7 +224,7 @@ describe('Stylable scope-selector v2', () => {
         selfTest(result);
     });
 
-    it('should properly scope states in nested-pseudo-classes2222', () => {
+    it('should properly scope states in nested-pseudo-classes (more exmaples)', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
@@ -254,6 +254,10 @@ describe('Stylable scope-selector v2', () => {
                         */
                         .local::mid {}
 
+                        /*
+                            @check .style__local .mid__base
+                        */
+                        .local::base {}
 
                         .root {
                             -st-extends: Base;
@@ -306,6 +310,73 @@ describe('Stylable scope-selector v2', () => {
         
         selfTest(result);
     });
+
+    it('should properly scope states in nested-pseudo-classes with aliase state override', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'style',
+                    content: `
+                        :import {
+                            -st-from: "./middle.st.css";
+                            -st-default: Mid;
+                        }
+                        /*
+                            @check .style__local .base__base
+                        */
+                        .local::base {}
+
+                        
+                        /*
+                            @check .style__local .base__base.mid--teststate
+                        */
+                        .local::base:teststate {}
+
+
+                        .local {
+                            -st-extends: Mid;
+                        }
+                     
+                    `
+                },
+                '/middle.st.css': {
+                    namespace: 'mid',
+                    content: `
+                        :import {
+                            -st-from: "./base.st.css";
+                            -st-default: Base;
+                            -st-named: base;
+                        }
+                        .root {
+                            -st-extends: Base;
+                        }
+                        
+                        .base {
+                            -st-states: teststate;
+                        }
+
+                    `
+                },
+                '/base.st.css': {
+                    namespace: 'base',
+                    content: `
+                        .root {
+                            -st-states: test;
+                        }
+                        .base{
+                            -st-states: testInner;
+                        }
+                    `
+                }
+                
+            }
+        });
+
+        
+        selfTest(result);
+    });
+
 
     
     it('should properly scope states in nested-pseudo-classes222231241241242', () => {
