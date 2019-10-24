@@ -1175,7 +1175,7 @@ export class StylableTransformer {
         if (hasSingleSelector && internalContext.currentAnchor) {
             // context.currentAnchor = internalContext.currentAnchor;
             context.currentAnchor = {
-                name: name,
+                name,
                 type: 'pseudo-element',
                 resolved: internalContext.currentAnchor.resolved
             };
@@ -1183,7 +1183,7 @@ export class StylableTransformer {
             // unknown context due to multiple selectors
             // context.currentAnchor = anyElementAnchor(meta);
             context.currentAnchor = {
-                name: name,
+                name,
                 type: 'pseudo-element',
                 resolved: anyElementAnchor(meta).resolved
             };
@@ -1226,7 +1226,6 @@ export class StylableTransformer {
                     (res, extend) => {
                         const decl = findRule(meta.ast, '.' + className);
                         if (decl) {
-                            debugger;
                             if (res && res._kind === 'js') {
                                 this.diagnostics.error(
                                     decl,

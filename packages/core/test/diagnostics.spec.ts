@@ -637,7 +637,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarningsFromTransform(config, [
                     // tslint:disable-next-line:max-line-length
                     { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('special', './file.st.css'), file: '/main.css', skipLocationCheck: true },
-                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' },
+                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' }
                 ]);
             });
         });
