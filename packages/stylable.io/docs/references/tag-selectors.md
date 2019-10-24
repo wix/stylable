@@ -34,14 +34,10 @@ span { background: blue; } /* this will affect *ALL* spans in your application *
 
 ```js
 /* comp.jsx */
-import * as React from 'react';
+import React from 'react';
 import { style, classes } from './comp.st.css';
 
-class Comp {
-    constructor(props) {
-        super(props);
-    }
-
+class Comp extends React.Component {
     render () {
         return (
             <div className={style(classes.root, this.props.className)}>
@@ -80,17 +76,13 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 
 ```js
 /* comp.jsx */
-import * as React from 'react';
+import React from 'react';
 import { style, classes } from './comp.st.css';
 
 /* React implementation - button component implements toggle-button.css */
 import ToggleButton from './toggle-button';
 
-class Comp {
-    constructor(props) {
-        super(props);
-    }
-
+class Comp extends React.Component {
     render () {
         return (
             <div className={style(classes.root, this.props.className)}>

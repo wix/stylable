@@ -1,35 +1,35 @@
 {
   "name": "@stylable/react-scripts",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Like react-scripts, but with stylable and typescript built-in",
   "bin": {
     "stylable-scripts": "./bin/stylable-scripts.js"
   },
   "dependencies": {
-    "@stylable/core": "^2.3.0",
-    "@stylable/webpack-plugin": "^2.3.0",
-    "@ts-tools/webpack-loader": "^0.8.14",
+    "@stylable/core": "^2.3.1",
+    "@stylable/webpack-plugin": "^2.3.1",
+    "@ts-tools/webpack-loader": "^1.1.0",
     "bfj": "^7.0.1",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
     "chalk": "^2.4.2",
-    "dotenv": "^8.1.0",
+    "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
     "file-loader": "^4.2.0",
     "fs-extra": "^8.1.0",
     "html-webpack-plugin": "next",
     "object-assign": "^4.1.1",
-    "react-dev-utils": "^9.0.3",
-    "terser-webpack-plugin": "^2.0.1",
+    "react-dev-utils": "^9.1.0",
+    "terser-webpack-plugin": "^2.2.1",
     "tslib": "^1.10.0",
-    "typescript": "~3.6.3",
-    "url-loader": "^2.1.0",
-    "webpack": "^4.39.3",
-    "webpack-dev-server": "^3.8.0",
-    "webpack-manifest-plugin": "^2.0.4",
+    "typescript": "~3.6.4",
+    "url-loader": "^2.2.0",
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0",
+    "webpack-manifest-plugin": "^2.2.0",
     "workbox-webpack-plugin": "^4.3.1"
   },
   "optionalDependencies": {
-    "fsevents": "^2.0.7"
+    "fsevents": "^2.1.1"
   },
   "files": [
     "bin",

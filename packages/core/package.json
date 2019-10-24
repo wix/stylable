@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -15,7 +15,7 @@
     "clean-css": "^4.2.1",
     "css-selector-tokenizer": "^0.7.1",
     "deindent": "^0.1.0",
-    "enhanced-resolve": "^4.1.0",
+    "enhanced-resolve": "^4.1.1",
     "is-vendor-prefixed": "^3.3.1",
     "jest-docblock": "^24.9.0",
     "lodash.clonedeep": "^4.5.0",
@@ -32,7 +32,6 @@
   "files": [
     "cjs",
     "src",
-    "!src/tsconfig.json",
     "test-utils.js",
     "test-utils.d.ts"
   ],
