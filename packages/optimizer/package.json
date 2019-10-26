@@ -14,7 +14,7 @@
   "dependencies": {
     "@stylable/core": "^2.3.1",
     "csso": "^4.0.1",
-    "postcss": "^7.0.18"
+    "postcss": "^7.0.21"
   },
   "files": [
     "cjs",
