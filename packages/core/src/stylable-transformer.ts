@@ -81,7 +81,7 @@ export interface TransformHooks {
 
 type EnvMode = 'production' | 'development';
 
-export interface Options {
+export interface TransformerOptions {
     fileProcessor: FileProcessor<StylableMeta>;
     requireModule: (modulePath: string) => any;
     diagnostics: Diagnostics;
@@ -139,7 +139,7 @@ export class StylableTransformer {
     public replaceValueHook: replaceValueHook | undefined;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
-    constructor(options: Options) {
+    constructor(options: TransformerOptions) {
         this.diagnostics = options.diagnostics;
         this.delimiter = options.delimiter || '__';
         this.keepValues = options.keepValues || false;
