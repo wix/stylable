@@ -2728,9 +2728,9 @@ cssesc@^3.0.0:
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
 csso@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/csso/-/csso-4.0.1.tgz#3fa221b87d0a0e8d590443797fc0c6ab3bf117d6"
-  integrity sha512-f5daxykJJMhZUCTn6BDsoYSYQuj3uwlqLDPCISJlJKb/lunQIheE0AlAFB0wjwMIK6B0M0h0bbCC0KLK9BEIrA==
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/csso/-/csso-4.0.2.tgz#e5f81ab3a56b8eefb7f0092ce7279329f454de3d"
+  integrity sha512-kS7/oeNVXkHWxby5tHVxlhjizRCSv8QdU7hB2FpdAibDU8FjTAolhNjKNTiLzXtUrKT6HwClE81yXwEk1309wg==
   dependencies:
     css-tree "1.0.0-alpha.37"
 
