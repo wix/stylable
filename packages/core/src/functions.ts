@@ -34,6 +34,8 @@ export const functionWarnings = {
     CANNOT_FIND_IMPORTED_VAR: (varName: string) => `cannot use unknown imported "${varName}"`,
     MULTI_ARGS_IN_VALUE: (args: string) =>
         `value function accepts only a single argument: "value(${args})"`,
+    COULD_NOT_RESOLVE_VALUE: (args: string) =>
+        `cannot resolve value function using the arguments provided: "${args}"`,
     UNKNOWN_FORMATTER: (name: string) =>
         `cannot find native function or custom formatter called ${name}`,
     UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
@@ -77,7 +79,7 @@ export function processDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = []
-): { topLevelType: any; outputValue: string } {
+): { topLevelType: any; outputValue: string; typeError: Error } {
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -120,7 +122,7 @@ export function processDeclarationValue(
                         }
                         const varSymbol = meta.mappedSymbols[varName];
                         if (varSymbol && varSymbol._kind === 'var') {
-                            const resolvedValue = evalDeclarationValue(
+                            const resolved = processDeclarationValue(
                                 resolver,
                                 stripQuotation(varSymbol.text),
                                 meta,
@@ -132,9 +134,27 @@ export function processDeclarationValue(
                                 cssVarsMapping,
                                 getArgs
                             );
+
+                            const { outputValue, topLevelType, typeError } = resolved;
+
+                            if (diagnostics) {
+                                const argsAsString = parsedArgs.join(', ');
+                                if (typeError) {
+                                    diagnostics.warn(
+                                        node,
+                                        functionWarnings.COULD_NOT_RESOLVE_VALUE(argsAsString)
+                                    );
+                                } else if (!topLevelType && parsedArgs.length > 1) {
+                                    diagnostics.warn(
+                                        node,
+                                        functionWarnings.MULTI_ARGS_IN_VALUE(argsAsString)
+                                    );
+                                }
+                            }
+
                             parsedNode.resolvedValue = valueHook
-                                ? valueHook(resolvedValue, varName, true, passedThrough)
-                                : resolvedValue;
+                                ? valueHook(outputValue, varName, true, passedThrough)
+                                : outputValue;
                         } else if (varSymbol && varSymbol._kind === 'import') {
                             const resolvedVar = resolver.deepResolve(varSymbol);
                             if (resolvedVar && resolvedVar.symbol) {
@@ -217,6 +237,9 @@ export function processDeclarationValue(
                     } else if (value === 'url') {
                         // postcss-value-parser treats url differently:
                         // https://github.com/TrySound/postcss-value-parser/issues/34
+                    } else if (value === 'format') {
+                        // perserve native format function quotation
+                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
                     } else {
                         const formatterRef = meta.mappedSymbols[value];
                         const formatter = resolver.deepResolve(formatterRef);
@@ -278,29 +301,27 @@ export function processDeclarationValue(
 
     let outputValue = '';
     let topLevelType = null;
+    let typeError = null;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
             const matchingType = customValues[n.value as keyof typeof stTypes];
 
             if (matchingType) {
                 topLevelType = matchingType.evalVarAst(n, customValues);
-                outputValue += matchingType.getValue(args, topLevelType, n, customValues);
+                try {
+                    outputValue += matchingType.getValue(args, topLevelType, n, customValues);
+                } catch (e) {
+                    typeError = e;
+                    // catch broken variable resolutions
+                }
             } else {
                 outputValue += getStringValue([n]);
-
-                const parsedArgs = getFormatterArgs(n);
-                if (diagnostics && parsedArgs.length > 1 && n.value === 'value') {
-                    const argsAsString = parsedArgs.join(', ');
-                    diagnostics.warn(node, functionWarnings.MULTI_ARGS_IN_VALUE(argsAsString), {
-                        word: argsAsString
-                    });
-                }
             }
         } else {
             outputValue += getStringValue([n]);
         }
     }
-    return { outputValue, topLevelType };
+    return { outputValue, topLevelType, typeError };
     // }
     // TODO: handle calc (parse internals but maintain expression)
     // TODO: check this thing. native function that accent our function dose not work
@@ -351,8 +372,8 @@ function handleCyclicValues(
     return stringifyFunction(value, parsedNode);
 }
 
-function stringifyFunction(name: string, parsedNode: ParsedValue) {
-    return `${name}(${getFormatterArgs(parsedNode).join(', ')})`;
+function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes: boolean = false) {
+    return `${name}(${getFormatterArgs(parsedNode, false, undefined, perserveQuotes).join(', ')})`;
 }
 
 function createUniqID(source: string, varName: string) {

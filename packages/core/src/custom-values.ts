@@ -207,7 +207,7 @@ export function getBoxValue(
 ): string {
     if (typeof value === 'string') {
         return value;
-    } else if (customTypes[value.type]) {
+    } else if (value && customTypes[value.type]) {
         return customTypes[value.type].getValue(path, value, node, customTypes);
     } else {
         throw new Error('Unknown Type ' + JSON.stringify(value));

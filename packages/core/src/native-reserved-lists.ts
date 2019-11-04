@@ -49,16 +49,17 @@ export const nativePseudoClasses = [
 
 export const nativePseudoElements = [
     'after',
+    'backdrop',
     'before',
     'cue',
     'first-letter',
     'first-line',
-    'selection',
-    'backdrop',
-    'placeholder',
+    'grammar-error',
     'marker',
-    'spelling-error',
-    'grammar-error'
+    'placeholder',
+    'selection',
+    'slotted',
+    'spelling-error'
 ];
 
 export const reservedKeyFrames = [
@@ -98,12 +99,14 @@ export const nativeFunctionsDic = {
     brightness: true,
     calc: true,
     circle: true,
+    constant: true,
     contrast: true,
     counter: true,
     counters: true,
     'cubic-bezier': true,
     'drop-shadow': true,
     ellipse: true,
+    env: true,
     format: true,
     grayscale: true,
     hsl: true,
@@ -114,6 +117,7 @@ export const nativeFunctionsDic = {
     inset: true,
     invert: true,
     'linear-gradient': true,
+    local: true,
     matrix: true,
     matrix3d: true,
     minmax: true,
