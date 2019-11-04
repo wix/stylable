@@ -306,6 +306,27 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
             });
 
+            it('should perserve native format function quotation with stylable var', () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                                :vars {
+                                    fontType: "'woff'";
+                                }
+                                @font-face {
+                                    src: url(/test.st.css) format(value(fontType));
+                                }
+                            `
+                        }
+                    }
+                });
+
+                const rule = result.nodes![0] as postcss.Rule;
+                expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
+            });
+
             xit('should allow using formatters inside a url native function', () => {
                 // see: https://github.com/TrySound/postcss-value-parser/issues/34
                 const result = generateStylableRoot({

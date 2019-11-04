@@ -239,7 +239,7 @@ export function processDeclarationValue(
                         // https://github.com/TrySound/postcss-value-parser/issues/34
                     } else if (value === 'format') {
                         // perserve native format function quotation
-                        parsedNode.resolvedValue = valueParser.stringify(parsedNode);
+                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
                     } else {
                         const formatterRef = meta.mappedSymbols[value];
                         const formatter = resolver.deepResolve(formatterRef);
@@ -372,8 +372,8 @@ function handleCyclicValues(
     return stringifyFunction(value, parsedNode);
 }
 
-function stringifyFunction(name: string, parsedNode: ParsedValue) {
-    return `${name}(${getFormatterArgs(parsedNode).join(', ')})`;
+function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes: boolean = false) {
+    return `${name}(${getFormatterArgs(parsedNode, false, undefined, perserveQuotes).join(', ')})`;
 }
 
 function createUniqID(source: string, varName: string) {
