@@ -214,7 +214,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         describe('native', () => {
             testedNativeFunctions.forEach(cssFunc => {
                 // cannot use formatter inside a url naitve function
-                if (cssFunc !== 'url') {
+                if (cssFunc !== 'url' && cssFunc !== 'format') {
                     it(`should pass through native function (${cssFunc}) and resolve formatters`, () => {
                         const result = generateStylableRoot({
                             entry: `/style.st.css`,
@@ -286,6 +286,45 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 const rule = result.nodes![0] as postcss.Rule;
                 expect(rule.nodes![0].toString()).to.equal('background: calc(42 * 42)');
+            });
+
+            it('should perserve native format function quotation', () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                                @font-face {
+                                    src: url(/test.st.css) format('woff');
+                                }
+                            `
+                        }
+                    }
+                });
+
+                const rule = result.nodes![0] as postcss.Rule;
+                expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
+            });
+
+            it('should perserve native format function quotation with stylable var', () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        '/style.st.css': {
+                            content: `
+                                :vars {
+                                    fontType: "'woff'";
+                                }
+                                @font-face {
+                                    src: url(/test.st.css) format(value(fontType));
+                                }
+                            `
+                        }
+                    }
+                });
+
+                const rule = result.nodes![0] as postcss.Rule;
+                expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
             });
 
             xit('should allow using formatters inside a url native function', () => {
@@ -540,7 +579,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
             expect(rule.nodes![0].toString()).to.equal('border: 3px solid black');
         });
 
-        it('should support using formatters in a complex multi file scenario', () => {
+        it('should support using a formatter in a media query param', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -605,7 +644,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
     describe('diagnostics', () => {
         describe('value()', () => {
-            it('should return warning when passing more than one argument to a value() function', () => {
+            it('should return a warning when passing more than one argument to a value() function', () => {
                 expectWarningsFromTransform(
                     {
                         entry: '/style.st.css',
@@ -617,7 +656,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 color2: gold;
                             }
                             .my-class {
-                                |color:value($color1, color2$)|;
+                                |color:value(color1, color2)|;
                             }
                             `
                             }
@@ -630,6 +669,114 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     ]
                 );
+            });
+
+            it('should return a warning when trying to access unknown custom-value entries', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                            :vars {
+                                myVar: stMap(
+                                    key1 red,
+                                    key2 stMap(
+                                        key3 green
+                                    )
+                                );   
+                            }
+                            .root {
+                                color: value(myVar, key1);
+                                color: value(myVar, key2, key3);
+                                |color: value(myVar, key2, key4)|;
+                            }
+                            `
+                            }
+                        }
+                    },
+                    [
+                        {
+                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
+                            file: '/style.st.css'
+                        }
+                    ]
+                );
+            });
+
+            it('should return multiple warnings for unknown custom-value keys and too many arguments in a simple var', () => {
+                expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                            :vars {
+                                v1: red;
+                                v2: green;
+                                myVar: stMap(
+                                    key1 red,
+                                    key2 stMap(
+                                        key3 green
+                                    )
+                                );
+                            }
+                            .root {
+                                |background: value(myVar, key2, key4), value(v1, v2)|;
+                            }
+                            `
+                            }
+                        }
+                    },
+                    [
+                        {
+                            message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
+                            file: '/style.st.css'
+                        },
+                        {
+                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
+                            file: '/style.st.css'
+                        }
+                    ]
+                );
+            });
+
+            it('should return a warning when passing more than one argument to custom value with working fallback', () => {
+                const { meta } = expectWarningsFromTransform(
+                    {
+                        entry: '/style.st.css',
+                        files: {
+                            '/style.st.css': {
+                                content: `
+                            :vars {
+                                v1: key3;
+                                v2: key4;
+                                myVar: stMap(
+                                    key1 red,
+                                    key2 stMap(
+                                        key3 green
+                                    )
+                                );
+                            }
+                            .root {
+                                |background: value(myVar, key2, value(v1, v2))|;
+                            }
+                            `
+                            }
+                        }
+                    },
+                    [
+                        {
+                            message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
+                            file: '/style.st.css'
+                        }
+                    ]
+                );
+
+                expect(
+                    ((meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration)
+                        .value
+                ).to.eql('green');
             });
 
             it('should return warning for unknown var on transform', () => {

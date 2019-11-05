@@ -123,7 +123,7 @@ export class StylableGenerator {
             typeof depth === 'number' ? depth.toString() : depth,
             'module.' + module.exportsArgument,
             this.options.experimentalHMR
-                ? ` // Webpack HMR if (module && module.hot) { module.hot.accept(); }`
+                ? `/* Webpack HMR */ if (module && module.hot) { module.hot.accept(); }`
                 : '',
             renderableOnly
         );

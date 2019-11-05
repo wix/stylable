@@ -5,9 +5,9 @@ import { safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
-    Options,
     StylableResults,
     StylableTransformer,
+    TransformerOptions,
     TransformHooks
 } from './stylable-transformer';
 import { IStylableOptimizer } from './types';
@@ -78,7 +78,7 @@ export class Stylable {
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
-    public createTransformer(options: Partial<Options> = {}) {
+    public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
             diagnostics: new Diagnostics(),
@@ -95,7 +95,7 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<Options> = {}
+        options: Partial<TransformerOptions> = {}
     ): StylableResults {
         if (typeof meta === 'string') {
             // TODO: refactor to use fileProcessor

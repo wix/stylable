@@ -198,7 +198,8 @@ export function getNamedArgs(node: ParsedValue) {
 export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
-    _reportWarning?: ReportWarning
+    _reportWarning?: ReportWarning,
+    perserveQuotes: boolean = false
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -214,7 +215,7 @@ export function getFormatterArgs(
                 currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
             }
         } else if (currentNode.type === 'string') {
-            currentArg += currentNode.value;
+            currentArg += perserveQuotes ? valueParser.stringify(currentNode) : currentNode.value;
         } else {
             currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
         }
