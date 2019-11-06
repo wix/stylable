@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,7 +12,6 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "clean-css": "^4.2.1",
     "css-selector-tokenizer": "^0.7.1",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^4.1.1",
@@ -23,7 +22,7 @@
     "murmurhash": "^0.0.2",
     "postcss": "^7.0.21",
     "postcss-js": "^2.0.3",
-    "postcss-nested": "^4.1.2",
+    "postcss-nested": "^4.2.0",
     "postcss-safe-parser": "^4.0.1",
     "postcss-selector-matches": "^4.0.0",
     "postcss-value-parser": "^4.0.2",

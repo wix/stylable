@@ -5,7 +5,8 @@ const postcssJS = require('postcss-js');
 const safeParser = require('postcss-safe-parser');
 
 const postcssConfig = { parser: postcssJS };
-const processor = postcss([postcssNested]);
+// any until issue resolved: https://github.com/postcss/postcss-nested/issues/88
+const processor = postcss([postcssNested as any]);
 
 export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
     return processor.process(cssObject, { from: sourceFile, ...postcssConfig });
