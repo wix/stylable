@@ -29,7 +29,7 @@ For details on both options, see [Install & Configure](https://stylable.io/docs/
 
 ## Repository Structure
 
-This repository is a `mono-repo` containing multiple `packages` that together comprise the Stylable ecosystem. It uses [Lerna](https://lernajs.io/) and [Yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) to manage the various packages and their dependencies. 
+This repository is a `mono-repo` containing multiple `packages` that together comprise the Stylable ecosystem. It uses [Lerna](https://lernajs.io/) and [Yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) to manage the various packages and their dependencies.
 
 ### Core & Internals
 
