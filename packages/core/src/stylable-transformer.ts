@@ -1025,7 +1025,10 @@ export class StylableTransformer {
             const { symbol, meta } = getOriginDefinition(resolved);
             this.scopeClassNode(symbol, meta, node, originMeta);
         } else if (type === 'element') {
-            const resolved = metaParts.element[name];
+            const resolved = metaParts.element[name] || [
+                // provides resolution for native elements
+                { _kind: 'css', meta: originMeta, symbol: { _kind: 'element', name } }
+            ];
             context.currentAnchor = { name, type: 'element', resolved };
             // native node does not resolve e.g. div
             if (resolved && resolved.length > 1) {

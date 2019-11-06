@@ -5,6 +5,26 @@ import { createWarningRule } from '../../src';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-elements', () => {
+        it('should perserve native elements and its native pseudo element', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            header::before {}
+                            div::after {}
+                            form::focused {}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('header::before');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('div::after');
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('form::focused');
+        });
+
         it('component/tag selector that extends root with inner class targeting', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
