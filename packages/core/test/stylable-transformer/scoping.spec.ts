@@ -198,7 +198,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
                 files: {
-                    'entry.st.css': {
+                    '/entry.st.css': {
                         namespace: 'entry',
                         content: `
                         :import {
@@ -233,7 +233,6 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
             expect(result.nodes!.length).to.equal(1);
         });
-
 
         it('should NOT add a warning rule while in production mode', () => {
             const result = generateStylableRoot({
