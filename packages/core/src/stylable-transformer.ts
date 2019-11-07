@@ -174,6 +174,8 @@ export class StylableTransformer {
             keyframes: {}
         };
         const ast = this.resetTransformProperties(meta);
+        this.resolver.validateImports(meta, this.diagnostics);
+        validateScopes(meta, this.resolver, this.diagnostics);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
         meta.transformDiagnostics = this.diagnostics;
@@ -186,12 +188,11 @@ export class StylableTransformer {
         meta: StylableMeta,
         metaExports?: StylableExports,
         variableOverride?: Record<string, string>,
-        path: string[] = []
+        path: string[] = [],
+        mixinTransform = false
     ) {
         const keyframeMapping = this.scopeKeyframes(ast, meta);
         const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
-        this.resolver.validateImports(meta, this.diagnostics);
-        validateScopes(meta, this.resolver, this.diagnostics);
 
         ast.walkRules((rule: SRule) => {
             if (isChildOfAtRule(rule, 'keyframes')) {
@@ -240,8 +241,9 @@ export class StylableTransformer {
                     );
             }
         });
+        
         if (USE_SCOPE_SELECTOR_2) {
-            if (this.mode === 'development') {
+            if (!mixinTransform && meta.outputAst && this.mode === 'development') {
                 this.addDevRules(meta);
             }
         }

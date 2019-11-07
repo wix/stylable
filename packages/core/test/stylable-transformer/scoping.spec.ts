@@ -193,6 +193,48 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect(result.nodes!.length).to.equal(2);
         });
 
+
+        it('should not add a warning rule while in development when apply with mixin', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    'entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./variant.st.css";
+                            -st-default: Variant;
+                        }
+                        .root {
+                            -st-mixin: Variant;
+                        }`
+                    },
+                    '/variant.st.css': {
+                        namespace: 'variant',
+                        content: `
+                            :import {
+                                -st-from: "./comp.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                -st-extends: Comp;
+                            }
+                        `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                        `
+                    }
+                },
+                mode: 'development'
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect(result.nodes!.length).to.equal(1);
+        });
+
+
         it('should NOT add a warning rule while in production mode', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
