@@ -1,7 +1,0 @@
-:import {
-    -st-from: './variant.st.css';
-    -st-default: Variant;
-}
-div {
-    -st-mixin: Variant;
-}
