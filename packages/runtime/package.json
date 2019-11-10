@@ -1,6 +1,6 @@
 {
   "name": "@stylable/runtime",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Stylable runtime DOM integration",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
