@@ -241,7 +241,7 @@ export class StylableTransformer {
                     );
             }
         });
-        
+
         if (USE_SCOPE_SELECTOR_2) {
             if (!mixinTransform && meta.outputAst && this.mode === 'development') {
                 this.addDevRules(meta);
@@ -962,14 +962,17 @@ export class StylableTransformer {
             rule: rule || postcss.rule({ selector }),
             _currentAnchor: null,
             elements: [],
+            initRootAnchor(anchor) {
+                this._currentAnchor = anchor;
+            },
             get currentAnchor() {
                 return this._currentAnchor;
             },
-            set currentAnchor(c) {
+            set currentAnchor(anchor) {
                 if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
-                    this.elements![this.selectorIndex!]!.push(c!);
+                    this.elements![this.selectorIndex!]!.push(anchor!);
                 }
-                this._currentAnchor = c;
+                this._currentAnchor = anchor;
             }
         };
         return {
@@ -985,11 +988,13 @@ export class StylableTransformer {
         // resolve meta classes and elements
         context.metaParts = this.resolveMetaParts(originMeta);
         // set stylesheet root as the global anchor
-        context.currentAnchor = context.currentAnchor || {
-            name: originMeta.root,
-            type: 'class',
-            resolved: context.metaParts.class[originMeta.root]
-        };
+        if (!context.currentAnchor) {
+            context.initRootAnchor({
+                name: originMeta.root,
+                type: 'class',
+                resolved: context.metaParts.class[originMeta.root]
+            });
+        }
         context.selectorIndex = -1;
 
         // used to add additional selector (used in custom selector flow)
@@ -1009,6 +1014,13 @@ export class StylableTransformer {
                     // transfrom node
                     this.handleChunkNode(context as Required<ScopeSelectorContext>);
                 }
+            }
+            if (selectorListChunks.length - 1 > context.selectorIndex) {
+                context.initRootAnchor({
+                    name: originMeta.root,
+                    type: 'class',
+                    resolved: context.metaParts.class[originMeta.root]
+                });
             }
         }
         const outputAst = mergeChunks(selectorListChunks);
@@ -1165,6 +1177,9 @@ export class StylableTransformer {
             rule: context.rule,
             _currentAnchor: null,
             elements: [],
+            initRootAnchor(anchor) {
+                this._currentAnchor = anchor;
+            },
             get currentAnchor() {
                 return this._currentAnchor;
             },
@@ -1434,6 +1449,12 @@ function lazyCreateSelector(
     };
 }
 
+interface ScopeAnchor {
+    type: 'class' | 'element' | 'pseudo-element';
+    name: string;
+    resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
+}
+
 interface ScopeSelectorContext {
     originMeta: StylableMeta;
     selectorAst: SelectorAstNode;
@@ -1448,12 +1469,10 @@ interface ScopeSelectorContext {
     elements?: any[];
     _currentAnchor?: any;
 
-    currentAnchor?: {
-        type: 'class' | 'element' | 'pseudo-element';
-        name: string;
-        resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>;
-    };
+    currentAnchor?: ScopeAnchor;
     transformGlobals?: boolean;
+
+    initRootAnchor(rootAnchor: ScopeAnchor): void;
 }
 
 interface MetaParts {

@@ -193,7 +193,6 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect(result.nodes!.length).to.equal(2);
         });
 
-
         it('should not add a warning rule while in development when apply with mixin', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
@@ -703,6 +702,49 @@ describe('Stylable postcss transform (Scoping)', () => {
             // tslint:disable-next-line:max-line-length
             expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep .ns0__deepest');
 
+        });
+
+        it('should scope multiple selectors with a pseudo element passed through a mixin', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                            :import {
+                                -st-from: "./variant.st.css";
+                                -st-default: Variant;
+                            }
+                            .root {
+                                -st-mixin: Variant;
+                            }
+                        `
+                    },
+                    '/variant.st.css': {
+                        namespace: 'variant',
+                        content: `
+                            :import {
+                                -st-from: "./comp.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                -st-extends: Comp;
+                            }
+                            .root::partA, .root::partB {}
+                        `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                            .partA {}
+                            .partB {}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.style__root .comp__partA, .style__root .comp__partB');
         });
     });
 

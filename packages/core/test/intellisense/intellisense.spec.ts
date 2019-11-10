@@ -36,6 +36,49 @@ describe('Stylable intellisense selector meta data', () => {
         ]);
     });
 
+    it('naive multiple selector support', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        .a, .b {
+
+                        }
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+
+        const elements = t.resolveSelectorElements(meta, '.a, .b');
+
+        expect(elements).to.eql([
+            [{
+                type: 'class',
+                name: 'a',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.a,
+                        _kind: 'css'
+                    }
+                ]
+            }],
+            [{
+                type: 'class',
+                name: 'b',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.b,
+                        _kind: 'css'
+                    }
+                ]
+            }]
+        ]);
+    });
+
     it('resolve pseudo-element', () => {
         const t = createTransformer({
             files: {
