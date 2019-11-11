@@ -1,9 +1,9 @@
+import { ResolverFactory } from 'enhanced-resolve';
 import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
-import { ResolverFactory } from 'enhanced-resolve';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -30,12 +30,17 @@ export function createInfrastructure(
         }
         return moduleId;
     };
+
     if (timedCacheOptions) {
-        resolvePath = timedCache(resolvePath, {
-            ...timedCacheOptions,
-            createKey: (args: string[]) => args.join(';')
-        }).get;
+        const cacheManager = timedCache(resolvePath, {
+            timeout: 1,
+            useTimer: true,
+            createKey: (args: string[]) => args.join(';'),
+            ...timedCacheOptions
+        });
+        resolvePath = cacheManager.get;
     }
+
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
             return process(

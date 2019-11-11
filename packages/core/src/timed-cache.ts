@@ -1,17 +1,23 @@
 export interface TimedCacheOptions {
     timeout: number;
+    useTimer: boolean;
     createKey: (args: string[]) => string;
 }
 
 export function timedCache<T extends (...args: string[]) => string>(
     fn: T,
-    { timeout, createKey }: TimedCacheOptions
+    { timeout, useTimer, createKey }: TimedCacheOptions
 ) {
     const cache = new Map();
     let prevTime = Infinity;
+    let shouldClean = false;
     const get = (...args: string[]) => {
-        let current = Date.now();
-        if (current - prevTime > timeout) {
+        if (!shouldClean && useTimer) {
+            setTimeout(() => cache.clear(), timeout);
+        }
+        shouldClean = true;
+        const current = Date.now();
+        if (current - prevTime > timeout && !useTimer) {
             cache.clear();
         }
         prevTime = current;
