@@ -1,6 +1,11 @@
+export interface TimedCacheOptions {
+    timeout: number;
+    createKey: (args: string[]) => string;
+}
+
 export function timedCache<T extends (...args: string[]) => string>(
     fn: T,
-    { timeout, createKey } = { timeout: 10000, createKey: (args: string[]) => args.join(';') }
+    { timeout, createKey }: TimedCacheOptions
 ) {
     const cache = new Map();
     let prevTime = Infinity;

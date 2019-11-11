@@ -2,7 +2,7 @@ import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
-import { timedCache } from './timed-cache';
+import { timedCache, TimedCacheOptions } from './timed-cache';
 import { ResolverFactory } from 'enhanced-resolve';
 
 export interface StylableInfrastructure {
@@ -15,7 +15,8 @@ export function createInfrastructure(
     fileSystem: MinimalFS,
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
     resolveOptions: any = {},
-    resolveNamespace?: typeof processNamespace
+    resolveNamespace?: typeof processNamespace,
+    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>
 ): StylableInfrastructure {
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
@@ -23,15 +24,18 @@ export function createInfrastructure(
         ...resolveOptions
     });
 
-    const resolvePath = timedCache(
-        (context: string | undefined = projectRoot, moduleId: string) => {
-            if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
-                moduleId = eResolver.resolveSync({}, context, moduleId);
-            }
-            return moduleId;
+    let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
+        if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
+            moduleId = eResolver.resolveSync({}, context, moduleId);
         }
-    ).get;
-
+        return moduleId;
+    };
+    if (timedCacheOptions) {
+        resolvePath = timedCache(resolvePath, {
+            ...timedCacheOptions,
+            createKey: (args: string[]) => args.join(';')
+        }).get;
+    }
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
             return process(
