@@ -1243,7 +1243,7 @@ export class StylableTransformer {
                     meta,
                     className,
                     false,
-                    this,
+                    undefined,
                     (res, extend) => {
                         const decl = findRule(meta.ast, '.' + className);
                         if (decl) {
