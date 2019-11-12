@@ -129,7 +129,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`
         });
 
-        const nsr = require.resolve('@stylable/node/src');
+        const nsr = require.resolve('@stylable/node');
         const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
         expect(stderr.toString('utf8')).equal('');
