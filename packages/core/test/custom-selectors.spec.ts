@@ -244,4 +244,34 @@ describe('@custom-selector', () => {
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.interface__root .controls__root cc');
     });
+
+    it('target a custom selector with the same name as an inner part as a pseudo element', () => {
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./variant.st.css";
+                            -st-default: Variant;
+                        }
+                        Variant::input{
+                            color: blue;
+                        }
+                    `
+                },
+                '/variant.st.css': {
+                    namespace: 'variant',
+                    content: `
+                        @custom-selector :--input .x .input;
+                        .input {}
+                    `
+                }
+            }
+        });
+
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.variant__root .variant__x .variant__input');
+    });
 });

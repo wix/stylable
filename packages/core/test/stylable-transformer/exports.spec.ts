@@ -209,6 +209,192 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.Elm).to.equal(undefined);
         });
+
+        it('should handle root extends root', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: Elm;
+                            }
+                            .root {
+                                -st-extends: Elm; 
+                            }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.root).to.equal('entry__root');
+        });
+        
+        it('should handle root extends local class', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .root {
+                                -st-extends: y; 
+                            }
+                            .y {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.root).to.equal('entry__root entry__y');
+        });
+        
+        it('should handle root extends imported class', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: y;
+                            }
+                            .root {
+                                -st-extends: y; 
+                            }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            .y{}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.root).to.equal('entry__root index__y');
+        });
+        
+        it('should handle root extends imported class alias', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./alias.st.css";
+                                -st-named: y;
+                            }
+                            .root {
+                                -st-extends: y; 
+                            }
+                        `
+                    },
+                    '/alias.st.css': {
+                        namespace: 'alias',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: y;
+                            }
+
+                            .y{}
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            .y{}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.root).to.equal('entry__root index__y');
+        });
+        
+        it('should handle multiple extends levels', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./middle.st.css";
+                                -st-named: x;
+                            }
+                            .root {
+                                -st-extends: x; 
+                            }
+                        `
+                    },
+                    '/middle.st.css': {
+                        namespace: 'middle',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: y;
+                            }
+
+                            .x{
+                                -st-extends: y;
+                            }
+                        `
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            .y{}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.root).to.equal('entry__root middle__x index__y');
+        });
+        
+        it('should handle classes from mixins', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./middle.st.css";
+                                -st-named: x;
+                            }
+
+                            .root {
+                                -st-mixin: x; 
+                            }
+                            .z { 
+                                -st-mixin: x; 
+                            }
+                        `
+                    },
+                    '/middle.st.css': {
+                        namespace: 'middle',
+                        content: `
+                            .x {
+                            }
+                            .x .y {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes).to.eql({
+                root: 'entry__root',
+                z: 'entry__z'
+            });
+        });
+        
     });
 
     describe('stylable vars', () => {

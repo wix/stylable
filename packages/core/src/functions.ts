@@ -72,14 +72,15 @@ export function processDeclarationValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
-    node: postcss.Node,
+    node?: postcss.Node,
     variableOverride?: Record<string, string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = []
-): { topLevelType: any; outputValue: string; typeError: Error } {
+): { topLevelType: any; outputValue: string;  typeError: Error } {
+    diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue = valueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
@@ -137,7 +138,7 @@ export function processDeclarationValue(
 
                             const { outputValue, topLevelType, typeError } = resolved;
 
-                            if (diagnostics) {
+                            if (diagnostics && node) {
                                 const argsAsString = parsedArgs.join(', ');
                                 if (typeError) {
                                     diagnostics.warn(
@@ -189,7 +190,7 @@ export function processDeclarationValue(
                                             resolvedVarSymbol[valueMapping.root]
                                                 ? 'stylesheet'
                                                 : resolvedVarSymbol._kind;
-                                        if (diagnostics) {
+                                        if (diagnostics && node) {
                                             diagnostics.warn(
                                                 node,
                                                 functionWarnings.CANNOT_USE_AS_VALUE(
@@ -200,7 +201,7 @@ export function processDeclarationValue(
                                             );
                                         }
                                     }
-                                } else if (resolvedVar._kind === 'js' && diagnostics) {
+                                } else if (resolvedVar._kind === 'js' && diagnostics && node) {
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.warn(
                                         node,
@@ -214,7 +215,7 @@ export function processDeclarationValue(
                                 const namedDecl = varSymbol.import.rule.nodes!.find(node => {
                                     return node.type === 'decl' && node.prop === valueMapping.named;
                                 });
-                                if (namedDecl && diagnostics) {
+                                if (namedDecl && diagnostics && node) {
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.error(
                                         node,
@@ -223,7 +224,7 @@ export function processDeclarationValue(
                                     );
                                 }
                             }
-                        } else if (diagnostics) {
+                        } else if (diagnostics && node) {
                             diagnostics.warn(node, functionWarnings.UNKNOWN_VAR(varName), {
                                 word: varName
                             });
@@ -260,7 +261,7 @@ export function processDeclarationValue(
                                 }
                             } catch (error) {
                                 parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                                if (diagnostics) {
+                                if (diagnostics && node) {
                                     diagnostics.warn(
                                         node,
                                         functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
@@ -284,7 +285,7 @@ export function processDeclarationValue(
                             }
                         } else if (isCssNativeFunction(value)) {
                             parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                        } else if (diagnostics) {
+                        } else if (diagnostics && node) {
                             parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                             diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
                                 word: value
@@ -332,7 +333,7 @@ export function evalDeclarationValue(
     resolver: StylableResolver,
     value: string,
     meta: StylableMeta,
-    node: postcss.Node,
+    node?: postcss.Node,
     variableOverride?: Record<string, string> | null,
     valueHook?: replaceValueHook,
     diagnostics?: Diagnostics,
@@ -358,13 +359,13 @@ function handleCyclicValues(
     passedThrough: string[],
     refUniqID: string,
     diagnostics: Diagnostics | undefined,
-    node: postcss.Node,
+    node: postcss.Node | undefined,
     value: string,
     parsedNode: ParsedValue
 ) {
     const cyclicChain = passedThrough.map(variable => variable || '');
     cyclicChain.push(refUniqID);
-    if (diagnostics) {
+    if (diagnostics && node) {
         diagnostics.warn(node, functionWarnings.CYCLIC_VALUE(cyclicChain), {
             word: refUniqID
         });

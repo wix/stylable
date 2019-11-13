@@ -5,6 +5,26 @@ import { createWarningRule } from '../../src';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-elements', () => {
+        it('should perserve native elements and its native pseudo element', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns',
+                        content: `
+                            header::before {}
+                            div::after {}
+                            form::focused {}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('header::before');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('div::after');
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('form::focused');
+        });
+
         it('component/tag selector that extends root with inner class targeting', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -173,6 +193,46 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect(result.nodes!.length).to.equal(2);
         });
 
+        it('should not add a warning rule while in development when apply with mixin', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: "./variant.st.css";
+                            -st-default: Variant;
+                        }
+                        .root {
+                            -st-mixin: Variant;
+                        }`
+                    },
+                    '/variant.st.css': {
+                        namespace: 'variant',
+                        content: `
+                            :import {
+                                -st-from: "./comp.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                -st-extends: Comp;
+                            }
+                        `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                        `
+                    }
+                },
+                mode: 'development'
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect(result.nodes!.length).to.equal(1);
+        });
+
         it('should NOT add a warning rule while in production mode', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -187,9 +247,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: root1;
                             }
-                            .root::part {
-                                color: pink;
-                            }
                         `
                     },
                     '/inner.st.css': {
@@ -198,9 +255,6 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root1 {
                                 color: green;
                             }
-                            .part {
-                                color: yellow;
-                            }
                         `
                     }
                 },
@@ -208,8 +262,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__part');
-            expect(result.nodes!.length).to.equal(2);
+            expect(result.nodes!.length).to.equal(1);
         });
 
         it('class selector that extends root uses pseudo-element after pseudo-class', () => {
@@ -566,6 +619,132 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![2] as postcss.Rule).selector).to.equal(
                 '.entry__root .Deep__x .Comp__y.Y--hovered'
             );
+        });
+
+        it('should only lookup in the extedns chain', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'ns4',
+                        content: `
+                            :import {
+                                -st-from: "./inner3.st.css";
+                                -st-named: midClass;
+                            }
+                            .gaga {
+                                -st-extends: midClass;
+                            }
+                            .gaga::deep {
+                                color: gold;
+                            }
+                            .gaga::deep::deepest {
+                                color: gold;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner3.st.css': {
+                        namespace: 'ns3',
+                        content: `
+                            :import {
+                                -st-from: "./inner2.st.css";
+                                -st-named: deepClass;
+                            }
+                            .midClass {
+                                -st-extends: deepClass;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner2.st.css': {
+                        namespace: 'ns2',
+                        content: `
+                            :import {
+                                -st-from: "./inner1.st.css";
+                                -st-default: Comp;
+                            }
+                            .deepClass {
+                                -st-extends: Comp;
+                            }
+                            .deep {} /* should not pick this class */
+                        `
+                    },
+                    '/inner1.st.css': {
+                        namespace: 'ns1',
+                        content: `
+                            :import {
+                                -st-from: "./inner0.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                
+                            }
+                            .deep {
+                                -st-extends: Comp;
+                                color: beige;
+                            }
+                        `
+                    },
+                    '/inner0.st.css': {
+                        namespace: 'ns0',
+                        content: `
+                            .deepest {
+                                color: red;
+                            }
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
+            // tslint:disable-next-line:max-line-length
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep .ns0__deepest');
+
+        });
+
+        it('should scope multiple selectors with a pseudo element passed through a mixin', () => {
+
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                            :import {
+                                -st-from: "./variant.st.css";
+                                -st-default: Variant;
+                            }
+                            .root {
+                                -st-mixin: Variant;
+                            }
+                        `
+                    },
+                    '/variant.st.css': {
+                        namespace: 'variant',
+                        content: `
+                            :import {
+                                -st-from: "./comp.st.css";
+                                -st-default: Comp;
+                            }
+                            .root {
+                                -st-extends: Comp;
+                            }
+                            .root::partA, .root::partB {}
+                        `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                            .partA {}
+                            .partB {}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.style__root .comp__partA, .style__root .comp__partB');
         });
     });
 

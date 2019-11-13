@@ -144,7 +144,7 @@ function handleJSMixin(
         }
     });
 
-    transformer.transformAst(mixinRoot, meta, undefined, variableOverride);
+    transformer.transformAst(mixinRoot, meta, undefined, variableOverride, [], true);
 
     fixRelativeUrls(mixinRoot, mix, meta);
 
@@ -191,7 +191,8 @@ function createMixinRootFromCSSResolve(
         mixinMeta,
         undefined,
         resolvedArgs,
-        path.concat(symbolName + ' from ' + meta.source)
+        path.concat(symbolName + ' from ' + meta.source),
+        true
     );
 
     fixRelativeUrls(mixinRoot, mix, meta);
@@ -288,7 +289,8 @@ function handleLocalClassMixin(
         isRootMixin ? meta : createInheritedMeta({ meta, symbol: mix.ref, _kind: 'css' }),
         undefined,
         resolvedArgs,
-        path.concat(mix.mixin.type + ' from ' + meta.source)
+        path.concat(mix.mixin.type + ' from ' + meta.source),
+        true
     );
     mergeRules(mixinRoot, rule);
 }

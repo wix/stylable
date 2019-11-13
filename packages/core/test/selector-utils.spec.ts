@@ -46,6 +46,7 @@ describe('Selector Utils', () => {
                     },
                     {
                         type: 'spacing',
+                        value: ' ',
                         nodes: [
                             {type: 'class', name: 'y'}
                         ]
