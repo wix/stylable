@@ -4,7 +4,7 @@ const delay = (time: number) => new Promise(res => setTimeout(res, time));
 
 import { timedCache } from '../src/timed-cache';
 
-describe.only('timed-cache', () => {
+describe('timed-cache', () => {
     it('should cache for specific time', async () => {
         const spy = Sinon.spy((...args: string[]) => args.join(';'));
         const cached = timedCache(spy, {
