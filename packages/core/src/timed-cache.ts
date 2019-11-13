@@ -13,7 +13,10 @@ export function timedCache<T extends (...args: string[]) => string>(
     let shouldClean = false;
     const get = (...args: string[]) => {
         if (!shouldClean && useTimer) {
-            setTimeout(() => cache.clear(), timeout);
+            setTimeout(() => {
+                shouldClean = false;
+                cache.clear();
+            }, timeout);
         }
         shouldClean = true;
         const current = Date.now();
