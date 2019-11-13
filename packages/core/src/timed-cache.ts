@@ -37,32 +37,3 @@ export function timedCache<T extends (...args: string[]) => string>(
         cache
     };
 }
-
-// log = console.log
-
-// const resolvedTimed = timedCache(
-//     a => {
-//         return log('resolved(' + a + ')');
-//     },
-//     { timeout: 2000, createKey: (args)=> args.join(';') }
-// );
-
-// resolvedTimed.get('1');
-// log('Z');
-// resolvedTimed.get('1');
-
-// resolvedTimed.get('2');
-// resolvedTimed.get('2');
-
-// resolvedTimed.get('3');
-// log('Z3');
-
-// console.log(resolvedTimed);
-
-// setTimeout(()=>{
-// resolvedTimed.get('2');
-// log('Z4');
-
-// console.log(resolvedTimed);
-
-// }, 4000)
