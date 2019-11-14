@@ -1,0 +1,22 @@
+language: node_js
+
+os:
+  - linux
+  - osx
+  - windows
+
+node_js:
+  - 13 # Current
+  - 12 # LTS
+  - 10
+  - 8
+
+# needed for windows travis, which gets stuck after running tests
+# https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288/9
+env:
+  - YARN_GPG=no
+
+# Travis uses inconsistent yarn versions across platforms. force latest.
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s
+  - export PATH=$HOME/.yarn/bin:$PATH
