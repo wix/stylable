@@ -1,9 +1,12 @@
-import { ResolverFactory } from 'enhanced-resolve';
 import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
+
+// importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
+// this allows @stylable/core to be bundled for browser usage without special custom configuration
+const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
