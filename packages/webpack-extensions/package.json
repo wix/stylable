@@ -11,6 +11,9 @@
     "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000",
     "prepack": "yarn build"
   },
+  "peerDependencies": {
+    "webpack": "^4.6.0"
+  },
   "dependencies": {
     "@stylable/core": "^2.5.1",
     "@stylable/node": "^2.5.1",
@@ -18,7 +21,6 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "webpack": "^4.41.2",
     "webpack-sources": "^1.4.3"
   },
   "files": [
