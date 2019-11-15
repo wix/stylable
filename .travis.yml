@@ -9,6 +9,7 @@ node_js:
   - 13 # Current
   - 12 # LTS
   - 10
+  - 8
 
 # needed for windows travis, which gets stuck after running tests
 # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288/9
