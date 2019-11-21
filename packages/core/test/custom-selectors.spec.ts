@@ -157,6 +157,56 @@ describe('@custom-selector', () => {
         expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
     });
 
+    it('expand complex custom-selector in pseudo-element with multiple custom parts', () => {
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./comp.st.css";
+                            -st-default: Comp;
+                        }
+
+                        Comp::class-icon Comp::class-icon {
+                            color: blue;
+                        }
+                    `
+                },
+                '/comp.st.css': {
+                    namespace: 'comp',
+                    content: `
+                        @custom-selector :--class-icon .icon, .class;
+                    `
+                }
+            }
+        });
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+    });
+    it('expand complex custom-selector in nested-pseudo-class', () => {
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        @custom-selector :--A .a;
+                        @custom-selector :--B .b;
+
+                        .root:has(:--A, .z, :--B) {
+                            color: blue;
+                        }
+                    `
+                }
+            }
+        });
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+    });
+
+
     it('expand custom-selector when there is global root', () => {
         const ast = generateStylableRoot({
             entry: '/entry.st.css',

@@ -621,6 +621,47 @@ describe('Stylable postcss transform (Scoping)', () => {
             );
         });
 
+        it('resolve inner part that is a @custom-selector (with multiple selectros) in nested-pseudo-class', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .root {
+                                -st-extends: Inner;
+                            }
+                            .root :not(::option){
+                                z-index: 1;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'Inner',
+                        content: `
+                            @custom-selector :--option .a, .b ;
+                            
+                            .root {
+                                
+                            }
+                            .a{}
+                            .b{}
+                            .option{}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+                '.entry__root :not( .Inner__a), .entry__root :not( .Inner__b)'
+            );
+        });
+        
+
         it('should only lookup in the extedns chain', () => {
 
             const result = generateStylableRoot({

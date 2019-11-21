@@ -137,7 +137,6 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
-
     
     it('resolves with neasted-pseudo-class (should not include inner parts)', () => {
         const t = createTransformer({
@@ -167,6 +166,95 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
+
+    it('should resolve elements for pseudo-element nested in a pseudo-state', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        .root {}
+                        .part {}
+
+                        .root:not(::part) {}
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(meta, '.root:not(::part)');
+        expect(elements[0].length).to.equal(2);
+        
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'root',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'part',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.part,
+                        _kind: 'css'
+                    }
+                ]
+            }
+        ]);
+    });
+
+
+    it('should resolve elements for pseudo-element nested in a pseudo-state (@custom-selector)', () => {
+        const t = createTransformer({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        @custom-selector :--part .partA, .partB;
+                        .root {}
+                        .part{}
+                        .partA {}
+                        .partB {}
+
+                        .root:not(::part) {}
+                    `
+                }
+            }
+        });
+
+        const meta = t.fileProcessor.process('/entry.st.css');
+        const elements = t.resolveSelectorElements(meta, '.root:not(::part)');
+        expect(elements[0].length).to.equal(2);
+        
+        expect(elements[0]).to.eql([
+            {
+                type: 'class',
+                name: 'root',
+                resolved: [
+                    {
+                        meta,
+                        symbol: meta.classes.root,
+                        _kind: 'css'
+                    }
+                ]
+            },
+            {
+                type: 'pseudo-element',
+                name: 'part',
+                resolved: [
+
+                    { _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }
+                ]
+            }
+        ]);
+    });    
 
     it('resolves with globals???', () => {
         const t = createTransformer({
@@ -384,7 +472,6 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
-
     
     it('resolves pseudo custom selector (multiple selectors)', () => {
         const t = createTransformer({
