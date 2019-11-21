@@ -358,6 +358,36 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root middle__x index__y');
         });
+
+        it('should handle multiple levels of extending with a local class', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./base.st.css";
+                                -st-default: Comp;
+                            }
+                            .local {
+                                -st-extends: Comp; 
+                            }
+                            .extending {
+                                -st-extends: local;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.extending).to.equal('entry__extending entry__local');
+        });
         
         it('should handle classes from mixins', () => {
             const cssExports = generateStylableExports({
