@@ -55,7 +55,7 @@ export interface StylableGeneratorOptions {
 }
 
 export type ShallowPartial<T> = {
-    [P in keyof T]?: T[P] extends new () => any ? T[P] : Partial<T[P]>
+    [P in keyof T]?: T[P] extends new () => any ? T[P] : Partial<T[P]>;
 };
 
 export interface CalcResult {
@@ -63,15 +63,12 @@ export interface CalcResult {
     cssDependencies: StylableModule[];
 }
 
-export interface StylableModule extends webpack.Module {
+export interface StylableModule extends webpack.compilation.Module {
     context: string;
     dependencies?: StylableModule[];
-    hash?: string;
     module?: StylableModule;
-    exportsArgument: string;
     resource: string;
     reasons: Array<{ module: StylableModule }>;
-    type: string;
     request: string;
     loaders: webpack.NewLoader[];
     buildInfo: {

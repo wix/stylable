@@ -10,15 +10,22 @@ import { RUNTIME_SOURCE, RUNTIME_SOURCE_LEGACY, WEBPACK_STYLABLE } from './runti
 import { StylableBootstrapModule } from './stylable-bootstrap-module';
 import { StylableAssetDependency, StylableImportDependency } from './stylable-dependencies';
 import { StylableGenerator } from './stylable-generator';
-import { calculateModuleDepthAndShallowStylableDependencies, renderStaticCSS } from './stylable-module-helpers';
+import {
+    calculateModuleDepthAndShallowStylableDependencies,
+    renderStaticCSS
+} from './stylable-module-helpers';
 import { StylableParser } from './stylable-parser';
-import { StyleableAutoInitDependency, StyleableAutoInitDependencyTemplate } from './styleable-auto-init-dependency';
+import {
+    StyleableAutoInitDependency,
+    StyleableAutoInitDependencyTemplate
+} from './styleable-auto-init-dependency';
 import { CalcResult, ShallowPartial, StylableModule, StylableWebpackPluginOptions } from './types';
 import { isImportedByNonStylable } from './utils';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const findConfig = require('find-config');
 const MultiModule = require('webpack/lib/MultiModule');
+const last = <T>(_: T[]): any => _[_.length - 1];
 
 export class StylableWebpackPlugin {
     public stylable!: Stylable;
@@ -30,7 +37,7 @@ export class StylableWebpackPlugin {
     }
     public apply(compiler: webpack.Compiler) {
         this.normalizeOptions(compiler.options.mode);
-        this.overrideOptionsWithLocalConfig((compiler as any).context);
+        this.overrideOptionsWithLocalConfig(compiler.context);
         this.createStylable(compiler);
         this.injectStylableModuleRuleSet(compiler);
         this.injectStylableCompilation(compiler);
@@ -52,7 +59,9 @@ export class StylableWebpackPlugin {
     }
     public loadLocalStylableConfig(
         dir: string
-    ): undefined | { options: (o: Partial<StylableWebpackPluginOptions>) => StylableWebpackPluginOptions } {
+    ):
+        | undefined
+        | { options: (o: Partial<StylableWebpackPluginOptions>) => StylableWebpackPluginOptions } {
         let localConfigOverride;
         try {
             localConfigOverride = findConfig.require('stylable.config', { cwd: dir });
@@ -63,16 +72,17 @@ export class StylableWebpackPlugin {
     }
     public createStylable(compiler: webpack.Compiler) {
         const stylable = new Stylable(
-            (compiler as any).context,
+            compiler.context,
             compiler.inputFileSystem as any,
             this.options.requireModule,
             '__',
             meta => {
-
-                if(this.options.unsafeBuildNamespace) {
+                if (this.options.unsafeBuildNamespace) {
                     try {
-                        meta.namespace = require(meta.source + '.js').namespace
-                    } catch{/* */}
+                        meta.namespace = require(meta.source + '.js').namespace;
+                    } catch {
+                        /* */
+                    }
                 }
 
                 // meta.namespace = getNamespaceFromBuiltStylsheet()
@@ -80,7 +90,7 @@ export class StylableWebpackPlugin {
                 if (this.options.optimize.shortNamespaces) {
                     meta.namespace = stylable.optimizer!.namespaceOptimizer.getNamespace(
                         meta,
-                        (compiler as any).context,
+                        compiler.context,
                         stylable
                     );
                 }
@@ -96,7 +106,7 @@ export class StylableWebpackPlugin {
         this.stylable = stylable;
     }
     public injectPlugins(compiler: webpack.Compiler) {
-        if(this.options.plugins) {
+        if (this.options.plugins) {
             this.options.plugins.forEach(plugin => plugin.apply(compiler, this));
         }
     }
@@ -147,9 +157,7 @@ export class StylableWebpackPlugin {
                         ) {
                             compilation.warnings.push(
                                 new Error(
-                                    `Duplicate module namespace: ${
-                                    module.buildInfo.stylableMeta.namespace
-                                    } from ${module.resource}`
+                                    `Duplicate module namespace: ${module.buildInfo.stylableMeta.namespace} from ${module.resource}`
                                 )
                             );
                         }
@@ -207,7 +215,7 @@ export class StylableWebpackPlugin {
         if (this.options.createRuntimeChunk) {
             const extractedStylableChunk = (compilation as any).addChunk('stylable-css-runtime');
             const extractedBootstrap = new StylableBootstrapModule(
-                (compiler as any).context,
+                compiler.context,
                 extractedStylableChunk,
                 null,
                 this.options.bootstrap
@@ -231,9 +239,7 @@ export class StylableWebpackPlugin {
     }
     public optimizeChunks(chunks: webpack.compilation.Chunk[]) {
         chunks.forEach(chunk => {
-            const stModules: StylableModule[] = Array.from(chunk.modulesIterable).filter(m => {
-                return m.type === 'stylable';
-            });
+            const stModules = Array.from(chunk.modulesIterable).filter(m => m.type === 'stylable');
 
             stModules.forEach(m => {
                 const shouldKeep = m.reasons.some(r => {
@@ -254,7 +260,10 @@ export class StylableWebpackPlugin {
             });
         });
     }
-    public createChunkCSSBundle(chunk: webpack.compilation.Chunk, compilation: webpack.compilation.Compilation) {
+    public createChunkCSSBundle(
+        chunk: webpack.compilation.Chunk,
+        compilation: webpack.compilation.Compilation
+    ) {
         if (this.options.includeDynamicModulesInCSS) {
             const stModules = getModuleInGraph(chunk, module => module.type === 'stylable');
             if (stModules.size !== 0) {
@@ -290,14 +299,14 @@ export class StylableWebpackPlugin {
     }
     public createBootstrapModule(compiler: webpack.Compiler, chunk: webpack.compilation.Chunk) {
         const bootstrap = new StylableBootstrapModule(
-            (compiler as any).context,
+            compiler.context,
             chunk,
             null,
             this.options.bootstrap
         );
         for (const module of chunk.modulesIterable) {
             if (module.type === 'stylable') {
-                bootstrap.addStylableModuleDependency(module);
+                bootstrap.addStylableModuleDependency(module as StylableModule);
             }
         }
         return bootstrap;
@@ -306,8 +315,14 @@ export class StylableWebpackPlugin {
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
-                compilation.dependencyFactories.set(StylableImportDependency as any, normalModuleFactory);
-                compilation.dependencyFactories.set(StylableAssetDependency as any, normalModuleFactory);
+                compilation.dependencyFactories.set(
+                    StylableImportDependency as any,
+                    normalModuleFactory
+                );
+                compilation.dependencyFactories.set(
+                    StylableAssetDependency as any,
+                    normalModuleFactory
+                );
                 normalModuleFactory.hooks.createParser
                     .for('stylable')
                     .tap(StylableWebpackPlugin.name, () => {
@@ -346,7 +361,10 @@ export class StylableWebpackPlugin {
             );
         });
     }
-    public injectRuntimeCodeToMainTemplate(compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
+    public injectRuntimeCodeToMainTemplate(
+        compiler: webpack.Compiler,
+        compilation: webpack.compilation.Compilation
+    ) {
         (compilation.mainTemplate as any).hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
             (source: string, chunk: webpack.compilation.Chunk) => {
@@ -363,7 +381,7 @@ export class StylableWebpackPlugin {
                 );
 
                 const bootstrap = new StylableBootstrapModule(
-                    (compiler as any).context,
+                    compiler.context,
                     null,
                     null,
                     this.options.bootstrap
@@ -381,15 +399,20 @@ export class StylableWebpackPlugin {
             }
         );
     }
-    public injectRuntimeSource(_compiler: webpack.Compiler, compilation: webpack.compilation.Compilation) {
+    public injectRuntimeSource(
+        _compiler: webpack.Compiler,
+        compilation: webpack.compilation.Compilation
+    ) {
         (compilation.mainTemplate as any).hooks.beforeStartup.tap(
             StylableWebpackPlugin.name,
             (source: string, chunk: webpack.compilation.Chunk) => {
                 if (!hasStylableModuleInGraph(chunk)) {
                     return source;
                 }
-                
-                const runtimeSource = this.options.legacyRuntime ? RUNTIME_SOURCE_LEGACY : RUNTIME_SOURCE;
+
+                const runtimeSource = this.options.legacyRuntime
+                    ? RUNTIME_SOURCE_LEGACY
+                    : RUNTIME_SOURCE;
 
                 if (this.options.runtimeMode === 'isolated') {
                     return `${runtimeSource};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
@@ -408,16 +431,18 @@ export class StylableWebpackPlugin {
             }
         );
     }
-    public injectInitToEntryModule(chunk: webpack.compilation.Chunk, compilation: webpack.compilation.Compilation) {
+    public injectInitToEntryModule(
+        chunk: webpack.compilation.Chunk,
+        compilation: webpack.compilation.Compilation
+    ) {
         if (
             chunk.hasEntryModule() &&
             hasStylableModuleInGraph(chunk) &&
             this.options.bootstrap.autoInit
         ) {
-            const last = <T>(_: T[]): any => _[_.length - 1];
-            const getEntryModule = (): webpack.Module => {
-                return chunk.entryModule instanceof MultiModule
-                    ? last(chunk.entryModule.dependencies).module
+            const getEntryModule = (): webpack.compilation.Module => {
+                return chunk.entryModule && chunk.entryModule instanceof MultiModule
+                    ? last((chunk.entryModule as any).dependencies).module
                     : chunk.entryModule;
             };
             const injectModule = this.options.bootstrap.getAutoInitModule
