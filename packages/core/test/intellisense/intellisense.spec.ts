@@ -138,7 +138,8 @@ describe('Stylable intellisense selector meta data', () => {
         ]);
     });
     
-    it('resolves with neasted-pseudo-class (should not include inner parts)', () => {
+    // see more about this case: https://github.com/wix/stylable/issues/891
+    xit('resolves with neasted-pseudo-class (should not include inner parts)', () => {
         const t = createTransformer({
             files: {
                 '/entry.st.css': {
