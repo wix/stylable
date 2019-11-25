@@ -28,6 +28,15 @@ export interface JSResolve {
     meta: null;
 }
 
+export function isInPath(
+    extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
+    { symbol: { name: name1 }, meta: { source: source1 } }: CSSResolve<ClassSymbol | ElementSymbol>
+) {
+    return extendPath.find(({ symbol: { name }, meta: { source } }) => {
+        return name1 === name && source === source1;
+    });
+}
+
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
@@ -149,7 +158,7 @@ export class StylableResolver {
         meta: StylableMeta,
         symbol: StylableSymbol,
         isElement: boolean
-    ): CSSResolve | null {
+    ): CSSResolve<ClassSymbol | ElementSymbol> | null {
         const type = isElement ? 'element' : 'class';
         let finalSymbol;
         let finalMeta;
@@ -200,7 +209,6 @@ export class StylableResolver {
         ) => void
     ): Array<CSSResolve<ClassSymbol | ElementSymbol>> {
         const bucket = isElement ? meta.elements : meta.classes;
-        const type = isElement ? 'element' : 'class';
 
         const customSelector = isElement ? null : meta.customSelectors[':--' + className];
 
@@ -217,38 +225,48 @@ export class StylableResolver {
             }
         }
 
+        let current = {
+            _kind: 'css' as const,
+            symbol: bucket[className],
+            meta
+        };
         const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];
-        const resolvedClass = this.resolveName(meta, bucket[className], isElement);
 
-        if (
-            resolvedClass &&
-            resolvedClass._kind === 'css' &&
-            resolvedClass.symbol &&
-            resolvedClass.symbol._kind === type
-        ) {
-            let current = resolvedClass as CSSResolve<ClassSymbol | ElementSymbol>;
-            let extend = resolvedClass.symbol[valueMapping.extends] || resolvedClass.symbol.alias;
+        while (current?.symbol) {
+            if (isInPath(extendPath, current)) {
+                break;
+            }
 
-            while (current) {
-                extendPath.push(current);
-                if (!extend) {
-                    break;
-                }
-                const res = this.resolve(extend) || { _kind: 'css', symbol: extend, meta };
-                if (
-                    res &&
-                    res._kind === 'css' &&
-                    res.symbol &&
-                    (res.symbol._kind === 'element' || res.symbol._kind === 'class')
-                ) {
-                    current = res as CSSResolve<ClassSymbol | ElementSymbol>;
-                    extend = res.symbol[valueMapping.extends] || res.symbol.alias;
-                } else {
-                    if (reportError) {
-                        reportError(res, extend, extendPath, meta, className, isElement);
+            extendPath.push(current);
+
+            const parent = current.symbol[valueMapping.extends] || current.symbol.alias;
+
+            if (parent) {
+                if (parent._kind === 'import') {
+                    const res = this.resolve(parent);
+                    if (
+                        res &&
+                        res._kind === 'css' &&
+                        res.symbol &&
+                        (res.symbol._kind === 'element' || res.symbol._kind === 'class')
+                    ) {
+                        const { _kind, meta, symbol } = res;
+                        current = {
+                            _kind,
+                            meta,
+                            symbol
+                        };
+                    } else {
+                        if (reportError) {
+                            reportError(res, parent, extendPath, meta, className, isElement);
+                        }
+                        break;
                     }
-                    break;
+                } else {
+                    current = { _kind: 'css', symbol: parent, meta };
                 }
+            } else {
+                break;
             }
         }
 

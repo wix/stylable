@@ -344,9 +344,13 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
 }
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
-    return (symbol && symbol._kind === 'class') || symbol._kind === 'element'
-        ? symbol.alias
-        : undefined;
+    if (symbol._kind === 'class' || symbol._kind === 'element') {
+        if (!symbol[valueMapping.extends]) {
+            return symbol.alias;
+        }
+    }
+
+    return undefined;
 }
 
 export function generateScopedCSSVar(namespace: string, varName: string) {

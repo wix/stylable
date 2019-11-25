@@ -235,7 +235,7 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root');
         });
-        
+
         it('should handle root extends local class', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
@@ -253,7 +253,7 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root entry__y');
         });
-        
+
         it('should handle root extends imported class', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
@@ -280,7 +280,7 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root index__y');
         });
-        
+
         it('should handle root extends imported class alias', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
@@ -318,7 +318,7 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root index__y');
         });
-        
+
         it('should handle multiple extends levels', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
@@ -359,7 +359,7 @@ describe('Exports to js', () => {
             expect(cssExports.classes.root).to.equal('entry__root middle__x index__y');
         });
 
-        it('should handle multiple levels of extending with a local class', () => {
+        it('should handle multiple levels of extending with local classes and an import', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
                 files: {
@@ -373,8 +373,11 @@ describe('Exports to js', () => {
                             .local {
                                 -st-extends: Comp; 
                             }
+                            .local2 {
+                                -st-extends: local; 
+                            }
                             .extending {
-                                -st-extends: local;
+                                -st-extends: local2;
                             }
                         `
                     },
@@ -386,9 +389,11 @@ describe('Exports to js', () => {
                     }
                 }
             });
-            expect(cssExports.classes.extending).to.equal('entry__extending entry__local');
+            expect(cssExports.classes.extending).to.equal(
+                'entry__extending entry__local2 entry__local'
+            );
         });
-        
+
         it('should handle classes from mixins', () => {
             const cssExports = generateStylableExports({
                 entry: '/entry.st.css',
@@ -424,7 +429,6 @@ describe('Exports to js', () => {
                 z: 'entry__z'
             });
         });
-        
     });
 
     describe('stylable vars', () => {
