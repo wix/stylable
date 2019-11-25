@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "2.5.2",
+  "version": "2.5.3",
   "description": "Experimental Stylable webpack plugins",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -15,9 +15,9 @@
     "webpack": "^4.6.0"
   },
   "dependencies": {
-    "@stylable/core": "^2.5.2",
-    "@stylable/node": "^2.5.2",
-    "@stylable/webpack-plugin": "^2.5.2",
+    "@stylable/core": "^2.5.3",
+    "@stylable/node": "^2.5.3",
+    "@stylable/webpack-plugin": "^2.5.3",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
