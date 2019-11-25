@@ -1255,7 +1255,7 @@ export class StylableTransformer {
                 Array<CSSResolve<ClassSymbol | ElementSymbol>>
             > = {};
             for (const k of Object.keys(meta.elements)) {
-                resolvedElements[k] = this.resolver.resolveExtends(meta, k, true, this);
+                resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }
             metaParts = { class: resolvedClasses, element: resolvedElements };
             this.metaParts.set(meta, metaParts);
