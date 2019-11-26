@@ -14,7 +14,7 @@
     "chalk": "^3.0.0",
     "dotenv": "^8.2.0",
     "dotenv-expand": "^5.1.0",
-    "file-loader": "^4.3.0",
+    "file-loader": "^5.0.2",
     "fs-extra": "^8.1.0",
     "html-webpack-plugin": "next",
     "object-assign": "^4.1.1",
