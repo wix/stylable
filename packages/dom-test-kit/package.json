@@ -20,7 +20,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=8"
   },
   "publishConfig": {
     "access": "public"
