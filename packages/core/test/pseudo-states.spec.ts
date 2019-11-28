@@ -1661,6 +1661,35 @@ describe('pseudo-states', () => {
                 });
 
             });
+
+            it('resolve states from extended local class', () => {
+
+                const result = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                                .y {
+                                    -st-states: disabled;
+                                }
+
+                                .x {
+                                    -st-extends: y;
+                                }
+
+                                .x:disabled {}
+                            `
+                        }
+                    }
+                });
+
+                expect(result.meta.diagnostics.reports, 'no diagnostics reported for imported states').to.eql([]);
+                expect(result).to.have.styleRules({
+                    2: '.entry__x.entry--disabled {}'
+                });
+
+            });
         });
 
         describe('state after pseudo-element', () => {

@@ -188,13 +188,18 @@ export function getNamedArgs(node: ParsedValue) {
             }
         });
     }
-    return args;
+
+    // handle trailing comma
+    return (args.length && args[args.length - 1].length === 0) ?
+        args.slice(0, -1) :
+        args;
 }
 
 export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
-    _reportWarning?: ReportWarning
+    _reportWarning?: ReportWarning,
+    perserveQuotes: boolean = false
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -210,7 +215,7 @@ export function getFormatterArgs(
                 currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
             }
         } else if (currentNode.type === 'string') {
-            currentArg += currentNode.value;
+            currentArg += perserveQuotes ? valueParser.stringify(currentNode) : currentNode.value;
         } else {
             currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
         }

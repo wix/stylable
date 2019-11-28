@@ -1,4 +1,4 @@
-const { StylableWebpackPlugin } = require('@stylable/webpack-plugin/src');
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const autoprefixer = require('autoprefixer');

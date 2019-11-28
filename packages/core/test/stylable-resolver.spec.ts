@@ -92,6 +92,44 @@ describe('stylable-resolver', () => {
         expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
     });
 
+    it('should not enter infinite loops even with broken code', () => {
+        const { fs } = createMinimalFS({
+            files: {
+                '/button.st.css': {
+                    content: `
+                        @namespace: 'Button';
+                        :import {
+                            -st-from: './extended-button.st.css';
+                            -st-default: Button;
+                        }
+                        .root {
+                            -st-extends: Button
+                        }
+                    `
+                },
+                '/extended-button.st.css': {
+                    content: `
+                        :import {
+                            -st-from: './button.st.css';
+                            -st-default: Button;
+                        }
+                        .root {
+                            -st-extends: Button;
+                        }
+                        Button {
+                            width: 100px;
+                        }
+                    `
+                }
+            }
+        });
+
+        const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
+        expect(results[0].symbol!.name).to.equal('Button');
+        expect(results[1].symbol!.name).to.equal('root');
+        expect(results[1].meta.source).to.equal(resolve('/button.st.css'));
+    });
+
     it('should resolve extend classes on broken css', () => {
         const { fs } = createMinimalFS({
             files: {
@@ -145,6 +183,45 @@ describe('stylable-resolver', () => {
         expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
         expect(results[1].meta.source).to.equal(resolve('/index.st.css'));
         expect(results[2].meta.source).to.equal(resolve('/button.st.css'));
+    });
+
+    it('should resolve class as local and not an alias when an -st-extend is present', () => {
+        const { fs } = createMinimalFS({
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        :import {
+                            -st-from: 'inner.st.css';
+                            -st-named: alias;
+                        }
+                        .root {}
+
+                        .alias {
+                            -st-extends: root;
+                        }
+                        
+                        .target { 
+                            -st-extends: alias;
+                        }
+                    `
+                },
+                '/inner.st.css': {
+                    content: `
+                        .alias {}
+                    `
+                }
+            }
+        });
+
+        const results = createResolveExtendsResults(fs, resolve('/entry.st.css'), 'target');
+
+        expect(results[0].symbol!.name).to.equal('target');
+        expect(results[1].symbol!.name).to.equal('alias');
+        expect(results[2].symbol!.name).to.equal('root');
+
+        expect(results[0].meta.source).to.equal(resolve('/entry.st.css'));
+        expect(results[1].meta.source).to.equal(resolve('/entry.st.css'));
+        expect(results[2].meta.source).to.equal(resolve('/entry.st.css'));
     });
 
     it('should resolve classes', () => {

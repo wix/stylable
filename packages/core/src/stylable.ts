@@ -5,11 +5,12 @@ import { safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
-    Options,
     StylableResults,
     StylableTransformer,
+    TransformerOptions,
     TransformHooks
 } from './stylable-transformer';
+import { TimedCacheOptions } from './timed-cache';
 import { IStylableOptimizer } from './types';
 
 export interface StylableConfig {
@@ -28,6 +29,7 @@ export interface StylableConfig {
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
+    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
 }
 
 export class Stylable {
@@ -48,7 +50,8 @@ export class Stylable {
             config.resolveOptions,
             config.optimizer,
             config.mode,
-            config.resolveNamespace
+            config.resolveNamespace,
+            config.timedCacheOptions
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -65,20 +68,25 @@ export class Stylable {
         protected resolveOptions: any = {},
         public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
-        protected resolveNamespace?: typeof processNamespace
+        protected resolveNamespace?: typeof processNamespace,
+        protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
+            timeout: 1,
+            useTimer: true
+        }
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
             fileSystem,
             onProcess,
             resolveOptions,
-            this.resolveNamespace
+            this.resolveNamespace,
+            timedCacheOptions
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
-    public createTransformer(options: Partial<Options> = {}) {
+    public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
             diagnostics: new Diagnostics(),
@@ -95,7 +103,7 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<Options> = {}
+        options: Partial<TransformerOptions> = {}
     ): StylableResults {
         if (typeof meta === 'string') {
             // TODO: refactor to use fileProcessor

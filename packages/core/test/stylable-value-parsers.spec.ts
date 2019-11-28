@@ -16,25 +16,43 @@ describe('stylable-value-parsers', () => {
     });
 
     it('named arguments with one simple param', () => {
-        expect(parseMixin('Button(color 1px)')).to.eql([
-            { type: 'Button', options: { color: '1px' } }
+        expect(parseMixin('Button(color red)')).to.eql([
+            { type: 'Button', options: { color: 'red' } }
         ]);
     });
 
     it('named arguments with two simple params', () => {
-        expect(parseMixin('Button(color 1px, color2 2px)')).to.eql([
+        expect(parseMixin('Button(color red, color2 green)')).to.eql([
             {
                 type: 'Button',
-                options: { color: '1px', color2: '2px' }
+                options: { color: 'red', color2: 'green' }
+            }
+        ]);
+    });
+
+    it('named arguments with a trailing comma', () => {
+        expect(parseMixin('Button(color red,)')).to.eql([
+            {
+                type: 'Button',
+                options: { color: 'red' }
+            }
+        ]);
+    });
+    
+    it('multiple named arguments with a trailing comma', () => {
+        expect(parseMixin('Button(color red, size 2px,)')).to.eql([
+            {
+                type: 'Button',
+                options: { color: 'red', size: '2px' }
             }
         ]);
     });
 
     it('named arguments with one param with spaces', () => {
-        expect(parseMixin('Button(color 1px solid red)')).to.eql([
+        expect(parseMixin('Button(border 1px solid red)')).to.eql([
             {
                 type: 'Button',
-                options: { color: '1px solid red' }
+                options: { border: '1px solid red' }
             }
         ]);
     });

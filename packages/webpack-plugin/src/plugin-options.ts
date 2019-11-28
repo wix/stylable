@@ -47,6 +47,7 @@ export function normalizeOptions(
             DUPLICATE_MODULE_NAMESPACE: false,
             ...options.unsafeMuteDiagnostics
         },
+        unsafeBuildNamespace: false,
         includeDynamicModulesInCSS: true,
         useEntryModuleInjection: false,
         experimentalHMR: false,

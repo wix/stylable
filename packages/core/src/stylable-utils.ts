@@ -278,11 +278,12 @@ export function findDeclaration(importNode: Imported, test: any) {
     return importNode.rule.nodes![fromIndex] as postcss.Declaration;
 }
 
+// TODO: What is this?
 export function findRule(
     root: postcss.Root,
     selector: string,
     test: any = (statement: any) => statement.prop === valueMapping.extends
-) {
+): null | postcss.Declaration {
     let found: any = null;
     root.walkRules(selector, rule => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
@@ -343,9 +344,13 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
 }
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {
-    return (symbol && symbol._kind === 'class') || symbol._kind === 'element'
-        ? symbol.alias
-        : undefined;
+    if (symbol._kind === 'class' || symbol._kind === 'element') {
+        if (!symbol[valueMapping.extends]) {
+            return symbol.alias;
+        }
+    }
+
+    return undefined;
 }
 
 export function generateScopedCSSVar(namespace: string, varName: string) {

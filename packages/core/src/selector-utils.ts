@@ -1,4 +1,7 @@
 import postcss from 'postcss';
+import { ClassSymbol, ElementSymbol } from './stylable-meta';
+import { CSSResolve } from './stylable-resolver';
+import { valueMapping } from './stylable-value-parsers';
 const tokenizer = require('css-selector-tokenizer');
 
 export interface SelectorAstNode {
@@ -145,7 +148,71 @@ export function isNodeMatch(nodeA: Partial<SelectorAstNode>, nodeB: Partial<Sele
 export interface SelectorChunk {
     type: string;
     operator?: string;
+    value?: string;
     nodes: Array<Partial<SelectorAstNode>>;
+}
+
+export interface SelectorChunk2 {
+    type: string;
+    operator?: string;
+    value?: string;
+    nodes: SelectorAstNode[];
+    before?: string;
+}
+
+export function mergeChunks(chunks: SelectorChunk2[][]) {
+    const ast: any = { type: 'selectors', nodes: [] };
+    let i = 0;
+
+    for (const selectorChunks of chunks) {
+        ast.nodes[i] = { type: 'selector', nodes: [] };
+        for (const chunk of selectorChunks) {
+            if (chunk.type !== 'selector') {
+                ast.nodes[i].nodes.push(chunk);
+            } else {
+                ast.nodes[i].before = chunk.before;
+            }
+            for (const node of chunk.nodes) {
+                ast.nodes[i].nodes.push(node);
+            }
+        }
+        i++;
+    }
+    return ast;
+}
+
+export function separateChunks2(selectorNode: SelectorAstNode) {
+    const selectors: SelectorChunk2[][] = [];
+    selectorNode.nodes.map(({ nodes, before }) => {
+        selectors.push([{ type: 'selector', nodes: [], before }]);
+        nodes.forEach(node => {
+            if (node.type === 'operator') {
+                const chunks = selectors[selectors.length - 1];
+                chunks.push({ ...node, nodes: [] });
+            } else if (node.type === 'spacing') {
+                const chunks = selectors[selectors.length - 1];
+                chunks.push({ ...node, nodes: [] });
+            } else {
+                const chunks = selectors[selectors.length - 1];
+                chunks[chunks.length - 1].nodes.push(node);
+            }
+        });
+    });
+    return selectors;
+}
+
+export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
+    for (const r of resolved) {
+        const { symbol } = r;
+        if (symbol._kind === 'class' || symbol._kind === 'element') {
+            if (symbol.alias && !symbol[valueMapping.extends]) {
+                continue;
+            } else {
+                return r;
+            }
+        }
+    }
+    return resolved[0];
 }
 
 export function separateChunks(selectorNode: SelectorAstNode) {
@@ -161,7 +228,7 @@ export function separateChunks(selectorNode: SelectorAstNode) {
             chunks.push({ type: node.type, operator: node.operator, nodes: [] });
         } else if (node.type === 'spacing') {
             const chunks = selectors[selectors.length - 1];
-            chunks.push({ type: node.type, nodes: [] });
+            chunks.push({ type: node.type, value: node.value, nodes: [] });
         } else {
             const chunks = selectors[selectors.length - 1];
             chunks[chunks.length - 1].nodes.push(node);
@@ -290,12 +357,15 @@ export function createWarningRule(
     extendedFile: string,
     extendingNode: string,
     scopedExtendingNode: string,
-    extendingFile: string
+    extendingFile: string,
+    useScoped = false
 ) {
     // tslint:disable-next-line:max-line-length
     const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
-        selector: `.${extendingNode}:not(.${extendedNode})::before`,
+        selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${
+            useScoped ? scopedExtendedNode : extendedNode
+        })::before`,
         nodes: [
             postcss.decl({
                 prop: 'content',

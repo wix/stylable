@@ -2,7 +2,11 @@ import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
-const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory');
+import { timedCache, TimedCacheOptions } from './timed-cache';
+
+// importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
+// this allows @stylable/core to be bundled for browser usage without special custom configuration
+const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -14,7 +18,8 @@ export function createInfrastructure(
     fileSystem: MinimalFS,
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
     resolveOptions: any = {},
-    resolveNamespace?: typeof processNamespace
+    resolveNamespace?: typeof processNamespace,
+    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>
 ): StylableInfrastructure {
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
@@ -22,12 +27,22 @@ export function createInfrastructure(
         ...resolveOptions
     });
 
-    const resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
+    let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
             moduleId = eResolver.resolveSync({}, context, moduleId);
         }
         return moduleId;
     };
+
+    if (timedCacheOptions) {
+        const cacheManager = timedCache(resolvePath, {
+            timeout: 1,
+            useTimer: true,
+            createKey: (args: string[]) => args.join(';'),
+            ...timedCacheOptions
+        });
+        resolvePath = cacheManager.get;
+    }
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {

@@ -1,13 +1,13 @@
 {
   "name": "@stylable/runtime",
-  "version": "2.1.3",
+  "version": "2.5.3",
   "description": "Stylable runtime DOM integration",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs && yarn bundle",
-    "bundle": "node -r @ts-tools/node/r ./scripts/build-runtime.ts",
+    "bundle": "node -r @ts-tools/node/r -r tsconfig-paths/register ./scripts/build-runtime.ts",
     "test:unit": "mocha \"test/unit/**/*.spec.ts?(x)\"",
     "test:e2e": "mocha \"test/e2e/**/*.spec.[tj]s?(x)\" --timeout 20000",
     "test": "run-p test:unit test:e2e",
@@ -16,7 +16,6 @@
   "files": [
     "cjs",
     "src",
-    "!src/tsconfig.json",
     "runtime.lib.js",
     "runtime-legacy.lib.js"
   ],

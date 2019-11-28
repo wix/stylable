@@ -4,7 +4,7 @@ title: Create a Stylable Component Library
 layout: docs
 ---
 
-We are now experimenting with a new [component library](https://github.com/wix/stylable-components) based on **Stylable** and React. It is in the **early development stages** and will be available soon. Here are some guidelines we gathered related to this project that you may be interested in following if you build your own library.
+Here are some guidelines we gathered related to this project that you may be interested in following if you build your own library.
 
 **Stylable** enables you to author a component library, that can be themed, and easily consumed and styled, by other **Stylable** projects.  
 

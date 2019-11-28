@@ -67,6 +67,9 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
                 rng
             );
     }
+
+    // Remove this and other throws in this file after upgrading to a TS version with a fix
+    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, rng: ProviderRange) {
@@ -98,6 +101,8 @@ export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, r
                 rng
             );
     }
+
+    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: ProviderRange) {
@@ -145,6 +150,8 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 rng
             );
     }
+
+    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function valueDirective(rng: ProviderRange) {

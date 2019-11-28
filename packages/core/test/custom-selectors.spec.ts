@@ -244,4 +244,128 @@ describe('@custom-selector', () => {
         const r = ast.nodes![0] as postcss.Rule;
         expect(r.selector).to.equal('.interface__root .controls__root cc');
     });
+
+    it('target a custom selector with the same name as an inner part as a pseudo element', () => {
+        const ast = generateStylableRoot({
+            entry: '/entry.st.css',
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        :import {
+                            -st-from: "./variant.st.css";
+                            -st-default: Variant;
+                        }
+                        Variant::input{
+                            color: blue;
+                        }
+                    `
+                },
+                '/variant.st.css': {
+                    namespace: 'variant',
+                    content: `
+                        @custom-selector :--input .x .input;
+                        .input {}
+                    `
+                }
+            }
+        });
+
+        const r = ast.nodes![0] as postcss.Rule;
+        expect(r.selector).to.equal('.variant__root .variant__x .variant__input');
+    });
+
+    xdescribe('FUTURE', () => {
+        // these issues should be resolved in the future
+        // see https://github.com/wix/stylable/issues/890
+        it('resolve inner part that is a @custom-selector (with multiple selectros) in nested-pseudo-class', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./inner.st.css";
+                                -st-default: Inner;
+                            }
+                            .root {
+                                -st-extends: Inner;
+                            }
+                            .root :not(::option){
+                                z-index: 1;
+                            }
+                        `
+                    },
+                    '/inner.st.css': {
+                        namespace: 'Inner',
+                        content: `
+                            @custom-selector :--option .a, .b ;
+                            
+                            .root {
+                                
+                            }
+                            .a{}
+                            .b{}
+                            .option{}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+                '.entry__root :not( .Inner__a), .entry__root :not( .Inner__b)'
+            );
+        });
+
+        it('expand complex custom-selector in pseudo-element with multiple custom parts', () => {
+            const ast = generateStylableRoot({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./comp.st.css";
+                                -st-default: Comp;
+                            }
+    
+                            Comp::class-icon Comp::class-icon {
+                                color: blue;
+                            }
+                        `
+                    },
+                    '/comp.st.css': {
+                        namespace: 'comp',
+                        content: `
+                            @custom-selector :--class-icon .icon, .class;
+                        `
+                    }
+                }
+            });
+            const r = ast.nodes![0] as postcss.Rule;
+            expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+        });
+
+        it('expand complex custom-selector in nested-pseudo-class', () => {
+            const ast = generateStylableRoot({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            @custom-selector :--A .a;
+                            @custom-selector :--B .b;
+    
+                            .root:has(:--A, .z, :--B) {
+                                color: blue;
+                            }
+                        `
+                    }
+                }
+            });
+            const r = ast.nodes![0] as postcss.Rule;
+            expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+        });
+    });
 });

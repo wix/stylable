@@ -1,11 +1,12 @@
 import { isAsset, Stylable } from '@stylable/core';
 import { createModuleSource } from '@stylable/module-utils';
+import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { Generator } from './default-generator';
-import { FileSystem, findFiles } from './find-files';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
+import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
 
@@ -16,6 +17,7 @@ export interface BuildOptions {
     rootDir: string;
     srcDir: string;
     outDir: string;
+    manifest?: string;
     log: (...args: string[]) => void;
     indexFile?: string;
     diagnostics?: (...args: string[]) => void;
@@ -28,7 +30,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
-    compat?: boolean
+    compat?: boolean;
 }
 
 export async function build({
@@ -50,7 +52,8 @@ export async function build({
     injectCSSRequest,
     optimize,
     minify,
-    compat
+    compat,
+    manifest
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -112,6 +115,7 @@ export async function build({
 
     if (!indexFile) {
         handleAssets(assets, rootDir, srcDir, outDir, fs);
+        generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
     }
 }
 
@@ -186,7 +190,8 @@ function buildSingleFile(
                     undefined,
                     undefined,
                     injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    compat ? '@stylable/runtime/cjs/index-legacy': '@stylable/runtime'
+                    compat ? '@stylable/runtime/cjs/index-legacy' : '@stylable/runtime',
+                    compat ? ['module.exports.default = module.exports;'] : []
                 ),
             `Transform Error: ${filePath}`
         );
