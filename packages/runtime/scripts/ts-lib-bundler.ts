@@ -33,9 +33,9 @@ export function useModule(outModule: string, libExports: string[], allowOverride
     if (missing.length) {
         throw new Error(`missing lib exports ["${missing.join('", "')}"]`);
     }
-    
+
     exportErrors = exportErrors.filter(k => !allowOverride.some(o => o === k));
-    
+
     if (exportErrors.length) {
         throw new Error(`duplicate export ["${exportErrors.join('", "')}"]`);
     }
@@ -75,7 +75,6 @@ function bundleFiles(name: string, files: string[]) {
         })
         .join('\n');
 
-    // tslint:disable-next-line:max-line-length
     return `function ${name}(exports){\nexports = exports || {};\nfunction require(){return exports;};\n${libCode};\nreturn exports;\n}`;
 }
 

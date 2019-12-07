@@ -1,4 +1,4 @@
-const testFiles = require('glob').sync("./test/**/*.spec.ts");
+const testFiles = require('glob').sync('./test/**/*.spec.ts');
 const first = testFiles.shift();
 const withMochaLoader = [`mocha-loader!${first}`].concat(testFiles);
 
@@ -24,5 +24,4 @@ module.exports = {
             }
         ]
     }
-}
-
+};

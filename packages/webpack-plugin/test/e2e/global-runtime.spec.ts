@@ -30,11 +30,12 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const res = await page.evaluate(() => {
-
             return {
                 runtimes: (window as any).__stylable_renderer_global_counter,
-                index: getComputedStyle(document.querySelector('[data-name="index"]')!).backgroundColor,
-                index2: getComputedStyle(document.querySelector('[data-name="index2"]')!).backgroundColor
+                index: getComputedStyle(document.querySelector('[data-name="index"]')!)
+                    .backgroundColor,
+                index2: getComputedStyle(document.querySelector('[data-name="index2"]')!)
+                    .backgroundColor
             };
         });
 

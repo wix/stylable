@@ -6,7 +6,6 @@ import { ParsedValue, StateParsedValue } from './types';
 
 const valueParser = require('postcss-value-parser');
 
-/* tslint:disable:max-line-length */
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
         return 'value can not be a string (remove quotes?)';
@@ -15,7 +14,6 @@ export const valueParserWarnings = {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
     }
 };
-/* tslint:enable:max-line-length */
 
 export interface MappedStates {
     [s: string]: StateParsedValue | string | null;
@@ -65,13 +63,10 @@ export const valueMapping = {
 export type stKeys = keyof typeof valueMapping;
 
 export const stValues: string[] = Object.keys(valueMapping).map(key => valueMapping[key as stKeys]);
-export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce(
-    (acc, key) => {
-        acc[valueMapping[key as stKeys]] = true;
-        return acc;
-    },
-    {} as Record<string, boolean>
-);
+export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
+    acc[valueMapping[key as stKeys]] = true;
+    return acc;
+}, {} as Record<string, boolean>);
 
 export const STYLABLE_VALUE_MATCHER = /^-st-/;
 export const STYLABLE_NAMED_MATCHER = new RegExp(`^${valueMapping.named}-(.+)`);
@@ -190,9 +185,7 @@ export function getNamedArgs(node: ParsedValue) {
     }
 
     // handle trailing comma
-    return (args.length && args[args.length - 1].length === 0) ?
-        args.slice(0, -1) :
-        args;
+    return args.length && args[args.length - 1].length === 0 ? args.slice(0, -1) : args;
 }
 
 export function getFormatterArgs(

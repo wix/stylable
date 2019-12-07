@@ -2,7 +2,11 @@ import { Imported, isAsset, makeAbsolute, Stylable } from '@stylable/core';
 import path from 'path';
 import webpack from 'webpack';
 import { isLoadedByLoaders } from './is-loaded-by-loaders';
-import { StylableAssetDependency, StylableExportsDependency, StylableImportDependency } from './stylable-dependencies';
+import {
+    StylableAssetDependency,
+    StylableExportsDependency,
+    StylableImportDependency
+} from './stylable-dependencies';
 
 const stylableExtension = /\.st\.css$/;
 
@@ -11,16 +15,13 @@ export class StylableParser {
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
         private useWeakDeps: boolean
-    ) {
-    }
+    ) {}
     public parse(_source: string, state: any) {
         if (
             isLoadedByLoaders(state.module, () => {
                 this.compilation.warnings.push(
                     `Loading a Stylable stylesheet via webpack loaders is not supported` +
-                    ` and may cause runtime errors.\n"${
-                    state.module.rawRequest
-                    }" in "${state.module.issuer.resource}"`
+                        ` and may cause runtime errors.\n"${state.module.rawRequest}" in "${state.module.issuer.resource}"`
                 );
             })
         ) {
@@ -52,10 +53,10 @@ export class StylableParser {
                 };
                 const dep = this.useWeakDeps
                     ? StylableImportDependency.createWeak(
-                        stylableImport.fromRelative,
-                        state.module,
-                        importRef
-                    )
+                          stylableImport.fromRelative,
+                          state.module,
+                          importRef
+                      )
                     : new StylableImportDependency(stylableImport.fromRelative, importRef);
                 state.module.addDependency(dep);
                 this.addChildDeps(stylableImport);

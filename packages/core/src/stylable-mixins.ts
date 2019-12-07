@@ -8,7 +8,6 @@ import { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
-/* tslint:disable:max-line-length */
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
         return `could not apply mixin: ${error}`;
@@ -23,7 +22,6 @@ export const mixinWarnings = {
         return `cannot mixin unknown symbol "${name}"`;
     }
 };
-/* tslint:enable:max-line-length */
 
 export function appendMixins(
     transformer: StylableTransformer,

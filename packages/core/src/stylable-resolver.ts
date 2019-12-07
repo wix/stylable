@@ -5,7 +5,6 @@ import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor
 import { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 
-/* tslint:disable:max-line-length */
 export const resolverWarnings = {
     UNKNOWN_IMPORTED_FILE(path: string) {
         return `cannot resolve imported file: "${path}"`;
@@ -14,7 +13,6 @@ export const resolverWarnings = {
         return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
     }
 };
-/* tslint:enable:max-line-length */
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     _kind: 'css';

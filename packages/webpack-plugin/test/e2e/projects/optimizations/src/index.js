@@ -1,4 +1,4 @@
-import { classes, cssStates, namespace, stVars } from "./index.st.css";
+import { classes, cssStates, namespace, stVars } from './index.st.css';
 window.stylableClasses = classes;
 window.namespace = namespace;
 window.stVars = stVars;

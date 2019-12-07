@@ -2,7 +2,11 @@ import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
 
-import { applyStylableForceStateSelectors, createDataAttr, OVERRIDE_STATE_PREFIX } from '@stylable/webpack-extensions';
+import {
+    applyStylableForceStateSelectors,
+    createDataAttr,
+    OVERRIDE_STATE_PREFIX
+} from '@stylable/webpack-extensions';
 
 describe('stylable-forcestates-plugin', () => {
     it('should mark a boolean state as forced using a data-attribute selector', () => {
@@ -83,8 +87,11 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
-            // tslint:disable-next-line: max-line-length
-            `.entry__root.entry---myState-5-value,.entry__root[${createDataAttr(OVERRIDE_STATE_PREFIX, 'myState', 'value')}]`
+            `.entry__root.entry---myState-5-value,.entry__root[${createDataAttr(
+                OVERRIDE_STATE_PREFIX,
+                'myState',
+                'value'
+            )}]`
         );
     });
 
@@ -112,8 +119,11 @@ describe('stylable-forcestates-plugin', () => {
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
-            // tslint:disable-next-line: max-line-length
-            `.entry__root[class~="entry---myState-10-some_value"],.entry__root[${createDataAttr(OVERRIDE_STATE_PREFIX, 'myState', 'some value')}]`
+            `.entry__root[class~="entry---myState-10-some_value"],.entry__root[${createDataAttr(
+                OVERRIDE_STATE_PREFIX,
+                'myState',
+                'some value'
+            )}]`
         );
     });
 });

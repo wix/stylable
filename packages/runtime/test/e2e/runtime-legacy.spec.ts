@@ -27,8 +27,7 @@ describe(`(${project})`, () => {
                 backgroundColor: computedStyle.backgroundColor
             };
         });
-       
+
         expect(backgroundColor).to.eql('rgb(255, 0, 0)');
-        
     });
 });

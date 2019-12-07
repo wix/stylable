@@ -10,11 +10,11 @@ module.exports = {
     // mode: 'production',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({useWeakDeps: true}), new HtmlWebpackPlugin()],
+    plugins: [new StylableWebpackPlugin({ useWeakDeps: true }), new HtmlWebpackPlugin()],
     optimization: {
         splitChunks: {
             chunks: 'all',
-            maxInitialRequests: 1,
+            maxInitialRequests: 1
         }
     }
 };

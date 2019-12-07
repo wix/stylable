@@ -20,15 +20,8 @@ const chalk = require('chalk');
 const spawn = require('react-dev-utils/crossSpawn');
 const clearConsole = require('react-dev-utils/clearConsole');
 
-module.exports = function (
-    appPath,
-    appName,
-    verbose,
-    originalDirectory,
-    template
-) {
-    const ownPackageName = require(path.join(__dirname, '..', 'package.json'))
-        .name;
+module.exports = function(appPath, appName, verbose, originalDirectory, template) {
+    const ownPackageName = require(path.join(__dirname, '..', 'package.json')).name;
     const ownPath = path.join(appPath, 'node_modules', ownPackageName);
     const appPackage = require(path.join(appPath, 'package.json'));
     const useYarn = fs.existsSync(path.join(appPath, 'yarn.lock'));
@@ -43,20 +36,14 @@ module.exports = function (
         start: 'stylable-scripts start',
         build: 'stylable-scripts build',
         // test: 'stylable-scripts test --env=jsdom',
-        eject: 'stylable-scripts eject',
+        eject: 'stylable-scripts eject'
     };
 
-    fs.writeFileSync(
-        path.join(appPath, 'package.json'),
-        JSON.stringify(appPackage, null, 2)
-    );
+    fs.writeFileSync(path.join(appPath, 'package.json'), JSON.stringify(appPackage, null, 2));
 
     const readmeExists = fs.existsSync(path.join(appPath, 'README.md'));
     if (readmeExists) {
-        fs.renameSync(
-            path.join(appPath, 'README.md'),
-            path.join(appPath, 'README.old.md')
-        );
+        fs.renameSync(path.join(appPath, 'README.md'), path.join(appPath, 'README.old.md'));
     }
 
     // Copy the files for the user
@@ -66,31 +53,24 @@ module.exports = function (
     if (fs.existsSync(templatePath)) {
         fs.copySync(templatePath, appPath);
     } else {
-        console.error(
-            `Could not locate supplied template: ${chalk.green(templatePath)}`
-        );
+        console.error(`Could not locate supplied template: ${chalk.green(templatePath)}`);
         return;
     }
 
     // Rename gitignore after the fact to prevent npm from renaming it to .npmignore
     // See: https://github.com/npm/npm/issues/1862
-    fs.move(
-        path.join(appPath, 'gitignore'),
-        path.join(appPath, '.gitignore'),
-        [],
-        err => {
-            if (err) {
-                // Append if there's already a `.gitignore` file there
-                if (err.code === 'EEXIST') {
-                    const data = fs.readFileSync(path.join(appPath, 'gitignore'));
-                    fs.appendFileSync(path.join(appPath, '.gitignore'), data);
-                    fs.unlinkSync(path.join(appPath, 'gitignore'));
-                } else {
-                    throw err;
-                }
+    fs.move(path.join(appPath, 'gitignore'), path.join(appPath, '.gitignore'), [], err => {
+        if (err) {
+            // Append if there's already a `.gitignore` file there
+            if (err.code === 'EEXIST') {
+                const data = fs.readFileSync(path.join(appPath, 'gitignore'));
+                fs.appendFileSync(path.join(appPath, '.gitignore'), data);
+                fs.unlinkSync(path.join(appPath, 'gitignore'));
+            } else {
+                throw err;
             }
         }
-    );
+    });
 
     function depsToArray(deps = {}) {
         return Object.keys(deps).map(key => {
@@ -114,15 +94,19 @@ module.exports = function (
         devArgs = ['add', '--dev'].concat(templateDevDependencies);
     } else {
         command = 'npm';
-        args = ['install', '--save', verbose && '--verbose'].filter(e => e).concat(templateDependencies);
-        devArgs = ['install', '--save-dev', verbose && '--verbose'].filter(e => e).concat(templateDevDependencies);
+        args = ['install', '--save', verbose && '--verbose']
+            .filter(e => e)
+            .concat(templateDependencies);
+        devArgs = ['install', '--save-dev', verbose && '--verbose']
+            .filter(e => e)
+            .concat(templateDevDependencies);
     }
 
     console.log(`Installing dependencies and dev dependencies using ${displayedCommand}...`);
     console.log();
 
     if (templateDependencies.length) {
-        // install dependencies    
+        // install dependencies
         const depsInstall = spawn.sync(command, args, { stdio: 'inherit' });
         if (depsInstall.status !== 0) {
             console.error(`\`${command} ${args.join(' ')}\` failed`);
@@ -131,7 +115,7 @@ module.exports = function (
     }
 
     if (templateDevDependencies) {
-        // install dev dependencies    
+        // install dev dependencies
         const devDepsInstall = spawn.sync(command, devArgs, { stdio: 'inherit' });
         if (devDepsInstall.status !== 0) {
             console.error(`\`${command} ${devArgs.join(' ')}\` failed`);
@@ -156,7 +140,7 @@ module.exports = function (
     }
 
     clearConsole();
-    
+
     console.log();
     console.log(`Success! Created ${appName} at ${appPath}`);
     console.log('Inside that directory, you can run several commands:');
@@ -164,23 +148,15 @@ module.exports = function (
     console.log(chalk.cyan(`  ${displayedCommand} start`));
     console.log('    Starts the development server.');
     console.log();
-    console.log(
-        chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}build`)
-    );
+    console.log(chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}build`));
     console.log('    Bundles the app into static files for production.');
     console.log();
     // console.log(chalk.cyan(`  ${displayedCommand} test`));
     // console.log('    Starts the test runner.');
     console.log();
-    console.log(
-        chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}eject`)
-    );
-    console.log(
-        '    Removes this tool and copies build dependencies, configuration files'
-    );
-    console.log(
-        '    and scripts into the app directory. If you do this, you can’t go back!'
-    );
+    console.log(chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}eject`));
+    console.log('    Removes this tool and copies build dependencies, configuration files');
+    console.log('    and scripts into the app directory. If you do this, you can’t go back!');
     console.log();
     console.log('We suggest that you begin by typing:');
     console.log();
@@ -188,11 +164,7 @@ module.exports = function (
     console.log(`  ${chalk.cyan(`${displayedCommand} start`)}`);
     if (readmeExists) {
         console.log();
-        console.log(
-            chalk.yellow(
-                'You had a `README.md` file, we renamed it to `README.old.md`'
-            )
-        );
+        console.log(chalk.yellow('You had a `README.md` file, we renamed it to `README.old.md`'));
     }
     console.log();
     console.log('Happy hacking!');

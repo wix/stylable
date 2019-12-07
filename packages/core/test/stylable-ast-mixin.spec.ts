@@ -78,11 +78,9 @@ describe('scopeSelector', () => {
             expect(res.selector).to.equal(test.selector);
         });
     });
-
 });
 
 describe('createSubsetAst', () => {
-
     function testMatcher(expected: any[], actualNodes: any[]) {
         expected.forEach((expectedMatch, i) => {
             const { nodes, ...match } = expectedMatch;
@@ -96,8 +94,8 @@ describe('createSubsetAst', () => {
     }
 
     it('should extract all selectors that has given prefix in the first chunk', () => {
-
-        const res = createSubsetAst(safeParse(`
+        const res = createSubsetAst(
+            safeParse(`
             .i .x{}
             .i::x{}
             .i[data]{}
@@ -123,7 +121,9 @@ describe('createSubsetAst', () => {
             /*not extracted*/
             .x .i{}
             :not(.i) .i{}
-        `), '.i');
+        `),
+            '.i'
+        );
 
         const expected = [
             { selector: '& .x' },
@@ -145,35 +145,36 @@ describe('createSubsetAst', () => {
         ];
 
         testMatcher(expected, res.nodes!);
-
     });
 
     it('should extract global when creating root chunk', () => {
-
-        const res = createSubsetAst(safeParse(`
+        const res = createSubsetAst(
+            safeParse(`
             :global(.x){}
             :global(.x) .root{}
-        `), '.root', undefined, true);
+        `),
+            '.root',
+            undefined,
+            true
+        );
 
-        const expected = [
-            { selector: ':global(.x)' },
-            { selector: ':global(.x) &' }
-        ];
+        const expected = [{ selector: ':global(.x)' }, { selector: ':global(.x) &' }];
 
         testMatcher(expected, res.nodes!);
-
     });
 
     it('should parts under @media', () => {
-
-        const res = createSubsetAst(safeParse(`
+        const res = createSubsetAst(
+            safeParse(`
             .i {color: red}
             .i:hover {}
             @media (max-width: 300px) {
                 .i {}
                 .i:hover {}
             }
-        `), '.i');
+        `),
+            '.i'
+        );
 
         const expected = [
             { selector: '&' },
@@ -181,31 +182,26 @@ describe('createSubsetAst', () => {
             {
                 type: 'atrule',
                 params: '(max-width: 300px)',
-                nodes: [
-                    { selector: '&' },
-                    { selector: '&:hover' }
-                ]
+                nodes: [{ selector: '&' }, { selector: '&:hover' }]
             }
         ];
 
         testMatcher(expected, res.nodes!);
-
     });
 
     it('should not append empty media', () => {
-
-        const res = createSubsetAst(safeParse(`
+        const res = createSubsetAst(
+            safeParse(`
             .i {}
             @media (max-width: 300px) {
                 .x {}
             }
-        `), '.i');
+        `),
+            '.i'
+        );
 
-        const expected = [
-            { selector: '&' }
-        ];
+        const expected = [{ selector: '&' }];
 
         testMatcher(expected, res.nodes!);
-
     });
 });

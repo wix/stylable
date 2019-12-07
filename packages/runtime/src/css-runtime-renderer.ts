@@ -73,7 +73,10 @@ export class RuntimeRenderer {
         return index;
     }
     public getStyles(ids: string[], sortIndexes: boolean) {
-        return this.sortStyles(ids.map(id => this.stylesMap[id]), sortIndexes);
+        return this.sortStyles(
+            ids.map(id => this.stylesMap[id]),
+            sortIndexes
+        );
     }
     public sortStyles(styles: RenderableStylesheet[], sortIndexes = false) {
         const s = styles.slice();

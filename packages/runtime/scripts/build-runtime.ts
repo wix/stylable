@@ -18,7 +18,7 @@ const outModuleLegacy = bundle({
     name: 'StylableRuntime',
     entry: join(__dirname, '../src/index-legacy.ts'),
     includeEntry: false,
-    header: `/* runtime version: ${require('../package.json').version} */`    
+    header: `/* runtime version: ${require('../package.json').version} */`
 });
 
 useModule(outModuleLegacy, ['$', 'create', 'createRenderable', 'RuntimeRenderer'], ['create']);

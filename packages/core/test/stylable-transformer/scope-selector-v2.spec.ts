@@ -160,7 +160,6 @@ describe('Stylable scope-selector v2', () => {
             }
         });
 
-        
         selfTest(result);
     });
 
@@ -220,7 +219,6 @@ describe('Stylable scope-selector v2', () => {
             }
         });
 
-        
         selfTest(result);
     });
 
@@ -303,11 +301,9 @@ describe('Stylable scope-selector v2', () => {
                         .otherBase {}
                     `
                 }
-                
             }
         });
 
-        
         selfTest(result);
     });
 
@@ -369,16 +365,12 @@ describe('Stylable scope-selector v2', () => {
                         }
                     `
                 }
-                
             }
         });
 
-        
         selfTest(result);
     });
 
-
-    
     it('should properly scope states in nested-pseudo-classes222231241241242', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
@@ -406,11 +398,9 @@ describe('Stylable scope-selector v2', () => {
                      
                     `
                 }
-                
             }
         });
 
-        
         selfTest(result);
     });
 });

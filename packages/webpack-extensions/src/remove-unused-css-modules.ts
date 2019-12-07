@@ -31,7 +31,7 @@ export class RemoveUnusedCSSModules {
         });
         const stylableBootstrap = (chunk as any).stylableBootstrap;
         if (stylableBootstrap) {
-          bootstraps.push(stylableBootstrap);
+            bootstraps.push(stylableBootstrap);
         }
         bootstraps.forEach(bootstrap => {
             bootstrap.dependencies = bootstrap.dependencies.filter((dep: any) => {

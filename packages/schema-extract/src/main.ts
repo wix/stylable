@@ -84,7 +84,7 @@ export function generateSchema(
                 schema.properties[entry] = {
                     $ref: stylableVar
                 };
-                
+
                 generateCssDocs(meta, symbol, schema.properties[entry] as StylableSymbolSchema);
             } else if (symbol._kind === 'cssVar') {
                 schema.properties[entry] = {
@@ -97,7 +97,11 @@ export function generateSchema(
     return schema;
 }
 
-function generateCssDocs(meta: StylableMeta, symbol: ClassSymbol | ElementSymbol | VarSymbol, schemaEntry: StylableSymbolSchema) {
+function generateCssDocs(
+    meta: StylableMeta,
+    symbol: ClassSymbol | ElementSymbol | VarSymbol,
+    schemaEntry: StylableSymbolSchema
+) {
     const cssDoc = getCssDocsForSymbol(meta, symbol);
     if (cssDoc) {
         if (cssDoc.description) {

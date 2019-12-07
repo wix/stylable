@@ -820,7 +820,6 @@ describe('css custom-properties (vars)', () => {
             };
 
             expectWarningsFromTransform(config, [
-                // tslint:disable-next-line:max-line-length
                 {
                     message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
                         '--unknownVar',

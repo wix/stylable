@@ -79,7 +79,7 @@ export function processDeclarationValue(
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
     args: string[] = []
-): { topLevelType: any; outputValue: string;  typeError: Error } {
+): { topLevelType: any; outputValue: string; typeError: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
     const parsedValue = valueParser(value);

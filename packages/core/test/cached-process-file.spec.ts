@@ -2,8 +2,7 @@ import { expect } from 'chai';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 
 describe('cachedProcessFile', () => {
-
-     it('return process file content', () => {
+    it('return process file content', () => {
         const file = 'C:/file.txt';
         const fs: MinimalFS = {
             readFileSync(fullpath: string) {
@@ -19,15 +18,18 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile((_fullpath, content) => {
-            return content + '!';
-        }, fs, x => x);
+        const p = cachedProcessFile(
+            (_fullpath, content) => {
+                return content + '!';
+            },
+            fs,
+            x => x
+        );
 
         expect(p.process(file)).to.equal('content!');
-
     });
 
-     it('not process file if not changed', () => {
+    it('not process file if not changed', () => {
         const file = 'C:/file.txt';
         let res: {};
         const fs: MinimalFS = {
@@ -44,17 +46,20 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile((fullpath, content) => {
-            const processed = { content, fullpath };
-            res = res ? res : processed;
-            return processed;
-        }, fs, x => x);
+        const p = cachedProcessFile(
+            (fullpath, content) => {
+                const processed = { content, fullpath };
+                res = res ? res : processed;
+                return processed;
+            },
+            fs,
+            x => x
+        );
 
         expect(p.process(file)).to.equal(p.process(file));
-
     });
 
-     it('not read file if not changed', () => {
+    it('not read file if not changed', () => {
         const file = 'C:/file.txt';
 
         let count = 0;
@@ -71,15 +76,18 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile(() => null, fs, x => x);
+        const p = cachedProcessFile(
+            () => null,
+            fs,
+            x => x
+        );
         p.process(file);
         p.process(file);
         p.process(file);
         expect(count).to.equal(1);
-
     });
 
-     it('read file if and reprocess if changed', () => {
+    it('read file if and reprocess if changed', () => {
         const file = 'C:/file.txt';
 
         let readCount = 0;
@@ -97,20 +105,23 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile(() => {
-            processCount++;
-            return null;
-        }, fs, x => x);
+        const p = cachedProcessFile(
+            () => {
+                processCount++;
+                return null;
+            },
+            fs,
+            x => x
+        );
 
         p.process(file);
         p.process(file);
 
         expect(readCount).to.equal(2);
         expect(processCount).to.equal(2);
-
     });
 
-     it('add stuff to ', () => {
+    it('add stuff to ', () => {
         const file = 'C:/file.txt';
 
         let readCount = 0;
@@ -128,17 +139,19 @@ describe('cachedProcessFile', () => {
             }
         };
 
-        const p = cachedProcessFile(() => {
-            processCount++;
-            return null;
-        }, fs, x => x);
+        const p = cachedProcessFile(
+            () => {
+                processCount++;
+                return null;
+            },
+            fs,
+            x => x
+        );
 
         p.process(file);
         p.process(file);
 
         expect(readCount).to.equal(2);
         expect(processCount).to.equal(2);
-
     });
-
 });

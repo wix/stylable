@@ -113,7 +113,6 @@ export interface AdditionalSelector {
     customElementChunk: string;
 }
 
-/* tslint:disable:max-line-length */
 export const transformerWarnings = {
     UNKNOWN_PSEUDO_ELEMENT(name: string) {
         return `unknown pseudo element "${name}"`;
@@ -143,7 +142,6 @@ export const transformerWarnings = {
         return `"@st-scope" received an unknown symbol: "${name}"`;
     }
 };
-/* tslint:enable:max-line-length */
 
 export class StylableTransformer {
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -1009,7 +1007,13 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleChunkNode(context: ScopeContext) {
-        const { currentAnchor, metaParts, node, originMeta, transformGlobals } = context as Required<ScopeContext>;
+        const {
+            currentAnchor,
+            metaParts,
+            node,
+            originMeta,
+            transformGlobals
+        } = context as Required<ScopeContext>;
         const { type, name } = node;
         if (type === 'class') {
             const resolved = metaParts.class[name] || [
@@ -1122,16 +1126,14 @@ export class StylableTransformer {
                     node.type = 'selector';
                 }
             } else {
-                
                 const nestedContext = context.createNestedContext({
                     type: 'selectors',
                     name: `${name}`,
                     nodes: node.nodes
-                })
+                });
                 this.scopeSelectorAst(nestedContext);
                 // delegate elements of first selector
-                context.elements[context.selectorIndex].push(...nestedContext.elements[0]);            
-
+                context.elements[context.selectorIndex].push(...nestedContext.elements[0]);
             }
         } else if (type === 'invalid' && node.value === '&') {
             if (/* maybe should be currentAnchor meta */ originMeta.parent) {
@@ -1454,9 +1456,9 @@ class ScopeContext {
         ctx.selectorAst = selectorAst;
 
         ctx.selectorIndex = -1;
-        ctx.elements = []
-        ctx.additionalSelectors = []
-        
+        ctx.elements = [];
+        ctx.additionalSelectors = [];
+
         return ctx;
     }
 }

@@ -102,7 +102,7 @@ export function expectWarningsFromTransform(
         const path = expectedWarning.file;
 
         expect(report.message).to.equal(expectedWarning.message);
-        
+
         if (!expectedWarning.skipLocationCheck) {
             expect(report.node.source!.start).to.eql(locations[path].start);
         }

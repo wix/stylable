@@ -1,2 +1,2 @@
-const {attachHook} = require(__dirname)
-attachHook()
+const { attachHook } = require(__dirname);
+attachHook();

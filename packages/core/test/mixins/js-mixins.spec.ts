@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
@@ -69,7 +68,7 @@ describe('Javascript Mixins', () => {
                 }
             }
         });
-        
+
         const rule = result.nodes![1] as postcss.Rule;
 
         expect(rule.selector).to.equal('.style__container Test');

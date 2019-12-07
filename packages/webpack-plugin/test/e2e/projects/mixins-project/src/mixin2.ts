@@ -1,5 +1,5 @@
 export function Mixin(args: string[]) {
-  return {
-    border: args[0]
-  };
+    return {
+        border: args[0]
+    };
 }

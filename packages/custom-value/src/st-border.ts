@@ -5,10 +5,7 @@ import {
     CustomValueStrategy
 } from '@stylable/core';
 
-export const stBorder = createCustomValue<
-    BoxedValueMap,
-    BoxedValueArray
->({
+export const stBorder = createCustomValue<BoxedValueMap, BoxedValueArray>({
     processArgs: (node, customTypes) => {
         return CustomValueStrategy.args(node, customTypes);
     },

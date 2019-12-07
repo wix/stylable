@@ -3,7 +3,10 @@ import { JSDOM } from 'jsdom';
 import { createDOMListRenderer, DOMListRenderer } from '../../src/keyed-list-renderer';
 import { NodeRenderer } from '../../src/types';
 
-interface TestNode { key: string; value: string; }
+interface TestNode {
+    key: string;
+    value: string;
+}
 
 describe('createDOMListRenderer', () => {
     let document: Document;
@@ -11,7 +14,9 @@ describe('createDOMListRenderer', () => {
     let render: DOMListRenderer<TestNode, Element, Element>['render'];
 
     const basicNodeRenderer: NodeRenderer<TestNode, Element> = {
-        renderKey({ key }) { return key; },
+        renderKey({ key }) {
+            return key;
+        },
         hasKey(node) {
             return node.hasAttribute('key');
         },
@@ -27,7 +32,6 @@ describe('createDOMListRenderer', () => {
         }
     };
     beforeEach(() => {
-
         const dom = new JSDOM(`
             <body><div id="container"></div></body>
         `);
@@ -39,7 +43,6 @@ describe('createDOMListRenderer', () => {
     });
 
     it('should render dom nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
 
@@ -47,11 +50,9 @@ describe('createDOMListRenderer', () => {
 
         checkNode(container.children[0], a);
         checkNode(container.children[1], b);
-
     });
 
     it('should update dom nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
 
@@ -63,11 +64,9 @@ describe('createDOMListRenderer', () => {
 
         checkNode(container.children[0], a1);
         checkNode(container.children[1], b1);
-
     });
 
     it('should update dom nodes (same object)', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
 
@@ -80,11 +79,9 @@ describe('createDOMListRenderer', () => {
 
         checkNode(container.children[0], a);
         checkNode(container.children[1], b);
-
     });
 
     it('should re-order dom nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
 
@@ -96,11 +93,9 @@ describe('createDOMListRenderer', () => {
         expect(container.children.length).to.equal(2);
         checkNode(container.children[0], b);
         checkNode(container.children[1], a);
-
     });
 
     it('should re-order dom nodes (2)', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
         const c = { key: 'c', value: 'c' };
@@ -116,11 +111,9 @@ describe('createDOMListRenderer', () => {
         checkNode(container.children[1], c);
         checkNode(container.children[2], b);
         checkNode(container.children[3], a);
-
     });
 
     it('should remove nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
         const c = { key: 'c', value: 'c' };
@@ -131,11 +124,9 @@ describe('createDOMListRenderer', () => {
         render(container, [b]);
         expect(container.children.length).to.equal(1);
         checkNode(container.children[0], b);
-
     });
 
     it('should insert nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
         const c = { key: 'c', value: 'c' };
@@ -153,11 +144,9 @@ describe('createDOMListRenderer', () => {
         checkNode(container.children[0], a);
         checkNode(container.children[1], b);
         checkNode(container.children[2], c);
-
     });
 
     it('should empty nodes', () => {
-
         const a = { key: 'a', value: 'a' };
         const b = { key: 'b', value: 'b' };
         const c = { key: 'c', value: 'c' };
@@ -167,9 +156,7 @@ describe('createDOMListRenderer', () => {
 
         render(container, []);
         expect(container.children.length).to.equal(0);
-
     });
-
 });
 
 function checkNode(node: Element, { value, key }: TestNode) {

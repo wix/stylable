@@ -1,4 +1,3 @@
-/* tslint:disable:max-line-length */
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
@@ -767,7 +766,10 @@ describe('CSS Mixins', () => {
 
         matchAllRulesAndDeclarations(
             media,
-            [['.entry__x', 'color: yellow'], ['.entry__x:hover', 'color: red']],
+            [
+                ['.entry__x', 'color: yellow'],
+                ['.entry__x:hover', 'color: red']
+            ],
             '@media'
         );
 
@@ -980,7 +982,11 @@ describe('CSS Mixins', () => {
 
         matchAllRulesAndDeclarations(
             result,
-            [['.entry__x', ''], ['.entry__x .r__r', ''], ['.entry__x .r__r .y__y', '']],
+            [
+                ['.entry__x', ''],
+                ['.entry__x .r__r', ''],
+                ['.entry__x .r__r .y__y', '']
+            ],
             ''
         );
     });

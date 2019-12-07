@@ -54,28 +54,32 @@ describe('Stylable intellisense selector meta data', () => {
         const elements = t.resolveSelectorElements(meta, '.a, .b');
 
         expect(elements).to.eql([
-            [{
-                type: 'class',
-                name: 'a',
-                resolved: [
-                    {
-                        meta,
-                        symbol: meta.classes.a,
-                        _kind: 'css'
-                    }
-                ]
-            }],
-            [{
-                type: 'class',
-                name: 'b',
-                resolved: [
-                    {
-                        meta,
-                        symbol: meta.classes.b,
-                        _kind: 'css'
-                    }
-                ]
-            }]
+            [
+                {
+                    type: 'class',
+                    name: 'a',
+                    resolved: [
+                        {
+                            meta,
+                            symbol: meta.classes.a,
+                            _kind: 'css'
+                        }
+                    ]
+                }
+            ],
+            [
+                {
+                    type: 'class',
+                    name: 'b',
+                    resolved: [
+                        {
+                            meta,
+                            symbol: meta.classes.b,
+                            _kind: 'css'
+                        }
+                    ]
+                }
+            ]
         ]);
     });
 
@@ -137,7 +141,7 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
-    
+
     // see more about this case: https://github.com/wix/stylable/issues/891
     xit('resolves with neasted-pseudo-class (should not include inner parts)', () => {
         const t = createTransformer({
@@ -185,7 +189,7 @@ describe('Stylable intellisense selector meta data', () => {
         const meta = t.fileProcessor.process('/entry.st.css');
         const elements = t.resolveSelectorElements(meta, '.root:not(::part)');
         expect(elements[0].length).to.equal(2);
-        
+
         expect(elements[0]).to.eql([
             {
                 type: 'class',
@@ -212,7 +216,6 @@ describe('Stylable intellisense selector meta data', () => {
         ]);
     });
 
-
     it('should resolve elements for pseudo-element nested in a pseudo-state (@custom-selector)', () => {
         const t = createTransformer({
             files: {
@@ -233,7 +236,7 @@ describe('Stylable intellisense selector meta data', () => {
         const meta = t.fileProcessor.process('/entry.st.css');
         const elements = t.resolveSelectorElements(meta, '.root:not(::part)');
         expect(elements[0].length).to.equal(2);
-        
+
         expect(elements[0]).to.eql([
             {
                 type: 'class',
@@ -249,13 +252,10 @@ describe('Stylable intellisense selector meta data', () => {
             {
                 type: 'pseudo-element',
                 name: 'part',
-                resolved: [
-
-                    { _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }
-                ]
+                resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }]
             }
         ]);
-    });    
+    });
 
     it('resolves with globals???', () => {
         const t = createTransformer({
@@ -287,7 +287,7 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
-    
+
     it('resolves native/unknown pseudo?', () => {
         const t = createTransformer({
             files: {
@@ -473,7 +473,7 @@ describe('Stylable intellisense selector meta data', () => {
             }
         ]);
     });
-    
+
     it('resolves pseudo custom selector (multiple selectors)', () => {
         const t = createTransformer({
             files: {
@@ -526,7 +526,9 @@ describe('Stylable intellisense selector meta data', () => {
             {
                 type: 'pseudo-element',
                 name: 'pongo',
-                resolved: [{ _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } }]
+                resolved: [
+                    { _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } }
+                ]
             }
         ]);
     });

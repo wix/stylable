@@ -6,22 +6,17 @@ import {
 import { expect } from 'chai';
 import { resolve } from 'path';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
-import {
-    nativePseudoElements,
-    reservedKeyFrames
-} from '../src/native-reserved-lists';
+import { nativePseudoElements, reservedKeyFrames } from '../src/native-reserved-lists';
 import { processorWarnings } from '../src/stylable-processor';
 import { resolverWarnings } from '../src/stylable-resolver';
 import { transformerWarnings } from '../src/stylable-transformer';
 import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
 
 describe('findTestLocations', () => {
-
     it('find single location 1', () => {
         const l = findTestLocations('\n  |a|');
         expect(l.start, 'start').to.eql({ line: 2, column: 3 });
         expect(l.end, 'end').to.eql({ line: 2, column: 4 });
-
     });
 
     it('find single location 2', () => {
@@ -42,113 +37,146 @@ describe('findTestLocations', () => {
         const l = findTestLocations(css);
         expect(l.css, 'start').to.eql(css.replace(/[|$]/gm, ''));
     });
-
 });
 
 describe('diagnostics: warnings and errors', () => {
     // TODO2: next phase
     describe('syntax', () => {
-
         xdescribe('selectors', () => {
             it('should return warning for unidentified tag selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |Something| {
 
                     }
-                `, [{ message: '"Something" component is not imported', file: 'main.css' }]);
+                `,
+                    [{ message: '"Something" component is not imported', file: 'main.css' }]
+                );
             });
 
             it('should return warning for unterminated "."', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     .|
-                `, [{ message: 'identifier expected', file: 'main.css' }]);
+                `,
+                    [{ message: 'identifier expected', file: 'main.css' }]
+                );
             });
             it('should return warning for unterminated ":"', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     :|
-                `, [{ message: 'identifier expected', file: 'main.css' }]);
+                `,
+                    [{ message: 'identifier expected', file: 'main.css' }]
+                );
             });
             it('should return warning for className without rule area', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     .gaga|
-                `, [{ message: '{ expected', file: 'main.css' }]);
+                `,
+                    [{ message: '{ expected', file: 'main.css' }]
+                );
             });
-
         });
         xdescribe('ruleset', () => {
             it('should return warning for unterminated ruleset', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     .gaga{
                         color:red|
-                `, [{ message: '; expected', file: 'main.css' }]);
+                `,
+                    [{ message: '; expected', file: 'main.css' }]
+                );
             });
         });
         xdescribe('rules', () => {
             it('should return warning for unterminated rule', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     .gaga{
                         color|
                     }
-                `, [{ message: ': expected', file: 'main.css' }]);
-                expectWarnings(`
+                `,
+                    [{ message: ': expected', file: 'main.css' }]
+                );
+                expectWarnings(
+                    `
                     .root{
 
                     }
                     .gaga{
                         color:|
                     }
-                `, [{ message: 'property value expected', file: 'main.css' }]);
+                `,
+                    [{ message: 'property value expected', file: 'main.css' }]
+                );
                 // todo: add cases for any unterminated selectors (direct descendant, etc...)
             });
             it('should return warning for unknown rule', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root{
                         |hello|:yossi;
                     }
-                `, [{ message: 'unknown rule "hello"', file: 'main.css' }]);
+                `,
+                    [{ message: 'unknown rule "hello"', file: 'main.css' }]
+                );
             });
 
             it('should warn when using illegal characters', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     <|{
 
                     }
-                `, [{ message: 'illegal character <', file: 'main.css' }]);
+                `,
+                    [{ message: 'illegal character <', file: 'main.css' }]
+                );
             });
 
             it('should return warning for unknown directive', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .gaga{
                         |-st-something|:true;
                     }
-                `, [{ message: 'unknown directive "-st-something"', file: 'main.css' }]);
+                `,
+                    [{ message: 'unknown directive "-st-something"', file: 'main.css' }]
+                );
             });
         });
         describe('pseudo selectors', () => {
             xit('should return warning for native pseudo elements without selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |::before|{
 
                     }
-                `, [{
-                        message: 'global pseudo elements are not allowed, you can use ".root::before" instead',
-                        file: 'main.css'
-                    }]);
+                `,
+                    [
+                        {
+                            message:
+                                'global pseudo elements are not allowed, you can use ".root::before" instead',
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
 
             describe('elements', () => {
@@ -164,10 +192,12 @@ describe('diagnostics: warnings and errors', () => {
                             }
                         }
                     };
-                    expectWarningsFromTransform(
-                        config,
-                        [{ message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'), file: '/main.css' }]
-                    );
+                    expectWarningsFromTransform(config, [
+                        {
+                            message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
+                            file: '/main.css'
+                        }
+                    ]);
                 });
                 it('should not warn on vendor prefixed pseudo element', () => {
                     const config = {
@@ -181,10 +211,7 @@ describe('diagnostics: warnings and errors', () => {
                             }
                         }
                     };
-                    expectWarningsFromTransform(
-                        config,
-                        []
-                    );
+                    expectWarningsFromTransform(config, []);
                 });
                 it('should not warn on vendor prefixed pseudo class', () => {
                     const config = {
@@ -198,10 +225,7 @@ describe('diagnostics: warnings and errors', () => {
                             }
                         }
                     };
-                    expectWarningsFromTransform(
-                        config,
-                        []
-                    );
+                    expectWarningsFromTransform(config, []);
                 });
                 nativePseudoElements.forEach(nativeElement => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
@@ -224,55 +248,71 @@ describe('diagnostics: warnings and errors', () => {
     });
 
     describe('structure', () => {
-
         describe('root', () => {
             it('should return warning for ".root" after a selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |.gaga .root|{}
-                `, [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]);
+                `,
+                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
+                );
             });
 
             it('should return warning for ".root" after global and local classes', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:global(*) .x .root|{}
-                `, [
-                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
-                ]);
+                `,
+                    [{ message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }]
+                );
             });
 
             it('should return warning for ".root" after a global and element', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:global(*) div .root|{}
-                `, [
-                    { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
-                    { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
-                ]);
+                `,
+                    [
+                        { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
+                        { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
+                    ]
+                );
             });
 
             it('should not return warning for ".root" after a global selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :global(*) .root{}
-                `, []);
+                `,
+                    []
+                );
             });
 
             it('should not return warning for ".root" after a complex global selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :global(body[dir="rtl"] > header) .root {}
-                `, []);
+                `,
+                    []
+                );
             });
         });
 
         describe('-st-mixin', () => {
             it('should return warning for unknown mixin', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .gaga{
                         |-st-mixin: $myMixin$|;
                     }
-                `, [{ message: processorWarnings.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]);
+                `,
+                    [{ message: processorWarnings.UNKNOWN_MIXIN('myMixin'), file: 'main.css' }]
+                );
             });
 
             it('should return a warning for a CSS mixin using un-named params', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .mixed {
                         color: red;
                     }
@@ -280,10 +320,14 @@ describe('diagnostics: warnings and errors', () => {
                         |-st-mixin: mixed($1$)|;
                     }
 
-                `, [{
-                    message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
-                    file: 'main.css'
-                }]);
+                `,
+                    [
+                        {
+                            message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
 
             it('should add error when attempting to mix in an unknown mixin symbol', () => {
@@ -306,10 +350,17 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                // tslint:disable-next-line:max-line-length
+
                 expectWarningsFromTransform(config, [
-                    // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('my-mixin', './imported.st.css'), file: '/main.css', skip: true, skipLocationCheck: true },
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                            'my-mixin',
+                            './imported.st.css'
+                        ),
+                        file: '/main.css',
+                        skip: true,
+                        skipLocationCheck: true
+                    },
                     { message: mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'), file: '/main.css' }
                 ]);
             });
@@ -334,8 +385,16 @@ describe('diagnostics: warnings and errors', () => {
                 const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
                 const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
                 expectWarningsFromTransform(config, [
-                    { message: mixinWarnings.CIRCULAR_MIXIN(xPath), file: '/main.css', skipLocationCheck: true },
-                    { message: mixinWarnings.CIRCULAR_MIXIN(yPath), file: '/main.css', skipLocationCheck: true }
+                    {
+                        message: mixinWarnings.CIRCULAR_MIXIN(xPath),
+                        file: '/main.css',
+                        skipLocationCheck: true
+                    },
+                    {
+                        message: mixinWarnings.CIRCULAR_MIXIN(yPath),
+                        file: '/main.css',
+                        skipLocationCheck: true
+                    }
                 ]);
             });
 
@@ -363,8 +422,12 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'),
+                        file: '/main.css'
+                    }
+                ]);
             });
 
             it('js mixin must be a function', () => {
@@ -389,8 +452,10 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                // tslint:disable-next-line:max-line-length
-                expectWarningsFromTransform(config, [{ message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' }]);
+
+                expectWarningsFromTransform(config, [
+                    { message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' }
+                ]);
             });
 
             it('should not add warning when mixin value is a string', () => {
@@ -413,8 +478,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }
+                ]);
             });
 
             it('should warn about non-existing variables in mixin overrides', () => {
@@ -431,8 +497,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }
+                ]);
             });
 
             it('should warn about non-existing variables in a multi-argument mixin override', () => {
@@ -456,41 +523,67 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }
+                ]);
             });
         });
 
         describe(':vars', () => {
             it('should return warning when defined in a complex selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                 |.gaga:vars|{
                     myColor:red;
                 }
 
                 `,
-                // tslint:disable-next-line:max-line-length
-                [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(rootValueMapping.vars), file: 'main.css' }]);
+
+                    [
+                        {
+                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                rootValueMapping.vars
+                            ),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
         });
 
         describe(':import', () => {
             it('should return warning when defined in a complex selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |.gaga:import|{
                         -st-from:"./file.st.css";
                         -st-default:Comp;
                     }
-                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'), file: 'main.css' }]);
+                `,
+                    [
+                        {
+                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
 
             it('should return warning when default import is defined with a lowercase first letter', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import{
                         -st-from:"./file.st.css";
                         |-st-default: $comp$;|
                     }
-                `, [{ message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), file: 'main.css' }]);
+                `,
+                    [
+                        {
+                            message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
 
             it('should return a warning for non import rules inside imports', () => {
@@ -515,45 +608,66 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'), file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'),
+                        file: '/main.st.css'
+                    }
+                ]);
             });
 
             it('should return a warning for import with missing "-st-from" declaration', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:import{
                         -st-default:Comp;
                     }|
-                `, [{ message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(), file: 'main.st.css' }]
+                `,
+                    [
+                        {
+                            message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(),
+                            file: 'main.st.css'
+                        }
+                    ]
                 );
             });
 
             it('should return a warning for import with empty "-st-from" declaration', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import{
                         |-st-from: "   ";|
                         -st-default: Comp;
                     }
-                `, [{ severity: 'error', message: processorWarnings.EMPTY_IMPORT_FROM(), file: 'main.st.css' }]
+                `,
+                    [
+                        {
+                            severity: 'error',
+                            message: processorWarnings.EMPTY_IMPORT_FROM(),
+                            file: 'main.st.css'
+                        }
+                    ]
                 );
             });
 
             it('should return a warning for multiple "-st-from" declarations', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:import{
                         -st-from: "a";
                         -st-from: "b";
                         -st-default: Comp;
                     }|
-                `, [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
+                `,
+                    [{ message: processorWarnings.MULTIPLE_FROM_IN_IMPORT(), file: 'main.st.css' }]
                 );
             });
-
         });
 
         describe('-st-extends', () => {
             it('should return warning when defined under complex selector', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import{
                         -st-from:"./file";
                         -st-default:Comp;
@@ -561,7 +675,16 @@ describe('diagnostics: warnings and errors', () => {
                     .root:hover{
                         |-st-extends|:Comp;
                     }
-                `, [{ message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR('-st-extends'), file: 'main.css' }]);
+                `,
+                    [
+                        {
+                            message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
+                                '-st-extends'
+                            ),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
 
             it('Only import of type class can be used to extend', () => {
@@ -588,8 +711,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' }
+                ]);
             });
             it('should warn if extends by js import', () => {
                 const config = {
@@ -611,8 +735,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' }
+                ]);
             });
             it('should warn if named extends does not exist', () => {
                 const config = {
@@ -635,17 +760,26 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config, [
-                    // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('special', './file.st.css'), file: '/main.css', skipLocationCheck: true },
-                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'), file: '/main.css' }
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                            'special',
+                            './file.st.css'
+                        ),
+                        file: '/main.css',
+                        skipLocationCheck: true
+                    },
+                    {
+                        message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'),
+                        file: '/main.css'
+                    }
                 ]);
             });
         });
 
         describe('override -st-* warnings', () => {
-
             it('should warn on typed class extend override', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from : './file.css';
                         -st-default: Comp;
@@ -656,9 +790,17 @@ describe('diagnostics: warnings and errors', () => {
                     .root {
                         |-st-extends: Comp;|
                     }
-                `, [
-                    { message: processorWarnings.OVERRIDE_TYPED_RULE(valueMapping.extends, 'root'), file: 'main.css' }
-                ]);
+                `,
+                    [
+                        {
+                            message: processorWarnings.OVERRIDE_TYPED_RULE(
+                                valueMapping.extends,
+                                'root'
+                            ),
+                            file: 'main.css'
+                        }
+                    ]
+                );
             });
         });
     });
@@ -679,7 +821,9 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 }
             };
-            expectWarningsFromTransform(config, [{ message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' }]);
+            expectWarningsFromTransform(config, [
+                { message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' }
+            ]);
         });
 
         describe('from import', () => {
@@ -711,24 +855,38 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config, [
-                    // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('momo', './import.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
-                    { message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'), file: '/main.st.css' }
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                            'momo',
+                            './import.st.css'
+                        ),
+                        file: '/main.st.css',
+                        skip: true,
+                        skipLocationCheck: true
+                    },
+                    {
+                        message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'),
+                        file: '/main.st.css'
+                    }
                 ]);
             });
 
             it('should warn when import redeclare same symbol (in same block)', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:import {
                         -st-from: './file.st.css';
                         -st-default: Name;
                         -st-named: $Name$;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
+                `,
+                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                );
             });
 
             it('should warn when import redeclare same symbol (in different block)', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: './file.st.css';
                         -st-default: Name;
@@ -737,11 +895,14 @@ describe('diagnostics: warnings and errors', () => {
                         -st-from: './file.st.css';
                         -st-default: $Name$;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
+                `,
+                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                );
             });
 
             it('should warn when import redeclare same symbol (in different block types)', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: './file.st.css';
                         -st-default: Name;
@@ -749,11 +910,11 @@ describe('diagnostics: warnings and errors', () => {
                     :vars {
                         |$Name$: red;
                     }
-                `, [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]);
+                `,
+                    [{ message: processorWarnings.REDECLARE_SYMBOL('Name'), file: 'main.st.css' }]
+                );
             });
-
         });
-
     });
 
     describe('complex examples', () => {
@@ -782,9 +943,16 @@ describe('diagnostics: warnings and errors', () => {
                     }
                 };
                 expectWarningsFromTransform(config, [
-                    // tslint:disable-next-line:max-line-length
-                    { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
-                    { message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'), file: '/main.st.css' }
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'),
+                        file: '/main.st.css',
+                        skip: true,
+                        skipLocationCheck: true
+                    },
+                    {
+                        message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'),
+                        file: '/main.st.css'
+                    }
                 ]);
             });
         });
@@ -793,7 +961,8 @@ describe('diagnostics: warnings and errors', () => {
     describe('selectors', () => {
         // TODO2: next phase
         xit('should not allow conflicting extends', () => {
-            expectWarnings(`
+            expectWarnings(
+                `
                 :import {
                     -st-from: "./sheetA";
                     -st-named: SheetA;
@@ -808,45 +977,61 @@ describe('diagnostics: warnings and errors', () => {
                 .my-a.my-b {}
                 SheetA.my-b {}
                 SheetB.my-a {}
-            `, [
-                    { message: 'conflicting extends matching same target [.my-a.my-b]', file: 'main.css' },
-                    { message: 'conflicting extends matching same target [SheetA.my-b]', file: 'main.css' },
-                    { message: 'conflicting extends matching same target [SheetB.my-a]', file: 'main.css' }
+            `,
+                [
+                    {
+                        message: 'conflicting extends matching same target [.my-a.my-b]',
+                        file: 'main.css'
+                    },
+                    {
+                        message: 'conflicting extends matching same target [SheetA.my-b]',
+                        file: 'main.css'
+                    },
+                    {
+                        message: 'conflicting extends matching same target [SheetB.my-a]',
+                        file: 'main.css'
+                    }
                 ]
             );
         });
 
         describe('root scoping disabled', () => {
             it('should not warn when using native elements with root scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .root button {}
-                `, []);
+                `,
+                    []
+                );
             });
 
             it('should not warn when using native elements after scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     .class {}
                     .class button {}
-                `, []);
+                `,
+                    []
+                );
             });
 
             it('should warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: "./blah.st.css";
                         -st-named: Blah;
                     }
 
                     |.$Blah$| {}
-                `, [
-                    { message: processorWarnings.UNSCOPED_CLASS('Blah'), file: 'main.css' }
-
-                ]);
+                `,
+                    [{ message: processorWarnings.UNSCOPED_CLASS('Blah'), file: 'main.css' }]
+                );
             });
 
-            
             it('should not warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: "./blah.st.css";
                         -st-named: someClass;
@@ -859,52 +1044,55 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
 
-                `, [
-                    
-
-                ]);
+                `,
+                    []
+                );
             });
 
             it('should warn regardless if using a global before the element', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |:global(div) $button$| {}
-                `, [
-                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
-                ]);
+                `,
+                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                );
             });
 
             it('should warn when using imported element with no root scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: "./blah.st.css";
                         -st-default: Blah;
                     }
 
                     |$Blah$| {}
-                `, [
-                    { message: processorWarnings.UNSCOPED_ELEMENT('Blah'), file: 'main.css' }
-                ]);
+                `,
+                    [{ message: processorWarnings.UNSCOPED_ELEMENT('Blah'), file: 'main.css' }]
+                );
             });
 
             it('should warn when using native elements without scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     |$button$| {}
-                `, [
-                    { message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }
-                ]);
+                `,
+                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                );
             });
 
             it('should warn when using imported elements (classes) without scoping', () => {
-                expectWarnings(`
+                expectWarnings(
+                    `
                     :import {
                         -st-from: "./blah.st.css";
                         -st-named: blah;
                     }
 
                     |.$blah$| {}
-                `, [
-                    { message: processorWarnings.UNSCOPED_CLASS('blah'), file: 'main.css' }
-                ]);
+                `,
+                    [{ message: processorWarnings.UNSCOPED_CLASS('blah'), file: 'main.css' }]
+                );
             });
         });
     });
@@ -924,8 +1112,9 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' }]);
+                expectWarningsFromTransform(config, [
+                    { message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' }
+                ]);
             });
         });
 
@@ -953,9 +1142,19 @@ describe('diagnostics: warnings and errors', () => {
                 }
             };
             expectWarningsFromTransform(config, [
-                // tslint:disable-next-line:max-line-length
-                { message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('inner-class', './imported.st.css'), file: '/main.st.css', skip: true, skipLocationCheck: true },
-                { message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'), file: '/main.st.css' }
+                {
+                    message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                        'inner-class',
+                        './imported.st.css'
+                    ),
+                    file: '/main.st.css',
+                    skip: true,
+                    skipLocationCheck: true
+                },
+                {
+                    message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'),
+                    file: '/main.st.css'
+                }
             ]);
         });
 
@@ -974,8 +1173,12 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'), file: '/main.st.css' }]);
+                expectWarningsFromTransform(config, [
+                    {
+                        message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
+                        file: '/main.st.css'
+                    }
+                ]);
             });
 
             it('should error on unresolved file from third party', () => {
@@ -992,9 +1195,18 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    // tslint:disable-next-line:max-line-length
-                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_FILE('missing-package/index.st.css'), file: '/main.st.css' }]);
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_FILE(
+                                'missing-package/index.st.css'
+                            ),
+                            file: '/main.st.css'
+                        }
+                    ]
+                );
             });
 
             it('should error on unresolved named symbol', () => {
@@ -1015,9 +1227,19 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    // tslint:disable-next-line:max-line-length
-                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                'Missing',
+                                './imported.st.css'
+                            ),
+                            file: '/main.st.css'
+                        }
+                    ]
+                );
             });
 
             it('should error on unresolved named symbol with alias', () => {
@@ -1038,9 +1260,19 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                expectWarningsFromTransform(config,
-                    // tslint:disable-next-line:max-line-length
-                    [{ message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('Missing', './imported.st.css'), file: '/main.st.css' }]);
+                expectWarningsFromTransform(
+                    config,
+
+                    [
+                        {
+                            message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
+                                'Missing',
+                                './imported.st.css'
+                            ),
+                            file: '/main.st.css'
+                        }
+                    ]
+                );
             });
         });
     });

@@ -170,7 +170,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
                 '.ns__root:not(.ns1__root)::before'
             );
-            // tslint:disable:max-line-length
+
             (createWarningRule(
                 'root',
                 'ns1__root',
@@ -622,7 +622,6 @@ describe('Stylable postcss transform (Scoping)', () => {
         });
 
         it('should only lookup in the extedns chain', () => {
-
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -699,13 +698,13 @@ describe('Stylable postcss transform (Scoping)', () => {
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
-            // tslint:disable-next-line:max-line-length
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep .ns0__deepest');
 
+            expect((result.nodes![2] as postcss.Rule).selector).to.equal(
+                '.ns4__gaga .ns1__deep .ns0__deepest'
+            );
         });
 
         it('should scope multiple selectors with a pseudo element passed through a mixin', () => {
-
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
                 files: {
@@ -744,7 +743,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 }
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.style__root .comp__partA, .style__root .comp__partB');
+            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+                '.style__root .comp__partA, .style__root .comp__partB'
+            );
         });
     });
 

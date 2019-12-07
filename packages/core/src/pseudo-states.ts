@@ -25,7 +25,6 @@ export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
 
-/* tslint:disable:max-line-length */
 export const stateErrors = {
     UNKNOWN_STATE_USAGE: (name: string) => `unknown pseudo-state "${name}"`,
     UNKNOWN_STATE_TYPE: (name: string, type: string) =>
@@ -41,7 +40,6 @@ export const stateErrors = {
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
         `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
 };
-/* tslint:enable:max-line-length */
 
 // PROCESS
 
@@ -210,11 +208,8 @@ export function validateStateDefinition(
                                 );
 
                                 if (res.errors) {
-                                    // tslint:disable-next-line:max-line-length
                                     res.errors.unshift(
-                                        `pseudo-state "${stateName}" default value "${
-                                            state.defaultValue
-                                        }" failed validation:`
+                                        `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
                                     );
                                     diagnostics.warn(decl, res.errors.join('\n'), {
                                         word: decl.value
@@ -456,7 +451,6 @@ export function resolveStateParam(param: string) {
     if (isValidClassName(param)) {
         return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param}`;
     } else {
-        // tslint:disable-next-line: max-line-length
         return `${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${stripQuotation(
             JSON.stringify(param).replace(/\s/gm, '_')
         )}`;

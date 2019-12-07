@@ -360,7 +360,6 @@ export function createWarningRule(
     extendingFile: string,
     useScoped = false
 ) {
-    // tslint:disable-next-line:max-line-length
     const message = `"class extending component '.${extendingNode} => ${scopedExtendingNode}' in stylesheet '${extendingFile}' was set on a node that does not extend '.${extendedNode} => ${scopedExtendedNode}' from stylesheet '${extendedFile}'" !important`;
     return postcss.rule({
         selector: `.${useScoped ? scopedExtendingNode : extendingNode}:not(.${

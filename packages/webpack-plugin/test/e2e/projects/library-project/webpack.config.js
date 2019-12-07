@@ -1,20 +1,20 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: "development",
-  context: __dirname,
-  devtool: "source-map",
-  output: {
-    library: "Library",
-    libraryTarget: "umd"
-  },
-  plugins: [
-    new StylableWebpackPlugin({
-      bootstrap: {
-        autoInit: false
-      }
-    }),
-    new HtmlWebpackPlugin()
-  ]
+    mode: 'development',
+    context: __dirname,
+    devtool: 'source-map',
+    output: {
+        library: 'Library',
+        libraryTarget: 'umd'
+    },
+    plugins: [
+        new StylableWebpackPlugin({
+            bootstrap: {
+                autoInit: false
+            }
+        }),
+        new HtmlWebpackPlugin()
+    ]
 };

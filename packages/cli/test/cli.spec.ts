@@ -7,10 +7,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
 
 function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
-    return spawnSync('node', [
-        join(__dirname, '../cli.js'),
-        ...cliArgs
-    ]);
+    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs]);
 }
 
 interface Files {
@@ -202,7 +199,7 @@ describe('Stylable Cli', () => {
         const m = JSON.parse(dirContent[file]);
         expect(m.namespaceMapping).eql({ 'style.st.css': 'test-ns-0' });
     });
-    
+
     it('manifestFilepath', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
