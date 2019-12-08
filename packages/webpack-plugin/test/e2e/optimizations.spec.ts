@@ -35,24 +35,35 @@ describe(`(${project})`, () => {
             {
                 id: './src/index.st.css',
                 depth: '3',
-                // tslint:disable-next-line: max-line-length
-                css: '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}'
+
+                css:
+                    '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}'
             }
         ]);
     });
 
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
-        // tslint:disable-next-line: max-line-length
-        const { fontFamily, backgroundColor, classes, stVars, namespace, global1ClassColor, global2ClassColor } = await page.evaluate(() => {
+
+        const {
+            fontFamily,
+            backgroundColor,
+            classes,
+            stVars,
+            namespace,
+            global1ClassColor,
+            global2ClassColor
+        } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
                 fontFamily: getComputedStyle(document.documentElement!).fontFamily,
                 classes: (window as any).stylableClasses,
                 namespace: (window as any).namespace,
                 stVars: (window as any).stVars,
-                global1ClassColor: getComputedStyle(document.querySelector('.global1')!).backgroundColor,
-                global2ClassColor: getComputedStyle(document.querySelector('.global2')!).backgroundColor
+                global1ClassColor: getComputedStyle(document.querySelector('.global1')!)
+                    .backgroundColor,
+                global2ClassColor: getComputedStyle(document.querySelector('.global2')!)
+                    .backgroundColor
             };
         });
 

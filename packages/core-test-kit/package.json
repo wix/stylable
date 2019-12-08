@@ -14,7 +14,7 @@
     "@stylable/core": "^2.5.3",
     "chai": "^4.2.0",
     "flat": "^5.0.0",
-    "postcss": "^7.0.23"
+    "postcss": "^7.0.24"
   },
   "files": [
     "cjs",

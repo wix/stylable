@@ -13,9 +13,9 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
         alias: {
-            "source-map": __dirname + '/empty-object.js',
-            "chalk": __dirname + '/empty-object.js',
-            "support-color": __dirname + '/empty-object.js'
+            'source-map': __dirname + '/empty-object.js',
+            chalk: __dirname + '/empty-object.js',
+            'support-color': __dirname + '/empty-object.js'
         }
     },
     node: {
@@ -33,5 +33,4 @@ module.exports = {
         // new IgnorePlugin(/(source-map)|(chalk)|(support-color)/,/node_modules/),
         new WBA()
     ]
-}
-
+};

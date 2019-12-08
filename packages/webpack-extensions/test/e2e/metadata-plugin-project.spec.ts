@@ -1,4 +1,3 @@
-// tslint:disable:max-line-length
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
@@ -81,9 +80,7 @@ describe(`(${project})`, () => {
                     variantsPath: '/test/src/variants',
                     namespace: 'o0',
                     stylesheetPath: '/test/src/index.st.css',
-                    snapshots: [
-                        '<snapshot>index.js</snapshot>'
-                    ]
+                    snapshots: ['<snapshot>index.js</snapshot>']
                 }
             },
             packages: {
@@ -119,7 +116,6 @@ describe(`(${project})`, () => {
 
             expectMetadataJSON(e);
         });
-
     });
 
     describe('amd static mode', () => {
@@ -142,7 +138,6 @@ describe(`(${project})`, () => {
 
             expectMetadataJSON(e);
         });
-
     });
 
     describe('amd factory mode', () => {
@@ -165,7 +160,6 @@ describe(`(${project})`, () => {
 
             expectMetadataJSON(e);
         });
-
     });
 });
 

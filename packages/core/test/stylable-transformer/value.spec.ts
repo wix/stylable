@@ -207,7 +207,9 @@ describe('Generator variables interpolation', () => {
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
         expect((rule.nodes![0] as postcss.Declaration).value).to.equal('xxx(green)');
-        expect(meta.transformDiagnostics!.reports[0].message).to.equal(functionWarnings.UNKNOWN_FORMATTER('xxx'));
+        expect(meta.transformDiagnostics!.reports[0].message).to.equal(
+            functionWarnings.UNKNOWN_FORMATTER('xxx')
+        );
     });
 
     xit('should resolve value() usage in mixin call', () => {

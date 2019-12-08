@@ -419,7 +419,7 @@ export class StylableWebpackPlugin {
                 } else {
                     const id = this.options.globalRuntimeId;
                     const globalObj = compilation.outputOptions.globalObject;
-                    // tslint:disable-next-line:max-line-length
+
                     const injected = `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
                     if (this.options.runtimeMode === 'shared') {
                         return `${runtimeSource};\n${injected}`;

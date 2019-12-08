@@ -4,7 +4,7 @@ import { basename } from 'path';
 
 function filename2varname(filePath: string) {
     const varname = basename(basename(filePath, '.css'), '.st') // remove prefixes
-        .replace(/^\d+/, '');                                   // remove leading numbers
+        .replace(/^\d+/, ''); // remove leading numbers
     return upperfirst(camelcase(varname));
 }
 

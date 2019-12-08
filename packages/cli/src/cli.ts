@@ -80,11 +80,11 @@ const argv = require('yargs')
     .boolean('minify')
     .describe('minify', 'minify generated css')
     .default('minify', false)
-    
+
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
-    
+
     .option('manifest')
     .boolean('manifest')
     .describe('manifest', 'should output manifest file')

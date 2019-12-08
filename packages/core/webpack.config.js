@@ -1,6 +1,6 @@
 const { join } = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-const testFiles = require('glob').sync("./test/**/*.spec.ts");
+const testFiles = require('glob').sync('./test/**/*.spec.ts');
 const first = testFiles.shift();
 const withMochaLoader = [`mocha-loader!${first}`].concat(testFiles);
 
@@ -29,5 +29,4 @@ module.exports = {
             }
         ]
     }
-}
-
+};

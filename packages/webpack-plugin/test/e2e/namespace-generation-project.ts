@@ -22,15 +22,18 @@ describe(`(${project})`, () => {
         const {
             name: localPackageName,
             version: localPackageVersion
-         } = require('./projects/namespace-generation-project/package.json');
+        } = require('./projects/namespace-generation-project/package.json');
         const {
             name: externalPackageName,
             version: externalPackageVersion
         } = require('./projects/namespace-generation-project/node_modules/test-package/package.json');
-        // tslint:disable:max-line-length
-        const expectedLocalClassname = 'index' + hash.v3(localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css');
-        const expectedImportedClassname = 'index' + hash.v3(externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css');
-        // tslint:enable:max-line-length
+
+        const expectedLocalClassname =
+            'index' +
+            hash.v3(localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css');
+        const expectedImportedClassname =
+            'index' +
+            hash.v3(externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css');
 
         const source: string = projectRunner.getBuildAsset('main.js');
         const testPackage = projectRunner.evalAssetModule(source).testPackage;

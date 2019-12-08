@@ -1,10 +1,5 @@
 import { RuntimeRenderer } from './css-runtime-renderer';
-import {
-    RuntimeStylesheet,
-    StateMap,
-    StateValue,
-    StylableExports
-} from './types';
+import { RuntimeStylesheet, StateMap, StateValue, StylableExports } from './types';
 
 const stateMiddleDelimiter = '-';
 const booleanStateDelimiter = '--';
@@ -18,7 +13,6 @@ export function create(
     id: string | number,
     renderer: RuntimeRenderer | null
 ): RuntimeStylesheet {
-
     const stylesheet: RuntimeStylesheet = {
         namespace,
         classes: exports.classes,
@@ -54,8 +48,9 @@ export function create(
     }
 
     function createStateWithParamClassName(stateName: string, param: string) {
-        // tslint:disable-next-line: max-line-length
-        return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${param.length}${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
+        return `${namespace}${stateWithParamDelimiter}${stateName}${stateMiddleDelimiter}${
+            param.length
+        }${stateMiddleDelimiter}${param.replace(/\s/gm, '_')}`;
     }
 
     function createStateClass(stateName: string, stateValue: StateValue): string {
@@ -68,7 +63,8 @@ export function create(
             return '';
         }
 
-        if (stateValue === true) { // boolean state
+        if (stateValue === true) {
+            // boolean state
             return createBooleanStateClassName(stateName);
         }
 

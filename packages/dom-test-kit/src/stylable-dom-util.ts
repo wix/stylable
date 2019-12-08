@@ -1,4 +1,10 @@
-import { isValidClassName, parseSelector, pseudoStates, stringifySelector, traverseNode } from '@stylable/core';
+import {
+    isValidClassName,
+    parseSelector,
+    pseudoStates,
+    stringifySelector,
+    traverseNode
+} from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
 export interface PartialElement {

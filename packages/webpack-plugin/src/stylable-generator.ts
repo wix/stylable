@@ -56,7 +56,14 @@ export class StylableGenerator {
                   });
 
         return new ReplaceSource(
-            this.createModuleSource(module, id, stylableResult, css, depth, !isImportedByNonStylable)
+            this.createModuleSource(
+                module,
+                id,
+                stylableResult,
+                css,
+                depth,
+                !isImportedByNonStylable
+            )
         );
     }
     public transform(module: StylableModule) {
@@ -111,7 +118,6 @@ export class StylableGenerator {
         depth: string | number,
         renderableOnly = false
     ) {
-
         const moduleSource = generateModuleSource(
             stylableResult,
             moduleId,

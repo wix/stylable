@@ -5,7 +5,10 @@ module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({useEntryModuleInjection: true}), new HtmlWebpackPlugin()],
+    plugins: [
+        new StylableWebpackPlugin({ useEntryModuleInjection: true }),
+        new HtmlWebpackPlugin()
+    ],
     optimization: {
         splitChunks: {
             minSize: 0,

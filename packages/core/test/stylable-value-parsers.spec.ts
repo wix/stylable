@@ -38,7 +38,7 @@ describe('stylable-value-parsers', () => {
             }
         ]);
     });
-    
+
     it('multiple named arguments with a trailing comma', () => {
         expect(parseMixin('Button(color red, size 2px,)')).to.eql([
             {

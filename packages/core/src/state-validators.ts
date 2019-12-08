@@ -5,7 +5,6 @@ export interface StateResult {
     errors: string[] | null;
 }
 
-/* tslint:disable:max-line-length */
 const validationErrors = {
     string: {
         STRING_TYPE_VALIDATION_FAILED: (actualParam: string) =>
@@ -41,7 +40,6 @@ const validationErrors = {
             `expected "${actualParam}" to be a single value with no spaces`
     }
 };
-/* tslint:enable:max-line-length */
 
 export type SubValidator = (value: string, ...rest: string[]) => StateResult;
 

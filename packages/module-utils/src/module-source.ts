@@ -70,7 +70,10 @@ export function createModuleSource(
                 includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
                 depth,
                 'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }', // = $
-                [`export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`, ...afterModule].join('\n'),
+                [
+                    `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
+                    ...afterModule
+                ].join('\n'),
                 renderableOnly
             );
         case 'cjs':

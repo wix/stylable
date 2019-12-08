@@ -21,9 +21,7 @@ export interface MetadataOptions {
 }
 
 export class StylableMetadataPlugin {
-    constructor(
-        private options: MetadataOptions
-    ) {}
+    constructor(private options: MetadataOptions) {}
     public apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
             compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
@@ -40,10 +38,7 @@ export class StylableMetadataPlugin {
             )
         );
     }
-    private loadJSON<T>(
-        fs: { readFileSync(path: string): Buffer },
-        resource: string
-    ): T | null {
+    private loadJSON<T>(fs: { readFileSync(path: string): Buffer }, resource: string): T | null {
         try {
             return JSON.parse(fs.readFileSync(resource).toString());
         } catch (e) {
@@ -116,9 +111,15 @@ export class StylableMetadataPlugin {
             const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
             let fileContent = jsonSource;
             switch (this.options.mode) {
-                case 'cjs':         fileContent = `module.exports = ${fileContent}`; break;
-                case 'amd:static':  fileContent = `define(${fileContent});`; break;
-                case 'amd:factory': fileContent = `define(() => { return ${fileContent}; });`; break;
+                case 'cjs':
+                    fileContent = `module.exports = ${fileContent}`;
+                    break;
+                case 'amd:static':
+                    fileContent = `define(${fileContent});`;
+                    break;
+                case 'amd:factory':
+                    fileContent = `define(() => { return ${fileContent}; });`;
+                    break;
             }
             compilation.assets[fileName] = new RawSource(fileContent);
         }
@@ -134,13 +135,17 @@ export class StylableMetadataPlugin {
     ) {
         if (componentConfig.variantsPath) {
             const variantsDir = join(componentDir, componentConfig.variantsPath);
-         
-            const { result: variants, errors } = findFiles(compilation.inputFileSystem, variantsDir, '.st.css', new Set(), true)
-            if(errors.length) {
+
+            const { result: variants, errors } = findFiles(
+                compilation.inputFileSystem,
+                variantsDir,
+                '.st.css',
+                new Set(),
+                true
+            );
+            if (errors.length) {
                 throw new Error(
-                    `Error while reading variants for: ${
-                        componentConfig.id
-                    } in ${variantsDir}\nOriginal Errors:\n${ errors }`
+                    `Error while reading variants for: ${componentConfig.id} in ${variantsDir}\nOriginal Errors:\n${errors}`
                 );
             }
 
@@ -157,13 +162,19 @@ export class StylableMetadataPlugin {
                         `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`
                     );
                 }
-                if(name.includes('_')){
+                if (name.includes('_')) {
                     throw new Error(
                         `Error variant name or folder cannot contain "_" found in: ${name}`
                     );
                 }
                 builder.addSource(variantPath, content, {
-                    namespace: name.replace(/\\/g, '/').replace(/\//g, '_').replace('.st.css', '') + '-' + namespace,
+                    namespace:
+                        name
+                            .replace(/\\/g, '/')
+                            .replace(/\//g, '_')
+                            .replace('.st.css', '') +
+                        '-' +
+                        namespace,
                     variant: true,
                     depth
                 });

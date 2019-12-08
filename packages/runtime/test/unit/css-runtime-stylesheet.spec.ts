@@ -10,7 +10,7 @@ describe('Stylable runtime stylesheet', () => {
                 keyframes: {},
                 vars: {},
                 stVars: {}
-             },
+            },
             '',
             0,
             'test-stylesheet.st.css',
@@ -28,7 +28,7 @@ describe('Stylable runtime stylesheet', () => {
                 keyframes: {},
                 vars: {},
                 stVars: {}
-             },
+            },
             '',
             0,
             'test-stylesheet.st.css',
@@ -50,7 +50,7 @@ describe('Stylable runtime stylesheet', () => {
                 keyframes: {},
                 vars: { myVar: '--entry-myVar' },
                 stVars: {}
-             },
+            },
             '',
             0,
             'test-stylesheet.st.css',
@@ -59,7 +59,7 @@ describe('Stylable runtime stylesheet', () => {
 
         expect(stylesheet.vars.myVar).to.equal('--entry-myVar');
     });
-    
+
     it('style and st alias', () => {
         const stylesheet = create(
             'entry',
@@ -68,7 +68,7 @@ describe('Stylable runtime stylesheet', () => {
                 keyframes: {},
                 vars: { myVar: '--entry-myVar' },
                 stVars: {}
-             },
+            },
             '',
             0,
             'test-stylesheet.st.css',

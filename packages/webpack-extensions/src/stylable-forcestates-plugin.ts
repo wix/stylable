@@ -12,13 +12,10 @@ import postcss from 'postcss';
 // This transformation is applied on target AST code
 // Not Stylable source AST
 
-const nativePseudoClassesMap = nativePseudoClasses.reduce(
-    (acc, name: string) => {
-        acc[name] = true;
-        return acc;
-    },
-    {} as Record<string, boolean>
-);
+const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name: string) => {
+    acc[name] = true;
+    return acc;
+}, {} as Record<string, boolean>);
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
@@ -82,15 +79,12 @@ export function addForceStateSelectors(ast: postcss.Root, context: AddForceState
     ast.walkRules(rule => {
         const selectorAst = parseSelector(rule.selector);
 
-        const overrideSelectors = selectorAst.nodes.reduce(
-            (selectors, selector) => {
-                if (hasStates(selector, context)) {
-                    selectors.push(transformStates(cloneDeep(selector), context));
-                }
-                return selectors;
-            },
-            [] as SelectorAstNode[]
-        );
+        const overrideSelectors = selectorAst.nodes.reduce((selectors, selector) => {
+            if (hasStates(selector, context)) {
+                selectors.push(transformStates(cloneDeep(selector), context));
+            }
+            return selectors;
+        }, [] as SelectorAstNode[]);
 
         if (overrideSelectors.length) {
             selectorAst.nodes.push(...overrideSelectors);

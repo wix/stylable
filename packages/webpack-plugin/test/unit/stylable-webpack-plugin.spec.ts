@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import { StylableWebpackPlugin } from '../../src';
 
 describe('StylableWebpackPlugin Unit', () => {
@@ -9,12 +9,12 @@ describe('StylableWebpackPlugin Unit', () => {
                 return {
                     options(options: any) {
                         expect(options.test, 'top level option').to.equal(true);
-                        return {...options, fromConfig: true};
+                        return { ...options, fromConfig: true };
                     }
                 };
             }
         }
-        const plugin = new Test({test: true} as any);
+        const plugin = new Test({ test: true } as any);
         plugin.normalizeOptions();
         plugin.overrideOptionsWithLocalConfig('.');
 

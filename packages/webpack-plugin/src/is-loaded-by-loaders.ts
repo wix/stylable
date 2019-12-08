@@ -9,7 +9,9 @@ export function isLoadedByLoaders(module: StylableModule, warn: (m: StylableModu
         isRawOnly =
             module.loaders.length === 1 &&
             module.loaders[0].loader === require.resolve('raw-loader');
-    } catch { /* */}
+    } catch {
+        /* */
+    }
     if (!isRawOnly) {
         warn(module);
     }

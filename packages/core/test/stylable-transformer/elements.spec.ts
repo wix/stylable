@@ -4,7 +4,6 @@ import postcss from 'postcss';
 
 describe('Stylable transform elements', () => {
     describe('scoped elements', () => {
-        // tslint:disable-next-line:max-line-length
         it('component/tag selector with first Capital letter automatically extends reference with identical name', () => {
             const result = generateStylableRoot({
                 entry: `/style.st.css`,
@@ -31,7 +30,6 @@ describe('Stylable transform elements', () => {
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__root');
         });
 
-        // tslint:disable-next-line:max-line-length
         it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,

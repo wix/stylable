@@ -28,7 +28,6 @@ describe(`(${project})`, () => {
         expect(text.index).to.match(/\/\* CONTENT \*\//);
         expect(text.css).to.equal('data:text/css;base64,LyogQ09OVEVOVCAqLw==');
         expect(projectRunner.getBuildWarningMessages()[0]).to.match(
-            // tslint:disable-next-line:max-line-length
             /Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors\.\n".*?" in ".*?"/
         );
     });

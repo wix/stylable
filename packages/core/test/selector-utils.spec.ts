@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import {
     filterChunkNodesByType,
     matchSelectorTarget,
@@ -8,16 +8,15 @@ import {
 } from '../src/selector-utils';
 
 describe('Selector Utils', () => {
-
-    const seperateChunksTestVectors: Array<{ title: string, selector: string, expected: SelectorChunk[][] }> = [
+    const seperateChunksTestVectors: Array<{
+        title: string;
+        selector: string;
+        expected: SelectorChunk[][];
+    }> = [
         {
             title: 'empty selector',
             selector: '',
-            expected: [
-                [
-                    {type: 'selector', nodes: []}
-                ]
-            ]
+            expected: [[{ type: 'selector', nodes: [] }]]
         },
         {
             title: 'class in first chunk',
@@ -26,9 +25,7 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'x'}
-                        ]
+                        nodes: [{ type: 'class', name: 'x' }]
                     }
                 ]
             ]
@@ -40,16 +37,12 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'x'}
-                        ]
+                        nodes: [{ type: 'class', name: 'x' }]
                     },
                     {
                         type: 'spacing',
                         value: ' ',
-                        nodes: [
-                            {type: 'class', name: 'y'}
-                        ]
+                        nodes: [{ type: 'class', name: 'y' }]
                     }
                 ]
             ]
@@ -61,16 +54,12 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'x'}
-                        ]
+                        nodes: [{ type: 'class', name: 'x' }]
                     },
                     {
                         type: 'operator',
                         operator: '+',
-                        nodes: [
-                            {type: 'class', name: 'y'}
-                        ]
+                        nodes: [{ type: 'class', name: 'y' }]
                     }
                 ]
             ]
@@ -82,17 +71,13 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'x'}
-                        ]
+                        nodes: [{ type: 'class', name: 'x' }]
                     }
                 ],
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'y'}
-                        ]
+                        nodes: [{ type: 'class', name: 'y' }]
                     }
                 ]
             ]
@@ -104,17 +89,15 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [
-                            {type: 'class', name: 'x'}
-                        ]
+                        nodes: [{ type: 'class', name: 'x' }]
                     }
                 ],
                 [
                     {
                         type: 'selector',
                         nodes: [
-                            {type: 'class', name: 'y'},
-                            {type: 'pseudo-element', name: 'z'}
+                            { type: 'class', name: 'y' },
+                            { type: 'pseudo-element', name: 'z' }
                         ]
                     }
                 ]
@@ -128,8 +111,8 @@ describe('Selector Utils', () => {
                     {
                         type: 'selector',
                         nodes: [
-                            {type: 'class', name: 'x'},
-                            {type: 'class', name: 'y'}
+                            { type: 'class', name: 'x' },
+                            { type: 'class', name: 'y' }
                         ]
                     }
                 ]
@@ -143,18 +126,22 @@ describe('Selector Utils', () => {
                 expect(separateChunks(parseSelector(test.selector))).to.eql(test.expected);
             });
         });
-
     });
 
     describe('matchSelectorTarget', () => {
         it('source should be composed of only one compound selector', () => {
-            expect(() => matchSelectorTarget('.x,.menu::button', '.x'))
-                .to.throw('source selector must not be composed of more than one compound selector');
+            expect(() => matchSelectorTarget('.x,.menu::button', '.x')).to.throw(
+                'source selector must not be composed of more than one compound selector'
+            );
         });
 
         it('should return true if requesting selector is contained in target selector', () => {
-            expect(matchSelectorTarget('.menu::button', '.x .menu:hover::button'), '1').to.equal(true);
-            expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover'), '2').to.equal(false);
+            expect(matchSelectorTarget('.menu::button', '.x .menu:hover::button'), '1').to.equal(
+                true
+            );
+            expect(matchSelectorTarget('.x .menu::button', '.menu::button::hover'), '2').to.equal(
+                false
+            );
 
             expect(matchSelectorTarget('.menu::button', '.button'), '3').to.equal(false);
             expect(matchSelectorTarget('.menu::button', '.menu'), '4').to.equal(false);
@@ -201,14 +188,32 @@ describe('Selector Utils', () => {
 
     describe('filterChunkNodesByType', () => {
         it('should filter and return only selector nodes which match types specified in array', () => {
-            expect(filterChunkNodesByType({nodes: [{name: '0', type: 'a'}], type: 'dont-care'}, ['a'])).to.eql([{
-                name: '0',
-                type: 'a'
-            }]);
-            expect(filterChunkNodesByType({
-                nodes: [{name: '0', type: 'a'}, {name: '1', type: 'b'}, {name: '2', type: 'c'}],
-                type: 'dont-care'
-            }, ['b', 'a'])).to.eql([{name: '0', type: 'a'}, {name: '1', type: 'b'}]);
+            expect(
+                filterChunkNodesByType({ nodes: [{ name: '0', type: 'a' }], type: 'dont-care' }, [
+                    'a'
+                ])
+            ).to.eql([
+                {
+                    name: '0',
+                    type: 'a'
+                }
+            ]);
+            expect(
+                filterChunkNodesByType(
+                    {
+                        nodes: [
+                            { name: '0', type: 'a' },
+                            { name: '1', type: 'b' },
+                            { name: '2', type: 'c' }
+                        ],
+                        type: 'dont-care'
+                    },
+                    ['b', 'a']
+                )
+            ).to.eql([
+                { name: '0', type: 'a' },
+                { name: '1', type: 'b' }
+            ]);
         });
     });
 });

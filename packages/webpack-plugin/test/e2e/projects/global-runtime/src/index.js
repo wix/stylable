@@ -1,7 +1,7 @@
 import { classes, $id } from './index.st.css';
 
 const div = document.createElement('div');
-div.dataset.name = 'index'
+div.dataset.name = 'index';
 div.classList.add(classes.root);
 
 div.textContent = JSON.stringify(
