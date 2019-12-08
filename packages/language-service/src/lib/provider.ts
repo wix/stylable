@@ -134,15 +134,15 @@ export class Provider {
         position: ProviderPosition,
         filePath: string,
         fs: IFileSystem
-    ): Thenable<ProviderLocation[]> {
+    ): ProviderLocation[] {
         if (!filePath.endsWith('.st.css')) {
-            return Promise.resolve([]);
+            return [];
         }
 
         const callingMeta = this.stylable.process(filePath);
         const { word, meta } = getDefSymbol(src, position, filePath, this.stylable);
         if (!meta || !word) {
-            return Promise.resolve([]);
+            return [];
         }
 
         const defs: ProviderLocation[] = [];
@@ -265,7 +265,7 @@ export class Provider {
             defs.push(new ProviderLocation(meta.source, createRange(0, 0, 0, 0)));
         }
 
-        return Promise.resolve(defs);
+        return defs;
     }
 
     public findMyState(

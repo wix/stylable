@@ -1,39 +1,31 @@
-import { IBaseFileSystemSyncActions, IFileSystem, ReadFileOptions } from '@file-services/types';
+import { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable } from '@stylable/core';
-import { CompletionParams } from 'vscode-languageserver';
-import { IConnection, TextDocuments } from 'vscode-languageserver';
+import { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import {
-    ColorPresentationParams,
-    Definition,
-    DocumentColorParams,
-    Hover,
-    ReferenceParams,
-    RenameParams,
-    SignatureHelp,
-    TextDocumentPositionParams,
-    WorkspaceEdit
-} from 'vscode-languageserver-protocol';
-import {
+    Color,
+    ColorInformation,
+    ColorPresentation,
     Command,
     CompletionItem,
-    Diagnostic,
+    Definition,
+    Hover,
     Location,
     ParameterInformation,
     Position,
+    Range,
+    SignatureHelp,
     TextDocument,
-    TextDocumentChangeEvent,
-    TextEdit
+    TextEdit,
+    WorkspaceEdit
 } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-
-import { Provider } from './provider';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';
 import { Completion } from './completion-types';
 import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
-import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
+import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
@@ -42,39 +34,22 @@ interface Config {
     rootPath: string;
     fs: IFileSystem;
     requireModule: (request: string) => any;
-    textDocuments: TextDocuments;
-}
-
-function wrapFs(fs: IFileSystem, docs: TextDocuments): IFileSystem {
-    const readFileSync = ((path: string, ...args: [ReadFileOptions]) => {
-        const file = docs.get(URI.file(path).toString());
-
-        return file ? file.getText() : fs.readFileSync(path, ...args);
-    }) as IBaseFileSystemSyncActions['readFileSync'];
-
-    return { ...fs, readFileSync };
 }
 
 export class StylableLanguageService {
-    private docsDispatcher: TextDocuments;
-    private tsLanguageService: ExtendedTsLanguageService;
-    private stylable: Stylable;
-    private provider: Provider;
-    private cssService: CssService;
-    private fs: IFileSystem;
+    public stylable: Stylable;
+    public cssService: CssService;
+    protected tsLanguageService: ExtendedTsLanguageService;
+    protected provider: Provider;
+    protected fs: IFileSystem;
 
-    constructor({ rootPath, fs, requireModule, textDocuments }: Config) {
-        this.docsDispatcher = textDocuments;
-        this.fs = wrapFs(fs, this.docsDispatcher);
+    constructor({ rootPath, fs, requireModule }: Config) {
+        this.fs = fs;
 
         this.tsLanguageService = typescriptSupport(this.fs);
         this.stylable = new Stylable(rootPath, this.fs as any, requireModule);
         this.provider = new Provider(this.stylable, this.tsLanguageService);
         this.cssService = new CssService(this.fs);
-    }
-
-    public getDocsDispatcher() {
-        return this.docsDispatcher;
     }
 
     public getStylable() {
@@ -85,79 +60,33 @@ export class StylableLanguageService {
         return this.fs;
     }
 
-    public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {
-        return this.provider.provideCompletionItemsFromSrc(src, pos, fileName, this.fs);
+    public onDidChangeContent() {
+        // TODO: figure this one out
     }
 
-    public async getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
-        const defs = await this.provider.getDefinitionLocation(
-            src,
-            position,
-            URI.file(filePath).fsPath,
-            this.fs
-        );
-        return defs.map(loc => Location.create(URI.file(loc.uri).fsPath, loc.range));
+    public onDidClose() {
+        // TODO: handle this too
     }
 
-    public getSignatureHelp(
-        src: string,
-        pos: Position,
-        filePath: string,
-        paramInfo: typeof ParameterInformation
-    ) {
-        return this.provider.getSignatureHelp(src, pos, filePath, this.fs, paramInfo);
-    }
+    public onCompletion(filePath: string, offset: number): CompletionItem[] {
+        const stylableFile = this.readStylableFile(filePath);
 
-    public getRefs(filePath: string, position: ProviderPosition) {
-        return getRefs(filePath, position, this.fs, this.stylable);
-    }
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const document = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+            const position = document.positionAt(offset);
 
-    public resolveDocumentColors(document: TextDocument) {
-        return resolveDocumentColors(this.stylable, this.cssService, document, this.fs);
-    }
-
-    public getColorPresentation(document: TextDocument, params: ColorPresentationParams) {
-        return getColorPresentation(this.cssService, document, params);
-    }
-
-    public diagnose(connection: IConnection) {
-        const diagnoseConfig = {
-            connection,
-            cssService: this.cssService,
-            docsDispatcher: this.docsDispatcher,
-            stylable: this.stylable
-        };
-
-        return () => diagnose(diagnoseConfig);
-    }
-
-    public clearDiagnostics(connection: IConnection) {
-        return (event: TextDocumentChangeEvent) => {
-            connection.sendDiagnostics({
-                diagnostics: [],
-                uri: event.document.uri
-            });
-        };
-    }
-
-    public onCompletion(params: CompletionParams): CompletionItem[] {
-        const documentUri = params.textDocument.uri;
-        const position = params.position;
-
-        if (!documentUri.endsWith('.st.css') && !documentUri.startsWith('untitled:')) {
-            return [];
-        }
-
-        const document = this.docsDispatcher.get(documentUri);
-
-        if (document) {
             const res = this.provider.provideCompletionItemsFromSrc(
                 document.getText(),
                 {
                     line: position.line,
                     character: position.character
                 },
-                URI.parse(documentUri).fsPath,
+                filePath,
                 this.fs
             );
 
@@ -201,182 +130,224 @@ export class StylableLanguageService {
         }
     }
 
-    public async onDefinition(params: TextDocumentPositionParams): Promise<Definition> {
-        const documentUri = params.textDocument.uri;
-        const docPath = URI.parse(documentUri).fsPath;
+    public onDefinition(filePath: string, offset: number): Definition {
+        const stylableFile = this.readStylableFile(filePath);
 
-        if (!documentUri.endsWith('.st.css') && !documentUri.startsWith('untitled:')) {
-            return [];
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            const res = this.provider.getDefinitionLocation(
+                stylableFile.content,
+                doc.positionAt(offset),
+                filePath,
+                this.fs
+            );
+
+            return res.map(loc => Location.create(URI.file(loc.uri).toString(), loc.range));
         }
 
-        const fileContent = this.fs.readFileSync(docPath, 'utf8');
-        const pos = params.position;
-
-        const res = await this.provider.getDefinitionLocation(
-            fileContent,
-            {
-                line: pos.line,
-                character: pos.character
-            },
-            docPath,
-            this.fs
-        );
-
-        return res.map(loc => Location.create(URI.file(loc.uri).toString(), loc.range));
+        return [];
     }
 
-    public onHover(params: TextDocumentPositionParams): Hover | null {
-        const doc = this.docsDispatcher.get(params.textDocument.uri);
+    public onHover(filePath: string, offset: number): Hover | null {
+        const stylableFile = this.readStylableFile(filePath);
 
-        return doc && doc.uri.endsWith('.st.css')
-            ? this.cssService.doHover(doc, params.position)
-            : null;
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            return this.cssService.doHover(doc, doc.positionAt(offset));
+        }
+
+        return null;
     }
 
-    public onReferences(params: ReferenceParams): Location[] {
-        const u = URI.parse(params.textDocument.uri);
+    public onReferences(filePath: string, offset: number): Location[] {
+        const stylableFile = this.readStylableFile(filePath);
 
-        if (!u.path.endsWith('.st.css') && !u.path.startsWith('untitled:')) {
-            return [];
-        }
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
 
-        const refs = this.getRefs(u.fsPath, params.position);
+            const position = doc.positionAt(offset);
+            const refs = this.getRefs(filePath, position);
 
-        if (refs.length) {
-            return dedupeRefs(refs);
-        } else {
-            const doc = this.docsDispatcher.get(params.textDocument.uri);
-            return doc ? dedupeRefs(this.cssService.findReferences(doc, params.position)) : [];
-        }
-    }
-
-    public onDocumentColor(params: DocumentColorParams) {
-        const documentUri = params.textDocument.uri;
-
-        if (!documentUri.endsWith('.st.css') && !documentUri.startsWith('untitled:')) {
-            return [];
-        }
-
-        const doc = this.docsDispatcher.get(params.textDocument.uri);
-        return doc ? resolveDocumentColors(this.stylable, this.cssService, doc, this.fs) : [];
-    }
-
-    public onColorPresentation(params: ColorPresentationParams) {
-        const documentUri = params.textDocument.uri;
-
-        if (!documentUri.endsWith('.st.css') && !documentUri.startsWith('untitled:')) {
-            return [];
-        }
-
-        const doc = this.docsDispatcher.get(params.textDocument.uri);
-        return doc ? getColorPresentation(this.cssService, doc, params) : [];
-    }
-
-    public onRenameRequest(params: RenameParams): WorkspaceEdit {
-        const documentUri = params.textDocument.uri;
-
-        if (!documentUri.endsWith('.st.css') && !documentUri.startsWith('untitled:')) {
-            return { changes: {} };
-        }
-
-        const edit: WorkspaceEdit = { changes: {} };
-        getRenameRefs(
-            URI.parse(params.textDocument.uri).fsPath,
-            params.position,
-            this.fs,
-            this.stylable
-        ).forEach(ref => {
-            if (edit.changes![ref.uri]) {
-                edit.changes![ref.uri].push({ range: ref.range, newText: params.newName });
+            if (refs.length) {
+                return dedupeRefs(refs);
             } else {
-                edit.changes![ref.uri] = [{ range: ref.range, newText: params.newName }];
+                return dedupeRefs(this.cssService.findReferences(doc, position));
             }
-        });
+        }
+
+        return [];
+    }
+
+    public onDocumentColor(filePath: string): ColorInformation[] {
+        const stylableFile = this.readStylableFile(filePath);
+
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+            return resolveDocumentColors(this.stylable, this.cssService, doc, this.fs);
+        }
+
+        return [];
+    }
+
+    public onColorPresentation(
+        filePath: string,
+        offset: { start: number; end: number },
+        color: Color
+    ): ColorPresentation[] {
+        const stylableFile = this.readStylableFile(filePath);
+
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            const range = Range.create(doc.positionAt(offset.start), doc.positionAt(offset.end));
+
+            return getColorPresentation(this.cssService, doc, { color, range, textDocument: doc });
+        }
+
+        return [];
+    }
+
+    public onRenameRequest(filePath: string, offset: number, newName: string): WorkspaceEdit {
+        const stylableFile = this.readStylableFile(filePath);
+        const edit: WorkspaceEdit = { changes: {} };
+
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            getRenameRefs(filePath, doc.positionAt(offset), this.fs, this.stylable).forEach(ref => {
+                if (edit.changes![ref.uri]) {
+                    edit.changes![ref.uri].push({ range: ref.range, newText: newName });
+                } else {
+                    edit.changes![ref.uri] = [{ range: ref.range, newText: newName }];
+                }
+            });
+        }
 
         return edit;
     }
 
-    public onSignatureHelp(params: TextDocumentPositionParams): Thenable<SignatureHelp> | null {
-        const documentPath = URI.parse(params.textDocument.uri).fsPath;
+    public onSignatureHelp(filePath: string, offset: number): SignatureHelp | null {
+        const stylableFile = this.readStylableFile(filePath);
 
-        if (!documentPath.endsWith('.st.css') && !documentPath.startsWith('untitled:')) {
-            return null;
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            const sig = this.provider.getSignatureHelp(
+                stylableFile.content,
+                doc.positionAt(offset),
+                filePath,
+                this.fs,
+                ParameterInformation
+            );
+
+            return sig;
         }
 
-        const doc: string = this.fs.readFileSync(params.textDocument.uri, 'utf8');
-
-        const sig = this.provider.getSignatureHelp(
-            doc,
-            params.position,
-            documentPath,
-            this.fs,
-            ParameterInformation
-        );
-        return Promise.resolve(sig!);
+        return null;
     }
 
     public onDocumentFormatting() {
         // no op
         return null;
     }
-}
 
-interface DiagConfig {
-    connection: IConnection;
-    docsDispatcher: TextDocuments;
-    stylable: Stylable;
-    cssService: CssService;
-}
-
-async function diagnose({ connection, docsDispatcher, stylable, cssService }: DiagConfig) {
-    let res: any;
-    let ignore = false;
-    try {
-        res = await connection.workspace.getConfiguration({
-            section: 'stylable'
-        });
-        if (
-            !!res &&
-            !!res.diagnostics &&
-            !!res.diagnostics.ignore &&
-            !!res.diagnostics.ignore.length
-        ) {
-            ignore = true;
-        }
-    } catch (e) {
-        /*Client has no workspace/configuration method, ignore silently */
+    public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {
+        return this.provider.provideCompletionItemsFromSrc(src, pos, fileName, this.fs);
     }
 
-    const result: Diagnostic[] = [];
-    docsDispatcher.keys().forEach(key => {
-        const doc = docsDispatcher.get(key);
-        if (!!doc) {
-            if (doc.languageId === 'stylable') {
-                let diagnostics: Diagnostic[];
-                if (
-                    ignore &&
-                    (res.diagnostics.ignore as string[]).some(p => {
-                        return URI.parse(doc.uri).fsPath.startsWith(p);
-                    })
-                ) {
-                    diagnostics = [];
-                } else {
-                    diagnostics = createDiagnosis(
-                        doc.getText(),
-                        URI.parse(doc.uri).fsPath,
-                        stylable
-                    )
-                        .map(diag => {
-                            diag.source = 'stylable';
-                            return diag;
-                        })
-                        .concat(cssService.getDiagnostics(doc));
-                    result.push(...diagnostics);
-                }
-                connection.sendDiagnostics({ uri: doc.uri, diagnostics });
-            }
-        }
-    });
+    public async getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
+        const defs = await this.provider.getDefinitionLocation(
+            src,
+            position,
+            URI.file(filePath).fsPath,
+            this.fs
+        );
+        return defs.map(loc => Location.create(URI.file(loc.uri).fsPath, loc.range));
+    }
 
-    return result;
+    public getSignatureHelp(
+        src: string,
+        pos: Position,
+        filePath: string,
+        paramInfo: typeof ParameterInformation
+    ) {
+        return this.provider.getSignatureHelp(src, pos, filePath, this.fs, paramInfo);
+    }
+
+    public getRefs(filePath: string, position: ProviderPosition) {
+        return getRefs(filePath, position, this.fs, this.stylable);
+    }
+
+    public resolveDocumentColors(document: TextDocument) {
+        return resolveDocumentColors(this.stylable, this.cssService, document, this.fs);
+    }
+
+    public getColorPresentation(document: TextDocument, params: ColorPresentationParams) {
+        return getColorPresentation(this.cssService, document, params);
+    }
+
+    private readStylableFile(filePath: string): StylableFile | null {
+        if (!filePath.endsWith('.st.css') && !filePath.startsWith('untitled:')) {
+            return null;
+        }
+
+        let stat;
+        try {
+            stat = this.fs.statSync(filePath);
+        } catch {
+            // TODO: something?
+        }
+
+        if (stat && stat.isFile()) {
+            const content = this.fs.readFileSync(filePath, 'utf8');
+            return {
+                content,
+                stat
+            };
+        }
+
+        return null;
+    }
+}
+
+interface StylableFile {
+    stat: IFileSystemStats;
+    content: string;
 }

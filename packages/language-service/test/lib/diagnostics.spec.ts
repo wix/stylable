@@ -1,6 +1,5 @@
 import { createMemoryFs } from '@file-services/memory';
 import { expect } from 'chai';
-import { TextDocuments } from 'vscode-languageserver';
 import { createDiagnosis } from '../../src/lib/diagnosis';
 import { StylableLanguageService } from '../../src/lib/service';
 
@@ -9,8 +8,7 @@ function createDiagnostics(files: { [filePath: string]: string }, filePath: stri
     const stylableLSP = new StylableLanguageService({
         rootPath: '/',
         fs,
-        requireModule: require,
-        textDocuments: new TextDocuments()
+        requireModule: require
     });
 
     const file = stylableLSP.getFs().readFileSync(filePath, 'utf8');

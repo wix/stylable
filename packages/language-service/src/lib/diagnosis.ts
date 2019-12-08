@@ -40,7 +40,7 @@ export function createDiagnosis(
     }
 }
 
-function createRange(report: StylableDiagnostic) {
+export function createRange(report: StylableDiagnostic) {
     const source = report.node.source;
     const start = { line: 0, character: 0 };
     const end = { line: 0, character: 0 };

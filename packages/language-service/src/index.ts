@@ -1,3 +1,3 @@
 export * from './lib/service';
-export * from './lib/connect';
-export * from './capabilities';
+export * from './lib/css-service';
+export * from './lib/diagnosis';
