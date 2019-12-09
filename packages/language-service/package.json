@@ -27,8 +27,7 @@
   "author": "Wix.com",
   "files": [
     "cjs",
-    "src",
-    "!src/tsconfig.json"
+    "src"
   ],
   "engines": {
     "node": ">=10"

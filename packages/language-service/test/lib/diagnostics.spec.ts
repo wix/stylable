@@ -1,14 +1,15 @@
 import { createMemoryFs } from '@file-services/memory';
+import { Stylable } from '@stylable/core';
 import { expect } from 'chai';
 import { createDiagnosis } from '../../src/lib/diagnosis';
 import { StylableLanguageService } from '../../src/lib/service';
 
 function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
     const fs = createMemoryFs(files);
+    
     const stylableLSP = new StylableLanguageService({
-        rootPath: '/',
         fs,
-        requireModule: require
+        stylable: new Stylable('/', fs as any, require)
     });
 
     const file = stylableLSP.getFs().readFileSync(filePath, 'utf8');

@@ -31,23 +31,22 @@ import { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
 
 interface Config {
-    rootPath: string;
     fs: IFileSystem;
-    requireModule: (request: string) => any;
+    stylable: Stylable;
 }
 
 export class StylableLanguageService {
-    public stylable: Stylable;
     public cssService: CssService;
-    protected tsLanguageService: ExtendedTsLanguageService;
-    protected provider: Provider;
     protected fs: IFileSystem;
+    protected provider: Provider;
+    protected stylable: Stylable;
+    protected tsLanguageService: ExtendedTsLanguageService;
 
-    constructor({ rootPath, fs, requireModule }: Config) {
+    constructor({ fs, stylable }: Config) {
         this.fs = fs;
+        this.stylable = stylable;
 
         this.tsLanguageService = typescriptSupport(this.fs);
-        this.stylable = new Stylable(rootPath, this.fs as any, requireModule);
         this.provider = new Provider(this.stylable, this.tsLanguageService);
         this.cssService = new CssService(this.fs);
     }
@@ -58,14 +57,6 @@ export class StylableLanguageService {
 
     public getFs() {
         return this.fs;
-    }
-
-    public onDidChangeContent() {
-        // TODO: figure this one out
-    }
-
-    public onDidClose() {
-        // TODO: handle this too
     }
 
     public onCompletion(filePath: string, offset: number): CompletionItem[] {
@@ -332,7 +323,7 @@ export class StylableLanguageService {
         try {
             stat = this.fs.statSync(filePath);
         } catch {
-            // TODO: something?
+            // TODO: add warning?
         }
 
         if (stat && stat.isFile()) {
