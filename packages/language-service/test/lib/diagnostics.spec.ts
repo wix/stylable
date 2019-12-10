@@ -2,6 +2,8 @@ import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
 import { expect } from 'chai';
 
+import path from 'path';
+
 import { createDiagnosis } from '../../src/lib/diagnosis';
 import { StylableLanguageService } from '../../src/lib/service';
 
@@ -63,7 +65,7 @@ describe('diagnostics', () => {
                 start: { line: 3, character: 39 },
                 end: { line: 3, character: 44 }
             },
-            message: `cannot resolve imported symbol "ninja" from stylesheet "${filePathA}"`,
+            message: `cannot resolve imported symbol "ninja" from stylesheet "${path.normalize(filePathA)}"`,
             severity: 2
         });
     });
