@@ -1,12 +1,13 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
 import { expect } from 'chai';
+
 import { createDiagnosis } from '../../src/lib/diagnosis';
 import { StylableLanguageService } from '../../src/lib/service';
 
 function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
     const fs = createMemoryFs(files);
-    
+
     const stylableLSP = new StylableLanguageService({
         fs,
         stylable: new Stylable('/', fs as any, require)
@@ -38,16 +39,16 @@ describe('diagnostics', () => {
         });
     });
 
-    xit('should create cross file errors', () => {
-        const filePathA = 'style.css';
-        const filePathB = 'import-style.st.css';
+    it('should create cross file errors', () => {
+        const filePathA = '/style.css';
+        const filePathB = '/import-style.st.css';
 
         const diagnostics = createDiagnostics(
             {
                 [filePathA]: ``,
                 [filePathB]: `
                         :import {
-                            -st-from: ./${filePathA};
+                            -st-from: ${filePathA};
                             -st-named: ninja;
                         }
 
@@ -62,7 +63,7 @@ describe('diagnostics', () => {
                 start: { line: 3, character: 39 },
                 end: { line: 3, character: 44 }
             },
-            message: `cannot resolve imported symbol "ninja" in stylesheet "./${filePathA}"`,
+            message: `cannot resolve imported symbol "ninja" from stylesheet "${filePathA}"`,
             severity: 2
         });
     });
