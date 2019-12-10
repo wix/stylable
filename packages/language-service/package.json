@@ -17,7 +17,6 @@
     "@stylable/core": "^2.5.3",
     "css-selector-tokenizer": "^0.7.1",
     "postcss": "^7.0.17",
-    "postcss-selector-parser": "^6.0.2",
     "postcss-value-parser": "^4.0.0",
     "typescript": "~3.5.3",
     "vscode-css-languageservice": "^4.0.2",
