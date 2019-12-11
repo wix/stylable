@@ -1,0 +1,8 @@
+:import {
+    -st-from: "fake-stylable-package/js-mixins.js";
+    -st-named: aMixin, aBareMixin;
+}
+
+.myClass {
+    -st-mixin: aMixin(|)
+}

@@ -1,0 +1,11 @@
+:import {
+    -st-from: "./states-deep.st.css";
+    -st-named: deep;
+}
+
+.veryDeep {
+    -st-extends: deep;
+    -st-states: theAbyss;
+}
+
+.veryDeep:rootState:extendState:deepState:theAbyss {}

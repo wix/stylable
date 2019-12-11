@@ -1,0 +1,7 @@
+
+:import {
+    -st-from: "./import-from-here.st.css";
+    -st-default: X;
+    -st-named: shlomo;
+    -|
+}

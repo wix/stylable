@@ -1,0 +1,12 @@
+:import{
+    -st-from: "./mid-level-import.st.css";
+    -st-default: Comp;
+
+}
+
+.gaga{
+    -st-extends: Comp;
+    -st-states: clover;
+}
+
+.baga .gaga:|

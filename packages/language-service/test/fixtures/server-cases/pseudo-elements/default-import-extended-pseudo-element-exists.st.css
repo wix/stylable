@@ -1,0 +1,11 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-named: shlomo, momo;
+    -st-default: Comp;
+}
+
+.gaga {
+    -st-extends: Comp;
+}
+
+.gaga::shlomo|

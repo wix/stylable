@@ -1,0 +1,9 @@
+.momo{
+    -st-states: anotherState,oneMoreState;
+}
+
+.root {
+    -st-states : state,otherState;
+}
+
+@custom-selector :--bongo .root;

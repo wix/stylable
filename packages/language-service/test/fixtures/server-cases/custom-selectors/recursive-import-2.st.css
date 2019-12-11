@@ -1,0 +1,9 @@
+:import {
+    -st-from: './recursive-import-1.st.css';
+    -st-default: Comp;
+}
+
+@custom-selector :--bongo Comp .root;
+
+@custom-selector :--mongo Comp .root;
+

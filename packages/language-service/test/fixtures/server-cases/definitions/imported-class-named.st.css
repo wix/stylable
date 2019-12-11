@@ -1,0 +1,13 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-named: mo|mo;
+}
+
+.local {
+    -st-extends: momo;
+}
+
+.local:momo {
+    color: blue;
+}
+

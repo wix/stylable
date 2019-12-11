@@ -26,6 +26,9 @@
     "cjs",
     "src"
   ],
+  "engines": {
+    "node": ">=10"
+  },
   "publishConfig": {
     "access": "public"
   },

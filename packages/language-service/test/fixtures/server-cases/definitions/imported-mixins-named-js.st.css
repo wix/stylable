@@ -1,0 +1,10 @@
+
+:import {
+    -st-from: "../mixins/js-mixins.js";
+    -st-named: aM|ixin, aBareMixin, aFormatter;
+}
+
+.local {
+    color: notARealMixin();
+    background-color: aFormatter(a,b,45);
+}

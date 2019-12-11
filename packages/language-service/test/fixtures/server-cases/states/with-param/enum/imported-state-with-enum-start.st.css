@@ -1,0 +1,12 @@
+:import {
+    -st-from: "./state-with-enum.st.css";
+    -st-default: Enum;
+}
+
+.blah {
+    -st-extends: Enum;
+}
+
+.blah:hello(|) {
+
+}

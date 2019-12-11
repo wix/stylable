@@ -1,0 +1,3 @@
+.root {
+    -st-states: shmover(number(min(3), max(42)));
+}

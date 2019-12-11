@@ -1,0 +1,18 @@
+:import {
+    -st-from: "./recursive-import-2.st.css";
+    -st-default: Comp;
+}
+
+:import {
+    -st-from: "./recursive-import-1.st.css";
+    -st-named: momo, shlomo;
+}
+
+.local {
+    color: fuchsia;
+}
+
+.gaga {
+    -st-mixin: shlomo, |
+}
+

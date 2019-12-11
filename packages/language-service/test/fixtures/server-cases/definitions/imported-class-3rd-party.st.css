@@ -1,0 +1,9 @@
+:import {
+    -st-from: "fake-stylable-package/stylesheet.st.css";
+    -st-named: part1;
+}
+
+.local {
+    -st-extends: par|t1;
+}
+

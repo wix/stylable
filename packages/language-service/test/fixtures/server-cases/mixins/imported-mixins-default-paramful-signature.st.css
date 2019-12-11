@@ -1,0 +1,13 @@
+:import {
+    -st-from: "./my-mixins.ts";
+    -st-default: mixin;
+}
+
+:import {
+    -st-from: "./my-mixins.js";
+    -st-named: aMixin, aBareMixin;
+}
+
+.myClass {
+    -st-mixin: mixin(|)
+}

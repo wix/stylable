@@ -1,0 +1,18 @@
+  .gaga {
+    -st-states: active;
+    color: red;
+}
+
+.gaga:active .gaga {
+    background-color: fuchsia;
+}
+
+.lokal {
+    -st-extends:      gaga;
+}
+
+.mixed {
+    -st-mixin: lokal,
+    gaga, lokal,
+    gaga;
+}

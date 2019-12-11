@@ -1,0 +1,12 @@
+.local {
+    color: red;
+}
+
+:vars {
+    one: fuchsia;
+    two: goldenrod;
+}
+
+.gaga {
+    color: value(on|e);
+}

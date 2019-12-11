@@ -1,0 +1,10 @@
+:import {
+    -st-from: './recursive-import-2.st.css';
+    -st-default: Comp;
+}
+
+.local {
+    -st-ectends: Comp;
+}
+
+local|

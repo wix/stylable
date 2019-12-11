@@ -1,0 +1,17 @@
+:import {
+    -st-from: "./recursive-import-0.st.css";
+    -st-default: Compi;
+}
+
+.shlomo {
+    color: black;
+}
+
+.momo{
+    -st-extends: Compi;
+    -st-states: anotherState;
+}
+
+.root {
+    -st-states : state,otherState;
+}

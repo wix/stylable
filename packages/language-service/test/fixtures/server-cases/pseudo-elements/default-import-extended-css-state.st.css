@@ -1,0 +1,14 @@
+:import {
+    -st-from: "./import.st.css";
+    -st-default: Comp;
+}
+
+.local {
+    -st-extends: Comp;
+    -st-states: lala;
+}
+
+.local:hover|
+{
+
+}

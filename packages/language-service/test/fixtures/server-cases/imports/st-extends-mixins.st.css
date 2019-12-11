@@ -1,0 +1,21 @@
+:import{
+    -st-from:"./import-from-here.st.css";
+    -st-default:Comp;
+    -st-named: shlomo, oneVar, twoVar;
+}
+
+:import {
+    -st-from: "../mixins/my-mixins.ts";
+    -st-named: paramlessMixin, paramfulMixin, notARealMixin;
+    -st-default: mixin;
+}
+
+:import {
+    -st-from: "../mixins/js-mixins.js";
+    -st-named: aMixin, aBareMixin, aFormatter;
+}
+
+.gaga{
+    -st-extends:|
+}
+

@@ -1,0 +1,13 @@
+:import {
+    -st-from: "./my-mixins.ts";
+    -st-named: paramlessFormatter, formatterWithParams;
+}
+
+:import {
+    -st-from: "./js-mixins.js";
+    -st-named: aFormatter, aFormatterWithParams;
+}
+
+.myClass {
+    color: aFormatterWithParams('25','aaa','a'), |
+}
