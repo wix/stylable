@@ -48,6 +48,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | [cli](./packages/cli)                       | `@stylable/cli`            |            [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)            | Used for managing Stylable stylesheets in a project                       |
 | [react-scripts](./packages/react-scripts)   | `@stylable/react-scripts`  |  [![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)  | `create-react-app` boilerplate generator scripts                          |
 | [schema-extract](./packages/schema-extract) | `@stylable/schema-extract` | [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract) | JSON Schema convertor for Stylable stylesheets                            |
+| [language-service](./packages/language-service) | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
 | [stylable.io](./packages/stylable.io)       | -                          |                                                                  -                                                                  | source package for the [stylable.io](http://stylable.io) official website |
 
 ### Integrations
