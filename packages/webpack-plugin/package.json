@@ -11,8 +11,8 @@
     "prepack": "yarn build"
   },
   "peerDependencies": {
-    "@stylable/core": "^2.0.0",
-    "webpack": "^4.6.0"
+    "@stylable/core": ">=3",
+    "webpack": ">=4"
   },
   "dependencies": {
     "@stylable/module-utils": "^3.0.0",
