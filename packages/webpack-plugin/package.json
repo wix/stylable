@@ -1,6 +1,6 @@
 {
   "name": "@stylable/webpack-plugin",
-  "version": "2.5.3",
+  "version": "3.0.0",
   "description": "Webpack (4.x) plugin for Stylable modules",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -15,10 +15,10 @@
     "webpack": "^4.6.0"
   },
   "dependencies": {
-    "@stylable/module-utils": "^2.5.3",
-    "@stylable/node": "^2.5.3",
-    "@stylable/optimizer": "^2.5.3",
-    "@stylable/runtime": "^2.5.3",
+    "@stylable/module-utils": "^3.0.0",
+    "@stylable/node": "^3.0.0",
+    "@stylable/optimizer": "^3.0.0",
+    "@stylable/runtime": "^3.0.0",
     "find-config": "^1.0.0",
     "webpack-sources": "^1.4.3"
   },
