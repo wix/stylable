@@ -1,4 +1,5 @@
 import { ProjectRunner } from './project-runner';
+import { basename } from 'path';
 
 export class StylableProjectRunner extends ProjectRunner {
     public loadTestConfig(configName?: string) {
@@ -13,4 +14,8 @@ export class StylableProjectRunner extends ProjectRunner {
         }
         return config;
     }
+}
+
+export function getProjectName(__filename: string) {
+    return basename(__filename).replace(/\.spec\.(j|t)sx?/, '');
 }

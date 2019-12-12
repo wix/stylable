@@ -12,7 +12,8 @@ import { StylableAssetDependency, StylableImportDependency } from './stylable-de
 import { StylableGenerator } from './stylable-generator';
 import {
     calculateModuleDepthAndShallowStylableDependencies,
-    renderStaticCSS
+    renderStaticCSS,
+    isStylableModule
 } from './stylable-module-helpers';
 import { StylableParser } from './stylable-parser';
 import {
@@ -20,7 +21,7 @@ import {
     StyleableAutoInitDependencyTemplate
 } from './styleable-auto-init-dependency';
 import { CalcResult, ShallowPartial, StylableModule, StylableWebpackPluginOptions } from './types';
-import { isImportedByNonStylable } from './utils';
+import { isImportedByNonStylable, isUsedAsCompose } from './utils';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const findConfig = require('find-config');
@@ -115,7 +116,7 @@ export class StylableWebpackPlugin {
             compilation.hooks.optimizeModules.tap(StylableWebpackPlugin.name, modules => {
                 const cache = new WeakMap<StylableModule, CalcResult>();
                 modules.forEach((module: any) => {
-                    if (module.type === 'stylable') {
+                    if (isStylableModule(module)) {
                         module.buildInfo.runtimeInfo = calculateModuleDepthAndShallowStylableDependencies(
                             module,
                             [],
@@ -123,6 +124,7 @@ export class StylableWebpackPlugin {
                             cache
                         );
                         module.buildInfo.isImportedByNonStylable = isImportedByNonStylable(module);
+                        module.buildInfo.isUsedAsCompose = isUsedAsCompose(module);
                     }
                 });
             });
@@ -148,7 +150,10 @@ export class StylableWebpackPlugin {
                         module.buildInfo.optimize = this.options.optimize;
                         module.buildInfo.usageMapping = usageMapping;
                         module.buildInfo.usedStylableModules = used;
-                        if (module.buildInfo.isImportedByNonStylable) {
+                        if (
+                            module.buildInfo.isImportedByNonStylable ||
+                            module.buildInfo.isUsedAsCompose
+                        ) {
                             used.push(module);
                         }
                         if (
@@ -162,7 +167,8 @@ export class StylableWebpackPlugin {
                             );
                         }
                         usageMapping[module.buildInfo.stylableMeta.namespace] =
-                            module.buildInfo.isImportedByNonStylable;
+                            module.buildInfo.isImportedByNonStylable ||
+                            module.buildInfo.isUsedAsCompose;
                     }
                 });
             });
@@ -251,7 +257,7 @@ export class StylableWebpackPlugin {
                 });
                 if (!shouldKeep) {
                     if ((m as any).chunksIterable.size === 1) {
-                        if (m.buildInfo.isImportedByNonStylable) {
+                        if (m.buildInfo.isImportedByNonStylable || m.buildInfo.isUsedAsCompose) {
                             return;
                         }
                     }

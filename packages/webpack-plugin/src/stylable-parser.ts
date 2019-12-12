@@ -7,6 +7,7 @@ import {
     StylableExportsDependency,
     StylableImportDependency
 } from './stylable-dependencies';
+import { isUsedAsComposeViaExtends } from './utils';
 
 const stylableExtension = /\.st\.css$/;
 
@@ -51,7 +52,7 @@ export class StylableParser {
                     defaultImport: stylableImport.defaultExport,
                     names: []
                 };
-                const dep = this.useWeakDeps
+                const dep = this.useWeakDeps && !isUsedAsComposeViaExtends(meta, stylableImport.from)
                     ? StylableImportDependency.createWeak(
                           stylableImport.fromRelative,
                           state.module,

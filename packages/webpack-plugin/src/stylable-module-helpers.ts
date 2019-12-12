@@ -118,7 +118,10 @@ export function getDeepCSSDependencies(
         m.buildInfo.runtimeInfo.cssDependencies.forEach(dep => {
             if (origin !== dep) {
                 getDeepCSSDependencies(dep, onlyUsed, deps, origin);
-                if (onlyUsed && !dep.buildInfo.isImportedByNonStylable) {
+                if (
+                    onlyUsed &&
+                    !dep.buildInfo.isImportedByNonStylable && !dep.buildInfo.isUsedAsCompose
+                ) {
                     return;
                 }
                 deps.add(dep);
@@ -138,6 +141,10 @@ export function getStylableModulesFromDependencies(
         }
     });
     return modules;
+}
+
+export function isStylableModule(m: any): m is StylableModule {
+    return m.type === 'stylable';
 }
 
 export function getStylableModulesFromCompilation(compilation: webpack.compilation.Compilation) {

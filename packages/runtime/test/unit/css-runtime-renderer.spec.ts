@@ -357,7 +357,7 @@ describe('css-runtime-renderer', () => {
                 $id: '/a.st.css',
                 $depth: 0,
                 $css: `.a{}`,
-                $theme: true
+                $renderable: true
             };
 
             api.register(a);

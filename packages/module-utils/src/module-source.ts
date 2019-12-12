@@ -17,7 +17,7 @@ export function generateModuleSource(
     const localsExports = JSON.stringify(exports);
     const namespace = JSON.stringify(meta.namespace);
     if (renderableOnly) {
-        return `${createRenderableFunction}(${css}, ${depth}, ${moduleId});`;
+        return `${createRenderableFunction}(${css}, ${depth}, ${moduleId}, ${renderer});`;
     }
     return `
 ${beforeModule.join('\n')}

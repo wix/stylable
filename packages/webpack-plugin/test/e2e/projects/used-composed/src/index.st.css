@@ -1,0 +1,12 @@
+:import {
+    -st-from: "./v.st.css";
+    -st-named: v1; 
+}
+
+.root {
+    background-color: red; 
+}
+
+.part {
+    -st-extends: v1;
+}

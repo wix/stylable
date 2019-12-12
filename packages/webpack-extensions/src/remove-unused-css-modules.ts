@@ -23,7 +23,7 @@ export class RemoveUnusedCSSModules {
                 bootstraps.push(_module);
             }
             if (_module.type === 'stylable') {
-                if (!_module.buildInfo.isImportedByNonStylable) {
+                if (!_module.buildInfo.isImportedByNonStylable && !_module.buildInfo.isUsedAsCompose) {
                     removed.add(_module);
                     chunk.removeModule(_module);
                 }

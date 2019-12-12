@@ -100,6 +100,14 @@ export function create(
     return stylesheet;
 }
 
-export function createRenderable(css: string, depth: number | string, id: number | string) {
-    return { $css: css, $depth: depth, $id: id, $theme: true };
+export function createRenderable(
+    css: string,
+    depth: number,
+    id: number | string,
+    renderer?: RuntimeRenderer | null
+) {
+    const renderable = { $css: css, $depth: depth, $id: id, $renderable: true };
+    if (renderer) {
+        renderer.register(renderable);
+    }
 }

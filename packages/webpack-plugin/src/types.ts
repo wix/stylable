@@ -74,6 +74,7 @@ export interface StylableModule extends webpack.compilation.Module {
     buildInfo: {
         optimize: StylableWebpackPluginOptions['optimize'];
         isImportedByNonStylable: boolean;
+        isUsedAsCompose: boolean;
         runtimeInfo: CalcResult;
         stylableMeta: StylableMeta;
         usageMapping: Record<string, boolean>;
