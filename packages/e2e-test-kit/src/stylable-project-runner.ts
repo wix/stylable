@@ -1,5 +1,5 @@
-import { ProjectRunner } from './project-runner';
 import { basename } from 'path';
+import { ProjectRunner } from './project-runner';
 
 export class StylableProjectRunner extends ProjectRunner {
     public loadTestConfig(configName?: string) {

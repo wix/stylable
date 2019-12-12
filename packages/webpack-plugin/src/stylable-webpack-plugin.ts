@@ -12,8 +12,8 @@ import { StylableAssetDependency, StylableImportDependency } from './stylable-de
 import { StylableGenerator } from './stylable-generator';
 import {
     calculateModuleDepthAndShallowStylableDependencies,
-    renderStaticCSS,
-    isStylableModule
+    isStylableModule,
+    renderStaticCSS
 } from './stylable-module-helpers';
 import { StylableParser } from './stylable-parser';
 import {

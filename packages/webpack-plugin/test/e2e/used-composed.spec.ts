@@ -1,4 +1,4 @@
-import { getProjectName, browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
+import { browserFunctions, getProjectName, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 

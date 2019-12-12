@@ -1,5 +1,5 @@
-import { StylableModule } from './types';
 import { StylableMeta } from '@stylable/core';
+import { StylableModule } from './types';
 
 export function isImportedByNonStylable(module: { reasons: Array<{ module: { type: string } }> }) {
     return module.reasons.some(({ module }) => module && module.type !== 'stylable');
