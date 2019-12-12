@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
 
         expect(styleElements).to.eql([
-            { id: './src/v.st.css', depth: '1' }
+            { id: './src/v.st.css', depth: '1' },
             { id: './src/index.st.css', depth: '2' }
         ]);
     });
