@@ -73,7 +73,7 @@ export class StylableWebpackPlugin {
     public createStylable(compiler: webpack.Compiler) {
         const stylable = new Stylable(
             compiler.context,
-            compiler.inputFileSystem as any,
+            (compiler.inputFileSystem as any).fileSystem || compiler.inputFileSystem as any,
             this.options.requireModule,
             '__',
             meta => {
