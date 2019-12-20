@@ -140,9 +140,9 @@
   integrity sha512-W+tNVGdj3t6IPFoqRUpjcEUNM/RqbdzwGtj2BlzKo+TN0eu93PV0FV1BncRQ/mBhxI/H2arj3SnigID5c+YiEQ==
 
 "@file-services/typescript@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-2.1.0.tgz#0386b3ab61e4f793f9f2679cc2153487e0f92338"
-  integrity sha512-bjKPtss0X7jBWU4OUAOHXiBwzA4zeYUvDOm+yaqhYUVyszhuEYi1vjcas6Q0Fqlr7qZEbU1dTd06bOZMMg47EA==
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-2.1.2.tgz#eb377c9e6e5c1929c1bfbd10da6d9c2ddc2af306"
+  integrity sha512-MKfSCuR4GhqwB4ho0yHeSM9G8kUCdyQF7GkRxdUc5oiRAJzHYm9YnbsE6W73nf36W+XxdjgcQyTdlipN5REzJA==
   dependencies:
     "@file-services/types" "^2.1.0"
 
