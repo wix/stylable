@@ -154,9 +154,9 @@
     "@file-services/types" "^2.1.0"
 
 "@file-services/webpack@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@file-services/webpack/-/webpack-2.1.0.tgz#699774cb881691ee62b6f12f327fbd2d194a169b"
-  integrity sha512-fY3uoc2qRcTdLwOgYewxuxBQFw0t0GpWSKeMastukcsHxcnWhT7XyYSGVTXG+4/6um4NeIjjeRJhkCRyUnvIWw==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@file-services/webpack/-/webpack-2.1.1.tgz#9a0f0bd013c8aab2d70cc5e173fd7c8b80384ace"
+  integrity sha512-/Zb82CfNh+CGnSKEYizYLdCBKhCRTl+E6WCkLMczmm5ufo/Mr5SJndJAmP7iPGhboJAesAgTrOFCTyX6VWbeRQ==
   dependencies:
     "@file-services/types" "^2.1.0"
 
