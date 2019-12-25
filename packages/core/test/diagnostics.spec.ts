@@ -4,7 +4,6 @@ import {
     findTestLocations
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { resolve } from 'path';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
 import { nativePseudoElements, reservedKeyFrames } from '../src/native-reserved-lists';
 import { processorWarnings } from '../src/stylable-processor';
@@ -381,7 +380,7 @@ describe('diagnostics: warnings and errors', () => {
                         }
                     }
                 };
-                const mainPath = resolve('/main.css');
+                const mainPath = '/main.css';
                 const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
                 const yPath = [`x from ${mainPath}`, `y from ${mainPath}`];
                 expectWarningsFromTransform(config, [
