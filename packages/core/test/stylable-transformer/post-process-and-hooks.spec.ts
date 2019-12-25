@@ -178,8 +178,8 @@ describe('post-process-and-hooks', () => {
         const expected = [
             ['red', 'myColor', true, []],
             ['green', 'myBG', true, []],
-            ['Ariel', 'param2', true, [`default from '/entry.st.css'`]],
-            ['Ariel', 'param2', true, [`default from '/entry.st.css'`]]
+            ['Ariel', 'param2', true, [`default from /entry.st.css`]],
+            ['Ariel', 'param2', true, [`default from /entry.st.css`]]
         ];
 
         t.transform(t.fileProcessor.process('/entry.st.css'));
