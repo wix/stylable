@@ -677,7 +677,11 @@ export class StylableProcessor {
                         importObj.from = importPath;
                     } else {
                         importObj.fromRelative = importPath;
-                        importObj.from = path.resolve(path.dirname(this.meta.source), importPath);
+                        const dirPath = path.dirname(this.meta.source);
+                        importObj.from =
+                            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
+                                ? path.posix.join(dirPath, importPath)
+                                : path.join(dirPath, importPath);
                     }
                     fromExists = true;
                     break;

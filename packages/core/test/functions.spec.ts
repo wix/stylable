@@ -1,7 +1,6 @@
 import { expectWarningsFromTransform } from '@stylable/core-test-kit';
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { resolve } from 'path';
 import postcss from 'postcss';
 import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
@@ -901,7 +900,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         }
                     }
                 };
-                const mainPath = resolve('/main.st.css');
+                const mainPath = '/main.st.css';
                 expectWarningsFromTransform(config, [
                     {
                         message: functionWarnings.CYCLIC_VALUE([
@@ -910,7 +909,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             `${mainPath}: c`,
                             `${mainPath}: a`
                         ]),
-                        file: '/main.st.css'
+                        file: mainPath
                     }
                 ]);
             });
