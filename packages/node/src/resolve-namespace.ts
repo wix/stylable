@@ -19,4 +19,25 @@ export function resolveNamespaceFactory(
     };
 }
 
+export function noCollisionNamespace({
+    prefix = '',
+    used: usedNamespaces = new Map<
+        string,
+        { prefix: string; namespace: string; stylesheetPath: string }
+    >()
+} = {}): typeof resolveNamespace {
+    return (namespace, stylesheetPath) => {
+        const ns = prefix + namespace;
+        const used = usedNamespaces.get(ns);
+        if (used) {
+            if (used.stylesheetPath !== stylesheetPath) {
+                throw new Error(`namespace (${ns} of ${stylesheetPath}) is already in use`);
+            }
+        } else {
+            usedNamespaces.set(ns, { prefix, namespace, stylesheetPath });
+        }
+        return ns;
+    };
+}
+
 export const resolveNamespace = resolveNamespaceFactory();
