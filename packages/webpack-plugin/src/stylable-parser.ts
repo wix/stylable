@@ -52,13 +52,14 @@ export class StylableParser {
                     defaultImport: stylableImport.defaultExport,
                     names: []
                 };
-                const dep = this.useWeakDeps && !isUsedAsComposeViaExtends(meta, stylableImport.from)
-                    ? StylableImportDependency.createWeak(
-                          stylableImport.fromRelative,
-                          state.module,
-                          importRef
-                      )
-                    : new StylableImportDependency(stylableImport.fromRelative, importRef);
+                const dep =
+                    this.useWeakDeps && !isUsedAsComposeViaExtends(meta, stylableImport.from)
+                        ? StylableImportDependency.createWeak(
+                              stylableImport.fromRelative,
+                              state.module,
+                              importRef
+                          )
+                        : new StylableImportDependency(stylableImport.fromRelative, importRef);
                 state.module.addDependency(dep);
                 this.addChildDeps(stylableImport);
             }
