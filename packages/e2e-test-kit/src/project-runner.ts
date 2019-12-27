@@ -1,16 +1,17 @@
 import { safeListeningHttpServer } from 'create-listening-server';
 import express from 'express';
-import http from 'http';
 import { join, normalize } from 'path';
 import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
+import { runCode } from './run-code-in-process';
 
 export interface Options {
     projectDir: string;
     port?: number;
     puppeteerOptions: puppeteer.LaunchOptions;
+    webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
 }
@@ -52,18 +53,20 @@ export class ProjectRunner {
     public stats: webpack.Stats | null;
     public throwOnBuildError: boolean;
     public serverUrl: string;
-    public server!: http.Server | null;
+    public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
+    private isolateServer = true;
     constructor({
         projectDir,
         port = 3000,
         puppeteerOptions = {},
         throwOnBuildError = true,
+        webpackOptions,
         configName = 'webpack.config'
     }: Options) {
         this.projectDir = projectDir;
         this.outputDir = join(this.projectDir, 'dist');
-        this.webpackConfig = this.loadTestConfig(configName);
+        this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
         this.puppeteerOptions = puppeteerOptions;
@@ -71,8 +74,11 @@ export class ProjectRunner {
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
     }
-    public loadTestConfig(configName?: string) {
-        return require(join(this.projectDir, configName || 'webpack.config'));
+    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        return {
+            ...require(join(this.projectDir, configName || 'webpack.config')),
+            ...webpackOptions
+        };
     }
     public async bundle() {
         const webpackConfig = this.webpackConfig;
@@ -94,12 +100,38 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        const app = express();
-        app.use(express.static(this.outputDir, { cacheControl: false, etag: false }));
-        const { httpServer, port } = await safeListeningHttpServer(this.port, app);
-        this.port = port;
-        this.serverUrl = `http://localhost:${port}`;
-        this.server = httpServer;
+        if (this.isolateServer) {
+            return new Promise(res => {
+                const child = runCode(
+                    async function(startPort, outputDir) {
+                        const { safeListeningHttpServer } = require('create-listening-server');
+                        const express = require('express');
+
+                        const app = express();
+                        app.use(express.static(outputDir, { cacheControl: false, etag: false }));
+                        const { port } = await safeListeningHttpServer(startPort, app);
+                        process.send && process.send(port);
+                    },
+                    [this.port, this.outputDir]
+                );
+                child.once('message', port => {
+                    this.serverUrl = `http://localhost:${port}`;
+                    this.server = {
+                        async close() {
+                            child.kill();
+                        }
+                    };
+                    res();
+                });
+            });
+        } else {
+            const app = express();
+            app.use(express.static(this.outputDir, { cacheControl: false, etag: false }));
+            const { httpServer, port } = await safeListeningHttpServer(this.port, app);
+            this.port = port;
+            this.serverUrl = `http://localhost:${port}`;
+            this.server = httpServer;
+        }
     }
 
     public async openInBrowser() {

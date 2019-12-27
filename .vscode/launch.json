@@ -7,6 +7,19 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program",
+            "outputCapture": "std",
+            "autoAttachChildProcesses": true,
+            "program": "",
+            "args": [
+                "-r",
+                "@ts-tools/node/r",
+                 "${file}"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Mocha Current",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": ["${file}", "--timeout", "999999", ],
