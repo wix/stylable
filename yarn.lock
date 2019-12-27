@@ -1908,12 +1908,12 @@ before-after-hook@^2.0.0:
   integrity sha512-IWIbu7pMqyw3EAJHzzHbWa85b6oud/yfKYg5rqB5hNE8CeMi3nX+2C2sj0HswfblST86hpVEOAb9x34NZd6P7A==
 
 bfj@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/bfj/-/bfj-7.0.1.tgz#da7d3da7adb59124809675c984727a5a673feef9"
-  integrity sha512-Zsy7GRuwXTxxTUUMAJ2mnKKkzuwMx0/byIxZHAUiw5QlVzrlX274f4P4V0e2BAhYwgqH5qVi2bVKPfwtUayw5Q==
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/bfj/-/bfj-7.0.2.tgz#1988ce76f3add9ac2913fd8ba47aad9e651bfbb2"
+  integrity sha512-+e/UqUzwmzJamNF50tBV6tZPTORow7gQ96iFow+8b562OdMpEK0BcJEq2OSPEDmAbSMBQ7PKZ87ubFkgxpYWgw==
   dependencies:
     bluebird "^3.5.5"
-    check-types "^8.0.3"
+    check-types "^11.1.1"
     hoopy "^0.1.4"
     tryer "^1.0.1"
 
@@ -2349,10 +2349,10 @@ check-error@^1.0.2:
   resolved "https://registry.yarnpkg.com/check-error/-/check-error-1.0.2.tgz#574d312edd88bb5dd8912e9286dd6c0aed4aac82"
   integrity sha1-V00xLt2Iu13YkS6Sht1sCu1KrII=
 
-check-types@^8.0.3:
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/check-types/-/check-types-8.0.3.tgz#3356cca19c889544f2d7a95ed49ce508a0ecf552"
-  integrity sha512-YpeKZngUmG65rLudJ4taU7VLkOCTMhNl/u4ctNC56LQS/zJTyNH0Lrtwm1tfTsbLlwvlfsA2d1c8vCf/Kh2KwQ==
+check-types@^11.1.1:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/check-types/-/check-types-11.1.1.tgz#82b45cab716fcd8243964f9452b107ae22d97d29"
+  integrity sha512-ERidMpQiiCdZHeanDnOK8G0ewQH3DTCSQWim+36Nk4iEi6RJRyyRIkCsj6OMDnfxQUXmThpV2aCDDQyAPFb/5Q==
 
 chokidar@^2.0.2, chokidar@^2.0.4, chokidar@^2.1.8:
   version "2.1.8"
