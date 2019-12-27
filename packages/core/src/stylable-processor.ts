@@ -620,6 +620,14 @@ export class StylableProcessor {
             } else {
                 // TODO: diagnostics - scoped on none class
             }
+        } else if (decl.prop === valueMapping.variant) {
+            this.extendTypedRule(
+                decl,
+                rule.selector,
+                valueMapping.variant,
+                true
+            );
+
         }
     }
 

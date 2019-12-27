@@ -69,6 +69,7 @@ export interface StylableDirectives {
     '-st-root'?: boolean;
     '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
+    '-st-variant'?: true;
     '-st-global'?: SelectorAstNode[];
 }
 

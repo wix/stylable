@@ -57,7 +57,8 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    global: '-st-global' as '-st-global'
+    global: '-st-global' as '-st-global',
+    variant: '-st-variant' as '-st-variant'
 };
 
 export type stKeys = keyof typeof valueMapping;
