@@ -1183,15 +1183,10 @@
   resolved "https://registry.yarnpkg.com/@types/murmurhash/-/murmurhash-0.0.1.tgz#564a85100cb16eeec43218a09b08cd87da076afc"
   integrity sha512-jiYuTCJ60WxEDOkJFs2192G/nH0PY8mtyHeZkv5fOQQ5DkSkmEgY7YLzCxyM8Y8jibd8Dprb9bGth4EO34mAjw==
 
-"@types/node@*", "@types/node@>= 8":
+"@types/node@*", "@types/node@13", "@types/node@>= 8":
   version "13.1.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.1.tgz#6d11a8c2d58405b3db9388ab740106cbfa64c3c9"
   integrity sha512-hx6zWtudh3Arsbl3cXay+JnkvVgCKzCWKv42C9J01N2T2np4h8w5X8u6Tpz5mj38kE3M9FM0Pazx8vKFFMnjLQ==
-
-"@types/node@10":
-  version "10.17.13"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.13.tgz#ccebcdb990bd6139cd16e84c39dc2fb1023ca90c"
-  integrity sha512-pMCcqU2zT4TjqYFrWtYHKal7Sl30Ims6ulZ4UFXxI4xbtQqK/qqKwkDoBFCfooRqqmRu9vY3xaJRwxSh673aYg==
 
 "@types/postcss-nested@^4.1.0":
   version "4.1.0"
