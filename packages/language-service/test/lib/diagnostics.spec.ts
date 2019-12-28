@@ -57,7 +57,7 @@ describe('diagnostics', () => {
             },
             filePathB
         );
-        
+
         expect(diagnostics).to.deep.include({
             range: {
                 start: { line: 3, character: 39 },

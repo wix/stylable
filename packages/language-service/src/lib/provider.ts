@@ -69,12 +69,15 @@ import {
 const valueParser = require('postcss-value-parser');
 const selectorTokenizer = require('css-selector-tokenizer');
 
-function findLast<T>(arr: T[], predicate: (item: T, index: number, array: T[]) => boolean): T | null {
+function findLast<T>(
+    arr: T[],
+    predicate: (item: T, index: number, array: T[]) => boolean
+): T | null {
     for (let index = arr.length - 1; index >= 0; index--) {
         const item = arr[index];
-        
+
         if (predicate(item, index, arr)) {
-            return item
+            return item;
         }
     }
 
@@ -761,12 +764,9 @@ export class Provider {
             cursorPosInLine
         );
         const ps = parseSelector(lineChunkAtCursor, fixedCharIndex);
-        const chunkStrings: string[] = ps.selector.reduce(
-            (acc, s) => {
-                return acc.concat(s.text);
-            },
-            [] as string[]
-        );
+        const chunkStrings: string[] = ps.selector.reduce((acc, s) => {
+            return acc.concat(s.text);
+        }, [] as string[]);
         const currentSelector =
             (ps.selector[0] as SelectorChunk).classes[0] ||
             (ps.selector[0] as SelectorChunk).customSelectors[0] ||
@@ -1773,8 +1773,9 @@ export function getDefSymbol(
             meta.mappedSymbols[word]._kind === 'element' &&
             (meta.mappedSymbols[word] as ElementSymbol).alias
         ) {
-            imp = stylable.resolver.resolveImport((meta.mappedSymbols[word] as ElementSymbol)
-                .alias as ImportSymbol);
+            imp = stylable.resolver.resolveImport(
+                (meta.mappedSymbols[word] as ElementSymbol).alias as ImportSymbol
+            );
         } else if (meta.mappedSymbols[word]._kind === 'class') {
             if (!!(meta.mappedSymbols[word] as ClassSymbol).alias) {
                 meta = (stylable.resolver.resolveImport(
