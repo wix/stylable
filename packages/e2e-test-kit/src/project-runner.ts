@@ -1,3 +1,4 @@
+import { spawn } from 'child_process';
 import { safeListeningHttpServer } from 'create-listening-server';
 import express from 'express';
 import { join, normalize } from 'path';
@@ -5,7 +6,6 @@ import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
-import { runCode } from './run-code-in-process';
 
 export interface Options {
     projectDir: string;
@@ -102,19 +102,13 @@ export class ProjectRunner {
     public async serve() {
         if (this.isolateServer) {
             return new Promise(res => {
-                const child = runCode(
-                    async (startPort, outputDir) => {
-                        const { safeListeningHttpServer } = require('create-listening-server');
-                        const express = require('express');
-
-                        const app = express();
-                        app.use(express.static(outputDir, { cacheControl: false, etag: false }));
-                        const { port } = await safeListeningHttpServer(startPort, app);
-                        if (process.send) {
-                            process.send(port);
-                        }
-                    },
-                    [this.port, this.outputDir]
+                const child = spawn(
+                    'node',
+                    ['-r', '@ts-tools/node/r', './isolated-server', this.outputDir, this.port.toString()],
+                    {
+                        cwd: __dirname,
+                        stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+                    }
                 );
                 child.once('message', port => {
                     this.serverUrl = `http://localhost:${port}`;
