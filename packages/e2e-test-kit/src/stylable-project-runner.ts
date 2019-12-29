@@ -1,5 +1,5 @@
-import { ProjectRunner } from './project-runner';
 import webpack from 'webpack';
+import { ProjectRunner } from './project-runner';
 
 export class StylableProjectRunner extends ProjectRunner {
     public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {

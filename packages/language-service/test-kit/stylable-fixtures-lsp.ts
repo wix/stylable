@@ -17,4 +17,3 @@ export const stylableLSP = new StylableLanguageService({
     fs,
     stylable: new Stylable(CASES_PATH, fs as any, requireModule)
 });
-

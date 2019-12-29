@@ -103,14 +103,16 @@ export class ProjectRunner {
         if (this.isolateServer) {
             return new Promise(res => {
                 const child = runCode(
-                    async function(startPort, outputDir) {
+                    async (startPort, outputDir) => {
                         const { safeListeningHttpServer } = require('create-listening-server');
                         const express = require('express');
 
                         const app = express();
                         app.use(express.static(outputDir, { cacheControl: false, etag: false }));
                         const { port } = await safeListeningHttpServer(startPort, app);
-                        process.send && process.send(port);
+                        if (process.send) {
+                            process.send(port);
+                        }
                     },
                     [this.port, this.outputDir]
                 );

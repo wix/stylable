@@ -159,7 +159,7 @@ describe('Definitions', () => {
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('mixins/js-mixins.js'));
-                expect(def.range).to.eql(createRange(33, 8, 33, 18));
+                expect(def.range).to.eql(createRange(26, 8, 26, 18));
             });
 
             xit('should return definition of TS mixin in use', async () => {
