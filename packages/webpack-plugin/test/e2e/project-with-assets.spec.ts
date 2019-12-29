@@ -48,7 +48,7 @@ describe(`(${project}) production mode`, () => {
         {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
-                headless: false
+                // headless: false
             },
             webpackOptions: {
                 mode: 'production'
