@@ -967,7 +967,7 @@
     "@sinonjs/commons" "^1"
     "@sinonjs/samsam" "^4.2.0"
 
-"@sinonjs/samsam@^4.0.1", "@sinonjs/samsam@^4.2.0":
+"@sinonjs/samsam@^4.2.0", "@sinonjs/samsam@^4.2.1":
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-4.2.1.tgz#cee77dc95f8d00339633e1683e026f2d73ed1d3a"
   integrity sha512-7+5S4C4wpug5pzHS+z/63+XUwsH7dtyYELDafoT1QnfruFh7eFjlDWwZXltUB0GLk6y5eMeAt34Bjx8wJ4KfSA==
@@ -981,14 +981,14 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
-"@ts-tools/build@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.2.tgz#f928382a961ac2d71317d11d5c896b98b4983420"
-  integrity sha512-tpVQ/c8XpjmnhnZiiH8gOJRcws8L8WgkHprr3uvamTvpVt51e4mGUFsXAbgSHWVZ+EOhCV331rdCtEX4WsAoWQ==
+"@ts-tools/build@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.3.tgz#4d29c8f9dcd2cde289cb5fe6c4e626ad067ef4dc"
+  integrity sha512-QERkxaTdtuaoZSBrmWLapc0KId762KiJbgqX6fAku2fCP6TR1n/gb7TwG7ex9NB9jIfKm9hJwuQZON/W0GqidA==
   dependencies:
     "@ts-tools/transpile" "^2.0.0"
     chalk "^3.0.0"
-    commander "^4.0.0"
+    commander "^4.0.1"
 
 "@ts-tools/node@^1.1.2":
   version "1.1.2"
@@ -1003,10 +1003,10 @@
   resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.0.0.tgz#619c3bad28d050d579e7d6b71016e129aad3741d"
   integrity sha512-Vv9SlCOMPF926iXErWg63zexwkjqfz3eQrgvLnkoyT3g01LG9XPScSEnYzIKJKu2gV2l1TxBMEAXjP1nHn85AA==
 
-"@ts-tools/webpack-loader@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-1.1.0.tgz#d91b49de702ca29e759b9fae15ff80efebacbb88"
-  integrity sha512-AbPRTS2WEqgc6n7YcrzEBLW7jg9Llztio0XCglYQscueYT3ErES4rFy97cC0qtnQHtJGFoMgk0H/yE0pPIvHhA==
+"@ts-tools/webpack-loader@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-1.1.2.tgz#6e24385ac441df2c43e73d57dbf20a7037cb061a"
+  integrity sha512-lPtjxSJ7m20Bny3+1zRMbNv59D5YQzls0UDM3GM+GeDqNtl5Sm+p7zFpL2LsuoeDQ6OBA4Y2W47UpvZ4QukplQ==
   dependencies:
     "@ts-tools/transpile" "^2.0.0"
     loader-utils "^1.2.3"
@@ -1297,10 +1297,10 @@
     "@types/source-list-map" "*"
     source-map "^0.6.1"
 
-"@types/webpack@^4.41.0":
-  version "4.41.0"
-  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.41.0.tgz#b813a044d8b0dec7dfcd7622fdbe327bde06eb9a"
-  integrity sha512-tWkdf9nO0zFgAY/EumUKwrDUhraHKDqCPhwfFR/R8l0qnPdgb9le0Gzhvb7uzVpouuDGBgiE//ZdY+5jcZy2TA==
+"@types/webpack@^4.41.1":
+  version "4.41.1"
+  resolved "https://registry.yarnpkg.com/@types/webpack/-/webpack-4.41.1.tgz#571f0e137ce698710dd2637f7d222811eb83e274"
+  integrity sha512-n9fP8UrMxOi1wiM3oM+vMZHMJJ7WoQohqd63C20cmKOFkNEy9Q8hyZyDR6PWdvSYt3V3A7cwDq/kWxHlRYYZEg==
   dependencies:
     "@types/anymatch" "*"
     "@types/node" "*"
@@ -2553,7 +2553,7 @@ commander@^2.12.1, commander@^2.18.0, commander@^2.20.0, commander@~2.20.3:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
-commander@^4.0.0:
+commander@^4.0.0, commander@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.0.1.tgz#b67622721785993182e807f4883633e6401ba53c"
   integrity sha512-IPF4ouhCP+qdlcmCedhxX4xiGBPyigb8v5NeUp+0LyhwLgxMqyp3S0vl7TAPfS/hiP7FC3caI/PB9lTmP8r1NA==
@@ -6172,10 +6172,10 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nise@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/nise/-/nise-3.0.0.tgz#811330bf07ed3661c4b8bd72b18d9b6c6eb76f9f"
-  integrity sha512-EObFx5tioBMePHpU/gGczaY2YDqL255iwjmZwswu2CiwEW8xIGrr3E2xij+efIppS1nLQo9NyXSIUySGHUOhHQ==
+nise@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/nise/-/nise-3.0.1.tgz#0659982af515e5aac15592226246243e8da0013d"
+  integrity sha512-fYcH9y0drBGSoi88kvhpbZEsenX58Yr+wOJ4/Mi1K4cy+iGP/a73gNoyNhu5E9QxPdgTlVChfIaAlnyOy/gHUA==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
     "@sinonjs/formatio" "^4.0.1"
@@ -8007,17 +8007,17 @@ sinon-chai@^3.4.0:
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.4.0.tgz#06fb88dee80decc565106a3061d380007f21e18d"
   integrity sha512-BpVxsjEkGi6XPbDXrgWUe7Cb1ZzIfxKUbu/MmH5RoUnS7AXpKo3aIYIyQUg0FMvlUL05aPt7VZuAdaeQhEnWxg==
 
-sinon@^8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.0.1.tgz#c256376cd133dbb0c69ba4d73ed5bdd591597502"
-  integrity sha512-vbXMHBszVioyPsuRDLEiPEgvkZnbjfdCFvLYV4jONNJqZNLWTwZ/gYSNh3SuiT1w9MRXUz+S7aX0B4Ar2XI8iw==
+sinon@^8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.0.2.tgz#cc5f6daa9cc351b86b03faaca1e9c3650a04ae11"
+  integrity sha512-8W1S7BnCyvk7SK+Xi15B1QAVLuS81G/NGmWefPb31+ly6xI3fXaug/g5oUdfc8+7ruC4Ay51AxuLlYm8diq6kA==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
     "@sinonjs/formatio" "^4.0.1"
-    "@sinonjs/samsam" "^4.0.1"
+    "@sinonjs/samsam" "^4.2.1"
     diff "^4.0.1"
     lolex "^5.1.2"
-    nise "^3.0.0"
+    nise "^3.0.1"
     supports-color "^7.1.0"
 
 slash@^1.0.0:

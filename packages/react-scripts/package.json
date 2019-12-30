@@ -8,7 +8,7 @@
   "dependencies": {
     "@stylable/core": "^3.0.0",
     "@stylable/webpack-plugin": "^3.0.2",
-    "@ts-tools/webpack-loader": "^1.1.0",
+    "@ts-tools/webpack-loader": "^1.1.2",
     "bfj": "^7.0.2",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
     "chalk": "^3.0.0",
