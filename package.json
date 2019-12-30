@@ -58,7 +58,7 @@
     "glob": "^7.1.6",
     "html-webpack-plugin": "next",
     "jsdom": "^15.2.1",
-    "lerna": "^3.20.0",
+    "lerna": "^3.20.1",
     "mocha": "^6.2.2",
     "mocha-loader": "^4.0.0",
     "node-eval": "^2.0.0",
