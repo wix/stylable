@@ -36,10 +36,12 @@ export class StylableGenerator {
             ? this.getCSSInJSWithAssets(
                   meta.outputAst!,
                   module =>
-                      `" + (function(m){return m.default || m})(__webpack_require__(${runtimeTemplate.moduleId({
-                          module,
-                          request: module.request
-                      })})) + "`,
+                      `" + (function(m){return m.default || m})(__webpack_require__(${runtimeTemplate.moduleId(
+                          {
+                              module,
+                              request: module.request
+                          }
+                      )})) + "`,
                   (this.compilation as any).options.context,
                   module.resource,
                   true,

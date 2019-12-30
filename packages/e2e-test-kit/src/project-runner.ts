@@ -1,6 +1,4 @@
 import { spawn } from 'child_process';
-import { safeListeningHttpServer } from 'create-listening-server';
-import express from 'express';
 import { join, normalize } from 'path';
 import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
@@ -55,7 +53,6 @@ export class ProjectRunner {
     public serverUrl: string;
     public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
-    private isolateServer = true;
     constructor({
         projectDir,
         port = 3000,
@@ -100,34 +97,31 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        if (this.isolateServer) {
-            return new Promise(res => {
-                const child = spawn(
-                    'node',
-                    ['-r', '@ts-tools/node/r', './isolated-server', this.outputDir, this.port.toString()],
-                    {
-                        cwd: __dirname,
-                        stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+        return new Promise(res => {
+            const child = spawn(
+                'node',
+                [
+                    '-r',
+                    '@ts-tools/node/r',
+                    './isolated-server',
+                    this.outputDir,
+                    this.port.toString()
+                ],
+                {
+                    cwd: __dirname,
+                    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+                }
+            );
+            child.once('message', port => {
+                this.serverUrl = `http://localhost:${port}`;
+                this.server = {
+                    async close() {
+                        child.kill();
                     }
-                );
-                child.once('message', port => {
-                    this.serverUrl = `http://localhost:${port}`;
-                    this.server = {
-                        async close() {
-                            child.kill();
-                        }
-                    };
-                    res();
-                });
+                };
+                res();
             });
-        } else {
-            const app = express();
-            app.use(express.static(this.outputDir, { cacheControl: false, etag: false }));
-            const { httpServer, port } = await safeListeningHttpServer(this.port, app);
-            this.port = port;
-            this.serverUrl = `http://localhost:${port}`;
-            this.server = httpServer;
-        }
+        });
     }
 
     public async openInBrowser() {
