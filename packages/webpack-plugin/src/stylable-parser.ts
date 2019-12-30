@@ -14,6 +14,7 @@ export class StylableParser {
     constructor(
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
+        private normalModuleFactory: any,
         private useWeakDeps: boolean
     ) {}
     public parse(_source: string, state: any) {
@@ -25,7 +26,9 @@ export class StylableParser {
                 );
             })
         ) {
-            return state;
+            const parser = this.normalModuleFactory.getParser('javascript/auto');
+            state.module.type = 'javascript/auto';
+            return parser.parse(_source, state);
         }
         const meta = this.stylable.process(state.module.resource);
         state.module.buildInfo.stylableMeta = meta;

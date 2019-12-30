@@ -42,3 +42,34 @@ describe(`(${project})`, () => {
         }
     });
 });
+
+describe(`(${project}) production mode`, () => {
+    const projectRunner = StylableProjectRunner.mochaSetup(
+        {
+            projectDir: join(__dirname, 'projects', project),
+            puppeteerOptions: {
+                // headless: false
+            },
+            webpackOptions: {
+                mode: 'production'
+            }
+        },
+        before,
+        afterEach,
+        after
+    );
+
+    it('load assets from url() declaration value', async () => {
+        const expectedAssets = ['asset.jpg', 'asset-in-root.png'];
+        const { responses } = await projectRunner.openInBrowser();
+        const assetResponses = filterAssetResponses(responses, expectedAssets);
+
+        expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
+            expectedAssets.length
+        );
+
+        for (const response of assetResponses) {
+            expect(response.ok(), `${response.url()} to be loaded`).to.equal(true);
+        }
+    });
+});

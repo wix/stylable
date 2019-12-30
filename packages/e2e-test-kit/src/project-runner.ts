@@ -1,6 +1,4 @@
-import { safeListeningHttpServer } from 'create-listening-server';
-import express from 'express';
-import http from 'http';
+import { spawn } from 'child_process';
 import { join, normalize } from 'path';
 import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
@@ -11,6 +9,7 @@ export interface Options {
     projectDir: string;
     port?: number;
     puppeteerOptions: puppeteer.LaunchOptions;
+    webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
 }
@@ -52,18 +51,19 @@ export class ProjectRunner {
     public stats: webpack.Stats | null;
     public throwOnBuildError: boolean;
     public serverUrl: string;
-    public server!: http.Server | null;
+    public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
     constructor({
         projectDir,
         port = 3000,
         puppeteerOptions = {},
         throwOnBuildError = true,
+        webpackOptions,
         configName = 'webpack.config'
     }: Options) {
         this.projectDir = projectDir;
         this.outputDir = join(this.projectDir, 'dist');
-        this.webpackConfig = this.loadTestConfig(configName);
+        this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
         this.puppeteerOptions = puppeteerOptions;
@@ -71,8 +71,11 @@ export class ProjectRunner {
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
     }
-    public loadTestConfig(configName?: string) {
-        return require(join(this.projectDir, configName || 'webpack.config'));
+    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        return {
+            ...require(join(this.projectDir, configName || 'webpack.config')),
+            ...webpackOptions
+        };
     }
     public async bundle() {
         const webpackConfig = this.webpackConfig;
@@ -94,12 +97,31 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        const app = express();
-        app.use(express.static(this.outputDir, { cacheControl: false, etag: false }));
-        const { httpServer, port } = await safeListeningHttpServer(this.port, app);
-        this.port = port;
-        this.serverUrl = `http://localhost:${port}`;
-        this.server = httpServer;
+        return new Promise(res => {
+            const child = spawn(
+                'node',
+                [
+                    '-r',
+                    '@ts-tools/node/r',
+                    './isolated-server',
+                    this.outputDir,
+                    this.port.toString()
+                ],
+                {
+                    cwd: __dirname,
+                    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+                }
+            );
+            child.once('message', port => {
+                this.serverUrl = `http://localhost:${port}`;
+                this.server = {
+                    async close() {
+                        child.kill();
+                    }
+                };
+                res();
+            });
+        });
     }
 
     public async openInBrowser() {
