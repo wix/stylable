@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset.jpg', 'asset-in-root.png'];
+        const expectedAssets = ['asset.png', 'asset-in-root.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
@@ -60,7 +60,7 @@ describe(`(${project}) production mode`, () => {
     );
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset.jpg', 'asset-in-root.png'];
+        const expectedAssets = ['asset.png', 'asset-in-root.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
