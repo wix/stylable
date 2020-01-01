@@ -1,4 +1,4 @@
-import { Imported, isAsset, makeAbsolute, Stylable } from '@stylable/core';
+import { Imported, isAsset, makeAbsolute, processDeclarationUrls, Stylable } from '@stylable/core';
 import path from 'path';
 import webpack from 'webpack';
 import { isLoadedByLoaders } from './is-loaded-by-loaders';
@@ -32,6 +32,21 @@ export class StylableParser {
         }
         const meta = this.stylable.process(state.module.resource);
         state.module.buildInfo.stylableMeta = meta;
+
+        const { meta: transformedMeta } = this.stylable
+            .createTransformer({ postProcessor: undefined, replaceValueHook: undefined })
+            .transform(meta);
+
+        if (meta.mixins.length) {
+            // collect assets added through mixins into dependencies
+            const mixinUrls: string[] = [];
+            transformedMeta.outputAst!.walkDecls(node =>
+                processDeclarationUrls(node, node => node.url && mixinUrls.push(node.url), false)
+            );
+
+            addUrlDependencies(mixinUrls, state.module, this.compilation);
+        }
+
         // state.module.buildMeta.exportsType = 'namespace';
         meta.urls
             .filter(url => isAsset(url))
@@ -85,4 +100,16 @@ export class StylableParser {
             /* */
         }
     }
+}
+
+function addUrlDependencies(urls: string[], stylableModule: any, compilation: any) {
+    urls.filter(url => isAsset(url)).forEach(asset => {
+        const absPath = makeAbsolute(
+            asset,
+            compilation.options.context,
+            path.dirname(stylableModule.resource)
+        );
+        stylableModule.buildInfo.fileDependencies.add(absPath);
+        stylableModule.addDependency(new StylableAssetDependency(absPath));
+    });
 }

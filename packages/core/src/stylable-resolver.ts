@@ -56,7 +56,7 @@ export class StylableResolver {
         } else {
             let _module;
             try {
-                _module = this.requireModule(from);
+                _module = this.requireModule(this.fileProcessor.resolvePath(from));
             } catch {
                 return null;
             }

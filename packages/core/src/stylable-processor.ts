@@ -594,14 +594,17 @@ export class StylableProcessor {
                 this.diagnostics
             ).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
+
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
                 ) {
-                    mixins.push({
+                    const refedMixin = {
                         mixin,
                         ref: mixinRefSymbol
-                    });
+                    };
+                    mixins.push(refedMixin);
+                    this.meta.mixins.push(refedMixin);
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
                         word: mixin.type
