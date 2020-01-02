@@ -16,6 +16,7 @@ export interface FileProcessor<T> {
     processContent: (content: string, fullpath: string) => T;
     cache: Record<string, CacheItem<T>>;
     postProcessors: Array<(value: T, path: string) => T>;
+    resolvePath: (path: string, context?: string) => string;
 }
 
 export function cachedProcessFile<T = any>(
@@ -69,6 +70,7 @@ export function cachedProcessFile<T = any>(
         postProcessors,
         cache,
         process,
-        add
+        add,
+        resolvePath
     };
 }

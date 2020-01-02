@@ -1,7 +1,6 @@
 import path from 'path';
 import postcss from 'postcss';
 import urlRegex from 'url-regex';
-import { ImportSymbol, RefedMixin, StylableMeta } from './stylable-processor';
 import { ParsedValue } from './types';
 
 const { parseValues, stringifyValues } = require('css-selector-tokenizer');
@@ -70,7 +69,7 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
     }
 }
 
-export function fixRelativeUrls(ast: postcss.Root, mix: RefedMixin, targetMeta: StylableMeta) {
+export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
     ast.walkDecls(decl =>
         processDeclarationUrls(
             decl,
@@ -82,8 +81,8 @@ export function fixRelativeUrls(ast: postcss.Root, mix: RefedMixin, targetMeta: 
                             path
                                 .join(
                                     path.relative(
-                                        path.dirname(targetMeta.source),
-                                        path.dirname((mix.ref as ImportSymbol).import.from)
+                                        path.dirname(targetPath),
+                                        path.dirname(originPath)
                                     ),
                                     node.url!
                                 )

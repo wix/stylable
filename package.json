@@ -15,9 +15,7 @@
     "prettify": "prettier \"packages/**/*.{js,ts,tsx}\" --write"
   },
   "devDependencies": {
-    "@file-services/commonjs": "^2.1.1",
     "@file-services/memory": "^2.1.1",
-    "@file-services/webpack": "^2.1.1",
     "@ts-tools/build": "^1.2.3",
     "@ts-tools/node": "^1.1.2",
     "@ts-tools/webpack-loader": "^1.1.2",

@@ -23,6 +23,7 @@ export class StylableMeta {
     public transformDiagnostics: Diagnostics | null;
     public scopes: postcss.AtRule[];
     public simpleSelectors: Record<string, SimpleSelector>;
+    public mixins: RefedMixin[];
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -52,6 +53,7 @@ export class StylableMeta {
         this.urls = [];
         this.scopes = [];
         this.simpleSelectors = {};
+        this.mixins = [];
         this.transformDiagnostics = null;
     }
 }

@@ -99,14 +99,6 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-"@file-services/commonjs@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@file-services/commonjs/-/commonjs-2.1.1.tgz#22b645e867ad1ff994eea28e5f9c0bdfcdd2c004"
-  integrity sha512-V60TJtRcRp6ax1Lux4ffZCyuZZF8IU+hnreqWcQLMKSq0tJCbN0DO5SBdjnwO6bFXSRQorvY6G6SOTvXsoY2/Q==
-  dependencies:
-    "@file-services/resolve" "^2.1.1"
-    "@file-services/types" "^2.1.0"
-
 "@file-services/memory@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-2.1.1.tgz#a8e46abb260ff44eb722269db55716584051a6c8"
@@ -129,11 +121,6 @@
   resolved "https://registry.yarnpkg.com/@file-services/posix-path/-/posix-path-2.1.0.tgz#56ef31b6c156dc2b5e47316327e13ef82a2d99f0"
   integrity sha512-0gq7IJqc9HftLEiEOwYa4uDoROTn0fn3qwIXx6h7Mz4fLkleRWlflEFvWK0PdZOhL1e1LyR5+OvxqCVXWahR5Q==
 
-"@file-services/resolve@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@file-services/resolve/-/resolve-2.1.1.tgz#1fa45b8f76e39e7973c2542f900bdc07e35527ea"
-  integrity sha512-Zvqub6pQ8hA2yUzF3r7ExSDANqu6F1gEAfzvStwXAyvOuD88GAR9mwN210v80v1pjG64S+g0YRBGUsfdYKBCVg==
-
 "@file-services/types@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.1.0.tgz#5259d0e2cbf49c6d8367b8db3a6ac21b03e3be2c"
@@ -150,13 +137,6 @@
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-2.1.0.tgz#d17a18dc97d663b3b0119ded6f1d078eb166c6f8"
   integrity sha512-i4avLTrOdrf//EtNECX1n/Im2+P+Rksh9KqrUY8nNzOTzmwCCUqaE67pMyzJpUQU2O6k4doDC8+2YzScmjVJIQ==
-  dependencies:
-    "@file-services/types" "^2.1.0"
-
-"@file-services/webpack@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@file-services/webpack/-/webpack-2.1.1.tgz#9a0f0bd013c8aab2d70cc5e173fd7c8b80384ace"
-  integrity sha512-/Zb82CfNh+CGnSKEYizYLdCBKhCRTl+E6WCkLMczmm5ufo/Mr5SJndJAmP7iPGhboJAesAgTrOFCTyX6VWbeRQ==
   dependencies:
     "@file-services/types" "^2.1.0"
 
@@ -1184,9 +1164,9 @@
   integrity sha512-jiYuTCJ60WxEDOkJFs2192G/nH0PY8mtyHeZkv5fOQQ5DkSkmEgY7YLzCxyM8Y8jibd8Dprb9bGth4EO34mAjw==
 
 "@types/node@*", "@types/node@>= 8":
-  version "13.1.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.1.tgz#6d11a8c2d58405b3db9388ab740106cbfa64c3c9"
-  integrity sha512-hx6zWtudh3Arsbl3cXay+JnkvVgCKzCWKv42C9J01N2T2np4h8w5X8u6Tpz5mj38kE3M9FM0Pazx8vKFFMnjLQ==
+  version "13.1.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.2.tgz#fe94285bf5e0782e1a9e5a8c482b1c34465fa385"
+  integrity sha512-B8emQA1qeKerqd1dmIsQYnXi+mmAzTB7flExjmy5X1aVAKFNNNDubkavwR13kR6JnpeLp3aLoJhwn9trWPAyFQ==
 
 "@types/node@10":
   version "10.17.13"
@@ -7086,9 +7066,9 @@ postcss-value-parser@^4.0.0, postcss-value-parser@^4.0.2:
   integrity sha512-LmeoohTpp/K4UiyQCwuGWlONxXamGzCMtFxLq4W1nZVGIQLYvMCJx3yAF9qyyuFpflABI9yVdtJAqbihOsCsJQ==
 
 postcss@7.x.x, postcss@^7.0.0, postcss@^7.0.14, postcss@^7.0.16, postcss@^7.0.18, postcss@^7.0.2, postcss@^7.0.21, postcss@^7.0.23, postcss@^7.0.25, postcss@^7.0.5, postcss@^7.0.6:
-  version "7.0.25"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.25.tgz#dd2a2a753d50b13bed7a2009b4a18ac14d9db21e"
-  integrity sha512-NXXVvWq9icrm/TgQC0O6YVFi4StfJz46M1iNd/h6B26Nvh/HKI+q4YZtFN/EjcInZliEscO/WL10BXnc1E5nwg==
+  version "7.0.26"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.26.tgz#5ed615cfcab35ba9bbb82414a4fa88ea10429587"
+  integrity sha512-IY4oRjpXWYshuTDFxMVkJDtWIk2LhsTlu8bZnbEJA4+bYT16Lvpo8Qv6EvDumhYRgzjZl489pmsY3qVgJQ08nA==
   dependencies:
     chalk "^2.4.2"
     source-map "^0.6.1"
