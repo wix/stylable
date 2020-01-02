@@ -33,12 +33,12 @@ export class StylableParser {
         const meta = this.stylable.process(state.module.resource);
         state.module.buildInfo.stylableMeta = meta;
 
-        const { meta: transformedMeta } = this.stylable
-            .createTransformer({ postProcessor: undefined, replaceValueHook: undefined })
-            .transform(meta);
-
         if (meta.mixins.length) {
             // collect assets added through mixins into dependencies
+            const { meta: transformedMeta } = this.stylable
+                .createTransformer({ postProcessor: undefined, replaceValueHook: undefined })
+                .transform(meta);
+
             const mixinUrls: string[] = [];
             transformedMeta.outputAst!.walkDecls(node =>
                 processDeclarationUrls(node, node => node.url && mixinUrls.push(node.url), false)
