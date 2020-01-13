@@ -111,6 +111,18 @@ export const processorWarnings = {
     NO_IMPORT_IN_ST_SCOPE() {
         return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`;
     },
+    NO_ST_IMPORT_IN_NESTED_SCOPE() {
+        return `cannot use "@st-import" inside of nested scope`;
+    },
+    ST_IMPORT_STAR() {
+        return '@st-import * is not supported';
+    },
+    ST_IMPORT_EMPTY_FROM() {
+        return '@st-import must specify from with value';
+    },
+    INVALID_ST_IMPORT_FORMAT() {
+        return 'Invalid @st-import format';
+    },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
@@ -136,12 +148,15 @@ export const processorWarnings = {
 
 export class StylableProcessor {
     protected meta!: StylableMeta;
+    protected dirContext!: string;
     constructor(
         protected diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
     ) {}
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
+
+        this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
 
@@ -174,22 +189,9 @@ export class StylableProcessor {
             );
         });
 
-        this.meta.scopes.forEach(atRule => {
-            const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
-            this.handleRule(scopingRule, true);
-            validateScopingSelector(atRule, scopingRule, this.diagnostics);
-
-            if (scopingRule.selector) {
-                atRule.walkRules(rule => {
-                    rule.replaceWith(
-                        rule.clone({ selector: `${scopingRule.selector} ${rule.selector}` })
-                    );
-                });
-            }
-
-            atRule.replaceWith(atRule.nodes || []);
-        });
         stubs.forEach(s => s && s.remove());
+
+        this.meta.scopes.forEach(scope => this.handleScope(scope));
 
         return this.meta;
     }
@@ -248,6 +250,20 @@ export class StylableProcessor {
                     break;
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
+                    break;
+                case 'st-import':
+                    if (atRule.parent.type !== 'root') {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
+                        );
+                        atRule.remove();
+                    } else {
+                        const _import = this.handleStImport(atRule);
+                        this.meta.imports.push(_import);
+                        this.addImportSymbols(_import);
+                    }
+
                     break;
                 case 'st-global-custom-property':
                     const cssVars = atRule.params.split(',');
@@ -448,7 +464,7 @@ export class StylableProcessor {
                 type: 'default',
                 name: 'default',
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: this.dirContext
             };
         }
         Object.keys(importDef.named).forEach(name => {
@@ -458,7 +474,7 @@ export class StylableProcessor {
                 type: 'named',
                 name: importDef.named[name],
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: this.dirContext
             };
         });
     }
@@ -651,6 +667,41 @@ export class StylableProcessor {
             typedRule[key] = value;
         }
     }
+    protected handleStImport(atRule: postcss.AtRule) {
+        const importObj: Imported = {
+            defaultExport: '',
+            from: '',
+            fromRelative: '',
+            named: {},
+            rule: atRule,
+            context: this.dirContext
+        };
+        // simple import parts extraction for now no parser is needed.  
+        const isStarImport = atRule.params.match(/^\s*\*/);
+        const matchImport = atRule.params.match(
+            /^((\w+)\s*,?\s*)?(\[(.*?)\])?(\s+from\s+)?(['"](.*?)['"])$/
+        );
+        if (isStarImport) {
+            this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
+        } else if (matchImport) {
+            const def = matchImport[2];
+            const named = matchImport[4];
+            const from = (matchImport[7] || '').trim();
+
+            importObj.defaultExport = def || '';
+            setImportObjectFrom(from, this.dirContext, importObj);
+            importObj.named = parseNamed(named);
+            if (!from) {
+                this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
+            }
+        } else {
+            this.diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT());
+        }
+
+        atRule.remove();
+
+        return importObj;
+    }
 
     protected handleImport(rule: postcss.Rule) {
         let fromExists = false;
@@ -660,7 +711,7 @@ export class StylableProcessor {
             fromRelative: '',
             named: {},
             rule,
-            context: path.dirname(this.meta.source)
+            context: this.dirContext
         };
 
         rule.walkDecls(decl => {
@@ -675,17 +726,7 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-                        importObj.fromRelative = importPath;
-                        importObj.from = importPath;
-                    } else {
-                        importObj.fromRelative = importPath;
-                        const dirPath = path.dirname(this.meta.source);
-                        importObj.from =
-                            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
-                                ? path.posix.join(dirPath, importPath)
-                                : path.join(dirPath, importPath);
-                    }
+                    setImportObjectFrom(importPath, this.dirContext, importObj);
                     fromExists = true;
                     break;
                 case valueMapping.default:
@@ -719,6 +760,34 @@ export class StylableProcessor {
         rule.remove();
 
         return importObj;
+    }
+    private handleScope(atRule: postcss.AtRule) {
+        const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
+        this.handleRule(scopingRule, true);
+        validateScopingSelector(atRule, scopingRule, this.diagnostics);
+
+        if (scopingRule.selector) {
+            atRule.walkRules(rule => {
+                rule.replaceWith(
+                    rule.clone({ selector: `${scopingRule.selector} ${rule.selector}` })
+                );
+            });
+        }
+
+        atRule.replaceWith(atRule.nodes || []);
+    }
+}
+
+function setImportObjectFrom(importPath: string, dirContext: string, importObj: Imported) {
+    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+        importObj.fromRelative = importPath;
+        importObj.from = importPath;
+    } else {
+        importObj.fromRelative = importPath;
+        importObj.from =
+            path.posix && path.posix.isAbsolute(dirContext) // browser has no posix methods
+                ? path.posix.join(dirContext, importPath)
+                : path.join(dirContext, importPath);
     }
 }
 

@@ -62,7 +62,7 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
-    rule: postcss.Rule;
+    rule: postcss.Rule | postcss.AtRule;
     fromRelative: string;
     context: string;
 }
