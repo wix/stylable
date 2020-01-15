@@ -45,7 +45,7 @@
     "@types/tapable": "^1.0.5",
     "@types/webpack": "^4.41.2",
     "@types/webpack-sources": "^0.1.5",
-    "autoprefixer": "^9.7.3",
+    "autoprefixer": "^9.7.4",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
