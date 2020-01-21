@@ -18,9 +18,9 @@
     "css-selector-tokenizer": "^0.7.1",
     "postcss": "^7.0.26",
     "postcss-value-parser": "^4.0.2",
-    "typescript": "~3.7.4",
+    "typescript": "~3.7.5",
     "vscode-css-languageservice": "^4.0.2",
-    "vscode-languageserver": "^6.0.0",
+    "vscode-languageserver": "^6.0.1",
     "vscode-uri": "^2.1.1"
   },
   "author": "Wix.com",
