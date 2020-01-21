@@ -56,7 +56,7 @@ export function generateInfra(
             return meta;
         },
         fs,
-        x => x
+        x => (x.startsWith('./') || isAbsolute(x) ? x : '/node_modules/' + x)
     );
 
     const resolver = new StylableResolver(fileProcessor, requireModule);

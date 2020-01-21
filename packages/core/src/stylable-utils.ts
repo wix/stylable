@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import { isAbsolute, resolve } from 'path';
+import { isAbsolute } from 'path';
 import postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import {
@@ -340,7 +340,7 @@ export function getSourcePath(root: postcss.Root, diagnostics: Diagnostics) {
     } else if (!isAbsolute(source)) {
         throw new Error('source filename is not absolute path: "' + source + '"');
     }
-    return source ? resolve(source) : source;
+    return source;
 }
 
 export function getAlias(symbol: StylableSymbol): ImportSymbol | undefined {

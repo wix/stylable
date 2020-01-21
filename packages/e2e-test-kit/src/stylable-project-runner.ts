@@ -1,9 +1,10 @@
 import { basename } from 'path';
+import webpack from 'webpack';
 import { ProjectRunner } from './project-runner';
 
 export class StylableProjectRunner extends ProjectRunner {
-    public loadTestConfig(configName?: string) {
-        const config = super.loadTestConfig(configName);
+    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        const config = super.loadTestConfig(configName, webpackOptions);
         if (config.plugins) {
             const plugin = config.plugins.find(
                 (p: any) => p.constructor.name === 'StylableWebpackPlugin'

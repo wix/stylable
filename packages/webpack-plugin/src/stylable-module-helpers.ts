@@ -185,7 +185,7 @@ export function renderStaticCSS(
             const source = assetModule.originalSource().source();
             const getStaticPath = new Function(
                 '__webpack_public_path__',
-                'var module = {}; return ' + source
+                'var module = {}; return ' + source.replace('export default', 'module.exports = ')
             );
             return JSON.stringify(getStaticPath(publicPath));
         });

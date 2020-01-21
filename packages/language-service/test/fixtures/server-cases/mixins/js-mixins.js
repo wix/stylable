@@ -6,10 +6,7 @@
  * @param {'a'|'b'} enumParam An enum param
  * @returns {object}
  */
-exports.aMixin = function (strParam, numParam, enumParam) {
-
-}
-
+exports.aMixin = function(strParam, numParam, enumParam) {};
 
 /**
  * @description A mixin with no params
@@ -19,10 +16,7 @@ exports.aMixin = function (strParam, numParam, enumParam) {
  * lalala lalala
  * {@link OOF}
  */
-
-exports.aBareMixin = function () {
-
-}
+exports.aBareMixin = function() {};
 
 /**
  * @description A formatter with no params
@@ -30,10 +24,7 @@ exports.aBareMixin = function () {
  * baga bgaa
  * @returns {string} lalala
  */
-
-exports.aFormatter = function () {
-
-}
+exports.aFormatter = function() {};
 
 /**
  * A formatter with several params
@@ -43,6 +34,4 @@ exports.aFormatter = function () {
  * @param {'a'|'b'} enumParam An enum param
  * @returns {string}
  */
-exports.aFormatterWithParams = function (strParam, numParam, enumParam) {
-
-}
+exports.aFormatterWithParams = function(strParam, numParam, enumParam) {};

@@ -18,8 +18,9 @@ export function generateFileIndexEntry(
 ) {
     const name = generator.generateImport(filePath).default;
     if (nameMapping[name]) {
-        // prettier-ignore
-        throw new Error(`Name Collision Error: ${nameMapping[name]} and ${filePath} has the same filename`);
+        throw new Error(
+            `Name Collision Error: ${nameMapping[name]} and ${filePath} has the same filename`
+        );
     }
     log('[Build Index]', `Add file: ${filePath}`);
     nameMapping[name] = filePath;

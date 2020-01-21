@@ -74,7 +74,7 @@ export class StylableWebpackPlugin {
     public createStylable(compiler: webpack.Compiler) {
         const stylable = new Stylable(
             compiler.context,
-            compiler.inputFileSystem as any,
+            (compiler.inputFileSystem as any).fileSystem || (compiler.inputFileSystem as any),
             this.options.requireModule,
             '__',
             meta => {
@@ -335,17 +335,24 @@ export class StylableWebpackPlugin {
                         return new StylableParser(
                             this.stylable,
                             compilation,
+                            normalModuleFactory,
                             this.options.useWeakDeps
                         );
                     });
+
                 normalModuleFactory.hooks.createGenerator
                     .for('stylable')
                     .tap(StylableWebpackPlugin.name, () => {
-                        return new StylableGenerator(this.stylable, compilation, {
-                            includeCSSInJS: this.options.includeCSSInJS,
-                            experimentalHMR: this.options.experimentalHMR,
-                            ...this.options.generate
-                        });
+                        return new StylableGenerator(
+                            this.stylable,
+                            compilation,
+                            normalModuleFactory,
+                            {
+                                includeCSSInJS: this.options.includeCSSInJS,
+                                experimentalHMR: this.options.experimentalHMR,
+                                ...this.options.generate
+                            }
+                        );
                     });
             }
         );

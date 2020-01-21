@@ -14,7 +14,7 @@ This is the quickest way to get a Stylable project up and running. It is an opin
 
 In your terminal, run:
 ```
-$ npx create-react-app --scripts-version @stylable/react-scripts [APP NAME]
+$ npx create-react-app@3.2.0 --scripts-version @stylable/react-scripts [APP NAME]
 $ cd [APP NAME]
 $ yarn
 $ yarn start

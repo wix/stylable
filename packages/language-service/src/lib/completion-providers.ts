@@ -1095,54 +1095,45 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
 
             const allStates = collectStates(lastNode);
 
-            const newStates = lastNode.resolved.reduce(
-                (acc, cur) => {
-                    let relPath = path.relative(path.dirname(meta.source), cur.meta.source);
-                    if (!relPath.startsWith('.')) {
-                        relPath = './' + relPath;
-                    }
-                    const symbol = cur.symbol;
-                    if (symbol._kind === 'class') {
-                        const symbolStates = symbol[valueMapping.states];
+            const newStates = lastNode.resolved.reduce((acc, cur) => {
+                let relPath = path.relative(path.dirname(meta.source), cur.meta.source);
+                if (!relPath.startsWith('.')) {
+                    relPath = './' + relPath;
+                }
+                const symbol = cur.symbol;
+                if (symbol._kind === 'class') {
+                    const symbolStates = symbol[valueMapping.states];
 
-                        if (symbolStates) {
-                            Object.keys(symbolStates).forEach(k => {
-                                if (
-                                    !acc[k] &&
-                                    // selectoid is a substring of current state
-                                    (k.slice(0, -1).startsWith(lastSelectoid.replace(':', '')) ||
-                                        // selectoid is a CSS native pseudo-sclass
-                                        nativePseudoClasses.indexOf(
-                                            lastSelectoid.replace(':', '')
-                                        ) !== -1 ||
-                                        allStates.hasOwnProperty(lastSelectoid.replace(':', ''))) &&
-                                    chunkyStates.every(cs => cs !== k)
-                                ) {
-                                    const symbolStates = symbol[valueMapping.states];
-                                    const stateDef = symbolStates && symbolStates[k];
+                    if (symbolStates) {
+                        Object.keys(symbolStates).forEach(k => {
+                            if (
+                                !acc[k] &&
+                                // selectoid is a substring of current state
+                                (k.slice(0, -1).startsWith(lastSelectoid.replace(':', '')) ||
+                                    // selectoid is a CSS native pseudo-sclass
+                                    nativePseudoClasses.indexOf(lastSelectoid.replace(':', '')) !==
+                                        -1 ||
+                                    allStates.hasOwnProperty(lastSelectoid.replace(':', ''))) &&
+                                chunkyStates.every(cs => cs !== k)
+                            ) {
+                                const symbolStates = symbol[valueMapping.states];
+                                const stateDef = symbolStates && symbolStates[k];
 
-                                    // if (stateDef) {
-                                    const stateType =
-                                        stateDef && typeof stateDef === 'object'
-                                            ? stateDef.type
-                                            : null;
-                                    acc[k] = {
-                                        path:
-                                            meta.source === cur.meta.source
-                                                ? 'Local file'
-                                                : relPath,
-                                        hasParam: !!stateDef,
-                                        type: stateType
-                                    };
-                                    // }
-                                }
-                            });
-                        }
+                                // if (stateDef) {
+                                const stateType =
+                                    stateDef && typeof stateDef === 'object' ? stateDef.type : null;
+                                acc[k] = {
+                                    path: meta.source === cur.meta.source ? 'Local file' : relPath,
+                                    hasParam: !!stateDef,
+                                    type: stateType
+                                };
+                                // }
+                            }
+                        });
                     }
-                    return acc;
-                },
-                {} as { [k: string]: { path: string; hasParam: boolean; type: string | null } }
-            );
+                }
+                return acc;
+            }, {} as { [k: string]: { path: string; hasParam: boolean; type: string | null } });
 
             const states = Object.keys(newStates).map(k => {
                 return { name: k, state: newStates[k] };

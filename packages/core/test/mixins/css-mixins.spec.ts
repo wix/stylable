@@ -1,4 +1,5 @@
 import {
+    generateStylableResult,
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration
@@ -1068,6 +1069,81 @@ describe('CSS Mixins', () => {
             matchAllRulesAndDeclarations(
                 result,
                 [['.entry__x', 'background: url(./asset.png)']],
+                ''
+            );
+        });
+
+        it('should rewrite relative urls used through a 3rd-party css mixin', () => {
+            const result = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    :import {
+                        -st-from: "fake-package/index.st.css";
+                        -st-named: mix;
+                    }
+                    .x {
+                        -st-mixin: mix;
+                    }
+                `
+                    },
+                    '/node_modules/fake-package/index.st.css': {
+                        namespace: 'mix',
+                        content: `
+                    .mix {
+                        background: url(./asset.png);
+                    }
+                `
+                    },
+                    '/node_modules/fake-package/package.json': {
+                        content: '{"name": "fake-package", "version": "0.0.1"}'
+                    }
+                }
+            });
+
+            matchAllRulesAndDeclarations(
+                result.meta.outputAst!,
+                [['.entry__x', 'background: url(./node_modules/fake-package/asset.png)']],
+                ''
+            );
+        });
+
+        it('should rewrite relative urls used through a 3rd-party js mixin', () => {
+            const result = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                    :import {
+                        -st-from: "fake-package/mixin.js";
+                        -st-named: mix;
+                    }
+                    .x {
+                        -st-mixin: mix();
+                    }
+                `
+                    },
+                    '/node_modules/fake-package/mixin.js': {
+                        content: `
+                        module.exports.mix = function() {
+                            return {
+                                "background": 'url(./asset.png)'
+                            };
+                        }
+                `
+                    },
+                    '/node_modules/fake-package/package.json': {
+                        content: '{"name": "fake-package", "version": "0.0.1"}'
+                    }
+                }
+            });
+
+            matchAllRulesAndDeclarations(
+                result.meta.outputAst!,
+                [['.entry__x', 'background: url(./node_modules/fake-package/asset.png)']],
                 ''
             );
         });

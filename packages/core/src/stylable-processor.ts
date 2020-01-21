@@ -594,14 +594,17 @@ export class StylableProcessor {
                 this.diagnostics
             ).forEach(mixin => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
+
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
                 ) {
-                    mixins.push({
+                    const refedMixin = {
                         mixin,
                         ref: mixinRefSymbol
-                    });
+                    };
+                    mixins.push(refedMixin);
+                    this.meta.mixins.push(refedMixin);
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
                         word: mixin.type
@@ -685,7 +688,11 @@ export class StylableProcessor {
                         importObj.from = importPath;
                     } else {
                         importObj.fromRelative = importPath;
-                        importObj.from = path.resolve(path.dirname(this.meta.source), importPath);
+                        const dirPath = path.dirname(this.meta.source);
+                        importObj.from =
+                            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
+                                ? path.posix.join(dirPath, importPath)
+                                : path.join(dirPath, importPath);
                     }
                     fromExists = true;
                     break;

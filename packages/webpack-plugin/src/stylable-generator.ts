@@ -13,17 +13,20 @@ import webpack from 'webpack';
 import { OriginalSource, ReplaceSource } from 'webpack-sources';
 import { WEBPACK_STYLABLE } from './runtime-dependencies';
 import { StylableGeneratorOptions, StylableModule } from './types';
-
 export class StylableGenerator {
     constructor(
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
+        private normalModuleFactory: any,
         private options: Partial<StylableGeneratorOptions>
     ) {}
 
     public generate(module: StylableModule, _dependencyTemplates: any, runtimeTemplate: any) {
         if (module.type === 'stylable-raw' || !module.buildInfo.stylableMeta) {
-            return module.originalSource();
+            const targetModule = this.normalModuleFactory
+                .getGenerator('javascript/auto')
+                .generate(module, _dependencyTemplates, runtimeTemplate);
+            return targetModule;
         }
         const stylableResult = this.transform(module);
         const { meta } = stylableResult;
@@ -33,10 +36,12 @@ export class StylableGenerator {
             ? this.getCSSInJSWithAssets(
                   meta.outputAst!,
                   module =>
-                      `" + __webpack_require__(${runtimeTemplate.moduleId({
-                          module,
-                          request: module.request
-                      })}) + "`,
+                      `" + (function(m){return m.default || m})(__webpack_require__(${runtimeTemplate.moduleId(
+                          {
+                              module,
+                              request: module.request
+                          }
+                      )})) + "`,
                   (this.compilation as any).options.context,
                   module.resource,
                   true,
