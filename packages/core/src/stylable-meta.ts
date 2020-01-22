@@ -72,6 +72,7 @@ export interface StylableDirectives {
     '-st-states'?: MappedStates;
     '-st-extends'?: ImportSymbol | ClassSymbol | ElementSymbol;
     '-st-global'?: SelectorAstNode[];
+    '-st-compose'?: Array<ImportSymbol | ClassSymbol | ElementSymbol>;
 }
 
 export interface ClassSymbol extends StylableDirectives {

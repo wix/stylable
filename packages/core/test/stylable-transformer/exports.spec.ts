@@ -358,6 +358,132 @@ describe('Exports to js', () => {
             });
             expect(cssExports.classes.root).to.equal('entry__root middle__x index__y');
         });
+        it('should handle multiple extends values', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .a {
+                                -st-extends: x y y1;
+                            }
+                            .x {
+                                -st-extends: z end;
+                            }
+                            .y {
+
+                            }
+                            .y1 {
+                                -st-extends: a x;
+                            }
+                            .z {}
+                            .end {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.a).to.equal(
+                'entry__a entry__x entry__z entry__y entry__y1 entry__end'
+            );
+        });
+
+        it('should handle multiple extends values from different stylesheets', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {-st-from: './base.st.css';-st-named: base;}
+                            .x {
+                                -st-extends: base end;
+                            }
+                            .end {}
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .base {
+                                -st-extends: a b c;
+                            }
+                            .a {}
+                            .b {}
+                            .c {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.x).to.equal(
+                'entry__x base__base base__a entry__end base__b base__c'
+            );
+        });
+
+        it('should handle class extends values from different stylesheets (bug fix)', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {-st-from: './base.st.css';-st-named: base;}
+                            .x {
+                                -st-extends: base;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .base {
+                                -st-extends: a;
+                            }
+                            .a {
+                                -st-extends: b;
+                            }
+                            .b {
+
+                            }
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.x).to.equal(
+                'entry__x base__base base__a base__b'
+            );
+        });
+        
+        it('should handle root extends with multiple extends values (should not add composed classes on root)', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {-st-from: './base.st.css';-st-default: Base;}
+                            .x {
+                                -st-extends: Base;
+                            }
+                        `
+                    },
+                    '/base.st.css': {
+                        namespace: 'base',
+                        content: `
+                            .root {
+                                -st-extends: a b c;
+                            }
+                            .a {}
+                            .b {}
+                            .c {}
+                        `
+                    }
+                }
+            });
+            expect(cssExports.classes.x).to.equal(
+                'entry__x'
+            );
+        });
 
         it('should handle multiple levels of extending with local classes and an import', () => {
             const cssExports = generateStylableExports({

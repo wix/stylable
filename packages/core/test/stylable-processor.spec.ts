@@ -212,6 +212,54 @@ describe('Stylable postcss process', () => {
         });
     });
 
+    it('collect typed classes extends with multiple extends into compose', () => {
+        const result = processSource(
+            `
+            :import {
+                -st-from: './file.css';
+                -st-default: Style;
+                -st-named: z;
+            }
+            .y{}
+            .myclass {
+                -st-extends: Style x y z;
+            }
+            .x{}
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.diagnostics.reports.length, 'no reports').to.eql(0);
+
+        expect(result.classes).to.flatMatch({
+            myclass: {
+                '-st-extends': {
+                    _kind: 'import',
+                    type: 'default',
+                    import: {
+                        // from: '/path/to/file.css',
+                        fromRelative: './file.css',
+                        defaultExport: 'Style'
+                    }
+                },
+                '-st-compose': [
+                    {
+                        _kind: 'class',
+                        name: 'x'
+                    },
+                    {
+                        _kind: 'class',
+                        name: 'y'
+                    },
+                    {
+                        _kind: 'import',
+                        name: 'z'
+                    }
+                ]
+            }
+        });
+    });
+
     it('collect typed elements', () => {
         const result = processSource(
             `

@@ -854,6 +854,30 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
         });
 
+        it('scope selector that extends multiple classes (no change on the output)', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            .a {
+                                -st-extends: root x;
+                            }
+                            .x {
+                                -st-extends: y z;
+                            }
+                            .y {}
+                            .z {}
+                        `
+                    }
+                }
+            });
+
+            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
+        });
+
+
         it.skip('TODO: fix it. scope selector that extends local root', () => {
             generateStylableRoot({
                 entry: `/entry.st.css`,

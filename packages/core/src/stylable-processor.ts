@@ -21,7 +21,8 @@ import {
     RefedMixin,
     StylableDirectives,
     StylableMeta,
-    VarSymbol
+    VarSymbol,
+    StylableSymbol
 } from './stylable-meta';
 import {
     CUSTOM_SELECTOR_RE,
@@ -550,29 +551,36 @@ export class StylableProcessor {
         } else if (decl.prop === valueMapping.extends) {
             if (rule.isSimpleSelector) {
                 const parsed = parseExtends(decl.value);
-                const symbolName = parsed.types[0] && parsed.types[0].symbolName;
 
-                const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
-                if (
-                    (extendsRefSymbol &&
-                        (extendsRefSymbol._kind === 'import' ||
-                            extendsRefSymbol._kind === 'class' ||
-                            extendsRefSymbol._kind === 'element')) ||
-                    decl.value === this.meta.root
-                ) {
-                    this.extendTypedRule(
-                        decl,
-                        rule.selector,
-                        valueMapping.extends,
-                        getAlias(extendsRefSymbol) || extendsRefSymbol
-                    );
-                } else {
-                    this.diagnostics.warn(
-                        decl,
-                        processorWarnings.CANNOT_RESOLVE_EXTEND(decl.value),
-                        { word: decl.value }
-                    );
-                }
+                parsed.types.forEach(({ symbolName }, index) => {
+                    const extendsRefSymbol = this.meta.mappedSymbols[symbolName];
+                    if (isClassOrElement(extendsRefSymbol) || decl.value === this.meta.root) {
+                        if (index === 0) {
+                            this.extendTypedRule(
+                                decl,
+                                rule.selector,
+                                valueMapping.extends,
+                                getAlias(extendsRefSymbol) || extendsRefSymbol
+                            );
+                        } else {
+                            const name = rule.selector.replace('.', '');
+                            const typedRule = this.meta.mappedSymbols[name] as
+                                | ClassSymbol
+                                | ElementSymbol;
+                            typedRule[valueMapping.compose] = typedRule[valueMapping.compose] || [];
+                            const composed = getAlias(extendsRefSymbol) || extendsRefSymbol;
+                            if (isClassOrElement(composed)) {
+                                typedRule[valueMapping.compose]!.push(composed);
+                            }
+                        }
+                    } else {
+                        this.diagnostics.warn(
+                            decl,
+                            processorWarnings.CANNOT_RESOLVE_EXTEND(symbolName),
+                            { word: symbolName }
+                        );
+                    }
+                });
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
@@ -720,6 +728,17 @@ export class StylableProcessor {
 
         return importObj;
     }
+}
+
+function isClassOrElement(
+    extendsRefSymbol: StylableSymbol
+): extendsRefSymbol is ClassSymbol | ElementSymbol | ImportSymbol {
+    return (
+        extendsRefSymbol &&
+        (extendsRefSymbol._kind === 'import' ||
+            extendsRefSymbol._kind === 'class' ||
+            extendsRefSymbol._kind === 'element')
+    );
 }
 
 export function validateScopingSelector(

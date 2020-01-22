@@ -171,6 +171,7 @@ export class StylableTransformer {
             stVars: {},
             keyframes: {}
         };
+
         const ast = this.resetTransformProperties(meta);
         this.resolver.validateImports(meta, this.diagnostics);
         validateScopes(meta, this.resolver, this.diagnostics);
@@ -927,14 +928,17 @@ export class StylableTransformer {
         const metaParts = this.resolveMetaParts(meta);
         for (const [localName, resolved] of Object.entries(metaParts.class)) {
             const exportedClasses = this.getPartExports(resolved);
-            locals[localName] = exportedClasses.join(' ');
+            locals[localName] = [...exportedClasses].join(' ');
         }
         return locals;
     }
     /* None alias symbol */
-    public getPartExports(resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>) {
-        const exportedClasses = [];
+    public getPartExports(
+        resolved: Array<CSSResolve<ClassSymbol | ElementSymbol>>,
+        exportedClasses = new Set<string>()
+    ) {
         let first = true;
+        const composes = [];
         for (const { meta, symbol } of resolved) {
             if (!first && symbol[valueMapping.root]) {
                 break;
@@ -943,8 +947,22 @@ export class StylableTransformer {
             if (symbol.alias && !symbol[valueMapping.extends]) {
                 continue;
             }
-            exportedClasses.push(this.scope(symbol.name, meta.namespace));
+            const className = this.scope(symbol.name, meta.namespace);
+            if (!exportedClasses.has(className)) {
+                exportedClasses.add(className);
+                if (symbol[valueMapping.compose]) {
+                    composes.push({ meta, symbols: symbol[valueMapping.compose] });
+                }
+            }
         }
+        composes.forEach(({ meta, symbols }) => {
+            const parts = this.resolveMetaParts(meta);
+            symbols?.forEach(({ name }) => {
+                for (const exportClass of this.getPartExports(parts.class[name], exportedClasses)) {
+                    exportedClasses.add(exportClass);
+                }
+            });
+        });
         return exportedClasses;
     }
     public scopeSelector2(
@@ -1262,7 +1280,7 @@ export class StylableTransformer {
             metaParts = { class: resolvedClasses, element: resolvedElements };
             this.metaParts.set(meta, metaParts);
         }
-        return metaParts!;
+        return metaParts;
     }
     private addDevRules(meta: StylableMeta) {
         const metaParts = this.resolveMetaParts(meta);

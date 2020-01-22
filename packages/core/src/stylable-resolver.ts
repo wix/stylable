@@ -248,11 +248,11 @@ export class StylableResolver {
                         res.symbol &&
                         (res.symbol._kind === 'element' || res.symbol._kind === 'class')
                     ) {
-                        const { _kind, meta, symbol } = res;
+                        const { _kind, symbol, meta } = res;
                         current = {
                             _kind,
-                            meta,
-                            symbol
+                            symbol,
+                            meta
                         };
                     } else {
                         if (reportError) {
@@ -261,7 +261,7 @@ export class StylableResolver {
                         break;
                     }
                 } else {
-                    current = { _kind: 'css', symbol: parent, meta };
+                    current = { _kind: 'css', symbol: parent, meta: current.meta };
                 }
             } else {
                 break;
