@@ -52,7 +52,7 @@ describe('Stylable @st-import', () => {
         );
     });
 
-    it('warn on invalid format', () => {
+    it('warn on invalid default format', () => {
         const result = processSource(
             `
             @st-import %$ from ("");
@@ -130,5 +130,26 @@ describe('Stylable @st-import', () => {
             defaultExport: 't',
             named: { t1: 't1' }
         });
+    });
+
+    
+    it('collect @st-import with classNames', () => {
+        const result = processSource(
+            `
+            @st-import t-x, [-t1-x] from "./some/external/path";
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.mappedSymbols['t-x']).to.include({
+            _kind: 'import',
+            type: 'default'
+        });
+
+        expect(result.mappedSymbols['-t1-x']).to.include({
+            _kind: 'import',
+            type: 'named'
+        });
+
     });
 });

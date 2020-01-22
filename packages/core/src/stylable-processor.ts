@@ -679,7 +679,7 @@ export class StylableProcessor {
         // simple import parts extraction for now no parser is needed.  
         const isStarImport = atRule.params.match(/^\s*\*/);
         const matchImport = atRule.params.match(
-            /^((\w+)\s*,?\s*)?(\[(.*?)\])?(\s+from\s+)?(['"](.*?)['"])$/
+            /^((-?[_a-zA-Z]+[_a-zA-Z0-9-]*?)\s*,?\s*)?(\[(.*?)\])?(\s+from\s+)?(['"](.*?)['"])$/
         );
         if (isStarImport) {
             this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
