@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { NodeRenderer } from './types';
 
 export interface DOMListRenderer<I, O extends Element, C extends Element = Element> {
@@ -24,7 +23,7 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
     };
 
     const render = (container: C, data: I[] = []) => {
-        let node: O;
+        let node: O | undefined;
         if (data.length) {
             let next: O | undefined = first;
             for (let i = 0; i < data.length; i++) {
