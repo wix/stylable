@@ -304,7 +304,7 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                 return topLevelDeclarations
                     .filter(
                         d =>
-                            !(meta.ast.source!.input as any).css.includes("@namespace") ||
+                            !(meta.ast.source!.input as any).css.includes('@namespace') ||
                             d !== 'namespace'
                     )
                     .filter(d => topLevelDirectives[d].startsWith(fullLineText.trim()))
@@ -372,7 +372,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
     },
 
     isInsideValueDirective(wholeLine: string, pos: number) {
-        if (!wholeLine.includes("value(")) {
+        if (!wholeLine.includes('value(')) {
             return false;
         }
         const line = wholeLine.slice(0, pos).slice(wholeLine.lastIndexOf('value('));
@@ -1144,8 +1144,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
 
             const lastState = lastSelectoid.replace(':', '');
             const realState =
-                allStates.hasOwnProperty(lastState) ||
-                nativePseudoClasses.includes(lastState);
+                allStates.hasOwnProperty(lastState) || nativePseudoClasses.includes(lastState);
 
             return states.reduce((acc: Completion[], st) => {
                 acc.push(

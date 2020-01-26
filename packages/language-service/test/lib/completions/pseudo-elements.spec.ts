@@ -22,7 +22,10 @@ describe('Pseudo-elements', () => {
                     () => {
                         const rng = createRange(6, 4, 6, 4 + i);
 
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-as-tag.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-as-tag.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -44,7 +47,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(9, 10, 9, 10 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-as-tag-css-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-as-tag-css-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -66,7 +72,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(9, 10, 9, 10 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-as-tag-imported-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-as-tag-imported-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -88,7 +97,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(5, 12, 5, 12 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-as-tag-pseudo-element-exists.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-as-tag-pseudo-element-exists.st.css',
+                            prefix
+                        );
 
                         const notExp: Array<Partial<Completion>> = [];
                         notExp.push(createCompletion(a[0], rng));
@@ -119,7 +131,10 @@ describe('Pseudo-elements', () => {
                     () => {
                         const rng = createRange(9, 5, 9, 5 + i);
 
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -141,7 +156,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(11, 10, 11, 10 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended-local-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended-local-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -163,7 +181,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 12, 10, 12 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended-css-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended-css-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -185,7 +206,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 12, 10, 12 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended-imported-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended-imported-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -207,7 +231,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(6, 4, 6, 6 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended-pseudo-element-exists.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended-pseudo-element-exists.st.css',
+                            prefix
+                        );
                         const notExp: Array<Partial<Completion>> = [];
                         notExp.push(createCompletion(a[0], rng));
                         notExp.push(createCompletion(a[1], rng));
@@ -237,7 +264,10 @@ describe('Pseudo-elements', () => {
                     () => {
                         const rng = createRange(10, 5, 10, 5 + i);
 
-                        const asserter = asserters.getCompletions('pseudo-elements/named-import-extended.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/named-import-extended.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -259,7 +289,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/named-import-extended-local-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/named-import-extended-local-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -281,7 +314,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 13, 10, 13 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/named-import-extended-css-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/named-import-extended-css-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -303,7 +339,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/named-import-extended-imported-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/named-import-extended-imported-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -325,7 +364,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(6, 4, 6, 6 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/default-import-extended-pseudo-element-exists.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/default-import-extended-pseudo-element-exists.st.css',
+                            prefix
+                        );
                         const notExp: Array<Partial<Completion>> = [];
                         notExp.push(createCompletion(a[0], rng));
                         notExp.push(createCompletion(a[1], rng));
@@ -336,7 +378,9 @@ describe('Pseudo-elements', () => {
         });
 
         it('should not complete root pseudo-elements on class extending named import', () => {
-            const asserter = asserters.getCompletions('pseudo-elements/named-import-extended.st.css');
+            const asserter = asserters.getCompletions(
+                'pseudo-elements/named-import-extended.st.css'
+            );
             asserter.notSuggested([
                 asserters.pseudoElementCompletion(
                     'bobo',
@@ -366,7 +410,10 @@ describe('Pseudo-elements', () => {
                     () => {
                         const rng = createRange(10, 11, 10, 11 + i);
 
-                        const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/recursive-import-3.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -389,7 +436,10 @@ describe('Pseudo-elements', () => {
                     () => {
                         const rng = createRange(10, 12, 10, 12 + i);
 
-                        const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-leading-space.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/recursive-import-3-leading-space.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -411,7 +461,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-css-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/recursive-import-3-css-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -433,7 +486,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(10, 17, 10, 17 + i);
-                        const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-imported-state.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/recursive-import-3-imported-state.st.css',
+                            prefix
+                        );
                         const exp: Array<Partial<Completion>> = [];
                         const notExp: Array<Partial<Completion>> = [];
                         exp.push(createCompletion(a[j], rng));
@@ -455,7 +511,10 @@ describe('Pseudo-elements', () => {
                         ' ',
                     () => {
                         const rng = createRange(0, 0, 0, 0);
-                        const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-pseudo-element-exists.st.css', prefix);
+                        const asserter = asserters.getCompletions(
+                            'pseudo-elements/recursive-import-3-pseudo-element-exists.st.css',
+                            prefix
+                        );
                         const notExp: Array<Partial<Completion>> = [];
                         notExp.push(createCompletion(a[0], rng));
                         notExp.push(createCompletion(a[1], rng));
@@ -483,7 +542,10 @@ describe('Pseudo-elements', () => {
                     prefix +
                     ' ',
                 () => {
-                    const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-deep.st.css', prefix);
+                    const asserter = asserters.getCompletions(
+                        'pseudo-elements/recursive-import-3-deep.st.css',
+                        prefix
+                    );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str, rng));
@@ -510,7 +572,10 @@ describe('Pseudo-elements', () => {
             it(
                 'should complete state ' + str1 + ' in deep chain with prefix: ' + prefix + ' ',
                 () => {
-                    const asserter = asserters.getCompletions('pseudo-elements/recursive-import-3-deep.st.css', prefix);
+                    const asserter = asserters.getCompletions(
+                        'pseudo-elements/recursive-import-3-deep.st.css',
+                        prefix
+                    );
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str1, rng));
@@ -539,7 +604,10 @@ describe('Pseudo-elements', () => {
                 () => {
                     const rng = createRange(9, 14, 9, 14 + i);
 
-                    const asserter = asserters.getCompletions('pseudo-elements/default-import-with-native-element.st.css', prefix);
+                    const asserter = asserters.getCompletions(
+                        'pseudo-elements/default-import-with-native-element.st.css',
+                        prefix
+                    );
                     const exp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str, rng));
                     asserter.suggested(exp);
@@ -555,7 +623,10 @@ describe('Pseudo-elements', () => {
                 () => {
                     const rng = createRange(9, 12, 9, 12 + i);
 
-                    const asserter = asserters.getCompletions('pseudo-elements/default-import-with-native-class.st.css', prefix);
+                    const asserter = asserters.getCompletions(
+                        'pseudo-elements/default-import-with-native-class.st.css',
+                        prefix
+                    );
                     const exp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str, rng));
                     asserter.suggested(exp);

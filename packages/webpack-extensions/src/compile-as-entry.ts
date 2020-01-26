@@ -65,7 +65,7 @@ export function compileAsEntry(
 
 export const exec = (code: string, filename: string, context: string) => {
     const module = new NativeModule(filename);
-    module.paths = (NativeModule)._nodeModulePaths(context);
+    module.paths = NativeModule._nodeModulePaths(context);
     module.filename = filename;
     module._compile(code, filename);
     return module.exports;

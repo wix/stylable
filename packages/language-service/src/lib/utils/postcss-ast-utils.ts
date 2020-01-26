@@ -15,10 +15,7 @@ export function isInNode(
     if (node.source.start.line > position.line) {
         return false;
     }
-    if (
-        node.source.start.line === position.line &&
-        node.source.start.column > position.character
-    ) {
+    if (node.source.start.line === position.line && node.source.start.column > position.character) {
         return false;
     }
     if (!node.source.end) {

@@ -3,10 +3,7 @@ import hash from 'murmurhash';
 import { dirname, relative } from 'path';
 const findConfig = require('find-config');
 
-export function resolveNamespaceFactory(
-    hashSalt = '',
-    prefix = ''
-): typeof processNamespace {
+export function resolveNamespaceFactory(hashSalt = '', prefix = ''): typeof processNamespace {
     return (namespace: string, stylesheetPath: string) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
         const config = require(configPath);

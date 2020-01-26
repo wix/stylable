@@ -4,9 +4,7 @@ import * as asserters from '../../../test-kit/completions-asserters';
 describe('Completions', () => {
     describe('Stylesheet Top Level', () => {
         it('should complete ONLY import and vars directive, root and existing classes at top level', () => {
-            const asserter = asserters.getCompletions(
-                'general/top-level-existing-classes.st.css'
-            );
+            const asserter = asserters.getCompletions('general/top-level-existing-classes.st.css');
             asserter.suggested([
                 asserters.importDirectiveCompletion(createRange(3, 0, 3, 0)),
                 asserters.customSelectorDirectiveCompletion(createRange(3, 0, 3, 0)),
@@ -61,9 +59,7 @@ describe('Completions', () => {
         });
 
         it('should complete named imports used locally only once', () => {
-            const asserter = asserters.getCompletions(
-                'general/top-level-import-and-local.st.css'
-            );
+            const asserter = asserters.getCompletions('general/top-level-import-and-local.st.css');
             asserter.suggested([
                 asserters.rootClassCompletion(createRange(9, 0, 9, 0)),
                 asserters.classCompletion('btn', createRange(9, 0, 9, 0)),
@@ -102,9 +98,7 @@ describe('Completions', () => {
 
     describe('Multiple Files', () => {
         it('complete states for localy imported component', () => {
-            const asserter = asserters.getCompletions(
-                'states/locally-imported-component.st.css'
-            );
+            const asserter = asserters.getCompletions('states/locally-imported-component.st.css');
             asserter.suggested([
                 asserters.stateSelectorCompletion(
                     'shmover',

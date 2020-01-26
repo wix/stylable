@@ -35,26 +35,23 @@ describe('Custom Selectors', () => {
                     asserter.notSuggested(notExp);
                 });
 
-                it(
-                    'should be completed in complex selectors, with prefix ' + prefix + ' ',
-                    () => {
-                        const rng = createRange(10, 11, 10, 11 + i);
-                        const asserter = asserters.getCompletions(
-                            'custom-selectors/local-selector-complex.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        exp.push(createCompletion(a[j], rng));
-                        if (prefix.length <= 5) {
-                            exp.push(createCompletion(a[1 - j], rng));
-                        } else {
-                            notExp.push(createCompletion(a[1 - j], rng));
-                        }
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
+                it('should be completed in complex selectors, with prefix ' + prefix + ' ', () => {
+                    const rng = createRange(10, 11, 10, 11 + i);
+                    const asserter = asserters.getCompletions(
+                        'custom-selectors/local-selector-complex.st.css',
+                        prefix
+                    );
+                    const exp: Array<Partial<Completion>> = [];
+                    const notExp: Array<Partial<Completion>> = [];
+                    exp.push(createCompletion(a[j], rng));
+                    if (prefix.length <= 5) {
+                        exp.push(createCompletion(a[1 - j], rng));
+                    } else {
+                        notExp.push(createCompletion(a[1 - j], rng));
                     }
-                );
+                    asserter.suggested(exp);
+                    asserter.notSuggested(notExp);
+                });
             });
         });
 
@@ -153,26 +150,23 @@ describe('Custom Selectors', () => {
                     asserters.pseudoElementCompletion(str.slice(2), rng, path);
                 const prefix = str.slice(0, i);
 
-                it(
-                    'should have relevant pseudo-elements, with prefix ' + prefix + ' ',
-                    () => {
-                        const rng = createRange(10, 8, 10, 8 + i);
-                        const asserter = asserters.getCompletions(
-                            'pseudo-elements/custom-selector-local.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        exp.push(createCompletion(a[j], rng, './import.st.css'));
-                        if (prefix.length <= 2) {
-                            exp.push(createCompletion(a[1 - j], rng, './import.st.css'));
-                        } else {
-                            notExp.push(createCompletion(a[1 - j], rng, './import.st.css'));
-                        }
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
+                it('should have relevant pseudo-elements, with prefix ' + prefix + ' ', () => {
+                    const rng = createRange(10, 8, 10, 8 + i);
+                    const asserter = asserters.getCompletions(
+                        'pseudo-elements/custom-selector-local.st.css',
+                        prefix
+                    );
+                    const exp: Array<Partial<Completion>> = [];
+                    const notExp: Array<Partial<Completion>> = [];
+                    exp.push(createCompletion(a[j], rng, './import.st.css'));
+                    if (prefix.length <= 2) {
+                        exp.push(createCompletion(a[1 - j], rng, './import.st.css'));
+                    } else {
+                        notExp.push(createCompletion(a[1 - j], rng, './import.st.css'));
                     }
-                );
+                    asserter.suggested(exp);
+                    asserter.notSuggested(notExp);
+                });
             });
         });
     });
@@ -286,26 +280,23 @@ describe('Custom Selectors', () => {
                     asserter.notSuggested(notExp);
                 });
 
-                it(
-                    'should have relevant states after root, with prefix ' + prefix + ' ',
-                    () => {
-                        const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = asserters.getCompletions(
-                            'custom-selectors/imported-selector-on-root-inner.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        exp.push(createCompletion(a[j], rng, './top-import.st.css'));
-                        if (prefix.length <= 1) {
-                            exp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
-                        } else {
-                            notExp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
-                        }
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
+                it('should have relevant states after root, with prefix ' + prefix + ' ', () => {
+                    const rng = createRange(9, 12, 9, 12 + i);
+                    const asserter = asserters.getCompletions(
+                        'custom-selectors/imported-selector-on-root-inner.st.css',
+                        prefix
+                    );
+                    const exp: Array<Partial<Completion>> = [];
+                    const notExp: Array<Partial<Completion>> = [];
+                    exp.push(createCompletion(a[j], rng, './top-import.st.css'));
+                    if (prefix.length <= 1) {
+                        exp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
+                    } else {
+                        notExp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
                     }
-                );
+                    asserter.suggested(exp);
+                    asserter.notSuggested(notExp);
+                });
 
                 it(
                     'should not have states when custom selector is grouped, with prefix ' +
@@ -332,26 +323,23 @@ describe('Custom Selectors', () => {
                     asserters.pseudoElementCompletion(str.slice(2), rng, path);
                 const prefix = str.slice(0, i);
 
-                it(
-                    'should have relevant pseudo-elements, with prefix ' + prefix + ' ',
-                    () => {
-                        const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = asserters.getCompletions(
-                            'custom-selectors/imported-selector-inner.st.css',
-                            prefix
-                        );
-                        const exp: Array<Partial<Completion>> = [];
-                        const notExp: Array<Partial<Completion>> = [];
-                        exp.push(createCompletion(a[j], rng, './top-import.st.css'));
-                        if (prefix.length <= 2) {
-                            exp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
-                        } else {
-                            notExp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
-                        }
-                        asserter.suggested(exp);
-                        asserter.notSuggested(notExp);
+                it('should have relevant pseudo-elements, with prefix ' + prefix + ' ', () => {
+                    const rng = createRange(9, 12, 9, 12 + i);
+                    const asserter = asserters.getCompletions(
+                        'custom-selectors/imported-selector-inner.st.css',
+                        prefix
+                    );
+                    const exp: Array<Partial<Completion>> = [];
+                    const notExp: Array<Partial<Completion>> = [];
+                    exp.push(createCompletion(a[j], rng, './top-import.st.css'));
+                    if (prefix.length <= 2) {
+                        exp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
+                    } else {
+                        notExp.push(createCompletion(a[1 - j], rng, './top-import.st.css'));
                     }
-                );
+                    asserter.suggested(exp);
+                    asserter.notSuggested(notExp);
+                });
 
                 it(
                     'should have relevant pseudo-elements after root, with prefix ' + prefix + ' ',
