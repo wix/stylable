@@ -40,7 +40,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const border = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).border;
+            return getComputedStyle(document.documentElement).border;
         });
 
         expect(border).to.eql('1px solid rgb(0, 128, 0)');

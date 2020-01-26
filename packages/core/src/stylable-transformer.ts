@@ -395,7 +395,7 @@ export class StylableTransformer {
 
         ast.walkAtRules(/keyframes$/, atRule => {
             const name = atRule.params;
-            if (!!~reservedKeyFrames.indexOf(name)) {
+            if (~reservedKeyFrames.indexOf(name)) {
                 this.diagnostics.error(atRule, transformerWarnings.KEYFRAME_NAME_RESERVED(name), {
                     word: name
                 });
@@ -910,7 +910,7 @@ export class StylableTransformer {
                 }
             }
         } else if (rule) {
-            if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+            if (!nativePseudoElements.includes(name) && !isVendorPrefixed(name)) {
                 this.diagnostics.warn(rule, transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name), {
                     word: name
                 });
@@ -1084,7 +1084,7 @@ export class StylableTransformer {
                     resolved: []
                 });
 
-                if (nativePseudoElements.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+                if (!nativePseudoElements.includes(name) && !isVendorPrefixed(name)) {
                     this.diagnostics.warn(
                         context.rule,
                         transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name),
@@ -1114,7 +1114,7 @@ export class StylableTransformer {
                     break;
                 }
             }
-            if (!found && nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+            if (!found && !nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
                 this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(name), {
                     word: name
                 });
@@ -1193,7 +1193,7 @@ export class StylableTransformer {
             const globalMappedNodes = symbol[valueMapping.global];
             node.type = 'selector';
             node.nodes = globalMappedNodes;
-            this.addGlobalsToMeta(globalMappedNodes!, originMeta);
+            this.addGlobalsToMeta(globalMappedNodes, originMeta);
         } else {
             node.type = 'class';
             node.name = this.scope(symbol.name, meta.namespace);
@@ -1262,7 +1262,7 @@ export class StylableTransformer {
             metaParts = { class: resolvedClasses, element: resolvedElements };
             this.metaParts.set(meta, metaParts);
         }
-        return metaParts!;
+        return metaParts;
     }
     private addDevRules(meta: StylableMeta) {
         const metaParts = this.resolveMetaParts(meta);
@@ -1428,9 +1428,9 @@ class ScopeContext {
     public selectorAst: SelectorAstNode;
     public rule: postcss.Rule;
     public additionalSelectors: Array<() => void> = [];
-    public selectorIndex: number = -1;
+    public selectorIndex = -1;
     public elements: any[] = [];
-    public transformGlobals: boolean = false;
+    public transformGlobals = false;
     public metaParts?: MetaParts;
     public chunks?: SelectorChunk2[];
     public chunk?: SelectorChunk2;
@@ -1446,7 +1446,7 @@ class ScopeContext {
     }
     public setCurrentAnchor(anchor: ScopeAnchor) {
         if (this.selectorIndex !== undefined && this.selectorIndex !== -1) {
-            this.elements[this.selectorIndex].push(anchor!);
+            this.elements[this.selectorIndex].push(anchor);
         }
         this.currentAnchor = anchor;
     }

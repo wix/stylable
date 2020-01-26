@@ -21,7 +21,7 @@ describe(`(${project})`, () => {
     it('css renders with legacy runtime', async () => {
         const { page } = await projectRunner.openInBrowser();
         const { backgroundColor } = await page.evaluate(() => {
-            const computedStyle = getComputedStyle(document.documentElement!);
+            const computedStyle = getComputedStyle(document.documentElement);
 
             return {
                 backgroundColor: computedStyle.backgroundColor

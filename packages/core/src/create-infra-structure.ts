@@ -28,7 +28,7 @@ export function createInfrastructure(
     });
 
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
+        if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
             moduleId = eResolver.resolveSync({}, context, moduleId);
         }
         return moduleId;

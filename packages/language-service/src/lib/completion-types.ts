@@ -175,7 +175,7 @@ export function globalCompletion(rng: ProviderRange) {
 }
 
 // semantic
-export function classCompletion(className: string, rng: ProviderRange, removeDot: boolean = false) {
+export function classCompletion(className: string, rng: ProviderRange, removeDot = false) {
     return new Completion(
         (removeDot ? '' : '.') + className,
         'Stylable class or tag',

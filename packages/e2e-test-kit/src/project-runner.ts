@@ -115,7 +115,7 @@ export class ProjectRunner {
             child.once('message', port => {
                 this.serverUrl = `http://localhost:${port}`;
                 this.server = {
-                    async close() {
+                    close() {
                         child.kill();
                     }
                 };
@@ -128,7 +128,7 @@ export class ProjectRunner {
         if (!this.browser) {
             this.browser = await puppeteer.launch(this.puppeteerOptions);
         }
-        const page = await this.browser!.newPage();
+        const page = await this.browser.newPage();
         this.pages.push(page);
 
         await page.setCacheEnabled(false);
@@ -184,7 +184,7 @@ export class ProjectRunner {
             this.browser = null;
         }
         if (this.server) {
-            await this.server.close();
+            this.server.close();
             this.server = null;
         }
         await rimraf(this.outputDir);

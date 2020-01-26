@@ -232,7 +232,7 @@ export class Provider {
                         name = name!.replace('.', '').replace(/:/g, '');
                         if (
                             name === k.name ||
-                            (name.charAt(0) !== name.charAt(0).toLowerCase() && k.name === 'root')
+                            (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
                         ) {
                             temp = k;
                             stateMeta = meta;
@@ -242,9 +242,9 @@ export class Provider {
                             !!(callingMeta.mappedSymbols[name] as ClassSymbol)[valueMapping.extends]
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
-                            if (!!res) {
+                            if (res) {
                                 temp = k;
-                                stateMeta = res.meta!;
+                                stateMeta = res.meta;
                                 return true;
                             }
                         }
@@ -263,7 +263,7 @@ export class Provider {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
             );
-        } else if (word.charAt(0) !== word.charAt(0).toLowerCase()) {
+        } else if (!word.startsWith(word.charAt(0).toLowerCase())) {
             // Default import, link to top of imported stylesheet
             defs.push(new ProviderLocation(meta.source, createRange(0, 0, 0, 0)));
         }
@@ -286,7 +286,7 @@ export class Provider {
         if (
             !!res &&
             res._kind === 'css' &&
-            Object.keys(res.symbol[valueMapping.states]).indexOf(state) !== -1
+            Object.keys(res.symbol[valueMapping.states]).includes(state)
         ) {
             return res as CSSResolve;
         } else if (
@@ -319,7 +319,7 @@ export class Provider {
 
         const split = src.split('\n');
         const line = split[pos.line];
-        let value: string = '';
+        let value = '';
 
         const path = pathFromPosition(meta.rawAst, {
             line: pos.line + 1,
@@ -368,7 +368,7 @@ export class Provider {
                 )
                 .trim();
         }
-        if (/value\(\s*[^\)]*$/.test(value)) {
+        if (/value\(\s*[^)]*$/.test(value)) {
             return null;
         }
         const parsed = valueParser(value);
@@ -394,7 +394,7 @@ export class Provider {
                 return this.getSignatureForTsModifier(
                     mixin,
                     activeParam,
-                    (mappedSymbol as ImportSymbol).import.from,
+                    mappedSymbol.import.from,
                     (meta.mappedSymbols[mixin]! as ImportSymbol).type === 'default',
                     paramInfo
                 );
@@ -459,7 +459,7 @@ export class Provider {
     }
 
     private escapeRegExp(re: string) {
-        return re.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+        return re.replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1');
     }
 
     private getSignatureForTsModifier(
@@ -491,7 +491,7 @@ export class Provider {
             ? (sig.declaration.type as ts.TypeReferenceNode).getText()
             : '';
 
-        const parameters: ParameterInformation[] = sig!.parameters.map(pt => {
+        const parameters: ParameterInformation[] = sig.parameters.map(pt => {
             const label =
                 pt.name +
                 ':' +
@@ -646,7 +646,7 @@ export class Provider {
         pos: ProviderPosition,
         line: string
     ): SignatureHelp | null {
-        let word: string = '';
+        let word = '';
         const posChar = pos.character + 1;
         const parsed = selectorTokenizer.parse(line);
         if (parsed.nodes[0].type === 'selector') {
@@ -822,7 +822,7 @@ export class Provider {
 }
 
 function isIllegalLine(line: string): boolean {
-    return /^\s*[-\.:]+\s*$/.test(line);
+    return /^\s*[-.:]+\s*$/.test(line);
 }
 
 const lineEndsRegexp = /({|}|;)/;
@@ -882,12 +882,12 @@ function findRefs(
                         uri: URI.file(scannedMeta.source).toString(),
                         range: {
                             start: {
-                                line: rule.source.start!.line - 1,
-                                character: rule.source.start!.column + index
+                                line: rule.source.start.line - 1,
+                                character: rule.source.start.column + index
                             },
                             end: {
-                                line: rule.source.start!.line - 1,
-                                character: rule.source.start!.column + index + word.length
+                                line: rule.source.start.line - 1,
+                                character: rule.source.start.column + index + word.length
                             }
                         }
                     });
@@ -928,10 +928,10 @@ function findRefs(
                                 inner.meta.source === defMeta.source &&
                                 Object.keys(
                                     (inner.symbol as ClassSymbol)[valueMapping.states]!
-                                ).indexOf(word) !== -1
+                                ).includes(word)
                         ) &&
                         rs.resolved[rs.resolved.length - 1].symbol.name ===
-                            lastResolvedSelector!.symbol.name
+                            lastResolvedSelector.symbol.name
                     ) {
                         return true;
                     }
@@ -945,12 +945,12 @@ function findRefs(
                         uri: URI.file(scannedMeta.source).toString(),
                         range: {
                             start: {
-                                line: rule.source.start!.line - 1,
-                                character: rule.source.start!.column + index
+                                line: rule.source.start.line - 1,
+                                character: rule.source.start.column + index
                             },
                             end: {
-                                line: rule.source.start!.line - 1,
-                                character: rule.source.start!.column + index + word.length
+                                line: rule.source.start.line - 1,
+                                character: rule.source.start.column + index + word.length
                             }
                         }
                     });
@@ -960,7 +960,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta!.rawAst.walkDecls(decl => {
+    scannedMeta.rawAst.walkDecls(decl => {
         if (!decl.source || !decl.source.start) {
             return;
         }
@@ -976,19 +976,19 @@ function findRefs(
                     uri: URI.file(scannedMeta.source).toString(),
                     range: {
                         start: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) -
                                 1
                         },
                         end: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) +
                                 word.length -
@@ -999,7 +999,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta!.rawAst.walkDecls(decl => {
+    scannedMeta.rawAst.walkDecls(decl => {
         if (!decl.source || !decl.source.start || !pos) {
             return;
         }
@@ -1039,19 +1039,19 @@ function findRefs(
                     uri: URI.file(scannedMeta.source).toString(),
                     range: {
                         start: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) -
                                 1
                         },
                         end: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) +
                                 word.length -
@@ -1062,7 +1062,7 @@ function findRefs(
             }
         }
     });
-    scannedMeta!.rawAst.walkDecls(valueMapping.mixin, decl => {
+    scannedMeta.rawAst.walkDecls(valueMapping.mixin, decl => {
         // usage in -st-mixin
         if (!decl.source || !decl.source.start) {
             return;
@@ -1103,7 +1103,7 @@ function findRefs(
             }
         });
     });
-    scannedMeta!.rawAst.walkDecls(word, decl => {
+    scannedMeta.rawAst.walkDecls(word, decl => {
         // Variable definition
         if (
             decl.parent.type === 'rule' &&
@@ -1115,18 +1115,18 @@ function findRefs(
                 uri: URI.file(scannedMeta.source).toString(),
                 range: {
                     start: {
-                        line: decl.source.start!.line - 1,
-                        character: decl.source.start!.column - 1
+                        line: decl.source.start.line - 1,
+                        character: decl.source.start.column - 1
                     },
                     end: {
-                        line: decl.source.start!.line - 1,
-                        character: decl.source.start!.column + word.length - 1
+                        line: decl.source.start.line - 1,
+                        character: decl.source.start.column + word.length - 1
                     }
                 }
             });
         }
     });
-    scannedMeta!.rawAst.walkDecls(decl => {
+    scannedMeta.rawAst.walkDecls(decl => {
         // Variable usage
         if (decl.value.includes('value(') && !!decl.source && !!decl.source.start) {
             const usageRegex = new RegExp('value\\(\\s*' + word + '\\s*\\)', 'g');
@@ -1136,20 +1136,20 @@ function findRefs(
                     uri: URI.file(scannedMeta.source).toString(),
                     range: {
                         start: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) +
                                 'value('.length -
                                 1
                         },
                         end: {
-                            line: decl.source.start!.line - 1,
+                            line: decl.source.start.line - 1,
                             character:
                                 match.index +
-                                decl.source.start!.column +
+                                decl.source.start.column +
                                 decl.prop.length +
                                 (decl.raws.between ? decl.raws.between.length : 0) +
                                 'value('.length +
@@ -1187,11 +1187,11 @@ function newFindRefs(
     } else {
         word = word.replace('.', '');
     }
-    if (!defMeta.mappedSymbols[word] && word.charAt(0) !== word.charAt(0).toLowerCase()) {
+    if (!defMeta.mappedSymbols[word] && !word.startsWith(word.charAt(0).toLowerCase())) {
         // Default import
         stylesheetsPath.forEach(stylesheetPath => {
             const scannedMeta = stylable.process(stylesheetPath);
-            let tmp: string = '';
+            let tmp = '';
             if (
                 Object.keys(scannedMeta.mappedSymbols).some(k => {
                     tmp = k;
@@ -1367,10 +1367,11 @@ function newFindRefs(
                     const parsed = parseSelector(r.selector, r.selector.indexOf(word));
                     const elem =
                         (parsed.selector[parsed.target.index] as SelectorChunk).type === '*' ||
-                        (parsed.selector[parsed.target.index] as SelectorChunk).type.charAt(0) !==
+                        !(parsed.selector[parsed.target.index] as SelectorChunk).type.startsWith(
                             (parsed.selector[parsed.target.index] as SelectorChunk).type
                                 .charAt(0)
                                 .toLowerCase()
+                        )
                             ? findLast(
                                   (parsed.selector[parsed.target.index] as SelectorChunk).text,
                                   (str: string) => !str.startsWith(':') || str.startsWith('::')
@@ -1387,7 +1388,7 @@ function newFindRefs(
                                 return (
                                     symbolStates &&
                                     inner.meta.source === defMeta.source &&
-                                    Object.keys(symbolStates).indexOf(word) !== -1
+                                    Object.keys(symbolStates).includes(word)
                                 );
                             }
                             return false;
@@ -1552,7 +1553,7 @@ export function extractTsSignature(
     if (!mix) {
         return;
     }
-    return tc.getSignatureFromDeclaration(mix!.declarations![0] as ts.SignatureDeclaration);
+    return tc.getSignatureFromDeclaration(mix.declarations[0] as ts.SignatureDeclaration);
 }
 
 export function extractJsModifierReturnType(mixin: string, fileSrc: string): string {
@@ -1620,13 +1621,13 @@ export function isDirective(line: string) {
 }
 
 function isNamedDirective(line: string) {
-    return line.indexOf(valueMapping.named) !== -1;
+    return line.includes(valueMapping.named);
 }
 
 export function isInValue(lineText: string, position: ProviderPosition) {
-    let isInValue: boolean = false;
+    let isInValue = false;
 
-    if (/value\(/.test(lineText)) {
+    if (lineText.includes('value(')) {
         const line = lineText.slice(0, position.character);
         let stack = 0;
         for (let i = 0; i <= line.length; i++) {
@@ -1777,7 +1778,7 @@ export function getDefSymbol(
                 (meta.mappedSymbols[word] as ElementSymbol).alias as ImportSymbol
             );
         } else if (meta.mappedSymbols[word]._kind === 'class') {
-            if (!!(meta.mappedSymbols[word] as ClassSymbol).alias) {
+            if ((meta.mappedSymbols[word] as ClassSymbol).alias) {
                 meta = (stylable.resolver.resolveImport(
                     (meta.mappedSymbols[word] as ClassSymbol).alias!
                 ) as CSSResolve).meta;
@@ -1829,7 +1830,7 @@ export function getDefSymbol(
     const resolvedElements = transformer.resolveSelectorElements(meta, expandedLine);
 
     let reso: CSSResolve | undefined;
-    if (word.charAt(0) !== word.charAt(0).toLowerCase()) {
+    if (!word.startsWith(word.charAt(0).toLowerCase())) {
         reso = resolvedElements[0][resolvedElements[0].length - 1].resolved.find(
             res => !!(res.symbol as ClassSymbol)['-st-root']
         );

@@ -104,7 +104,7 @@ export class ComponentMetadataBuilder {
         let maxDepth = 0;
         const source = Object.keys(this.output.components).reduce((source, name) => {
             const { stylesheetPath } = this.output.components[name];
-            const { depth } = this.output.fs[stylesheetPath].metadata!;
+            const { depth } = this.output.fs[stylesheetPath].metadata;
             const from = stylesheetPath;
             maxDepth = Math.max(maxDepth, depth);
 
@@ -154,7 +154,7 @@ export class ComponentMetadataBuilder {
 
 function normPath(resource: string, context = '') {
     const v = resource.replace(context, '').replace(/\\/g, '/');
-    return v.charAt(0) === '/' ? v : `/${v}`;
+    return v.startsWith('/') ? v : `/${v}`;
 }
 
 function cloneObject<T = object>(obj: T) {

@@ -20,7 +20,6 @@ describe('Signature Help', () => {
                         activeParameter: prefix.match(/,/g) ? prefix.match(/,/g)!.length : 0,
                         signatures: [
                             SignatureInformation.create(
-                                // tslint:disable-next-line: max-line-length
                                 "paramfulMixin(numParam: string, strParam: string, aliasedParam: string, enumParam: 'a' | 'b'): object",
                                 undefined,
                                 ParameterInformation.create('numParam: string'),
@@ -155,7 +154,6 @@ describe('Signature Help', () => {
                         activeParameter: prefix.match(/,/g) ? prefix.match(/,/g)!.length : 0,
                         signatures: [
                             SignatureInformation.create(
-                                // tslint:disable-next-line: max-line-length
                                 "paramfulMixin(numParam: string, strParam: string, aliasedParam: string, enumParam: 'a'|'b'): object",
                                 undefined,
                                 ParameterInformation.create('numParam: stNumber<0,200>'),
@@ -296,7 +294,6 @@ describe('Signature Help', () => {
                                     activeParameter: 0,
                                     signatures: [
                                         SignatureInformation.create(
-                                            // tslint:disable-next-line: max-line-length
                                             'Supported "string" validator types:\n- "regex, contains, minLength, maxLength"',
                                             undefined,
                                             ParameterInformation.create(
@@ -398,7 +395,6 @@ describe('Signature Help', () => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
                 it(
-                    // tslint:disable-next-line: max-line-length
                     'Provides signature help and identifies imported state type definition and validators, with prefix ' +
                         prefix,
                     () => {

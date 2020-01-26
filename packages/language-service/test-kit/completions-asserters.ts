@@ -8,7 +8,7 @@ import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 function assertPresent(
     actualCompletions: Completion[],
     expectedCompletions: Array<Partial<Completion>>,
-    prefix: string = ''
+    prefix = ''
 ) {
     expectedCompletions.forEach(expected => {
         const actual = actualCompletions.find(comp => comp.label === expected.label);
@@ -44,7 +44,7 @@ function assertPresent(
 function assertNotPresent(
     actualCompletions: Completion[],
     nonCompletions: Array<Partial<Completion>>,
-    prefix: string = ''
+    prefix = ''
 ) {
     nonCompletions.forEach(notAllowed => {
         const actual = actualCompletions.find(
@@ -63,8 +63,7 @@ function assertNotPresent(
     });
 }
 
-// TODO : remove async (no need for it) and fix all breaking tests
-export async function getCompletions(fileName: string, prefix: string = '') {
+export function getCompletions(fileName: string, prefix = '') {
     const fullPath = path.join(CASES_PATH, fileName);
     const src: string = fs.readFileSync(fullPath).toString();
 

@@ -192,7 +192,7 @@ export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
     _reportWarning?: ReportWarning,
-    perserveQuotes: boolean = false
+    perserveQuotes = false
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -321,13 +321,13 @@ export function listOptions(node: any) {
 export function validateAllowedNodesUntil(
     node: ParsedValue,
     i: number,
-    untilType: string = 'div',
+    untilType = 'div',
     allowed = ['comment']
 ) {
     i = 1;
     let current = node.nodes[i];
     while (current && current.type !== untilType) {
-        if (allowed.indexOf(current.type) === -1) {
+        if (!allowed.includes(current.type)) {
             return false;
         }
         i++;

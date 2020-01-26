@@ -27,7 +27,7 @@ export function cachedProcessFile<T = any>(
     const cache: { [key: string]: CacheItem<T> } = {};
     const postProcessors: Array<(value: T, path: string) => T> = [];
 
-    function process(fullpath: string, ignoreCache: boolean = false, context?: string) {
+    function process(fullpath: string, ignoreCache = false, context?: string) {
         const resolvedPath = resolvePath(fullpath, context);
         const stat = fs.statSync(resolvedPath);
         const cached = cache[resolvedPath];

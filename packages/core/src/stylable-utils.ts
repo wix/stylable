@@ -34,7 +34,7 @@ export function expandCustomSelectors(
     customSelectors: Record<string, string>,
     diagnostics?: Diagnostics
 ): string {
-    if (rule.selector.indexOf(':--') > -1) {
+    if (rule.selector.includes(':--')) {
         rule.selector = rule.selector.replace(
             CUSTOM_SELECTOR_RE,
             (extensionName, _matches, selector) => {
@@ -239,7 +239,7 @@ export function removeUnusedRules(
     usedFiles: string[],
     resolvePath: (ctx: string, path: string) => string
 ): void {
-    const isUnusedImport = usedFiles.indexOf(_import.from) === -1;
+    const isUnusedImport = !usedFiles.includes(_import.from);
 
     if (isUnusedImport) {
         const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
@@ -247,7 +247,7 @@ export function removeUnusedRules(
             let shouldOutput = true;
             traverseNode(rule.selectorAst, node => {
                 // TODO: remove.
-                if (symbols.indexOf(node.name) !== -1) {
+                if (symbols.includes(node.name)) {
                     return (shouldOutput = false);
                 }
                 const symbol = meta.mappedSymbols[node.name];
@@ -258,7 +258,7 @@ export function removeUnusedRules(
                     if (
                         extend &&
                         extend._kind === 'import' &&
-                        usedFiles.indexOf(resolvePath(meta.source, extend.import.from)) === -1
+                        !usedFiles.includes(resolvePath(meta.source, extend.import.from))
                     ) {
                         return (shouldOutput = false);
                     }

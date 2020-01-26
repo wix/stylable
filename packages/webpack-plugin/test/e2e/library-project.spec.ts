@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('eval bundle exports', async () => {
+    it('eval bundle exports', () => {
         const global = { Library: {} };
 
         new Function('window', projectRunner.getBuildAsset('main.js'))(global);

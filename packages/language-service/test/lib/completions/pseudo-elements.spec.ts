@@ -19,10 +19,10 @@ describe('Pseudo-elements', () => {
                         ' after class with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 4, 6, 4 + i);
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-as-tag.st.css',
                             prefix
                         );
@@ -45,9 +45,9 @@ describe('Pseudo-elements', () => {
                         ' after CSS state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 10, 9, 10 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-as-tag-css-state.st.css',
                             prefix
                         );
@@ -70,9 +70,9 @@ describe('Pseudo-elements', () => {
                         ' after imported state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 10, 9, 10 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-as-tag-imported-state.st.css',
                             prefix
                         );
@@ -95,9 +95,9 @@ describe('Pseudo-elements', () => {
                         ' if a pseudo-element exists with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(5, 12, 5, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-as-tag-pseudo-element-exists.st.css',
                             prefix
                         );
@@ -128,10 +128,10 @@ describe('Pseudo-elements', () => {
                         ' after class with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 5, 9, 5 + i);
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended.st.css',
                             prefix
                         );
@@ -154,9 +154,9 @@ describe('Pseudo-elements', () => {
                         ' after local state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(11, 10, 11, 10 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended-local-state.st.css',
                             prefix
                         );
@@ -179,9 +179,9 @@ describe('Pseudo-elements', () => {
                         ' after CSS state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 12, 10, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended-css-state.st.css',
                             prefix
                         );
@@ -204,9 +204,9 @@ describe('Pseudo-elements', () => {
                         ' after imported state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 12, 10, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended-imported-state.st.css',
                             prefix
                         );
@@ -229,9 +229,9 @@ describe('Pseudo-elements', () => {
                         ' if a pseudo-element exists with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 4, 6, 6 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended-pseudo-element-exists.st.css',
                             prefix
                         );
@@ -261,10 +261,10 @@ describe('Pseudo-elements', () => {
                         ' after class with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 5, 10, 5 + i);
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/named-import-extended.st.css',
                             prefix
                         );
@@ -287,9 +287,9 @@ describe('Pseudo-elements', () => {
                         ' after local state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/named-import-extended-local-state.st.css',
                             prefix
                         );
@@ -312,9 +312,9 @@ describe('Pseudo-elements', () => {
                         ' after CSS state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 13, 10, 13 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/named-import-extended-css-state.st.css',
                             prefix
                         );
@@ -337,9 +337,9 @@ describe('Pseudo-elements', () => {
                         ' after imported state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/named-import-extended-imported-state.st.css',
                             prefix
                         );
@@ -362,9 +362,9 @@ describe('Pseudo-elements', () => {
                         ' if a pseudo-element exists with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 4, 6, 6 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended-pseudo-element-exists.st.css',
                             prefix
                         );
@@ -377,8 +377,8 @@ describe('Pseudo-elements', () => {
             });
         });
 
-        it('should not complete root pseudo-elements on class extending named import', async () => {
-            const asserter = await asserters.getCompletions(
+        it('should not complete root pseudo-elements on class extending named import', () => {
+            const asserter = asserters.getCompletions(
                 'pseudo-elements/named-import-extended.st.css'
             );
             asserter.notSuggested([
@@ -407,10 +407,10 @@ describe('Pseudo-elements', () => {
                         ' after pseudo-element with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 11, 10, 11 + i);
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3.st.css',
                             prefix
                         );
@@ -433,10 +433,10 @@ describe('Pseudo-elements', () => {
                         ' after pseudo-element when line has leading spaces, with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 12, 10, 12 + i);
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-leading-space.st.css',
                             prefix
                         );
@@ -459,9 +459,9 @@ describe('Pseudo-elements', () => {
                         ' after CSS state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 16, 10, 16 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-css-state.st.css',
                             prefix
                         );
@@ -484,9 +484,9 @@ describe('Pseudo-elements', () => {
                         ' after imported state with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 17, 10, 17 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-imported-state.st.css',
                             prefix
                         );
@@ -509,9 +509,9 @@ describe('Pseudo-elements', () => {
                         ' if a pseudo-element exists with prefix: ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(0, 0, 0, 0);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-pseudo-element-exists.st.css',
                             prefix
                         );
@@ -541,8 +541,8 @@ describe('Pseudo-elements', () => {
                     ' in deep chain with prefix: ' +
                     prefix +
                     ' ',
-                async () => {
-                    const asserter = await asserters.getCompletions(
+                () => {
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/recursive-import-3-deep.st.css',
                         prefix
                     );
@@ -571,8 +571,8 @@ describe('Pseudo-elements', () => {
 
             it(
                 'should complete state ' + str1 + ' in deep chain with prefix: ' + prefix + ' ',
-                async () => {
-                    const asserter = await asserters.getCompletions(
+                () => {
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/recursive-import-3-deep.st.css',
                         prefix
                     );
@@ -601,10 +601,10 @@ describe('Pseudo-elements', () => {
                     ' after CSS native pseudo-element with prefix: ' +
                     prefix +
                     ' ',
-                async () => {
+                () => {
                     const rng = createRange(9, 14, 9, 14 + i);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/default-import-with-native-element.st.css',
                         prefix
                     );
@@ -620,10 +620,10 @@ describe('Pseudo-elements', () => {
                     ' after CSS native pseudo-class with prefix: ' +
                     prefix +
                     ' ',
-                async () => {
+                () => {
                     const rng = createRange(9, 12, 9, 12 + i);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/default-import-with-native-class.st.css',
                         prefix
                     );

@@ -16,9 +16,9 @@ describe('States', () => {
 
                 it(
                     'should complete available states from same file, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(4, 5, 4, 5 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/class-with-states.st.css',
                             prefix
                         );
@@ -39,9 +39,9 @@ describe('States', () => {
                     'should complete available states in complex selectors, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 19, 9, 19 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/complex-selectors.st.css',
                             prefix
                         );
@@ -68,9 +68,9 @@ describe('States', () => {
                     'should complete only unused states in complex selectors ending in state name, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 25, 9, 25 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/complex-selectors-with-states.st.css',
                             prefix
                         );
@@ -89,8 +89,8 @@ describe('States', () => {
             });
         });
 
-        it('should not complete state value after :: ', async () => {
-            const asserter = await asserters.getCompletions(
+        it('should not complete state value after :: ', () => {
+            const asserter = asserters.getCompletions(
                 'states/class-with-states-double-colon.st.css'
             );
             asserter.notSuggested([
@@ -102,12 +102,12 @@ describe('States', () => {
 
     describe('State with param', () => {
         describe('Definition', () => {
-            it('should complete available states param types', async () => {
+            it('should complete available states param types', () => {
                 const rng = createRange(1, 22, 1, 22);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateTypeDefinitionCompletion(str, rng, path);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/state-def-with-param-start.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -119,12 +119,12 @@ describe('States', () => {
             });
 
             describe('String', () => {
-                it('should complete available state with the start of a "string" pre-written', async () => {
+                it('should complete available state with the start of a "string" pre-written', () => {
                     const rng = createRange(1, 22, 1, 23);
                     const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'states/with-param/string/state-def-with-param-string-start.st.css'
                     );
                     const exp: Array<Partial<Completion>> = [];
@@ -138,7 +138,7 @@ describe('States', () => {
                 });
 
                 describe('Validators', () => {
-                    it('should complete available state string validators', async () => {
+                    it('should complete available state string validators', () => {
                         const rng = createRange(1, 29, 1, 29);
                         const createCompletion = (
                             validator: string,
@@ -153,7 +153,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/string/local-state-string-validators.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -164,7 +164,7 @@ describe('States', () => {
                         asserter.suggested(exp);
                     });
 
-                    it('should complete regex string validator', async () => {
+                    it('should complete regex string validator', () => {
                         const rng = createRange(1, 29, 1, 31);
                         const createCompletion = (
                             validator: string,
@@ -179,7 +179,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/string/state-def-with-param-string-regex-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -192,7 +192,7 @@ describe('States', () => {
                         asserter.notSuggested(unExp);
                     });
 
-                    it('should complete contains string validator', async () => {
+                    it('should complete contains string validator', () => {
                         const rng = createRange(1, 29, 1, 30);
                         const createCompletion = (
                             validator: string,
@@ -207,7 +207,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/string/state-def-with-param-string-contains-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -220,7 +220,7 @@ describe('States', () => {
                         asserter.notSuggested(unExp);
                     });
 
-                    it('should complete min/max Length string validators', async () => {
+                    it('should complete min/max Length string validators', () => {
                         const rng = createRange(1, 29, 1, 30);
                         const createCompletion = (
                             validator: string,
@@ -235,7 +235,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/string/state-def-with-param-string-m-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -250,12 +250,12 @@ describe('States', () => {
                 });
             });
             describe('Number', () => {
-                it('should complete available state with the start of a "number" pre-written', async () => {
+                it('should complete available state with the start of a "number" pre-written', () => {
                     const rng = createRange(1, 22, 1, 23);
                     const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'states/with-param/number/state-def-with-param-number-start.st.css'
                     );
                     const exp: Array<Partial<Completion>> = [];
@@ -269,7 +269,7 @@ describe('States', () => {
                 });
 
                 describe('Validators', () => {
-                    it('should complete available state number validators', async () => {
+                    it('should complete available state number validators', () => {
                         const rng = createRange(1, 29, 1, 29);
                         const createCompletion = (
                             validator: string,
@@ -284,7 +284,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/number/local-state-number-validators.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -294,7 +294,7 @@ describe('States', () => {
                         asserter.suggested(exp);
                     });
 
-                    it('should complete min number validator', async () => {
+                    it('should complete min number validator', () => {
                         const rng = createRange(1, 29, 1, 31);
                         const createCompletion = (
                             validator: string,
@@ -309,7 +309,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/number/state-def-with-param-number-min-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -321,7 +321,7 @@ describe('States', () => {
                         asserter.notSuggested(unExp);
                     });
 
-                    it('should complete max number validator', async () => {
+                    it('should complete max number validator', () => {
                         const rng = createRange(1, 29, 1, 31);
                         const createCompletion = (
                             validator: string,
@@ -336,7 +336,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/number/state-def-with-param-number-max-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -348,7 +348,7 @@ describe('States', () => {
                         asserter.notSuggested(unExp);
                     });
 
-                    it('should complete multipleOf number validator', async () => {
+                    it('should complete multipleOf number validator', () => {
                         const rng = createRange(1, 29, 1, 31);
                         const createCompletion = (
                             validator: string,
@@ -363,7 +363,7 @@ describe('States', () => {
                                 path
                             );
 
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'states/with-param/number/state-def-with-param-number-multiple-start.st.css'
                         );
                         const exp: Array<Partial<Completion>> = [];
@@ -378,12 +378,12 @@ describe('States', () => {
             });
 
             describe('Enum', () => {
-                it('should complete available state with the start of a "enum" pre-written', async () => {
+                it('should complete available state with the start of a "enum" pre-written', () => {
                     const rng = createRange(1, 22, 1, 23);
                     const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'states/with-param/enum/state-def-with-param-enum-start.st.css'
                     );
                     const exp: Array<Partial<Completion>> = [];
@@ -398,12 +398,12 @@ describe('States', () => {
             });
 
             describe('Tag', () => {
-                it('should complete available state with the start of a "tag" pre-written', async () => {
+                it('should complete available state with the start of a "tag" pre-written', () => {
                     const rng = createRange(1, 22, 1, 23);
                     const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                         asserters.stateTypeDefinitionCompletion(str, rng, path);
 
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'states/with-param/tag/state-def-with-param-tag-start.st.css'
                     );
                     const exp: Array<Partial<Completion>> = [];
@@ -419,12 +419,12 @@ describe('States', () => {
         });
 
         describe('Usage', () => {
-            it('should complete available states from same file (with parenthesis)', async () => {
+            it('should complete available states from same file (with parenthesis)', () => {
                 const rng = createRange(4, 5, 4, 5);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateSelectorCompletion(str.slice(1), rng, path, true);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/local-state-param.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -432,12 +432,12 @@ describe('States', () => {
                 asserter.suggested(exp);
             });
 
-            it('should complete imported state (with parenthesis)', async () => {
+            it('should complete imported state (with parenthesis)', () => {
                 const rng = createRange(9, 5, 9, 5);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateSelectorCompletion(str.slice(1), rng, path, true);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/imported-state-param.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -445,12 +445,12 @@ describe('States', () => {
                 asserter.suggested(exp);
             });
 
-            it('should complete enum state parameter options', async () => {
+            it('should complete enum state parameter options', () => {
                 const rng = createRange(4, 12, 4, 12);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateEnumCompletion(str, rng, path);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/enum/state-with-param-enum-suggestion.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -460,12 +460,12 @@ describe('States', () => {
                 asserter.suggested(exp);
             });
 
-            it('should complete pre-existing enum state parameter options from imported file', async () => {
+            it('should complete pre-existing enum state parameter options from imported file', () => {
                 const rng = createRange(9, 12, 9, 13);
                 const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateEnumCompletion(str, rng, path);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/enum/imported-state-with-enum-middle.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -477,8 +477,7 @@ describe('States', () => {
                 asserter.notSuggested(unExp);
             });
 
-            // tslint:disable-next-line: max-line-length
-            it('should not complete pseudo-states and pseudo-elements when inside an enum (from imported file)', async () => {
+            it('should not complete pseudo-states and pseudo-elements when inside an enum (from imported file)', () => {
                 const rng = createRange(9, 12, 9, 12);
                 const createEnumComp = (str: string, rng: ProviderRange, path?: string) =>
                     asserters.stateEnumCompletion(str, rng, path);
@@ -488,7 +487,7 @@ describe('States', () => {
                     asserters.pseudoElementCompletion(str, rng, path);
                 const createGlobalComp = (rng: ProviderRange) => asserters.globalCompletion(rng);
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'states/with-param/enum/imported-state-with-enum-start.st.css'
                 );
                 const exp: Array<Partial<Completion>> = [];
@@ -524,9 +523,9 @@ describe('States', () => {
                         ' value for default import used as tag, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 4, 6, 4 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-as-tag.st.css',
                             prefix
                         );
@@ -549,9 +548,9 @@ describe('States', () => {
                         ' value for local class extending default import, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 5, 9, 5 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/default-import-extended.st.css',
                             prefix
                         );
@@ -580,9 +579,9 @@ describe('States', () => {
                         ' value for local class extending named import, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 5, 9, 5 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/named-import-extended-named.st.css',
                             prefix
                         );
@@ -612,9 +611,9 @@ describe('States', () => {
                         ' after pseudo-element, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 11, 10, 11 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3.st.css',
                             prefix
                         );
@@ -643,9 +642,9 @@ describe('States', () => {
                         ' after pseudo-element when line has leading spaces, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 12, 10, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-leading-space.st.css',
                             prefix
                         );
@@ -677,9 +676,9 @@ describe('States', () => {
                     'should complete only unused pseudo-element states when pseudo-element state exists, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 25, 9, 25 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/multiple-states.st.css',
                             prefix
                         );
@@ -713,8 +712,8 @@ describe('States', () => {
                     ' in deep chain ending with state, with prefix ' +
                     prefix +
                     ' ',
-                async () => {
-                    const asserter = await asserters.getCompletions(
+                () => {
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/recursive-import-3-deep-state.st.css',
                         prefix
                     );

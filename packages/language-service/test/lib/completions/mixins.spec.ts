@@ -23,9 +23,9 @@ describe('Mixins', () => {
 
                 it(
                     'should be completed from local and imported classes, with prefix ' + prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(15, 15, 15, 15 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin.st.css',
                             prefix
                         );
@@ -51,9 +51,9 @@ describe('Mixins', () => {
                 it(
                     'should complete local and imported classes after single value, with prefix ' +
                         prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(15, 23, 15, 23 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin-single-value.st.css',
                             prefix
                         );
@@ -86,9 +86,9 @@ describe('Mixins', () => {
                 it(
                     'should complete local and imported classes after multiple values, with prefix ' +
                         prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(15, 28, 15, 28 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/recursive-import-3-mixin-multiple-values.st.css',
                             prefix
                         );
@@ -123,11 +123,11 @@ describe('Mixins', () => {
         const mixin = 'part1';
         mixin.split('').forEach((_c, i) => {
             const prefix = mixin.slice(0, i);
-            it('should complete css mixin imported from 3rd party', async () => {
+            it('should complete css mixin imported from 3rd party', () => {
                 const rng = createRange(6, 14, 6, 14 + i);
                 const exp: Array<Partial<Completion>> = [];
 
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'mixins/3rd-party-css-mixin.st.css',
                     prefix
                 );
@@ -158,9 +158,9 @@ describe('Mixins', () => {
                     it(
                         'should complete imported TS mixins, but not formatters, with prefix ' +
                             prefix,
-                        async () => {
+                        () => {
                             const rng = createRange(12, 15, 12, 15 + i);
-                            const asserter = await asserters.getCompletions(
+                            const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins.st.css',
                                 prefix
                             );
@@ -191,9 +191,9 @@ describe('Mixins', () => {
 
                     it(
                         'should complete imported TS mixins after value, with prefix ' + prefix,
-                        async () => {
+                        () => {
                             const rng = createRange(11, 46, 11, 46 + i);
-                            const asserter = await asserters.getCompletions(
+                            const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins-single-value.st.css',
                                 prefix
                             );
@@ -228,9 +228,9 @@ describe('Mixins', () => {
                     it(
                         'should complete imported JS mixins, but not formatters, with prefix ' +
                             prefix,
-                        async () => {
+                        () => {
                             const rng = createRange(12, 15, 12, 15 + i);
-                            const asserter = await asserters.getCompletions(
+                            const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins.st.css',
                                 prefix
                             );
@@ -252,9 +252,9 @@ describe('Mixins', () => {
 
                     it(
                         'should complete imported JS mixins after value, with prefix ' + prefix,
-                        async () => {
+                        () => {
                             const rng = createRange(11, 46, 11, 46 + i);
-                            const asserter = await asserters.getCompletions(
+                            const asserter = asserters.getCompletions(
                                 'mixins/imported-mixins-single-value.st.css',
                                 prefix
                             );
@@ -275,8 +275,8 @@ describe('Mixins', () => {
                 });
             });
 
-            it('should not complete mixins inside a mixin param list', async () => {
-                const asserter = await asserters.getCompletions(
+            it('should not complete mixins inside a mixin param list', () => {
+                const asserter = asserters.getCompletions(
                     'mixins/imported-mixins-in-param-list.st.css'
                 );
                 const rng = createRange(0, 0, 0, 0);

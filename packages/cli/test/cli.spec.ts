@@ -64,7 +64,7 @@ describe('Stylable Cli', () => {
         const dirContent = loadDirSync(tempDir.path);
         expect(
             evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'] as string,
+                dirContent['style.st.css.js'],
                 'style.st.css.js'
             ).namespace
         ).equal('test-ns-0');
@@ -136,7 +136,7 @@ describe('Stylable Cli', () => {
 
         expect(
             evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'] as string,
+                dirContent['style.st.css.js'],
                 'style.st.css.js'
             ).namespace
         ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
@@ -165,10 +165,7 @@ describe('Stylable Cli', () => {
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'style.st.css.js');
-        const m = evalStylableModule<{ namespace: string; default: any }>(
-            dirContent[file] as string,
-            file
-        );
+        const m = evalStylableModule<{ namespace: string; default: any }>(dirContent[file], file);
         expect(typeof m).equal('function');
 
         expect(m).equal(m.default);

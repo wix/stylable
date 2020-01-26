@@ -110,7 +110,7 @@ export function processDeclarationValue(
                             return (parsedNode.resolvedValue = variableOverride[varName]);
                         }
                         const refUniqID = createUniqID(meta.source, varName);
-                        if (passedThrough.indexOf(refUniqID) !== -1) {
+                        if (passedThrough.includes(refUniqID)) {
                             // TODO: move diagnostic to original value usage instead of the end of the cyclic chain
                             return handleCyclicValues(
                                 passedThrough,
@@ -233,7 +233,7 @@ export function processDeclarationValue(
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                 } else {
-                    if (customValues[value as keyof typeof stTypes]) {
+                    if (customValues[value]) {
                         // no op resolved at the bottom
                     } else if (value === 'url') {
                         // postcss-value-parser treats url differently:
@@ -373,7 +373,7 @@ function handleCyclicValues(
     return stringifyFunction(value, parsedNode);
 }
 
-function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes: boolean = false) {
+function stringifyFunction(name: string, parsedNode: ParsedValue, perserveQuotes = false) {
     return `${name}(${getFormatterArgs(parsedNode, false, undefined, perserveQuotes).join(', ')})`;
 }
 

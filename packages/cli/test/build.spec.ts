@@ -56,7 +56,7 @@ describe('build stand alone', () => {
         expect(fs.existsSync(resolve('/lib/index.st.css')), '/lib/index.st.css').to.equal(false);
     });
 
-    it('should report errors originating from stylable (process + transform)', async () => {
+    it('should report errors originating from stylable (process + transform)', () => {
         const fs = createFS({
             '/comp.st.css': `
                 :import {
@@ -74,7 +74,7 @@ describe('build stand alone', () => {
         const stylable = new Stylable('/', fs, () => ({}));
         let reportedError = '';
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -93,7 +93,7 @@ describe('build stand alone', () => {
         );
     });
 
-    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
+    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', () => {
         const fs = createFS({
             '/comp.st.css': `
                 .root {
@@ -108,7 +108,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -128,7 +128,7 @@ describe('build stand alone', () => {
         expect(builtFile).to.not.contain(`.x`);
     });
 
-    it('should minify', async () => {
+    it('should minify', () => {
         const fs = createFS({
             '/comp.st.css': `
                 .root {
@@ -145,7 +145,7 @@ describe('build stand alone', () => {
             }
         });
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -164,7 +164,7 @@ describe('build stand alone', () => {
         expect(builtFile).to.contain(`.test__root{color:red}`);
     });
 
-    it('should inject request to output module', async () => {
+    it('should inject request to output module', () => {
         const fs = createFS({
             '/comp.st.css': `
                 .root {
@@ -175,7 +175,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,

@@ -59,7 +59,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             );
         }
     }
-    public removeStylableDirectives(root: postcss.Root, shouldComment: boolean = false) {
+    public removeStylableDirectives(root: postcss.Root, shouldComment = false) {
         const toRemove: postcss.Node[] = [];
         root.walkDecls((decl: postcss.Declaration) => {
             if (decl.prop.startsWith('-st-')) {
@@ -86,11 +86,11 @@ export class StylableOptimizer implements IStylableOptimizer {
         delimiter: string,
         outputAst: postcss.Root,
         usageMapping: Record<string, boolean>,
-        shouldComment: boolean = false
+        shouldComment = false
     ) {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
         outputAst.walkRules(rule => {
-            const outputSelectors = rule.selectors!.filter(selector => {
+            const outputSelectors = rule.selectors.filter(selector => {
                 const selectorAst = parseSelector(selector);
                 return !this.isContainsUnusedParts(selectorAst, usageMapping, matchNamespace);
             });

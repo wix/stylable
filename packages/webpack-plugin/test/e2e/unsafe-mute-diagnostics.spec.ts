@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('should build a project with no errors (duplicate namespace) when muted', async () => {
+    it('should build a project with no errors (duplicate namespace) when muted', () => {
         expect(projectRunner.getBuildErrorMessages().length).to.equal(0);
         expect(projectRunner.getBuildWarningMessages().length).to.equal(0);
     });
@@ -25,7 +25,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).backgroundColor;
+            return getComputedStyle(document.documentElement).backgroundColor;
         });
 
         expect(backgroundColor).to.eql('rgb(0, 128, 0)');

@@ -33,7 +33,7 @@ export interface BuildOptions {
     compat?: boolean;
 }
 
-export async function build({
+export function build({
     extension,
     fs,
     stylable,
@@ -130,14 +130,14 @@ function buildSingleFile(
     diagnosticsMsg: string[],
     projectAssets: string[],
     moduleFormats: string[],
-    includeCSSInJS: boolean = false,
-    outputCSS: boolean = false,
-    outputCSSNameTemplate: string = '[filename].css',
-    outputSources: boolean = false,
-    injectCSSRequest: boolean = false,
-    optimize: boolean = false,
-    minify: boolean = false,
-    compat: boolean = false
+    includeCSSInJS = false,
+    outputCSS = false,
+    outputCSSNameTemplate = '[filename].css',
+    outputSources = false,
+    injectCSSRequest = false,
+    optimize = false,
+    minify = false,
+    compat = false
 ) {
     // testBuild(filePath, fullSrcDir, fs);
 

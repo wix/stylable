@@ -234,7 +234,7 @@ export function validateStateArgument(
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
     validateDefinition?: boolean,
-    validateValue: boolean = true
+    validateValue = true
 ) {
     const resolvedValidations: StateResult = {
         res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
@@ -335,7 +335,7 @@ export function transformPseudoStateSelector(
     }
 
     if (!found && rule) {
-        if (nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+        if (!nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
             diagnostics.warn(rule, stateErrors.UNKNOWN_STATE_USAGE(name), { word: name });
         }
     }

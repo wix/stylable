@@ -54,7 +54,7 @@ export function isSelectorInternalChunk(chunk: SelectorQuery): chunk is Selector
 
 export function parseSelector(
     inputSelector: string,
-    cursorIndex: number = 0
+    cursorIndex = 0
 ): { selector: SelectorQuery[]; target: CursorPosition; lastSelector: string } {
     const res: SelectorQuery[] = [];
     const textArr: string[] = [];
@@ -69,8 +69,8 @@ export function parseSelector(
     const spaceBeforeSelector = inputSelector.match(/^(\s)*/);
     let selector = inputSelector.trim();
     let currentPosition = (spaceBeforeSelector && spaceBeforeSelector[0].length) || 0;
-    let currentSourceQuery: string = '';
-    let lastSelector: string = '';
+    let currentSourceQuery = '';
+    let lastSelector = '';
     let chunkInternalPos = 0;
     res.push(createSelectorChunk());
     for (const selectorQueryItem of firstSelector.nodes) {

@@ -8,7 +8,7 @@ const log = () => {
 };
 
 describe('build index', () => {
-    it('should create index file importing all matched stylesheets in srcDir', async () => {
+    it('should create index file importing all matched stylesheets in srcDir', () => {
         const fs = createFS({
             '/compA.st.css': `
                .a{}
@@ -20,7 +20,7 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -42,7 +42,7 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it('should create index file using a the default generator', async () => {
+    it('should create index file using a the default generator', () => {
         const fs = createFS({
             '/comp-A.st.css': `
                .a{}
@@ -54,7 +54,7 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -76,7 +76,7 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it('should create index file using a custom generator', async () => {
+    it('should create index file using a custom generator', () => {
         const fs = createFS({
             '/comp-A.st.css': `
                .a{}
@@ -88,7 +88,7 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -111,7 +111,7 @@ describe('build index', () => {
             ].join('\n')
         );
     });
-    it('should create non-existing folders in path to the generated indexFile', async () => {
+    it('should create non-existing folders in path to the generated indexFile', () => {
         const fs = createFS({
             '/comp.st.css': `
                .a{}
@@ -119,7 +119,7 @@ describe('build index', () => {
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
-        await build({
+        build({
             extension: '.st.css',
             fs,
             stylable,
@@ -136,7 +136,7 @@ describe('build index', () => {
             [':import {-st-from: "../../comp.st.css";-st-default:Comp;}', '.root Comp{}'].join('\n')
         );
     });
-    it('should handle name collisions by failing', async () => {
+    it('should handle name collisions by failing', () => {
         const fs = createFS({
             '/comp.st.css': `
                .a{}
@@ -148,7 +148,7 @@ describe('build index', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
         try {
-            await build({
+            build({
                 extension: '.st.css',
                 fs,
                 stylable,

@@ -93,6 +93,7 @@ export function getCSSComponentLogicModule(stylableModule: StylableModule) {
                 _module &&
                 _module.type !== 'stylable' &&
                 _module.resource &&
+                // eslint-disable-next-line @typescript-eslint/prefer-string-starts-ends-with
                 _module.resource.slice(0, -1 * path.extname(_module.resource).length) === name
             );
         })
