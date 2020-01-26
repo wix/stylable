@@ -204,11 +204,11 @@ export const ImportInternalDirectivesProvider: CompletionProvider = {
             const res: Completion[] = [];
             importDeclarations.forEach(name => {
                 if (
-                    parentSelector!.nodes!.every(
+                    parentSelector.nodes!.every(
                         (n: any) =>
                             (isDeclaration(n) && importDirectives[name] !== n.prop) || isComment(n)
                     ) &&
-                    importDirectives[name].indexOf(fullLineText.trim()) === 0
+                    importDirectives[name].startsWith(fullLineText.trim())
                 ) {
                     res.push(
                         importInternalDirective(
@@ -248,7 +248,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
                     (n: any) =>
                         (isDeclaration(n) && rulesetDirectives.mixin !== n.prop) || isComment(n)
                 ) &&
-                rulesetDirectives.mixin.indexOf(fullLineText.trim()) === 0
+                rulesetDirectives.mixin.startsWith(fullLineText.trim())
             ) {
                 res.push(
                     rulesetInternalDirective(
@@ -262,12 +262,12 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
                     .filter(d => d !== 'mixin')
                     .forEach(name => {
                         if (
-                            parentSelector!.nodes!.every(
+                            parentSelector.nodes!.every(
                                 (n: any) =>
                                     (isDeclaration(n) && rulesetDirectives[name] !== n.prop) ||
                                     isComment(n)
                             ) &&
-                            rulesetDirectives[name].indexOf(fullLineText.trim()) === 0
+                            rulesetDirectives[name].startsWith(fullLineText.trim())
                         ) {
                             res.push(
                                 rulesetInternalDirective(
@@ -304,10 +304,10 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                 return topLevelDeclarations
                     .filter(
                         d =>
-                            !/@namespace/.test((meta.ast.source!.input as any).css) ||
+                            !(meta.ast.source!.input as any).css.includes("@namespace") ||
                             d !== 'namespace'
                     )
-                    .filter(d => topLevelDirectives[d].indexOf(fullLineText.trim()) === 0)
+                    .filter(d => topLevelDirectives[d].startsWith(fullLineText.trim()))
                     .map(d =>
                         topLevelDirective(
                             d,
@@ -340,7 +340,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
             parentSelector &&
             !isDirective(fullLineText) &&
             !this.isInsideValueDirective(fullLineText, position.character) &&
-            fullLineText.indexOf(':') !== -1
+            fullLineText.includes(':')
         ) {
             const parsed = pvp(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
             const node = parsed[parsed.length - 1];
@@ -372,7 +372,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
     },
 
     isInsideValueDirective(wholeLine: string, pos: number) {
-        if (!/value\(/.test(wholeLine)) {
+        if (!wholeLine.includes("value(")) {
             return false;
         }
         const line = wholeLine.slice(0, pos).slice(wholeLine.lastIndexOf('value('));
@@ -572,7 +572,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
                         meta.mappedSymbols[ms]._kind === 'class'
                 )
                 .filter(ms => ms.startsWith(lastName))
-                .filter(ms => names.indexOf(ms) === -1)
+                .filter(ms => !names.includes(ms))
                 .map(ms => {
                     return cssMixinCompletion(
                         ms,
@@ -703,7 +703,7 @@ export const NamedCompletionProvider: CompletionProvider & {
     }: ProviderOptions): Completion[] {
         const { isNamedValueLine, namedValues } = getNamedValues(src, position.line);
         if (isNamedValueLine) {
-            let importName: string = '';
+            let importName = '';
             if (
                 parentSelector &&
                 parentSelector.selector === ':import' &&
@@ -837,7 +837,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             let lastNode = resolvedElements[0][resolvedElements[0].length - 1];
             if (
                 lastNode.type === 'pseudo-element' &&
-                nativePseudoElements.indexOf(lastNode.name) !== -1
+                nativePseudoElements.includes(lastNode.name)
             ) {
                 lastNode = resolvedElements[0][resolvedElements[0].length - 2];
             }
@@ -852,16 +852,16 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             }, cssPseudoClasses);
 
             let filter = lastNode.resolved.length
-                ? states.indexOf(lastSelectoid.replace(':', '')) !== -1
+                ? states.includes(lastSelectoid.replace(':', ''))
                     ? ''
                     : lastSelectoid.replace(':', '')
                 : lastNode.name;
 
             const scope = filter
                 ? resolvedElements[0][resolvedElements[0].length - 2].type === 'pseudo-element' &&
-                  nativePseudoElements.indexOf(
+                  nativePseudoElements.includes(
                       resolvedElements[0][resolvedElements[0].length - 2].name
-                  ) !== -1
+                  )
                     ? resolvedElements[0][resolvedElements[0].length - 3]
                     : resolvedElements[0][resolvedElements[0].length - 2]
                 : lastNode;
@@ -1083,7 +1083,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
             let lastNode = resolvedElements[0][resolvedElements[0].length - 1];
             if (
                 lastNode.type === 'pseudo-element' &&
-                nativePseudoElements.indexOf(lastNode.name) !== -1
+                nativePseudoElements.includes(lastNode.name)
             ) {
                 lastNode = resolvedElements[0][resolvedElements[0].length - 2];
             }
@@ -1111,8 +1111,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                                 // selectoid is a substring of current state
                                 (k.slice(0, -1).startsWith(lastSelectoid.replace(':', '')) ||
                                     // selectoid is a CSS native pseudo-sclass
-                                    nativePseudoClasses.indexOf(lastSelectoid.replace(':', '')) !==
-                                        -1 ||
+                                    nativePseudoClasses.includes(lastSelectoid.replace(':', '')) ||
                                     allStates.hasOwnProperty(lastSelectoid.replace(':', ''))) &&
                                 chunkyStates.every(cs => cs !== k)
                             ) {
@@ -1146,7 +1145,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
             const lastState = lastSelectoid.replace(':', '');
             const realState =
                 allStates.hasOwnProperty(lastState) ||
-                nativePseudoClasses.indexOf(lastState) !== -1;
+                nativePseudoClasses.includes(lastState);
 
             return states.reduce((acc: Completion[], st) => {
                 acc.push(

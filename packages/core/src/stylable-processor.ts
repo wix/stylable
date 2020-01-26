@@ -214,10 +214,10 @@ export class StylableProcessor {
         const toRemove: postcss.Node[] = [];
         root.walkAtRules(atRule => {
             switch (atRule.name) {
-                case 'namespace':
+                case 'namespace': {
                     const match = atRule.params.match(/["'](.*?)['"]/);
                     if (match) {
-                        if (!!match[1].trim()) {
+                        if (match[1].trim()) {
                             namespace = match[1];
                         } else {
                             this.diagnostics.error(atRule, processorWarnings.EMPTY_NAMESPACE_DEF());
@@ -227,6 +227,7 @@ export class StylableProcessor {
                         this.diagnostics.error(atRule, processorWarnings.INVALID_NAMESPACE_DEF());
                     }
                     break;
+                }
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
@@ -234,7 +235,7 @@ export class StylableProcessor {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
                     break;
-                case 'custom-selector':
+                case 'custom-selector': {
                     const params = atRule.params.split(/\s/);
                     const customName = params.shift();
                     toRemove.push(atRule);
@@ -246,10 +247,11 @@ export class StylableProcessor {
                         // TODO: add warn there are two types one is not valid name and the other is empty name.
                     }
                     break;
+                }
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
-                case 'st-global-custom-property':
+                case 'st-global-custom-property': {
                     const cssVars = atRule.params.split(',');
 
                     if (atRule.params.trim().split(/\s+/g).length > cssVars.length) {
@@ -283,6 +285,7 @@ export class StylableProcessor {
                     }
                     toRemove.push(atRule);
                     break;
+                }
             }
         });
         toRemove.forEach(node => node.remove());
@@ -290,12 +293,12 @@ export class StylableProcessor {
         this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
     }
 
-    protected handleRule(rule: SRule, inStScope: boolean = false) {
+    protected handleRule(rule: SRule, inStScope = false) {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
         const validRoot = isRootValid(rule.selectorAst, 'root');
-        let locallyScoped: boolean = false;
+        let locallyScoped = false;
 
         traverseNode(rule.selectorAst, (node, _index, _nodes) => {
             if (!checker(node)) {
@@ -665,7 +668,7 @@ export class StylableProcessor {
 
         rule.walkDecls(decl => {
             switch (decl.prop) {
-                case valueMapping.from:
+                case valueMapping.from: {
                     const importPath = stripQuotation(decl.value);
                     if (!importPath.trim()) {
                         this.diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
@@ -688,6 +691,7 @@ export class StylableProcessor {
                     }
                     fromExists = true;
                     break;
+                }
                 case valueMapping.default:
                     importObj.defaultExport = decl.value;
 

@@ -115,7 +115,7 @@ export function resolveDocumentColors(
                         const reg = new RegExp('\\b' + v.name + '\\b', 'g');
 
                         const lineIndex = lines.findIndex(l => reg.test(l));
-                        if (lineIndex > -1 && lines[lineIndex].indexOf(v.name) > -1) {
+                        if (lineIndex > -1 && lines[lineIndex].includes(v.name)) {
                             let extraLines = 0;
                             let extraChars = 0;
                             if (decl.raws.between) {

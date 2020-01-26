@@ -23,7 +23,7 @@ export interface IRegisterConfig {
     onUpdate?(registration: ServiceWorkerRegistration): void;
 }
 
-declare var process: { env: { [key: string]: string } };
+declare let process: { env: { [key: string]: string } };
 
 export function register(config?: IRegisterConfig) {
     if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
@@ -111,7 +111,7 @@ function checkValidServiceWorker(swUrl: string, config?: IRegisterConfig) {
             // Ensure service worker exists, and that we really are getting a JS file.
             if (
                 response.status === 404 ||
-                (contentType && contentType.indexOf('javascript') === -1)
+                (contentType && !contentType.includes('javascript'))
             ) {
                 // No service worker found. Probably a different app. Reload the page.
                 navigator.serviceWorker.ready.then(registration => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { contractTest } from '@stylable/dom-test-kit/test/contract-test';
 import { ElementRemoteApi, StylableUnidriverUtil } from '../src';
 

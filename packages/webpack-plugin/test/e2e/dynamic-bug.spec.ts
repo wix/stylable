@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('split chunks nicely', async () => {
+    it('split chunks nicely', () => {
         const chunkByName = getNamedChunks(projectRunner);
 
         expect(getModulesNames(chunkByName.entryA)).to.eql([

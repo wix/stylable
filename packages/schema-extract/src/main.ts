@@ -124,7 +124,7 @@ function addModuleDependency(
         schema.moduleDependencies = [];
     }
     const importedPath = normalizeImportPath(filePath, importPath, basePath, path);
-    if (schema.moduleDependencies.indexOf(importedPath) === -1) {
+    if (!schema.moduleDependencies.includes(importedPath)) {
         schema.moduleDependencies.push(importedPath);
     }
 }

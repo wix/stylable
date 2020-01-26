@@ -117,7 +117,7 @@ function checkRecursive(
                 ? meta.root
                 : 'default'
             : mix.mixin.type;
-    const isRecursive = path.indexOf(symbolName + ' from ' + meta.source) !== -1;
+    const isRecursive = path.includes(symbolName + ' from ' + meta.source);
     if (isRecursive) {
         // Todo: add test verifying word
         transformer.diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), {

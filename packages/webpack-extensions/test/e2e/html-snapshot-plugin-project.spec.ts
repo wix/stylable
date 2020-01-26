@@ -17,7 +17,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('contains index snapshot', async () => {
+    it('contains index snapshot', () => {
         const s = projectRunner.getBuildAsset('snapshots/index.snapshot.html');
         expect(s).to.eql(`<div class="o0__root">Hello World</div>`);
     });

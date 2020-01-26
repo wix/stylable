@@ -18,7 +18,7 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('reports warnings', async () => {
+    it('reports warnings', () => {
         const warnings = projectRunner.getBuildWarningMessages();
         // const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
 

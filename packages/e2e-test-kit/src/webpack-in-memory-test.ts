@@ -22,9 +22,9 @@ export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: str
         memfs.writeFileSync(r, files[k] || '\n');
     }
 
-    for (const k in content) {
-        memfs.mkdirpSync(dirname(content[k].fullpath));
-        memfs.writeFileSync(content[k].fullpath, content[k].content || '\n');
+    for (const entry of content) {
+        memfs.mkdirpSync(dirname(entry.fullpath));
+        memfs.writeFileSync(entry.fullpath, entry.content || '\n');
     }
 
     return memfs;
@@ -46,7 +46,7 @@ export function webpackTest({ files, config }: any) {
     return { compiler, evalCssJSModule, fs: memfs };
 }
 
-export function evalCssJSModule(source: string, filename: string = 'file.js') {
+export function evalCssJSModule(source: string, filename = 'file.js') {
     return _eval(source, filename, {
         require(id: string) {
             return { id };

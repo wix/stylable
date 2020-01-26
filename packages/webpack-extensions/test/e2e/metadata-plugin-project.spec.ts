@@ -90,7 +90,7 @@ describe(`(${project})`, () => {
         });
     };
 
-    it('contains metadata', async () => {
+    it('contains metadata', () => {
         const s = projectRunner.getBuildAsset('test.metadata.json');
 
         expectMetadataJSON(JSON.parse(s));
@@ -110,7 +110,7 @@ describe(`(${project})`, () => {
             after
         );
 
-        it('contains metadata as cjs export', async () => {
+        it('contains metadata as cjs export', () => {
             const s = projectRunnerJs.getBuildAsset('test.metadata.json.js');
             const e = projectRunnerJs.evalAssetModule(s);
 
@@ -132,7 +132,7 @@ describe(`(${project})`, () => {
             after
         );
 
-        it('contains metadata as static amd export', async () => {
+        it('contains metadata as static amd export', () => {
             const s = projectRunnerAmdStatic.getBuildAsset('test.metadata.json.js');
             const e = projectRunnerAmdStatic.evalAssetModule(s);
 
@@ -154,7 +154,7 @@ describe(`(${project})`, () => {
             after
         );
 
-        it('contains metadata as factory amd export', async () => {
+        it('contains metadata as factory amd export', () => {
             const s = projectRunnerAmdFactory.getBuildAsset('test.metadata.json.js');
             const e = projectRunnerAmdFactory.evalAssetModule(s);
 

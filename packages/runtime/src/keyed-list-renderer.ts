@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { NodeRenderer } from './types';
 
 export interface DOMListRenderer<I, O extends Element, C extends Element = Element> {
@@ -38,7 +39,7 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
 
             while (node!.nextElementSibling) {
                 if (nodeRenderer.hasKey(node!.nextElementSibling as O)) {
-                    container.removeChild(node!.nextElementSibling!);
+                    container.removeChild(node!.nextElementSibling);
                 } else {
                     break;
                 }

@@ -92,7 +92,7 @@ const reactScriptsLinked =
 // config before publish: we're in ./packages/@stylable/react-scripts/config/
 if (
     !reactScriptsLinked &&
-    __dirname.indexOf(path.join('packages', 'react-scripts', 'config')) !== -1
+    __dirname.includes(path.join('packages', 'react-scripts', 'config'))
 ) {
     module.exports = {
         dotenv: resolveOwn('template/.env'),

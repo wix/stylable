@@ -30,7 +30,7 @@ export function matchAllRulesAndDeclarations(
     parent: postcss.Container,
     all: string[][],
     msg?: string,
-    offset: number = 0
+    offset = 0
 ) {
     all.forEach((_, i) => matchRuleAndDeclaration(parent, i + offset, _[0], _[1], msg));
 }

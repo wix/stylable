@@ -24,12 +24,9 @@ describe('Named Values', () => {
                 'completes classes and vars from imported file after -st-named, with prefix ' +
                     prefix +
                     ' ',
-                async () => {
+                () => {
                     const rng = createRange(2, 15, 2, 15 + i);
-                    const asserter = await asserters.getCompletions(
-                        'named/st-named.st.css',
-                        prefix
-                    );
+                    const asserter = asserters.getCompletions('named/st-named.st.css', prefix);
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     if (prefix.length === 0) {
@@ -48,9 +45,9 @@ describe('Named Values', () => {
                 }
             );
 
-            it('completes names after single value, with prefix ' + prefix + ' ', async () => {
+            it('completes names after single value, with prefix ' + prefix + ' ', () => {
                 const rng = createRange(2, 22, 2, 22 + i);
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'named/st-named-single-value.st.css',
                     prefix
                 );
@@ -75,9 +72,9 @@ describe('Named Values', () => {
                 asserter.notSuggested(notExp);
             });
 
-            it('completes names after multiple values, with prefix ' + prefix + ' ', async () => {
+            it('completes names after multiple values, with prefix ' + prefix + ' ', () => {
                 const rng = createRange(2, 29, 2, 29 + i);
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'named/st-named-multi-values.st.css',
                     prefix
                 );
@@ -102,9 +99,9 @@ describe('Named Values', () => {
                 asserter.notSuggested(notExp);
             });
 
-            it('completes names on second line, with prefix ' + prefix + ' ', async () => {
+            it('completes names on second line, with prefix ' + prefix + ' ', () => {
                 const rng = createRange(3, 4, 3, 4 + i);
-                const asserter = await asserters.getCompletions(
+                const asserter = asserters.getCompletions(
                     'named/st-named-multi-line.st.css',
                     prefix
                 );
@@ -142,26 +139,20 @@ describe('Named Values', () => {
 
             const createComp = (str: string, rng: ProviderRange) =>
                 asserters.namedCompletion(str, rng, path, 'Mixin');
-            it(
-                'Completes names of functions from JS imports, with prefix ' + prefix + ' ',
-                async () => {
-                    const asserter = await asserters.getCompletions(
-                        'named/st-named-mixin.st.css',
-                        prefix
-                    );
-                    const exp: Array<Partial<Completion>> = [];
-                    const notExp: Array<Partial<Completion>> = [];
-                    if (prefix.length <= 1) {
-                        exp.push(createComp(str5, rng));
-                        exp.push(createComp(str6, rng));
-                    } else {
-                        exp.push(createComp(str, rng));
-                        notExp.push(createComp(str === str5 ? str6 : str5, rng));
-                    }
-                    asserter.suggested(exp);
-                    asserter.notSuggested(notExp);
+            it('Completes names of functions from JS imports, with prefix ' + prefix + ' ', () => {
+                const asserter = asserters.getCompletions('named/st-named-mixin.st.css', prefix);
+                const exp: Array<Partial<Completion>> = [];
+                const notExp: Array<Partial<Completion>> = [];
+                if (prefix.length <= 1) {
+                    exp.push(createComp(str5, rng));
+                    exp.push(createComp(str6, rng));
+                } else {
+                    exp.push(createComp(str, rng));
+                    notExp.push(createComp(str === str5 ? str6 : str5, rng));
                 }
-            );
+                asserter.suggested(exp);
+                asserter.notSuggested(notExp);
+            });
         });
     });
 });

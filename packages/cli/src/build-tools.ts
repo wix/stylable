@@ -37,7 +37,7 @@ export function createImportForComponent(from: string, defaultName: string) {
 
 export function addDotSlash(p: string) {
     p = p.replace(/\\/g, '/');
-    return p.charAt(0) === '.' ? p : './' + p;
+    return p.startsWith('.') ? p : './' + p;
 }
 
 export function ensureDirectory(dir: string, fs: FileSystem) {

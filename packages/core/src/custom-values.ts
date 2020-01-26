@@ -21,10 +21,12 @@ export function box<Type extends string, Value extends any>(
     };
 }
 
+const { hasOwnProperty } = Object.prototype;
+
 export function unbox<B extends Box<string, unknown>>(boxed: B) {
     if (typeof boxed === 'string') {
         return boxed;
-    } else if (typeof boxed === 'object' && boxed.type && boxed.hasOwnProperty('value')) {
+    } else if (typeof boxed === 'object' && boxed.type && hasOwnProperty.call(boxed, 'value')) {
         return cloneDeepWith(boxed.value, unbox);
     }
 }
@@ -99,7 +101,7 @@ export const CustomValueStrategy = {
             if (valueNodes.length === 0) {
                 // TODO: error
             } else if (valueNodes.length === 1) {
-                const valueNode = valueNodes[0] as ParsedValue;
+                const valueNode = valueNodes[0];
                 resolvedValue = valueNode.resolvedValue;
 
                 if (!resolvedValue) {

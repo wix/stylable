@@ -23,7 +23,7 @@ export function createMinimalFS(config: MinimalFSSetup) {
     }
     function isDir(path: string) {
         return Object.keys(files).some(p => {
-            return p.startsWith(path[path.length - 1] === sep ? path : path + sep);
+            return p.startsWith(path.endsWith(sep) ? path : path + sep);
         });
     }
     const fs: MinimalFS = {

@@ -283,8 +283,8 @@ export class StylableLanguageService {
         return this.provider.provideCompletionItemsFromSrc(src, pos, fileName, this.fs);
     }
 
-    public async getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
-        const defs = await this.provider.getDefinitionLocation(
+    public getDefinitionLocation(src: string, position: ProviderPosition, filePath: string) {
+        const defs = this.provider.getDefinitionLocation(
             src,
             position,
             URI.file(filePath).fsPath,

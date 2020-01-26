@@ -44,7 +44,7 @@ const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024;
 
 // Process CLI arguments
 const argv = process.argv.slice(2);
-const writeStatsJson = argv.indexOf('--stats') !== -1;
+const writeStatsJson = argv.includes('--stats');
 
 // First, read the current file sizes in build directory.
 // This lets us display how much they changed later.
@@ -110,7 +110,7 @@ measureFileSizesBeforeBuild(paths.appBuild)
 function build(previousFileSizes) {
     console.log('Creating an optimized production build...');
 
-    let compiler = webpack(config);
+    const compiler = webpack(config);
     return new Promise((resolve, reject) => {
         compiler.run((err, stats) => {
             let messages;

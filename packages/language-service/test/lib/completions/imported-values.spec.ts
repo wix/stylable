@@ -24,8 +24,8 @@ describe('Imported Values', () => {
                     'completes default and named imports in -st-extends, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
-                        const asserter = await asserters.getCompletions(
+                    () => {
+                        const asserter = asserters.getCompletions(
                             'imports/st-extends.st.css',
                             prefix
                         );
@@ -46,8 +46,8 @@ describe('Imported Values', () => {
                     'completes named and default imports in -st-extends with final ; , with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
-                        const asserter = await asserters.getCompletions(
+                    () => {
+                        const asserter = asserters.getCompletions(
                             'imports/st-extends-with-semicolon.st.css',
                             prefix
                         );
@@ -66,13 +66,13 @@ describe('Imported Values', () => {
             });
         });
 
-        it('does not complete mixins, formatters, or vars in -st-extends', async () => {
+        it('does not complete mixins, formatters, or vars in -st-extends', () => {
             const oneVar = 'oneVar';
             const twoVar = 'twoVar';
             const mixin = 'paramfulMixin';
             const formatter = 'aFormatter';
 
-            const asserter = await asserters.getCompletions('imports/st-extends-mixins.st.css');
+            const asserter = asserters.getCompletions('imports/st-extends-mixins.st.css');
             const notExp: Array<Partial<Completion>> = [];
             notExp.push(createComp2(oneVar, createRange(0, 0, 0, 0), realPath));
             notExp.push(createComp2(twoVar, createRange(0, 0, 0, 0), realPath));
@@ -91,9 +91,9 @@ describe('Imported Values', () => {
                     'completes named and default imports as initial selectors, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 0, 6, i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'imports/st-extends-selectors.st.css',
                             prefix
                         );
@@ -114,9 +114,9 @@ describe('Imported Values', () => {
                     'completes named and default imports as non-initial selectors, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(6, 6, 6, 6 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'imports/st-extends-complex-selectors.st.css',
                             prefix
                         );
@@ -152,8 +152,8 @@ describe('Imported Values', () => {
                     'completes default and named imports in -st-extends, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
-                        const asserter = await asserters.getCompletions(
+                    () => {
+                        const asserter = asserters.getCompletions(
                             'imports/from-package/st-extends.st.css',
                             prefix
                         );

@@ -9,7 +9,7 @@ function createResolveExtendsResults(
     fs: MinimalFS,
     fileToProcess: string,
     classNameToLookup: string,
-    isElement: boolean = false
+    isElement = false
 ) {
     const processFile = cachedProcessFile<StylableMeta>(
         (fullpath, content) => {
@@ -86,8 +86,8 @@ describe('stylable-resolver', () => {
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
-        expect(results[0].symbol!.name).to.equal('Button');
-        expect(results[1].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('Button');
+        expect(results[1].symbol.name).to.equal('root');
         expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
@@ -124,8 +124,8 @@ describe('stylable-resolver', () => {
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
-        expect(results[0].symbol!.name).to.equal('Button');
-        expect(results[1].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('Button');
+        expect(results[1].symbol.name).to.equal('root');
         expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
@@ -175,9 +175,9 @@ describe('stylable-resolver', () => {
         });
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'root');
 
-        expect(results[0].symbol!.name).to.equal('root');
-        expect(results[1].symbol!.name).to.equal('Comp');
-        expect(results[2].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('root');
+        expect(results[1].symbol.name).to.equal('Comp');
+        expect(results[2].symbol.name).to.equal('root');
 
         expect(results[0].meta.source).to.equal('/entry.st.css');
         expect(results[1].meta.source).to.equal('/index.st.css');
@@ -214,9 +214,9 @@ describe('stylable-resolver', () => {
 
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'target');
 
-        expect(results[0].symbol!.name).to.equal('target');
-        expect(results[1].symbol!.name).to.equal('alias');
-        expect(results[2].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('target');
+        expect(results[1].symbol.name).to.equal('alias');
+        expect(results[2].symbol.name).to.equal('root');
 
         expect(results[0].meta.source).to.equal('/entry.st.css');
         expect(results[1].meta.source).to.equal('/entry.st.css');

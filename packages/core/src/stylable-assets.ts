@@ -30,7 +30,7 @@ export function makeAbsolute(resourcePath: string, rootContext: string, moduleCo
     let abs: string;
     if (isExternal(resourcePath)) {
         abs = resourcePath;
-    } else if (isAbs && resourcePath[0] === '/') {
+    } else if (isAbs && resourcePath.startsWith('/')) {
         abs = path.join(rootContext, resourcePath);
     } else if (isAbs) {
         abs = resourcePath;
@@ -47,7 +47,7 @@ export function processDeclarationUrls(
 ) {
     const ast = parseValues(decl.value);
     ast.nodes.forEach((node: ParsedValue) => {
-        node.nodes!.forEach((node: ParsedValue) => findUrls(node, onUrl));
+        node.nodes.forEach((node: ParsedValue) => findUrls(node, onUrl));
     });
     if (transform) {
         decl.value = stringifyValues(ast);
@@ -75,7 +75,7 @@ export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPat
             decl,
             node => {
                 if (isAsset(node.url!)) {
-                    if (node.url![0] === '.') {
+                    if (node.url!.startsWith('.')) {
                         node.url =
                             './' +
                             path

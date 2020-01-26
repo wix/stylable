@@ -4,8 +4,8 @@ import { dirname, relative } from 'path';
 const findConfig = require('find-config');
 
 export function resolveNamespaceFactory(
-    hashSalt: string = '',
-    prefix: string = ''
+    hashSalt = '',
+    prefix = ''
 ): typeof processNamespace {
     return (namespace: string, stylesheetPath: string) => {
         const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });

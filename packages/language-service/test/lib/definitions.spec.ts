@@ -10,32 +10,32 @@ describe('Definitions', () => {
     const getCasePath = (innerPath: string) => URI.file(path.join(CASES_PATH, innerPath)).fsPath;
 
     describe('Local elements', () => {
-        it('should return first definition of class in same file', async () => {
-            const defs = await asserters.getDefinition('definitions/local-class.st.css');
+        it('should return first definition of class in same file', () => {
+            const defs = asserters.getDefinition('definitions/local-class.st.css');
             expect(defs.length).to.equal(1);
             const def = defs[0];
             expect(def.uri).to.equal(getCasePath('definitions/local-class.st.css'));
             expect(def.range).to.eql(createRange(0, 1, 0, 6));
         });
 
-        it('should return definition of var in same file', async () => {
-            const defs = await asserters.getDefinition('definitions/local-var.st.css');
+        it('should return definition of var in same file', () => {
+            const defs = asserters.getDefinition('definitions/local-var.st.css');
             expect(defs.length).to.equal(1);
             const def = defs[0];
             expect(def.uri).to.equal(getCasePath('definitions/local-var.st.css'));
             expect(def.range).to.eql(createRange(5, 4, 5, 7));
         });
 
-        it('should return definition of custom selector in same file', async () => {
-            const defs = await asserters.getDefinition('definitions/local-custom-selector.st.css');
+        it('should return definition of custom selector in same file', () => {
+            const defs = asserters.getDefinition('definitions/local-custom-selector.st.css');
             expect(defs.length).to.equal(1);
             const def = defs[0];
             expect(def.uri).to.equal(getCasePath('definitions/local-custom-selector.st.css'));
             expect(def.range).to.eql(createRange(4, 17, 4, 24));
         });
 
-        it('should return definition of class in complex selector', async () => {
-            const defs = await asserters.getDefinition('definitions/local-class-complex.st.css');
+        it('should return definition of class in complex selector', () => {
+            const defs = asserters.getDefinition('definitions/local-class-complex.st.css');
             expect(defs.length).to.equal(1);
             const def = defs[0];
             expect(def.uri).to.equal(getCasePath('definitions/local-class-complex.st.css'));
@@ -45,28 +45,24 @@ describe('Definitions', () => {
 
     describe('Imported elements', () => {
         describe('Classes', () => {
-            it('should return definition of imported class in -st-named', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-class-named.st.css'
-                );
+            it('should return definition of imported class in -st-named', () => {
+                const defs = asserters.getDefinition('definitions/imported-class-named.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
                 expect(def.range).to.eql(createRange(4, 1, 4, 5));
             });
 
-            it('should return definition of imported class in -st-extend', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-class-extend.st.css'
-                );
+            it('should return definition of imported class in -st-extend', () => {
+                const defs = asserters.getDefinition('definitions/imported-class-extend.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
                 expect(def.range).to.eql(createRange(4, 1, 4, 5));
             });
 
-            it('should return definition of imported class used as pseudo-element', async () => {
-                const defs = await asserters.getDefinition(
+            it('should return definition of imported class used as pseudo-element', () => {
+                const defs = asserters.getDefinition(
                     'definitions/imported-class-pseudo-element.st.css'
                 );
                 expect(defs.length).to.equal(1);
@@ -75,10 +71,8 @@ describe('Definitions', () => {
                 expect(def.range).to.eql(createRange(4, 1, 4, 5));
             });
 
-            it('should return definition of imported class from 3rd party module', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-class-3rd-party.st.css'
-                );
+            it('should return definition of imported class from 3rd party module', () => {
+                const defs = asserters.getDefinition('definitions/imported-class-3rd-party.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(
@@ -89,18 +83,16 @@ describe('Definitions', () => {
         });
 
         describe('Vars', () => {
-            it('should return definition of imported var in -st-named', async () => {
-                const defs = await asserters.getDefinition('definitions/imported-var-named.st.css');
+            it('should return definition of imported var in -st-named', () => {
+                const defs = asserters.getDefinition('definitions/imported-var-named.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
                 expect(def.range).to.eql(createRange(14, 4, 14, 8));
             });
 
-            it('should return definition of 3rd party var in -st-named', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/3rd-party-var-named.st.css'
-                );
+            it('should return definition of 3rd party var in -st-named', () => {
+                const defs = asserters.getDefinition('definitions/3rd-party-var-named.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(
@@ -109,8 +101,8 @@ describe('Definitions', () => {
                 expect(def.range).to.eql(createRange(1, 4, 1, 10));
             });
 
-            it('should return definition of imported var in RHS of rule', async () => {
-                const defs = await asserters.getDefinition('definitions/imported-var-value.st.css');
+            it('should return definition of imported var in RHS of rule', () => {
+                const defs = asserters.getDefinition('definitions/imported-var-value.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('definitions/import.st.css'));
@@ -119,18 +111,16 @@ describe('Definitions', () => {
         });
 
         describe('Mixins and Formatters', () => {
-            it('should return definition of JS mixin in -st-named', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-mixins-named-js.st.css'
-                );
+            it('should return definition of JS mixin in -st-named', () => {
+                const defs = asserters.getDefinition('definitions/imported-mixins-named-js.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('mixins/js-mixins.js'));
                 expect(def.range).to.eql(createRange(8, 8, 8, 14));
             });
 
-            it('should return definition of 3rd party JS mixin in -st-named', async () => {
-                const defs = await asserters.getDefinition(
+            it('should return definition of 3rd party JS mixin in -st-named', () => {
+                const defs = asserters.getDefinition(
                     'definitions/3rd-party-mixins-named-js.st.css'
                 );
                 expect(defs.length).to.equal(1);
@@ -142,30 +132,24 @@ describe('Definitions', () => {
             });
 
             // Feature undergoing redesign
-            xit('should return definition of TS mixin in -st-named', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-mixins-named-ts.st.css'
-                );
+            xit('should return definition of TS mixin in -st-named', () => {
+                const defs = asserters.getDefinition('definitions/imported-mixins-named-ts.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('mixins/my-mixins.ts'));
                 expect(def.range).to.eql(createRange(2, 16, 2, 29));
             });
 
-            it('should return definition of JS mixin in use', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-mixins-value-js.st.css'
-                );
+            it('should return definition of JS mixin in use', () => {
+                const defs = asserters.getDefinition('definitions/imported-mixins-value-js.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('mixins/js-mixins.js'));
                 expect(def.range).to.eql(createRange(26, 8, 26, 18));
             });
 
-            xit('should return definition of TS mixin in use', async () => {
-                const defs = await asserters.getDefinition(
-                    'definitions/imported-mixins-value-ts.st.css'
-                );
+            xit('should return definition of TS mixin in use', () => {
+                const defs = asserters.getDefinition('definitions/imported-mixins-value-ts.st.css');
                 expect(defs.length).to.equal(1);
                 const def = defs[0];
                 expect(def.uri).to.equal(getCasePath('mixins/my-mixins.ts'));
@@ -199,8 +183,8 @@ describe('Definitions', () => {
                         cl.filePath +
                         ' in position ' +
                         JSON.stringify(cl.pos),
-                    async () => {
-                        const defs = await asserters.getDefFromLoc(cl);
+                    () => {
+                        const defs = asserters.getDefFromLoc(cl);
                         expect(defs.length).to.equal(1);
                         const def = defs[0];
                         expect(def.uri).to.equal(getCasePath('definitions/states-import.st.css'));
@@ -225,8 +209,8 @@ describe('Definitions', () => {
                         cl.filePath +
                         ' in position ' +
                         JSON.stringify(cl.pos),
-                    async () => {
-                        const defs = await asserters.getDefFromLoc(cl);
+                    () => {
+                        const defs = asserters.getDefFromLoc(cl);
                         expect(defs.length).to.equal(1);
                         const def = defs[0];
                         expect(def.uri).to.equal(getCasePath('definitions/states-import.st.css'));

@@ -109,7 +109,7 @@ export class StylableResolver {
             resolved.symbol.alias &&
             !resolved.symbol[valueMapping.extends]
         ) {
-            if (path.indexOf(resolved.symbol) !== -1) {
+            if (path.includes(resolved.symbol)) {
                 return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
             }
             path.push(resolved.symbol);
@@ -126,7 +126,7 @@ export class StylableResolver {
             return null;
         }
         if (symbol._kind === 'element' || symbol._kind === 'class') {
-            if (path.indexOf(symbol) !== -1) {
+            if (path.includes(symbol)) {
                 return { meta, symbol, _kind: 'css' };
             }
             path.push(symbol);
@@ -135,7 +135,7 @@ export class StylableResolver {
                 ? this.resolveSymbolOrigin(symbol.alias, meta, path)
                 : { meta, symbol, _kind: 'css' };
         } else if (symbol._kind === 'cssVar') {
-            if (path.indexOf(symbol) !== -1) {
+            if (path.includes(symbol)) {
                 return { meta, symbol, _kind: 'css' };
             }
         } else if (symbol._kind === 'import') {
@@ -195,7 +195,7 @@ export class StylableResolver {
     public resolveExtends(
         meta: StylableMeta,
         className: string,
-        isElement: boolean = false,
+        isElement = false,
         transformer?: StylableTransformer,
         reportError?: (
             res: CSSResolve | JSResolve | null,

@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
     it('css runtime variable overrides', async () => {
         const { page } = await projectRunner.openInBrowser();
         const { backgroundColor, borderColor, color } = await page.evaluate(() => {
-            const computedStyle = getComputedStyle(document.documentElement!);
+            const computedStyle = getComputedStyle(document.documentElement);
 
             return {
                 backgroundColor: computedStyle.backgroundColor,

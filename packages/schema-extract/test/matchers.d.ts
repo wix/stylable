@@ -1,4 +1,4 @@
-declare module Chai {
+declare namespace Chai {
     export interface Assertion {
         flatMatch(obj: any, maxDepth?: number): void;
     }

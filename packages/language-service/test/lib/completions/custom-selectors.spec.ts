@@ -17,9 +17,9 @@ describe('Custom Selectors', () => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
 
-                it('should be completed at top level, with prefix ' + prefix + ' ', async () => {
+                it('should be completed at top level, with prefix ' + prefix + ' ', () => {
                     const rng = createRange(10, 0, 10, 0 + i);
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'custom-selectors/local-selector.st.css',
                         prefix
                     );
@@ -37,9 +37,9 @@ describe('Custom Selectors', () => {
 
                 it(
                     'should be completed in complex selectors, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 11, 10, 11 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/local-selector-complex.st.css',
                             prefix
                         );
@@ -65,9 +65,9 @@ describe('Custom Selectors', () => {
                     'should have relevant states and pseudo-elements when extending root class, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(16, 8, 16, 8 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/local-selector-inner-2.st.css',
                             prefix
                         );
@@ -93,9 +93,9 @@ describe('Custom Selectors', () => {
                     'should have relevant states when extending local class, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(16, 8, 16, 8 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/local-selector-inner.st.css',
                             prefix
                         );
@@ -127,9 +127,9 @@ describe('Custom Selectors', () => {
                 const createCompletion = (str: string, rng: ProviderRange, path: string) =>
                     asserters.stateSelectorCompletion(str.slice(1), rng, path);
 
-                it('should have relevant states, with prefix ' + prefix + ' ', async () => {
+                it('should have relevant states, with prefix ' + prefix + ' ', () => {
                     const rng = createRange(10, 8, 10, 8 + i);
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'pseudo-elements/custom-selector-local.st.css',
                         prefix
                     );
@@ -155,9 +155,9 @@ describe('Custom Selectors', () => {
 
                 it(
                     'should have relevant pseudo-elements, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(10, 8, 10, 8 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'pseudo-elements/custom-selector-local.st.css',
                             prefix
                         );
@@ -195,9 +195,9 @@ describe('Custom Selectors', () => {
                     'should be completed at top level after extending class, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 5, 9, 5 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-extended.st.css',
                             prefix
                         );
@@ -218,9 +218,9 @@ describe('Custom Selectors', () => {
                     'should be completed at top level after extending root class, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 5, 9, 5 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-extended-on-root.st.css',
                             prefix
                         );
@@ -241,9 +241,9 @@ describe('Custom Selectors', () => {
                     'should be completed at top level after default import as tag, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 4, 9, 4 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-as-tag.st.css',
                             prefix
                         );
@@ -268,9 +268,9 @@ describe('Custom Selectors', () => {
                 const createCompletion = (str: string, rng: ProviderRange, path: string) =>
                     asserters.stateSelectorCompletion(str.slice(1), rng, path);
 
-                it('should have relevant states, with prefix ' + prefix + ' ', async () => {
+                it('should have relevant states, with prefix ' + prefix + ' ', () => {
                     const rng = createRange(9, 12, 9, 12 + i);
-                    const asserter = await asserters.getCompletions(
+                    const asserter = asserters.getCompletions(
                         'custom-selectors/imported-selector-inner.st.css',
                         prefix
                     );
@@ -288,9 +288,9 @@ describe('Custom Selectors', () => {
 
                 it(
                     'should have relevant states after root, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-on-root-inner.st.css',
                             prefix
                         );
@@ -311,9 +311,9 @@ describe('Custom Selectors', () => {
                     'should not have states when custom selector is grouped, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-grouped.st.css',
                             prefix
                         );
@@ -334,9 +334,9 @@ describe('Custom Selectors', () => {
 
                 it(
                     'should have relevant pseudo-elements, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-inner.st.css',
                             prefix
                         );
@@ -355,9 +355,9 @@ describe('Custom Selectors', () => {
 
                 it(
                     'should have relevant pseudo-elements after root, with prefix ' + prefix + ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-on-root-inner.st.css',
                             prefix
                         );
@@ -378,9 +378,9 @@ describe('Custom Selectors', () => {
                     'should not have pseudo-elements when custom selector is grouped, with prefix ' +
                         prefix +
                         ' ',
-                    async () => {
+                    () => {
                         const rng = createRange(9, 12, 9, 12 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'custom-selectors/imported-selector-grouped.st.css',
                             prefix
                         );

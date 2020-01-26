@@ -438,7 +438,7 @@ describe('Javascript Mixins', () => {
         if (keyframes.type !== 'atrule') {
             throw new Error('expected 2nd rule to be the @keyframes');
         }
-        expect((keyframes as postcss.AtRule).params, 'keyframes id').to.equal('entry__abc');
+        expect((keyframes).params, 'keyframes id').to.equal('entry__abc');
         expect((keyframes as any).nodes[0].selector, 'first keyframe').to.equal('0%');
         expect((keyframes as any).nodes[1].selector, 'last keyframe').to.equal('100%');
     });

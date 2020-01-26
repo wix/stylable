@@ -19,7 +19,7 @@ export function resolveStateTypeOrValidator(
     const valueStartChar = line.indexOf(':') + 1;
     const value = line.slice(valueStartChar);
     const stateParts: ParsedValue[] = pvp(value).nodes;
-    let requiredHinting: boolean = false;
+    let requiredHinting = false;
     const validator = { length: 0, requiredHinting: false };
     let stateTypeValidatorToHint: string | null = null;
     let length = valueStartChar;

@@ -56,7 +56,7 @@ describe(`(${project})`, () => {
         } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
-                fontFamily: getComputedStyle(document.documentElement!).fontFamily,
+                fontFamily: getComputedStyle(document.documentElement).fontFamily,
                 classes: (window as any).stylableClasses,
                 namespace: (window as any).namespace,
                 stVars: (window as any).stVars,

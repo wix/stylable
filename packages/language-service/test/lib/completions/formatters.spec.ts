@@ -20,9 +20,9 @@ describe('Formatters', () => {
                 const prefix = str.slice(0, i);
                 it(
                     'should complete imported TS formatters, but not mixins, with prefix ' + prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(12, 11, 12, 11 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'mixins/imported-formatters.st.css',
                             prefix
                         );
@@ -47,9 +47,9 @@ describe('Formatters', () => {
 
                 it(
                     'should complete imported TS formatters after value, with prefix ' + prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(11, 49, 11, 49 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'mixins/imported-formatters-single-value.st.css',
                             prefix
                         );
@@ -81,9 +81,9 @@ describe('Formatters', () => {
                 const prefix = str.slice(0, i);
                 it(
                     'should complete imported JS formatters, but not mixins, with prefix ' + prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(12, 11, 12, 11 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'mixins/imported-formatters.st.css',
                             prefix
                         );
@@ -102,9 +102,9 @@ describe('Formatters', () => {
 
                 it(
                     'should complete imported JS formatters after value, with prefix ' + prefix,
-                    async () => {
+                    () => {
                         const rng = createRange(11, 49, 11, 49 + i);
-                        const asserter = await asserters.getCompletions(
+                        const asserter = asserters.getCompletions(
                             'mixins/imported-formatters-single-value.st.css',
                             prefix
                         );
@@ -123,8 +123,8 @@ describe('Formatters', () => {
             });
         });
 
-        it('should complete formatters inside a mixin param list', async () => {
-            const asserter = await asserters.getCompletions(
+        it('should complete formatters inside a mixin param list', () => {
+            const asserter = asserters.getCompletions(
                 'mixins/imported-mixins-in-param-list.st.css'
             );
             const rng = createRange(0, 0, 0, 0);

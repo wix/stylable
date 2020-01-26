@@ -37,7 +37,7 @@ export function stringifySelector(ast: SelectorAstNode): string {
 export function traverseNode(
     node: SelectorAstNode,
     visitor: Visitor,
-    index: number = 0,
+    index = 0,
     nodes: SelectorAstNode[] = [node]
 ): boolean | void {
     if (!node) {
@@ -67,7 +67,7 @@ export function createChecker(types: Array<string | string[]>) {
         return (node: SelectorAstNode) => {
             const matcher = types[index];
             if (Array.isArray(matcher)) {
-                return matcher.indexOf(node.type) !== -1;
+                return matcher.includes(node.type);
             } else if (matcher !== node.type) {
                 return false;
             }
@@ -246,7 +246,7 @@ export function filterChunkNodesByType(
     typeOptions: string[]
 ): Array<Partial<SelectorAstNode>> {
     return chunk.nodes.filter(node => {
-        return node.type && typeOptions.indexOf(node.type) !== -1;
+        return node.type && typeOptions.includes(node.type);
     });
 }
 
@@ -257,7 +257,7 @@ function isPseudoDiff(a: nodeWithPseudo, b: nodeWithPseudo) {
     if (!aNodes || !bNodes || aNodes.length !== bNodes.length) {
         return false;
     }
-    return aNodes!.every((node, index) => isNodeMatch(node, bNodes![index]));
+    return aNodes.every((node, index) => isNodeMatch(node, bNodes[index]));
 }
 
 function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): nodeWithPseudo[] {
@@ -284,7 +284,7 @@ const containsInTheEnd = (
     currentMatchingElements: nodeWithPseudo[]
 ) => {
     const offset = originalElements.length - currentMatchingElements.length;
-    let arraysEqual: boolean = false;
+    let arraysEqual = false;
     if (offset >= 0 && currentMatchingElements.length > 0) {
         arraysEqual = true;
         for (let i = 0; i < currentMatchingElements.length; i++) {
