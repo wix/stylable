@@ -33,7 +33,7 @@ export function compileAsEntry(
             // Remove all chunk assets
             compilation.chunks.forEach(chunk => {
                 chunk.files.forEach((file: string) => {
-                    delete compilation.assets[file]; // eslint-disable-line no-param-reassign
+                    delete compilation.assets[file];
                 });
             });
         }
