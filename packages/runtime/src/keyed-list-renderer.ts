@@ -23,8 +23,8 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
     };
 
     const render = (container: C, data: I[] = []) => {
-        let node: O | undefined;
         if (data.length) {
+            let node: O | undefined;
             let next: O | undefined = first;
             for (let i = 0; i < data.length; i++) {
                 node = renderNode(data[i]);
