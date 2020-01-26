@@ -26,7 +26,6 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
         let node: O;
         if (data.length) {
             let next: O | undefined = first;
-            // tslint:disable-next-line:prefer-for-of
             for (let i = 0; i < data.length; i++) {
                 node = renderNode(data[i]);
                 if (node !== next) {

@@ -113,7 +113,6 @@ describe('Inner Directives', () => {
         });
     });
 
-    // tslint:disable-next-line: max-line-length
     it('should not complete -st-states, -st-extends, -st-mixin inside simple selector ruleset when they exist', async () => {
         const asserter = await asserters.getCompletions(
             'general/inside-simple-ruleset-with-all-st-fields.st.css'

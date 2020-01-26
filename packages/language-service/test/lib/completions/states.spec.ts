@@ -477,7 +477,6 @@ describe('States', () => {
                 asserter.notSuggested(unExp);
             });
 
-            // tslint:disable-next-line: max-line-length
             it('should not complete pseudo-states and pseudo-elements when inside an enum (from imported file)', async () => {
                 const rng = createRange(9, 12, 9, 12);
                 const createEnumComp = (str: string, rng: ProviderRange, path?: string) =>
