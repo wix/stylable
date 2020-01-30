@@ -32,7 +32,7 @@
     "@types/lodash.findlast": "^4.6.6",
     "@types/lodash.upperfirst": "^4.3.6",
     "@types/memory-fs": "^0.3.2",
-    "@types/mocha": "^5.2.7",
+    "@types/mocha": "^7.0.1",
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",
     "@types/postcss-nested": "^4.1.0",
