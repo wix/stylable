@@ -66,7 +66,7 @@ export class ProjectRunner {
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
-        this.puppeteerOptions = puppeteerOptions;
+        this.puppeteerOptions = { ...puppeteerOptions, pipe: true };
         this.pages = [];
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
