@@ -993,13 +993,13 @@
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
 "@ts-tools/build@^1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.4.tgz#f6e901cdec9be9b6ccc637f76f0ead2773af3a0e"
-  integrity sha512-0N+yDvVzSCBiOOJqJOvbR11UKNCATX2UFwh3SwgM6iOZHDl31ZZT/3TlgeYVfjFF44YplooV2jxhc+4zwg2NEA==
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.5.tgz#a87eef5a70aa4dea3a78487a9e120819a79ee794"
+  integrity sha512-Yfo7wPJGIaBaw9HNkZi4nvzu/hjnipWkdrTnZGs+Do30OS0Tmj8dwrZ6eD+mc0peNNTI8POHFhTjELO+DU0BqA==
   dependencies:
     "@ts-tools/transpile" "^2.0.0"
     chalk "^3.0.0"
-    commander "^4.1.0"
+    commander "^4.1.1"
 
 "@ts-tools/node@^1.1.3":
   version "1.1.3"
@@ -2682,7 +2682,7 @@ commander@^2.18.0, commander@^2.20.0, commander@~2.20.3:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
-commander@^4.0.0, commander@^4.1.0:
+commander@^4.0.0, commander@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
