@@ -1,4 +1,5 @@
 import { IFileSystem } from '@file-services/types';
+import path from 'path';
 import postcss from 'postcss';
 import * as VCL from 'vscode-css-languageservice';
 import { ColorInformation, TextDocument } from 'vscode-languageserver-protocol';
@@ -157,7 +158,20 @@ export class CssService {
                 }
                 if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
-                    const filePath = URI.parse(document.uri).fsPath;
+
+                    const uri = URI.parse(document.uri);
+                    // on windows, uri.fsPath replaces separators with '\'
+                    // this breaks posix paths in-memory when running on windows
+                    // take raw posix path instead
+                    // ()
+                    const filePath =
+                        uri.scheme === 'file' &&
+                        !uri.authority && // not UNC
+                        uri.path.charCodeAt(2) !== 58 && // the colon in "c:"
+                        path.isAbsolute(uri.path)
+                            ? uri.path
+                            : uri.fsPath;
+
                     const src = this.fs.readFileSync(filePath, 'utf8');
                     const meta = createMeta(src, filePath).meta;
                     if (meta && Object.keys(meta.mappedSymbols).some(ms => ms === prop)) {
