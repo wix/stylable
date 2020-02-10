@@ -2,7 +2,6 @@ import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
 import { expect } from 'chai';
 
-import { createDiagnosis } from '../../src/lib/diagnosis';
 import { StylableLanguageService } from '../../src/lib/service';
 
 function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
@@ -13,8 +12,7 @@ function createDiagnostics(files: { [filePath: string]: string }, filePath: stri
         stylable: new Stylable('/', fs as any, require)
     });
 
-    const file = stylableLSP.getFs().readFileSync(filePath, 'utf8');
-    return file ? createDiagnosis(file, filePath, stylableLSP.getStylable()) : null;
+    return stylableLSP.diagnose(filePath);
 }
 
 describe('diagnostics', () => {
@@ -35,11 +33,12 @@ describe('diagnostics', () => {
             },
             message:
                 '".root" class cannot be used after native elements or selectors external to the stylesheet',
-            severity: 2
+            severity: 2,
+            source: 'stylable'
         });
     });
 
-    xit('should create cross file errors', () => {
+    it('should create cross file errors', () => {
         const filePathA = '/style.css';
         const filePathB = '/import-style.st.css';
 
@@ -64,7 +63,95 @@ describe('diagnostics', () => {
                 end: { line: 3, character: 44 }
             },
             message: `cannot resolve imported symbol "ninja" from stylesheet ".${filePathA}"`,
-            severity: 2
+            severity: 2,
+            source: 'stylable'
+        });
+    });
+
+    describe('css service', () => {
+        it('should pass through unknown properties diagnostics from the css service', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `
+                    .gaga {
+                      colorr: red;
+                    }
+                    `
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([
+                {
+                    range: {
+                        start: { line: 2, character: 22 },
+                        end: { line: 2, character: 28 }
+                    },
+                    message: `Unknown property: 'colorr'`,
+                    severity: 2,
+                    source: 'css',
+                    code: 'unknownProperties'
+                }
+            ]);
+        });
+
+        it('should not warn about unknown properties inside :vars definition', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `
+                    :vars {
+                      varvar: binks;
+                    }
+                    `
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should not warn about pseudo-states with params', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `
+                    .root {
+                      -st-states: someState(string);
+                    }
+                    .root:someState(T1)   {}    /* css-identifierexpected */ 
+                    .root:someState(T1.1) {}    /* css-rparentexpected    */
+                    `
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should ignore errors from stylable vars in a media query', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `
+                    :vars {
+                        size: "screen and (min-width: 30em)";
+                    }
+                    
+                    @media value(size) {
+                        .part{}
+                    }
+                    `
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
         });
     });
 });

@@ -1,10 +1,13 @@
 import { Diagnostic as StylableDiagnostic, process, safeParse, Stylable } from '@stylable/core';
 import { Diagnostic, Range } from 'vscode-languageserver-types';
+import { CssService } from './css-service';
 
 export function createDiagnosis(
     content: string,
+    version: number,
     filePath: string,
-    stylable: Stylable
+    stylable: Stylable,
+    cssService: CssService
 ): Diagnostic[] {
     if (!filePath.endsWith('.st.css')) {
         return [];
@@ -28,15 +31,19 @@ export function createDiagnosis(
     } catch {
         /**/
     }
+
+    const cleanDoc = cssService.createSanitizedDocument(docPostCSSRoot, filePath, version);
+
     return meta.diagnostics.reports
         .concat(meta.transformDiagnostics ? meta.transformDiagnostics.reports : [])
-        .map(reportToDiagnostic);
+        .map(reportToDiagnostic)
+        .concat(cssService.getDiagnostics(cleanDoc));
 
     // stylable diagnostic to protocol diagnostic
     function reportToDiagnostic(report: StylableDiagnostic) {
         const severity = report.type === 'error' ? 1 : 2;
         const range = createRange(report);
-        return Diagnostic.create(range, report.message, severity);
+        return Diagnostic.create(range, report.message, severity, undefined, 'stylable');
     }
 }
 

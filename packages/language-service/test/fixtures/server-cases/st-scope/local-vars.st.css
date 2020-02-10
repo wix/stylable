@@ -1,0 +1,12 @@
+:vars {
+    color1: red;
+    color2: blue;
+}
+
+.root {}
+
+@st-scope .root {
+    .local {
+        color: |
+    }
+}

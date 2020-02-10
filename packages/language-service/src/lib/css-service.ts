@@ -1,4 +1,5 @@
 import { IFileSystem } from '@file-services/types';
+import postcss from 'postcss';
 import * as VCL from 'vscode-css-languageservice';
 import { ColorInformation, TextDocument } from 'vscode-languageserver-protocol';
 import {
@@ -56,6 +57,55 @@ export class CssService {
             this.inner.parseStylesheet(document)
         );
         return cssCompsRaw ? cssCompsRaw.items : [];
+    }
+
+    public createSanitizedDocument(ast: postcss.Root, filePath: string, version: number) {
+        // const cleanContentAst = this.cleanValuesInMediaQuery(ast);
+        let cleanContentAst = this.cleanValuesInMediaQuery(ast);
+        cleanContentAst = this.cleanStScopes(cleanContentAst);
+
+        return TextDocument.create(
+            URI.file(filePath).toString(),
+            'stylable',
+            version,
+            cleanContentAst.toString()
+        );
+    }
+
+    private cleanValuesInMediaQuery(ast: postcss.Root): postcss.Root {
+        const mq = 'media';
+        const valueMatch = 'value(';
+
+        ast.walkAtRules(mq, atRule => {
+            while (atRule.params.includes('value(')) {
+                const currentValueIndex = atRule.params.indexOf(valueMatch);
+                const closingParenthesisIndex = atRule.params.indexOf(')', currentValueIndex);
+
+                atRule.params = atRule.params.replace(valueMatch, ' '.repeat(valueMatch.length));
+
+                atRule.params =
+                    atRule.params.substr(0, closingParenthesisIndex) +
+                    ' ' +
+                    atRule.params.substr(closingParenthesisIndex + 1);
+            }
+        });
+
+        return ast;
+    }
+
+    private cleanStScopes(ast: postcss.Root): postcss.Root {
+        const stScope = 'st-scope';
+        const mq = 'media';
+
+        ast.walkAtRules(stScope, atRule => {
+            atRule.name = mq + ' '.repeat(stScope.length - mq.length);
+
+            if (atRule.params.includes('.')) {
+                atRule.params = atRule.params.replace('.', ' ');
+            }
+        });
+
+        return ast;
     }
 
     public getDiagnostics(document: TextDocument): Diagnostic[] {
