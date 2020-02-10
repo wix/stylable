@@ -1,0 +1,10 @@
+:vars {
+    myColor: red;
+}
+
+@st-scope .root {
+    .root {
+        color: value(myColor);
+        background-color: #ffffff;
+    }
+}
