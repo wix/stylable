@@ -32,7 +32,7 @@ export function createDiagnosis(
         /**/
     }
 
-    const cleanDoc = cssService.createSanitizedDocument(docPostCSSRoot, filePath, version);
+    const cleanDoc = cssService.createSanitizedDocument(meta.rawAst, filePath, version);
 
     return meta.diagnostics.reports
         .concat(meta.transformDiagnostics ? meta.transformDiagnostics.reports : [])

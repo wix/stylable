@@ -75,6 +75,8 @@ describe('diagnostics', () => {
             const diagnostics = createDiagnostics(
                 {
                     [filePath]: `
+                    :vars {}
+
                     .gaga {
                       colorr: red;
                     }
@@ -86,8 +88,8 @@ describe('diagnostics', () => {
             expect(diagnostics).to.eql([
                 {
                     range: {
-                        start: { line: 2, character: 22 },
-                        end: { line: 2, character: 28 }
+                        start: { line: 4, character: 22 },
+                        end: { line: 4, character: 28 }
                     },
                     message: `Unknown property: 'colorr'`,
                     severity: 2,
