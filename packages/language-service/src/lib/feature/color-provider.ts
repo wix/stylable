@@ -149,7 +149,13 @@ export function resolveDocumentColors(
             });
         });
 
-        return colorComps.concat(cssService.findColors(document));
+        const cleanDocument = cssService.createSanitizedDocument(
+            meta.rawAst,
+            filePath,
+            document.version
+        );
+
+        return colorComps.concat(cssService.findColors(cleanDocument));
     }
 
     return [];

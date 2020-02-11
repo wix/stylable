@@ -1,4 +1,6 @@
 import { IFileSystem } from '@file-services/types';
+import path from 'path';
+import postcss from 'postcss';
 import * as VCL from 'vscode-css-languageservice';
 import { ColorInformation, TextDocument } from 'vscode-languageserver-protocol';
 import {
@@ -58,6 +60,62 @@ export class CssService {
         return cssCompsRaw ? cssCompsRaw.items : [];
     }
 
+    public createSanitizedDocument(ast: postcss.Root, filePath: string, version: number) {
+        let cleanContentAst = this.cleanValuesInMediaQuery(ast);
+        cleanContentAst = this.cleanStScopes(cleanContentAst);
+
+        return TextDocument.create(
+            URI.file(filePath).toString(),
+            'stylable',
+            version,
+            cleanContentAst.toString()
+        );
+    }
+
+    // cleaning strategy: replace the "value(*)" syntax with spaces,
+    // without touching the inner content (*)
+    // by removing the function from the params,
+    // the css-service will consider it a valid media query
+    private cleanValuesInMediaQuery(ast: postcss.Root): postcss.Root {
+        const mq = 'media';
+        const valueMatch = 'value(';
+
+        ast.walkAtRules(mq, atRule => {
+            while (atRule.params.includes('value(')) {
+                const currentValueIndex = atRule.params.indexOf(valueMatch);
+                const closingParenthesisIndex = atRule.params.indexOf(')', currentValueIndex);
+
+                atRule.params = atRule.params.replace(valueMatch, ' '.repeat(valueMatch.length));
+
+                atRule.params =
+                    atRule.params.substr(0, closingParenthesisIndex) +
+                    ' ' +
+                    atRule.params.substr(closingParenthesisIndex + 1);
+            }
+        });
+
+        return ast;
+    }
+
+    // cleaning strategy: replace the "@st-scope" syntax with a media query,
+    // if the @st-scope param was a class, replace the "." with a space as well.
+    // this works because the css-service now considers this a valid media query where
+    // completions and nesting behaviors are similar between the two
+    private cleanStScopes(ast: postcss.Root): postcss.Root {
+        const stScope = 'st-scope';
+        const mq = 'media';
+
+        ast.walkAtRules(stScope, atRule => {
+            atRule.name = mq + ' '.repeat(stScope.length - mq.length);
+
+            if (atRule.params.includes('.')) {
+                atRule.params = atRule.params.replace('.', ' ');
+            }
+        });
+
+        return ast;
+    }
+
     public getDiagnostics(document: TextDocument): Diagnostic[] {
         if (!document.uri.endsWith('.css')) {
             return [];
@@ -107,7 +165,19 @@ export class CssService {
                 }
                 if (diag.code === 'unknownProperties') {
                     const prop = diag.message.match(/'(.*)'/)![1];
-                    const filePath = URI.parse(document.uri).fsPath;
+
+                    const uri = URI.parse(document.uri);
+                    // on windows, uri.fsPath replaces separators with '\'
+                    // this breaks posix paths in-memory when running on windows
+                    // take raw posix path instead
+                    const filePath =
+                        uri.scheme === 'file' &&
+                        !uri.authority && // not UNC
+                        uri.path.charCodeAt(2) !== 58 && // the colon in "c:"
+                        path.isAbsolute(uri.path)
+                            ? uri.path
+                            : uri.fsPath;
+
                     const src = this.fs.readFileSync(filePath, 'utf8');
                     const meta = createMeta(src, filePath).meta;
                     if (meta && Object.keys(meta.mappedSymbols).some(ms => ms === prop)) {

@@ -296,4 +296,23 @@ describe('References', () => {
             });
         });
     });
+
+    describe('inside an @st-scope', () => {
+        it('should return all instances of local class when called from selector ', () => {
+            const refs = getReferences('st-scope/local-class-from-selector.st.css', {
+                line: 6,
+                character: 20
+            });
+            expect(refs.length).to.equal(6);
+            expect(refs[0].range).to.deep.equal(createRange(1, 7, 1, 11));
+            expect(refs[1].range).to.deep.equal(createRange(6, 5, 6, 9));
+            expect(refs[2].range).to.deep.equal(createRange(6, 18, 6, 22));
+            expect(refs[3].range).to.deep.equal(createRange(11, 26, 11, 30));
+            expect(refs[4].range).to.deep.equal(createRange(16, 8, 16, 12));
+            expect(refs[5].range).to.deep.equal(createRange(17, 8, 17, 12));
+            refs.forEach(ref => {
+                expect(ref.uri).to.equal(getCasePath('st-scope/local-class-from-selector.st.css'));
+            });
+        });
+    });
 });

@@ -51,6 +51,25 @@ describe('Colors', () => {
 
             expect(res.length).to.eql(1);
         });
+
+        it('should resolve information colors in a @st-scope', () => {
+            const res = getDocumentColors('st-scope/single-variable-color.st.css');
+
+            expect(res).to.eql([
+                {
+                    range: createRange(6, 15, 6, 28),
+                    color: createColor(1, 0, 0, 1)
+                },
+                {
+                    range: createRange(1, 13, 1, 16),
+                    color: createColor(1, 0, 0, 1)
+                },
+                {
+                    range: createRange(7, 26, 7, 33),
+                    color: createColor(1, 1, 1, 1)
+                }
+            ]);
+        });
     });
 
     describe('ColorPresentation', () => {

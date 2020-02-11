@@ -1,6 +1,8 @@
 import fs from '@file-services/node';
 import { expect } from 'chai';
 import * as path from 'path';
+import { TextDocument } from 'vscode-languageserver';
+import { URI } from 'vscode-uri';
 import { ProviderPosition, ProviderRange } from '../src/lib/completion-providers';
 import { Completion, Snippet } from '../src/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
@@ -84,6 +86,22 @@ export function getCompletions(fileName: string, prefix = '') {
             assertNotPresent(completions, expectedNoCompletions);
         }
     };
+}
+
+export function getStylableAndCssCompletions(fileName: string) {
+    const fullPath = path.join(CASES_PATH, fileName);
+    const src: string = fs.readFileSync(fullPath).toString();
+
+    const pos = getCaretPosition(src);
+
+    const document = TextDocument.create(
+        URI.file(fullPath).toString(),
+        'stylable',
+        1,
+        src.replace('|', '')
+    );
+
+    return stylableLSP.getCompletions(document, fullPath, pos);
 }
 
 export function getCaretPosition(src: string) {
