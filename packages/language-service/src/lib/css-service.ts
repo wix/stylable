@@ -61,7 +61,6 @@ export class CssService {
     }
 
     public createSanitizedDocument(ast: postcss.Root, filePath: string, version: number) {
-        // const cleanContentAst = this.cleanValuesInMediaQuery(ast);
         let cleanContentAst = this.cleanValuesInMediaQuery(ast);
         cleanContentAst = this.cleanStScopes(cleanContentAst);
 
@@ -163,7 +162,6 @@ export class CssService {
                     // on windows, uri.fsPath replaces separators with '\'
                     // this breaks posix paths in-memory when running on windows
                     // take raw posix path instead
-                    // ()
                     const filePath =
                         uri.scheme === 'file' &&
                         !uri.authority && // not UNC

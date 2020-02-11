@@ -311,9 +311,7 @@ describe('References', () => {
             expect(refs[4].range).to.deep.equal(createRange(16, 8, 16, 12));
             expect(refs[5].range).to.deep.equal(createRange(17, 8, 17, 12));
             refs.forEach(ref => {
-                expect(ref.uri).to.equal(
-                    getCasePath('st-scope/local-class-from-selector.st.css')
-                );
+                expect(ref.uri).to.equal(getCasePath('st-scope/local-class-from-selector.st.css'));
             });
         });
     });
