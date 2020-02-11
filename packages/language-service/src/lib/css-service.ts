@@ -72,6 +72,10 @@ export class CssService {
         );
     }
 
+    // cleaning strategy: replace the "value(*)" syntax with spaces,
+    // without touching the inner content (*)
+    // by removing the function from the params,
+    // the css-service will consider it a valid media query
     private cleanValuesInMediaQuery(ast: postcss.Root): postcss.Root {
         const mq = 'media';
         const valueMatch = 'value(';
@@ -93,6 +97,10 @@ export class CssService {
         return ast;
     }
 
+    // cleaning strategy: replace the "@st-scope" syntax with a media query,
+    // if the @st-scope param was a class, replace the "." with a space as well.
+    // this works because the css-service now considers this a valid media query where
+    // completions and nesting behaviors are similar between the two
     private cleanStScopes(ast: postcss.Root): postcss.Root {
         const stScope = 'st-scope';
         const mq = 'media';
