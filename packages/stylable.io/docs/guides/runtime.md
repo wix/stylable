@@ -19,6 +19,7 @@ Imported **Stylable** stylesheets contain minimal runtime code to help define th
 /* index.jsx - stylesheet's runtime api */
 import { 
     style,    // runtime utility function 
+    st,       // alias for the style function above
     classes,  // class names mapping
     vars,     // css variables mapping
     stVars,   // stylable build-time variable values
@@ -56,11 +57,6 @@ cssStates({ selected:false }) // no states
 cssStates({ a:true, b:true }) // multiple
 ```
 
-## Generate element attributes
-
-The minimal runtime provides a function to help with component definition.  
-Calling the function returns an object describing the attributes of a node in the component view.
-
 ### Element name
 
 The first argument represents the scoped name of the element, and passes through the received class name.
@@ -87,11 +83,16 @@ style('root')
 
 The second argument represents the [custom state](#custom-state-mapping) (or another class), and returns a class to represent every custom state on the element.
 
+States are optional and the second argument can be replaced with another className if needed.
+
 ```javascript
 /* 'style__root style--selected' */
 style(classes.root, { selected:true })
 /* 'style__label style--searched' */
 style(classes.label, { searched:true })
+
+/* 'style__label style__icon' */
+style(classes.label, classes.icon)
 ```
 
 ### Merge props

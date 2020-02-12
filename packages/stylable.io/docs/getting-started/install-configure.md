@@ -9,11 +9,11 @@ There are currently two options for installing and working with **Stylable** as 
 
 ## Create a new Stylable project from a boilerplate
 
-To begin writing your own project, you can create a **Stylable** app from our boilerplate. It is based on [create-react-app](https://github.com/facebookincubator/create-react-app). To create the project, follow these instructions: 
+To begin writing your own project, you can create a **Stylable** app from our boilerplate. It is based on [create-react-app](https://github.com/facebook/create-react-app). To create the project, follow these instructions: 
 
 Using npm:
 ```bash
-npx create-react-app --scripts-version @stylable/react-scripts [APP NAME]
+npx create-react-app@3.2.0 --scripts-version @stylable/react-scripts [APP NAME]
 ```
 
 For the `[APP NAME]` placeholder above, replace with the name of your project. Once you run the command, a directory with that same name is created. Go to that directory and run `yarn`, followed by `yarn start` to view the project in a browser, or `yarn build` to build your project's target code.

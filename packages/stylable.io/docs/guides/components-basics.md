@@ -18,7 +18,7 @@ Whether creating your own components or using components you imported from a 3rd
 
 ## 1. Style a component 
 
-Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property straight from the style object, or by executing and then [spreading](https://reactjs.org/docs/jsx-in-depth.html#spread-attributes){:target="_blank"} the style [runtime function](./runtime.md) (see the `root` node as an example).
+Let's say you have a `Button` component with a render function per this example. You can style its JSX using the `className` property straight from the style object, or by executing the style [runtime function](./runtime.md) (see the `root` node as an example).
 
 ```js
 /* button.jsx */
