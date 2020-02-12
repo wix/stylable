@@ -153,6 +153,7 @@
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* index.jsx - stylesheet's runtime api */</span>
 <span class="k">import</span> <span class="p">{</span> 
     <span class="nx">style</span><span class="p">,</span>    <span class="c1">// runtime utility function </span>
+    <span class="nx">st</span><span class="p">,</span>       <span class="c1">// alias for the style function above</span>
     <span class="nx">classes</span><span class="p">,</span>  <span class="c1">// class names mapping</span>
     <span class="nx">vars</span><span class="p">,</span>     <span class="c1">// css variables mapping</span>
     <span class="nx">stVars</span><span class="p">,</span>   <span class="c1">// stylable build-time variable values</span>
@@ -190,11 +191,6 @@ The <a href="../references/root">root class</a> is available even when it is not
 <span class="nx">cssStates</span><span class="p">({</span> <span class="na">a</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span> <span class="na">b</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span> <span class="c1">// multiple</span>
 </code></pre></div></div>
 
-<h2 id="generate-element-attributes">Generate element attributes</h2>
-
-<p>The minimal runtime provides a function to help with component definition.<br />
-Calling the function returns an object describing the attributes of a node in the component view.</p>
-
 <h3 id="element-name">Element name</h3>
 
 <p>The first argument represents the scoped name of the element, and passes through the received class name.</p>
@@ -222,10 +218,15 @@ Stylable no longer performs auto-scoping for classes, and strings are passed as-
 
 <p>The second argument represents the <a href="#custom-state-mapping">custom state</a> (or another class), and returns a class to represent every custom state on the element.</p>
 
+<p>States are optional and the second argument can be replaced with another className if needed.</p>
+
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* 'style__root style--selected' */</span>
 <span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="p">{</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
 <span class="cm">/* 'style__label style--searched' */</span>
 <span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="p">{</span> <span class="na">searched</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
+
+<span class="cm">/* 'style__label style__icon' */</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">label</span><span class="p">,</span> <span class="nx">classes</span><span class="p">.</span><span class="nx">icon</span><span class="p">)</span>
 </code></pre></div></div>
 
 <h3 id="merge-props">Merge props</h3>

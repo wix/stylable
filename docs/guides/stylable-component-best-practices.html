@@ -211,7 +211,7 @@
 <span class="c">/* 
 &gt; directly style navBtn - a type of button
 selector: .comp__gallery .gallery__navBtn
-specificity: 0,0,4,0 
+specificity: 0,0,2,0 
 */</span>
 <span class="nc">.gallery</span><span class="nd">::navBtn</span> <span class="p">{}</span> 
 </code></pre></div></div>
@@ -231,13 +231,12 @@ For the <code class="highlighter-rouge">button</code> selector, we manually adde
 
 <h2 id="justify-your-css-declarations-in-comments">Justify your CSS declarations in comments</h2>
 
-<p>A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify each of them with a comment per this example.</p>
+<p>A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify any special overrides or interactions with a comment per this example.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.link</span> <span class="p">{</span>
+    <span class="nl">display</span><span class="p">:</span> <span class="nb">block</span><span class="p">;</span>
     <span class="c">/* override default anchor color */</span>
     <span class="nl">color</span><span class="p">:</span> <span class="n">currentColor</span><span class="p">;</span>
-    <span class="c">/* cover entire line */</span>
-    <span class="nl">display</span><span class="p">:</span> <span class="nb">block</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
@@ -245,14 +244,15 @@ For the <code class="highlighter-rouge">button</code> selector, we manually adde
 
 <h2 id="use-consistent-variables-from-a-central-location">Use consistent variables from a central location</h2>
 
-<p>Import variables from the <a href="../guides/project-commons">project commons stylesheet</a>.</p>
+<p>Import CSS or Stylable variables from the <a href="../guides/project-commons">project commons stylesheet</a>.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./project.st.css"</span><span class="p">;</span>
-    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">color1</span><span class="p">,</span> <span class="n">--font-small</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="nc">.item</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="n">--font-small</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
