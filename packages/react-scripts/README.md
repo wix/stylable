@@ -20,5 +20,7 @@ $ yarn
 $ yarn start
 ```
 
+> Note: due to recent changes with how create-react-app handles external customization, we are forced to lock our react-scripts package to an older version of create-react-app (v3.2.0).
+
 ## License
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [MIT license](./LICENSE).
