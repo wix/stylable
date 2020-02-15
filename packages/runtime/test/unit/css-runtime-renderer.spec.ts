@@ -306,7 +306,7 @@ describe('css-runtime-renderer', () => {
             expect(api.window).to.equal(null);
             expect(api.renderer).to.equal(null);
 
-            api.init(window);
+            api.init(window as unknown as Window);
 
             expect(typeof api.renderer!.render).to.equal('function');
             expect(api.window).to.equal(window);
@@ -337,7 +337,7 @@ describe('css-runtime-renderer', () => {
             api.register(a);
             api.register(b);
 
-            api.init(window);
+            api.init(window as unknown as Window);
             const head = document.head;
             expect(head.children.length).to.equal(2);
             assertStyle(head.children[0], { key: '/a.st.css', $css: '.a{}' });
@@ -362,7 +362,7 @@ describe('css-runtime-renderer', () => {
 
             api.register(a);
 
-            api.init(window);
+            api.init(window as unknown as Window);
             const head = document.head;
             expect(head.children.length).to.equal(1);
         });
