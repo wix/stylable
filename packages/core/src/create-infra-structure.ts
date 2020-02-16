@@ -3,10 +3,7 @@ import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-fi
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
-
-// importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
-// this allows @stylable/core to be bundled for browser usage without special custom configuration
-const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
+import { createDefaultResolver } from './module-resolver';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -19,17 +16,12 @@ export function createInfrastructure(
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
     resolveOptions: any = {},
     resolveNamespace?: typeof processNamespace,
-    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>
+    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
+    resolveModule = createDefaultResolver(fileSystem, resolveOptions)
 ): StylableInfrastructure {
-    const eResolver = ResolverFactory.createResolver({
-        useSyncFileSystemCalls: true,
-        fileSystem,
-        ...resolveOptions
-    });
-
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
-            moduleId = eResolver.resolveSync({}, context, moduleId);
+            moduleId = resolveModule(context, moduleId);
         }
         return moduleId;
     };
