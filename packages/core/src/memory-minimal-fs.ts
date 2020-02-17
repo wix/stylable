@@ -51,6 +51,9 @@ export function createMinimalFS(config: MinimalFSSetup) {
                 },
                 mtime: isDirectory ? new Date() : files[path].mtime!
             };
+        },
+        readlinkSync() {
+            throw new Error(`not implemented`);
         }
     };
 

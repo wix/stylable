@@ -3,7 +3,7 @@ import { safeParse } from '../src/parser';
 import { createSubsetAst, scopeSelector } from '../src/stylable-utils';
 
 describe('scopeSelector', () => {
-    const tests = [
+    const tests: Array<{ root: string; child: string; selector: string; only?: boolean }> = [
         {
             root: '.a',
             child: '.x',
@@ -71,13 +71,13 @@ describe('scopeSelector', () => {
         }
     ];
 
-    tests.forEach(test => {
-        const _it = (test as any).only ? it.only : it;
-        _it(`apply "${test.root}" on "${test.child}" should output "${test.selector}"`, () => {
-            const res = scopeSelector(test.root, test.child);
-            expect(res.selector).to.equal(test.selector);
+    for (const { only, root, selector, child } of tests) {
+        const test = only ? it.only : it;
+        test(`apply "${root}" on "${child}" should output "${selector}"`, () => {
+            const res = scopeSelector(root, child);
+            expect(res.selector).to.equal(selector);
         });
-    });
+    }
 });
 
 describe('createSubsetAst', () => {

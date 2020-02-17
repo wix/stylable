@@ -147,7 +147,7 @@ export function createStylableInstance(config: Config) {
 
     const stylable = new Stylable(
         '/',
-        fs as any,
+        fs,
         requireModule,
         '__',
         (meta, path) => {
