@@ -484,7 +484,7 @@ describe('stylable-resolver', () => {
 
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
-        expect(meta.diagnostics.reports).to.have.lengthOf(0);
-        expect(meta.transformDiagnostics!.reports).to.have.lengthOf(0);
+        expect(meta.diagnostics.reports).to.eql([]);
+        expect(meta.transformDiagnostics!.reports).to.eql([]);
     });
 });
