@@ -1,4 +1,4 @@
-import { resolve, sep } from 'path';
+import { dirname } from 'path';
 const deindent = require('deindent');
 
 import { MinimalFS } from './cached-process-file';
@@ -12,34 +12,37 @@ export interface MinimalFSSetup {
     trimWS?: boolean;
 }
 
-export function createMinimalFS(config: MinimalFSSetup) {
-    const files = config.files;
-
-    for (const file in files) {
-        if (files[file].mtime === undefined) {
-            files[file].mtime = new Date();
-            files[resolve(file)] = files[file];
+export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
+    const creationDate = new Date();
+    const filePaths = new Map<string, { content: string; mtime: Date }>(
+        Object.entries(files).map(([filePath, { content, mtime = creationDate }]) => [
+            filePath,
+            { content, mtime }
+        ])
+    );
+    const directoryPaths = new Set<string>();
+    for (const filePath of filePaths.keys()) {
+        for (const directoryPath of getParentPaths(dirname(filePath))) {
+            directoryPaths.add(directoryPath);
         }
     }
-    function isDir(path: string) {
-        return Object.keys(files).some(p => {
-            return p.startsWith(path.endsWith(sep) ? path : path + sep);
-        });
-    }
+
     const fs: MinimalFS = {
         readFileSync(path: string) {
             if (!files[path]) {
                 throw new Error('Cannot find file: ' + path);
             }
-            if (config.trimWS) {
+            if (trimWS) {
                 return deindent(files[path].content).trim();
             }
             return files[path].content;
         },
         statSync(path: string) {
-            const isDirectory = isDir(path);
-            if (!files[path] && !isDirectory) {
-                throw new Error('Cannot find file: ' + path);
+            const isDirectory = directoryPaths.has(path);
+            const fileEntry = filePaths.get(path);
+
+            if (!fileEntry && !isDirectory) {
+                throw new Error(`ENOENT: no such file or directory, stat ${path}`);
             }
 
             return {
@@ -47,9 +50,9 @@ export function createMinimalFS(config: MinimalFSSetup) {
                     return isDirectory;
                 },
                 isFile() {
-                    return true;
+                    return !!fileEntry;
                 },
-                mtime: isDirectory ? new Date() : files[path].mtime!
+                mtime: fileEntry ? fileEntry.mtime : new Date()
             };
         },
         readlinkSync() {
@@ -83,4 +86,19 @@ export function createMinimalFS(config: MinimalFSSetup) {
         requireModule,
         resolvePath
     };
+}
+
+function getParentPaths(initialDirectoryPath: string) {
+    const parentPaths: string[] = [];
+
+    let currentPath = initialDirectoryPath;
+    let lastPath: string | undefined;
+
+    while (currentPath !== lastPath) {
+        parentPaths.push(currentPath);
+        lastPath = currentPath;
+        currentPath = dirname(currentPath);
+    }
+
+    return parentPaths;
 }
