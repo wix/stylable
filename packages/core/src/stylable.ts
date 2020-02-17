@@ -11,7 +11,7 @@ import {
     TransformHooks
 } from './stylable-transformer';
 import { TimedCacheOptions } from './timed-cache';
-import { IStylableOptimizer } from './types';
+import { IStylableOptimizer, ModuleResolver } from './types';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -30,6 +30,7 @@ export interface StylableConfig {
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
+    resolveModule?: ModuleResolver;
 }
 
 export class Stylable {
@@ -72,7 +73,8 @@ export class Stylable {
         protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
             timeout: 1,
             useTimer: true
-        }
+        },
+        protected resolveModule?: ModuleResolver
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -80,7 +82,8 @@ export class Stylable {
             onProcess,
             resolveOptions,
             this.resolveNamespace,
-            timedCacheOptions
+            timedCacheOptions,
+            resolveModule
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;

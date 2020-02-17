@@ -91,8 +91,8 @@ export class ProjectRunner {
         compiler.run = compiler.run.bind(compiler);
         const promisedRun = promisify(compiler.run);
         this.stats = await promisedRun();
-        if (this.throwOnBuildError && this.stats.compilation.errors.length) {
-            throw new Error(this.stats.compilation.errors.join('\n'));
+        if (this.throwOnBuildError && this.stats.hasErrors()) {
+            throw new Error(this.stats.toString({ colors: true }));
         }
     }
 

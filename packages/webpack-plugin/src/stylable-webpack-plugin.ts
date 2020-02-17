@@ -1,4 +1,4 @@
-import { Stylable } from '@stylable/core';
+import { Stylable, createDefaultResolver } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { EOL } from 'os';
@@ -71,6 +71,10 @@ export class StylableWebpackPlugin {
         return localConfigOverride;
     }
     public createStylable(compiler: webpack.Compiler) {
+        const resolveModule = createDefaultResolver(
+            compiler.inputFileSystem as any,
+            compiler.options.resolve
+        );
         const stylable = new Stylable(
             compiler.context,
             (compiler.inputFileSystem as any).fileSystem || (compiler.inputFileSystem as any),
@@ -101,7 +105,9 @@ export class StylableWebpackPlugin {
             compiler.options.resolve,
             this.options.optimizer || new StylableOptimizer(),
             compiler.options.mode as any,
-            this.options.resolveNamespace || resolveNamespace
+            this.options.resolveNamespace || resolveNamespace,
+            undefined,
+            resolveModule
         );
         this.stylable = stylable;
     }
