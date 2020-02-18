@@ -1,6 +1,7 @@
 import hash from 'murmurhash';
 import path from 'path';
 import postcss from 'postcss';
+import valueParser from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import {
     createSimpleSelectorChecker,
@@ -36,10 +37,8 @@ import {
     validateAllowedNodesUntil,
     valueMapping
 } from './stylable-value-parsers';
-import { ParsedValue } from './types';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
-const valueParser = require('postcss-value-parser');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
@@ -495,7 +494,7 @@ export class StylableProcessor {
 
     protected handleCSSVarUse(decl: postcss.Declaration) {
         const parsed = valueParser(decl.value);
-        parsed.walk((node: ParsedValue) => {
+        parsed.walk(node => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
                 const varName = node.nodes[0];
                 if (!validateAllowedNodesUntil(node, 1)) {

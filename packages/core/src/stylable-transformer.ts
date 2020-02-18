@@ -1,6 +1,8 @@
-import cloneDeep from 'lodash.clonedeep';
 import { basename } from 'path';
 import postcss from 'postcss';
+import valueParser from 'postcss-value-parser';
+import cloneDeep from 'lodash.clonedeep';
+
 import { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
 import { Diagnostics } from './diagnostics';
@@ -44,7 +46,6 @@ import { valueMapping } from './stylable-value-parsers';
 const USE_SCOPE_SELECTOR_2 = true;
 
 const isVendorPrefixed = require('is-vendor-prefixed');
-const valueParser = require('postcss-value-parser');
 
 export interface ResolvedElement {
     name: string;
@@ -409,9 +410,9 @@ export class StylableTransformer {
             atRule.params = keyframesExports[name].value;
         });
 
-        ast.walkDecls(/animation$|animation-name$/, decl => {
+        ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
             const parsed = valueParser(decl.value);
-            parsed.nodes.forEach((node: any) => {
+            parsed.nodes.forEach(node => {
                 const alias = keyframesExports[node.value] && keyframesExports[node.value].value;
                 if (node.type === 'word' && Boolean(alias)) {
                     node.value = alias;
