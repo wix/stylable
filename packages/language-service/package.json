@@ -16,11 +16,11 @@
     "@file-services/typescript": "^2.1.2",
     "@stylable/core": "^3.2.0",
     "css-selector-tokenizer": "^0.7.1",
-    "postcss": "^7.0.26",
+    "postcss": "^7.0.27",
     "postcss-value-parser": "^4.0.2",
     "typescript": "~3.7.5",
     "vscode-css-languageservice": "^4.0.2",
-    "vscode-languageserver": "^6.1.0",
+    "vscode-languageserver": "^6.1.1",
     "vscode-uri": "^2.1.1"
   },
   "author": "Wix.com",
