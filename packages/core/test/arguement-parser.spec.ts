@@ -1,10 +1,6 @@
-// import { flatMatch, processSource } from '@stylable/core-test-kit';
-import * as chai from 'chai';
+import { expect } from 'chai';
+import valueParser from 'postcss-value-parser';
 import { getFormatterArgs } from '../src/stylable-value-parsers';
-
-const valueParser = require('postcss-value-parser');
-
-const expect = chai.expect;
 
 function getFunctionNode(src: string) {
     return valueParser(src).nodes[0];
