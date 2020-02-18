@@ -1,3 +1,7 @@
+import path from 'path';
+import ts from 'typescript';
+import postcss from 'postcss';
+import valueParser from 'postcss-value-parser';
 import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
@@ -15,9 +19,6 @@ import {
     StylableTransformer,
     valueMapping
 } from '@stylable/core';
-import path from 'path';
-import postcss from 'postcss';
-import ts from 'typescript';
 import {
     Location,
     ParameterInformation,
@@ -66,7 +67,6 @@ import {
     SelectorQuery
 } from './utils/selector-analyzer';
 
-const valueParser = require('postcss-value-parser');
 const selectorTokenizer = require('css-selector-tokenizer');
 
 function findLast<T>(
@@ -374,15 +374,16 @@ export class Provider {
         const parsed = valueParser(value);
 
         let mixin = '';
-        const rev = parsed.nodes.reverse()[0];
+        const rev = parsed.nodes[parsed.nodes.length - 1];
         if (rev.type === 'function' && !!rev.unclosed) {
             mixin = rev.value;
         } else {
             return null;
         }
-        const activeParam = parsed.nodes.reverse()[0].nodes.reduce((acc: number, cur: any) => {
+        const activeParam = rev.nodes.reduce((acc, cur) => {
             return cur.type === 'div' ? acc + 1 : acc;
         }, 0);
+
         if (mixin === 'value') {
             return null;
         }
