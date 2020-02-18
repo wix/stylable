@@ -448,9 +448,6 @@ describe('stylable-resolver', () => {
 
     it('should resolve 4th party according to context', () => {
         const stylable = createStylableInstance({
-            resolve: {
-                symlinks: false
-            },
             files: {
                 '/entry.st.css': {
                     namespace: 'entry',
@@ -484,7 +481,10 @@ describe('stylable-resolver', () => {
         });
 
         const { meta } = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
+
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
+        expect(meta.diagnostics.reports).to.eql([]);
+        expect(meta.transformDiagnostics!.reports).to.eql([]);
     });
 });

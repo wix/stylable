@@ -56,6 +56,9 @@ export function createInfrastructure(
                     };
                 }
                 return stat;
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         },
         (path, context) => resolvePath(context || projectRoot, path)

@@ -15,6 +15,9 @@ describe('cachedProcessFile', () => {
                 return {
                     mtime: new Date(0)
                 } as any;
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         };
 
@@ -43,6 +46,9 @@ describe('cachedProcessFile', () => {
                 return {
                     mtime: new Date(0)
                 };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         };
 
@@ -73,6 +79,9 @@ describe('cachedProcessFile', () => {
                 return {
                     mtime: new Date(0)
                 };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         };
 
@@ -102,6 +111,9 @@ describe('cachedProcessFile', () => {
                 return {
                     mtime: readCount === 0 ? new Date(0) : new Date(1)
                 };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         };
 
@@ -136,6 +148,9 @@ describe('cachedProcessFile', () => {
                 return {
                     mtime: readCount === 0 ? new Date(0) : new Date(1)
                 };
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
             }
         };
 
