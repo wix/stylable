@@ -1,5 +1,5 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import { StylableMeta } from './stylable-meta';
 import { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
@@ -79,7 +79,7 @@ export const CustomValueStrategy = {
         const pathArgs = getFormatterArgs(fnNode);
         const outputArray = [];
         for (const arg of pathArgs) {
-            const parsedArg = valueParser(arg).nodes[0];
+            const parsedArg = postcssValueParser(arg).nodes[0];
             const ct = parsedArg.type === 'function' && parsedArg.value;
             const resolvedValue =
                 typeof ct === 'string' && customTypes[ct]

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import postcss from 'postcss';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 
@@ -647,7 +647,7 @@ describe('Generator variables interpolation', () => {
                 }
             ) {
                 describe('Api Test: ' + desc, () => {
-                    const valueAst = valueParser(typeDef).nodes[0];
+                    const valueAst = postcssValueParser(typeDef).nodes[0];
                     const typeExtension = stTypes[valueAst.value];
 
                     it('should create a runtime value from ast', () => {

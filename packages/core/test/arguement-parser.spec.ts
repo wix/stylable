@@ -1,10 +1,6 @@
 import { expect } from 'chai';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import { getFormatterArgs } from '../src/stylable-value-parsers';
-
-function getFunctionNode(src: string) {
-    return valueParser(src).nodes[0];
-}
 
 function test(
     desc: string,
@@ -14,12 +10,14 @@ function test(
     expectedWarnings?: string[]
 ) {
     it(desc, () => {
-        const warns: string[] = [];
-        expect(
-            getFormatterArgs(getFunctionNode(src), allowComments, msg => warns.push(msg))
-        ).to.eql(expected);
+        const actualWarnings: string[] = [];
+        const [firstNode] = postcssValueParser(src).nodes;
+        const formatterArgs = getFormatterArgs(firstNode, allowComments, msg =>
+            actualWarnings.push(msg)
+        );
+        expect(formatterArgs).to.eql(expected);
         if (expectedWarnings) {
-            expect(expectedWarnings).to.eql(warns);
+            expect(expectedWarnings).to.eql(actualWarnings);
         }
     });
 }

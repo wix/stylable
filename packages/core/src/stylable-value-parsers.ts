@@ -4,7 +4,7 @@ import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { ParsedValue, StateParsedValue } from './types';
 
-const valueParser = require('postcss-value-parser');
+const postcssValueParser = require('postcss-value-parser');
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -40,7 +40,7 @@ export interface ExtendsValue {
     args: ArgValue[][] | null;
 }
 
-type ReportWarning = (message: string, options?: { word: string }) => void;
+export type ReportWarning = (message: string, options?: { word: string }) => void;
 
 export const rootValueMapping = {
     vars: ':vars' as ':vars',
@@ -88,7 +88,7 @@ export const SBTypesParsers = {
         return processPseudoStates(value, decl, diagnostics);
     },
     '-st-extends'(value: string) {
-        const ast = valueParser(value);
+        const ast = postcssValueParser(value);
         const types: ExtendsValue[] = [];
 
         ast.walk((node: any) => {
@@ -135,7 +135,7 @@ export const SBTypesParsers = {
         strategy: (type: string) => 'named' | 'args',
         diagnostics?: Diagnostics
     ) {
-        const ast = valueParser(mixinNode.value);
+        const ast = postcssValueParser(mixinNode.value);
         const mixins: Array<{
             type: string;
             options: Array<{ value: string }> | Record<string, string>;
@@ -205,12 +205,15 @@ export function getFormatterArgs(
             currentArg = '';
         } else if (currentNode.type === 'comment') {
             if (allowComments) {
-                currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
+                currentArg +=
+                    currentNode.resolvedValue || postcssValueParser.stringify(currentNode);
             }
         } else if (currentNode.type === 'string') {
-            currentArg += perserveQuotes ? valueParser.stringify(currentNode) : currentNode.value;
+            currentArg += perserveQuotes
+                ? postcssValueParser.stringify(currentNode)
+                : currentNode.value;
         } else {
-            currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
+            currentArg += currentNode.resolvedValue || postcssValueParser.stringify(currentNode);
         }
     }
     checkEmptyArg();
@@ -229,14 +232,14 @@ export function getFormatterArgs(
     function checkEmptyArg() {
         if (currentArg.trim() === '' && _reportWarning) {
             _reportWarning(
-                `${valueParser.stringify(node)}: argument at index ${argIndex} is empty`
+                `${postcssValueParser.stringify(node)}: argument at index ${argIndex} is empty`
             );
         }
     }
 }
 
 export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
-    return valueParser.stringify(nodes, (node: ParsedValue) => {
+    return postcssValueParser.stringify(nodes, (node: ParsedValue) => {
         if (node.resolvedValue !== undefined) {
             return node.resolvedValue;
         } else {
@@ -291,7 +294,7 @@ export const strategies = {
 };
 
 function stringifyParam(nodes: any) {
-    return valueParser.stringify(nodes, (n: any) => {
+    return postcssValueParser.stringify(nodes, (n: any) => {
         if (n.type === 'div') {
             return null;
         } else if (n.type === 'string') {
@@ -305,7 +308,7 @@ function stringifyParam(nodes: any) {
 export function listOptions(node: any) {
     return groupValues(node.nodes)
         .map((nodes: any) =>
-            valueParser.stringify(nodes, (n: any) => {
+            postcssValueParser.stringify(nodes, (n: any) => {
                 if (n.type === 'div') {
                     return null;
                 } else if (n.type === 'string') {

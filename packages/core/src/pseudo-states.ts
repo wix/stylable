@@ -19,7 +19,7 @@ import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
-const valueParser = require('postcss-value-parser');
+const postcssValueParser = require('postcss-value-parser');
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -49,7 +49,7 @@ export function processPseudoStates(
     diagnostics: Diagnostics
 ) {
     const mappedStates: MappedStates = {};
-    const ast = valueParser(value);
+    const ast = postcssValueParser(value);
     const statesSplitByComma = groupValues(ast.nodes);
 
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
@@ -102,7 +102,7 @@ function resolveStateType(
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
         arguments: [],
-        defaultValue: valueParser.stringify(stateDefault).trim()
+        defaultValue: postcssValueParser.stringify(stateDefault).trim()
     };
 
     if (isCustomMapping(stateDefinition)) {

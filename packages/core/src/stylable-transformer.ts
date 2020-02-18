@@ -1,6 +1,6 @@
 import { basename } from 'path';
 import postcss from 'postcss';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import cloneDeep from 'lodash.clonedeep';
 
 import { FileProcessor } from './cached-process-file';
@@ -411,7 +411,7 @@ export class StylableTransformer {
         });
 
         ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
-            const parsed = valueParser(decl.value);
+            const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach(node => {
                 const alias = keyframesExports[node.value] && keyframesExports[node.value].value;
                 if (node.type === 'word' && Boolean(alias)) {

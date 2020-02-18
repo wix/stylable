@@ -1,6 +1,6 @@
-import valueParser from 'postcss-value-parser';
-import { StateParsedValue, systemValidators } from '@stylable/core';
+import postcssValueParser from 'postcss-value-parser';
 import { ParameterInformation, SignatureHelp, SignatureInformation } from 'vscode-languageserver';
+import { StateParsedValue, systemValidators } from '@stylable/core';
 import { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value
@@ -16,7 +16,7 @@ export function resolveStateTypeOrValidator(
 ): string | boolean | null {
     const valueStartChar = line.indexOf(':') + 1;
     const value = line.slice(valueStartChar);
-    const { nodes: stateParts } = valueParser(value);
+    const { nodes: stateParts } = postcssValueParser(value);
     let requiredHinting = false;
     const validator = { length: 0, requiredHinting: false };
     let stateTypeValidatorToHint: string | null = null;
@@ -72,7 +72,7 @@ export function resolveStateTypeOrValidator(
 }
 
 function resolveStateType(
-    stateNodes: valueParser.Node[],
+    stateNodes: postcssValueParser.Node[],
     length: number,
     requiredHinting: boolean,
     pos: ProviderPosition,
@@ -117,7 +117,7 @@ function resolveStateType(
 function resolveStateValidator(
     pos: ProviderPosition,
     length: number,
-    valNode: valueParser.Node,
+    valNode: postcssValueParser.Node,
     stateTypeValidatorToHint: string | null,
     typeNode: any
 ) {

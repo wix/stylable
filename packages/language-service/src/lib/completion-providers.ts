@@ -1,6 +1,6 @@
 import path from 'path';
 import postcss from 'postcss';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import ts from 'typescript';
 
 import {
@@ -342,7 +342,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
             !this.isInsideValueDirective(fullLineText, position.character) &&
             fullLineText.includes(':')
         ) {
-            const parsed = valueParser(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
+            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
             const node = parsed[parsed.length - 1];
             if (
                 node.type === 'div' ||

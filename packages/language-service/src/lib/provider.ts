@@ -1,7 +1,7 @@
 import path from 'path';
 import ts from 'typescript';
 import postcss from 'postcss';
-import valueParser from 'postcss-value-parser';
+import postcssValueParser from 'postcss-value-parser';
 import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
@@ -371,7 +371,7 @@ export class Provider {
         if (/value\(\s*[^)]*$/.test(value)) {
             return null;
         }
-        const parsed = valueParser(value);
+        const parsed = postcssValueParser(value);
 
         let mixin = '';
         const rev = parsed.nodes[parsed.nodes.length - 1];
@@ -1703,7 +1703,7 @@ export function getNamedValues(
 export function getExistingNames(lineText: string, position: ProviderPosition) {
     const valueStart = lineText.indexOf(':') + 1;
     const value = lineText.slice(valueStart, position.character);
-    const parsed = valueParser(value.trim());
+    const parsed = postcssValueParser(value.trim());
     const names: string[] = parsed.nodes
         .filter((n: any) => n.type === 'function' || n.type === 'word')
         .map((n: any) => n.value);
@@ -1735,7 +1735,7 @@ export function getDefSymbol(
         return { word: '', meta: null };
     }
 
-    const parsed: any[] = valueParser(res.currentLine).nodes;
+    const parsed: any[] = postcssValueParser(res.currentLine).nodes;
 
     let val = findNode(parsed, position.character);
     while (val.nodes && val.nodes.length > 0) {
