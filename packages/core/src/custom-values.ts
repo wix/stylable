@@ -1,10 +1,9 @@
+import cloneDeepWith from 'lodash.clonedeepwith';
+import postcssValueParser from 'postcss-value-parser';
 import { StylableMeta } from './stylable-meta';
 import { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import { ParsedValue } from './types';
-
-const cloneDeepWith = require('lodash.clonedeepwith');
-const valueParser = require('postcss-value-parser');
 
 export interface Box<Type extends string, Value extends any> {
     type: Type;
@@ -23,7 +22,7 @@ export function box<Type extends string, Value extends any>(
 
 const { hasOwnProperty } = Object.prototype;
 
-export function unbox<B extends Box<string, unknown>>(boxed: B) {
+export function unbox<B extends Box<string, unknown>>(boxed: B | string): any {
     if (typeof boxed === 'string') {
         return boxed;
     } else if (typeof boxed === 'object' && boxed.type && hasOwnProperty.call(boxed, 'value')) {
@@ -80,11 +79,12 @@ export const CustomValueStrategy = {
         const pathArgs = getFormatterArgs(fnNode);
         const outputArray = [];
         for (const arg of pathArgs) {
-            const parsedArg = valueParser(arg).nodes[0];
+            const parsedArg = postcssValueParser(arg).nodes[0];
             const ct = parsedArg.type === 'function' && parsedArg.value;
-            const resolvedValue = customTypes[ct]
-                ? customTypes[ct].evalVarAst(parsedArg, customTypes)
-                : arg;
+            const resolvedValue =
+                typeof ct === 'string' && customTypes[ct]
+                    ? customTypes[ct].evalVarAst(parsedArg, customTypes)
+                    : arg;
             outputArray.push(resolvedValue);
         }
         return outputArray;

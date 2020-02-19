@@ -1,5 +1,6 @@
 import path from 'path';
 import postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
 import ts from 'typescript';
 
 import {
@@ -55,7 +56,6 @@ import { ExtendedTsLanguageService } from './types';
 import { isComment, isDeclaration } from './utils/postcss-ast-utils';
 import { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
 
-const pvp = require('postcss-value-parser');
 
 export interface ProviderOptions {
     meta: StylableMeta;
@@ -342,7 +342,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
             !this.isInsideValueDirective(fullLineText, position.character) &&
             fullLineText.includes(':')
         ) {
-            const parsed = pvp(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
+            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
             const node = parsed[parsed.length - 1];
             if (
                 node.type === 'div' ||

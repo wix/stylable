@@ -1,6 +1,7 @@
 import hash from 'murmurhash';
 import path from 'path';
 import postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import {
     createSimpleSelectorChecker,
@@ -36,10 +37,8 @@ import {
     validateAllowedNodesUntil,
     valueMapping
 } from './stylable-value-parsers';
-import { ParsedValue } from './types';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
-const valueParser = require('postcss-value-parser');
 
 const parseNamed = SBTypesParsers[valueMapping.named];
 const parseMixin = SBTypesParsers[valueMapping.mixin];
@@ -494,18 +493,18 @@ export class StylableProcessor {
     }
 
     protected handleCSSVarUse(decl: postcss.Declaration) {
-        const parsed = valueParser(decl.value);
-        parsed.walk((node: ParsedValue) => {
+        const parsed = postcssValueParser(decl.value);
+        parsed.walk(node => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
                 const varName = node.nodes[0];
                 if (!validateAllowedNodesUntil(node, 1)) {
-                    const args = valueParser.stringify(node.nodes);
+                    const args = postcssValueParser.stringify(node.nodes);
                     this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_ARGS(args), {
                         word: args
                     });
                 }
 
-                this.addCSSVar(valueParser.stringify(varName).trim(), decl);
+                this.addCSSVar(postcssValueParser.stringify(varName).trim(), decl);
             }
         });
     }

@@ -15,7 +15,7 @@ import {
 import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 
-const valueParser = require('postcss-value-parser');
+const postcssValueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -82,7 +82,7 @@ export function processDeclarationValue(
 ): { topLevelType: any; outputValue: string; typeError: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
-    const parsedValue = valueParser(value);
+    const parsedValue = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
         switch (type) {
@@ -295,7 +295,7 @@ export function processDeclarationValue(
                 }
                 break;
             default: {
-                return valueParser.stringify(parsedNode);
+                return postcssValueParser.stringify(parsedNode);
             }
         }
     }, true);

@@ -1,3 +1,7 @@
+import path from 'path';
+import ts from 'typescript';
+import postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
 import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
@@ -15,9 +19,6 @@ import {
     StylableTransformer,
     valueMapping
 } from '@stylable/core';
-import path from 'path';
-import postcss from 'postcss';
-import ts from 'typescript';
 import {
     Location,
     ParameterInformation,
@@ -66,7 +67,6 @@ import {
     SelectorQuery
 } from './utils/selector-analyzer';
 
-const valueParser = require('postcss-value-parser');
 const selectorTokenizer = require('css-selector-tokenizer');
 
 function findLast<T>(
@@ -371,18 +371,19 @@ export class Provider {
         if (/value\(\s*[^)]*$/.test(value)) {
             return null;
         }
-        const parsed = valueParser(value);
+        const parsed = postcssValueParser(value);
 
         let mixin = '';
-        const rev = parsed.nodes.reverse()[0];
+        const rev = parsed.nodes[parsed.nodes.length - 1];
         if (rev.type === 'function' && !!rev.unclosed) {
             mixin = rev.value;
         } else {
             return null;
         }
-        const activeParam = parsed.nodes.reverse()[0].nodes.reduce((acc: number, cur: any) => {
+        const activeParam = rev.nodes.reduce((acc, cur) => {
             return cur.type === 'div' ? acc + 1 : acc;
         }, 0);
+
         if (mixin === 'value') {
             return null;
         }
@@ -1702,7 +1703,7 @@ export function getNamedValues(
 export function getExistingNames(lineText: string, position: ProviderPosition) {
     const valueStart = lineText.indexOf(':') + 1;
     const value = lineText.slice(valueStart, position.character);
-    const parsed = valueParser(value.trim());
+    const parsed = postcssValueParser(value.trim());
     const names: string[] = parsed.nodes
         .filter((n: any) => n.type === 'function' || n.type === 'word')
         .map((n: any) => n.value);
@@ -1734,7 +1735,7 @@ export function getDefSymbol(
         return { word: '', meta: null };
     }
 
-    const parsed: any[] = valueParser(res.currentLine).nodes;
+    const parsed: any[] = postcssValueParser(res.currentLine).nodes;
 
     let val = findNode(parsed, position.character);
     while (val.nodes && val.nodes.length > 0) {
