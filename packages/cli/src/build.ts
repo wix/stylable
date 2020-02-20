@@ -2,7 +2,7 @@ import { isAsset, Stylable } from '@stylable/core';
 import { createModuleSource } from '@stylable/module-utils';
 import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { basename, dirname, join, resolve } from 'path';
+import { basename, dirname, join, relative, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { Generator } from './default-generator';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
@@ -27,6 +27,7 @@ export interface BuildOptions {
     includeCSSInJS?: boolean;
     outputCSS?: boolean;
     outputSources?: boolean;
+    useSourceNamespace?: boolean;
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
@@ -49,6 +50,7 @@ export function build({
     outputCSS,
     outputCSSNameTemplate,
     outputSources,
+    useSourceNamespace,
     injectCSSRequest,
     optimize,
     minify,
@@ -98,6 +100,7 @@ export function build({
                   outputCSS,
                   outputCSSNameTemplate,
                   outputSources,
+                  useSourceNamespace,
                   injectCSSRequest,
                   optimize,
                   minify,
@@ -134,13 +137,12 @@ function buildSingleFile(
     outputCSS = false,
     outputCSSNameTemplate = '[filename].css',
     outputSources = false,
+    useSourceNamespace = false,
     injectCSSRequest = false,
     optimize = false,
     minify = false,
     compat = false
 ) {
-    // testBuild(filePath, fullSrcDir, fs);
-
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
     const fileDirectory = dirname(filePath);
@@ -152,7 +154,7 @@ function buildSingleFile(
 
     log('[Build]', filePath + ' --> ' + outPath);
     tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
-    const content = tryRun(
+    let content: string = tryRun(
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
     );
@@ -174,6 +176,15 @@ function buildSingleFile(
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
     if (outputSources) {
+        if (useSourceNamespace && !content.includes('st-namespace-reference')) {
+            const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
+                /\\/gm,
+                '/'
+            );
+            const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
+            content = srcNamespaceAnnotation + content;
+        }
+
         log('[Build]', 'output .st.css source');
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }

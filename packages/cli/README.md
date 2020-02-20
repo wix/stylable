@@ -25,6 +25,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |esm||output esm modules (`.mjs`)|`false`|
 |css||output transpiled css files (`.css`)|`false`|
 |stcss||output stylable source files (`.st.css`)|`false`|
+|useNamespaceReference||mark output stylable source files with relative path for namespacing purposes|`false`|
 |customGenerator||path of a custom index file generator|-|
 |ext||extension of stylable css files|`.st.css`|
 |cssInJs||output transpiled css into the js module|`false`|
