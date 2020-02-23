@@ -28,7 +28,8 @@ import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     getAlias,
-    isCSSVarProp
+    isCSSVarProp,
+    scopeSelector
 } from './stylable-utils';
 import {
     rootValueMapping,
@@ -181,7 +182,10 @@ export class StylableProcessor {
             if (scopingRule.selector) {
                 atRule.walkRules(rule => {
                     rule.replaceWith(
-                        rule.clone({ selector: `${scopingRule.selector} ${rule.selector}` })
+                        rule.clone({
+                            selector: scopeSelector(scopingRule.selector, rule.selector, false)
+                                .selector
+                        })
                     );
                 });
             }
@@ -297,7 +301,9 @@ export class StylableProcessor {
         this.meta.ast.walkComments(comment => {
             if (comment.text.includes('st-namespace-reference')) {
                 const namespaceReferenceParts = comment.text.split('=');
-                pathToSource = stripQuotation(namespaceReferenceParts[namespaceReferenceParts.length - 1]);
+                pathToSource = stripQuotation(
+                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
+                );
                 return false;
             }
             return undefined;
@@ -305,7 +311,9 @@ export class StylableProcessor {
 
         return this.resolveNamespace(
             namespace,
-            pathToSource ? path.resolve(path.dirname(this.meta.source), pathToSource) : this.meta.source
+            pathToSource
+                ? path.resolve(path.dirname(this.meta.source), pathToSource)
+                : this.meta.source
         );
     }
 

@@ -71,6 +71,8 @@ describe('Stylable postcss process', () => {
             { from: distFrom }
         );
 
+        // assure namesapce generated with st-namespace-reference
+        // is identical between source and dist with the relative correction
         expect(result.namespace).to.eql(processNamespace('style', from));
     });
 

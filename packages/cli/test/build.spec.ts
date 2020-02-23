@@ -113,6 +113,7 @@ describe('build stand alone', () => {
         });
 
         // check two builds using sourceNamespace are identical
+        // compare two serializable js modules including their namespace
         expect(fs.readFileSync(resolve('/cjs/main.st.css.js'), 'utf-8')).to.equal(
             fs.readFileSync(resolve('/cjs2/main.st.css.js'), 'utf-8')
         );

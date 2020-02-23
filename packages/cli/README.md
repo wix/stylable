@@ -25,7 +25,7 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |esm||output esm modules (`.mjs`)|`false`|
 |css||output transpiled css files (`.css`)|`false`|
 |stcss||output stylable source files (`.st.css`)|`false`|
-|useNamespaceReference||mark output stylable source files with relative path for namespacing purposes|`false`|
+|useNamespaceReference|`unsr`|mark output stylable source files with relative path for namespacing purposes (*)|`false`|
 |customGenerator||path of a custom index file generator|-|
 |ext||extension of stylable css files|`.st.css`|
 |cssInJs||output transpiled css into the js module|`false`|
@@ -39,6 +39,8 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |diagnostics||verbose diagnostics|`false`|
 |compat||use legacy v1 runtime api|`false`|
 |help|`h`|Show help|`boolean`|
+
+`*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
 
 ### Generate an index file
 This generates an `index.st.css` file that acts as an export entry from every stylesheet in the provided `srcDir`.
