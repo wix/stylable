@@ -38,6 +38,15 @@ const argv = require('yargs')
     .describe('stcss', 'output stylable sources (.st.css)')
     .default('stcss', false)
 
+    .option('useNamespaceReference')
+    .boolean('useNamespaceReference')
+    .alias('useNamespaceReference', 'unsr')
+    .describe(
+        'useNamespaceReference',
+        'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace'
+    )
+    .default('useNamespaceReference', false)
+
     .option('compat')
     .boolean('compat')
     .describe('compat', 'use legacy v1 runtime api')

@@ -95,11 +95,31 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect(meta.outputAst!.nodes).to.flatMatch([
-                {
-                    selector: '.entry__root .entry__part'
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+                '.entry__root .entry__part'
+            );
+        });
+
+        it('should scope rule with multiple selectors to root', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope .root {
+                            .part, .otherPart, .oneMorePart {}
+                        }
+                        `
+                    }
                 }
-            ]);
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+                '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart'
+            );
         });
 
         it('should scope "part" class using a default import', () => {

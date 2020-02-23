@@ -28,7 +28,8 @@ import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     getAlias,
-    isCSSVarProp
+    isCSSVarProp,
+    scopeSelector
 } from './stylable-utils';
 import {
     rootValueMapping,
@@ -181,7 +182,10 @@ export class StylableProcessor {
             if (scopingRule.selector) {
                 atRule.walkRules(rule => {
                     rule.replaceWith(
-                        rule.clone({ selector: `${scopingRule.selector} ${rule.selector}` })
+                        rule.clone({
+                            selector: scopeSelector(scopingRule.selector, rule.selector, false)
+                                .selector
+                        })
                     );
                 });
             }
@@ -289,7 +293,28 @@ export class StylableProcessor {
         });
         toRemove.forEach(node => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
+        this.meta.namespace = this.handleNamespaceReference(namespace);
+    }
+
+    private handleNamespaceReference(namespace: string): string {
+        let pathToSource: string | undefined;
+        this.meta.ast.walkComments(comment => {
+            if (comment.text.includes('st-namespace-reference')) {
+                const namespaceReferenceParts = comment.text.split('=');
+                pathToSource = stripQuotation(
+                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
+                );
+                return false;
+            }
+            return undefined;
+        });
+
+        return this.resolveNamespace(
+            namespace,
+            pathToSource
+                ? path.resolve(path.dirname(this.meta.source), pathToSource)
+                : this.meta.source
+        );
     }
 
     protected handleRule(rule: SRule, inStScope = false) {
