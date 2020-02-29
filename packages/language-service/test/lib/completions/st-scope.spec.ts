@@ -114,17 +114,20 @@ describe('completion inside @st-scope', () => {
 
             expect(actual.find(comp => comp.label === 'color')).to.deep.include({
                 label: 'color',
-                documentation: "Color of an element's text\n\nSyntax: <color>",
+                documentation: {
+                    kind: 'markdown',
+                    value: `Color of an element's text\n\nSyntax: <color>\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)`
+                },
                 textEdit: {
                     range: createRange(4, 8, 4, 8),
-                    newText: 'color: '
+                    newText: 'color: $0;'
                 },
                 kind: 10,
                 command: {
                     title: 'Suggest',
                     command: 'editor.action.triggerSuggest'
                 },
-                sortText: 'd'
+                sortText: 'd_0010'
             });
         });
 
