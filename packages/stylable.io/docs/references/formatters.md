@@ -73,7 +73,7 @@ module.exports = function(baseSize, modifier) {
 
 When the formatter is imported into the CSS, it can also be used with a [variable](./variables.md). 
 
-In this example the CSS imports the same formatter as the previous example, `cal-font-size`, but the variable `baseFontSize` is added to the calculation.  
+In this example the CSS imports the same formatter as the previous example, `calc-font-size`, but the variable `baseFontSize` is added to the calculation.  
 
 ```css
 :import {
