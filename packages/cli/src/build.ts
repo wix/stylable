@@ -19,6 +19,9 @@ export interface BuildOptions {
     indexFile?: string;
     diagnostics?: (...args: string[]) => void;
     generatorPath?: string;
+    outputJs?: boolean;
+    outputSources?: boolean;
+    useNamespaceReference?: boolean;
 }
 
 export async function build({
@@ -31,10 +34,14 @@ export async function build({
     log,
     diagnostics,
     indexFile,
-    generatorPath
+    generatorPath,
+    outputJs = true,
+    outputSources = true,
+    useNamespaceReference = false
 }: BuildOptions) {
-
-    const generatorModule = generatorPath ? require(resolve(generatorPath)) : require('./default-generator');
+    const generatorModule = generatorPath
+        ? require(resolve(generatorPath))
+        : require('./default-generator');
     const generator: Generator = new generatorModule.Generator();
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
@@ -52,7 +59,14 @@ export async function build({
     }
     filesToBuild.forEach(filePath => {
         indexFile
-            ? generateFileIndexEntry(filePath, nameMapping, log, indexFileOutput, fullOutDir, generator)
+            ? generateFileIndexEntry(
+                  filePath,
+                  nameMapping,
+                  log,
+                  indexFileOutput,
+                  fullOutDir,
+                  generator
+              )
             : buildSingleFile(
                   fullOutDir,
                   filePath,
@@ -62,7 +76,10 @@ export async function build({
                   stylable,
                   diagnostics,
                   diagnosticsMsg,
-                  assets
+                  assets,
+                  outputJs,
+                  outputSources,
+                  useNamespaceReference
               );
     });
 
@@ -121,7 +138,10 @@ function buildSingleFile(
     stylable: Stylable,
     diagnostics: ((...args: string[]) => void) | undefined,
     diagnosticsMsg: string[],
-    projectAssets: string[]
+    projectAssets: string[],
+    outputJs: boolean,
+    outputSources: boolean,
+    useSourceNamespace: boolean
 ) {
     // testBuild(filePath, fullSrcDir, fs);
 
@@ -131,18 +151,32 @@ function buildSingleFile(
     const outDirPath = dirname(outPath);
     log('[Build]', filePath + ' --> ' + outPath);
     tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
-    const content = tryRun(
+    let content = tryRun(
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
     );
+
+    if (useSourceNamespace && !content.includes('st-namespace-reference')) {
+        const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(/\\/gm, '/');
+        const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
+        content = srcNamespaceAnnotation + content;
+    }
+
     const res = stylable.transform(content, filePath);
     const code = tryRun(() => generateModuleSource(res, true), `Transform Error: ${filePath}`);
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
+
     // st.css
-    tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
+    if (outputSources) {
+        tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
+    }
     // st.css.js
-    tryRun(() => fs.writeFileSync(outPath, code), `Write File Error: ${outPath}`);
-    projectAssets.push(...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri)));
+    if (outputJs) {
+        tryRun(() => fs.writeFileSync(outPath, code), `Write File Error: ${outPath}`);
+    }
+    projectAssets.push(
+        ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
+    );
 }
 
 // function testBuild(filePath: string, fullSrcDir: string, fs: any) {
@@ -214,9 +248,9 @@ function handleDiagnostics(
     diagnosticsMsg: string[],
     filePath: string
 ) {
-    const reports = res.meta.transformDiagnostics ?
-        res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports) :
-        res.meta.diagnostics.reports;
+    const reports = res.meta.transformDiagnostics
+        ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
+        : res.meta.diagnostics.reports;
 
     if (diagnostics && reports.length) {
         diagnosticsMsg.push(`Errors in file: ${filePath}`);

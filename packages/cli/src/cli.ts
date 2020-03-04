@@ -17,9 +17,29 @@ const argv = require('yargs')
     .describe('outDir', 'target directory relative to root')
     .default('outDir', '.')
 
+    .option('js')
+    .boolean('js')
+    .describe('js', 'output stylable js module (.st.css.js)')
+    .default('js', true)
+
+    .option('stcss')
+    .boolean('stcss')
+    .describe('stcss', 'output stylable sources (.st.css)')
+    .default('stcss', true)
+
     .option('indexFile')
     .describe('indexFile', 'filename of the generated index')
     .default('indexFile', false)
+
+    .option('useNamespaceReference')
+    .boolean('useNamespaceReference')
+    .alias('useNamespaceReference', 'unsr')
+    .describe(
+        'useNamespaceReference',
+        // tslint:disable-next-line: max-line-length
+        'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace'
+    )
+    .default('useNamespaceReference', false)
 
     .option('customGenerator')
     .describe('customGenerator', 'path to file containing indexFile output override methods')
@@ -41,7 +61,17 @@ const argv = require('yargs')
 
 const log = createLogger('[Stylable]', argv.log);
 const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
-const { outDir, srcDir, rootDir, ext, indexFile, customGenerator: generatorPath } = argv;
+const {
+    outDir,
+    srcDir,
+    rootDir,
+    ext,
+    indexFile,
+    customGenerator: generatorPath,
+    js,
+    stcss,
+    useNamespaceReference
+} = argv;
 
 log('[Arguments]', argv);
 
@@ -57,7 +87,10 @@ build({
     log,
     diagnostics,
     indexFile,
-    generatorPath
+    generatorPath,
+    outputJs: js,
+    outputSources: stcss,
+    useNamespaceReference
 });
 
 function createLogger(prefix: string, shouldLog: boolean) {

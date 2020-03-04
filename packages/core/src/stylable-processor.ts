@@ -7,7 +7,6 @@ import {
     isChildOfAtRule,
     isCompRoot,
     isRootValid,
-    isSimpleSelector,
     parseSelector,
     SelectorAstNode,
     traverseNode
@@ -23,7 +22,7 @@ import {
     StylableMeta,
     VarSymbol
 } from './stylable-meta';
-import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias } from './stylable-utils';
+import { CUSTOM_SELECTOR_RE, expandCustomSelectors, getAlias, scopeSelector } from './stylable-utils';
 import { rootValueMapping, SBTypesParsers, stValuesMap, valueMapping } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
@@ -97,7 +96,12 @@ export class StylableProcessor {
 
             if (scopingRule.selector) {
                 atRule.walkRules(rule => {
-                    rule.replaceWith(rule.clone({ selector: `${scopingRule.selector} ${rule.selector}`}));
+                    rule.replaceWith(
+                        rule.clone({
+                            selector: scopeSelector(scopingRule.selector, rule.selector, false)
+                                .selector
+                        })
+                    );
                 });
             }
 
@@ -166,7 +170,28 @@ export class StylableProcessor {
         });
         toRemove.forEach(node => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
-        this.meta.namespace = this.resolveNamespace(namespace, this.meta.source);
+        this.meta.namespace = this.handleNamespaceReference(namespace);
+    }
+
+    protected handleNamespaceReference(namespace: string): string {
+        let pathToSource: string | undefined;
+        this.meta.ast.walkComments(comment => {
+            if (comment.text.includes('st-namespace-reference')) {
+                const namespaceReferenceParts = comment.text.split('=');
+                pathToSource = stripQuotation(
+                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
+                );
+                return false;
+            }
+            return undefined;
+        });
+
+        return this.resolveNamespace(
+            namespace,
+            pathToSource
+                ? path.resolve(path.dirname(this.meta.source), pathToSource)
+                : this.meta.source
+        );
     }
 
     protected handleRule(rule: SRule, inStScope: boolean = false) {
