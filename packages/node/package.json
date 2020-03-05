@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Integrate Stylable into your node application",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --timeout 10000"
   },
   "dependencies": {
-    "@stylable/core": "^1.3.1",
+    "@stylable/core": "^1.4.0",
     "find-config": "^1.0.0",
     "murmurhash": "^0.0.2"
   },
