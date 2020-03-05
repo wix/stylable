@@ -20,12 +20,17 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |rootDir|root directory of project|`cwd`|
 |srcDir|source directory relative to root|`./`|
 |outDir|target directory relative to root|`./`|
+|js|output transpiled js modules|`true`|
+|stcss|output stylable source files (`.st.css`)|`true`|
+|useNamespaceReference|mark output stylable source files with relative path for namespacing purposes (*)|`false`|
 |indexFile|filename of the generated index|`false`|
 |customGenerator|path of a custom index file generator|-|
 |ext|extension of stylable css files|`.st.css`|
 |log|verbose log|`false`|
 |diagnostics|verbose diagnostics|`false`|
 |help|Show help|`boolean`|
+
+`*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
 
 ### Generate an index file
 This generates an `index.st.css` file that acts as an export entry from every stylesheet in the provided `srcDir`.
