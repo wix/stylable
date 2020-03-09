@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Imports</title>
+    <title>Supporting Server Side Rendering</title>
 
 	<!-— facebook open graph tags -->
 	<meta property="og:type" content="website">
@@ -105,7 +105,7 @@
             
                 <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
             
-                <li class="active"><a href="../../docs/references/imports" class="active docs-nav-item">Imports</a></li>
+                <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>
             
                 <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>
             
@@ -141,99 +141,56 @@
 </nav>
 
 <section class="docs-content">
-    <h1>Imports</h1>
-    <p><strong>Stylable</strong> enables you to import other stylesheets and modules in a way that is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import">JS Imports</a>. You can then use the stylesheet or module as it’s been defined, or just one or more of its named values, in your own <strong>Stylable</strong> stylesheet.</p>
+    <h1>Supporting Server Side Rendering</h1>
+    <p>Server side rendering (SSR) is an approach to serving JavaScript rendered web applications (such as React, Vue, Angular, etc…) that tries to improve time-to-paint, SEO support and more.</p>
 
-<p>You use the <strong>Stylable</strong> syntax beginning with <code class="highlighter-rouge">-st-</code> for the <code class="highlighter-rouge">:import</code> config:</p>
+<p>To learn more about SSR - see this <a href="https://dev.to/sunnysingh/the-benefits-and-origins-of-server-side-rendering-4doh">introduction post</a>.</p>
 
-<ul>
-  <li><code class="highlighter-rouge">-st-from:</code> Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.</li>
-  <li><code class="highlighter-rouge">-st-default:</code> Imports the default export of the module named in <code class="highlighter-rouge">-st-from:</code>. Use with the name by which to identify the imported value in the scoped stylesheet.</li>
-  <li><code class="highlighter-rouge">-st-named:</code> List of the named exports to import into the local scoped stylesheet from the file named in <code class="highlighter-rouge">-st-from:</code>.</li>
-</ul>
+<p>When creating your library / application you will see that you might need to make some changes to your project publish / consumption process in order to integrate Stylable to your SSR flow.</p>
 
-<blockquote>
-  <p><strong>Note</strong></p>
-  <ul>
-    <li><code class="highlighter-rouge">:import</code> is a Stylable directive and not a selector.</li>
-    <li>Using <code class="highlighter-rouge">import</code> as part of a complex selector or inside a CSS ruleset does not import.</li>
-    <li>Multiple imports may conflict and the last one in the file wins.</li>
-  </ul>
-</blockquote>
+<h2 id="rendering-stylable-in-the-client">Rendering Stylable in the Client</h2>
+<p>To integrate Stylable into your application, use <code class="highlighter-rouge">@stylable/webpack-plugin</code> and <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">configure</a> it according to your project needs.</p>
 
-<h2 id="imports---basic-usage">Imports - basic usage</h2>
+<h2 id="transforming-stylable-in-the-server">Transforming Stylable in the Server</h2>
+<p>In order to use Stylable imports from your source files in <code class="highlighter-rouge">nodeJS</code>, you will need to add <code class="highlighter-rouge">@stylable/node</code> as a dependency.</p>
 
-<p>Here are some examples of how you can use imports in your <strong>Stylable</strong> stylesheet.</p>
+<p>Import and use its <code class="highlighter-rouge">requireHook</code> method before rendering to enable requiring Stylable stylesheets in their <code class="highlighter-rouge">CommonJS</code> module format.</p>
 
-<h3 id="import-the-default-export-of-a-local-reference-stylesheet-for-use-in-the-scoped-stylesheet">Import the default export of a local reference stylesheet for use in the scoped stylesheet</h3>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// server.js </span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">attachHook</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'@stylable/node'</span><span class="p">);</span>
 
-<p>Import the <code class="highlighter-rouge">toggle-button.css</code> stylesheet from a local location. Assign the name <code class="highlighter-rouge">ToggleButton</code> to the default export of that stylesheet for use in this scoped stylesheet.</p>
+<span class="nx">attachHook</span><span class="p">();</span> <span class="c1">// enables requiring .st.css files as CommonJS</span>
 
-<blockquote>
-  <p><strong>Note</strong><br />
-Generally when importing a <strong>default</strong> value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet.</p>
-</blockquote>
-
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
-    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./toggle-button.css'</span><span class="p">;</span>
-    <span class="py">-st-default</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="c1">// &lt; render application ... &gt;</span>
 </code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button.css'</span><span class="p">;</span>
+<h2 id="matching-namespaces">Matching namespaces</h2>
+<p>In order to ensure full SSR compatibility, <strong>generated namespaces for all stylesheets must match exactly</strong> across all different build targets.</p>
+
+<p>The default Stylable <code class="highlighter-rouge">namespaceResolver</code> uses a combination of file-system path, name and version from the <code class="highlighter-rouge">package.json</code> file to create its namespace. This means that namespaces can be influenced by the published file path structure.</p>
+
+<p>If you choose to provide an alternative namespace resolver that does not depend on file paths as part of its namespace creation, then you can avoid the problem described below.</p>
+
+<h3 id="supporting-multiple-transpilation-targets">Supporting multiple transpilation targets</h3>
+
+<p>When building a library or application for consumption in both client and server environments it is common to output multiple transpilation targets for various module systems.</p>
+
+<p>This means that a published project will usually have both <code class="highlighter-rouge">CommonJS</code> and <code class="highlighter-rouge">ES modules</code>, each with their own transpiled copy of the project, including the Stylable assets.</p>
+
+<p>This can pose a problem when trying to synchronize namespace creation for SSR.</p>
+
+<h3 id="publishing-ssr-ready-source-files-stcss">Publishing SSR-ready source files (<code class="highlighter-rouge">*.st.css</code>)</h3>
+
+<p>The Stylable CLI offers a feature that allows you to sync your namespace across dist targets by inserting a custom header comment to the start of your <code class="highlighter-rouge">.st.css</code> file. This header comment is used to normalize namespacing paths across different build targets.</p>
+
+<p>When using <code class="highlighter-rouge">@stylable/cli</code> to publish your source stylesheets, use the <code class="highlighter-rouge">useNamespaceReference</code> flag to mark all targets as originating from the same original source.</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stc <span class="nt">--srcDir</span> ./src <span class="nt">--outDir</span> ./dist/cjs <span class="nt">--cjs</span> <span class="nt">--stcss</span> <span class="nt">--useNamespaceReference</span>
+</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stc <span class="nt">--srcDir</span> ./src <span class="nt">--outDir</span> ./dist/esm <span class="nt">--esm</span> <span class="nt">--stcss</span> <span class="nt">--useNamespaceReference</span>
 </code></pre></div></div>
 
-<h3 id="import-named-exports-from-a-local-js-module">Import named exports from a local JS module</h3>
-
-<p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. These named exports are now imported into this scoped stylesheet.</p>
-
-<blockquote>
-  <p><strong>Note</strong><br />
-When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.</p>
-</blockquote>
-
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
-    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
-    <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h3 id="import-named-exports-from-a-local-js-module-and-locally-refer-to-one-of-the-export-values-as-a-different-name">Import named exports from a local JS module and locally refer to one of the export values as a different name</h3>
-
-<p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. The value <code class="highlighter-rouge">gridMixin</code> is used as is and <code class="highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltip</code> in this stylesheet.</p>
-
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
-    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
-    <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span> <span class="n">as</span> <span class="n">tooltip</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="k">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
-</code></pre></div></div>
-
-<h2 id="import-stylesheet">Import stylesheet</h2>
-
-<p>When importing another stylesheet, the default import represents the root of the stylesheet and is generally treated as a component, and named imports represent vars and classes.</p>
-
-<h2 id="usage">Usage</h2>
-
-<ul>
-  <li><a href="./tag-selectors">Tag selectors</a></li>
-  <li><a href="./extend-stylesheet">Extend a stylesheet</a></li>
-  <li><a href="./variables#import-variables">Import variables</a></li>
-  <li><a href="./class-selectors#import-classes">Import classes</a></li>
-  <li><a href="./mixins">Mixins</a></li>
-  <li><a href="../guides/component-variants">Component variants</a> and <a href="../guides/shared-classes">Shared classes</a></li>
-</ul>
+<p>For this to work properly, your source folder must be published along with your distribution build targets.</p>
 
 </section>
 

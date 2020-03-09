@@ -94,6 +94,8 @@
             
                 <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
             
+                <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>
+            
         </ul>
     </div>
     
@@ -164,9 +166,9 @@
 </code></pre></div></div>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
-<span class="nc">.Page__checkBtn.ToggleButton__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Page__checkBtn.ToggleButton__root</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
-<span class="nc">.Page__checkBtn.ToggleButton__root.ToggleButton--toggled</span><span class="o">]</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Page__checkBtn</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">white</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Page__checkBtn</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.Page__checkBtn.ToggleButton--toggled</span> <span class="nc">.ToggleButton__label</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* page.jsx */</span>
@@ -188,6 +190,55 @@
 </span>        <span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="extending-stylesheets-vs-classes">Extending stylesheets vs. classes</h2>
+
+<p>Stylable offers you the ability to import a stylesheet (default import) or class (named import). The two methods differ in their runtime export values.</p>
+
+<h3 id="extending-a-root">Extending a root</h3>
+
+<p>When extending a <code class="highlighter-rouge">root</code> class, Stylable assumes the component itself will place its own <code class="highlighter-rouge">root</code> class, and as such Stylable exports only the local className during runtime.</p>
+
+<p>The extended component will receive the extending (external) class name through its props and concat it to the <code class="highlighter-rouge">root</code> node class list.</p>
+
+<h3 id="extending-an-inner-part">Extending an inner part</h3>
+
+<p>Any class other than <code class="highlighter-rouge">root</code> defined in a Stylesheet is considered an inner part. Usually in Stylable extending a class signifies the use of a <a href="../guides/component-variants">variant</a> or composed* utility class.</p>
+
+<p>* - Stylable currently does not support composing multiple classes on the same part. We hope to introduce this capability in the near future.</p>
+
+<h3 id="extending-example">Extending example</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* page.st.css */</span>
+<span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./toggle-button.st.css"</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./toggle-button-variant.st.css"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">toggleVariant</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.defaultCheckBtn</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span> <span class="c">/* extending stylesheet */</span>
+<span class="p">}</span>
+<span class="nc">.variantCheckBtn</span> <span class="p">{</span>
+    <span class="py">-st-extends</span><span class="p">:</span> <span class="n">toggleVariant</span><span class="p">;</span> <span class="c">/* extending class */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output*/</span>
+<span class="nc">.Page__defaultCheckBtn</span> <span class="p">{}</span>
+<span class="nc">.Page__variantCheckBtn</span> <span class="p">{}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* runtime JS output*/</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./page.st.css'</span><span class="p">;</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">defaultCheckBtn</span><span class="p">)</span> <span class="c1">// "Page__defaultCheckBtn"</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">variantCheckBtn</span><span class="p">)</span> <span class="c1">// "Page__variantCheckBtn ToggleButton__toggleVariant"</span>
 </code></pre></div></div>
 
 </section>
