@@ -55,19 +55,13 @@ export class StylableParser {
 
         meta.imports.forEach(stylableImport => {
             if (isStylableImport(stylableImport)) {
-                const importRef = {
-                    defaultImport: stylableImport.defaultExport,
-                    names: Object.keys(stylableImport.named || {})
-                };
-                const dep = this.useWeakDeps
-                    ? StylableImportDependency.createWeak(
-                          stylableImport.fromRelative,
-                          currentModule,
-                          importRef
-                      )
-                    : new StylableImportDependency(stylableImport.fromRelative, importRef);
-                currentModule.addDependency(dep);
-                addStylableFileDependencyChain(this.stylable, stylableImport, fileDeps);
+                addStylableImportsDependencies(
+                    this.stylable,
+                    this.useWeakDeps,
+                    stylableImport,
+                    currentModule,
+                    fileDeps
+                );
             } else {
                 // TODO: handle deep js dependencies?
                 fileDeps.add(
@@ -78,6 +72,24 @@ export class StylableParser {
 
         return state;
     }
+}
+
+function addStylableImportsDependencies(
+    stylable: Stylable,
+    useWeakDeps: boolean,
+    stylableImport: Imported,
+    currentModule: StylableModule,
+    fileDeps: Set<string>
+) {
+    const importRef = {
+        defaultImport: stylableImport.defaultExport,
+        names: Object.keys(stylableImport.named || {})
+    };
+    const dep = useWeakDeps
+        ? StylableImportDependency.createWeak(stylableImport.fromRelative, currentModule, importRef)
+        : new StylableImportDependency(stylableImport.fromRelative, importRef);
+    currentModule.addDependency(dep);
+    addStylableFileDependencyChain(stylable, stylableImport, fileDeps);
 }
 
 function addStylableFileDependencyChain(
