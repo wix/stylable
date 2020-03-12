@@ -7,6 +7,8 @@ import webpack from 'webpack';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync } from 'fs';
+import { deferred } from 'promise-assist';
+
 export interface Options {
     projectDir: string;
     port?: number;
@@ -37,7 +39,7 @@ export class ProjectRunner {
             nodeFs.copyDirectorySync(projectToCopy, projectPath);
             symlinkSync(
                 join(__dirname, '../../../node_modules'),
-                join(tempDir.path, 'node_modules'),
+                join(tempDir.path, 'node_modules')
             );
             runnerOptions.projectDir = projectPath;
         }
@@ -72,6 +74,7 @@ export class ProjectRunner {
     public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
     public compiler!: webpack.Compiler | null;
+    public watchingHandle!: webpack.Watching | null;
     constructor({
         projectDir,
         port = 3000,
@@ -111,12 +114,24 @@ export class ProjectRunner {
         const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        compiler.watch = compiler.watch.bind(compiler);
-        const promisedWatch = promisify(compiler.watch);
-        this.stats = await promisedWatch({});
-        if (this.throwOnBuildError && this.stats.compilation.errors.length) {
-            throw new Error(this.stats.compilation.errors.join('\n'));
-        }
+
+        const firstCompile = deferred<webpack.Stats>();
+
+        this.watchingHandle = compiler.watch({}, (err, stats) => {
+            if (!this.stats) {
+                if (this.throwOnBuildError && stats.compilation.errors.length) {
+                    err = new Error(stats.compilation.errors.join('\n'));
+                }
+                if (err) {
+                    firstCompile.reject(err);
+                } else {
+                    firstCompile.resolve(stats);
+                }
+            }
+            this.stats = stats;
+        });
+
+        await firstCompile.promise;
     }
 
     public async serve() {
@@ -209,6 +224,13 @@ export class ProjectRunner {
         if (this.server) {
             this.server.close();
             this.server = null;
+        }
+        if (this.compiler) {
+            this.compiler = null;
+        }
+        if (this.watchingHandle) {
+            await new Promise(res => this.watchingHandle?.close(res));
+            this.watchingHandle = null;
         }
         await rimraf(this.outputDir);
     }
