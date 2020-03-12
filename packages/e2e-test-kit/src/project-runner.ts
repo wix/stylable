@@ -34,7 +34,7 @@ export class ProjectRunner {
             const projectToCopy = runnerOptions.projectDir;
             const tempDir = createTempDirectorySync('local-test');
             tempDir.path = nodeFs.realpathSync(tempDir.path);
-            const projectPath = tempDir.path;
+            const projectPath = join(tempDir.path, 'project');
             disposeAfterEach.add(tempDir.remove);
             nodeFs.copyDirectorySync(projectToCopy, projectPath);
             symlinkSync(
