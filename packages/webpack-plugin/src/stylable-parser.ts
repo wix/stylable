@@ -4,7 +4,7 @@ import {
     makeAbsolute,
     processDeclarationUrls,
     Stylable,
-    StylableMeta
+    StylableResults
 } from '@stylable/core';
 import path from 'path';
 import webpack from 'webpack';
@@ -14,6 +14,7 @@ import {
     StylableExportsDependency,
     StylableImportDependency
 } from './stylable-dependencies';
+import { StylableModule } from './types';
 
 const stylableExtension = /\.st\.css$/;
 export class StylableParser {
@@ -21,8 +22,7 @@ export class StylableParser {
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
         private normalModuleFactory: any,
-        private useWeakDeps: boolean,
-        private useAggressiveDependencies: boolean
+        private useWeakDeps: boolean
     ) {}
     public parse(_source: string, state: any) {
         if (
@@ -37,38 +37,22 @@ export class StylableParser {
             state.module.type = 'javascript/auto';
             return parser.parse(_source, state);
         }
-        const meta = this.stylable.process(state.module.resource);
-        state.module.buildInfo.stylableMeta = meta;
 
-        if (meta.mixins.length) {
-            // collect assets added through mixins into dependencies
-            const { meta: transformedMeta } = this.stylable
-                .createTransformer({ postProcessor: undefined, replaceValueHook: undefined })
-                .transform(meta);
+        const currentModule: StylableModule = state.module;
+        const context = (this.compilation as any).options.context;
+        const fileDeps = currentModule.buildInfo.fileDependencies;
+        const meta = this.stylable.process(currentModule.resource);
 
-            const mixinUrls: string[] = [];
-            transformedMeta.outputAst!.walkDecls(node =>
-                processDeclarationUrls(node, node => node.url && mixinUrls.push(node.url), false)
-            );
-            state.module.buildInfo.stylableTransformedAst = transformedMeta.outputAst;
-            addUrlDependencies(mixinUrls, state.module, this.compilation);
-        }
+        const res = this.stylable.createTransformer().transform(meta);
 
-        const fileDeps = state.module.buildInfo.fileDependencies;
+        currentModule.buildInfo.stylableMeta = meta;
+        currentModule.buildInfo.stylableTransformedAst = res.meta.outputAst;
+        currentModule.buildInfo.stylableTransformedExports = res.exports;
 
-        meta.urls
-            .filter(url => isAsset(url))
-            .forEach(asset => {
-                const absPath = makeAbsolute(
-                    asset,
-                    (this.compilation as any).options.context,
-                    path.dirname(state.module.resource)
-                );
-                fileDeps.add(absPath);
-                state.module.addDependency(new StylableAssetDependency(absPath));
-            });
+        currentModule.addDependency(new StylableExportsDependency(['default']));
 
-        state.module.addDependency(new StylableExportsDependency(['default']));
+        handleUrlDependencies(res, currentModule, context);
+
         meta.imports.forEach(stylableImport => {
             if (isStylableImport(stylableImport)) {
                 const importRef = {
@@ -78,58 +62,54 @@ export class StylableParser {
                 const dep = this.useWeakDeps
                     ? StylableImportDependency.createWeak(
                           stylableImport.fromRelative,
-                          state.module,
+                          currentModule,
                           importRef
                       )
                     : new StylableImportDependency(stylableImport.fromRelative, importRef);
-                state.module.addDependency(dep);
-                this.addStylableFileDependencyChain(meta, stylableImport, fileDeps);
+                currentModule.addDependency(dep);
+                addStylableFileDependencyChain(this.stylable, stylableImport, fileDeps);
             } else {
+                // TODO: handle deep js dependencies?
                 fileDeps.add(
                     this.stylable.resolvePath(stylableImport.context, stylableImport.from)
                 );
-                // TODO: handle js dependencies?
             }
         });
 
         return state;
     }
-    addStylableFileDependencyChain(
-        meta: StylableMeta,
-        stylableImport: Imported,
-        dependencies = new Set()
-    ) {
-        const shouldAddDeps = this.useAggressiveDependencies ? true : meta.mixins.length;
-        if (
-            !dependencies.has(stylableImport.from) &&
-            isStylableImport(stylableImport) &&
-            shouldAddDeps
-        ) {
-            try {
-                const resource = this.stylable.resolvePath(
-                    stylableImport.context,
-                    stylableImport.from
-                );
-                dependencies.add(resource);
-                const importedMeta = this.stylable.process(resource);
-                meta.imports.forEach(childImport => {
-                    this.addStylableFileDependencyChain(importedMeta, childImport, dependencies);
-                });
-            } catch {
-                // maybe remove watch error on deep dependency
-                console.warn(`Could not add ${stylableImport.from} to watch dependencies`);
-            }
+}
+
+function addStylableFileDependencyChain(
+    stylable: Stylable,
+    stylableImport: Imported,
+    dependencies = new Set()
+) {
+    const resource = stylable.resolvePath(stylableImport.context, stylableImport.from);
+    if (!dependencies.has(resource) && isStylableImport(stylableImport)) {
+        try {
+            dependencies.add(resource);
+            stylable.process(resource).imports.forEach(childImport => {
+                addStylableFileDependencyChain(stylable, childImport, dependencies);
+            });
+        } catch {
+            // maybe remove watch error on deep dependency
+            console.warn(`Could not add ${stylableImport.from} to watch dependencies`);
         }
     }
 }
 
-function addUrlDependencies(urls: string[], stylableModule: any, compilation: any) {
+function handleUrlDependencies(res: StylableResults, currentModule: StylableModule, context: any) {
+    const urls: string[] = [];
+    res.meta.outputAst!.walkDecls(node =>
+        processDeclarationUrls(node, node => node.url && urls.push(node.url), false)
+    );
+    addUrlDependencies(urls, currentModule, context);
+}
+
+function addUrlDependencies(urls: string[], stylableModule: StylableModule, rootContext: string) {
     urls.filter(url => isAsset(url)).forEach(asset => {
-        const absPath = makeAbsolute(
-            asset,
-            compilation.options.context,
-            path.dirname(stylableModule.resource)
-        );
+        const absPath = makeAbsolute(asset, rootContext, path.dirname(stylableModule.resource));
         stylableModule.buildInfo.fileDependencies.add(absPath);
         stylableModule.addDependency(new StylableAssetDependency(absPath));
     });

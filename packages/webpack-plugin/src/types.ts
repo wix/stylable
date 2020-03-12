@@ -1,4 +1,10 @@
-import { Stylable, StylableMeta, StylableResults, TransformHooks } from '@stylable/core';
+import {
+    Stylable,
+    StylableMeta,
+    StylableResults,
+    TransformHooks,
+    StylableExports
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import webpack from 'webpack';
 
@@ -6,7 +12,6 @@ export interface StylableWebpackPluginOptions {
     legacyRuntime: boolean;
     filename: string;
     useWeakDeps: boolean;
-    useAggressiveDependencies: boolean;
     includeDynamicModulesInCSS: boolean;
     createRuntimeChunk: boolean;
     outputCSS: boolean;
@@ -72,14 +77,18 @@ export interface StylableModule extends webpack.compilation.Module {
     reasons: Array<{ module: StylableModule }>;
     request: string;
     loaders: webpack.NewLoader[];
+    addDependency(dep: webpack.compilation.Dependency & any): void;
     buildInfo: {
+        fileDependencies: Set<string>;
         optimize: StylableWebpackPluginOptions['optimize'];
         isImportedByNonStylable: boolean;
         runtimeInfo: CalcResult;
         stylableMeta: StylableMeta;
         usageMapping: Record<string, boolean>;
         usedStylableModules: StylableModule[];
-        stylableTransformedAst?: StylableMeta['rawAst']
+        stylableTransformedAst: StylableMeta['outputAst'];
+        stylableTransformedExports: StylableExports;
+        stylableTransformed: boolean;
     };
     originalSource(): string;
 }

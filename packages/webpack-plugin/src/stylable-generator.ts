@@ -72,7 +72,16 @@ export class StylableGenerator {
         );
     }
     public transform(module: StylableModule) {
-        const results = this.stylable.createTransformer().transform(module.buildInfo.stylableMeta);
+        const results = {
+            meta: module.buildInfo.stylableMeta,
+            exports: module.buildInfo.stylableTransformedExports
+        };
+
+        if (module.buildInfo.stylableTransformed) {
+            return results;
+        }
+
+        module.buildInfo.stylableTransformed = true;
 
         if (this.stylable.optimizer) {
             this.stylable.optimizer.optimize(
@@ -185,4 +194,3 @@ function rewriteUrl(node: any, replacementIndex: number) {
     delete node.innerSpacingAfter;
     node.url = `__css_asset_placeholder__${replacementIndex}__`;
 }
-
