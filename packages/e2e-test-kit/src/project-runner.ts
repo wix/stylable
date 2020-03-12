@@ -4,7 +4,9 @@ import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
-
+import { createTempDirectorySync } from 'create-temp-directory';
+import { nodeFs } from '@file-services/node';
+import { symlinkSync } from 'fs';
 export interface Options {
     projectDir: string;
     port?: number;
@@ -22,13 +24,29 @@ export class ProjectRunner {
         runnerOptions: Options,
         before: MochaHook,
         afterEach: MochaHook,
-        after: MochaHook
+        after: MochaHook,
+        watch: boolean = false
     ) {
+        const disposeAfterEach: Set<() => void> = new Set();
+        if (watch) {
+            const projectToCopy = runnerOptions.projectDir;
+            const tempDir = createTempDirectorySync('local-test');
+            tempDir.path = nodeFs.realpathSync(tempDir.path);
+            const projectPath = tempDir.path;
+            disposeAfterEach.add(tempDir.remove);
+            nodeFs.copyDirectorySync(projectToCopy, projectPath);
+            symlinkSync(
+                join(__dirname, '../../../node_modules'),
+                join(tempDir.path, 'node_modules'),
+            );
+            runnerOptions.projectDir = projectPath;
+        }
+
         const projectRunner = new this(runnerOptions);
 
         before('bundle and serve project', async function() {
             this.timeout(40000);
-            await projectRunner.bundle();
+            watch ? await projectRunner.watch() : await projectRunner.bundle();
             await projectRunner.serve();
         });
 
@@ -53,6 +71,7 @@ export class ProjectRunner {
     public serverUrl: string;
     public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
+    public compiler!: webpack.Compiler | null;
     constructor({
         projectDir,
         port = 3000,
@@ -78,21 +97,25 @@ export class ProjectRunner {
         };
     }
     public async bundle() {
-        const webpackConfig = this.webpackConfig;
-        if (webpackConfig.output && webpackConfig.output.path) {
-            throw new Error('Test project should not specify output.path option');
-        } else {
-            webpackConfig.output = {
-                ...webpackConfig.output,
-                path: this.outputDir
-            };
-        }
+        const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
+        this.compiler = compiler;
         compiler.run = compiler.run.bind(compiler);
         const promisedRun = promisify(compiler.run);
         this.stats = await promisedRun();
         if (this.throwOnBuildError && this.stats.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
+        }
+    }
+    public async watch() {
+        const webpackConfig = this.getWebpackConfig();
+        const compiler = webpack(webpackConfig);
+        this.compiler = compiler;
+        compiler.watch = compiler.watch.bind(compiler);
+        const promisedWatch = promisify(compiler.watch);
+        this.stats = await promisedWatch({});
+        if (this.throwOnBuildError && this.stats.compilation.errors.length) {
+            throw new Error(this.stats.compilation.errors.join('\n'));
         }
     }
 
@@ -188,5 +211,18 @@ export class ProjectRunner {
             this.server = null;
         }
         await rimraf(this.outputDir);
+    }
+
+    private getWebpackConfig() {
+        const webpackConfig = this.webpackConfig;
+        if (webpackConfig.output && webpackConfig.output.path) {
+            throw new Error('Test project should not specify output.path option');
+        } else {
+            webpackConfig.output = {
+                ...webpackConfig.output,
+                path: this.outputDir
+            };
+        }
+        return webpackConfig;
     }
 }
