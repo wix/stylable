@@ -27,7 +27,7 @@ export class ProjectRunner {
         before: MochaHook,
         afterEach: MochaHook,
         after: MochaHook,
-        watch: boolean = false
+        watch = false
     ) {
         const disposeAfterEach: Set<() => void> = new Set();
         if (watch) {
