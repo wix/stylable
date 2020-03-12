@@ -336,7 +336,8 @@ export class StylableWebpackPlugin {
                             this.stylable,
                             compilation,
                             normalModuleFactory,
-                            this.options.useWeakDeps
+                            this.options.useWeakDeps,
+                            this.options.useAggressiveDependencies
                         );
                     });
 

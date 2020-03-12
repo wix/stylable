@@ -1,0 +1,9 @@
+:import {
+    -st-from: "./mixin-a.st.css";
+    -st-named: a;
+}
+
+.root {
+    -st-mixin: a;
+    z-index: 1;
+}

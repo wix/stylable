@@ -11,6 +11,7 @@ export function normalizeOptions(
             delete require.cache[id];
             return require(id);
         },
+        useAggressiveDependencies: false,
         legacyRuntime: false,
         transformHooks: undefined,
         resolveNamespace: undefined,

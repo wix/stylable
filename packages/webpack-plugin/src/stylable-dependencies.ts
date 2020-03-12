@@ -65,7 +65,15 @@ export class StylableImportDependency extends ModuleDependency {
 
     public updateHash(hash: any) {
         super.updateHash(hash);
-        hash.update('stylable ' + (this.module && this.module.hash));
+        const buildInfo = this.module?.buildInfo;
+        if (buildInfo) {
+            if (buildInfo.stylableTransformedAst) {
+                hash.update('stylable ' + buildInfo.stylableTransformedAst.toString());
+            }
+            if (buildInfo.stylableMeta) {
+                hash.update('stylable namespace' + buildInfo.stylableMeta.namespace);
+            }
+        }
     }
 }
 

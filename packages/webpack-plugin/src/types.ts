@@ -6,6 +6,7 @@ export interface StylableWebpackPluginOptions {
     legacyRuntime: boolean;
     filename: string;
     useWeakDeps: boolean;
+    useAggressiveDependencies: boolean;
     includeDynamicModulesInCSS: boolean;
     createRuntimeChunk: boolean;
     outputCSS: boolean;
@@ -78,6 +79,7 @@ export interface StylableModule extends webpack.compilation.Module {
         stylableMeta: StylableMeta;
         usageMapping: Record<string, boolean>;
         usedStylableModules: StylableModule[];
+        stylableTransformedAst?: StylableMeta['rawAst']
     };
     originalSource(): string;
 }

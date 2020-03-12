@@ -157,7 +157,7 @@ export class StylableGenerator {
                 const module = this.compilation.modules.find(_ => _.resource === resourcePath);
                 if (module) {
                     replacements.push(module);
-                    this.rewriteUrl(node, replacements.length - 1);
+                    rewriteUrl(node, replacements.length - 1);
                 } else {
                     node.url = resourcePath;
                     this.compilation.warnings.push(`Stylable missing asset: ${resourcePath}`);
@@ -177,11 +177,12 @@ export class StylableGenerator {
             return onAsset(replacements[$1]); // `" + __webpack_require__(${replacements[$1]}) + "`;
         });
     }
-
-    public rewriteUrl(node: any, replacementIndex: number) {
-        node.stringType = '';
-        delete node.innerSpacingBefore;
-        delete node.innerSpacingAfter;
-        node.url = `__css_asset_placeholder__${replacementIndex}__`;
-    }
 }
+
+function rewriteUrl(node: any, replacementIndex: number) {
+    node.stringType = '';
+    delete node.innerSpacingBefore;
+    delete node.innerSpacingAfter;
+    node.url = `__css_asset_placeholder__${replacementIndex}__`;
+}
+
