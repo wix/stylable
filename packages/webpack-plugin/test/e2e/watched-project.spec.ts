@@ -33,7 +33,6 @@ describe(`(${project})`, () => {
         const recompile = new Promise(res => {
             projectRunner.compiler?.hooks.done.tap('Test', () => {
                 res();
-                console.log('done')
             });
         });
 
