@@ -33,7 +33,8 @@ export class StylableDOMUtil {
         const ast = parseSelector(selector);
         traverseNode(ast, (node: any) => {
             if (node.type === 'class') {
-                node.name = this.stylesheet.classes[node.name] || node.name;
+                const className: string = this.stylesheet.classes[node.name] || node.name;
+                node.name = className.includes(' ') ? className.split(' ')[0] : className;
             } else if (node.type === 'pseudo-class') {
                 const param = node.content;
                 if (!param) {
