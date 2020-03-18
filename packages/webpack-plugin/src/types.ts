@@ -69,6 +69,8 @@ export interface CalcResult {
     cssDependencies: StylableModule[];
 }
 
+export type WebpackAssetModule = webpack.compilation.Module & { request: string }
+
 export interface StylableModule extends webpack.compilation.Module {
     context: string;
     dependencies?: StylableModule[];
@@ -86,9 +88,10 @@ export interface StylableModule extends webpack.compilation.Module {
         stylableMeta: StylableMeta;
         usageMapping: Record<string, boolean>;
         usedStylableModules: StylableModule[];
-        stylableTransformedAst: StylableMeta['outputAst'];
+        stylableTransformedAst: Required<StylableMeta>['outputAst'];
         stylableTransformedExports: StylableExports;
         stylableTransformed: boolean;
+        stylableAssetReplacement: WebpackAssetModule[];
     };
     originalSource(): string;
 }

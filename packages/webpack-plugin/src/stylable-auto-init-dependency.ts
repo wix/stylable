@@ -2,10 +2,10 @@ import { WEBPACK_STYLABLE } from './runtime-dependencies';
 
 const Dependency = require('webpack/lib/Dependency');
 
-export class StyleableAutoInitDependency extends Dependency {
+export class StylableAutoInitDependency extends Dependency {
     public range = 0;
     public requireWebpackRequire = true;
-    public type = 'StyleableAutoInitDependency';
+    public type = 'StylableAutoInitDependency';
 
     constructor(public module: any, public globalInjection?: (code: string) => string) {
         super();
@@ -15,7 +15,7 @@ export class StyleableAutoInitDependency extends Dependency {
     }
 }
 
-export class StyleableAutoInitDependencyTemplate {
+export class StylableAutoInitDependencyTemplate {
     public apply(_dep: any, source: any, _runtimeTemplate: any) {
         const renderingCode = [];
 
