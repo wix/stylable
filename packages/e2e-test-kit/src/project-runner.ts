@@ -39,7 +39,8 @@ export class ProjectRunner {
             nodeFs.copyDirectorySync(projectToCopy, projectPath);
             symlinkSync(
                 join(__dirname, '../../../node_modules'),
-                join(tempDir.path, 'node_modules')
+                join(tempDir.path, 'node_modules'),
+                'junction'
             );
             runnerOptions.projectDir = projectPath;
         }
