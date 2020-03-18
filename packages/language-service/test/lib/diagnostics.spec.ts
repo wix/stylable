@@ -78,7 +78,7 @@ describe('diagnostics', () => {
                     :vars {}
 
                     .gaga {
-                      colorr: red;
+                      myColor: red;
                     }
                     `
                 },
@@ -89,9 +89,9 @@ describe('diagnostics', () => {
                 {
                     range: {
                         start: { line: 4, character: 22 },
-                        end: { line: 4, character: 28 }
+                        end: { line: 4, character: 29 }
                     },
-                    message: `Unknown property: 'colorr'`,
+                    message: `Unknown property: 'myColor'`,
                     severity: 2,
                     source: 'css',
                     code: 'unknownProperties'
@@ -106,7 +106,7 @@ describe('diagnostics', () => {
                 {
                     [filePath]: `
                     :vars {
-                      varvar: binks;
+                      varVar: binks;
                     }
                     `
                 },

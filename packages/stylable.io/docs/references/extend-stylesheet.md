@@ -28,9 +28,9 @@ In this example, the stylesheet is extending the `toggle-button.st.css` styleshe
 
 ```css
 /* CSS output*/
-.Page__checkBtn.ToggleButton__root { background: white; }
-.Page__checkBtn.ToggleButton__root .ToggleButton__label { color: green; }
-.Page__checkBtn.ToggleButton__root.ToggleButton--toggled] .ToggleButton__label { color: red; }
+.Page__checkBtn { background: white; }
+.Page__checkBtn .ToggleButton__label { color: green; }
+.Page__checkBtn.ToggleButton--toggled .ToggleButton__label { color: red; }
 ```
 
 ```js
@@ -53,4 +53,56 @@ class Page {
         );
     }
 }
+```
+
+## Extending stylesheets vs. classes
+
+Stylable offers you the ability to import a stylesheet (default import) or class (named import). The two methods differ in their runtime export values.
+
+### Extending a root
+
+When extending a `root` class, Stylable assumes the component itself will place its own `root` class, and as such Stylable exports only the local className during runtime. 
+
+The extended component will receive the extending (external) class name through its props and concat it to the `root` node class list.
+
+### Extending an inner part
+
+Any class other than `root` defined in a Stylesheet is considered an inner part. Usually in Stylable extending a class signifies the use of a [variant](../guides/component-variants.md) or composed* utility class.
+
+\* - Stylable currently does not support composing multiple classes on the same part. We hope to introduce this capability in the near future.
+
+### Extending example
+
+```css
+/* page.st.css */
+@namespace "Page";
+:import {
+    -st-from: "./toggle-button.st.css";
+    -st-default: ToggleButton;
+}
+:import {
+    -st-from: "./toggle-button-variant.st.css";
+    -st-named: toggleVariant;
+}
+
+.defaultCheckBtn {
+    -st-extends: ToggleButton; /* extending stylesheet */
+}
+.variantCheckBtn {
+    -st-extends: toggleVariant; /* extending class */
+}
+```
+
+```css
+/* CSS output*/
+.Page__defaultCheckBtn {}
+.Page__variantCheckBtn {}
+```
+
+```js
+/* runtime JS output*/
+import { classes } from './page.st.css';
+
+console.log(classes.defaultCheckBtn) // "Page__defaultCheckBtn"
+console.log(classes.variantCheckBtn) // "Page__variantCheckBtn ToggleButton__toggleVariant"
 ```

@@ -10,7 +10,7 @@ export const contractTest = (
     const s = create(
         'ns',
         {
-            classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y' },
+            classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__y ns__x' },
             keyframes: {},
             vars: {},
             stVars: {}
@@ -29,6 +29,9 @@ export const contractTest = (
         });
         it('scopeSelector local class', () => {
             expect(util.scopeSelector('.x')).to.equal(`.ns__x`);
+        });
+        it('scopeSelector local class with compose', () => {
+            expect(util.scopeSelector('.z')).to.equal(`.ns__y`);
         });
         it('scopeSelector handle multiple local classes', () => {
             expect(util.scopeSelector('.x .y')).to.equal(`.ns__x .ns__y`);

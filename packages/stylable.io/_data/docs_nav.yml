@@ -34,6 +34,8 @@
     title: Shared Classes
   - id: guides/component-variants
     title: Component Variants
+  - id: guides/server-side-rendering
+    title: Server Side Rendering
 - title: Specification Reference
   items:
   - id: getting-started/cheatsheet
