@@ -22,7 +22,7 @@
     "terser-webpack-plugin": "^2.3.5",
     "tslib": "^1.11.1",
     "typescript": "~3.8.3",
-    "url-loader": "^3.0.0",
+    "url-loader": "^4.0.0",
     "webpack": "^4.42.0",
     "webpack-dev-server": "^3.10.3",
     "webpack-manifest-plugin": "^2.2.0",
