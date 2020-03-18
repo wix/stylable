@@ -46,7 +46,7 @@ export class StylableParser {
         const res = this.stylable.createTransformer().transform(meta);
 
         currentModule.buildInfo.stylableMeta = meta;
-        currentModule.buildInfo.stylableTransformedAst = res.meta.outputAst;
+        currentModule.buildInfo.stylableTransformedAst = res.meta.outputAst!;
         currentModule.buildInfo.stylableTransformedExports = res.exports;
 
         currentModule.addDependency(new StylableExportsDependency(['default']));
