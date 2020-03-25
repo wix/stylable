@@ -6472,10 +6472,10 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "^1.2.5"
 
-mocha-loader@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/mocha-loader/-/mocha-loader-4.0.2.tgz#4cfc0dbb4ae59d487edcd6a5e869e75944c8f042"
-  integrity sha512-yBxauAB2MCYQHvpbXoThn0bUaZKktaaVTOF0NdqofzcPNOMHycgIR5DpfTzdthClZ+wI2wj86HTVdAPd+aJA5A==
+mocha-loader@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/mocha-loader/-/mocha-loader-5.0.0.tgz#1eec711f3051b323ad6864dfd5da60830d07568d"
+  integrity sha512-8aWeTPZ/cSHxgK+M/WhXqeda00AT5bQeq9F63IKSHnKPmUjUU/oF/wKwTaKyxwacM471HQwipBBAhhtq84TWZg==
   dependencies:
     css-loader "^3.4.2"
     loader-utils "^2.0.0"
