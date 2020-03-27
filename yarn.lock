@@ -114,22 +114,22 @@
     "@file-services/utils" "^2.1.0"
 
 "@file-services/node@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-2.1.1.tgz#fd09f45c52f1e14f70f6e40ae4089c02ee7304f0"
-  integrity sha512-dtAZZYWyRXFuRIlJBeSvr1EiOSmmBzn0umX18o6W8aFpkAx9c4e2Jrc7B2MtPA0UlErAOTA4wfV6YpZAOd/H6Q==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-2.2.0.tgz#63b0e9c45a3cd4e5b7c0bbab6fe24ae1f447bcf9"
+  integrity sha512-cjhGnU+sT1/AGoYbq9HdPbCRfEclNU2kzEBYuBN/Kw4k60Dcc4Ql5CXIj69IA6vkV5JzUNMOKzHK9cmHpmMcWw==
   dependencies:
-    "@file-services/types" "^2.1.0"
-    "@file-services/utils" "^2.1.0"
+    "@file-services/types" "^2.2.0"
+    "@file-services/utils" "^2.2.0"
 
 "@file-services/posix-path@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@file-services/posix-path/-/posix-path-2.1.0.tgz#56ef31b6c156dc2b5e47316327e13ef82a2d99f0"
   integrity sha512-0gq7IJqc9HftLEiEOwYa4uDoROTn0fn3qwIXx6h7Mz4fLkleRWlflEFvWK0PdZOhL1e1LyR5+OvxqCVXWahR5Q==
 
-"@file-services/types@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.1.0.tgz#5259d0e2cbf49c6d8367b8db3a6ac21b03e3be2c"
-  integrity sha512-W+tNVGdj3t6IPFoqRUpjcEUNM/RqbdzwGtj2BlzKo+TN0eu93PV0FV1BncRQ/mBhxI/H2arj3SnigID5c+YiEQ==
+"@file-services/types@^2.1.0", "@file-services/types@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.2.0.tgz#c98430fc65040a0d30451ef621c2acb649d43051"
+  integrity sha512-vvQ7yJdaJJwB+NVCd13IXxJK9tpMb38TtumpupTxk9EDr4BjVU2WtI7yhKA6dqKmlLRf9vPKgcR8V3tELYbX/Q==
 
 "@file-services/typescript@^2.1.2":
   version "2.1.2"
@@ -138,12 +138,12 @@
   dependencies:
     "@file-services/types" "^2.1.0"
 
-"@file-services/utils@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-2.1.0.tgz#d17a18dc97d663b3b0119ded6f1d078eb166c6f8"
-  integrity sha512-i4avLTrOdrf//EtNECX1n/Im2+P+Rksh9KqrUY8nNzOTzmwCCUqaE67pMyzJpUQU2O6k4doDC8+2YzScmjVJIQ==
+"@file-services/utils@^2.1.0", "@file-services/utils@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-2.2.0.tgz#85017baaeee4b14986591e027a6001ce41400332"
+  integrity sha512-n+usslpQSz5UgmEg2QWs4Z8/Ii2tsm9D3MMKgx+uilXeSvLuLQBHofSersHilB0DtKkwmrTt5ZjmlR2kPLcMwQ==
   dependencies:
-    "@file-services/types" "^2.1.0"
+    "@file-services/types" "^2.2.0"
 
 "@hapi/address@2.x.x":
   version "2.1.4"
