@@ -126,17 +126,17 @@
   resolved "https://registry.yarnpkg.com/@file-services/posix-path/-/posix-path-2.1.0.tgz#56ef31b6c156dc2b5e47316327e13ef82a2d99f0"
   integrity sha512-0gq7IJqc9HftLEiEOwYa4uDoROTn0fn3qwIXx6h7Mz4fLkleRWlflEFvWK0PdZOhL1e1LyR5+OvxqCVXWahR5Q==
 
-"@file-services/types@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.1.0.tgz#5259d0e2cbf49c6d8367b8db3a6ac21b03e3be2c"
-  integrity sha512-W+tNVGdj3t6IPFoqRUpjcEUNM/RqbdzwGtj2BlzKo+TN0eu93PV0FV1BncRQ/mBhxI/H2arj3SnigID5c+YiEQ==
+"@file-services/types@^2.1.0", "@file-services/types@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-2.2.0.tgz#c98430fc65040a0d30451ef621c2acb649d43051"
+  integrity sha512-vvQ7yJdaJJwB+NVCd13IXxJK9tpMb38TtumpupTxk9EDr4BjVU2WtI7yhKA6dqKmlLRf9vPKgcR8V3tELYbX/Q==
 
 "@file-services/typescript@^2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-2.1.2.tgz#eb377c9e6e5c1929c1bfbd10da6d9c2ddc2af306"
-  integrity sha512-MKfSCuR4GhqwB4ho0yHeSM9G8kUCdyQF7GkRxdUc5oiRAJzHYm9YnbsE6W73nf36W+XxdjgcQyTdlipN5REzJA==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-2.2.0.tgz#dc807052c6a2964897faee3bbaf545e93e3393fa"
+  integrity sha512-BSgr9dDeJ84FhGs0VaMz4WOJJgvZQOQZASF2BrvU/XKMa7Ifh1FeE6azbgv4Se5REJbHwaZPySn+XfQcKTy0Lg==
   dependencies:
-    "@file-services/types" "^2.1.0"
+    "@file-services/types" "^2.2.0"
 
 "@file-services/utils@^2.1.0":
   version "2.1.0"
