@@ -16,7 +16,7 @@
     "deindent": "^0.1.0",
     "enhanced-resolve": "^4.1.1",
     "is-vendor-prefixed": "^3.3.1",
-    "jest-docblock": "^25.2.0",
+    "jest-docblock": "^25.2.3",
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
     "murmurhash": "^0.0.2",
