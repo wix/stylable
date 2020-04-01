@@ -1,9 +1,12 @@
 import { IFileSystem } from '@file-services/types';
 import path from 'path';
 import postcss from 'postcss';
-import * as VCL from 'vscode-css-languageservice';
-import { ColorInformation, TextDocument } from 'vscode-languageserver-protocol';
+import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
+    Color,
+    ColorInformation,
+    ColorPresentation,
     CompletionItem,
     Diagnostic,
     Hover,
@@ -47,7 +50,7 @@ function findPseudoStateStart(line: string, lookFrom: number) {
  * the API for "normal" css language features fallback
  */
 export class CssService {
-    private inner = VCL.getCSSLanguageService();
+    private inner = getCSSLanguageService({ fileSystemProvider: this.fs.promises as any }); // TODO: FIX TYPE
 
     constructor(private fs: IFileSystem) {}
 
@@ -204,19 +207,19 @@ export class CssService {
 
     public getColorPresentations(
         document: TextDocument,
-        color: VCL.Color,
+        color: Color,
         range: Range
-    ): VCL.ColorPresentation[] {
-        const stylesheet: VCL.Stylesheet = this.inner.parseStylesheet(document);
+    ): ColorPresentation[] {
+        const stylesheet: Stylesheet = this.inner.parseStylesheet(document);
         return this.inner.getColorPresentations(document, stylesheet, color, range);
     }
 
     public findColors(document: TextDocument): ColorInformation[] {
-        const stylesheet: VCL.Stylesheet = this.inner.parseStylesheet(document);
+        const stylesheet: Stylesheet = this.inner.parseStylesheet(document);
         return this.inner.findDocumentColors(document, stylesheet);
     }
 
-    public findColor(document: TextDocument): VCL.Color | null {
+    public findColor(document: TextDocument): Color | null {
         const colors = this.findColors(document);
         return colors.length ? colors[0].color : null;
     }

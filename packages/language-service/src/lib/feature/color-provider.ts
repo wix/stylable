@@ -1,7 +1,8 @@
 import { IFileSystem } from '@file-services/types';
 import { evalDeclarationValue, Stylable, StylableMeta, valueMapping } from '@stylable/core';
 import { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
-import { ColorPresentationParams, TextDocument } from 'vscode-languageserver-protocol';
+import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import { ProviderPosition, ProviderRange } from '../completion-providers';
 import { CssService } from '../css-service';

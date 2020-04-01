@@ -1,13 +1,13 @@
 import { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
 import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
     ColorInformation,
     ColorPresentation,
     Command,
     CompletionItem,
-    Definition,
     Diagnostic,
     Hover,
     Location,
@@ -15,7 +15,6 @@ import {
     Position,
     Range,
     SignatureHelp,
-    TextDocument,
     TextEdit,
     WorkspaceEdit
 } from 'vscode-languageserver-types';
@@ -79,7 +78,7 @@ export class StylableLanguageService {
         }
     }
 
-    public onDefinition(filePath: string, offset: number): Definition {
+    public onDefinition(filePath: string, offset: number): Location[] {
         const stylableFile = this.readStylableFile(filePath);
 
         if (stylableFile && stylableFile.stat.isFile()) {
