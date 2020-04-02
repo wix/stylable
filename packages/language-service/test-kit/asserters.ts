@@ -9,7 +9,8 @@ import {
     ParameterInformation,
     SignatureHelp
 } from 'vscode-languageserver';
-import { Range, TextDocument, TextDocumentIdentifier } from 'vscode-languageserver-types';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { ProviderPosition } from '../src/lib/completion-providers';
 import { createMeta, ProviderLocation } from '../src/lib/provider';

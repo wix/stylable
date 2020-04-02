@@ -12,8 +12,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.3.2-rc.1",
-    "csso": "^4.0.2",
+    "@stylable/core": "^3.3.0",
+    "csso": "^4.0.3",
     "postcss": "^7.0.27"
   },
   "files": [
