@@ -51,7 +51,10 @@ export function createModuleSource(
         // TODO: better error
         throw new Error('Configuration conflict (renderableOnly && !includeCSSInJS)');
     }
-
+    const cssString = includeCSSInJS
+        ? JSON.stringify(stylableResult.meta.outputAst!.toString())
+        : '""';
+        
     switch (moduleFormat) {
         case 'dts':
             return generateTypescriptDefinition();
@@ -67,7 +70,7 @@ export function createModuleSource(
                 `$`,
                 `create`,
                 `createRenderable`,
-                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                cssString,
                 depth,
                 'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }', // = $
                 [
@@ -88,7 +91,7 @@ export function createModuleSource(
                 `runtime.$`,
                 `runtime.create`,
                 `runtime.createRenderable`,
-                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                cssString,
                 depth,
                 'module.exports',
                 afterModule.join('\n'),

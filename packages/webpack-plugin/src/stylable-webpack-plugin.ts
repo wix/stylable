@@ -1,4 +1,10 @@
-import { Stylable, createDefaultResolver } from '@stylable/core';
+import {
+    Stylable,
+    createDefaultResolver,
+    isAsset,
+    makeAbsolute,
+    processDeclarationUrls
+} from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { EOL } from 'os';
@@ -16,11 +22,12 @@ import {
 } from './stylable-module-helpers';
 import { StylableParser } from './stylable-parser';
 import {
-    StyleableAutoInitDependency,
-    StyleableAutoInitDependencyTemplate
-} from './styleable-auto-init-dependency';
-import { CalcResult, ShallowPartial, StylableModule, StylableWebpackPluginOptions } from './types';
-import { isImportedByNonStylable } from './utils';
+    StylableAutoInitDependency,
+    StylableAutoInitDependencyTemplate
+} from './stylable-auto-init-dependency';
+import { CalcResult, ShallowPartial, StylableModule, StylableWebpackPluginOptions, WebpackAssetModule } from './types';
+import { isImportedByNonStylable, rewriteUrl, isStylableModule } from './utils';
+import { dirname } from 'path';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const findConfig = require('find-config');
@@ -120,8 +127,37 @@ export class StylableWebpackPlugin {
         compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
             compilation.hooks.optimizeModules.tap(StylableWebpackPlugin.name, modules => {
                 const cache = new WeakMap<StylableModule, CalcResult>();
-                modules.forEach((module: any) => {
-                    if (module.type === 'stylable') {
+                modules.forEach(module => {
+                    if (isStylableModule(module)) {
+                        const rootContext = (compilation as any).options.context;
+                        const replacements: WebpackAssetModule[] = [];
+
+                        const moduleDir = dirname(module.resource);
+
+                        const onUrl = (node: any) => {
+                            if (isAsset(node.url)) {
+                                const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
+                                const assetModule = compilation.modules.find(
+                                    _ => _.resource === resourcePath
+                                );
+                                if (assetModule) {
+                                    replacements.push(assetModule);
+                                    rewriteUrl(node, replacements.length - 1);
+                                } else {
+                                    node.url = resourcePath;
+                                    compilation.warnings.push(
+                                        `Stylable missing asset: ${resourcePath}`
+                                    );
+                                }
+                            }
+                        };
+
+                        module.buildInfo.stylableTransformedAst.walkDecls(decl =>
+                            processDeclarationUrls(decl, onUrl, true)
+                        );
+
+                        module.buildInfo.stylableAssetReplacement = replacements;
+
                         module.buildInfo.runtimeInfo = calculateModuleDepthAndShallowStylableDependencies(
                             module,
                             [],
@@ -178,8 +214,8 @@ export class StylableWebpackPlugin {
         compiler.hooks.compilation.tap(StylableWebpackPlugin.name, compilation => {
             if (this.options.useEntryModuleInjection) {
                 compilation.dependencyTemplates.set(
-                    StyleableAutoInitDependency as any,
-                    new StyleableAutoInitDependencyTemplate() as any
+                    StylableAutoInitDependency as any,
+                    new StylableAutoInitDependencyTemplate() as any
                 );
                 compilation.hooks.optimizeChunks.tap(StylableWebpackPlugin.name, chunks => {
                     chunks.forEach(chunk => this.injectInitToEntryModule(chunk, compilation));
@@ -463,12 +499,12 @@ export class StylableWebpackPlugin {
                 : getEntryModule();
 
             const injected = injectModule.dependencies.find(
-                (dep: webpack.compilation.Dependency) => dep instanceof StyleableAutoInitDependency
+                (dep: webpack.compilation.Dependency) => dep instanceof StylableAutoInitDependency
             );
             if (injected) {
                 return;
             }
-            injectModule.addDependency(new StyleableAutoInitDependency(injectModule));
+            injectModule.addDependency(new StylableAutoInitDependency(injectModule));
         }
     }
 }
