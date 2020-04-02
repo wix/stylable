@@ -1015,32 +1015,6 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
-"@stylable/core@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@stylable/core/-/core-3.3.0.tgz#e720698c1cd0df7db12c49f790716c3cdd2bf98f"
-  integrity sha512-3UCLNLvRBmSy98QLeRrSBnUpGZOwG9517wUsTOEkDzUWrf5/U8y9yAp+JCXq6OEcbHZzgSW+QbeusnH+IPUR+w==
-  dependencies:
-    css-selector-tokenizer "^0.7.2"
-    deindent "^0.1.0"
-    enhanced-resolve "^4.1.1"
-    is-vendor-prefixed "^3.3.1"
-    jest-docblock "^25.1.0"
-    lodash.clonedeep "^4.5.0"
-    lodash.clonedeepwith "^4.5.0"
-    murmurhash "^0.0.2"
-    postcss "^7.0.27"
-    postcss-js "^2.0.3"
-    postcss-nested "^4.2.1"
-    postcss-safe-parser "^4.0.2"
-    postcss-selector-matches "^4.0.0"
-    postcss-value-parser "^4.0.3"
-    url-regex "^5.0.0"
-
-"@stylable/runtime@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@stylable/runtime/-/runtime-3.2.0.tgz#a25c672b614368d49c505488e92dade9628e2f81"
-  integrity sha512-aGPl5eIZ8I1rBnZTC0iXSxxZD8H6TA/x79Y8XbIDyrs04sRgM6dPpFs8R0HesHKT0ydf2KB8bxRdLDy6iuPYyA==
-
 "@ts-tools/build@^1.2.6":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-1.2.6.tgz#4d0dbc568cdb2064d1efed0ce1790690179ed548"
@@ -5712,7 +5686,7 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jest-docblock@^25.1.0, jest-docblock@^25.2.3:
+jest-docblock@^25.2.3:
   version "25.2.3"
   resolved "https://registry.yarnpkg.com/jest-docblock/-/jest-docblock-25.2.3.tgz#ac45280c43d59e7139f9fbe5896c6e0320c01ebb"
   integrity sha512-d3/tmjLLrH5fpRGmIm3oFa3vOaD/IjPxtXVOrfujpfJ9y1tCDB1x/tvunmdOVAyF03/xeMwburl6ITbiQT1mVA==
