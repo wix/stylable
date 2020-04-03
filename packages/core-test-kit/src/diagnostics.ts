@@ -85,7 +85,7 @@ export function expectWarningsFromTransform(
     }
     const diagnostics = new Diagnostics();
     const result = generateFromMock(config, diagnostics);
-    const warningMessages = diagnostics.reports.map(d => d.message);
+    const warningMessages = diagnostics.reports.map((d) => d.message);
 
     if (expectedWarnings.length === 0 && diagnostics.reports.length !== 0) {
         expect(
@@ -122,7 +122,7 @@ export function expectWarningsFromTransform(
     expect(
         expectedWarnings.length,
         `expected diagnostics: ${JSON.stringify(
-            expectedWarnings.map(d => d.message),
+            expectedWarnings.map((d) => d.message),
             null,
             2
         )}, but received ${JSON.stringify(warningMessages, null, 2)}`
@@ -136,14 +136,14 @@ export function shouldReportNoDiagnostics(meta: StylableMeta, checkTransformDiag
 
     expect(
         processReports.length,
-        `processing diagnostics: ${processReports.map(r => r.message)}`
+        `processing diagnostics: ${processReports.map((r) => r.message)}`
     ).to.equal(0);
     if (meta.transformDiagnostics && checkTransformDiagnostics) {
         const transformerReports = meta.transformDiagnostics.reports;
 
         expect(
             transformerReports.length,
-            `transforming diagnostics: ${transformerReports.map(r => r.message)}`
+            `transforming diagnostics: ${transformerReports.map((r) => r.message)}`
         ).to.equal(0);
     }
 }

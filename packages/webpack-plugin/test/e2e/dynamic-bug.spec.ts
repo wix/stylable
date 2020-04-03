@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,16 +23,16 @@ describe(`(${project})`, () => {
         expect(getModulesNames(chunkByName.entryA)).to.eql([
             'test-components/badge.js',
             'test-components/badge.st.css',
-            'src/index-a.js'
+            'src/index-a.js',
         ]);
         expect(getModulesNames(chunkByName.entryB)).to.eql([
             'test-components/badge.js',
             'test-components/badge.st.css',
-            'src/index-b.js'
+            'src/index-b.js',
         ]);
         expect(getModulesNames(chunkByName.dynamicSplit)).to.eql([
             'test-components/text.js',
-            'test-components/text.st.css'
+            'test-components/text.st.css',
         ]);
     });
 });
@@ -48,11 +48,6 @@ function getNamedChunks(projectRunner: StylableProjectRunner) {
 
 function getModulesNames(chunk: any) {
     return Array.from(chunk.modulesIterable).map(
-        (m: any) =>
-            m.resource &&
-            m.resource
-                .split(/[\\/]/)
-                .slice(-2)
-                .join('/')
+        (m: any) => m.resource && m.resource.split(/[\\/]/).slice(-2).join('/')
     );
 }

@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -25,54 +25,54 @@ describe(`(${project})`, () => {
                 '/test/src/index.st.css': {
                     metadata: {
                         namespace: 'o0',
-                        depth: 4
+                        depth: 4,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/src/variants/v.st.css': {
                     metadata: {
                         namespace: 'v-o0',
                         variant: true,
-                        depth: 4
+                        depth: 4,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/src/variants/v1/v1.st.css': {
                     metadata: {
                         namespace: 'v1_v1-o0',
                         variant: true,
-                        depth: 4
+                        depth: 4,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/node_modules/test-components/index.st.css': {
                     metadata: {
                         namespace: 'o1',
-                        depth: 3
+                        depth: 3,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/node_modules/test-components/button.st.css': {
                     metadata: {
                         namespace: 'o2',
-                        depth: 1
+                        depth: 1,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/node_modules/test-components/gallery.st.css': {
                     metadata: {
                         namespace: 'o3',
-                        depth: 2
+                        depth: 2,
                     },
-                    content: null
+                    content: null,
                 },
                 '/test/index.st.css': {
                     metadata: {
                         namespace: 'test-index',
-                        depth: 4
+                        depth: 4,
                     },
-                    content: null
-                }
+                    content: null,
+                },
             },
             components: {
                 Index: {
@@ -80,13 +80,13 @@ describe(`(${project})`, () => {
                     variantsPath: '/test/src/variants',
                     namespace: 'o0',
                     stylesheetPath: '/test/src/index.st.css',
-                    snapshots: ['<snapshot>index.js</snapshot>']
-                }
+                    snapshots: ['<snapshot>index.js</snapshot>'],
+                },
             },
             packages: {
                 test: '/test',
-                ['test-components']: '/test/node_modules/test-components'
-            }
+                ['test-components']: '/test/node_modules/test-components',
+            },
         });
     };
 
@@ -103,7 +103,7 @@ describe(`(${project})`, () => {
                 puppeteerOptions: {
                     // headless: false
                 },
-                configName: 'webpack-js-mode.config'
+                configName: 'webpack-js-mode.config',
             },
             before,
             afterEach,
@@ -125,7 +125,7 @@ describe(`(${project})`, () => {
                 puppeteerOptions: {
                     // headless: false
                 },
-                configName: 'webpack-amd-static-mode.config'
+                configName: 'webpack-amd-static-mode.config',
             },
             before,
             afterEach,
@@ -147,7 +147,7 @@ describe(`(${project})`, () => {
                 puppeteerOptions: {
                     // headless: false
                 },
-                configName: 'webpack-amd-factory-mode.config'
+                configName: 'webpack-amd-factory-mode.config',
             },
             before,
             afterEach,
@@ -164,7 +164,7 @@ describe(`(${project})`, () => {
 });
 
 function nullContent(o: any) {
-    (Array.isArray(o) ? o : Object.keys(o)).forEach(k => {
+    (Array.isArray(o) ? o : Object.keys(o)).forEach((k) => {
         if (k === 'content') {
             o[k] = null;
         } else if (o[k] && typeof o[k] === 'object') {

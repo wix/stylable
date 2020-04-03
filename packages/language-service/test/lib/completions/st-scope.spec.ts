@@ -39,7 +39,7 @@ describe('completion inside @st-scope', () => {
                             createRange(9, 31, 9, 31 + i),
                             'blue',
                             'Local variable'
-                        )
+                        ),
                     ]);
                 });
             });
@@ -53,7 +53,7 @@ describe('completion inside @st-scope', () => {
                 it(' with Prefix: ' + prefix + ' ', () => {
                     const asserter = asserters.getCompletions('st-scope/directive.st.css', prefix);
                     asserter.suggested([
-                        asserters.extendsDirectiveCompletion(createRange(4, 8, 4, 8 + i))
+                        asserters.extendsDirectiveCompletion(createRange(4, 8, 4, 8 + i)),
                     ]);
                 });
             });
@@ -65,7 +65,7 @@ describe('completion inside @st-scope', () => {
                 it(' with Prefix: ' + prefix + ' ', () => {
                     const asserter = asserters.getCompletions('st-scope/directive.st.css', prefix);
                     asserter.suggested([
-                        asserters.mixinDirectiveCompletion(createRange(4, 8, 4, 8 + i))
+                        asserters.mixinDirectiveCompletion(createRange(4, 8, 4, 8 + i)),
                     ]);
                 });
             });
@@ -77,7 +77,7 @@ describe('completion inside @st-scope', () => {
                 it(' with Prefix: ' + prefix + ' ', () => {
                     const asserter = asserters.getCompletions('st-scope/directive.st.css', prefix);
                     asserter.suggested([
-                        asserters.statesDirectiveCompletion(createRange(4, 8, 4, 8 + i))
+                        asserters.statesDirectiveCompletion(createRange(4, 8, 4, 8 + i)),
                     ]);
                 });
             });
@@ -106,43 +106,43 @@ describe('completion inside @st-scope', () => {
         it('should not suggest selector parts in declaration properties inside a ruleset', () => {
             const actual = asserters.getStylableAndCssCompletions('st-scope/directive.st.css');
 
-            expect(actual.find(comp => comp.label === '.root')).to.eql(undefined);
+            expect(actual.find((comp) => comp.label === '.root')).to.eql(undefined);
         });
 
         it('should suggest declaration properties inside a ruleset', () => {
             const actual = asserters.getStylableAndCssCompletions('st-scope/directive.st.css');
 
-            expect(actual.find(comp => comp.label === 'color')).to.deep.include({
+            expect(actual.find((comp) => comp.label === 'color')).to.deep.include({
                 label: 'color',
                 documentation: {
                     kind: 'markdown',
-                    value: `Color of an element's text\n\nSyntax: <color>\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)`
+                    value: `Color of an element's text\n\nSyntax: <color>\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)`,
                 },
                 textEdit: {
                     range: createRange(4, 8, 4, 8),
-                    newText: 'color: $0;'
+                    newText: 'color: $0;',
                 },
                 kind: 10,
                 command: {
                     title: 'Suggest',
-                    command: 'editor.action.triggerSuggest'
+                    command: 'editor.action.triggerSuggest',
                 },
-                sortText: 'd_0010'
+                sortText: 'd_0010',
             });
         });
 
         it('should suggest local class in the beginning of a ruleset', () => {
             const actual = asserters.getStylableAndCssCompletions('st-scope/selector.st.css');
 
-            expect(actual.find(comp => comp.label === '.part')).to.deep.include({
+            expect(actual.find((comp) => comp.label === '.part')).to.deep.include({
                 label: '.part',
                 detail: 'Stylable class or tag',
                 textEdit: {
                     range: createRange(4, 4, 4, 4),
-                    newText: '.part'
+                    newText: '.part',
                 },
                 sortText: 'a',
-                filterText: '.part'
+                filterText: '.part',
             });
         });
     });

@@ -61,8 +61,8 @@ export function cachedProcessFile<T = any>(
         cache[fullpath] = {
             value,
             stat: {
-                mtime
-            }
+                mtime,
+            },
         };
     }
 
@@ -72,6 +72,6 @@ export function cachedProcessFile<T = any>(
         cache,
         process,
         add,
-        resolvePath
+        resolvePath,
     };
 }

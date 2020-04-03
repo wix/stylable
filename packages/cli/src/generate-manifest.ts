@@ -26,7 +26,7 @@ export function generateManifest(
                 return manifest;
             },
             {
-                namespaceMapping: {}
+                namespaceMapping: {},
             }
         );
         log('[Build]', 'creating manifest file: ');

@@ -10,10 +10,10 @@ export type OnUrlCallback = (node: ParsedValue) => void;
 
 export function collectAssets(ast: postcss.Root) {
     const assetDependencies: string[] = [];
-    const onUrl: OnUrlCallback = node => {
+    const onUrl: OnUrlCallback = (node) => {
         assetDependencies.push(node.url!);
     };
-    ast.walkDecls(decl => processDeclarationUrls(decl, onUrl, false));
+    ast.walkDecls((decl) => processDeclarationUrls(decl, onUrl, false));
     return assetDependencies;
 }
 
@@ -70,10 +70,10 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
 }
 
 export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
-    ast.walkDecls(decl =>
+    ast.walkDecls((decl) =>
         processDeclarationUrls(
             decl,
-            node => {
+            (node) => {
                 if (isAsset(node.url!)) {
                     if (node.url!.startsWith('.')) {
                         node.url =

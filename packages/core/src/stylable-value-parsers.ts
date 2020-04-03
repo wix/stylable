@@ -12,7 +12,7 @@ export const valueParserWarnings = {
     },
     CSS_MIXIN_FORCE_NAMED_PARAMS() {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
-    }
+    },
 };
 
 export interface MappedStates {
@@ -46,7 +46,7 @@ export const rootValueMapping = {
     vars: ':vars' as ':vars',
     import: ':import' as ':import',
     stScope: 'st-scope' as 'st-scope',
-    namespace: 'namespace' as 'namespace'
+    namespace: 'namespace' as 'namespace',
 };
 
 export const valueMapping = {
@@ -57,12 +57,14 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    global: '-st-global' as '-st-global'
+    global: '-st-global' as '-st-global',
 };
 
 export type stKeys = keyof typeof valueMapping;
 
-export const stValues: string[] = Object.keys(valueMapping).map(key => valueMapping[key as stKeys]);
+export const stValues: string[] = Object.keys(valueMapping).map(
+    (key) => valueMapping[key as stKeys]
+);
 export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
     acc[valueMapping[key as stKeys]] = true;
     return acc;
@@ -97,14 +99,14 @@ export const SBTypesParsers = {
 
                 types.push({
                     symbolName: node.value,
-                    args
+                    args,
                 });
 
                 return false;
             } else if (node.type === 'word') {
                 types.push({
                     symbolName: node.value,
-                    args: null
+                    args: null,
                 });
             }
             return undefined;
@@ -112,13 +114,13 @@ export const SBTypesParsers = {
 
         return {
             ast,
-            types
+            types,
         };
     },
     '-st-named'(value: string) {
         const namedMap: { [key: string]: string } = {};
         if (value) {
-            value.split(',').forEach(name => {
+            value.split(',').forEach((name) => {
                 const parts = name.trim().split(/\s+as\s+/);
                 if (parts.length === 1) {
                     namedMap[parts[0]] = parts[0];
@@ -152,22 +154,22 @@ export const SBTypesParsers = {
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: strategies[strat](node, reportWarning)
+                    options: strategies[strat](node, reportWarning),
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: strat === 'named' ? {} : []
+                    options: strat === 'named' ? {} : [],
                 });
             } else if (node.type === 'string' && diagnostics) {
                 diagnostics.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
-                    word: mixinNode.value
+                    word: mixinNode.value,
                 });
             }
         });
 
         return mixins;
-    }
+    },
 };
 
 export function getNamedArgs(node: ParsedValue) {
@@ -273,13 +275,13 @@ export function groupValues(nodes: any[], divType = 'div') {
 export const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {
         const named: Record<string, string> = {};
-        getNamedArgs(node).forEach(mixinArgsGroup => {
+        getNamedArgs(node).forEach((mixinArgsGroup) => {
             const argsDivider = mixinArgsGroup[1];
             if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
                 if (reportWarning) {
                     const argValue = mixinArgsGroup[0];
                     reportWarning(valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(), {
-                        word: argValue.value
+                        word: argValue.value,
                     });
                 }
                 return;
@@ -289,8 +291,8 @@ export const strategies = {
         return named;
     },
     args: (node: any, reportWarning?: ReportWarning) => {
-        return getFormatterArgs(node, true, reportWarning).map(value => ({ value }));
-    }
+        return getFormatterArgs(node, true, reportWarning).map((value) => ({ value }));
+    },
 };
 
 function stringifyParam(nodes: any) {

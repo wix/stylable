@@ -9,7 +9,7 @@ describe('Stylable runtime stylesheet', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -27,7 +27,7 @@ describe('Stylable runtime stylesheet', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -49,7 +49,7 @@ describe('Stylable runtime stylesheet', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: { myVar: '--entry-myVar' },
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -67,7 +67,7 @@ describe('Stylable runtime stylesheet', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: { myVar: '--entry-myVar' },
-                stVars: {}
+                stVars: {},
             },
             '',
             0,

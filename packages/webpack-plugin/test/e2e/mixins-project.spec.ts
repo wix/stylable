@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,7 +23,7 @@ describe(`(${project})`, () => {
 
         expect(styleElements[0]).to.include({
             id: './src/index.st.css',
-            depth: '1'
+            depth: '1',
         });
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
             /\.index\d+__root \{ arguments: \["1","2"\]; border: 1px solid rgb\(255, 0, 0\); z-index: 9; \}/

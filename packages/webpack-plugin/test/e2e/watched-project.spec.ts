@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,14 +23,14 @@ describe(`(${project})`, () => {
 
         expect(styleElements[0]).to.include({
             id: './src/index.st.css',
-            depth: '3'
+            depth: '3',
         });
 
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
             /\.index\d+__root \{ color: red; font-size: 3em; z-index: 1; \}/
         );
 
-        const recompile = new Promise(res => {
+        const recompile = new Promise((res) => {
             projectRunner.compiler?.hooks.done.tap('Test', () => {
                 res();
             });

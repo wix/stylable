@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         const text = await page.evaluate(() => {
             return {
                 css: (window as any).css,
-                index: (window as any).index
+                index: (window as any).index,
             };
         });
         expect(text.index).to.match(/\/\* CONTENT \*\//);

@@ -386,7 +386,7 @@ describe('Pseudo-elements', () => {
                     'bobo',
                     createRange(9, 5, 9, 5),
                     './import.st.css'
-                )
+                ),
             ]);
         });
     });
@@ -549,7 +549,7 @@ describe('Pseudo-elements', () => {
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str, rng));
-                    nonos.forEach(nono => notExp.push(createCompletion(nono, rng)));
+                    nonos.forEach((nono) => notExp.push(createCompletion(nono, rng)));
                     asserter.suggested(exp);
                     asserter.notSuggested(notExp);
                 }
@@ -579,7 +579,7 @@ describe('Pseudo-elements', () => {
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     exp.push(createCompletion(str1, rng));
-                    nonos1.forEach(nono => notExp.push(createCompletion(nono, rng)));
+                    nonos1.forEach((nono) => notExp.push(createCompletion(nono, rng)));
                     asserter.suggested(exp);
                     asserter.notSuggested(notExp);
                 }

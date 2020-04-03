@@ -9,7 +9,7 @@ describe('Namespace Directive', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions('imports/top-level.st.css', prefix);
                 asserter.suggested([
-                    asserters.namespaceDirectiveCompletion(createRange(0, 0, 0, i))
+                    asserters.namespaceDirectiveCompletion(createRange(0, 0, 0, i)),
                 ]);
             });
         });

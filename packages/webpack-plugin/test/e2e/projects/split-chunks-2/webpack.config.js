@@ -7,16 +7,16 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({ useEntryModuleInjection: true }),
-        new HtmlWebpackPlugin()
+        new HtmlWebpackPlugin(),
     ],
     optimization: {
         splitChunks: {
             minSize: 0,
             chunks: 'all',
-            name: false
+            name: false,
         },
         runtimeChunk: {
-            name: 'test-runtime'
-        }
-    }
+            name: 'test-runtime',
+        },
+    },
 };

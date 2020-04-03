@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             puppeteerOptions: {
                 // headless: false,
                 // devtools: true
-            }
+            },
         },
         before,
         afterEach,

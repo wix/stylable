@@ -164,20 +164,20 @@ describe('Definitions', () => {
                 { filePath: 'definitions/states-default.st.css', pos: new ProviderPosition(7, 14) },
                 {
                     filePath: 'definitions/states-default.st.css',
-                    pos: new ProviderPosition(16, 14)
+                    pos: new ProviderPosition(16, 14),
                 },
                 {
                     filePath: 'definitions/states-default.st.css',
-                    pos: new ProviderPosition(20, 14)
+                    pos: new ProviderPosition(20, 14),
                 },
                 { filePath: 'definitions/states-deep.st.css', pos: new ProviderPosition(10, 33) },
                 {
                     filePath: 'definitions/states-very-deep.st.css',
-                    pos: new ProviderPosition(10, 16)
-                }
+                    pos: new ProviderPosition(10, 16),
+                },
             ];
 
-            callLocs.forEach(cl => {
+            callLocs.forEach((cl) => {
                 it(
                     'Should find definition of rootState when called from file ' +
                         cl.filePath +
@@ -198,12 +198,12 @@ describe('Definitions', () => {
                 { filePath: 'definitions/states-default.st.css', pos: new ProviderPosition(7, 30) },
                 {
                     filePath: 'definitions/states-default.st.css',
-                    pos: new ProviderPosition(18, 15)
+                    pos: new ProviderPosition(18, 15),
                 },
-                { filePath: 'definitions/states-named.st.css', pos: new ProviderPosition(5, 17) }
+                { filePath: 'definitions/states-named.st.css', pos: new ProviderPosition(5, 17) },
             ];
 
-            callLocs.forEach(cl => {
+            callLocs.forEach((cl) => {
                 it(
                     "Should find definition of topState on element 'one' when called from file " +
                         cl.filePath +

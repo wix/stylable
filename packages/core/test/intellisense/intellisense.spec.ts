@@ -12,9 +12,9 @@ describe('Stylable intellisense selector meta data', () => {
                         .a {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -29,10 +29,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -44,9 +44,9 @@ describe('Stylable intellisense selector meta data', () => {
                         .a, .b {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -62,10 +62,10 @@ describe('Stylable intellisense selector meta data', () => {
                         {
                             meta,
                             symbol: meta.classes.a,
-                            _kind: 'css'
-                        }
-                    ]
-                }
+                            _kind: 'css',
+                        },
+                    ],
+                },
             ],
             [
                 {
@@ -75,11 +75,11 @@ describe('Stylable intellisense selector meta data', () => {
                         {
                             meta,
                             symbol: meta.classes.b,
-                            _kind: 'css'
-                        }
-                    ]
-                }
-            ]
+                            _kind: 'css',
+                        },
+                    ],
+                },
+            ],
         ]);
     });
 
@@ -96,15 +96,15 @@ describe('Stylable intellisense selector meta data', () => {
                             -st-extends: Other;
                             -st-states: b;
                         }
-                    `
+                    `,
                 },
                 '/other.st.css': {
                     content: `
                         .c {
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -119,14 +119,14 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -135,10 +135,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.c,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -150,9 +150,9 @@ describe('Stylable intellisense selector meta data', () => {
                     content: `
                         .a {}
                         .b {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
         const meta = t.fileProcessor.process('/entry.st.css');
         const elements = t.resolveSelectorElements(meta, '.a:not(.b)');
@@ -165,10 +165,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -181,9 +181,9 @@ describe('Stylable intellisense selector meta data', () => {
                         .part {}
 
                         .root:not(::part) {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -198,9 +198,9 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -209,10 +209,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.part,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -228,9 +228,9 @@ describe('Stylable intellisense selector meta data', () => {
                         .partB {}
 
                         .root:not(::part) {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -245,15 +245,15 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
                 name: 'part',
-                resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }]
-            }
+                resolved: [{ _kind: 'css', meta, symbol: { _kind: 'element', name: '*' } }],
+            },
         ]);
     });
 
@@ -265,9 +265,9 @@ describe('Stylable intellisense selector meta data', () => {
                         .a {
                             -st-states: x;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -281,10 +281,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -294,9 +294,9 @@ describe('Stylable intellisense selector meta data', () => {
                 '/entry.st.css': {
                     content: `
                         .a {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -309,15 +309,15 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
                 name: 'before',
-                resolved: []
-            }
+                resolved: [],
+            },
         ]);
     });
 
@@ -333,16 +333,16 @@ describe('Stylable intellisense selector meta data', () => {
                         .a {
                             -st-extends: c;
                         }
-                    `
+                    `,
                 },
                 '/other.st.css': {
                     content: `
                         .c {
                             -st-states: b;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -356,20 +356,20 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.a,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.c,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
                 name: 'c',
-                resolved: []
-            }
+                resolved: [],
+            },
         ]);
     });
 
@@ -383,9 +383,9 @@ describe('Stylable intellisense selector meta data', () => {
                     }
 
                     @custom-selector :--pongo .lala ;
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -402,10 +402,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.lala,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -424,7 +424,7 @@ describe('Stylable intellisense selector meta data', () => {
                     .x::pongo {
 
                     }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     content: `
@@ -434,9 +434,9 @@ describe('Stylable intellisense selector meta data', () => {
 
                     @custom-selector :--pongo .lala ;
 
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -451,14 +451,14 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.x,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -467,10 +467,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.lala,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -487,7 +487,7 @@ describe('Stylable intellisense selector meta data', () => {
                         -st-extends: Comp;
                     }
                     .x::pongo {}
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     content: `
@@ -497,9 +497,9 @@ describe('Stylable intellisense selector meta data', () => {
 
                     @custom-selector :--pongo .lala, .baba ;
 
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -514,22 +514,22 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.x,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
                 name: 'pongo',
                 resolved: [
-                    { _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } }
-                ]
-            }
+                    { _kind: 'css', meta: otherMeta, symbol: { _kind: 'element', name: '*' } },
+                ],
+            },
         ]);
     });
 
@@ -545,16 +545,16 @@ describe('Stylable intellisense selector meta data', () => {
                      }
 
                      Comp {}
-                    `
+                    `,
                 },
                 '/import.st.css': {
                     content: `
                     .shlomo {
                         color: black;
                     }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -569,15 +569,15 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.elements.Comp,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: otherMeta,
                         symbol: otherMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -595,7 +595,7 @@ describe('Stylable intellisense selector meta data', () => {
                         -st-extends: Comp;
                         -st-states: lala;
                     }
-                `
+                `,
                 },
                 '/recursive-import-2.st.css': {
                     content: `
@@ -607,7 +607,7 @@ describe('Stylable intellisense selector meta data', () => {
                     .bobo {
                         -st-extends: Comp;
                     }
-                    `
+                    `,
                 },
                 '/recursive-import-1.st.css': {
                     content: `
@@ -628,7 +628,7 @@ describe('Stylable intellisense selector meta data', () => {
                     .root {
                         -st-states : state,otherState;
                     }
-                    `
+                    `,
                 },
                 '/recursive-import-0.st.css': {
                     content: `
@@ -641,14 +641,14 @@ describe('Stylable intellisense selector meta data', () => {
                         -st-extends: Last;
                         -st-states : loompa;
                     }
-                    `
+                    `,
                 },
                 '/recursive-import.st.css': {
                     content: `
                     .root {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const meta = t.fileProcessor.process('/entry.st.css');
@@ -670,14 +670,14 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta,
                         symbol: meta.classes.gaga,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: recursive2,
                         symbol: recursive2.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -686,14 +686,14 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: recursive2,
                         symbol: recursive2.classes.bobo,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: recursive1,
                         symbol: recursive1.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -702,20 +702,20 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: recursive1,
                         symbol: recursive1.classes.momo,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: recursive0,
                         symbol: recursive0.classes.root,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: last,
                         symbol: last.classes.root,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 
@@ -735,7 +735,7 @@ describe('Stylable intellisense selector meta data', () => {
                         }
                         .root::base {}
                         .root::mid::base {}
-                        `
+                        `,
                 },
                 '/mid.st.css': {
                     namespace: 'mid',
@@ -750,16 +750,16 @@ describe('Stylable intellisense selector meta data', () => {
                         .mid {
                             -st-extends: Button;
                         }
-                        `
+                        `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
                     content: `
                         .root {}
                         .base {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const entryMeta = t.fileProcessor.process('/entry.st.css');
@@ -777,19 +777,19 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: entryMeta,
                         symbol: entryMeta.classes.root,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: midMeta,
                         symbol: midMeta.classes.root,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: baseMeta,
                         symbol: baseMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -798,10 +798,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: baseMeta,
                         symbol: baseMeta.classes.base,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
         expect(elements2[0]).to.eql([
             {
@@ -811,19 +811,19 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: entryMeta,
                         symbol: entryMeta.classes.root,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: midMeta,
                         symbol: midMeta.classes.root,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: baseMeta,
                         symbol: baseMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -832,14 +832,14 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: midMeta,
                         symbol: midMeta.classes.mid,
-                        _kind: 'css'
+                        _kind: 'css',
                     },
                     {
                         meta: baseMeta,
                         symbol: baseMeta.classes.root,
-                        _kind: 'css'
-                    }
-                ]
+                        _kind: 'css',
+                    },
+                ],
             },
             {
                 type: 'pseudo-element',
@@ -848,10 +848,10 @@ describe('Stylable intellisense selector meta data', () => {
                     {
                         meta: baseMeta,
                         symbol: baseMeta.classes.base,
-                        _kind: 'css'
-                    }
-                ]
-            }
+                        _kind: 'css',
+                    },
+                ],
+            },
         ]);
     });
 });

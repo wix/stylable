@@ -2,7 +2,7 @@ import {
     generateStylableResult,
     generateStylableRoot,
     matchAllRulesAndDeclarations,
-    matchRuleAndDeclaration
+    matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
@@ -21,9 +21,9 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: my-mixin;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
@@ -43,7 +43,7 @@ describe('CSS Mixins', () => {
                         .y {
                            -st-mixin: Base;
                         }
-                    `
+                    `,
                 },
                 '/design.st.css': {
                     namespace: 'design',
@@ -53,7 +53,7 @@ describe('CSS Mixins', () => {
                             -st-default: Base;
                         }
                         Base{}
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -64,9 +64,9 @@ describe('CSS Mixins', () => {
                         .root:disabled {
                             color: red;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
@@ -86,7 +86,7 @@ describe('CSS Mixins', () => {
                         .y {
                            -st-mixin: Design;
                         }
-                    `
+                    `,
                 },
                 '/design.st.css': {
                     namespace: 'design',
@@ -99,7 +99,7 @@ describe('CSS Mixins', () => {
                            -st-extends: Base;
                         }
                         .root:disabled { color: red; }
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -107,9 +107,9 @@ describe('CSS Mixins', () => {
                         .root {
                             -st-states: disabled;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
@@ -163,9 +163,9 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: y;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 2, '.entry__container', 'color: red');
@@ -185,9 +185,9 @@ describe('CSS Mixins', () => {
                 .y {
                     -st-mixin: x;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
@@ -210,7 +210,7 @@ describe('CSS Mixins', () => {
                             color: red;
                             -st-mixin: y;
                         }
-                    `
+                    `,
                 },
                 '/style1.st.css': {
                     namespace: 'entry',
@@ -222,9 +222,9 @@ describe('CSS Mixins', () => {
                         .y {
                             -st-mixin: x;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
@@ -247,9 +247,9 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: my-mixin;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 3, '.entry__container:hover', 'color: blue');
@@ -279,9 +279,9 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: my-mixin;
                 }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 2, '.entry__container', 'animation: entry__original 2s');
@@ -301,7 +301,7 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: my-mixin;
                 }
-            `
+            `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -309,9 +309,9 @@ describe('CSS Mixins', () => {
                 .my-mixin {
                     color: red;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red');
@@ -331,7 +331,7 @@ describe('CSS Mixins', () => {
                 .container {
                     -st-mixin: my-mixin;
                 }
-            `
+            `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -342,9 +342,9 @@ describe('CSS Mixins', () => {
                 .my-mixin .local {
                     color: green;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red');
@@ -364,7 +364,7 @@ describe('CSS Mixins', () => {
                     -st-named: a;
                 }
                 .b { -st-mixin: a; }
-            `
+            `,
                 },
                 '/mixin.st.css': {
                     namespace: 'mixin',
@@ -376,9 +376,9 @@ describe('CSS Mixins', () => {
 
                 .a { color: black; }
 
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__b', 'color: green;background: red');
@@ -398,7 +398,7 @@ describe('CSS Mixins', () => {
                     -st-named: a;
                 }
                 .b { -st-mixin: a; }
-            `
+            `,
                 },
                 '/enriched.st.css': {
                     namespace: 'enriched',
@@ -408,15 +408,15 @@ describe('CSS Mixins', () => {
                     -st-named: a;
                 }
                 .a { color: green; }
-            `
+            `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
                     content: `
                 .a { color: red; }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
@@ -435,7 +435,7 @@ describe('CSS Mixins', () => {
                     -st-named: a;
                 }
                 .b { -st-mixin: a; }
-            `
+            `,
                 },
                 '/enriched.st.css': {
                     namespace: 'enriched',
@@ -449,7 +449,7 @@ describe('CSS Mixins', () => {
                     color: yellow;
                 }
                 .a { color: purple; }
-            `
+            `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -458,9 +458,9 @@ describe('CSS Mixins', () => {
                 .a:hover {
                     color: gold;
                 }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__b', 'color: red');
@@ -482,15 +482,15 @@ describe('CSS Mixins', () => {
                     -st-named: a as b;
                 }
                 .a { -st-mixin: b; }
-            `
+            `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
                     content: `
                 .a { color: red; }
-            `
-                }
-            }
+            `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__a', 'color: red');
@@ -519,13 +519,13 @@ describe('CSS Mixins', () => {
                         .my-mixin::part{
                             color: green;
                         }
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
-                    content: `.part{}`
-                }
-            }
+                    content: `.part{}`,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
@@ -547,7 +547,7 @@ describe('CSS Mixins', () => {
                         .container {
                             -st-mixin: my-mixin;
                         }
-                    `
+                    `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -563,13 +563,13 @@ describe('CSS Mixins', () => {
                         .my-mixin::part{
                             color: green;
                         }
-                  `
+                  `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
-                    content: `.part{}`
-                }
-            }
+                    content: `.part{}`,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
@@ -592,9 +592,9 @@ describe('CSS Mixins', () => {
                         .class {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', '');
@@ -620,7 +620,7 @@ describe('CSS Mixins', () => {
                         .container {
                             -st-mixin: my-mixin;
                         }
-                    `
+                    `,
                 },
                 '/jump.st.css': {
                     namespace: 'imported',
@@ -631,7 +631,7 @@ describe('CSS Mixins', () => {
                         }
                         .my-mixin {}
                         .my-mixin::part {}
-                  `
+                  `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -647,13 +647,13 @@ describe('CSS Mixins', () => {
                         .my-mixin::part{
                             color: green;
                         }
-                  `
+                  `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
-                    content: `.part{}`
-                }
-            }
+                    content: `.part{}`,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', '-st-extends: Base;color: red');
@@ -675,7 +675,7 @@ describe('CSS Mixins', () => {
                 .x {
                     -st-mixin: i;
                 }
-            `
+            `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -683,9 +683,9 @@ describe('CSS Mixins', () => {
                         .i .i.y  {
                             color: yellow;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__x .entry__x.imported__y', 'color: yellow');
@@ -709,9 +709,9 @@ describe('CSS Mixins', () => {
                     .x:hover .y {
                         -st-mixin: i;
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchAllRulesAndDeclarations(
@@ -720,8 +720,8 @@ describe('CSS Mixins', () => {
                 ['.entry__x:hover .entry__y', 'color: red'],
                 [
                     '.entry__x:hover .entry__y:hover, .entry__x:hover .entry__y.entry__local:hover .entry__inner',
-                    'color: green'
-                ]
+                    'color: green',
+                ],
             ],
             '',
             2
@@ -742,7 +742,7 @@ describe('CSS Mixins', () => {
                 .x {
                     -st-mixin: i;
                 }
-            `
+            `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -755,9 +755,9 @@ describe('CSS Mixins', () => {
                             .i:hover {color: red;}
                         }
                         .i:hover {color: blue;}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red');
@@ -769,7 +769,7 @@ describe('CSS Mixins', () => {
             media,
             [
                 ['.entry__x', 'color: yellow'],
-                ['.entry__x:hover', 'color: red']
+                ['.entry__x:hover', 'color: red'],
             ],
             '@media'
         );
@@ -792,7 +792,7 @@ describe('CSS Mixins', () => {
                 .x {
                     -st-mixin: X;
                 }
-            `
+            `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -804,9 +804,9 @@ describe('CSS Mixins', () => {
                        .y{color:gold;}
                     }
 
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color:red');
@@ -830,7 +830,7 @@ describe('CSS Mixins', () => {
                 .x {
                     -st-mixin: mixme;
                 }
-                `
+                `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -847,15 +847,15 @@ describe('CSS Mixins', () => {
                     .mixme::part .part {
                         color: green;
                     }
-                `
+                `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
                     content: `
                     .part{}
-                `
-                }
-            }
+                `,
+                },
+            },
         });
         matchRuleAndDeclaration(result, 1, '.entry__x .comp__part .imported__part', 'color: green');
     });
@@ -874,7 +874,7 @@ describe('CSS Mixins', () => {
                         .root {
                             -st-mixin: Look1(c1 yellow);
                         }
-                    `
+                    `,
                 },
                 '/look1.st.css': {
                     namespace: 'look1',
@@ -896,16 +896,16 @@ describe('CSS Mixins', () => {
                         .root::label {
                             color:green;
                         }
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
                     content: `
                         .root {}
                         .label {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__root', '-st-extends:Base;color:yellow');
@@ -928,15 +928,15 @@ describe('CSS Mixins', () => {
                         .x {
                             -st-mixin: X;
                         }
-                    `
+                    `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
                     content: `
                         X {color:green;}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
@@ -956,7 +956,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: R;
                     }
-                `
+                `,
                 },
                 '/r.st.css': {
                     namespace: 'r',
@@ -968,7 +968,7 @@ describe('CSS Mixins', () => {
                     .r{
                         -st-mixin: Y;
                     }
-                `
+                `,
                 },
                 '/y.st.css': {
                     namespace: 'y',
@@ -976,9 +976,9 @@ describe('CSS Mixins', () => {
                     .y {
 
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchAllRulesAndDeclarations(
@@ -986,7 +986,7 @@ describe('CSS Mixins', () => {
             [
                 ['.entry__x', ''],
                 ['.entry__x .r__r', ''],
-                ['.entry__x .r__r .y__y', '']
+                ['.entry__x .r__r .y__y', ''],
             ],
             ''
         );
@@ -1007,7 +1007,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: mix;
                     }
-                `
+                `,
                     },
                     '/a/mix.st.css': {
                         namespace: 'mix',
@@ -1020,7 +1020,7 @@ describe('CSS Mixins', () => {
                         background: url(./asset.png);
                         -st-mixin: other-mix;
                     }
-                `
+                `,
                     },
                     '/a/b/other-mix.st.css': {
                         namespace: 'other-mix',
@@ -1028,9 +1028,9 @@ describe('CSS Mixins', () => {
                     .other-mix {
                         background: url(./asset.png)
                     }
-                `
-                    }
-                }
+                `,
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(
@@ -1053,7 +1053,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: mix;
                     }
-                `
+                `,
                     },
                     '/a/mix.st.css': {
                         namespace: 'mix',
@@ -1061,9 +1061,9 @@ describe('CSS Mixins', () => {
                     .mix {
                         background: url(../asset.png);
                     }
-                `
-                    }
-                }
+                `,
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(
@@ -1087,7 +1087,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: mix;
                     }
-                `
+                `,
                     },
                     '/node_modules/fake-package/index.st.css': {
                         namespace: 'mix',
@@ -1095,12 +1095,12 @@ describe('CSS Mixins', () => {
                     .mix {
                         background: url(./asset.png);
                     }
-                `
+                `,
                     },
                     '/node_modules/fake-package/package.json': {
-                        content: '{"name": "fake-package", "version": "0.0.1"}'
-                    }
-                }
+                        content: '{"name": "fake-package", "version": "0.0.1"}',
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(
@@ -1124,7 +1124,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: mix();
                     }
-                `
+                `,
                     },
                     '/node_modules/fake-package/mixin.js': {
                         content: `
@@ -1133,12 +1133,12 @@ describe('CSS Mixins', () => {
                                 "background": 'url(./asset.png)'
                             };
                         }
-                `
+                `,
                     },
                     '/node_modules/fake-package/package.json': {
-                        content: '{"name": "fake-package", "version": "0.0.1"}'
-                    }
-                }
+                        content: '{"name": "fake-package", "version": "0.0.1"}',
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(
@@ -1167,9 +1167,9 @@ describe('CSS Mixins', () => {
 
                             .y {color:value(color1);}
 
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
@@ -1192,9 +1192,9 @@ describe('CSS Mixins', () => {
 
                             .y {border:value(border1);}
 
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             matchRuleAndDeclaration(result, 0, '.entry__x', 'border:1px solid red');
@@ -1215,7 +1215,7 @@ describe('CSS Mixins', () => {
                             .x {
                                 -st-mixin: y(color1 green);
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -1224,9 +1224,9 @@ describe('CSS Mixins', () => {
                             color1: red;
                         }
                         .y {color:value(color1);}
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green');
@@ -1247,9 +1247,9 @@ describe('CSS Mixins', () => {
                                 color:value(color1);
                                 background:value(color2);
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             matchRuleAndDeclaration(result, 0, '.entry__x', 'color:green;background:yellow');
@@ -1270,7 +1270,7 @@ describe('CSS Mixins', () => {
                     .x {
                         -st-mixin: y(color1 green, color2 yellow);
                     }
-                `
+                `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -1286,7 +1286,7 @@ describe('CSS Mixins', () => {
                         .y {
                             -st-mixin: z(color3 value(color1), color4 value(color2));
                         }
-                    `
+                    `,
                     },
                     '/mixin.st.css': {
                         namespace: 'mixin',
@@ -1299,9 +1299,9 @@ describe('CSS Mixins', () => {
                             border: 1px solid value(color3);
                             background: value(color4);
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             matchRuleAndDeclaration(

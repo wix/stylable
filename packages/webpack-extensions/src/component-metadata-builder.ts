@@ -38,7 +38,7 @@ export class ComponentMetadataBuilder {
             name,
             fs: {},
             components: {},
-            packages: {}
+            packages: {},
         };
     }
     public hasPackages() {
@@ -52,7 +52,7 @@ export class ComponentMetadataBuilder {
         const local = this.localResourcePath(resourcePath);
         this.output.fs[local] = {
             metadata,
-            content
+            content,
         };
         this.output.packages[this.resourcePackageName(local)] = this.packageRootPath(local);
     }

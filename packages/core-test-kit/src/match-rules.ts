@@ -16,7 +16,7 @@ export function matchRuleAndDeclaration(
         );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    const actualDecl = rule.nodes!.map(x => x.toString()).join(';');
+    const actualDecl = rule.nodes!.map((x) => x.toString()).join(';');
     if (actualDecl !== decl) {
         throw new Error(
             `${

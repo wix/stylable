@@ -4,7 +4,7 @@ import {
     makeAbsolute,
     processDeclarationUrls,
     Stylable,
-    StylableResults
+    StylableResults,
 } from '@stylable/core';
 import path from 'path';
 import webpack from 'webpack';
@@ -12,7 +12,7 @@ import { isLoadedByLoaders } from './is-loaded-by-loaders';
 import {
     StylableAssetDependency,
     StylableExportsDependency,
-    StylableImportDependency
+    StylableImportDependency,
 } from './stylable-dependencies';
 import { StylableModule } from './types';
 
@@ -53,7 +53,7 @@ export class StylableParser {
 
         handleUrlDependencies(res, currentModule, context);
 
-        meta.imports.forEach(stylableImport => {
+        meta.imports.forEach((stylableImport) => {
             if (isStylableImport(stylableImport)) {
                 addStylableImportsDependencies(
                     this.stylable,
@@ -83,7 +83,7 @@ function addStylableImportsDependencies(
 ) {
     const importRef = {
         defaultImport: stylableImport.defaultExport,
-        names: Object.keys(stylableImport.named || {})
+        names: Object.keys(stylableImport.named || {}),
     };
     const dep = useWeakDeps
         ? StylableImportDependency.createWeak(stylableImport.fromRelative, currentModule, importRef)
@@ -101,7 +101,7 @@ function addStylableFileDependencyChain(
     if (!dependencies.has(resource) && isStylableImport(stylableImport)) {
         try {
             dependencies.add(resource);
-            stylable.process(resource).imports.forEach(childImport => {
+            stylable.process(resource).imports.forEach((childImport) => {
                 addStylableFileDependencyChain(stylable, childImport, dependencies);
             });
         } catch {
@@ -113,14 +113,14 @@ function addStylableFileDependencyChain(
 
 function handleUrlDependencies(res: StylableResults, currentModule: StylableModule, context: any) {
     const urls: string[] = [];
-    res.meta.outputAst!.walkDecls(node =>
-        processDeclarationUrls(node, node => node.url && urls.push(node.url), false)
+    res.meta.outputAst!.walkDecls((node) =>
+        processDeclarationUrls(node, (node) => node.url && urls.push(node.url), false)
     );
     addUrlDependencies(urls, currentModule, context);
 }
 
 function addUrlDependencies(urls: string[], stylableModule: StylableModule, rootContext: string) {
-    urls.filter(url => isAsset(url)).forEach(asset => {
+    urls.filter((url) => isAsset(url)).forEach((asset) => {
         const absPath = makeAbsolute(asset, rootContext, path.dirname(stylableModule.resource));
         stylableModule.buildInfo.fileDependencies.add(absPath);
         stylableModule.addDependency(new StylableAssetDependency(absPath));

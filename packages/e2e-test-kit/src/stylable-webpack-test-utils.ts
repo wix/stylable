@@ -15,7 +15,7 @@ export interface MinimalStylableModule extends MinimalModule {
 
 export function findModule(modules: MinimalModule[], contextPath: string) {
     return modules.find(
-        module => module.type === 'stylable' && normalizeModuleResource(module) === contextPath
+        (module) => module.type === 'stylable' && normalizeModuleResource(module) === contextPath
     );
 }
 
@@ -70,11 +70,11 @@ export function configLoadAssets() {
                 {
                     loader: 'url-loader',
                     options: {
-                        limit: 300
-                    }
-                }
-            ]
-        }
+                        limit: 300,
+                    },
+                },
+            ],
+        },
     ];
 }
 

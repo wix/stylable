@@ -30,9 +30,9 @@ describe('Named Values', () => {
                     const exp: Array<Partial<Completion>> = [];
                     const notExp: Array<Partial<Completion>> = [];
                     if (prefix.length === 0) {
-                        a.forEach(c => exp.push(createComp(c, rng)));
+                        a.forEach((c) => exp.push(createComp(c, rng)));
                     } else {
-                        a.forEach(c => {
+                        a.forEach((c) => {
                             if (c.startsWith(prefix)) {
                                 exp.push(createComp(c, rng));
                             } else {
@@ -54,13 +54,13 @@ describe('Named Values', () => {
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];
                 if (prefix.length === 0) {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c !== str1) {
                             exp.push(createComp(c, rng));
                         }
                     });
                 } else {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c.startsWith(prefix) && c !== str1) {
                             exp.push(createComp(c, rng));
                         } else {
@@ -81,13 +81,13 @@ describe('Named Values', () => {
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];
                 if (prefix.length === 0) {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c !== str1 && c !== str3) {
                             exp.push(createComp(c, rng));
                         }
                     });
                 } else {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c.startsWith(prefix) && c !== str1 && c !== str3) {
                             exp.push(createComp(c, rng));
                         } else {
@@ -108,13 +108,13 @@ describe('Named Values', () => {
                 const exp: Array<Partial<Completion>> = [];
                 const notExp: Array<Partial<Completion>> = [];
                 if (prefix.length === 0) {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c !== str1 && c !== str3) {
                             exp.push(createComp(c, rng));
                         }
                     });
                 } else {
-                    a.forEach(c => {
+                    a.forEach((c) => {
                         if (c.startsWith(prefix) && c !== str1 && c !== str3) {
                             exp.push(createComp(c, rng));
                         } else {
@@ -131,7 +131,7 @@ describe('Named Values', () => {
     const str5 = 'aMixin';
     const str6 = 'aFormatter';
 
-    [str5, str6].forEach(str => {
+    [str5, str6].forEach((str) => {
         str.split('').forEach((_c, i) => {
             const prefix = str.slice(0, i);
             const rng = createRange(2, 15, 2, 15 + i);

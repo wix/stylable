@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
         const { myBorder, myColor } = await page.evaluate(() => {
             return {
                 myBorder: (window as any).myBorder,
-                myColor: (window as any).myColor
+                myColor: (window as any).myColor,
             };
         });
 

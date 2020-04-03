@@ -9,7 +9,7 @@ module.exports = {
     context: __dirname,
     devtool: 'source-map',
     resolve: {
-        plugins: [new TsconfigPathsPlugin({ configFile: rootTsconfig })]
+        plugins: [new TsconfigPathsPlugin({ configFile: rootTsconfig })],
     },
-    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()]
+    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()],
 };

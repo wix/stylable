@@ -1,7 +1,7 @@
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
-    matchRuleAndDeclaration
+    matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
@@ -22,7 +22,7 @@ describe('Javascript Mixins', () => {
                         -st-mixin: mixin;
                         border: 0;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -31,9 +31,9 @@ describe('Javascript Mixins', () => {
                             color: "red"
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
         const rule = result.nodes![0] as postcss.Rule;
         expect(rule.nodes![1].toString()).to.equal('color: red');
@@ -53,7 +53,7 @@ describe('Javascript Mixins', () => {
                     .container {
                         -st-mixin: mixin;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -64,9 +64,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         const rule = result.nodes![1] as postcss.Rule;
@@ -90,7 +90,7 @@ describe('Javascript Mixins', () => {
                         -st-mixin: mixin;
                         -st-mixin: mixin;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -99,9 +99,9 @@ describe('Javascript Mixins', () => {
                             color: "red"
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
         const rule = result.nodes![0] as postcss.Rule;
         expect(rule.nodes![0].toString()).to.equal('color: red');
@@ -126,7 +126,7 @@ describe('Javascript Mixins', () => {
                     .containerB {
                         color: blue;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -144,9 +144,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         const rule = result.nodes![0] as postcss.Rule;
@@ -183,7 +183,7 @@ describe('Javascript Mixins', () => {
                         -st-mixin: mixin;
 
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -195,9 +195,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__containerA,.entry__containerB', 'color: red');
@@ -224,7 +224,7 @@ describe('Javascript Mixins', () => {
                     .containerA {
                         -st-mixin: mixin;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -235,9 +235,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(
@@ -266,7 +266,7 @@ describe('Javascript Mixins', () => {
                     .container {
                         -st-mixin: mixin(value(color1), value(color2));
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -276,9 +276,9 @@ describe('Javascript Mixins', () => {
                             background: options[1]
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red;background: blue');
@@ -299,7 +299,7 @@ describe('Javascript Mixins', () => {
                         color:red;
                         -st-mixin: mixStuff;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -313,9 +313,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     };
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__gaga', 'color:red;background:green');
@@ -340,7 +340,7 @@ describe('Javascript Mixins', () => {
                     .container {
                         -st-mixin: mixin1(red) mixin2(blue);
                     }
-                `
+                `,
                 },
                 '/mixin1.js': {
                     content: `
@@ -349,7 +349,7 @@ describe('Javascript Mixins', () => {
                             color: options[0]
                         }
                     }
-                `
+                `,
                 },
                 '/mixin2.js': {
                     content: `
@@ -358,9 +358,9 @@ describe('Javascript Mixins', () => {
                             background: options[0]
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container', 'color: red;background: blue');
@@ -383,7 +383,7 @@ describe('Javascript Mixins', () => {
                     .container-b {
                         -st-mixin: mixin1(blue);
                     }
-                `
+                `,
                 },
                 '/mixin1.js': {
                     content: `
@@ -392,9 +392,9 @@ describe('Javascript Mixins', () => {
                             color: options[0]
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         matchRuleAndDeclaration(result, 0, '.entry__container-a', 'color: red');
@@ -416,7 +416,7 @@ describe('Javascript Mixins', () => {
                     .container {
                         -st-mixin: mixin;
                     }
-                `
+                `,
                 },
                 '/mixin.js': {
                     content: `
@@ -428,9 +428,9 @@ describe('Javascript Mixins', () => {
                             }
                         }
                     }
-                `
-                }
-            }
+                `,
+                },
+            },
         });
 
         const { 0: rule, 1: keyframes } = result.nodes!;
@@ -458,7 +458,7 @@ describe('Javascript Mixins', () => {
                             .x {
                                 -st-mixin: mix;
                             }
-                        `
+                        `,
                     },
                     '/a/b/mixin1.js': {
                         content: `
@@ -467,9 +467,9 @@ describe('Javascript Mixins', () => {
                                 background: "url(./asset.png)"
                             }
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(
@@ -492,7 +492,7 @@ describe('Javascript Mixins', () => {
                     .x {
                         -st-mixin: mix;
                     }
-                `
+                `,
                     },
                     '/a/mixin1.js': {
                         content: `
@@ -501,9 +501,9 @@ describe('Javascript Mixins', () => {
                                 background: "url(../asset.png)"
                             }
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             matchAllRulesAndDeclarations(

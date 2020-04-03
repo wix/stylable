@@ -55,7 +55,7 @@ export function build({
     optimize,
     minify,
     compat,
-    manifest
+    manifest,
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -75,7 +75,7 @@ export function build({
     } else {
         log('[Build]', `Building ${filesToBuild.length} stylable files.`);
     }
-    filesToBuild.forEach(filePath => {
+    filesToBuild.forEach((filePath) => {
         indexFile
             ? generateFileIndexEntry(
                   filePath,
@@ -148,7 +148,7 @@ function buildSingleFile(
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css')
+        filename: basename(outSrcPath, '.st.css'),
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
 
@@ -167,7 +167,7 @@ function buildSingleFile(
                 removeEmptyNodes: true,
                 removeStylableDirectives: true,
                 classNameOptimizations: false,
-                removeUnusedComponents: false
+                removeUnusedComponents: false,
             },
             res,
             {}
@@ -189,7 +189,7 @@ function buildSingleFile(
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }
     // st.css.js
-    moduleFormats.forEach(format => {
+    moduleFormats.forEach((format) => {
         log('[Build]', 'moduleFormat', format);
         const code = tryRun(
             () =>

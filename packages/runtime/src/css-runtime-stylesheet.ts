@@ -24,7 +24,7 @@ export function create(
         st: style,
         $id: id,
         $depth: depth,
-        $css: css
+        $css: css,
     };
 
     if (renderer) {

@@ -25,7 +25,7 @@ export class StylableBootstrapModule extends Module {
             autoInit: true,
             globalInjection(symbol: string) {
                 return `window.__stylable_renderer__ = ${symbol}`;
-            }
+            },
         },
         public dependencies: StylableImportDependency[] = [],
         name = 'stylable-bootstrap-module',
@@ -55,10 +55,10 @@ export class StylableBootstrapModule extends Module {
     }
     public source(_m: any, runtimeTemplate: any) {
         const imports: string[] = [];
-        this.dependencies.forEach(dependency => {
+        this.dependencies.forEach((dependency) => {
             const id = runtimeTemplate.moduleId({
                 module: dependency.module,
-                request: dependency.request
+                request: dependency.request,
             });
             imports.push(`__webpack_require__(${id});`);
         });
@@ -94,7 +94,7 @@ export class StylableBootstrapModule extends Module {
     public addStylableModuleDependency(module: StylableModule) {
         const dep = new StylableImportDependency(module.request, {
             defaultImport: `style_${this.dependencies.length}`,
-            names: []
+            names: [],
         });
         dep.module = module;
         this.dependencies.push(dep);

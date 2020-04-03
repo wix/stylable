@@ -39,7 +39,7 @@ try {
         packageJson.transpileExternals &&
         Array.isArray(packageJson.transpileExternals)
     ) {
-        externalLibsToTranspile = packageJson.transpileExternals.map(libName =>
+        externalLibsToTranspile = packageJson.transpileExternals.map((libName) =>
             path.join(paths.appNodeModules, libName)
         );
     }
@@ -70,7 +70,7 @@ module.exports = {
         // require.resolve('webpack/hot/dev-server'),
         require.resolve('react-dev-utils/webpackHotDevClient'),
         // Finally, this is your app's code:
-        paths.appIndex
+        paths.appIndex,
         // We include the app code last so that if there is a runtime error during
         // initialization, it doesn't blow up the WebpackDevServer client, and
         // changing JS code would still trigger a refresh.
@@ -87,8 +87,8 @@ module.exports = {
         // This is the URL that app is served from. We use "/" in development.
         publicPath: publicPath,
         // Point sourcemap entries to original disk location (format as URL on Windows)
-        devtoolModuleFilenameTemplate: info =>
-            path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')
+        devtoolModuleFilenameTemplate: (info) =>
+            path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     },
     resolve: {
         // This allows you to set a fallback for where Webpack should look for modules.
@@ -116,7 +116,7 @@ module.exports = {
             // @remove-on-eject-end
             // Support React Native Web
             // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-            'react-native': 'react-native-web'
+            'react-native': 'react-native-web',
         },
         plugins: [
             // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -124,8 +124,8 @@ module.exports = {
             // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
             // please link the files into your node_modules/ and let module-resolution kick in.
             // Make sure your source files are compiled, as they will not be processed in any way.
-            new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])
-        ]
+            new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+        ],
     },
     module: {
         strictExportPresence: true,
@@ -146,14 +146,14 @@ module.exports = {
                         loader: require.resolve('url-loader'),
                         options: {
                             limit: 10000,
-                            name: 'static/media/[name].[hash:8].[ext]'
-                        }
+                            name: 'static/media/[name].[hash:8].[ext]',
+                        },
                     },
                     // Process application sources with TypeScript.
                     {
                         test: /\.tsx?$/,
                         include: paths.appSrc,
-                        loader: require.resolve('@ts-tools/webpack-loader')
+                        loader: require.resolve('@ts-tools/webpack-loader'),
                     },
                     {
                         test: /\.js$/,
@@ -161,9 +161,9 @@ module.exports = {
                         include: externalLibsToTranspile,
                         options: {
                             compilerOptions: {
-                                target: 'es5'
-                            }
-                        }
+                                target: 'es5',
+                            },
+                        },
                     },
                     // "file" loader makes sure those assets get served by WebpackDevServer.
                     // When you `import` an asset, you get its (virtual) filename.
@@ -178,20 +178,20 @@ module.exports = {
                         exclude: /\.(js|mjs|jsx|ts|tsx|html|json|css)$/,
                         loader: require.resolve('file-loader'),
                         options: {
-                            name: 'static/media/[name].[hash:8].[ext]'
-                        }
-                    }
-                ]
-            }
+                            name: 'static/media/[name].[hash:8].[ext]',
+                        },
+                    },
+                ],
+            },
             // ** STOP ** Are you adding a new loader?
             // Make sure to add the new loader(s) before the "file" loader.
-        ]
+        ],
     },
     plugins: [
         // Generates an `index.html` file with the <script> injected.
         new HtmlWebpackPlugin({
             inject: true,
-            template: paths.appHtml
+            template: paths.appHtml,
         }),
         // Makes some environment variables available in index.html.
         // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
@@ -224,10 +224,10 @@ module.exports = {
         // having to parse `index.html`.
         new ManifestPlugin({
             fileName: 'asset-manifest.json',
-            publicPath: publicPath
+            publicPath: publicPath,
         }),
         // Stylable support
-        new StylableWebpackPlugin()
+        new StylableWebpackPlugin(),
     ],
 
     // Some libraries import Node modules but don't use them in the browser.
@@ -237,9 +237,9 @@ module.exports = {
         fs: 'empty',
         net: 'empty',
         tls: 'empty',
-        child_process: 'empty'
+        child_process: 'empty',
     },
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
-    performance: false
+    performance: false,
 };

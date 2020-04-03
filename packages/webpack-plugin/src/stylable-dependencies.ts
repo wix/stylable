@@ -20,7 +20,7 @@ export class StylableExportsDependency extends NullDependency {
 
     public getExports() {
         return {
-            exports: this.exports
+            exports: this.exports,
         };
     }
 }
@@ -59,7 +59,7 @@ export class StylableImportDependency extends ModuleDependency {
         return {
             weak: this.weak,
             module: this.module,
-            importedNames: this.defaultImport ? ['default'].concat(this.names) : this.names.slice()
+            importedNames: this.defaultImport ? ['default'].concat(this.names) : this.names.slice(),
         };
     }
 

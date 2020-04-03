@@ -8,7 +8,7 @@ import {
     ParameterInformation,
     Position,
     Range,
-    TextEdit
+    TextEdit,
 } from 'vscode-languageserver';
 import { ColorPresentationRequest, DocumentColorRequest } from 'vscode-languageserver-protocol';
 

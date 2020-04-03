@@ -15,11 +15,11 @@ module.exports = {
                         loader: 'url-loader',
                         options: {
                             limit: 300,
-                            name: '[name].[ext]'
-                        }
-                    }
-                ]
-            }
-        ]
-    }
+                            name: '[name].[ext]',
+                        },
+                    },
+                ],
+            },
+        ],
+    },
 };

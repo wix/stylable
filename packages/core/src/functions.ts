@@ -10,7 +10,7 @@ import {
     getFormatterArgs,
     getStringValue,
     strategies,
-    valueMapping
+    valueMapping,
 } from './stylable-value-parsers';
 import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
@@ -38,7 +38,7 @@ export const functionWarnings = {
         `cannot resolve value function using the arguments provided: "${args}"`,
     UNKNOWN_FORMATTER: (name: string) =>
         `cannot find native function or custom formatter called ${name}`,
-    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`
+    UNKNOWN_VAR: (name: string) => `unknown var "${name}"`,
 };
 
 export function resolveArgumentsValue(
@@ -88,12 +88,12 @@ export function processDeclarationValue(
         switch (type) {
             case 'function':
                 if (value === 'value') {
-                    const parsedArgs = strategies.args(parsedNode).map(x => x.value);
+                    const parsedArgs = strategies.args(parsedNode).map((x) => x.value);
                     if (parsedArgs.length >= 1) {
                         const varName = parsedArgs[0];
                         const getArgs = parsedArgs
                             .slice(1)
-                            .map(arg =>
+                            .map((arg) =>
                                 evalDeclarationValue(
                                     resolver,
                                     arg,
@@ -207,12 +207,12 @@ export function processDeclarationValue(
                                         node,
                                         functionWarnings.CANNOT_USE_JS_AS_VALUE(varName),
                                         {
-                                            word: varName
+                                            word: varName,
                                         }
                                     );
                                 }
                             } else {
-                                const namedDecl = varSymbol.import.rule.nodes!.find(node => {
+                                const namedDecl = varSymbol.import.rule.nodes!.find((node) => {
                                     return node.type === 'decl' && node.prop === valueMapping.named;
                                 });
                                 if (namedDecl && diagnostics && node) {
@@ -226,7 +226,7 @@ export function processDeclarationValue(
                             }
                         } else if (diagnostics && node) {
                             diagnostics.warn(node, functionWarnings.UNKNOWN_VAR(varName), {
-                                word: varName
+                                word: varName,
                             });
                         }
                     }
@@ -288,7 +288,7 @@ export function processDeclarationValue(
                         } else if (diagnostics && node) {
                             parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
                             diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
-                                word: value
+                                word: value,
                             });
                         }
                     }
@@ -363,11 +363,11 @@ function handleCyclicValues(
     value: string,
     parsedNode: ParsedValue
 ) {
-    const cyclicChain = passedThrough.map(variable => variable || '');
+    const cyclicChain = passedThrough.map((variable) => variable || '');
     cyclicChain.push(refUniqID);
     if (diagnostics && node) {
         diagnostics.warn(node, functionWarnings.CYCLIC_VALUE(cyclicChain), {
-            word: refUniqID
+            word: refUniqID,
         });
     }
     return stringifyFunction(value, parsedNode);

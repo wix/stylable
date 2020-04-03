@@ -10,7 +10,7 @@ import {
     isRootValid,
     parseSelector,
     SelectorAstNode,
-    traverseNode
+    traverseNode,
 } from './selector-utils';
 import { processDeclarationUrls } from './stylable-assets';
 import {
@@ -22,21 +22,21 @@ import {
     RefedMixin,
     StylableDirectives,
     StylableMeta,
-    VarSymbol
+    VarSymbol,
 } from './stylable-meta';
 import {
     CUSTOM_SELECTOR_RE,
     expandCustomSelectors,
     getAlias,
     isCSSVarProp,
-    scopeSelector
+    scopeSelector,
 } from './stylable-utils';
 import {
     rootValueMapping,
     SBTypesParsers,
     stValuesMap,
     validateAllowedNodesUntil,
-    valueMapping
+    valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
@@ -131,7 +131,7 @@ export const processorWarnings = {
     },
     ILLEGAL_CSS_VAR_ARGS(name: string) {
         return `css variable "${name}" usage (var()) must receive comma separated values`;
-    }
+    },
 };
 
 export class StylableProcessor {
@@ -154,7 +154,7 @@ export class StylableProcessor {
             }
         });
 
-        root.walkDecls(decl => {
+        root.walkDecls((decl) => {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             } else if (isCSSVarProp(decl.prop)) {
@@ -167,24 +167,24 @@ export class StylableProcessor {
 
             processDeclarationUrls(
                 decl,
-                node => {
+                (node) => {
                     this.meta.urls.push(node.url!);
                 },
                 false
             );
         });
 
-        this.meta.scopes.forEach(atRule => {
+        this.meta.scopes.forEach((atRule) => {
             const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
             this.handleRule(scopingRule, true);
             validateScopingSelector(atRule, scopingRule, this.diagnostics);
 
             if (scopingRule.selector) {
-                atRule.walkRules(rule => {
+                atRule.walkRules((rule) => {
                     rule.replaceWith(
                         rule.clone({
                             selector: scopeSelector(scopingRule.selector, rule.selector, false)
-                                .selector
+                                .selector,
                         })
                     );
                 });
@@ -192,13 +192,13 @@ export class StylableProcessor {
 
             atRule.replaceWith(atRule.nodes || []);
         });
-        stubs.forEach(s => s && s.remove());
+        stubs.forEach((s) => s && s.remove());
 
         return this.meta;
     }
 
     public insertCustomSelectorsStubs() {
-        return Object.keys(this.meta.customSelectors).map(selector => {
+        return Object.keys(this.meta.customSelectors).map((selector) => {
             if (this.meta.customSelectors[selector]) {
                 const rule = postcss.rule({ selector });
                 this.meta.ast.append(rule);
@@ -215,7 +215,7 @@ export class StylableProcessor {
     protected handleAtRules(root: postcss.Root) {
         let namespace = '';
         const toRemove: postcss.Node[] = [];
-        root.walkAtRules(atRule => {
+        root.walkAtRules((atRule) => {
             switch (atRule.name) {
                 case 'namespace': {
                     const match = atRule.params.match(/["'](.*?)['"]/);
@@ -274,7 +274,7 @@ export class StylableProcessor {
                                 this.meta.cssVars[cssVar] = {
                                     _kind: 'cssVar',
                                     name: cssVar,
-                                    global: true
+                                    global: true,
                                 };
                                 this.meta.mappedSymbols[cssVar] = this.meta.cssVars[cssVar];
                             }
@@ -291,14 +291,14 @@ export class StylableProcessor {
                 }
             }
         });
-        toRemove.forEach(node => node.remove());
+        toRemove.forEach((node) => node.remove());
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
 
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        this.meta.ast.walkComments(comment => {
+        this.meta.ast.walkComments((comment) => {
             if (comment.text.includes('st-namespace-reference')) {
                 const namespaceReferenceParts = comment.text.split('=');
                 pathToSource = stripQuotation(
@@ -380,7 +380,7 @@ export class StylableProcessor {
                         locallyScoped = true;
                     } else if (locallyScoped === false && !inStScope) {
                         this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
-                            word: name
+                            word: name,
                         });
                     }
                 }
@@ -389,7 +389,7 @@ export class StylableProcessor {
 
                 if (locallyScoped === false && !inStScope) {
                     this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
-                        word: name
+                        word: name,
                     });
                 }
             } else if (type === 'nested-pseudo-class' && name === 'global') {
@@ -414,7 +414,7 @@ export class StylableProcessor {
         const symbol = this.meta.mappedSymbols[symbolName];
         if (symbol) {
             this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL(symbolName), {
-                word: symbolName
+                word: symbolName,
             });
         }
     }
@@ -430,12 +430,12 @@ export class StylableProcessor {
             this.meta.elements[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'element',
                 name,
-                alias
+                alias,
             };
 
             this.meta.simpleSelectors[name] = {
                 node: rule,
-                symbol: this.meta.elements[name]
+                symbol: this.meta.elements[name],
             };
         }
     }
@@ -451,18 +451,18 @@ export class StylableProcessor {
             this.meta.classes[name] = this.meta.mappedSymbols[name] = {
                 _kind: 'class',
                 name,
-                alias
+                alias,
             };
 
             this.meta.simpleSelectors[name] = {
                 node: rule,
-                symbol: this.meta.mappedSymbols[name] as ClassSymbol
+                symbol: this.meta.mappedSymbols[name] as ClassSymbol,
             };
         } else if (name === this.meta.root && !this.meta.simpleSelectors[name]) {
             // special handling for registering "root" node comments
             this.meta.simpleSelectors[name] = {
                 node: rule,
-                symbol: this.meta.classes[name]
+                symbol: this.meta.classes[name],
             };
         }
     }
@@ -475,23 +475,23 @@ export class StylableProcessor {
                 type: 'default',
                 name: 'default',
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: path.dirname(this.meta.source),
             };
         }
-        Object.keys(importDef.named).forEach(name => {
+        Object.keys(importDef.named).forEach((name) => {
             this.checkRedeclareSymbol(name, importDef.rule);
             this.meta.mappedSymbols[name] = {
                 _kind: 'import',
                 type: 'named',
                 name: importDef.named[name],
                 import: importDef,
-                context: path.dirname(this.meta.source)
+                context: path.dirname(this.meta.source),
             };
         });
     }
 
     protected addVarSymbols(rule: postcss.Rule) {
-        rule.walkDecls(decl => {
+        rule.walkDecls((decl) => {
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 
@@ -509,7 +509,7 @@ export class StylableProcessor {
                 value: '',
                 text: decl.value,
                 node: decl,
-                valueType: type
+                valueType: type,
             };
             this.meta.vars.push(varSymbol);
             this.meta.mappedSymbols[decl.prop] = varSymbol;
@@ -519,13 +519,13 @@ export class StylableProcessor {
 
     protected handleCSSVarUse(decl: postcss.Declaration) {
         const parsed = postcssValueParser(decl.value);
-        parsed.walk(node => {
+        parsed.walk((node) => {
             if (node.type === 'function' && node.value === 'var' && node.nodes) {
                 const varName = node.nodes[0];
                 if (!validateAllowedNodesUntil(node, 1)) {
                     const args = postcssValueParser.stringify(node.nodes);
                     this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_ARGS(args), {
-                        word: args
+                        word: args,
                     });
                 }
 
@@ -544,7 +544,7 @@ export class StylableProcessor {
             if (!this.meta.cssVars[varName]) {
                 const cssVarSymbol: CSSVarSymbol = {
                     _kind: 'cssVar',
-                    name: varName
+                    name: varName,
                 };
                 this.meta.cssVars[varName] = cssVarSymbol;
                 if (!this.meta.mappedSymbols[varName]) {
@@ -553,7 +553,7 @@ export class StylableProcessor {
             }
         } else {
             this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
-                word: varName
+                word: varName,
             });
         }
     }
@@ -607,7 +607,7 @@ export class StylableProcessor {
             const mixins: RefedMixin[] = [];
             parseMixin(
                 decl,
-                type => {
+                (type) => {
                     const mixinRefSymbol = this.meta.mappedSymbols[type];
                     if (
                         mixinRefSymbol &&
@@ -619,7 +619,7 @@ export class StylableProcessor {
                     return 'named';
                 },
                 this.diagnostics
-            ).forEach(mixin => {
+            ).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
 
                 if (
@@ -628,13 +628,13 @@ export class StylableProcessor {
                 ) {
                     const refedMixin = {
                         mixin,
-                        ref: mixinRefSymbol
+                        ref: mixinRefSymbol,
                     };
                     mixins.push(refedMixin);
                     this.meta.mixins.push(refedMixin);
                 } else {
                     this.diagnostics.warn(decl, processorWarnings.UNKNOWN_MIXIN(mixin.type), {
-                        word: mixin.type
+                        word: mixin.type,
                     });
                 }
             });
@@ -671,7 +671,7 @@ export class StylableProcessor {
         const typedRule = this.meta.mappedSymbols[name] as ClassSymbol | ElementSymbol;
         if (typedRule && typedRule[key]) {
             this.diagnostics.warn(node, processorWarnings.OVERRIDE_TYPED_RULE(key, name), {
-                word: name
+                word: name,
             });
         }
         if (typedRule) {
@@ -687,10 +687,10 @@ export class StylableProcessor {
             fromRelative: '',
             named: {},
             rule,
-            context: path.dirname(this.meta.source)
+            context: path.dirname(this.meta.source),
         };
 
-        rule.walkDecls(decl => {
+        rule.walkDecls((decl) => {
             switch (decl.prop) {
                 case valueMapping.from: {
                     const importPath = stripQuotation(decl.value);

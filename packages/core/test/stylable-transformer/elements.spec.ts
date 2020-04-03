@@ -17,13 +17,13 @@ describe('Stylable transform elements', () => {
                             }
                             Element {}
                             .root Element {}
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'ns1',
-                        content: ``
-                    }
-                }
+                        content: ``,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root');
@@ -42,15 +42,15 @@ describe('Stylable transform elements', () => {
                                 -st-default: Element;
                             }
                             Element::part {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
                             .part {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal(
@@ -72,7 +72,7 @@ describe('Stylable transform elements', () => {
                             .x {
                                 -st-extends: ButtonX;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'ns1',
@@ -82,13 +82,13 @@ describe('Stylable transform elements', () => {
                                 -st-default: ButtonX;
                             }
                             ButtonX{}
-                        `
+                        `,
                     },
                     '/button-x.st.css': {
                         namespace: 'button-x',
-                        content: ``
-                    }
-                }
+                        content: ``,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__x');
@@ -107,7 +107,7 @@ describe('Stylable transform elements', () => {
                             }
 
                             Element {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'inner',
@@ -117,15 +117,15 @@ describe('Stylable transform elements', () => {
                                 -st-default: Element;
                             }
                             Element {}
-                        `
+                        `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
                         content: `
                             .root {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base__root');

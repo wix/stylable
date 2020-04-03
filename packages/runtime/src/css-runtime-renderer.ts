@@ -28,7 +28,7 @@ export class RuntimeRenderer {
         this.renderer = createDOMListRenderer(
             new CacheStyleNodeRenderer({
                 attrKey: 'st-id' + (this.id ? '-' + this.id : ''),
-                createElement: _window.document.createElement.bind(_window.document)
+                createElement: _window.document.createElement.bind(_window.document),
             })
         );
         this.update();
@@ -74,7 +74,7 @@ export class RuntimeRenderer {
     }
     public getStyles(ids: string[], sortIndexes: boolean) {
         return this.sortStyles(
-            ids.map(id => this.stylesMap[id]),
+            ids.map((id) => this.stylesMap[id]),
             sortIndexes
         );
     }

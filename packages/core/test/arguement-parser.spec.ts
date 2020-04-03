@@ -12,7 +12,7 @@ function test(
     it(desc, () => {
         const actualWarnings: string[] = [];
         const [firstNode] = postcssValueParser(src).nodes;
-        const formatterArgs = getFormatterArgs(firstNode, allowComments, msg =>
+        const formatterArgs = getFormatterArgs(firstNode, allowComments, (msg) =>
             actualWarnings.push(msg)
         );
         expect(formatterArgs).to.eql(expected);
@@ -51,13 +51,13 @@ describe('Value argument parsing (split by comma)', () => {
 
         test('should process a function with string argument', 'func("A")', ['A']);
         test('should process a function with string argument and extra value', 'func("A" 10px)', [
-            'A 10px'
+            'A 10px',
         ]);
     });
 
     describe('invalid inputs', () => {
         test('should process a function with only a comment after a comma', 'func(a, /* BLAH*/)', [
-            'a'
+            'a',
         ]);
         test(
             'should process only comments in args',
@@ -75,7 +75,7 @@ describe('Value argument parsing (split by comma)', () => {
             false,
             [
                 'func(a,/**/ /**/,): argument at index 1 is empty',
-                'func(a,/**/ /**/,): argument at index 2 is empty'
+                'func(a,/**/ /**/,): argument at index 2 is empty',
             ]
         );
     });

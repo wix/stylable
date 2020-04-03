@@ -9,13 +9,13 @@ describe('Exports to js', () => {
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
-                        content: ``
-                    }
-                }
+                        content: ``,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry__root'
+                root: 'entry__root',
             });
         });
 
@@ -28,15 +28,15 @@ describe('Exports to js', () => {
                         content: `
                             .classA {}
                             .classB {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
                 root: 'entry__root',
                 classA: 'entry__classA',
-                classB: 'entry__classB'
+                classB: 'entry__classB',
             });
         });
 
@@ -48,13 +48,13 @@ describe('Exports to js', () => {
                         namespace: 'entry',
                         content: `
                             :global(.classA) {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry__root'
+                root: 'entry__root',
             });
         });
 
@@ -69,19 +69,19 @@ describe('Exports to js', () => {
                                 -st-from: "./imported.st.css";
                                 -st-named: my-class;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
                         content: `
                             .my-class {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
-                root: 'entry__root'
+                root: 'entry__root',
             });
         });
 
@@ -97,20 +97,20 @@ describe('Exports to js', () => {
                                 -st-named: my-class;
                             }
                             .my-class{}
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
                         content: `
                             .my-class {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
                 root: 'entry__root',
-                'my-class': 'imported__my-class'
+                'my-class': 'imported__my-class',
             });
         });
 
@@ -128,20 +128,20 @@ describe('Exports to js', () => {
                             .local-class {
                                 -st-extends: my-class;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
                         content: `
                             .my-class {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes).to.eql({
                 root: 'entry__root',
-                'local-class': 'entry__local-class imported__my-class'
+                'local-class': 'entry__local-class imported__my-class',
             });
         });
 
@@ -157,7 +157,7 @@ describe('Exports to js', () => {
                                 -st-named: my-class;
                             }
                             .my-class {}
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
@@ -167,15 +167,15 @@ describe('Exports to js', () => {
                                 -st-named: my-class;
                             }
                             .my-class {}
-                        `
+                        `,
                     },
                     '/project.st.css': {
                         namespace: 'project',
                         content: `
                             .my-class {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.classes['my-class']).to.equal('project__my-class');
@@ -193,7 +193,7 @@ describe('Exports to js', () => {
                                 -st-named: Elm;
                             }
                             Elm {}
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
@@ -203,9 +203,9 @@ describe('Exports to js', () => {
                                 -st-default: Elm;
                             }
                             Elm {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.Elm).to.equal(undefined);
         });
@@ -224,14 +224,14 @@ describe('Exports to js', () => {
                             .root {
                                 -st-extends: Elm; 
                             }
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
                         content: `
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.root).to.equal('entry__root');
         });
@@ -247,9 +247,9 @@ describe('Exports to js', () => {
                                 -st-extends: y; 
                             }
                             .y {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.root).to.equal('entry__root entry__y');
         });
@@ -268,15 +268,15 @@ describe('Exports to js', () => {
                             .root {
                                 -st-extends: y; 
                             }
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
                         content: `
                             .y{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.root).to.equal('entry__root index__y');
         });
@@ -295,7 +295,7 @@ describe('Exports to js', () => {
                             .root {
                                 -st-extends: y; 
                             }
-                        `
+                        `,
                     },
                     '/alias.st.css': {
                         namespace: 'alias',
@@ -306,15 +306,15 @@ describe('Exports to js', () => {
                             }
 
                             .y{}
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
                         content: `
                             .y{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.root).to.equal('entry__root index__y');
         });
@@ -333,7 +333,7 @@ describe('Exports to js', () => {
                             .root {
                                 -st-extends: x; 
                             }
-                        `
+                        `,
                     },
                     '/middle.st.css': {
                         namespace: 'middle',
@@ -346,15 +346,15 @@ describe('Exports to js', () => {
                             .x{
                                 -st-extends: y;
                             }
-                        `
+                        `,
                     },
                     '/index.st.css': {
                         namespace: 'index',
                         content: `
                             .y{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.root).to.equal('entry__root middle__x index__y');
         });
@@ -379,15 +379,15 @@ describe('Exports to js', () => {
                             .extending {
                                 -st-extends: local2;
                             }
-                        `
+                        `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
                         content: `
                             .root {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes.extending).to.equal(
                 'entry__extending entry__local2 entry__local'
@@ -412,7 +412,7 @@ describe('Exports to js', () => {
                             .z { 
                                 -st-mixin: x; 
                             }
-                        `
+                        `,
                     },
                     '/middle.st.css': {
                         namespace: 'middle',
@@ -420,13 +420,13 @@ describe('Exports to js', () => {
                             .x {
                             }
                             .x .y {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect(cssExports.classes).to.eql({
                 root: 'entry__root',
-                z: 'entry__z'
+                z: 'entry__z',
             });
         });
     });
@@ -442,13 +442,13 @@ describe('Exports to js', () => {
                             :vars {
                                 color1: red;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.stVars).to.eql({
-                color1: 'red'
+                color1: 'red',
             });
         });
 
@@ -463,7 +463,7 @@ describe('Exports to js', () => {
                                 -st-from: "./imported.st.css";
                                 -st-named: color1;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -471,9 +471,9 @@ describe('Exports to js', () => {
                             :vars {
                                 color1: red;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.stVars).to.eql({});
@@ -493,7 +493,7 @@ describe('Exports to js', () => {
                             :vars {
                                 color2: value(color1);
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -501,13 +501,13 @@ describe('Exports to js', () => {
                             :vars {
                                 color1: red;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.stVars).to.eql({
-                color2: 'red'
+                color2: 'red',
             });
         });
 
@@ -525,9 +525,9 @@ describe('Exports to js', () => {
                                 deepObject: stMap(x 1, y 2, z stMap(x 1, y 2));
                                 mixed: stMap(x 1, y stArray(2, 3, stArray(4, stMap(z 5))));
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.stVars).to.eql({
@@ -535,7 +535,7 @@ describe('Exports to js', () => {
                 deepArray: ['1', ['2', '3'], ['1', '2', '3']],
                 object: { x: '1', y: '2' },
                 deepObject: { x: '1', y: '2', z: { x: '1', y: '2' } },
-                mixed: { x: '1', y: ['2', '3', ['4', { z: '5' }]] }
+                mixed: { x: '1', y: ['2', '3', ['4', { z: '5' }]] },
             });
         });
     });
@@ -551,13 +551,13 @@ describe('Exports to js', () => {
                             @keyframes name {
 
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(cssExports.keyframes).to.eql({
-                name: 'entry__name'
+                name: 'entry__name',
             });
         });
     });
@@ -573,13 +573,13 @@ describe('Exports to js', () => {
                             .root {
                                 --myVar: green;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.vars).to.eql({
-                myVar: '--entry-myVar'
+                myVar: '--entry-myVar',
             });
         });
 
@@ -594,7 +594,7 @@ describe('Exports to js', () => {
                                 -st-from: "./imported.st.css";
                                 -st-named: --myVar;
                             }
-                            `
+                            `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -602,13 +602,13 @@ describe('Exports to js', () => {
                             .root {
                                 --myVar: green;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.vars).to.eql({
-                myVar: '--imported-myVar'
+                myVar: '--imported-myVar',
             });
         });
 
@@ -623,7 +623,7 @@ describe('Exports to js', () => {
                                 -st-from: "./imported.st.css";
                                 -st-named: --myVar as --renamed;
                             }
-                            `
+                            `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -631,13 +631,13 @@ describe('Exports to js', () => {
                             .root {
                                 --myVar: green;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.vars).to.eql({
-                renamed: '--imported-myVar'
+                renamed: '--imported-myVar',
             });
         });
 
@@ -655,7 +655,7 @@ describe('Exports to js', () => {
                             .root {
                                 --topVar: blue;
                             }
-                            `
+                            `,
                     },
                     '/mid.st.css': {
                         namespace: 'mid',
@@ -667,7 +667,7 @@ describe('Exports to js', () => {
                             .root {
                                 --midVar: green;
                             }
-                            `
+                            `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
@@ -675,15 +675,15 @@ describe('Exports to js', () => {
                             .root {
                                 --baseVar: red;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.vars).to.eql({
                 baseVar: '--base-baseVar',
                 midVar: '--mid-midVar',
-                topVar: '--entry-topVar'
+                topVar: '--entry-topVar',
             });
         });
 
@@ -707,7 +707,7 @@ describe('Exports to js', () => {
                                 --localGlobal1: 7;
                                 --localGlobal2: 8;
                             }
-                            `
+                            `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -720,9 +720,9 @@ describe('Exports to js', () => {
                                 --importedGlobal1: 3;
                                 --importedGlobal2: 4;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports.vars).to.eql({
@@ -733,7 +733,7 @@ describe('Exports to js', () => {
                 importedScoped1: '--imported-importedScoped1',
                 importedScoped2: '--imported-importedScoped2',
                 importedGlobal1: '--importedGlobal1',
-                importedGlobal2: '--importedGlobal2'
+                importedGlobal2: '--importedGlobal2',
             });
         });
     });
@@ -758,25 +758,25 @@ describe('Exports to js', () => {
                                 --cssVar: blue;
                             }
                             .part {}
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(cssExports).to.eql({
                 classes: {
                     root: 'entry__root',
-                    part: 'entry__part'
+                    part: 'entry__part',
                 },
                 vars: {
-                    cssVar: '--entry-cssVar'
+                    cssVar: '--entry-cssVar',
                 },
                 stVars: {
-                    stVar: 'green'
+                    stVar: 'green',
                 },
                 keyframes: {
-                    name: 'entry__name'
-                }
+                    name: 'entry__name',
+                },
             });
         });
     });

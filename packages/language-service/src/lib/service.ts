@@ -16,7 +16,7 @@ import {
     Range,
     SignatureHelp,
     TextEdit,
-    WorkspaceEdit
+    WorkspaceEdit,
 } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 
@@ -96,7 +96,7 @@ export class StylableLanguageService {
                 this.fs
             );
 
-            return res.map(loc => Location.create(URI.file(loc.uri).toString(), loc.range));
+            return res.map((loc) => Location.create(URI.file(loc.uri).toString(), loc.range));
         }
 
         return [];
@@ -194,13 +194,15 @@ export class StylableLanguageService {
                 stylableFile.content
             );
 
-            getRenameRefs(filePath, doc.positionAt(offset), this.fs, this.stylable).forEach(ref => {
-                if (edit.changes![ref.uri]) {
-                    edit.changes![ref.uri].push({ range: ref.range, newText: newName });
-                } else {
-                    edit.changes![ref.uri] = [{ range: ref.range, newText: newName }];
+            getRenameRefs(filePath, doc.positionAt(offset), this.fs, this.stylable).forEach(
+                (ref) => {
+                    if (edit.changes![ref.uri]) {
+                        edit.changes![ref.uri].push({ range: ref.range, newText: newName });
+                    } else {
+                        edit.changes![ref.uri] = [{ range: ref.range, newText: newName }];
+                    }
                 }
-            });
+            );
         }
 
         return edit;
@@ -247,7 +249,7 @@ export class StylableLanguageService {
             content,
             {
                 line: position.line,
-                character: position.character
+                character: position.character,
             },
             filePath,
             this.fs
@@ -304,7 +306,7 @@ export class StylableLanguageService {
             URI.file(filePath).fsPath,
             this.fs
         );
-        return defs.map(loc => Location.create(URI.file(loc.uri).fsPath, loc.range));
+        return defs.map((loc) => Location.create(URI.file(loc.uri).fsPath, loc.range));
     }
 
     public getSignatureHelp(
@@ -360,7 +362,7 @@ export class StylableLanguageService {
             const content = this.fs.readFileSync(filePath, 'utf8');
             return {
                 content,
-                stat
+                stat,
             };
         }
 

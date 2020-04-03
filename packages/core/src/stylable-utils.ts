@@ -8,7 +8,7 @@ import {
     SDecl,
     SRule,
     StylableMeta,
-    StylableSymbol
+    StylableSymbol,
 } from './stylable-processor';
 
 import {
@@ -17,7 +17,7 @@ import {
     parseSelector,
     SelectorAstNode,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
@@ -40,7 +40,7 @@ export function expandCustomSelectors(
             (extensionName, _matches, selector) => {
                 if (!customSelectors[extensionName] && diagnostics) {
                     diagnostics.warn(rule, `The selector '${rule.selector}' is undefined`, {
-                        word: rule.selector
+                        word: rule.selector,
                     });
                     return selector;
                 }
@@ -67,8 +67,8 @@ export function scopeSelector(
     const targetSelectorAst = parseSelector(targetSelectorRule);
 
     const nodes: any[] = [];
-    targetSelectorAst.nodes.forEach(targetSelector => {
-        scopingSelectorAst.nodes.forEach(scopingSelector => {
+    targetSelectorAst.nodes.forEach((targetSelector) => {
+        scopingSelectorAst.nodes.forEach((scopingSelector) => {
             const outputSelector: any = cloneDeep(targetSelector);
 
             outputSelector.before = scopingSelector.before || outputSelector.before;
@@ -98,7 +98,7 @@ export function scopeSelector(
             ) {
                 outputSelector.nodes.unshift(...cloneDeep(scopingSelector.nodes), {
                     type: 'spacing',
-                    value: ' '
+                    value: ' ',
                 });
             }
 
@@ -116,7 +116,7 @@ export function scopeSelector(
 
     return {
         selector: stringifySelector(scopingSelectorAst),
-        selectorAst: scopingSelectorAst
+        selectorAst: scopingSelectorAst,
     };
 }
 
@@ -140,16 +140,16 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
         let mixinEntry: postcss.Declaration | null = null;
 
-        rule.walkDecls(valueMapping.mixin, decl => {
+        rule.walkDecls(valueMapping.mixin, (decl) => {
             mixinEntry = decl;
         });
         if (!mixinEntry) {
             throw rule.error('missing mixin entry');
         }
         // TODO: handle rules before and after decl on entry
-        mixinAst.nodes.slice().forEach(node => {
+        mixinAst.nodes.slice().forEach((node) => {
             if (node === mixinRoot) {
-                node.walkDecls(node => {
+                node.walkDecls((node) => {
                     rule.insertBefore(mixinEntry!, node);
                 });
             } else if (node.type === 'decl') {
@@ -180,7 +180,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
 
-    root.nodes!.forEach(node => {
+    root.nodes!.forEach((node) => {
         if (node.type === 'rule') {
             const ast = isRoot
                 ? scopeSelector(selectorPrefix, node.selector, true).selectorAst
@@ -188,21 +188,21 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
 
             const matchesSelectors = isRoot
                 ? ast.nodes
-                : ast.nodes.filter(node => containsPrefix(node));
+                : ast.nodes.filter((node) => containsPrefix(node));
 
             if (matchesSelectors.length) {
                 const selector = stringifySelector({
                     ...ast,
-                    nodes: matchesSelectors.map(selectorNode => {
+                    nodes: matchesSelectors.map((selectorNode) => {
                         if (!isRoot) {
                             fixChunkOrdering(selectorNode, prefixType);
                         }
 
                         return destructiveReplaceNode(selectorNode, prefixType, {
                             type: 'invalid',
-                            value: '&'
+                            value: '&',
                         } as SelectorAstNode);
-                    })
+                    }),
                 });
 
                 mixinRoot.append(node.clone({ selector }));
@@ -214,7 +214,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
                     selectorPrefix,
                     postcss.atRule({
                         params: node.params,
-                        name: node.name
+                        name: node.name,
                     }),
                     isRoot
                 );
@@ -245,7 +245,7 @@ export function removeUnusedRules(
         const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
         ast.walkRules((rule: SRule) => {
             let shouldOutput = true;
-            traverseNode(rule.selectorAst, node => {
+            traverseNode(rule.selectorAst, (node) => {
                 // TODO: remove.
                 if (symbols.includes(node.name)) {
                     return (shouldOutput = false);
@@ -285,7 +285,7 @@ export function findRule(
     test: any = (statement: any) => statement.prop === valueMapping.extends
 ): null | postcss.Declaration {
     let found: any = null;
-    root.walkRules(selector, rule => {
+    root.walkRules(selector, (rule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
         if ((rule as SRule).isSimpleSelector && !!~declarationIndex) {
             found = rule.nodes![declarationIndex];
@@ -308,7 +308,7 @@ function destructiveReplaceNode(
     matchNode: SelectorAstNode,
     replacementNode: SelectorAstNode
 ) {
-    traverseNode(ast, node => {
+    traverseNode(ast, (node) => {
         if (isNodeMatch(node, matchNode)) {
             node.type = 'selector';
             node.nodes = [replacementNode];
@@ -319,7 +319,7 @@ function destructiveReplaceNode(
 
 function containsMatchInFirstChunk(prefixType: SelectorAstNode, selectorNode: SelectorAstNode) {
     let isMatch = false;
-    traverseNode(selectorNode, node => {
+    traverseNode(selectorNode, (node) => {
         if (node.type === 'operator' || node.type === 'spacing') {
             return false;
         } else if (node.type === 'nested-pseudo-class') {

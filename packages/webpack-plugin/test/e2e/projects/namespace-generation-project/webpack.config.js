@@ -8,7 +8,7 @@ module.exports = {
     target: 'node',
     output: {
         library: 'testPackage',
-        libraryTarget: 'commonjs'
+        libraryTarget: 'commonjs',
     },
     plugins: [
         new StylableWebpackPlugin({
@@ -18,9 +18,9 @@ module.exports = {
                 removeUnusedComponents: false,
                 classNameOptimizations: false,
                 shortNamespaces: false,
-                minify: false
-            }
+                minify: false,
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

@@ -17,7 +17,7 @@ export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
     const filePaths = new Map<string, { content: string; mtime: Date }>(
         Object.entries(files).map(([filePath, { content, mtime = creationDate }]) => [
             filePath,
-            { content, mtime }
+            { content, mtime },
         ])
     );
     const directoryPaths = new Set<string>();
@@ -52,18 +52,18 @@ export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
                 isFile() {
                     return !!fileEntry;
                 },
-                mtime: fileEntry ? fileEntry.mtime : new Date()
+                mtime: fileEntry ? fileEntry.mtime : new Date(),
             };
         },
         readlinkSync() {
             throw new Error(`not implemented`);
-        }
+        },
     };
 
     const requireModule = function require(id: string): any {
         const _module = {
             id,
-            exports: {}
+            exports: {},
         };
         try {
             if (!id.match(/\.js$/)) {
@@ -84,7 +84,7 @@ export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
     return {
         fs,
         requireModule,
-        resolvePath
+        resolvePath,
     };
 }
 

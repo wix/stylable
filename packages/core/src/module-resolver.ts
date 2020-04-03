@@ -11,7 +11,7 @@ export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any
     const eResolver = ResolverFactory.createResolver({
         useSyncFileSystemCalls: true,
         fileSystem,
-        ...resolveOptions
+        ...resolveOptions,
     });
 
     return (directoryPath, request) =>

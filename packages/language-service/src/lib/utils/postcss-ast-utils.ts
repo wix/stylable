@@ -44,7 +44,7 @@ export function isBeforeRuleset(position: ProviderPosition, node: postcss.NodeBa
     const part = ((node.source!.input as any).css as string)
         .split('\n')
         .slice(node.source!.start!.line - 1, node.source!.end ? node.source!.end.line : undefined);
-    if (part.findIndex(s => s.includes('{')) + node.source!.start!.line > position.line) {
+    if (part.findIndex((s) => s.includes('{')) + node.source!.start!.line > position.line) {
         return true;
     }
     if (part[position.line - node.source!.start!.line].indexOf('{') >= position.character) {
@@ -57,7 +57,7 @@ export function isAfterRuleset(position: ProviderPosition, node: postcss.NodeBas
     const part = ((node.source!.input as any).css as string)
         .split('\n')
         .slice(node.source!.start!.line - 1, node.source!.end!.line);
-    if (part.findIndex(s => s.includes('}')) + node.source!.start!.line < position.line) {
+    if (part.findIndex((s) => s.includes('}')) + node.source!.start!.line < position.line) {
         return true;
     }
     if (

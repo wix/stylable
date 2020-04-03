@@ -20,7 +20,7 @@ export function getCssDocsForSymbol(meta: StylableMeta, symbol: StylableSymbol):
         const { comments, pragmas } = parseWithComments(extract(commentNode.toString()));
         const res: CssDoc = {
             description: comments,
-            tags: {}
+            tags: {},
         };
 
         for (const [pragmaName, pragmaValue] of Object.entries(pragmas)) {

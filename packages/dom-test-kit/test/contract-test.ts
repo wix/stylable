@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 
 export const contractTest = (
     StylableUtilClass: any,
-    wrapEl: (el: HTMLElement) => any = el => el,
+    wrapEl: (el: HTMLElement) => any = (el) => el,
     options: { scopeSelectorTest: boolean } = { scopeSelectorTest: true }
 ) => () => {
     const s = create(
@@ -13,7 +13,7 @@ export const contractTest = (
             classes: { root: 'ns-root', x: 'ns__x', y: 'ns__y', z: 'ns__z ns__y' },
             keyframes: {},
             vars: {},
-            stVars: {}
+            stVars: {},
         },
         '',
         0,

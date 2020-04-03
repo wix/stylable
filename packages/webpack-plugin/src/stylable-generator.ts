@@ -25,11 +25,11 @@ export class StylableGenerator {
         const css = this.options.includeCSSInJS
             ? this.stringifyCSS(
                   module,
-                  module =>
+                  (module) =>
                       `" + (function(m){return m.default || m})(__webpack_require__(${runtimeTemplate.moduleId(
                           {
                               module,
-                              request: module.request
+                              request: module.request,
                           }
                       )})) + "`,
                   true,
@@ -45,7 +45,7 @@ export class StylableGenerator {
                 ? JSON.stringify(module.buildInfo.stylableMeta.namespace)
                 : runtimeTemplate.moduleId({
                       module,
-                      request: module.request
+                      request: module.request,
                   });
 
         return new ReplaceSource(
@@ -66,7 +66,7 @@ export class StylableGenerator {
     private afterTransform(module: StylableModule) {
         const results = {
             meta: module.buildInfo.stylableMeta,
-            exports: module.buildInfo.stylableTransformedExports
+            exports: module.buildInfo.stylableTransformedExports,
         };
 
         if (module.buildInfo.stylableTransformed) {
@@ -92,7 +92,7 @@ export class StylableGenerator {
     }
     private reportDiagnostics(meta: StylableMeta) {
         const transformReports = meta.transformDiagnostics ? meta.transformDiagnostics.reports : [];
-        meta.diagnostics.reports.concat(transformReports).forEach(report => {
+        meta.diagnostics.reports.concat(transformReports).forEach((report) => {
             if (report.node) {
                 this.compilation.warnings.push(
                     report.node

@@ -31,7 +31,7 @@ export class StylableMeta {
         const rootSymbol: ClassSymbol = {
             _kind: 'class',
             name: RESERVED_ROOT_NAME,
-            [valueMapping.root]: true
+            [valueMapping.root]: true,
         };
 
         this.rawAst = ast.clone();
@@ -44,10 +44,10 @@ export class StylableMeta {
         this.keyframes = [];
         this.elements = {};
         this.classes = {
-            [RESERVED_ROOT_NAME]: rootSymbol
+            [RESERVED_ROOT_NAME]: rootSymbol,
         };
         this.mappedSymbols = {
-            [RESERVED_ROOT_NAME]: rootSymbol
+            [RESERVED_ROOT_NAME]: rootSymbol,
         };
         this.customSelectors = {};
         this.urls = [];

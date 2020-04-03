@@ -1,7 +1,7 @@
 import {
     expectWarnings,
     expectWarningsFromTransform,
-    findTestLocations
+    findTestLocations,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { functionWarnings, mixinWarnings, valueMapping } from '../src';
@@ -172,8 +172,8 @@ describe('diagnostics: warnings and errors', () => {
                         {
                             message:
                                 'global pseudo elements are not allowed, you can use ".root::before" instead',
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -187,15 +187,15 @@ describe('diagnostics: warnings and errors', () => {
                                 content: `
                                 |.root::$myBtn$|{
 
-                                }`
-                            }
-                        }
+                                }`,
+                            },
+                        },
                     };
                     expectWarningsFromTransform(config, [
                         {
                             message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('myBtn'),
-                            file: '/main.css'
-                        }
+                            file: '/main.css',
+                        },
                     ]);
                 });
                 it('should not warn on vendor prefixed pseudo element', () => {
@@ -206,9 +206,9 @@ describe('diagnostics: warnings and errors', () => {
                                 content: `
                                 .root::-webkit-element{
 
-                                }`
-                            }
-                        }
+                                }`,
+                            },
+                        },
                     };
                     expectWarningsFromTransform(config, []);
                 });
@@ -220,13 +220,13 @@ describe('diagnostics: warnings and errors', () => {
                                 content: `
                                 .root:-webkit-hover{
 
-                                }`
-                            }
-                        }
+                                }`,
+                            },
+                        },
                     };
                     expectWarningsFromTransform(config, []);
                 });
-                nativePseudoElements.forEach(nativeElement => {
+                nativePseudoElements.forEach((nativeElement) => {
                     it(`should not return a warning for native ${nativeElement} pseudo element`, () => {
                         const selector = `|.root::$${nativeElement}$|{`;
                         const config = {
@@ -235,9 +235,9 @@ describe('diagnostics: warnings and errors', () => {
                                 '/main.css': {
                                     content: `
                                     ${selector}
-                                    }`
-                                }
-                            }
+                                    }`,
+                                },
+                            },
                         };
                         expectWarningsFromTransform(config, []);
                     });
@@ -273,7 +273,7 @@ describe('diagnostics: warnings and errors', () => {
                 `,
                     [
                         { message: processorWarnings.UNSCOPED_ELEMENT('div'), file: 'main.css' },
-                        { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' }
+                        { message: processorWarnings.ROOT_AFTER_SPACING(), file: 'main.css' },
                     ]
                 );
             });
@@ -323,8 +323,8 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message: valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -342,12 +342,12 @@ describe('diagnostics: warnings and errors', () => {
                             .container {
                                 |-st-mixin: $my-mixin$|;
                             }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
-                            content: ``
-                        }
-                    }
+                            content: ``,
+                        },
+                    },
                 };
 
                 expectWarningsFromTransform(config, [
@@ -358,9 +358,9 @@ describe('diagnostics: warnings and errors', () => {
                         ),
                         file: '/main.css',
                         skip: true,
-                        skipLocationCheck: true
+                        skipLocationCheck: true,
                     },
-                    { message: mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'), file: '/main.css' }
+                    { message: mixinWarnings.UNKNOWN_MIXIN_SYMBOL('my-mixin'), file: '/main.css' },
                 ]);
             });
 
@@ -376,9 +376,9 @@ describe('diagnostics: warnings and errors', () => {
                             .y {
                                 -st-mixin: x;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 const mainPath = '/main.css';
                 const xPath = [`y from ${mainPath}`, `x from ${mainPath}`];
@@ -387,13 +387,13 @@ describe('diagnostics: warnings and errors', () => {
                     {
                         message: mixinWarnings.CIRCULAR_MIXIN(xPath),
                         file: '/main.css',
-                        skipLocationCheck: true
+                        skipLocationCheck: true,
                     },
                     {
                         message: mixinWarnings.CIRCULAR_MIXIN(yPath),
                         file: '/main.css',
-                        skipLocationCheck: true
-                    }
+                        skipLocationCheck: true,
+                    },
                 ]);
             });
 
@@ -410,22 +410,22 @@ describe('diagnostics: warnings and errors', () => {
                             |.container {
                                 -st-mixin: $myMixin$;
                             }|
-                            `
+                            `,
                         },
                         '/imported.js': {
                             content: `
                                 module.exports = function(){
                                     throw 'bug in mixin'
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: mixinWarnings.FAILED_TO_APPLY_MIXIN('bug in mixin'),
-                        file: '/main.css'
-                    }
+                        file: '/main.css',
+                    },
                 ]);
             });
 
@@ -442,18 +442,18 @@ describe('diagnostics: warnings and errors', () => {
                             |.container {
                                 -st-mixin: $myMixin$;
                             }|
-                            `
+                            `,
                         },
                         '/imported.js': {
                             content: `
 
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
 
                 expectWarningsFromTransform(config, [
-                    { message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' }
+                    { message: mixinWarnings.JS_MIXIN_NOT_A_FUNC(), file: '/main.css' },
                 ]);
             });
 
@@ -470,15 +470,15 @@ describe('diagnostics: warnings and errors', () => {
                             .container {
                                 |-st-mixin: $"myMixin"$|;
                             }
-                            `
+                            `,
                         },
                         '/imported.js': {
-                            content: ``
-                        }
-                    }
+                            content: ``,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' }
+                    { message: valueParserWarnings.VALUE_CANNOT_BE_STRING(), file: '/main.css' },
                 ]);
             });
 
@@ -492,12 +492,12 @@ describe('diagnostics: warnings and errors', () => {
                             .container {
                                 |-st-mixin: mixed(arg value($missingVar$))|;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }
+                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
 
@@ -518,12 +518,12 @@ describe('diagnostics: warnings and errors', () => {
                             .container {
                                 |-st-mixin: mixed(color1 blue, color2 value($missingVar$))|;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' }
+                    { message: functionWarnings.UNKNOWN_VAR('missingVar'), file: '/main.css' },
                 ]);
             });
         });
@@ -543,8 +543,8 @@ describe('diagnostics: warnings and errors', () => {
                             message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                                 rootValueMapping.vars
                             ),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -562,8 +562,8 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(':import'),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -579,8 +579,8 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message: processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -596,22 +596,22 @@ describe('diagnostics: warnings and errors', () => {
                                 -st-default:Comp;
                                 |$color$:red;|
                             }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             content: `
                             .root{
                                 color: green;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: processorWarnings.ILLEGAL_PROP_IN_IMPORT('color'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -625,8 +625,8 @@ describe('diagnostics: warnings and errors', () => {
                     [
                         {
                             message: processorWarnings.FROM_PROP_MISSING_IN_IMPORT(),
-                            file: 'main.st.css'
-                        }
+                            file: 'main.st.css',
+                        },
                     ]
                 );
             });
@@ -643,8 +643,8 @@ describe('diagnostics: warnings and errors', () => {
                         {
                             severity: 'error',
                             message: processorWarnings.EMPTY_IMPORT_FROM(),
-                            file: 'main.st.css'
-                        }
+                            file: 'main.st.css',
+                        },
                     ]
                 );
             });
@@ -680,8 +680,8 @@ describe('diagnostics: warnings and errors', () => {
                             message: processorWarnings.FORBIDDEN_DEF_IN_COMPLEX_SELECTOR(
                                 '-st-extends'
                             ),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -699,19 +699,19 @@ describe('diagnostics: warnings and errors', () => {
                             .myclass {
                                 |-st-extends: $special$|;
                             }
-                            `
+                            `,
                         },
                         '/file.st.css': {
                             content: `
                                 :vars {
                                     special: red
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' }
+                    { message: transformerWarnings.IMPORT_ISNT_EXTENDABLE(), file: '/main.st.css' },
                 ]);
             });
             it('should warn if extends by js import', () => {
@@ -727,15 +727,15 @@ describe('diagnostics: warnings and errors', () => {
                             .myclass {
                                 |-st-extends: $special$|
                             }
-                            `
+                            `,
                         },
                         '/imported.js': {
-                            content: ``
-                        }
-                    }
+                            content: ``,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' }
+                    { message: transformerWarnings.CANNOT_EXTEND_JS(), file: '/main.css' },
                 ]);
             });
             it('should warn if named extends does not exist', () => {
@@ -751,12 +751,12 @@ describe('diagnostics: warnings and errors', () => {
                             .myclass {
                                 |-st-extends: $special$;|
                             }
-                            `
+                            `,
                         },
                         '/file.st.css': {
-                            content: ``
-                        }
-                    }
+                            content: ``,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
@@ -765,12 +765,12 @@ describe('diagnostics: warnings and errors', () => {
                             './file.st.css'
                         ),
                         file: '/main.css',
-                        skipLocationCheck: true
+                        skipLocationCheck: true,
                     },
                     {
                         message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('special'),
-                        file: '/main.css'
-                    }
+                        file: '/main.css',
+                    },
                 ]);
             });
         });
@@ -796,8 +796,8 @@ describe('diagnostics: warnings and errors', () => {
                                 valueMapping.extends,
                                 'root'
                             ),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -816,12 +816,12 @@ describe('diagnostics: warnings and errors', () => {
                             -st-mixin: a;
                             |-st-mixin: a|;
                         }
-                      `
-                    }
-                }
+                      `,
+                    },
+                },
             };
             expectWarningsFromTransform(config, [
-                { message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' }
+                { message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' },
             ]);
         });
 
@@ -842,16 +842,16 @@ describe('diagnostics: warnings and errors', () => {
                             .myClass1 {
                                 |-st-extends: $momo$;|
                             }
-                          `
+                          `,
                         },
                         '/import.st.css': {
                             content: `
                                 .shlomo {
                                     color: red
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
@@ -861,12 +861,12 @@ describe('diagnostics: warnings and errors', () => {
                         ),
                         file: '/main.st.css',
                         skip: true,
-                        skipLocationCheck: true
+                        skipLocationCheck: true,
                     },
                     {
                         message: transformerWarnings.CANNOT_EXTEND_UNKNOWN_SYMBOL('momo'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -930,28 +930,28 @@ describe('diagnostics: warnings and errors', () => {
                             }
                             .root {
                                 |color: value($myVar$);|
-                            }`
+                            }`,
                         },
                         '/file.st.css': {
                             content: `
                             :vars {
                                 otherVar: someValue;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_SYMBOL('myVar', './file.st.css'),
                         file: '/main.st.css',
                         skip: true,
-                        skipLocationCheck: true
+                        skipLocationCheck: true,
                     },
                     {
                         message: functionWarnings.CANNOT_FIND_IMPORTED_VAR('myVar'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
         });
@@ -980,16 +980,16 @@ describe('diagnostics: warnings and errors', () => {
                 [
                     {
                         message: 'conflicting extends matching same target [.my-a.my-b]',
-                        file: 'main.css'
+                        file: 'main.css',
                     },
                     {
                         message: 'conflicting extends matching same target [SheetA.my-b]',
-                        file: 'main.css'
+                        file: 'main.css',
                     },
                     {
                         message: 'conflicting extends matching same target [SheetB.my-a]',
-                        file: 'main.css'
-                    }
+                        file: 'main.css',
+                    },
                 ]
             );
         });
@@ -1098,7 +1098,7 @@ describe('diagnostics: warnings and errors', () => {
 
     describe('transforms', () => {
         it('should not allow @keyframe of reserved words', () => {
-            reservedKeyFrames.map(key => {
+            reservedKeyFrames.map((key) => {
                 const config = {
                     entry: '/main.css',
                     files: {
@@ -1107,12 +1107,12 @@ describe('diagnostics: warnings and errors', () => {
                             |@keyframes $${key}$| {
                                 from {}
                                 to {}
-                            }`
-                        }
-                    }
+                            }`,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
-                    { message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' }
+                    { message: transformerWarnings.KEYFRAME_NAME_RESERVED(key), file: '/main.css' },
                 ]);
             });
         });
@@ -1132,13 +1132,13 @@ describe('diagnostics: warnings and errors', () => {
 
                             .root .Imported{}
                             |.root .$inner-class$ {}|
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: `.root{}`
-                    }
-                }
+                        content: `.root{}`,
+                    },
+                },
             };
             expectWarningsFromTransform(config, [
                 {
@@ -1148,12 +1148,12 @@ describe('diagnostics: warnings and errors', () => {
                     ),
                     file: '/main.st.css',
                     skip: true,
-                    skipLocationCheck: true
+                    skipLocationCheck: true,
                 },
                 {
                     message: transformerWarnings.UNKNOWN_IMPORT_ALIAS('inner-class'),
-                    file: '/main.st.css'
-                }
+                    file: '/main.st.css',
+                },
             ]);
         });
 
@@ -1168,15 +1168,15 @@ describe('diagnostics: warnings and errors', () => {
                                 :import{
                                     |-st-from: "$./missing.st.css$";|
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing.st.css'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -1190,9 +1190,9 @@ describe('diagnostics: warnings and errors', () => {
                                 :import{
                                     |-st-from: "$missing-package/index.st.css$";|
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(
                     config,
@@ -1202,8 +1202,8 @@ describe('diagnostics: warnings and errors', () => {
                             message: resolverWarnings.UNKNOWN_IMPORTED_FILE(
                                 'missing-package/index.st.css'
                             ),
-                            file: '/main.st.css'
-                        }
+                            file: '/main.st.css',
+                        },
                     ]
                 );
             });
@@ -1219,12 +1219,12 @@ describe('diagnostics: warnings and errors', () => {
                                     -st-from: "./imported.st.css";
                                     |-st-named: $Missing$;|
                                 }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
-                            content: `.root{}`
-                        }
-                    }
+                            content: `.root{}`,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(
                     config,
@@ -1235,8 +1235,8 @@ describe('diagnostics: warnings and errors', () => {
                                 'Missing',
                                 './imported.st.css'
                             ),
-                            file: '/main.st.css'
-                        }
+                            file: '/main.st.css',
+                        },
                     ]
                 );
             });
@@ -1252,12 +1252,12 @@ describe('diagnostics: warnings and errors', () => {
                                     -st-from: "./imported.st.css";
                                     |-st-named: $Missing$ as LocalMissing;|
                                 }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
-                            content: `.root{}`
-                        }
-                    }
+                            content: `.root{}`,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(
                     config,
@@ -1268,8 +1268,8 @@ describe('diagnostics: warnings and errors', () => {
                                 'Missing',
                                 './imported.st.css'
                             ),
-                            file: '/main.st.css'
-                        }
+                            file: '/main.st.css',
+                        },
                     ]
                 );
             });

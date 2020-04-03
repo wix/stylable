@@ -29,7 +29,7 @@ describe('createDOMListRenderer', () => {
         update({ value }, node) {
             node.textContent = value;
             return node;
-        }
+        },
     };
     beforeEach(() => {
         const dom = new JSDOM(`

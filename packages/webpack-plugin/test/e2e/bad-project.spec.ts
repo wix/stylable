@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             throwOnBuildError: false,
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -25,7 +25,7 @@ describe(`(${project})`, () => {
         const expected = [
             /cannot resolve imported symbol "unknown" from stylesheet "\.\/comp\.st\.css"/,
             /cannot extend unknown symbol "unknown"/,
-            /unknown var "xxx"/
+            /unknown var "xxx"/,
         ];
         expect(warnings.length).to.equal(3);
         warnings.forEach((warning: string, i: number) => {

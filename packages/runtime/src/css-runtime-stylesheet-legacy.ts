@@ -20,7 +20,7 @@ export function create(
 
     function $cssStates(stateMapping: StateMap) {
         return {
-            className: stylesheet.cssStates(stateMapping)
+            className: stylesheet.cssStates(stateMapping),
         };
     }
 
@@ -31,7 +31,7 @@ export function create(
     function $mapClasses(className: string) {
         return className
             .split(/\s+/g)
-            .map(className => stylesheet.classes[className] || className)
+            .map((className) => stylesheet.classes[className] || className)
             .join(' ');
     }
 
@@ -77,7 +77,7 @@ export function create(
         $id: stylesheet.$id,
         $css: stylesheet.$css,
         $get,
-        $cssStates
+        $cssStates,
     });
     // EDGE CACHE BUG FIX
     (stylable_runtime_stylesheet as any).root = stylesheet.classes.root;

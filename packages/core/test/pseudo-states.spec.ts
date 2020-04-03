@@ -37,9 +37,9 @@ describe('pseudo-states', () => {
                     root: {
                         [valueMapping.states]: {
                             state1: null,
-                            state2: null
-                        }
-                    }
+                            state2: null,
+                        },
+                    },
                 });
             });
 
@@ -58,9 +58,9 @@ describe('pseudo-states', () => {
                 expect(res.classes).to.containSubset({
                     root: {
                         [valueMapping.states]: {
-                            state1: null
-                        }
-                    }
+                            state1: null,
+                        },
+                    },
                 });
             });
         });
@@ -77,10 +77,10 @@ describe('pseudo-states', () => {
                         {
                             message: stateErrors.TOO_MANY_STATE_TYPES('state1', [
                                 'string',
-                                'number(x)'
+                                'number(x)',
                             ]),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -95,8 +95,8 @@ describe('pseudo-states', () => {
                     [
                         {
                             message: stateErrors.NO_STATE_TYPE_GIVEN('state1'),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -112,10 +112,10 @@ describe('pseudo-states', () => {
                         {
                             message: stateErrors.TOO_MANY_ARGS_IN_VALIDATOR('state1', 'contains', [
                                 'one',
-                                'two'
+                                'two',
                             ]),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -130,8 +130,8 @@ describe('pseudo-states', () => {
                     [
                         {
                             message: stateErrors.UNKNOWN_STATE_TYPE('state1', 'unknown'),
-                            file: 'main.css'
-                        }
+                            file: 'main.css',
+                        },
                     ]
                 );
             });
@@ -153,10 +153,10 @@ describe('pseudo-states', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'string'
-                                }
-                            }
-                        }
+                                    type: 'string',
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -176,10 +176,10 @@ describe('pseudo-states', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'string'
-                                }
-                            }
-                        }
+                                    type: 'string',
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -199,10 +199,10 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     defaultValue: 'some Default String',
-                                    type: 'string'
-                                }
-                            }
-                        }
+                                    type: 'string',
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -226,12 +226,12 @@ describe('pseudo-states', () => {
                                     arguments: [
                                         {
                                             name: 'regex',
-                                            args: ['^user']
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                                            args: ['^user'],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -255,12 +255,12 @@ describe('pseudo-states', () => {
                                     arguments: [
                                         {
                                             name: 'minLength',
-                                            args: ['2']
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                                            args: ['2'],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -285,16 +285,16 @@ describe('pseudo-states', () => {
                                     arguments: [
                                         {
                                             name: 'minLength',
-                                            args: ['2']
+                                            args: ['2'],
                                         },
                                         {
                                             name: 'maxLength',
-                                            args: ['7']
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                                            args: ['7'],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -318,16 +318,16 @@ describe('pseudo-states', () => {
                                     arguments: [
                                         {
                                             name: 'regex',
-                                            args: ['^user']
+                                            args: ['^user'],
                                         },
                                         {
                                             name: 'contains',
-                                            args: ['user']
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                                            args: ['user'],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
                     });
                 });
             });
@@ -349,13 +349,13 @@ describe('pseudo-states', () => {
                         root: {
                             [valueMapping.states]: {
                                 state1: {
-                                    type: 'number'
+                                    type: 'number',
                                 },
                                 state2: {
-                                    type: 'number'
-                                }
-                            }
-                        }
+                                    type: 'number',
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -375,10 +375,10 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 state1: {
                                     defaultValue: '7',
-                                    type: 'number'
-                                }
-                            }
-                        }
+                                    type: 'number',
+                                },
+                            },
+                        },
                     });
                 });
             });
@@ -401,14 +401,14 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 size: {
                                     type: 'enum',
-                                    arguments: ['small', 'medium', 'large']
+                                    arguments: ['small', 'medium', 'large'],
                                 },
                                 color: {
                                     type: 'enum',
-                                    arguments: ['red', 'green', 'blue']
-                                }
-                            }
-                        }
+                                    arguments: ['red', 'green', 'blue'],
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -429,10 +429,10 @@ describe('pseudo-states', () => {
                                 size: {
                                     defaultValue: 'small',
                                     type: 'enum',
-                                    arguments: ['small', 'large']
-                                }
-                            }
-                        }
+                                    arguments: ['small', 'large'],
+                                },
+                            },
+                        },
                     });
                 });
             });
@@ -454,10 +454,10 @@ describe('pseudo-states', () => {
                         root: {
                             [valueMapping.states]: {
                                 category: {
-                                    type: 'tag'
-                                }
-                            }
-                        }
+                                    type: 'tag',
+                                },
+                            },
+                        },
                     });
                 });
 
@@ -477,10 +477,10 @@ describe('pseudo-states', () => {
                             [valueMapping.states]: {
                                 category: {
                                     defaultValue: 'movie',
-                                    type: 'tag'
-                                }
-                            }
-                        }
+                                    type: 'tag',
+                                },
+                            },
+                        },
                     });
                 });
             });
@@ -502,9 +502,9 @@ describe('pseudo-states', () => {
                     root: {
                         [valueMapping.states]: {
                             state1: null, // boolean
-                            state2: '[data-mapped]'
-                        }
-                    }
+                            state2: '[data-mapped]',
+                        },
+                    },
                 });
             });
         });
@@ -523,9 +523,9 @@ describe('pseudo-states', () => {
                         files: {
                             '/entry.css': {
                                 namespace: 'entry',
-                                content: `.root:${nativeClass}{}`
-                            }
-                        }
+                                content: `.root:${nativeClass}{}`,
+                            },
+                        },
                     });
 
                     expect(res).to.have.styleRules([`.entry__root:${nativeClass}{}`]);
@@ -550,9 +550,9 @@ describe('pseudo-states', () => {
                                      -st-states: state1;
                                 }
                                 .root:not(:state1) {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -560,7 +560,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__root:not(.entry--state1) {}'
+                    1: '.entry__root:not(.entry--state1) {}',
                 });
             });
 
@@ -575,9 +575,9 @@ describe('pseudo-states', () => {
                                 -st-states: state1(boolean);
                             }
                             .my-class:state1 {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -585,7 +585,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class.entry--state1 {}'
+                    1: '.entry__my-class.entry--state1 {}',
                 });
             });
         });
@@ -604,9 +604,9 @@ describe('pseudo-states', () => {
                                 -st-states: |state1|();
                             }
                             .my-class:state1 {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 // const res = expectWarningsFromTransform(config, [{
@@ -616,7 +616,7 @@ describe('pseudo-states', () => {
                 //     file: '/entry.st.css'
                 // }]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class[data-entry-state1] {}'
+                    1: '.entry__my-class[data-entry-state1] {}',
                 });
             });
 
@@ -631,9 +631,9 @@ describe('pseudo-states', () => {
                                 -st-states: state1(string);
                             }
                             .my-class:state1("someString") {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -641,7 +641,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class.entry---state1-10-someString {}'
+                    1: '.entry__my-class.entry---state1-10-someString {}',
                 });
             });
 
@@ -656,9 +656,9 @@ describe('pseudo-states', () => {
                                 -st-states: state( string());
                             }
                             .root:state(user name) {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -666,7 +666,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__root[class~="entry---state-9-user_name"] {}'
+                    1: '.entry__root[class~="entry---state-9-user_name"] {}',
                 });
             });
 
@@ -682,9 +682,9 @@ describe('pseudo-states', () => {
                                     -st-states: state1(string);
                                 }
                                 .my-class:state1(someString) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -692,7 +692,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---state1-10-someString {}'
+                        1: '.entry__my-class.entry---state1-10-someString {}',
                     });
                 });
 
@@ -707,9 +707,9 @@ describe('pseudo-states', () => {
                                     -st-states: stateWithDefault(string) myDefault String;
                                 }
                                 .my-class:stateWithDefault {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -717,7 +717,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---stateWithDefault-16-myDefault_String"] {}'
+                        1: '.entry__my-class[class~="entry---stateWithDefault-16-myDefault_String"] {}',
                     });
                 });
 
@@ -736,9 +736,9 @@ describe('pseudo-states', () => {
                                     -st-states: stateWithDefault(string) value(myID)name;
                                 }
                                 .my-class:stateWithDefault {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -746,7 +746,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---stateWithDefault-8-username {}'
+                        1: '.entry__my-class.entry---stateWithDefault-8-username {}',
                     });
                 });
 
@@ -762,9 +762,9 @@ describe('pseudo-states', () => {
                                         -st-states: state1( string( regex("^user") ));
                                     }
                                     .my-class:state1(userName) {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         });
 
                         expect(
@@ -772,7 +772,7 @@ describe('pseudo-states', () => {
                             'no diagnostics reported for native states'
                         ).to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-8-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}',
                         });
                     });
 
@@ -787,22 +787,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1( string( regex("^user") ));
                                     }
                                     |.my-class:state1(failingParameter)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "failingParameter" failed validation:',
-                                    'expected "failingParameter" to match regex "^user"'
+                                    'expected "failingParameter" to match regex "^user"',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-16-failingParameter {}'
+                            1: '.entry__my-class.entry---state1-16-failingParameter {}',
                         });
                     });
 
@@ -817,9 +817,9 @@ describe('pseudo-states', () => {
                                         -st-states: state1(string(contains(user)));
                                     }
                                     .my-class:state1(userName) {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         });
 
                         expect(
@@ -827,7 +827,7 @@ describe('pseudo-states', () => {
                             'no diagnostics reported for native states'
                         ).to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-8-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}',
                         });
                     });
 
@@ -846,9 +846,9 @@ describe('pseudo-states', () => {
                                         -st-states: state1(string(contains(value(validPrefix))));
                                     }
                                     .my-class:state1(userName) {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         });
 
                         expect(
@@ -856,7 +856,7 @@ describe('pseudo-states', () => {
                             'no diagnostics reported for native states'
                         ).to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-8-userName {}'
+                            1: '.entry__my-class.entry---state1-8-userName {}',
                         });
                     });
 
@@ -871,22 +871,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(string(contains(user)));
                                     }
                                     |.my-class:state1($wrongState$)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "wrongState" failed validation:',
-                                    'expected "wrongState" to contain string "user"'
+                                    'expected "wrongState" to contain string "user"',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-10-wrongState {}'
+                            1: '.entry__my-class.entry---state1-10-wrongState {}',
                         });
                     });
 
@@ -901,9 +901,9 @@ describe('pseudo-states', () => {
                                         -st-states: state1( string( regex("^user"), minLength(3), maxLength(5) ));
                                     }
                                     .my-class:state1(user) {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         });
 
                         expect(
@@ -911,7 +911,7 @@ describe('pseudo-states', () => {
                             'no diagnostics reported for native states'
                         ).to.eql([]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-4-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}',
                         });
                     });
 
@@ -926,22 +926,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(string(minLength(7)));
                                     }
                                     |.my-class:state1($user$)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
-                                    'expected "user" to be of length longer than or equal to 7'
+                                    'expected "user" to be of length longer than or equal to 7',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-4-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}',
                         });
                     });
 
@@ -956,22 +956,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(string(maxLength(3)));
                                     }
                                     |.my-class:state1($user$)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
-                                    'expected "user" to be of length shorter than or equal to 3'
+                                    'expected "user" to be of length shorter than or equal to 3',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-4-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}',
                         });
                     });
 
@@ -986,9 +986,9 @@ describe('pseudo-states', () => {
                                         -st-states: state1( string( maxLength(3), regex("^case") ));
                                     }
                                     |.my-class:state1($user$)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
@@ -996,13 +996,13 @@ describe('pseudo-states', () => {
                                 message: [
                                     'pseudo-state "state1" with parameter "user" failed validation:',
                                     'expected "user" to be of length shorter than or equal to 3',
-                                    'expected "user" to match regex "^case"'
+                                    'expected "user" to match regex "^case"',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class.entry---state1-4-user {}'
+                            1: '.entry__my-class.entry---state1-4-user {}',
                         });
                     });
 
@@ -1016,19 +1016,19 @@ describe('pseudo-states', () => {
                                     .my-class {
                                         |-st-states: $state1(string(missing()))$|;
                                     }
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" default value "" failed validation:',
-                                    'encountered unknown string validator "missing"'
+                                    'encountered unknown string validator "missing"',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                     });
                 });
@@ -1046,9 +1046,9 @@ describe('pseudo-states', () => {
                                     -st-states: state1(number);
                                 }
                                 .my-class:state1(42) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -1056,7 +1056,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---state1-2-42"] {}'
+                        1: '.entry__my-class[class~="entry---state1-2-42"] {}',
                     });
                 });
 
@@ -1070,19 +1070,19 @@ describe('pseudo-states', () => {
                                 .my-class{
                                     |-st-states: $state1(number) defaultBlah$|;
                                 }
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     };
 
                     expectWarningsFromTransform(config, [
                         {
                             message: [
                                 'pseudo-state "state1" default value "defaultBlah" failed validation:',
-                                'expected "defaultBlah" to be of type number'
+                                'expected "defaultBlah" to be of type number',
                             ].join('\n'),
-                            file: '/entry.st.css'
-                        }
+                            file: '/entry.st.css',
+                        },
                     ]);
                 });
 
@@ -1097,22 +1097,22 @@ describe('pseudo-states', () => {
                                     -st-states: state1(number);
                                 }
                                 |.my-class:state1(blah)| {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     };
 
                     const res = expectWarningsFromTransform(config, [
                         {
                             message: [
                                 'pseudo-state "state1" with parameter "blah" failed validation:',
-                                'expected "blah" to be of type number'
+                                'expected "blah" to be of type number',
                             ].join('\n'),
-                            file: '/entry.st.css'
-                        }
+                            file: '/entry.st.css',
+                        },
                     ]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---state1-4-blah {}'
+                        1: '.entry__my-class.entry---state1-4-blah {}',
                     });
                 });
 
@@ -1126,19 +1126,19 @@ describe('pseudo-states', () => {
                                 .my-class {
                                     |-st-states: $state1( number( missing() ))$|;
                                 }
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     };
 
                     expectWarningsFromTransform(config, [
                         {
                             message: [
                                 'pseudo-state "state1" default value "" failed validation:',
-                                'encountered unknown number validator "missing"'
+                                'encountered unknown number validator "missing"',
                             ].join('\n'),
-                            file: '/entry.st.css'
-                        }
+                            file: '/entry.st.css',
+                        },
                     ]);
                 });
 
@@ -1154,22 +1154,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(number(min(3)));
                                     }
                                     |.my-class:state1(1)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "1" failed validation:',
-                                    'expected "1" to be larger than or equal to 3'
+                                    'expected "1" to be larger than or equal to 3',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-1-1"] {}'
+                            1: '.entry__my-class[class~="entry---state1-1-1"] {}',
                         });
                     });
 
@@ -1184,22 +1184,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(number(max(5)));
                                     }
                                     |.my-class:state1(42)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "42" failed validation:',
-                                    'expected "42" to be lesser then or equal to 5'
+                                    'expected "42" to be lesser then or equal to 5',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-42"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-42"] {}',
                         });
                     });
 
@@ -1214,22 +1214,22 @@ describe('pseudo-states', () => {
                                         -st-states: state1(number(multipleOf(5)));
                                     }
                                     |.my-class:state1(42)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "state1" with parameter "42" failed validation:',
-                                    'expected "42" to be a multiple of 5'
+                                    'expected "42" to be a multiple of 5',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-42"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-42"] {}',
                         });
                     });
 
@@ -1244,14 +1244,14 @@ describe('pseudo-states', () => {
                                         -st-states: state1(number(min(3), max(100), multipleOf(5)));
                                     }
                                     |.my-class:state1(40)| {}
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         const res = expectWarningsFromTransform(config, []);
                         expect(res).to.have.styleRules({
-                            1: '.entry__my-class[class~="entry---state1-2-40"] {}'
+                            1: '.entry__my-class[class~="entry---state1-2-40"] {}',
                         });
                     });
                 });
@@ -1269,19 +1269,19 @@ describe('pseudo-states', () => {
                                     .my-class {
                                         |-st-states: size( enum() )|;
                                     }
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "size" default value "" failed validation:',
-                                    'expected enum to be defined with one option or more'
+                                    'expected enum to be defined with one option or more',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                     });
 
@@ -1295,19 +1295,19 @@ describe('pseudo-states', () => {
                                     .my-class {
                                         |-st-states: $size( enum(small, large)) huge$|;
                                     }
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         };
 
                         expectWarningsFromTransform(config, [
                             {
                                 message: [
                                     'pseudo-state "size" default value "huge" failed validation:',
-                                    'expected "huge" to be one of the options: "small, large"'
+                                    'expected "huge" to be one of the options: "small, large"',
                                 ].join('\n'),
-                                file: '/entry.st.css'
-                            }
+                                file: '/entry.st.css',
+                            },
                         ]);
                     });
                 });
@@ -1323,9 +1323,9 @@ describe('pseudo-states', () => {
                                     -st-states: size( enum(small, large) );
                                 }
                                 .my-class:size(small) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -1333,7 +1333,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size-5-small {}'
+                        1: '.entry__my-class.entry---size-5-small {}',
                     });
                 });
 
@@ -1352,9 +1352,9 @@ describe('pseudo-states', () => {
                                     -st-states: size( enum( value(small), value(large) ) );
                                 }
                                 .my-class:size(value(small)) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -1362,7 +1362,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size-5-small {}'
+                        1: '.entry__my-class.entry---size-5-small {}',
                     });
                 });
 
@@ -1377,22 +1377,22 @@ describe('pseudo-states', () => {
                                     -st-states: size( enum(small, large) );
                                 }
                                 |.my-class:size(huge)| {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     };
 
                     const res = expectWarningsFromTransform(config, [
                         {
                             message: [
                                 'pseudo-state "size" with parameter "huge" failed validation:',
-                                'expected "huge" to be one of the options: "small, large"'
+                                'expected "huge" to be one of the options: "small, large"',
                             ].join('\n'),
-                            file: '/entry.st.css'
-                        }
+                            file: '/entry.st.css',
+                        },
                     ]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---size-4-huge {}'
+                        1: '.entry__my-class.entry---size-4-huge {}',
                     });
                 });
             });
@@ -1409,9 +1409,9 @@ describe('pseudo-states', () => {
                                     -st-states: category( tag );
                                 }
                                 .my-class:category(movie) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -1419,7 +1419,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category-5-movie {}'
+                        1: '.entry__my-class.entry---category-5-movie {}',
                     });
                 });
 
@@ -1437,9 +1437,9 @@ describe('pseudo-states', () => {
                                     -st-states: category( tag() );
                                 }
                                 .my-class:category(value(category)) {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     });
 
                     expect(
@@ -1447,7 +1447,7 @@ describe('pseudo-states', () => {
                         'no diagnostics reported for native states'
                     ).to.eql([]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class.entry---category-5-disco {}'
+                        1: '.entry__my-class.entry---category-5-disco {}',
                     });
                 });
 
@@ -1462,22 +1462,22 @@ describe('pseudo-states', () => {
                                     -st-states: category( tag );
                                 }
                                 |.my-class:category($one two$)| {}
-                                `
-                            }
-                        }
+                                `,
+                            },
+                        },
                     };
 
                     const res = expectWarningsFromTransform(config, [
                         {
                             message: [
                                 'pseudo-state "category" with parameter "one two" failed validation:',
-                                'expected "one two" to be a single value with no spaces'
+                                'expected "one two" to be a single value with no spaces',
                             ].join('\n'),
-                            file: '/entry.st.css'
-                        }
+                            file: '/entry.st.css',
+                        },
                     ]);
                     expect(res).to.have.styleRules({
-                        1: '.entry__my-class[class~="entry---category-7-one_two"] {}'
+                        1: '.entry__my-class[class~="entry---category-7-one_two"] {}',
                     });
                 });
             });
@@ -1496,14 +1496,14 @@ describe('pseudo-states', () => {
                             }
                             .my-class:my-state {}
                             .my-class:my-other-state {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(res).to.have.styleRules({
                     1: '.entry__my-class.X {}',
-                    2: '.entry__my-class.y[data-z="value"] {}'
+                    2: '.entry__my-class.y[data-z="value"] {}',
                 });
             });
 
@@ -1518,13 +1518,13 @@ describe('pseudo-states', () => {
                                     -st-states: open(":not(:focus-within):not(:hover)");
                                 }
                                 .root:open {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry__root:not(:focus-within):not(:hover) {}'
+                    1: '.entry__root:not(:focus-within):not(:hover) {}',
                 });
             });
         });
@@ -1545,7 +1545,7 @@ describe('pseudo-states', () => {
                                     -st-extends: Inner;
                                 }
                                 .my-class:my-state {}
-                            `
+                            `,
                         },
                         '/inner.st.css': {
                             namespace: 'inner',
@@ -1553,9 +1553,9 @@ describe('pseudo-states', () => {
                                 .root {
                                     -st-states: my-state;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -1563,7 +1563,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for imported states'
                 ).to.eql([]);
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class.inner--my-state {}'
+                    1: '.entry__my-class.inner--my-state {}',
                 });
             });
 
@@ -1592,7 +1592,7 @@ describe('pseudo-states', () => {
                                 }
                                 .direct:my-state {}
                                 .proxy:my-state {}
-                            `
+                            `,
                         },
                         '/proxy-state.st.css': {
                             namespace: 'proxyState',
@@ -1604,7 +1604,7 @@ describe('pseudo-states', () => {
                                 .root {
                                     -st-extends: ExtendedState;
                                 }
-                            `
+                            `,
                         },
                         '/extended-state.st.css': {
                             namespace: 'extendedState',
@@ -1612,14 +1612,14 @@ describe('pseudo-states', () => {
                                 .root {
                                     -st-states: my-state;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(res).to.have.styleRules({
                     2: '.entry__direct.entry--my-state {}',
-                    3: '.entry__proxy.entry--my-state {}'
+                    3: '.entry__proxy.entry--my-state {}',
                 });
             });
 
@@ -1635,7 +1635,7 @@ describe('pseudo-states', () => {
                                     -st-named: Element;
                                 }
                                 .root Element:disabled{}
-                            `
+                            `,
                         },
                         '/index.st.css': {
                             namespace: 'index',
@@ -1645,7 +1645,7 @@ describe('pseudo-states', () => {
                                     -st-default: Element;
                                 }
                                 .root Element{}
-                            `
+                            `,
                         },
                         '/element.st.css': {
                             namespace: 'element',
@@ -1653,9 +1653,9 @@ describe('pseudo-states', () => {
                                 .root {
                                     -st-states: disabled;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -1663,7 +1663,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for imported states'
                 ).to.eql([]);
                 expect(result).to.have.styleRules({
-                    0: '.entry__root .element__root.element--disabled{}'
+                    0: '.entry__root .element__root.element--disabled{}',
                 });
             });
 
@@ -1683,7 +1683,7 @@ describe('pseudo-states', () => {
                                 }
                                 .local::inner:my-state {}
                                 Imported::inner:my-state {}
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             namespace: 'imported',
@@ -1691,14 +1691,14 @@ describe('pseudo-states', () => {
                                 .inner {
                                     -st-states: my-state;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(res).to.have.styleRules({
                     1: '.entry__local .imported__inner.imported--my-state {}',
-                    2: '.imported__root .imported__inner.imported--my-state {}'
+                    2: '.imported__root .imported__inner.imported--my-state {}',
                 });
             });
 
@@ -1717,7 +1717,7 @@ describe('pseudo-states', () => {
                                     -st-extends: Type;
                                 }
                                 .my-class::element:my-state {}
-                            `
+                            `,
                         },
                         '/type.st.css': {
                             namespace: 'type',
@@ -1729,7 +1729,7 @@ describe('pseudo-states', () => {
                                 .element {
                                     -st-extends: WithState;
                                 }
-                            `
+                            `,
                         },
                         '/with-state.st.css': {
                             namespace: 'withState',
@@ -1737,13 +1737,13 @@ describe('pseudo-states', () => {
                                 .root {
                                     -st-states: my-state;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(res).to.have.styleRules({
-                    1: '.entry__my-class .type__element.withState--my-state {}'
+                    1: '.entry__my-class .type__element.withState--my-state {}',
                 });
             });
         });
@@ -1762,16 +1762,14 @@ describe('pseudo-states', () => {
                                     }
                                     .my-class:my-state {}
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
-                expect(res)
-                    .to.have.mediaQuery(0)
-                    .with.styleRules({
-                        1: '.entry__my-class.entry--my-state {}'
-                    });
+                expect(res).to.have.mediaQuery(0).with.styleRules({
+                    1: '.entry__my-class.entry--my-state {}',
+                });
             });
         });
 
@@ -1792,9 +1790,9 @@ describe('pseudo-states', () => {
                                 }
 
                                 .x:disabled {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -1802,7 +1800,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for imported states'
                 ).to.eql([]);
                 expect(result).to.have.styleRules({
-                    2: '.entry__x.entry--disabled {}'
+                    2: '.entry__x.entry--disabled {}',
                 });
             });
 
@@ -1822,9 +1820,9 @@ describe('pseudo-states', () => {
                                 }
 
                                 .x:disabled {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 expect(
@@ -1832,7 +1830,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for imported states'
                 ).to.eql([]);
                 expect(result).to.have.styleRules({
-                    2: '.entry__x.entry--disabled {}'
+                    2: '.entry__x.entry--disabled {}',
                 });
             });
         });
@@ -1855,7 +1853,7 @@ describe('pseudo-states', () => {
                                 }
 
                                 .menu1::button:state {} /*TEST_SUBJECT*/
-                            `
+                            `,
                         },
                         '/menu.st.css': {
                             namespace: 'menu',
@@ -1868,13 +1866,13 @@ describe('pseudo-states', () => {
                                     -st-extends: Button;
                                     -st-states: state;
                                 }
-                            `
+                            `,
                         },
                         '/button.st.css': {
                             namespace: 'button',
-                            content: ``
-                        }
-                    }
+                            content: ``,
+                        },
+                    },
                 });
 
                 // result.meta.outputAst.toString();
@@ -1883,7 +1881,7 @@ describe('pseudo-states', () => {
                     'no diagnostics reported for imported states'
                 ).to.eql([]);
                 expect(result).to.have.styleRules({
-                    1: '.entry__menu1 .menu__button.menu--state {}'
+                    1: '.entry__menu1 .menu__button.menu--state {}',
                 });
             });
         });
@@ -1901,8 +1899,8 @@ describe('pseudo-states', () => {
                 [
                     {
                         message: 'global states are not supported, use .root:hover instead',
-                        file: 'main.css'
-                    }
+                        file: 'main.css',
+                    },
                 ]
             );
         });
@@ -1913,13 +1911,13 @@ describe('pseudo-states', () => {
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
-                        content: `|.root:$unknownState$|{}`
-                    }
-                }
+                        content: `|.root:$unknownState$|{}`,
+                    },
+                },
             };
 
             const res = expectWarningsFromTransform(config, [
-                { message: stateErrors.UNKNOWN_STATE_USAGE('unknownState'), file: '/entry.st.css' }
+                { message: stateErrors.UNKNOWN_STATE_USAGE('unknownState'), file: '/entry.st.css' },
             ]);
             expect(res, 'keep unknown state').to.have.styleRules([`.entry__root:unknownState{}`]);
         });
@@ -1935,8 +1933,8 @@ describe('pseudo-states', () => {
                 [
                     {
                         message: 'cannot define pseudo states inside complex selectors',
-                        file: 'main.css'
-                    }
+                        file: 'main.css',
+                    },
                 ]
             );
         });
@@ -1953,12 +1951,12 @@ describe('pseudo-states', () => {
                     {
                         message: processorWarnings.UNSCOPED_ELEMENT('MyElement'),
                         file: 'main.css',
-                        skip: true
+                        skip: true,
                     },
                     {
                         message: 'cannot define pseudo states inside element selectors',
-                        file: 'main.css'
-                    }
+                        file: 'main.css',
+                    },
                 ]
             );
         });
@@ -1988,8 +1986,8 @@ describe('pseudo-states', () => {
                     {
                         message: stateErrors.STATE_STARTS_WITH_HYPHEN('-someState'),
                         file: 'main.css',
-                        severity: 'error'
-                    }
+                        severity: 'error',
+                    },
                 ]
             );
         });

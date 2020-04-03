@@ -8,7 +8,7 @@ import {
     StylableResults,
     StylableTransformer,
     TransformerOptions,
-    TransformHooks
+    TransformHooks,
 } from './stylable-transformer';
 import { TimedCacheOptions } from './timed-cache';
 import { IStylableOptimizer, ModuleResolver } from './types';
@@ -38,7 +38,7 @@ export class Stylable {
         return new this(
             config.projectRoot,
             config.fileSystem,
-            id => {
+            (id) => {
                 if (config.requireModule) {
                     return config.requireModule(id);
                 }
@@ -72,7 +72,7 @@ export class Stylable {
         protected resolveNamespace?: typeof processNamespace,
         protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
             timeout: 1,
-            useTimer: true
+            useTimer: true,
         },
         protected resolveModule?: ModuleResolver
     ) {
@@ -98,7 +98,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             mode: this.mode,
-            ...options
+            ...options,
         });
     }
     public transform(meta: StylableMeta): StylableResults;

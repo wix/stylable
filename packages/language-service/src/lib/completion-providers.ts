@@ -18,7 +18,7 @@ import {
     StylableMeta,
     systemValidators,
     valueMapping,
-    VarSymbol
+    VarSymbol,
 } from '@stylable/core';
 
 import { IFileSystem } from '@file-services/types';
@@ -41,7 +41,7 @@ import {
     topLevelDirective,
     topLevelDirectives,
     valueCompletion,
-    valueDirective
+    valueDirective,
 } from './completion-types';
 import { resolveStateTypeOrValidator } from './feature/pseudo-class';
 import {
@@ -50,12 +50,11 @@ import {
     getExistingNames,
     getNamedValues,
     isDirective,
-    isInValue
+    isInValue,
 } from './provider';
 import { ExtendedTsLanguageService } from './types';
 import { isComment, isDeclaration } from './utils/postcss-ast-utils';
 import { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
-
 
 export interface ProviderOptions {
     meta: StylableMeta;
@@ -133,7 +132,7 @@ const cssPseudoClasses = [
     'scope',
     'target',
     'valid',
-    'visited'
+    'visited',
 ];
 
 // const cssPseudoElements = [
@@ -176,7 +175,7 @@ const importDeclarations: Array<keyof typeof importDirectives> = ['default', 'na
 const simpleRulesetDeclarations: Array<keyof typeof rulesetDirectives> = [
     'extends',
     'states',
-    'mixin'
+    'mixin',
 ];
 const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
     'root',
@@ -184,7 +183,7 @@ const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
     'vars',
     'import',
     'customSelector',
-    'stScope'
+    'stScope',
 ];
 
 // Providers
@@ -198,11 +197,11 @@ export const ImportInternalDirectivesProvider: CompletionProvider = {
         isMediaQuery,
         fullLineText,
         position,
-        lineChunkAtCursor
+        lineChunkAtCursor,
     }: ProviderOptions): Completion[] {
         if (parentSelector && parentSelector.selector === ':import' && !isMediaQuery) {
             const res: Completion[] = [];
-            importDeclarations.forEach(name => {
+            importDeclarations.forEach((name) => {
                 if (
                     parentSelector.nodes!.every(
                         (n: any) =>
@@ -222,7 +221,7 @@ export const ImportInternalDirectivesProvider: CompletionProvider = {
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside ruleset, which is not :import or :vars
@@ -236,7 +235,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
         isMediaQuery,
         fullLineText,
         position,
-        lineChunkAtCursor
+        lineChunkAtCursor,
     }: ProviderOptions): Completion[] {
         const res: Completion[] = [];
         if (
@@ -259,8 +258,8 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
             }
             if (this.isSimpleSelector(parentSelector.selector) && !isMediaQuery) {
                 simpleRulesetDeclarations
-                    .filter(d => d !== 'mixin')
-                    .forEach(name => {
+                    .filter((d) => d !== 'mixin')
+                    .forEach((name) => {
                         if (
                             parentSelector.nodes!.every(
                                 (n: any) =>
@@ -285,7 +284,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
     },
     isSimpleSelector(sel: string) {
         return !!/^\s*\.?[\w-]*$/.test(sel); // Only a single class or element
-    }
+    },
 };
 
 // Only top level
@@ -297,18 +296,18 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
         fullLineText,
         position,
         lineChunkAtCursor,
-        meta
+        meta,
     }: ProviderOptions): Completion[] {
         if (!parentSelector) {
             if (!isMediaQuery) {
                 return topLevelDeclarations
                     .filter(
-                        d =>
+                        (d) =>
                             !(meta.ast.source!.input as any).css.includes('@namespace') ||
                             d !== 'namespace'
                     )
-                    .filter(d => topLevelDirectives[d].startsWith(fullLineText.trim()))
-                    .map(d =>
+                    .filter((d) => topLevelDirectives[d].startsWith(fullLineText.trim()))
+                    .map((d) =>
                         topLevelDirective(
                             d,
                             createDirectiveRange(position, fullLineText, lineChunkAtCursor)
@@ -319,13 +318,13 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                     topLevelDirective(
                         'root',
                         createDirectiveRange(position, fullLineText, lineChunkAtCursor)
-                    )
+                    ),
                 ];
             }
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside ruleset, which is not :import
@@ -342,7 +341,8 @@ export const ValueDirectiveProvider: CompletionProvider & {
             !this.isInsideValueDirective(fullLineText, position.character) &&
             fullLineText.includes(':')
         ) {
-            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1)).nodes;
+            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1))
+                .nodes;
             const node = parsed[parsed.length - 1];
             if (
                 node.type === 'div' ||
@@ -361,7 +361,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
                             ),
                             position
                         )
-                    )
+                    ),
                 ];
             } else {
                 return [];
@@ -385,7 +385,7 @@ export const ValueDirectiveProvider: CompletionProvider & {
             }
         }
         return stack > 0;
-    }
+    },
 };
 
 // Selector level
@@ -394,7 +394,7 @@ export const GlobalCompletionProvider: CompletionProvider = {
         parentSelector,
         fullLineText,
         position,
-        lineChunkAtCursor
+        lineChunkAtCursor,
     }: ProviderOptions): Completion[] {
         if (
             !parentSelector &&
@@ -417,12 +417,12 @@ export const GlobalCompletionProvider: CompletionProvider = {
                         new ProviderPosition(position.line, position.character - offset),
                         position
                     )
-                )
+                ),
             ];
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Semantic
@@ -437,16 +437,16 @@ export const SelectorCompletionProvider: CompletionProvider = {
         lineChunkAtCursor,
         meta,
         fakes,
-        stylable
+        stylable,
     }: ProviderOptions): Completion[] {
         if (!parentSelector && (lineChunkAtCursor === ':' || !lineChunkAtCursor.endsWith(':'))) {
             const comps: Completion[] = [];
             comps.push(
                 ...Object.keys(meta.classes)
                     .filter(
-                        c => c !== 'root' && fakes.findIndex(f => f.selector === '.' + c) === -1
+                        (c) => c !== 'root' && fakes.findIndex((f) => f.selector === '.' + c) === -1
                     )
-                    .map(c =>
+                    .map((c) =>
                         classCompletion(
                             c,
                             createDirectiveRange(position, fullLineText, lineChunkAtCursor)
@@ -454,7 +454,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                     )
             );
             comps.push(
-                ...Object.keys(meta.customSelectors).map(c =>
+                ...Object.keys(meta.customSelectors).map((c) =>
                     classCompletion(
                         c,
                         createDirectiveRange(position, fullLineText, lineChunkAtCursor),
@@ -463,9 +463,9 @@ export const SelectorCompletionProvider: CompletionProvider = {
                 )
             );
             const moreComps = meta.imports
-                .filter(imp => imp.fromRelative.endsWith('st.css'))
+                .filter((imp) => imp.fromRelative.endsWith('st.css'))
                 .reduce((acc: Completion[], imp) => {
-                    if (acc.every(comp => comp.label !== imp.defaultExport)) {
+                    if (acc.every((comp) => comp.label !== imp.defaultExport)) {
                         acc.push(
                             classCompletion(
                                 imp.defaultExport,
@@ -474,14 +474,14 @@ export const SelectorCompletionProvider: CompletionProvider = {
                             )
                         );
                     }
-                    Object.keys(imp.named).forEach(exp => {
+                    Object.keys(imp.named).forEach((exp) => {
                         const res = stylable.resolver.resolve(meta.mappedSymbols[exp]);
                         if (
                             res &&
                             res._kind === 'css' &&
                             res.symbol &&
                             (res.symbol._kind === 'class' || res.symbol._kind === 'element') &&
-                            acc.every(comp => comp.label.replace('.', '') !== imp.named[exp])
+                            acc.every((comp) => comp.label.replace('.', '') !== imp.named[exp])
                         ) {
                             acc.push(
                                 classCompletion(
@@ -493,11 +493,11 @@ export const SelectorCompletionProvider: CompletionProvider = {
                     });
                     return acc;
                 }, comps);
-            return moreComps.filter(c => c.label.startsWith(lineChunkAtCursor));
+            return moreComps.filter((c) => c.label.startsWith(lineChunkAtCursor));
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside ruleset of simple selector, not :import or :vars
@@ -511,10 +511,10 @@ export const ExtendCompletionProvider: CompletionProvider = {
             const comps: string[][] = [[]];
             comps.push(
                 ...Object.keys(meta.classes)
-                    .filter(s => s.startsWith(str))
-                    .map(s => [s, 'Local file'])
+                    .filter((s) => s.startsWith(str))
+                    .map((s) => [s, 'Local file'])
             );
-            meta.imports.forEach(i => {
+            meta.imports.forEach((i) => {
                 if (
                     i.defaultExport &&
                     i.defaultExport.startsWith(str) &&
@@ -523,10 +523,10 @@ export const ExtendCompletionProvider: CompletionProvider = {
                     comps.push([i.defaultExport, i.fromRelative]);
                 }
             });
-            meta.imports.forEach(i =>
+            meta.imports.forEach((i) =>
                 comps.push(
                     ...Object.keys(i.named)
-                        .filter(s => {
+                        .filter((s) => {
                             const res = stylable.resolver.resolve(meta.mappedSymbols[s]);
                             return (
                                 res &&
@@ -534,13 +534,13 @@ export const ExtendCompletionProvider: CompletionProvider = {
                                 (res.symbol._kind === 'class' || res.symbol._kind === 'element')
                             );
                         })
-                        .filter(s => s.startsWith(str))
-                        .map(s => [s, i.fromRelative])
+                        .filter((s) => s.startsWith(str))
+                        .map((s) => [s, i.fromRelative])
                 )
             );
             return comps
                 .slice(1)
-                .map(c =>
+                .map((c) =>
                     extendCompletion(
                         c[0],
                         c[1],
@@ -553,7 +553,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside ruleset, which is not :import or :vars
@@ -564,16 +564,16 @@ export const CssMixinCompletionProvider: CompletionProvider = {
             const { names, lastName } = getExistingNames(fullLineText, position);
             return Object.keys(meta.mappedSymbols)
                 .filter(
-                    ms =>
+                    (ms) =>
                         (meta.mappedSymbols[ms]._kind === 'import' &&
                             (meta.mappedSymbols[ms] as ImportSymbol).import.fromRelative.endsWith(
                                 'st.css'
                             )) ||
                         meta.mappedSymbols[ms]._kind === 'class'
                 )
-                .filter(ms => ms.startsWith(lastName))
-                .filter(ms => !names.includes(ms))
-                .map(ms => {
+                .filter((ms) => ms.startsWith(lastName))
+                .filter((ms) => !names.includes(ms))
+                .map((ms) => {
                     return cssMixinCompletion(
                         ms,
                         new ProviderRange(
@@ -591,7 +591,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Mixin completions
@@ -608,11 +608,11 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
         position,
         fs,
         tsLangService,
-        stylable
+        stylable,
     }: ProviderOptions): Completion[] {
         if (
             meta.imports.some(
-                imp => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
+                (imp) => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
             ) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             parentSelector &&
@@ -624,18 +624,18 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
 
             const { lastName } = getExistingNames(fullLineText, position);
             return Object.keys(meta.mappedSymbols)
-                .filter(ms => meta.mappedSymbols[ms]._kind === 'import')
-                .filter(ms => ms.startsWith(lastName))
-                .filter(ms => {
+                .filter((ms) => meta.mappedSymbols[ms]._kind === 'import')
+                .filter((ms) => ms.startsWith(lastName))
+                .filter((ms) => {
                     const res = stylable.resolver.resolve(meta.mappedSymbols[ms]);
                     return res && res._kind === 'js';
                 })
-                .filter(ms => isMixin(ms, meta, fs, tsLangService))
-                .map(ms => createCodeMixinCompletion(ms, lastName, position, meta));
+                .filter((ms) => isMixin(ms, meta, fs, tsLangService))
+                .map((ms) => createCodeMixinCompletion(ms, lastName, position, meta));
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside ruleset, which is not :import
@@ -649,11 +649,11 @@ export const FormatterCompletionProvider: CompletionProvider = {
         position,
         fs,
         tsLangService,
-        stylable
+        stylable,
     }: ProviderOptions): Completion[] {
         if (
             meta.imports.some(
-                imp => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
+                (imp) => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
             ) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             !fullLineText.trim().startsWith(valueMapping.extends) &&
@@ -666,20 +666,20 @@ export const FormatterCompletionProvider: CompletionProvider = {
             const { lastName } = getExistingNames(fullLineText, position);
             return (
                 Object.keys(meta.mappedSymbols)
-                    .filter(ms => meta.mappedSymbols[ms]._kind === 'import')
-                    .filter(ms => ms.startsWith(lastName))
-                    .filter(ms => {
+                    .filter((ms) => meta.mappedSymbols[ms]._kind === 'import')
+                    .filter((ms) => ms.startsWith(lastName))
+                    .filter((ms) => {
                         const res = stylable.resolver.resolve(meta.mappedSymbols[ms]);
                         return res && res._kind === 'js';
                     })
                     // .filter(ms => names.length === 0 || !~names.indexOf(ms))
-                    .filter(ms => !isMixin(ms, meta, fs, tsLangService))
-                    .map(ms => createCodeMixinCompletion(ms, lastName, position, meta))
+                    .filter((ms) => !isMixin(ms, meta, fs, tsLangService))
+                    .map((ms) => createCodeMixinCompletion(ms, lastName, position, meta))
             );
         } else {
             return [];
         }
-    }
+    },
 };
 
 // Inside :import
@@ -699,7 +699,7 @@ export const NamedCompletionProvider: CompletionProvider & {
         meta,
         position,
         fullLineText,
-        src
+        src,
     }: ProviderOptions): Completion[] {
         const { isNamedValueLine, namedValues } = getNamedValues(src, position.line);
         if (isNamedValueLine) {
@@ -711,7 +711,7 @@ export const NamedCompletionProvider: CompletionProvider & {
                 (astAtCursor as postcss.Rule).nodes!.length
             ) {
                 importName = ((astAtCursor as postcss.Rule).nodes!.find(
-                    n => (n as postcss.Declaration).prop === valueMapping.from
+                    (n) => (n as postcss.Declaration).prop === valueMapping.from
                 ) as postcss.Declaration).value.replace(/'|"/g, '');
             } else {
                 return [];
@@ -730,14 +730,14 @@ export const NamedCompletionProvider: CompletionProvider & {
                     comps.push(
                         ...Object.keys(resolvedImport.mappedSymbols)
                             .filter(
-                                ms =>
+                                (ms) =>
                                     (resolvedImport.mappedSymbols[ms]._kind === 'class' ||
                                         resolvedImport.mappedSymbols[ms]._kind === 'var') &&
                                     ms !== 'root'
                             )
-                            .filter(ms => ms.slice(0, -1).startsWith(lastName))
-                            .filter(ms => !~namedValues.indexOf(ms))
-                            .map(ms => [
+                            .filter((ms) => ms.slice(0, -1).startsWith(lastName))
+                            .filter((ms) => !~namedValues.indexOf(ms))
+                            .map((ms) => [
                                 ms,
                                 path
                                     .relative(meta.source, resolvedImport.source)
@@ -745,12 +745,12 @@ export const NamedCompletionProvider: CompletionProvider & {
                                     .replace(/\\/g, '/'),
                                 resolvedImport.mappedSymbols[ms]._kind === 'var'
                                     ? (resolvedImport.mappedSymbols[ms] as VarSymbol).text
-                                    : 'Stylable class'
+                                    : 'Stylable class',
                             ])
                     );
                     return comps
                         .slice(1)
-                        .map(c =>
+                        .map((c) =>
                             namedCompletion(
                                 c[0],
                                 new ProviderRange(
@@ -776,14 +776,14 @@ export const NamedCompletionProvider: CompletionProvider & {
                 }
 
                 const { lastName } = getExistingNames(fullLineText, position);
-                Object.keys(req).forEach(k => {
+                Object.keys(req).forEach((k) => {
                     if (typeof req[k] === 'function' && k.startsWith(lastName)) {
                         comps.push([k, importName, 'Mixin']);
                     }
                 });
                 return comps
                     .slice(1)
-                    .map(c =>
+                    .map((c) =>
                         namedCompletion(
                             c[0],
                             new ProviderRange(
@@ -807,14 +807,14 @@ export const NamedCompletionProvider: CompletionProvider & {
         if (importName && importName.endsWith('.st.css')) {
             try {
                 resolvedImport = stylable.fileProcessor.process(
-                    meta.imports.find(i => i.fromRelative === importName)!.from
+                    meta.imports.find((i) => i.fromRelative === importName)!.from
                 );
             } catch {
                 /**/
             }
         }
         return resolvedImport;
-    }
+    },
 };
 
 export const PseudoElementCompletionProvider: CompletionProvider = {
@@ -826,7 +826,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
         lineChunkAtCursor,
         meta,
         position,
-        fullLineText
+        fullLineText,
     }: ProviderOptions): Completion[] {
         let comps: any[] = [];
         if (
@@ -868,7 +868,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
 
             const colons = lineChunkAtCursor.match(/:*$/)![0].length;
 
-            scope.resolved.forEach(res => {
+            scope.resolved.forEach((res) => {
                 if (!(res.symbol as ClassSymbol)[valueMapping.root]) {
                     return;
                 }
@@ -876,10 +876,10 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 comps = comps.concat(
                     Object.keys(res.meta.classes)
                         .concat(
-                            Object.keys(res.meta.customSelectors).map(s => s.slice(':--'.length))
+                            Object.keys(res.meta.customSelectors).map((s) => s.slice(':--'.length))
                         )
-                        .filter(e => e.startsWith(filter) && e !== 'root')
-                        .map(c => {
+                        .filter((e) => e.startsWith(filter) && e !== 'root')
+                        .map((c) => {
                             let relPath = path.relative(path.dirname(meta.source), res.meta.source);
                             if (!relPath.startsWith('.')) {
                                 relPath = './' + relPath;
@@ -911,7 +911,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 filter = scope.name;
             }
             if (otherScope) {
-                otherScope.resolved.forEach(res => {
+                otherScope.resolved.forEach((res) => {
                     if (!(res.symbol as ClassSymbol)[valueMapping.root]) {
                         return;
                     }
@@ -919,12 +919,12 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                     comps = comps.concat(
                         Object.keys(res.meta.classes)
                             .concat(
-                                Object.keys(res.meta.customSelectors).map(s =>
+                                Object.keys(res.meta.customSelectors).map((s) =>
                                     s.slice(':--'.length)
                                 )
                             )
-                            .filter(e => e.startsWith(filter) && e !== 'root')
-                            .map(c => {
+                            .filter((e) => e.startsWith(filter) && e !== 'root')
+                            .map((c) => {
                                 let relPath = path.relative(
                                     path.dirname(meta.source),
                                     res.meta.source
@@ -951,7 +951,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             }
         }
         return comps;
-    }
+    },
 };
 
 function isNodeRule(node: any): node is postcss.Rule {
@@ -1012,14 +1012,14 @@ export const StateTypeCompletionProvider: CompletionProvider = {
                         if (validators) {
                             const validatorNames = Object.keys(validators);
 
-                            let relevantValidators = validatorNames.filter(t =>
+                            let relevantValidators = validatorNames.filter((t) =>
                                 t.startsWith(input)
                             );
                             relevantValidators = relevantValidators.length
                                 ? relevantValidators
                                 : validatorNames;
 
-                            relevantValidators.forEach(validator => {
+                            relevantValidators.forEach((validator) => {
                                 acc.push(
                                     stateTypeCompletion(
                                         validator,
@@ -1037,10 +1037,10 @@ export const StateTypeCompletionProvider: CompletionProvider = {
                         }
                         // type completion
                     } else if (typeof toSuggest === 'boolean' && toSuggest) {
-                        let relevantTypes = types.filter(t => t.startsWith(input));
+                        let relevantTypes = types.filter((t) => t.startsWith(input));
                         relevantTypes = relevantTypes.length ? relevantTypes : types;
 
-                        relevantTypes.forEach(type => {
+                        relevantTypes.forEach((type) => {
                             acc.push(
                                 stateTypeCompletion(
                                     type,
@@ -1061,7 +1061,7 @@ export const StateTypeCompletionProvider: CompletionProvider = {
         }
 
         return acc;
-    }
+    },
 };
 
 export const StateSelectorCompletionProvider: CompletionProvider = {
@@ -1073,7 +1073,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
         lastSelectoid,
         meta,
         position,
-        fullLineText
+        fullLineText,
     }: ProviderOptions): Completion[] {
         if (
             !parentSelector &&
@@ -1105,7 +1105,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                     const symbolStates = symbol[valueMapping.states];
 
                     if (symbolStates) {
-                        Object.keys(symbolStates).forEach(k => {
+                        Object.keys(symbolStates).forEach((k) => {
                             if (
                                 !acc[k] &&
                                 // selectoid is a substring of current state
@@ -1113,7 +1113,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                                     // selectoid is a CSS native pseudo-sclass
                                     nativePseudoClasses.includes(lastSelectoid.replace(':', '')) ||
                                     allStates.hasOwnProperty(lastSelectoid.replace(':', ''))) &&
-                                chunkyStates.every(cs => cs !== k)
+                                chunkyStates.every((cs) => cs !== k)
                             ) {
                                 const symbolStates = symbol[valueMapping.states];
                                 const stateDef = symbolStates && symbolStates[k];
@@ -1124,7 +1124,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                                 acc[k] = {
                                     path: meta.source === cur.meta.source ? 'Local file' : relPath,
                                     hasParam: !!stateDef,
-                                    type: stateType
+                                    type: stateType,
                                 };
                                 // }
                             }
@@ -1134,7 +1134,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                 return acc;
             }, {} as { [k: string]: { path: string; hasParam: boolean; type: string | null } });
 
-            const states = Object.keys(newStates).map(k => {
+            const states = Object.keys(newStates).map((k) => {
                 return { name: k, state: newStates[k] };
             });
 
@@ -1174,7 +1174,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
         } else {
             return [];
         }
-    }
+    },
 };
 
 export const StateEnumCompletionProvider: CompletionProvider = {
@@ -1185,7 +1185,7 @@ export const StateEnumCompletionProvider: CompletionProvider = {
         lineChunkAtCursor,
         position,
         lastSelectoid,
-        resolvedElements
+        resolvedElements,
     }: ProviderOptions): Completion[] {
         let acc: Completion[] = [];
         const ast = astAtCursor as postcss.Node;
@@ -1208,7 +1208,7 @@ export const StateEnumCompletionProvider: CompletionProvider = {
                         let existingInput = fullLineText.slice(0, position.character);
                         existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
 
-                        if (resolvedState.arguments.every(opt => typeof opt === 'string')) {
+                        if (resolvedState.arguments.every((opt) => typeof opt === 'string')) {
                             const options = resolvedState.arguments as string[];
                             let filteredOptions = options.filter((opt: string) =>
                                 opt.startsWith(existingInput)
@@ -1246,7 +1246,7 @@ export const StateEnumCompletionProvider: CompletionProvider = {
         }
 
         return acc;
-    }
+    },
 };
 
 export const ValueCompletionProvider: CompletionProvider = {
@@ -1264,7 +1264,7 @@ export const ValueCompletionProvider: CompletionProvider = {
                 .trim();
 
             const comps: Completion[] = [];
-            meta.vars.forEach(v => {
+            meta.vars.forEach((v) => {
                 if (v.name.startsWith(inner)) {
                     const value = evalDeclarationValue(stylable.resolver, v.text, meta, v.node);
                     comps.push(
@@ -1285,14 +1285,14 @@ export const ValueCompletionProvider: CompletionProvider = {
             });
 
             const importVars: any[] = [];
-            meta.imports.forEach(imp => {
+            meta.imports.forEach((imp) => {
                 try {
                     stylable.fileProcessor.process(imp.from).vars.forEach((v: any) =>
                         importVars.push({
                             name: v.name,
                             value: v.text,
                             from: imp.fromRelative,
-                            node: v.node
+                            node: v.node,
                         })
                     );
                 } catch (e) {
@@ -1300,10 +1300,10 @@ export const ValueCompletionProvider: CompletionProvider = {
                 }
             });
 
-            importVars.forEach(v => {
+            importVars.forEach((v) => {
                 if (
                     v.name.startsWith(inner) &&
-                    meta.imports.some(imp => Object.keys(imp.named).some(key => key === v.name))
+                    meta.imports.some((imp) => Object.keys(imp.named).some((key) => key === v.name))
                 ) {
                     const value = evalDeclarationValue(stylable.resolver, v.value, meta, v.node);
                     comps.push(
@@ -1326,7 +1326,7 @@ export const ValueCompletionProvider: CompletionProvider = {
         } else {
             return [];
         }
-    }
+    },
 };
 
 function collectStates(lastNode: ResolvedElement) {
@@ -1336,7 +1336,7 @@ function collectStates(lastNode: ResolvedElement) {
             const symbolStates = symbol[valueMapping.states];
 
             if (symbolStates) {
-                Object.keys(symbolStates).forEach(k => {
+                Object.keys(symbolStates).forEach((k) => {
                     const symbolStates = symbol[valueMapping.states];
                     if (symbolStates && symbolStates[k] !== undefined) {
                         acc[k] = symbolStates[k];

@@ -60,7 +60,7 @@ describe('States', () => {
             });
         });
 
-        [str1, str3].forEach(str => {
+        [str1, str3].forEach((str) => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
 
@@ -95,7 +95,7 @@ describe('States', () => {
             );
             asserter.notSuggested([
                 asserters.stateSelectorCompletion('hello', createRange(0, 0, 0, 0)),
-                asserters.stateSelectorCompletion('goodbye', createRange(0, 0, 0, 0))
+                asserters.stateSelectorCompletion('goodbye', createRange(0, 0, 0, 0)),
             ]);
         });
     });
@@ -669,7 +669,7 @@ describe('States', () => {
             });
         });
 
-        [str3, str4].forEach(str => {
+        [str3, str4].forEach((str) => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
                 it(

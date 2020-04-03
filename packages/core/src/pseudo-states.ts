@@ -9,7 +9,7 @@ import {
     ElementSymbol,
     SRule,
     StylableMeta,
-    StylableSymbol
+    StylableSymbol,
 } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
@@ -38,7 +38,7 @@ export const stateErrors = {
             ', '
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`,
 };
 
 // PROCESS
@@ -57,7 +57,7 @@ export function processPseudoStates(
 
         if (stateDefinition.value.startsWith('-')) {
             diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
-                word: stateDefinition.value
+                word: stateDefinition.value,
             });
         }
 
@@ -84,7 +84,7 @@ function resolveStateType(
         resolveBooleanState(mappedStates, stateDefinition);
 
         diagnostics.warn(decl, stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
-            word: decl.value
+            word: decl.value,
         });
 
         return;
@@ -102,7 +102,7 @@ function resolveStateType(
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
         arguments: [],
-        defaultValue: postcssValueParser.stringify(stateDefault).trim()
+        defaultValue: postcssValueParser.stringify(stateDefault).trim(),
     };
 
     if (isCustomMapping(stateDefinition)) {
@@ -135,7 +135,7 @@ function resolveArguments(
 ) {
     const separatedByComma = groupValues(paramType.nodes);
 
-    separatedByComma.forEach(group => {
+    separatedByComma.forEach((group) => {
         const validator = group[0];
         if (validator.type === 'function') {
             const args = listOptions(validator);
@@ -148,7 +148,7 @@ function resolveArguments(
             } else {
                 stateType.arguments.push({
                     name: validator.value,
-                    args
+                    args,
                 });
             }
         } else if (validator.type === 'string' || validator.type === 'word') {
@@ -212,7 +212,7 @@ export function validateStateDefinition(
                                         `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
                                     );
                                     diagnostics.warn(decl, res.errors.join('\n'), {
-                                        word: decl.value
+                                        word: decl.value,
                                     });
                                 }
                             }
@@ -238,7 +238,7 @@ export function validateStateArgument(
 ) {
     const resolvedValidations: StateResult = {
         res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
-        errors: null
+        errors: null,
     };
 
     const { type: paramType } = stateAst;

@@ -28,7 +28,7 @@ export function calculateModuleDepthAndShallowStylableDependencies(
     // max(CSS deep)
     if (dependencies) {
         const stylableModulesDepth = (dependencies
-            .map(dep => dep.module)
+            .map((dep) => dep.module)
             .filter(Boolean) as StylableModule[]).map(
             getDependenciesModuleDepth(path, cssDependencies, module, cache)
         );
@@ -52,7 +52,7 @@ export function calculateModuleDepthAndShallowStylableDependencies(
 
     const result = {
         depth: selfDepth + Math.max(cssDepth, jsDepth),
-        cssDependencies
+        cssDependencies,
     };
 
     cache.set(module, result);
@@ -103,7 +103,7 @@ export function getCSSComponentLogicModule(stylableModule: StylableModule) {
         throw new Error(
             `Stylable Component Conflict:\n ${
                 stylableModule.resource
-            } has multiple components entries [${Array.from(set).map(m => m.resource)}] `
+            } has multiple components entries [${Array.from(set).map((m) => m.resource)}] `
         );
     }
     return views[0];
@@ -116,7 +116,7 @@ export function getDeepCSSDependencies(
     origin = m
 ) {
     if (!deps.has(m)) {
-        m.buildInfo.runtimeInfo.cssDependencies.forEach(dep => {
+        m.buildInfo.runtimeInfo.cssDependencies.forEach((dep) => {
             if (origin !== dep) {
                 getDeepCSSDependencies(dep, onlyUsed, deps, origin);
                 if (onlyUsed && !dep.buildInfo.isImportedByNonStylable) {
@@ -143,7 +143,7 @@ export function getStylableModulesFromDependencies(
 
 export function getStylableModulesFromCompilation(compilation: webpack.compilation.Compilation) {
     const modules: StylableModule[] = [];
-    compilation.modules.forEach(module => {
+    compilation.modules.forEach((module) => {
         if (module.type === 'stylable') {
             modules.push(module);
         }
@@ -153,7 +153,7 @@ export function getStylableModulesFromCompilation(compilation: webpack.compilati
 
 export function findStylableComponents(stylableModules: StylableModule[]) {
     return stylableModules
-        .map(m => {
+        .map((m) => {
             return { logicModule: getCSSComponentLogicModule(m), stylableModule: m };
         })
         .filter(({ logicModule }) => logicModule);
@@ -171,9 +171,9 @@ export function renderStaticCSS(
     filter: (item: any) => boolean = Boolean
 ): string[] {
     const modulesByDepth = sortedStylableModulesByDepth(modules.filter(filter));
-    const cssSources = modulesByDepth.map(module => {
+    const cssSources = modulesByDepth.map((module) => {
         const publicPath = mainTemplate.getPublicPath({
-            hash
+            hash,
         });
         return (module as any).generator.toCSS(module, (assetModule: any) => {
             const source = assetModule.originalSource().source();

@@ -10,7 +10,7 @@
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
     throw err;
 });
 
@@ -20,7 +20,7 @@ const chalk = require('chalk');
 const spawn = require('react-dev-utils/crossSpawn');
 const clearConsole = require('react-dev-utils/clearConsole');
 
-module.exports = function(appPath, appName, verbose, originalDirectory, template) {
+module.exports = function (appPath, appName, verbose, originalDirectory, template) {
     const ownPackageName = require(path.join(__dirname, '..', 'package.json')).name;
     const ownPath = path.join(appPath, 'node_modules', ownPackageName);
     const appPackage = require(path.join(appPath, 'package.json'));
@@ -36,7 +36,7 @@ module.exports = function(appPath, appName, verbose, originalDirectory, template
         start: 'stylable-scripts start',
         build: 'stylable-scripts build',
         // test: 'stylable-scripts test --env=jsdom',
-        eject: 'stylable-scripts eject'
+        eject: 'stylable-scripts eject',
     };
 
     fs.writeFileSync(path.join(appPath, 'package.json'), JSON.stringify(appPackage, null, 2));
@@ -59,7 +59,7 @@ module.exports = function(appPath, appName, verbose, originalDirectory, template
 
     // Rename gitignore after the fact to prevent npm from renaming it to .npmignore
     // See: https://github.com/npm/npm/issues/1862
-    fs.move(path.join(appPath, 'gitignore'), path.join(appPath, '.gitignore'), [], err => {
+    fs.move(path.join(appPath, 'gitignore'), path.join(appPath, '.gitignore'), [], (err) => {
         if (err) {
             // Append if there's already a `.gitignore` file there
             if (err.code === 'EEXIST') {
@@ -73,7 +73,7 @@ module.exports = function(appPath, appName, verbose, originalDirectory, template
     });
 
     function depsToArray(deps = {}) {
-        return Object.keys(deps).map(key => {
+        return Object.keys(deps).map((key) => {
             return `${key}@${deps[key]}`;
         });
     }
@@ -95,10 +95,10 @@ module.exports = function(appPath, appName, verbose, originalDirectory, template
     } else {
         command = 'npm';
         args = ['install', '--save', verbose && '--verbose']
-            .filter(e => e)
+            .filter((e) => e)
             .concat(templateDependencies);
         devArgs = ['install', '--save-dev', verbose && '--verbose']
-            .filter(e => e)
+            .filter((e) => e)
             .concat(templateDevDependencies);
     }
 

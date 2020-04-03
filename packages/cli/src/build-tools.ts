@@ -13,7 +13,7 @@ export function handleDiagnostics(
         : res.meta.diagnostics.reports;
     if (diagnostics && reports.length) {
         diagnosticsMsg.push(`Errors in file: ${filePath}`);
-        reports.forEach(report => {
+        reports.forEach((report) => {
             const err = report.node.error(report.message, report.options);
             diagnosticsMsg.push([report.message, err.showSourceCode()].join('\n'));
         });
@@ -31,7 +31,7 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
 export function createImportForComponent(from: string, defaultName: string) {
     return [
         `:import {-st-from: ${JSON.stringify(from)};-st-default:${defaultName};}`,
-        `.root ${defaultName}{}`
+        `.root ${defaultName}{}`,
     ].join('\n');
 }
 
@@ -61,7 +61,7 @@ export function ensureAssets(
     },
     fs: FileSystem
 ) {
-    Object.keys(projectAssetsMap).map(assetOriginalPath => {
+    Object.keys(projectAssetsMap).map((assetOriginalPath) => {
         if (fs.existsSync(assetOriginalPath)) {
             const content = fs.readFileSync(assetOriginalPath);
             const targetPath = projectAssetsMap[assetOriginalPath];

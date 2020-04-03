@@ -6,7 +6,9 @@ import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
 
 // var receives special handling and standalone testing
-export const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter(func => func !== 'var');
+export const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter(
+    (func) => func !== 'var'
+);
 
 describe('Stylable functions (native, formatter and variable)', () => {
     describe('transform', () => {
@@ -23,16 +25,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 background: colorGreen();
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function() {
                                 return 'green';
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -57,14 +59,14 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 background: formatter(1, "2px solid red" 10px);
                                 -st-mixin: mixin(1, "2");
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function() {
                                 return [...arguments].join(' ');
                             }
-                        `
+                        `,
                     },
                     '/mixin.js': {
                         content: `
@@ -73,9 +75,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                     content: [...args].map((x)=>\`url(\${JSON.stringify(x)})\`).join(', ')
                                 };
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -96,16 +98,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 background: color(green);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function(color) {
                                 return color;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -125,16 +127,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: myBorder(2px, solid, green);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function(size, style, color) {
                                 return size + " " + style + " " + color;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -155,7 +157,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: border(addSomePx(1, 5), solid, green);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
@@ -165,9 +167,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             module.exports.border = function(size, style, color) {
                                 return size + " " + style + " " + color;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -191,7 +193,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: print(argsAmount(a, a b, value(x) str), argsAmount(2, 2) argsAmount(1));
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
@@ -201,9 +203,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             module.exports.argsAmount = function() {
                                 return arguments.length;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -211,7 +213,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         describe('native', () => {
-            testedNativeFunctions.forEach(cssFunc => {
+            testedNativeFunctions.forEach((cssFunc) => {
                 // cannot use formatter inside a url naitve function
                 if (cssFunc !== 'url' && cssFunc !== 'format') {
                     it(`should pass through native function (${cssFunc}) and resolve formatters`, () => {
@@ -227,16 +229,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                         .container {
                                             border: ${cssFunc}(${cssFunc}(print(print(1))));
                                         }
-                                    `
+                                    `,
                                 },
                                 '/formatter.js': {
                                     content: `
                                         module.exports = function(arg) {
                                             return arg;
                                         }
-                                    `
-                                }
-                            }
+                                    `,
+                                },
+                            },
                         });
 
                         const rule = result.nodes![0] as postcss.Rule;
@@ -264,23 +266,23 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 .container {
                                     background: print(value(myVar));
                                 }
-                            `
+                            `,
                         },
                         '/vars.st.css': {
                             content: `
                                 :vars {
                                     myVar: calc(42 * 42);
                                 }
-                            `
+                            `,
                         },
                         '/formatter.js': {
                             content: `
                                 module.exports = function() {
                                     return [...arguments].filter(Boolean).join(' ');
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
@@ -296,9 +298,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 @font-face {
                                     src: url(/test.st.css) format('woff');
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
@@ -317,9 +319,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 @font-face {
                                     src: url(/test.st.css) format(value(fontType));
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
@@ -340,16 +342,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 .container {
                                     background: url(print(some-static-url));
                                 }
-                            `
+                            `,
                         },
                         '/formatter.js': {
                             content: `
                                 module.exports = function print(arg) {
                                     return arg;
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
@@ -365,9 +367,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 .container {
                                     background: url("some-static-url");
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
@@ -392,16 +394,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: print(print(value(a)));
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function(result) {
                                 return result;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -424,7 +426,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         .container {
                             background: value(color2);
                         }
-                    `
+                    `,
                     },
                     '/style1.st.css': {
                         content: `
@@ -435,9 +437,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 color2: value(color1)
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -460,16 +462,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: value(border);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function myBorder(amount, size) {
                                 return (Number(size) + Number(amount)) + 'px';
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -489,7 +491,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 background: value(color1);
                             }
-                        `
+                        `,
                     },
                     '/vars.st.css': {
                         content: `
@@ -500,16 +502,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 color1: getGreen();
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function getGreen() {
                                 return 'green';
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -529,7 +531,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 border: value(myBorder);
                             }
-                        `
+                        `,
                     },
                     '/vars-outer.st.css': {
                         content: `
@@ -544,14 +546,14 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 myBorder: normalizeBorder(value(borderSize));
                             }
-                        `
+                        `,
                     },
                     '/formatter-outer.js': {
                         content: `
                             module.exports = function normalizeBorder(size) {
                                 return size + 'px' + ' ' + 'solid black';
                             }
-                        `
+                        `,
                     },
                     '/vars-inner.st.css': {
                         content: `
@@ -562,16 +564,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             :vars {
                                 borderSize: biggerByTwo(1);
                             }
-                        `
+                        `,
                     },
                     '/formatter-inner.js': {
                         content: `
                             module.exports = function biggerByTwo(origSize) {
                                 return Number(origSize) + 2;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -592,16 +594,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 bigScreenWidth: 1800;
                             }
                             @media maxWidthAdd50Px(value(bigScreenWidth)) {}
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function maxWidthAdd50Px(origSize) {
                                 return "max-width: " + (Number(origSize) + Number(50)) + "px";
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.AtRule;
@@ -624,16 +626,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .some-class {
                                 color: fail(a, value(param1), c);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function fail() {
                                 throw new Error("FAIL FAIL FAIL");
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const rule = result.nodes![0] as postcss.Rule;
@@ -657,15 +659,15 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .my-class {
                                 |color:value(color1, color2)|;
                             }
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     [
                         {
                             message: functionWarnings.MULTI_ARGS_IN_VALUE('color1, color2'),
-                            file: '/style.st.css'
-                        }
+                            file: '/style.st.css',
+                        },
                     ]
                 );
             });
@@ -690,15 +692,15 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 color: value(myVar, key2, key3);
                                 |color: value(myVar, key2, key4)|;
                             }
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     [
                         {
                             message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
-                            file: '/style.st.css'
-                        }
+                            file: '/style.st.css',
+                        },
                     ]
                 );
             });
@@ -723,19 +725,19 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root {
                                 |background: value(myVar, key2, key4), value(v1, v2)|;
                             }
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     [
                         {
                             message: functionWarnings.COULD_NOT_RESOLVE_VALUE('myVar, key2, key4'),
-                            file: '/style.st.css'
+                            file: '/style.st.css',
                         },
                         {
                             message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
-                            file: '/style.st.css'
-                        }
+                            file: '/style.st.css',
+                        },
                     ]
                 );
             });
@@ -760,15 +762,15 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root {
                                 |background: value(myVar, key2, value(v1, v2))|;
                             }
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     [
                         {
                             message: functionWarnings.MULTI_ARGS_IN_VALUE('v1, v2'),
-                            file: '/style.st.css'
-                        }
+                            file: '/style.st.css',
+                        },
                     ]
                 );
 
@@ -788,9 +790,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .gaga{
                                 |color:value($myColor$)|;
                             }
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     [{ message: functionWarnings.UNKNOWN_VAR('myColor'), file: '/style.st.css' }]
                 );
@@ -809,20 +811,20 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root{
                                 |color:value($my-class$)|;
                             }
-                          `
+                          `,
                         },
                         '/style.st.css': {
                             content: `
                                 .my-class {}
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: functionWarnings.CANNOT_USE_AS_VALUE('class', 'my-class'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -839,18 +841,18 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root{
                                 |color:value($Comp$)|;
                             }
-                          `
+                          `,
                         },
                         '/file.st.css': {
-                            content: ''
-                        }
-                    }
+                            content: '',
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: functionWarnings.CANNOT_USE_AS_VALUE('stylesheet', 'Comp'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -867,18 +869,18 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root{
                                 |color:value($my-mixin$)|;
                             }
-                          `
+                          `,
                         },
                         '/mixins.js': {
-                            content: `module.exports = function myMixin() {};`
-                        }
-                    }
+                            content: `module.exports = function myMixin() {};`,
+                        },
+                    },
                 };
                 expectWarningsFromTransform(config, [
                     {
                         message: functionWarnings.CANNOT_USE_JS_AS_VALUE('my-mixin'),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -896,9 +898,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .root{
                                 color: value(a);
                             }
-                          `
-                        }
-                    }
+                          `,
+                        },
+                    },
                 };
                 const mainPath = '/main.st.css';
                 expectWarningsFromTransform(config, [
@@ -907,10 +909,10 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             `${mainPath}: a`,
                             `${mainPath}: b`,
                             `${mainPath}: c`,
-                            `${mainPath}: a`
+                            `${mainPath}: a`,
                         ]),
-                        file: mainPath
-                    }
+                        file: mainPath,
+                    },
                 ]);
             });
         });
@@ -926,13 +928,13 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .container {
                                 |border: $print$|();
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
 
                 expectWarningsFromTransform(config, [
-                    { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' }
+                    { message: functionWarnings.UNKNOWN_FORMATTER(key), file: '/main.st.css' },
                 ]);
             });
 
@@ -952,16 +954,16 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             .some-class {
                                 |color: $fail(a, value(param1), c)$|;
                             }
-                            `
+                            `,
                         },
                         '/formatter.js': {
                             content: `
                                 module.exports = function fail() {
                                     throw new Error("FAIL FAIL FAIL");
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 };
 
                 expectWarningsFromTransform(config, [
@@ -970,8 +972,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             'fail(a, red, c)',
                             'FAIL FAIL FAIL'
                         ),
-                        file: '/main.st.css'
-                    }
+                        file: '/main.st.css',
+                    },
                 ]);
             });
 
@@ -990,9 +992,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 @media screen (max-width: 100px) {}
                                 @media screen (max-width: value(a)) {}
                                 @media screen (value(b)) {}
-                            `
-                            }
-                        }
+                            `,
+                            },
+                        },
                     },
                     []
                 );
@@ -1000,7 +1002,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
         });
 
         describe('native', () => {
-            testedNativeFunctions.forEach(cssFunc => {
+            testedNativeFunctions.forEach((cssFunc) => {
                 it(`should not return a warning for native ${cssFunc} pseudo class`, () => {
                     const config = {
                         entry: '/main.css',
@@ -1009,9 +1011,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 content: `
                                 .myClass {
                                     background: ${cssFunc}(a, b, c);
-                                }`
-                            }
-                        }
+                                }`,
+                            },
+                        },
                     };
                     expectWarningsFromTransform(config, []);
                 });

@@ -47,7 +47,7 @@ export class ProjectRunner {
 
         const projectRunner = new this(runnerOptions);
 
-        before('bundle and serve project', async function() {
+        before('bundle and serve project', async function () {
             this.timeout(40000);
             watch ? await projectRunner.watch() : await projectRunner.bundle();
             await projectRunner.serve();
@@ -82,7 +82,7 @@ export class ProjectRunner {
         puppeteerOptions = {},
         throwOnBuildError = true,
         webpackOptions,
-        configName = 'webpack.config'
+        configName = 'webpack.config',
     }: Options) {
         this.projectDir = projectDir;
         this.outputDir = join(this.projectDir, 'dist');
@@ -97,7 +97,7 @@ export class ProjectRunner {
     public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
         return {
             ...require(join(this.projectDir, configName || 'webpack.config')),
-            ...webpackOptions
+            ...webpackOptions,
         };
     }
     public async bundle() {
@@ -136,7 +136,7 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        return new Promise(res => {
+        return new Promise((res) => {
             const child = spawn(
                 'node',
                 [
@@ -144,19 +144,19 @@ export class ProjectRunner {
                     '@ts-tools/node/r',
                     './isolated-server',
                     this.outputDir,
-                    this.port.toString()
+                    this.port.toString(),
                 ],
                 {
                     cwd: __dirname,
-                    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+                    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
                 }
             );
-            child.once('message', port => {
+            child.once('message', (port) => {
                 this.serverUrl = `http://localhost:${port}`;
                 this.server = {
                     close() {
                         child.kill();
-                    }
+                    },
                 };
                 res();
             });
@@ -172,7 +172,7 @@ export class ProjectRunner {
 
         await page.setCacheEnabled(false);
         const responses: puppeteer.Response[] = [];
-        page.on('response', response => {
+        page.on('response', (response) => {
             responses.push(response);
         });
         await page.goto(this.serverUrl, { waitUntil: 'networkidle0' });
@@ -230,7 +230,7 @@ export class ProjectRunner {
             this.compiler = null;
         }
         if (this.watchingHandle) {
-            await new Promise(res => this.watchingHandle?.close(res));
+            await new Promise((res) => this.watchingHandle?.close(res));
             this.watchingHandle = null;
         }
         await rimraf(this.outputDir);
@@ -243,7 +243,7 @@ export class ProjectRunner {
         } else {
             webpackConfig.output = {
                 ...webpackConfig.output,
-                path: this.outputDir
+                path: this.outputDir,
             };
         }
         return webpackConfig;

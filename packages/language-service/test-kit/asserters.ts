@@ -7,7 +7,7 @@ import {
     ColorPresentation,
     Location,
     ParameterInformation,
-    SignatureHelp
+    SignatureHelp,
 } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
@@ -83,6 +83,6 @@ export function getDocColorPresentation(
     return stylableLSP.getColorPresentation(doc, {
         textDocument: TextDocumentIdentifier.create(doc.uri),
         color,
-        range
+        range,
     });
 }

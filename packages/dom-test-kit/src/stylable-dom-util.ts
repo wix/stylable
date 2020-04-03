@@ -3,7 +3,7 @@ import {
     parseSelector,
     pseudoStates,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
@@ -83,7 +83,7 @@ export class StylableDOMUtil {
         const baseState = this.getBaseStateWithParam(stateName);
 
         let paramValue = '';
-        element.classList.forEach(cls => {
+        element.classList.forEach((cls) => {
             if (!paramValue) {
                 paramValue = this.getStateValueFromClassName(cls, baseState);
             }

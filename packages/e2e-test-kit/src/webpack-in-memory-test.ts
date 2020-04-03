@@ -5,11 +5,11 @@ const webpack = require('webpack');
 const _eval = require('node-eval');
 
 const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
-const content = readdirSync(runtimeDir).map(f => {
+const content = readdirSync(runtimeDir).map((f) => {
     const fullpath = join(runtimeDir, f);
     return {
         content: readFileSync(fullpath, 'utf-8'),
-        fullpath
+        fullpath,
     };
 });
 
@@ -38,7 +38,7 @@ export function webpackTest({ files, config }: any) {
         apply(compiler: any) {
             compiler.inputFileSystem = memfs;
             compiler.outputFileSystem = memfs;
-        }
+        },
     });
 
     const compiler = webpack(config);
@@ -50,6 +50,6 @@ export function evalCssJSModule(source: string, filename = 'file.js') {
     return _eval(source, filename, {
         require(id: string) {
             return { id };
-        }
+        },
     });
 }

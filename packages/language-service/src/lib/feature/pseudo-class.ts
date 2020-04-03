@@ -91,7 +91,7 @@ function resolveStateType(
                 typeNode.value
             );
             length = validator.length;
-            typeNode.nodes.forEach(valNode => {
+            typeNode.nodes.forEach((valNode) => {
                 ({ validator, length, stateTypeValidatorToHint } = resolveStateValidator(
                     pos,
                     length,
@@ -156,13 +156,13 @@ export function createStateValidatorSignature(type: string) {
         const validatorsString = Object.keys(valiadtors).join(', ');
         const sigInfo: SignatureInformation = {
             label: `Supported "${type}" validator types:\n- "${validatorsString}"`,
-            parameters: [{ label: validatorsString }] as ParameterInformation[]
+            parameters: [{ label: validatorsString }] as ParameterInformation[],
         };
 
         return {
             activeParameter: 0,
             activeSignature: 0,
-            signatures: [sigInfo]
+            signatures: [sigInfo],
         } as SignatureHelp;
     } else {
         return null;
@@ -173,12 +173,12 @@ export function createStateTypeSignature() {
     const stateTypes = Object.keys(systemValidators).join(' | ');
     const sigInfo: SignatureInformation = {
         label: `Supported state types:\n- "${stateTypes}"`,
-        parameters: [{ label: stateTypes }] as ParameterInformation[]
+        parameters: [{ label: stateTypes }] as ParameterInformation[],
     };
     return {
         activeParameter: 0,
         activeSignature: 0,
-        signatures: [sigInfo]
+        signatures: [sigInfo],
     } as SignatureHelp;
 }
 
@@ -200,7 +200,7 @@ export function isBetweenLengths(location: number, length: number, modifier: { l
 export function resolveStateParams(stateDef: StateParsedValue) {
     const typeArguments: string[] = [];
     if (stateDef.arguments.length > 0) {
-        stateDef.arguments.forEach(arg => {
+        stateDef.arguments.forEach((arg) => {
             if (typeof arg === 'object') {
                 if (arg.args.length > 0) {
                     typeArguments.push(`${arg.name}(${arg.args.join(', ')})`);

@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -31,7 +31,7 @@ describe(`(${project})`, () => {
         const res = await page.evaluate(() => {
             return {
                 id: (window as any).$id,
-                namespace: (window as any).$namespace
+                namespace: (window as any).$namespace,
             };
         });
 

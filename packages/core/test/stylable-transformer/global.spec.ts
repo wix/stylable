@@ -13,9 +13,9 @@ describe('Stylable postcss transform (Global)', () => {
                         .root :global(.btn) {}
                         :global(.btn) {}
                         :global(.btn) .container {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect((result.nodes![0] as postcss.Rule).selector).to.equal('.style__root .btn');
@@ -37,15 +37,15 @@ describe('Stylable postcss transform (Global)', () => {
                         .root {
                             -st-mixin: Comp;
                         }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
                     content: `
                         :global(.btn) .root {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style__root');
@@ -65,7 +65,7 @@ describe('Stylable postcss transform (Global)', () => {
                         .root {
                             -st-mixin: Mixin;
                         }
-                    `
+                    `,
                 },
                 '/mixin.st.css': {
                     namespace: 'mixin',
@@ -77,15 +77,15 @@ describe('Stylable postcss transform (Global)', () => {
                         .root {
                             -st-mixin: Comp;
                         }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
                     content: `
                         :global(.btn) .root {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal('.btn .style__root');
@@ -108,7 +108,7 @@ describe('Stylable postcss transform (Global)', () => {
                         :global(.c .d) {}
                         :global(.e) {}
                         .mixIntoMe { -st-mixin: mix; }
-                    `
+                    `,
                 },
                 '/mixin.st.css': {
                     namespace: 'mixin',
@@ -118,9 +118,9 @@ describe('Stylable postcss transform (Global)', () => {
                         }
 
                         .mix :global(.global-test2) {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect(meta.globals).to.eql({
@@ -130,7 +130,7 @@ describe('Stylable postcss transform (Global)', () => {
             b: true,
             c: true,
             d: true,
-            e: true
+            e: true,
         });
         expect((meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal('.global-test');
         expect((meta.outputAst!.nodes![2] as postcss.Rule).selector).to.equal('.a .b');

@@ -12,7 +12,7 @@ import {
     Hover,
     Location,
     Position,
-    Range
+    Range,
 } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { createMeta } from './provider';
@@ -42,7 +42,7 @@ function findPseudoStateStart(line: string, lookFrom: number) {
 
     return {
         index: res,
-        openParens
+        openParens,
     };
 }
 
@@ -83,7 +83,7 @@ export class CssService {
         const mq = 'media';
         const valueMatch = 'value(';
 
-        ast.walkAtRules(mq, atRule => {
+        ast.walkAtRules(mq, (atRule) => {
             while (atRule.params.includes('value(')) {
                 const currentValueIndex = atRule.params.indexOf(valueMatch);
                 const closingParenthesisIndex = atRule.params.indexOf(')', currentValueIndex);
@@ -108,7 +108,7 @@ export class CssService {
         const stScope = 'st-scope';
         const mq = 'media';
 
-        ast.walkAtRules(stScope, atRule => {
+        ast.walkAtRules(stScope, (atRule) => {
             atRule.name = mq + ' '.repeat(stScope.length - mq.length);
 
             if (atRule.params.includes('.')) {
@@ -127,7 +127,7 @@ export class CssService {
 
         return this.inner
             .doValidation(document, stylesheet)
-            .filter(diag => {
+            .filter((diag) => {
                 if (diag.code === 'emptyRules') {
                     return false;
                 }
@@ -183,13 +183,13 @@ export class CssService {
 
                     const src = this.fs.readFileSync(filePath, 'utf8');
                     const meta = createMeta(src, filePath).meta;
-                    if (meta && Object.keys(meta.mappedSymbols).some(ms => ms === prop)) {
+                    if (meta && Object.keys(meta.mappedSymbols).some((ms) => ms === prop)) {
                         return false;
                     }
                 }
                 return true;
             })
-            .map(diag => {
+            .map((diag) => {
                 diag.source = 'css';
                 return diag;
             });

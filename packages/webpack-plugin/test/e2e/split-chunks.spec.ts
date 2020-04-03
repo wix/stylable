@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             puppeteerOptions: {
                 // headless: false,
                 // devtools: true
-            }
+            },
         },
         before,
         afterEach,
@@ -25,16 +25,16 @@ describe(`(${project})`, () => {
         expect(styleElements).to.eql([
             {
                 depth: '1',
-                id: './node_modules/lib/test.st.css'
+                id: './node_modules/lib/test.st.css',
             },
             {
                 depth: '2',
-                id: './node_modules/lib/index.st.css'
+                id: './node_modules/lib/index.st.css',
             },
             {
                 depth: '3',
-                id: './src/index.st.css'
-            }
+                id: './src/index.st.css',
+            },
         ]);
     });
 

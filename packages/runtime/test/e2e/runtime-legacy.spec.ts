@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             puppeteerOptions: {
                 // headless: false,
                 // devtools: true
-            }
+            },
         },
         before,
         afterEach,
@@ -24,7 +24,7 @@ describe(`(${project})`, () => {
             const computedStyle = getComputedStyle(document.documentElement);
 
             return {
-                backgroundColor: computedStyle.backgroundColor
+                backgroundColor: computedStyle.backgroundColor,
             };
         });
 

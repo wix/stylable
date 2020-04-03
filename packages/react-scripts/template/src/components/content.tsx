@@ -6,7 +6,7 @@ export interface IContentProps {
     mainFile: string;
 }
 
-export const Content: React.FunctionComponent<IContentProps> = props => (
+export const Content: React.FunctionComponent<IContentProps> = (props) => (
     <p className={style(classes.root, props.className)}>
         To get started, edit <code>{props.mainFile}</code> and save to reload.
     </p>

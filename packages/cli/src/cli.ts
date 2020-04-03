@@ -151,7 +151,7 @@ const {
     minify,
     manifestFilepath,
     manifest,
-    require: requires
+    require: requires,
 } = argv;
 
 log('[Arguments]', argv);
@@ -167,7 +167,7 @@ const stylable = Stylable.create({
     fileSystem: fs,
     requireModule: require,
     projectRoot: rootDir,
-    resolveNamespace: require(namespaceResolver).resolveNamespace
+    resolveNamespace: require(namespaceResolver).resolveNamespace,
 });
 
 build({
@@ -190,7 +190,7 @@ build({
     optimize,
     compat,
     minify,
-    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined
+    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

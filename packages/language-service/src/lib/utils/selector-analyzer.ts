@@ -30,7 +30,7 @@ export function createSelectorChunk(value?: Partial<SelectorChunk>): SelectorChu
         states: [],
         text: [],
         ...value,
-        _type: 'chunk'
+        _type: 'chunk',
     };
 }
 
@@ -130,7 +130,7 @@ export function parseSelector(
                     currentSourceQuery = '::' + selectorQueryItem.name;
                     currentTarget = createSelectorInternalChunk({
                         name: selectorQueryItem.name,
-                        type: selectorQueryItem.name
+                        type: selectorQueryItem.name,
                     });
                     currentTarget.text.push(currentSourceQuery);
                     res.push(currentTarget);
@@ -166,7 +166,7 @@ export function parseSelector(
                 focusChunk: currentTarget,
                 text: currentTarget.text,
                 index: res.indexOf(currentTarget),
-                internalIndex: chunkInternalPos
+                internalIndex: chunkInternalPos,
             };
         }
         currentPosition += queryLength;
@@ -188,6 +188,6 @@ export function parseSelector(
     return {
         selector: res,
         target: cursorTarget,
-        lastSelector
+        lastSelector,
     };
 }

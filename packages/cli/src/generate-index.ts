@@ -26,7 +26,7 @@ export function generateFileIndexEntry(
     nameMapping[name] = filePath;
     indexFileOutput.push({
         name,
-        from: addDotSlash(relative(fullOutDir, filePath))
+        from: addDotSlash(relative(fullOutDir, filePath)),
     });
 }
 
@@ -41,7 +41,7 @@ export function generateIndexFile(
     fs: any
 ) {
     const indexFileContent = indexFileOutput
-        .map(_ => createImportForComponent(_.from, _.name))
+        .map((_) => createImportForComponent(_.from, _.name))
         .join('\n');
     const indexFileTargetPath = join(fullOutDir, indexFile);
     log('[Build]', 'creating index file: ' + indexFileTargetPath);

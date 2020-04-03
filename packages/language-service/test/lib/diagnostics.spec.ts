@@ -9,7 +9,7 @@ function createDiagnostics(files: { [filePath: string]: string }, filePath: stri
 
     const stylableLSP = new StylableLanguageService({
         fs,
-        stylable: new Stylable('/', fs as any, require)
+        stylable: new Stylable('/', fs as any, require),
     });
 
     return stylableLSP.diagnose(filePath);
@@ -21,7 +21,7 @@ describe('diagnostics', () => {
 
         const diagnostics = createDiagnostics(
             {
-                [filePath]: '.gaga .root{}'
+                [filePath]: '.gaga .root{}',
             },
             filePath
         );
@@ -29,12 +29,12 @@ describe('diagnostics', () => {
         expect(diagnostics).to.deep.include({
             range: {
                 start: { line: 0, character: 0 },
-                end: { line: 0, character: 13 }
+                end: { line: 0, character: 13 },
             },
             message:
                 '".root" class cannot be used after native elements or selectors external to the stylesheet',
             severity: 2,
-            source: 'stylable'
+            source: 'stylable',
         });
     });
 
@@ -52,7 +52,7 @@ describe('diagnostics', () => {
                         }
 
                         .ninja{}
-                        `
+                        `,
             },
             filePathB
         );
@@ -60,11 +60,11 @@ describe('diagnostics', () => {
         expect(diagnostics).to.deep.include({
             range: {
                 start: { line: 3, character: 39 },
-                end: { line: 3, character: 44 }
+                end: { line: 3, character: 44 },
             },
             message: `cannot resolve imported symbol "ninja" from stylesheet ".${filePathA}"`,
             severity: 2,
-            source: 'stylable'
+            source: 'stylable',
         });
     });
 
@@ -80,7 +80,7 @@ describe('diagnostics', () => {
                     .gaga {
                       myColor: red;
                     }
-                    `
+                    `,
                 },
                 filePath
             );
@@ -89,13 +89,13 @@ describe('diagnostics', () => {
                 {
                     range: {
                         start: { line: 4, character: 22 },
-                        end: { line: 4, character: 29 }
+                        end: { line: 4, character: 29 },
                     },
                     message: `Unknown property: 'myColor'`,
                     severity: 2,
                     source: 'css',
-                    code: 'unknownProperties'
-                }
+                    code: 'unknownProperties',
+                },
             ]);
         });
 
@@ -108,7 +108,7 @@ describe('diagnostics', () => {
                     :vars {
                       varVar: binks;
                     }
-                    `
+                    `,
                 },
                 filePath
             );
@@ -127,7 +127,7 @@ describe('diagnostics', () => {
                     }
                     .root:someState(T1)   {}    /* css-identifierexpected */ 
                     .root:someState(T1.1) {}    /* css-rparentexpected    */
-                    `
+                    `,
                 },
                 filePath
             );
@@ -148,7 +148,7 @@ describe('diagnostics', () => {
                     @media value(size) {
                         .part{}
                     }
-                    `
+                    `,
                 },
                 filePath
             );

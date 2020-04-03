@@ -3,7 +3,7 @@ import {
     parseSelector,
     SelectorAstNode,
     StylableResults,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import csso from 'csso';
 import postcss from 'postcss';
@@ -68,10 +68,10 @@ export class StylableOptimizer implements IStylableOptimizer {
         });
         toRemove.forEach(
             shouldComment
-                ? node => {
+                ? (node) => {
                       node.replaceWith(...createLineByLineComment(node));
                   }
-                : node => {
+                : (node) => {
                       node.remove();
                   }
         );
@@ -89,8 +89,8 @@ export class StylableOptimizer implements IStylableOptimizer {
         shouldComment = false
     ) {
         const matchNamespace = new RegExp(`(.+)${delimiter}(.+)`);
-        outputAst.walkRules(rule => {
-            const outputSelectors = rule.selectors.filter(selector => {
+        outputAst.walkRules((rule) => {
+            const outputSelectors = rule.selectors.filter((selector) => {
                 const selectorAst = parseSelector(selector);
                 return !this.isContainsUnusedParts(selectorAst, usageMapping, matchNamespace);
             });
@@ -112,7 +112,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     ) {
         // TODO: !!-!-!! last working point
         let isContainsUnusedParts = false;
-        traverseNode(selectorAst, node => {
+        traverseNode(selectorAst, (node) => {
             if (isContainsUnusedParts) {
                 return false;
             }
@@ -133,8 +133,8 @@ export class StylableOptimizer implements IStylableOptimizer {
 }
 
 export function removeCommentNodes(root: postcss.Root) {
-    root.walkComments(comment => comment.remove());
-    root.walkDecls(decl => {
+    root.walkComments((comment) => comment.remove());
+    root.walkDecls((decl) => {
         const r: any = decl.raws;
         if (r.value) {
             r.value.raw = decl.value;
@@ -148,13 +148,13 @@ export function removeEmptyNodes(root: postcss.Root) {
     root.walkRules((rule: postcss.Rule) => {
         const shouldRemove =
             (rule.nodes && rule.nodes.length === 0) ||
-            (rule.nodes && rule.nodes.filter(node => node.type !== 'comment').length === 0);
+            (rule.nodes && rule.nodes.filter((node) => node.type !== 'comment').length === 0);
         if (shouldRemove) {
             toRemove.push(rule);
         }
     });
 
-    toRemove.forEach(node => {
+    toRemove.forEach((node) => {
         removeRecursiveUpIfEmpty(node);
     });
 }
@@ -162,9 +162,9 @@ export function removeEmptyNodes(root: postcss.Root) {
 export function createCommentFromNode(label: string, node: postcss.Node) {
     return [
         postcss.comment({
-            text: label + ':'
+            text: label + ':',
         }),
-        ...createLineByLineComment(node)
+        ...createLineByLineComment(node),
     ];
 }
 
@@ -172,7 +172,7 @@ export function createLineByLineComment(node: postcss.Node) {
     return node
         .toString()
         .split(/\r?\n/)
-        .map(x => {
+        .map((x) => {
             if (x.trim() === '') {
                 return undefined;
             }
@@ -207,7 +207,7 @@ export function replaceRecursiveUpIfEmpty(label: string, node: postcss.Node) {
     if (
         parent &&
         parent.nodes &&
-        parent.nodes.filter(node => node.type !== 'comment').length === 0
+        parent.nodes.filter((node) => node.type !== 'comment').length === 0
     ) {
         replaceRecursiveUpIfEmpty('EMPTY_NODE', parent);
     }

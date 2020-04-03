@@ -23,7 +23,7 @@ export interface MetadataOptions {
 export class StylableMetadataPlugin {
     constructor(private options: MetadataOptions) {}
     public apply(compiler: webpack.Compiler) {
-        compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
+        compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', (compilation) => {
             compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
                 await this.createMetadataAssets(compilation);
             });
@@ -46,7 +46,7 @@ export class StylableMetadataPlugin {
         }
     }
     private async createMetadataAssets(compilation: webpack.compilation.Compilation) {
-        const stylableModules = compilation.modules.filter(m => m.type === 'stylable');
+        const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
 
         const builder = new ComponentMetadataBuilder(
             this.options.context || compilation.compiler.options.context || process.cwd(),
@@ -169,14 +169,11 @@ export class StylableMetadataPlugin {
                 }
                 builder.addSource(variantPath, content, {
                     namespace:
-                        name
-                            .replace(/\\/g, '/')
-                            .replace(/\//g, '_')
-                            .replace('.st.css', '') +
+                        name.replace(/\\/g, '/').replace(/\//g, '_').replace('.st.css', '') +
                         '-' +
                         namespace,
                     variant: true,
-                    depth
+                    depth,
                 });
             });
         }

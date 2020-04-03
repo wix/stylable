@@ -6,7 +6,7 @@ import {
     stylableElement,
     stylableModule,
     StylableModuleSchema,
-    stylableVar
+    stylableVar,
 } from '../src';
 import { mockNamespace } from './mock-namespace';
 
@@ -35,10 +35,10 @@ describe('cssDocs extraction', () => {
                     $ref: stylableClass,
                     description: 'this is a description text',
                     docTags: {
-                        description: 'this is a description tag'
-                    }
-                }
-            }
+                        description: 'this is a description tag',
+                    },
+                },
+            },
         };
         expect(res).to.eql(expected);
     });
@@ -64,16 +64,16 @@ describe('cssDocs extraction', () => {
             namespace: 'entry',
             properties: {
                 root: {
-                    $ref: stylableClass
+                    $ref: stylableClass,
                 },
                 Comp: {
                     $ref: stylableElement,
                     description: 'this is a description text',
                     docTags: {
-                        description: 'this is a description tag'
-                    }
-                }
-            }
+                        description: 'this is a description tag',
+                    },
+                },
+            },
         };
         expect(res).to.eql(expected);
     });
@@ -101,16 +101,16 @@ describe('cssDocs extraction', () => {
             namespace: 'entry',
             properties: {
                 root: {
-                    $ref: stylableClass
+                    $ref: stylableClass,
                 },
                 myVar: {
                     $ref: stylableVar,
                     description: 'this is a var description text',
                     docTags: {
-                        description: 'this is a var description tag'
-                    }
-                }
-            }
+                        description: 'this is a var description tag',
+                    },
+                },
+            },
         };
         expect(res).to.eql(expected);
     });

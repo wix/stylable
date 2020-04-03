@@ -12,12 +12,12 @@ describe('Completions', () => {
                 asserters.varsDirectiveCompletion(createRange(3, 0, 3, 0)),
                 asserters.rootClassCompletion(createRange(3, 0, 3, 0)),
                 asserters.classCompletion('gaga', createRange(3, 0, 3, 0)),
-                asserters.classCompletion('baga', createRange(3, 0, 3, 0))
+                asserters.classCompletion('baga', createRange(3, 0, 3, 0)),
             ]);
             asserter.notSuggested([
                 asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
-                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0))
+                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0)),
             ]);
         });
 
@@ -31,13 +31,13 @@ describe('Completions', () => {
                 asserters.stScopeDirectiveCompletion(createRange(3, 0, 3, 0)),
                 asserters.varsDirectiveCompletion(createRange(3, 0, 3, 0)),
                 asserters.rootClassCompletion(createRange(3, 0, 3, 0)),
-                asserters.classCompletion('gaga', createRange(3, 0, 3, 0))
+                asserters.classCompletion('gaga', createRange(3, 0, 3, 0)),
             ]);
             asserter.notSuggested([
                 asserters.classCompletion('baga', createRange(0, 0, 0, 0)),
                 asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
-                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0))
+                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0)),
             ]);
         });
 
@@ -45,7 +45,7 @@ describe('Completions', () => {
             const asserter = asserters.getCompletions('general/top-level-dot.st.css');
             asserter.suggested([
                 asserters.rootClassCompletion(createRange(0, 0, 0, 1)),
-                asserters.classCompletion('gaga', createRange(0, 0, 0, 1))
+                asserters.classCompletion('gaga', createRange(0, 0, 0, 1)),
             ]);
             asserter.notSuggested([
                 asserters.importDirectiveCompletion(createRange(0, 0, 0, 0)),
@@ -54,7 +54,7 @@ describe('Completions', () => {
                 asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.customSelectorDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.stScopeDirectiveCompletion(createRange(0, 0, 0, 0)),
-                asserters.varsDirectiveCompletion(createRange(0, 0, 0, 0))
+                asserters.varsDirectiveCompletion(createRange(0, 0, 0, 0)),
             ]);
         });
 
@@ -67,12 +67,12 @@ describe('Completions', () => {
                 asserters.importDirectiveCompletion(createRange(9, 0, 9, 0)),
                 asserters.namespaceDirectiveCompletion(createRange(9, 0, 9, 0)),
                 asserters.customSelectorDirectiveCompletion(createRange(9, 0, 9, 0)),
-                asserters.stScopeDirectiveCompletion(createRange(9, 0, 9, 0))
+                asserters.stScopeDirectiveCompletion(createRange(9, 0, 9, 0)),
             ]);
             asserter.notSuggested([
                 asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
-                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0))
+                asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0)),
             ]);
         });
 
@@ -81,13 +81,13 @@ describe('Completions', () => {
             asserter.suggested([
                 asserters.classCompletion('shlomo', createRange(6, 6, 6, 6)),
                 asserters.classCompletion('momo', createRange(6, 6, 6, 6)),
-                asserters.classCompletion('Compo', createRange(6, 6, 6, 6), true)
+                asserters.classCompletion('Compo', createRange(6, 6, 6, 6), true),
             ]);
             asserter.notSuggested([
                 asserters.rootClassCompletion(createRange(0, 0, 0, 0)),
                 asserters.customSelectorDirectiveCompletion(createRange(0, 0, 0, 0)),
                 asserters.stScopeDirectiveCompletion(createRange(0, 0, 0, 0)),
-                asserters.varsDirectiveCompletion(createRange(0, 0, 0, 0))
+                asserters.varsDirectiveCompletion(createRange(0, 0, 0, 0)),
             ]);
         });
 
@@ -104,7 +104,7 @@ describe('Completions', () => {
                     'shmover',
                     createRange(10, 5, 10, 6),
                     './comp-to-import.st.css'
-                )
+                ),
             ]);
         });
 
@@ -118,7 +118,7 @@ describe('Completions', () => {
                     createRange(11, 5, 11, 6),
                     './comp-to-import.st.css'
                 ),
-                asserters.stateSelectorCompletion('clover', createRange(11, 5, 11, 6))
+                asserters.stateSelectorCompletion('clover', createRange(11, 5, 11, 6)),
             ]);
         });
 
@@ -137,7 +137,7 @@ describe('Completions', () => {
                     createRange(11, 11, 11, 12),
                     './mid-level-import.st.css'
                 ),
-                asserters.stateSelectorCompletion('clover', createRange(11, 11, 11, 12))
+                asserters.stateSelectorCompletion('clover', createRange(11, 11, 11, 12)),
             ]);
         });
     });

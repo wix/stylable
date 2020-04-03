@@ -12,7 +12,7 @@ describe('Inner Directives', () => {
                     prefix
                 );
                 asserter.suggested([
-                    asserters.importFromDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.importFromDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -27,7 +27,7 @@ describe('Inner Directives', () => {
                     prefix
                 );
                 asserter.suggested([
-                    asserters.importDefaultDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.importDefaultDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -42,7 +42,7 @@ describe('Inner Directives', () => {
                     prefix
                 );
                 asserter.suggested([
-                    asserters.importNamedDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.importNamedDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -55,7 +55,7 @@ describe('Inner Directives', () => {
         asserter.notSuggested([
             asserters.importFromDirectiveCompletion(createRange(0, 0, 0, 0)),
             asserters.importDefaultDirectiveCompletion(createRange(0, 0, 0, 0)),
-            asserters.importNamedDirectiveCompletion(createRange(0, 0, 0, 0))
+            asserters.importNamedDirectiveCompletion(createRange(0, 0, 0, 0)),
         ]);
     });
 
@@ -64,7 +64,7 @@ describe('Inner Directives', () => {
         asserter.notSuggested([
             asserters.importFromDirectiveCompletion(createRange(0, 0, 0, 0)),
             asserters.importDefaultDirectiveCompletion(createRange(0, 0, 0, 0)),
-            asserters.importNamedDirectiveCompletion(createRange(0, 0, 0, 0))
+            asserters.importNamedDirectiveCompletion(createRange(0, 0, 0, 0)),
         ]);
     });
 
@@ -74,7 +74,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions('imports/inside-ruleset.st.css', prefix);
                 asserter.suggested([
-                    asserters.statesDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.statesDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -86,7 +86,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions('imports/inside-ruleset.st.css', prefix);
                 asserter.suggested([
-                    asserters.extendsDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.extendsDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -98,7 +98,7 @@ describe('Inner Directives', () => {
             it(' with Prefix: ' + prefix + ' ', () => {
                 const asserter = asserters.getCompletions('imports/inside-ruleset.st.css', prefix);
                 asserter.suggested([
-                    asserters.mixinDirectiveCompletion(createRange(2, 4, 2, 4 + i))
+                    asserters.mixinDirectiveCompletion(createRange(2, 4, 2, 4 + i)),
                 ]);
             });
         });
@@ -111,7 +111,7 @@ describe('Inner Directives', () => {
         asserter.notSuggested([
             asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
             asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
-            asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0))
+            asserters.mixinDirectiveCompletion(createRange(0, 0, 0, 0)),
         ]);
     });
 
@@ -120,7 +120,7 @@ describe('Inner Directives', () => {
         asserter.suggested([asserters.mixinDirectiveCompletion(createRange(2, 8, 2, 8))]);
         asserter.notSuggested([
             asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
-            asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0))
+            asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
         ]);
     });
 
@@ -130,14 +130,14 @@ describe('Inner Directives', () => {
             'complex-selectors/class-and-descendant.st.css',
             'complex-selectors/class-and-tag.st.css',
             'complex-selectors/tag-and-class.st.css',
-            'complex-selectors/class-and-state.st.css'
-        ].map(src => {
+            'complex-selectors/class-and-state.st.css',
+        ].map((src) => {
             it('complex rule ' + src.slice(0, src.indexOf('{')), () => {
                 const asserter = asserters.getCompletions(src);
                 asserter.suggested([asserters.mixinDirectiveCompletion(createRange(1, 4, 1, 4))]);
                 asserter.notSuggested([
                     asserters.statesDirectiveCompletion(createRange(0, 0, 0, 0)),
-                    asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0))
+                    asserters.extendsDirectiveCompletion(createRange(0, 0, 0, 0)),
                 ]);
             });
         });

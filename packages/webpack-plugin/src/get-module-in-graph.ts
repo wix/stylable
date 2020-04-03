@@ -44,5 +44,5 @@ export function getModuleInGraph(
 }
 
 export function hasStylableModuleInGraph(chunk: webpack.compilation.Chunk) {
-    return getModuleInGraph(chunk, m => (m.type === 'stylable' ? earlyReturn : false)).size !== 0;
+    return getModuleInGraph(chunk, (m) => (m.type === 'stylable' ? earlyReturn : false)).size !== 0;
 }

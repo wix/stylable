@@ -54,7 +54,7 @@ export function createModuleSource(
     const cssString = includeCSSInJS
         ? JSON.stringify(stylableResult.meta.outputAst!.toString())
         : '""';
-        
+
     switch (moduleFormat) {
         case 'dts':
             return generateTypescriptDefinition();
@@ -64,8 +64,8 @@ export function createModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map(request => `import ${JSON.stringify(request)}`),
-                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`
+                    ...staticRequests.map((request) => `import ${JSON.stringify(request)}`),
+                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`,
                 ],
                 `$`,
                 `create`,
@@ -75,7 +75,7 @@ export function createModuleSource(
                 'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }', // = $
                 [
                     `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
-                    ...afterModule
+                    ...afterModule,
                 ].join('\n'),
                 renderableOnly
             );
@@ -85,8 +85,8 @@ export function createModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map(request => `require(${JSON.stringify(request)})`),
-                    `const runtime = require(${JSON.stringify(runtimeRequest)})`
+                    ...staticRequests.map((request) => `require(${JSON.stringify(request)})`),
+                    `const runtime = require(${JSON.stringify(runtimeRequest)})`,
                 ],
                 `runtime.$`,
                 `runtime.create`,

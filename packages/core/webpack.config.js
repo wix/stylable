@@ -9,24 +9,24 @@ const monorepoRoot = join(__dirname, '..', '..');
 module.exports = {
     mode: 'development',
     entry: {
-        tests: withMochaLoader
+        tests: withMochaLoader,
     },
     output: {
-        filename: '[name].bundle.js'
+        filename: '[name].bundle.js',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
-        plugins: [new TsconfigPathsPlugin({ configFile: join(monorepoRoot, 'tsconfig.json') })]
+        plugins: [new TsconfigPathsPlugin({ configFile: join(monorepoRoot, 'tsconfig.json') })],
     },
     node: {
-        fs: 'empty'
+        fs: 'empty',
     },
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: '@ts-tools/webpack-loader'
-            }
-        ]
-    }
+                loader: '@ts-tools/webpack-loader',
+            },
+        ],
+    },
 };

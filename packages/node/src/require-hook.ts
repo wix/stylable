@@ -22,7 +22,7 @@ export function attachHook({
     stylableConfig,
     runtimePath,
     ignoreJSModules,
-    legacyRuntime
+    legacyRuntime,
 }: Partial<Options> = {}) {
     const stylableToModule = stylableModuleFactory(
         {
@@ -30,7 +30,7 @@ export function attachHook({
             fileSystem: fs,
             requireModule: require,
             resolveNamespace,
-            ...stylableConfig
+            ...stylableConfig,
         },
         { runtimePath, legacyRuntime }
     );

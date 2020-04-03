@@ -3,7 +3,7 @@ import {
     StylableMeta,
     StylableResults,
     TransformHooks,
-    StylableExports
+    StylableExports,
 } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import webpack from 'webpack';
@@ -69,7 +69,7 @@ export interface CalcResult {
     cssDependencies: StylableModule[];
 }
 
-export type WebpackAssetModule = webpack.compilation.Module & { request: string }
+export type WebpackAssetModule = webpack.compilation.Module & { request: string };
 
 export interface StylableModule extends webpack.compilation.Module {
     context: string;

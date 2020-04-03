@@ -15,7 +15,7 @@ const url = require('url');
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
+const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 
 const envPublicUrl = process.env.PUBLIC_URL;
 
@@ -30,7 +30,7 @@ function ensureSlash(inputPath, needsSlash) {
     }
 }
 
-const getPublicUrl = appPackageJson => envPublicUrl || require(appPackageJson).homepage;
+const getPublicUrl = (appPackageJson) => envPublicUrl || require(appPackageJson).homepage;
 
 // We use `PUBLIC_URL` environment variable or "homepage" field to infer
 // "public path" at which the app is served.
@@ -58,11 +58,11 @@ module.exports = {
     proxySetup: resolveApp('src/setupProxy.js'),
     appNodeModules: resolveApp('node_modules'),
     publicUrl: getPublicUrl(resolveApp('package.json')),
-    servedPath: getServedPath(resolveApp('package.json'))
+    servedPath: getServedPath(resolveApp('package.json')),
 };
 
 // @remove-on-eject-begin
-const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
+const resolveOwn = (relativePath) => path.resolve(__dirname, '..', relativePath);
 
 // config before eject: we're in ./node_modules/@stylable/react-scripts/config/
 module.exports = {
@@ -81,7 +81,7 @@ module.exports = {
     servedPath: getServedPath(resolveApp('package.json')),
     // These properties only exist before ejecting:
     ownPath: resolveOwn('.'),
-    ownNodeModules: resolveOwn('node_modules') // This is empty on npm 3
+    ownNodeModules: resolveOwn('node_modules'), // This is empty on npm 3
 };
 
 const ownPackageJson = require('../package.json');
@@ -107,7 +107,7 @@ if (!reactScriptsLinked && __dirname.includes(path.join('packages', 'react-scrip
         servedPath: getServedPath(resolveOwn('package.json')),
         // These properties only exist before ejecting:
         ownPath: resolveOwn('.'),
-        ownNodeModules: resolveOwn('node_modules')
+        ownNodeModules: resolveOwn('node_modules'),
     };
 }
 // @remove-on-eject-end

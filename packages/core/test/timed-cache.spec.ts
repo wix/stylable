@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import Sinon from 'sinon';
-const delay = (time: number) => new Promise(res => setTimeout(res, time));
+const delay = (time: number) => new Promise((res) => setTimeout(res, time));
 
 import { timedCache } from '../src/timed-cache';
 
@@ -10,7 +10,7 @@ describe('timed-cache', () => {
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,
-            useTimer: false
+            useTimer: false,
         });
 
         cached.get('1');
@@ -38,7 +38,7 @@ describe('timed-cache', () => {
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,
-            useTimer: true
+            useTimer: true,
         });
 
         cached.get('1');
@@ -65,7 +65,7 @@ describe('timed-cache', () => {
         const cached = timedCache(spy, {
             createKey: (args: string[]) => args.join(';'),
             timeout: 100,
-            useTimer: true
+            useTimer: true,
         });
 
         cached.get('1');

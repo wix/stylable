@@ -26,7 +26,7 @@ describe('build stand alone', () => {
                 .baga{
                     color:red;
                 }
-            `
+            `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -40,15 +40,15 @@ describe('build stand alone', () => {
             rootDir: resolve('/'),
             log,
             moduleFormats: ['cjs'],
-            outputSources: true
+            outputSources: true,
         });
 
         [
             '/lib/main.st.css',
             '/lib/main.st.css.js',
             '/lib/components/comp.st.css',
-            '/lib/components/comp.st.css.js'
-        ].forEach(p => {
+            '/lib/components/comp.st.css.js',
+        ].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
 
@@ -72,7 +72,7 @@ describe('build stand alone', () => {
                 .baga{
                     color:red;
                 }
-            `
+            `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -87,19 +87,21 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputSources: true,
-            useSourceNamespace: true
+            useSourceNamespace: true,
         });
 
         [
             '/cjs/main.st.css',
             '/cjs/main.st.css.js',
             '/cjs/components/comp.st.css',
-            '/cjs/components/comp.st.css.js'
-        ].forEach(p => {
+            '/cjs/components/comp.st.css.js',
+        ].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
 
-        expect(fs.readFileSync(resolve('/cjs/main.st.css'), 'utf-8')).to.include('st-namespace-reference="../src/main.st.css"');
+        expect(fs.readFileSync(resolve('/cjs/main.st.css'), 'utf-8')).to.include(
+            'st-namespace-reference="../src/main.st.css"'
+        );
 
         build({
             extension: '.st.css',
@@ -109,7 +111,7 @@ describe('build stand alone', () => {
             srcDir: 'cjs',
             outDir: 'cjs2',
             log,
-            moduleFormats: ['cjs']
+            moduleFormats: ['cjs'],
         });
 
         // check two builds using sourceNamespace are identical
@@ -134,7 +136,7 @@ describe('build stand alone', () => {
                     -st-extends: MissingComp;
                     color: value(missingVar);
                 }
-            `
+            `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -149,7 +151,7 @@ describe('build stand alone', () => {
             rootDir: resolve('/'),
             log,
             diagnostics: (...args: string[]) => ([reportedError] = args),
-            moduleFormats: ['cjs']
+            moduleFormats: ['cjs'],
         });
 
         expect(reportedError).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
@@ -169,7 +171,7 @@ describe('build stand alone', () => {
                 .x {
                     
                 }
-            `
+            `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -184,7 +186,7 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputCSS: true,
-            outputCSSNameTemplate: '[filename].global.css'
+            outputCSSNameTemplate: '[filename].global.css',
         });
 
         const builtFile = fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8');
@@ -200,7 +202,7 @@ describe('build stand alone', () => {
                 .root {
                     color: rgb(255,0,0);
                 }
-            `
+            `,
         });
 
         const stylable = Stylable.create({
@@ -208,7 +210,7 @@ describe('build stand alone', () => {
             fileSystem: fs,
             resolveNamespace() {
                 return 'test';
-            }
+            },
         });
 
         build({
@@ -222,7 +224,7 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
             outputCSS: true,
-            outputCSSNameTemplate: '[filename].global.css'
+            outputCSSNameTemplate: '[filename].global.css',
         });
 
         const builtFile = fs.readFileSync(resolve('/dist/comp.global.css'), 'utf8');
@@ -236,7 +238,7 @@ describe('build stand alone', () => {
                 .root {
                     color: red;
                 }
-            `
+            `,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -252,7 +254,7 @@ describe('build stand alone', () => {
             moduleFormats: ['cjs'],
             outputCSS: true,
             injectCSSRequest: true,
-            outputCSSNameTemplate: '[filename].global.css'
+            outputCSSNameTemplate: '[filename].global.css',
         });
 
         expect(fs.readFileSync(resolve('/dist/comp.st.css.js'), 'utf8')).contains(

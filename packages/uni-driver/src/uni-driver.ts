@@ -31,7 +31,7 @@ export class StylableUnidriverUtil {
         const baseState = this.getBaseStateWithParam(stateName);
 
         let paramValue = '';
-        classList.forEach(cls => {
+        classList.forEach((cls) => {
             if (!paramValue) {
                 paramValue = this.getStateValueFromClassName(cls, baseState);
             }

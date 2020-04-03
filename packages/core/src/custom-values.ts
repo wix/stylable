@@ -16,7 +16,7 @@ export function box<Type extends string, Value extends any>(
 ): Box<Type, Value> {
     return {
         type,
-        value
+        value,
     };
 }
 
@@ -58,20 +58,20 @@ export const stTypes: CustomTypes = {
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.args(node, customTypes);
         },
-        createValue: args => {
+        createValue: (args) => {
             return args;
         },
-        getValue: (value, index) => value[parseInt(index, 10)]
+        getValue: (value, index) => value[parseInt(index, 10)],
     }).register('stArray'),
     stMap: createCustomValue<BoxedValueMap, BoxedValueMap>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.named(node, customTypes);
         },
-        createValue: args => {
+        createValue: (args) => {
             return args;
         },
-        getValue: (value, index) => value[index]
-    }).register('stMap')
+        getValue: (value, index) => value[index],
+    }).register('stMap'),
 };
 
 export const CustomValueStrategy = {
@@ -121,7 +121,7 @@ export const CustomValueStrategy = {
             }
         }
         return outputMap;
-    }
+    },
 };
 
 export interface JSValueExtension<Value> {
@@ -166,7 +166,7 @@ export function createCustomValue<Value, Args>({
     processArgs,
     createValue,
     flattenValue,
-    getValue
+    getValue,
 }: ExtensionApi<Value, Args>): JSValueExtension<Value> {
     return {
         _kind: 'CustomValue',
@@ -186,7 +186,7 @@ export function createCustomValue<Value, Args>({
                         if (flattenValue) {
                             const { delimiter, parts } = flattenValue(obj);
                             return parts
-                                .map(v => getBoxValue([], v, fallbackNode, customTypes))
+                                .map((v) => getBoxValue([], v, fallbackNode, customTypes))
                                 .join(delimiter);
                         } else {
                             // TODO: add diagnostics
@@ -195,9 +195,9 @@ export function createCustomValue<Value, Args>({
                     }
                     const value = getValue(obj.value, path[0]);
                     return getBoxValue(path.slice(1), value, fallbackNode, customTypes);
-                }
+                },
             };
-        }
+        },
     };
 }
 

@@ -18,7 +18,7 @@ export function stylableModuleFactory(
         injectCSS = true,
         renderableOnly = false,
         legacyRuntime,
-        staticImports = []
+        staticImports = [],
     }: Partial<Options> = {}
 ) {
     let afterModule = '';
@@ -33,8 +33,8 @@ export function stylableModuleFactory(
             res,
             runtimeStylesheetId === 'module' ? 'module.id' : res.meta.namespace,
             [
-                ...staticImports.map(request => `import ${JSON.stringify(request)}`),
-                `const runtime = require(${JSON.stringify(runtimePath)})`
+                ...staticImports.map((request) => `import ${JSON.stringify(request)}`),
+                `const runtime = require(${JSON.stringify(runtimePath)})`,
             ],
             `runtime.$`,
             `runtime.create`,

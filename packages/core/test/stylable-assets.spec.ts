@@ -29,11 +29,11 @@ describe('stylable assets', () => {
 
     it('makeAbsolute', () => {
         const ast = safeParse(css);
-        expect(collectAssets(ast).map(_ => makeAbsolute(_, '/root', '/root/module'))).to.eql([
+        expect(collectAssets(ast).map((_) => makeAbsolute(_, '/root', '/root/module'))).to.eql([
             normalize('/root/module/a.png'),
             normalize('/root/b.png'),
             'data:xxx',
-            'http://d.ddd'
+            'http://d.ddd',
         ]);
     });
 

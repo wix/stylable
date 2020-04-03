@@ -17,7 +17,7 @@ describe('Import Directive', () => {
                     prefix
                 );
                 asserter.suggested([
-                    asserters.importDirectiveCompletion(createRange(11, 0, 11, i))
+                    asserters.importDirectiveCompletion(createRange(11, 0, 11, i)),
                 ]);
             });
         });
@@ -43,12 +43,12 @@ describe('Import Directive', () => {
                 'imports/selector-with-colon.st.css',
                 'imports/selector-with-space.st.css',
                 'imports/selector-with-colon-space.st.css',
-                'imports/before-selector.st.css'
-            ].map(src => {
+                'imports/before-selector.st.css',
+            ].map((src) => {
                 it('complex rule ' + src.slice(0, src.indexOf('{')), () => {
                     const asserter = asserters.getCompletions(src);
                     asserter.notSuggested([
-                        asserters.importDirectiveCompletion(createRange(0, 0, 0, 0))
+                        asserters.importDirectiveCompletion(createRange(0, 0, 0, 0)),
                     ]);
                 });
             });

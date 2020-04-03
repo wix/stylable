@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -21,11 +21,11 @@ describe(`(${project})`, () => {
     it('generates persistent namespace', () => {
         const {
             name: localPackageName,
-            version: localPackageVersion
+            version: localPackageVersion,
         } = require('./projects/namespace-generation-project/package.json');
         const {
             name: externalPackageName,
-            version: externalPackageVersion
+            version: externalPackageVersion,
         } = require('./projects/namespace-generation-project/node_modules/test-package/package.json');
 
         const expectedLocalClassname =

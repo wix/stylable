@@ -31,7 +31,7 @@ export function createInfrastructure(
             timeout: 1,
             useTimer: true,
             createKey: (args: string[]) => args.join(';'),
-            ...timedCacheOptions
+            ...timedCacheOptions,
         });
         resolvePath = cacheManager.get;
     }
@@ -52,14 +52,14 @@ export function createInfrastructure(
                 const stat = fileSystem.statSync(resolvedPath);
                 if (!stat.mtime) {
                     return {
-                        mtime: new Date(0)
+                        mtime: new Date(0),
                     };
                 }
                 return stat;
             },
             readlinkSync() {
                 throw new Error(`not implemented`);
-            }
+            },
         },
         (path, context) => resolvePath(context || projectRoot, path)
     );
@@ -70,6 +70,6 @@ export function createInfrastructure(
 
     return {
         resolvePath,
-        fileProcessor
+        fileProcessor,
     };
 }

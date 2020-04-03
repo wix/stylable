@@ -15,7 +15,7 @@ process.env.NODE_ENV = 'production';
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
     throw err;
 });
 
@@ -49,7 +49,7 @@ const writeStatsJson = argv.includes('--stats');
 // First, read the current file sizes in build directory.
 // This lets us display how much they changed later.
 measureFileSizesBeforeBuild(paths.appBuild)
-    .then(previousFileSizes => {
+    .then((previousFileSizes) => {
         // Remove all content but keep the directory so that
         // if you're in it, you don't end up in Trash
         fs.emptyDirSync(paths.appBuild);
@@ -93,13 +93,13 @@ measureFileSizesBeforeBuild(paths.appBuild)
             const buildFolder = path.relative(process.cwd(), paths.appBuild);
             printHostingInstructions(appPackage, publicUrl, publicPath, buildFolder, useYarn);
         },
-        err => {
+        (err) => {
             console.log(chalk.red('Failed to compile.\n'));
             printBuildError(err);
             process.exit(1);
         }
     )
-    .catch(err => {
+    .catch((err) => {
         if (err && err.message) {
             console.log(err.message);
         }
@@ -120,7 +120,7 @@ function build(previousFileSizes) {
                 }
                 messages = formatWebpackMessages({
                     errors: [err.message],
-                    warnings: []
+                    warnings: [],
                 });
             } else {
                 messages = formatWebpackMessages(
@@ -152,13 +152,13 @@ function build(previousFileSizes) {
             const resolveArgs = {
                 stats,
                 previousFileSizes,
-                warnings: messages.warnings
+                warnings: messages.warnings,
             };
             if (writeStatsJson) {
                 return bfj
                     .write(paths.appBuild + '/bundle-stats.json', stats.toJson())
                     .then(() => resolve(resolveArgs))
-                    .catch(error => reject(new Error(error)));
+                    .catch((error) => reject(new Error(error)));
             }
 
             return resolve(resolveArgs);
@@ -169,6 +169,6 @@ function build(previousFileSizes) {
 function copyPublicFolder() {
     fs.copySync(paths.appPublic, paths.appBuild, {
         dereference: true,
-        filter: file => file !== paths.appHtml
+        filter: (file) => file !== paths.appHtml,
     });
 }

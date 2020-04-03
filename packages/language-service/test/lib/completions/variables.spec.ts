@@ -25,7 +25,7 @@ describe('Variables', () => {
                             prefix
                         );
                         asserter.suggested([
-                            asserters.valueDirective(createRange(6, 25, 6, 26 + i))
+                            asserters.valueDirective(createRange(6, 25, 6, 26 + i)),
                         ]);
                     }
                 );
@@ -40,7 +40,7 @@ describe('Variables', () => {
                             prefix
                         );
                         asserter.suggested([
-                            asserters.valueDirective(createRange(15, 10, 15, 11 + i))
+                            asserters.valueDirective(createRange(15, 10, 15, 11 + i)),
                         ]);
                     }
                 );
@@ -82,7 +82,7 @@ describe('Variables', () => {
                             createRange(6, 27, 6, 27 + i),
                             'blue',
                             'Local variable'
-                        )
+                        ),
                     ]);
                 });
 
@@ -103,7 +103,7 @@ describe('Variables', () => {
                             createRange(6, 27, 6, 27 + i),
                             'blue',
                             './import.st.css'
-                        )
+                        ),
                     ]);
                 });
 
@@ -126,7 +126,7 @@ describe('Variables', () => {
                                 createRange(6, 20, 6, 20 + i),
                                 'blue',
                                 './import.st.css'
-                            )
+                            ),
                         ]);
                         asserter.notSuggested([
                             asserters.valueCompletion(
@@ -134,7 +134,7 @@ describe('Variables', () => {
                                 createRange(6, 20, 6, 20 + i),
                                 'cyclic value',
                                 'Local variable'
-                            )
+                            ),
                         ]);
                     }
                 );
@@ -164,7 +164,7 @@ describe('Variables', () => {
                                 createRange(6, 17, 6, 17 + i),
                                 'goldenrod',
                                 'fake-stylable-package/stylesheet.st.css'
-                            )
+                            ),
                         ]);
                     }
                 );

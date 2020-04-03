@@ -8,7 +8,7 @@ function wrapWithMiniUni(el: HTMLElement): ElementRemoteApi {
         },
         hasClass(className) {
             return Promise.resolve(el.classList.contains(className));
-        }
+        },
     };
 }
 

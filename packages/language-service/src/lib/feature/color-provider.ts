@@ -47,7 +47,7 @@ export function resolveDocumentColors(
                     color = cssService.findColor(doc);
                 } else if (sym && sym._kind === 'import' && sym.type === 'named') {
                     const impMeta = processor.process(sym.import.from);
-                    const relevantVar = impMeta.vars.find(v => v.name === sym.name);
+                    const relevantVar = impMeta.vars.find((v) => v.name === sym.name);
                     if (relevantVar) {
                         const doc = TextDocument.create(
                             '',
@@ -87,7 +87,7 @@ export function resolveDocumentColors(
             }
         });
 
-        meta.imports.forEach(imp => {
+        meta.imports.forEach((imp) => {
             let impMeta: StylableMeta | undefined;
             try {
                 impMeta = processor.process(imp.from);
@@ -100,7 +100,7 @@ export function resolveDocumentColors(
             }
 
             const vars = impMeta.vars;
-            vars.forEach(v => {
+            vars.forEach((v) => {
                 const doc = TextDocument.create(
                     '',
                     'css',
@@ -111,11 +111,11 @@ export function resolveDocumentColors(
                 );
                 const color = cssService.findColor(doc);
                 if (color) {
-                    meta.rawAst.walkDecls(valueMapping.named, decl => {
+                    meta.rawAst.walkDecls(valueMapping.named, (decl) => {
                         const lines = decl.value.split('\n');
                         const reg = new RegExp('\\b' + v.name + '\\b', 'g');
 
-                        const lineIndex = lines.findIndex(l => reg.test(l));
+                        const lineIndex = lines.findIndex((l) => reg.test(l));
                         if (lineIndex > -1 && lines[lineIndex].includes(v.name)) {
                             let extraLines = 0;
                             let extraChars = 0;
@@ -183,7 +183,7 @@ export function getColorPresentation(
         params.range.start.character + 1
     );
     let noPicker = false;
-    meta.rawAst.walkDecls(valueMapping.named, node => {
+    meta.rawAst.walkDecls(valueMapping.named, (node) => {
         if (
             node &&
             ((wordStart.line === node.source!.start!.line &&

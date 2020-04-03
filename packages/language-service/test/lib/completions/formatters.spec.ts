@@ -15,7 +15,7 @@ describe('Formatters', () => {
         asserters.codeMixinCompletion(str, rng, path);
 
     xdescribe('TS Formatters', () => {
-        [ts_formatter_1, ts_formatter_2].forEach(str => {
+        [ts_formatter_1, ts_formatter_2].forEach((str) => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
                 it(
@@ -76,7 +76,7 @@ describe('Formatters', () => {
     });
 
     describe('JS Formatters', () => {
-        [js_formatter_1, js_formatter_2].forEach(str => {
+        [js_formatter_1, js_formatter_2].forEach((str) => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
                 it(
