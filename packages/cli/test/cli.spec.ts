@@ -161,10 +161,11 @@ describe('Stylable Cli', () => {
         expect(stdout.toString('utf8')).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
-        const stylesheetContent = dirContent['dist/style.st.css'];
-        const namespaceReference = stylesheetContent.split('\n')[0];
+        const stylesheetContent = dirContent[join('dist', 'style.st.css')];
 
-        expect(namespaceReference).equal('/* st-namespace-reference="../style.st.css" */');
+        expect(
+            stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
+        ).equal(true);
     });
 
     it('compat mode', () => {
