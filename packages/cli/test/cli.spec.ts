@@ -142,6 +142,31 @@ describe('Stylable Cli', () => {
         ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
     });
 
+    it('build .st.css source files with namespace reference', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{color:red}`,
+        });
+
+        const { stderr, stdout } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            'dist',
+            '--stcss',
+            '--useNamespaceReference',
+        ]);
+
+        expect(stderr.toString('utf8')).equal('');
+        expect(stdout.toString('utf8')).equal('');
+
+        const dirContent = loadDirSync(tempDir.path);
+        const stylesheetContent = dirContent['dist/style.st.css'];
+        const namespaceReference = stylesheetContent.split('\n')[0];
+
+        expect(namespaceReference).equal('/* st-namespace-reference="../style.st.css" */');
+    });
+
     it('compat mode', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
