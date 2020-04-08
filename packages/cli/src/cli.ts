@@ -152,6 +152,7 @@ const {
     manifestFilepath,
     manifest,
     require: requires,
+    useNamespaceReference,
 } = argv;
 
 log('[Arguments]', argv);
@@ -191,6 +192,7 @@ build({
     compat,
     minify,
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
+    useSourceNamespace: useNamespaceReference,
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
