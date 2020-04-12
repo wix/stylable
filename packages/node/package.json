@@ -14,7 +14,7 @@
     "@stylable/core": "^3.4.1",
     "@stylable/module-utils": "^3.4.1",
     "find-config": "^1.0.0",
-    "murmurhash": "^0.0.2"
+    "murmurhash": "^1.0.0"
   },
   "files": [
     "cjs",
