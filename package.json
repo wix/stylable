@@ -45,7 +45,7 @@
     "@types/sinon": "^9.0.0",
     "@types/sinon-chai": "^3.2.4",
     "@types/tapable": "^1.0.5",
-    "@types/webpack": "^4.41.10",
+    "@types/webpack": "^4.41.11",
     "@types/webpack-sources": "^0.1.7",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
