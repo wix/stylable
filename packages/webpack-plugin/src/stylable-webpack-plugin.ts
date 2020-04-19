@@ -156,7 +156,7 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation,
         module: StylableModule
     ) {
-        const rootContext = compilation.context;
+        const rootContext = (compilation as any).options.context;
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);
         const onUrl: OnUrlCallback  = (node) => {
