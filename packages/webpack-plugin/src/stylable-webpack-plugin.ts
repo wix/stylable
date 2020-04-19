@@ -4,6 +4,7 @@ import {
     isAsset,
     makeAbsolute,
     processDeclarationUrls,
+    OnUrlCallback,
 } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -135,35 +136,9 @@ export class StylableWebpackPlugin {
                 const cache = new WeakMap<StylableModule, CalcResult>();
                 modules.forEach((module) => {
                     if (isStylableModule(module)) {
-                        const rootContext = (compilation as any).options.context;
-                        const replacements: WebpackAssetModule[] = [];
-
-                        const moduleDir = dirname(module.resource);
-
-                        const onUrl = (node: any) => {
-                            if (isAsset(node.url)) {
-                                const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
-                                const assetModule = compilation.modules.find(
-                                    (_) => _.resource === resourcePath
-                                );
-                                if (assetModule) {
-                                    replacements.push(assetModule);
-                                    rewriteUrl(node, replacements.length - 1);
-                                } else {
-                                    node.url = resourcePath;
-                                    compilation.warnings.push(
-                                        `Stylable missing asset: ${resourcePath}`
-                                    );
-                                }
-                            }
-                        };
-
-                        module.buildInfo.stylableTransformedAst.walkDecls((decl) =>
-                            processDeclarationUrls(decl, onUrl, true)
-                        );
-
-                        module.buildInfo.stylableAssetReplacement = replacements;
-
+                        if (!module.buildInfo.stylableAssetReplacement) {
+                            this.processStylableModuleAssets(compilation, module);
+                        }
                         module.buildInfo.runtimeInfo = calculateModuleDepthAndShallowStylableDependencies(
                             module,
                             [],
@@ -177,6 +152,32 @@ export class StylableWebpackPlugin {
         });
         this.injectStylableCSSOptimizer(compiler);
     }
+    private processStylableModuleAssets(
+        compilation: webpack.compilation.Compilation,
+        module: StylableModule
+    ) {
+        const rootContext = (compilation as any).options.context;
+        const replacements: WebpackAssetModule[] = [];
+        const moduleDir = dirname(module.resource);
+        const onUrl: OnUrlCallback  = (node) => {
+            if (node.url !== undefined && isAsset(node.url)) {
+                const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
+                const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
+                if (assetModule) {
+                    replacements.push(assetModule);
+                    rewriteUrl(node, replacements.length - 1);
+                } else {
+                    node.url = resourcePath;
+                    compilation.warnings.push(`Stylable missing asset: ${resourcePath}`);
+                }
+            }
+        };
+        module.buildInfo.stylableTransformedAst.walkDecls((decl) =>
+            processDeclarationUrls(decl, onUrl, true)
+        );
+        module.buildInfo.stylableAssetReplacement = replacements;
+    }
+
     public injectChunkOptimizer(compiler: webpack.Compiler) {
         if (this.options.optimizeStylableModulesPerChunks) {
             compiler.hooks.thisCompilation.tap(StylableWebpackPlugin.name, (compilation) => {
