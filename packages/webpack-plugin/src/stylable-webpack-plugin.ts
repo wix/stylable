@@ -4,6 +4,7 @@ import {
     isAsset,
     makeAbsolute,
     processDeclarationUrls,
+    OnUrlCallback,
 } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -155,11 +156,11 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation,
         module: StylableModule
     ) {
-        const rootContext = (compilation as any).options.context;
+        const rootContext = compilation.context;
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);
-        const onUrl = (node: any) => {
-            if (isAsset(node.url)) {
+        const onUrl: OnUrlCallback  = (node) => {
+            if (node.url && isAsset(node.url)) {
                 const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
                 const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
                 if (assetModule) {
