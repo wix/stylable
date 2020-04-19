@@ -160,7 +160,7 @@ export class StylableWebpackPlugin {
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);
         const onUrl: OnUrlCallback  = (node) => {
-            if (node.url && isAsset(node.url)) {
+            if (node.url !== undefined && isAsset(node.url)) {
                 const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
                 const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
                 if (assetModule) {
