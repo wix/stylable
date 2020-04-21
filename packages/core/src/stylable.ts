@@ -52,7 +52,8 @@ export class Stylable {
             config.optimizer,
             config.mode,
             config.resolveNamespace,
-            config.timedCacheOptions
+            config.timedCacheOptions,
+            config.resolveModule
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
