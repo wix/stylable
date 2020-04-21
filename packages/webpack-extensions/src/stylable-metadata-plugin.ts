@@ -22,6 +22,14 @@ export interface MetadataOptions {
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
 }
 
+const hashContent = (source: string, length?: number) => {
+    const createHash = require('webpack/lib/util/createHash')
+    const hash = createHash('sha1')
+    hash.update(source || '')
+    const hashId = hash.digest('hex')
+    return length !== undefined ? hashId.slice(0, length) : hashId
+}
+
 export class StylableMetadataPlugin {
     constructor(private options: MetadataOptions) {}
     public apply(compiler: webpack.Compiler) {
@@ -110,16 +118,8 @@ export class StylableMetadataPlugin {
             builder.createIndex();
             const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
-            const hashContent = (source: string, length?: number) => {
-                const createHash = require('webpack/lib/util/createHash')
-                const hash = createHash('sha1')
-                hash.update(source || '')
-                const hashId = hash.digest('hex')
-                return length !== undefined ? hashId.slice(0, length) : hashId
-            }
 
             let fileContent = jsonSource
-            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
             switch (this.options.mode) {
                 case 'cjs':
                     fileContent = `module.exports = ${fileContent}`;
@@ -131,6 +131,7 @@ export class StylableMetadataPlugin {
                     fileContent = `define(() => { return ${fileContent}; });`;
                     break;
             }
+            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
             compilation.assets[fileName] = new RawSource(fileContent);
         }
     }
