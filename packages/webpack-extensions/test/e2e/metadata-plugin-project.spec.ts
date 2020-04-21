@@ -96,6 +96,29 @@ describe(`(${project})`, () => {
         expectMetadataJSON(JSON.parse(s));
     });
 
+    describe('content hash mode', () => {
+        const projectRunnerJs = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                puppeteerOptions: {
+                    // headless: false
+                },
+                configName: 'webpack-content-hash.config',
+            },
+            before,
+            afterEach,
+            after
+        );
+
+        it('contains metadata file with content hash (length 4)', () => {
+            const file = Object.keys(projectRunnerJs.stats?.compilation.assets).find((fileName) =>
+                fileName.match(/test\.(\w{4})\.metadata\.json/)
+            );
+            const s = projectRunnerJs.getBuildAsset(file!);
+            expectMetadataJSON(JSON.parse(s));
+        });
+    });
+
     describe('cjs mode', () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {

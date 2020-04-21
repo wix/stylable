@@ -6,6 +6,7 @@ import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
 import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
+import { hashContent } from './hash-content-util';
 
 export interface MetadataOptions {
     name: string;
@@ -20,14 +21,6 @@ export interface MetadataOptions {
         componentConfig: ComponentConfig
     ) => string;
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
-}
-
-const hashContent = (source: string, length?: number) => {
-    const createHash = require('webpack/lib/util/createHash')
-    const hash = createHash('sha1')
-    hash.update(source || '')
-    const hashId = hash.digest('hex')
-    return length !== undefined ? hashId.slice(0, length) : hashId
 }
 
 export class StylableMetadataPlugin {
