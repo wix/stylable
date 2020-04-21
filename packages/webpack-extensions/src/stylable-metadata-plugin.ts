@@ -9,6 +9,8 @@ import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
 
 export interface MetadataOptions {
     name: string;
+    useContentHashFileName?: boolean;
+    contentHashLength?: number;
     version: string;
     configExtension?: string;
     context?: string;
@@ -108,8 +110,16 @@ export class StylableMetadataPlugin {
             builder.createIndex();
             const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
-            const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
-            let fileContent = jsonSource;
+            const hashContent = (source: string, length?: number) => {
+                const createHash = require('webpack/lib/util/createHash')
+                const hash = createHash('sha1')
+                hash.update(source || '')
+                const hashId = hash.digest('hex')
+                return length !== undefined ? hashId.slice(0, length) : hashId
+            }
+
+            let fileContent = jsonSource
+            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
             switch (this.options.mode) {
                 case 'cjs':
                     fileContent = `module.exports = ${fileContent}`;
