@@ -56,7 +56,7 @@
     "create-temp-directory": "^1.1.1",
     "css-loader": "^3.5.2",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
+    "eslint-config-prettier": "^6.11.0",
     "express": "^4.17.1",
     "file-loader": "^6.0.0",
     "gh-pages": "^2.2.0",
