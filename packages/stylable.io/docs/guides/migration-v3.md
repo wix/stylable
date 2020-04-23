@@ -101,7 +101,7 @@ Stylable v3 usage is like so:
 className={style(classes.root, states, this.props.className)}
 ```
 
-There is no more props sprad anymore and stylable requires only
+There is no more props spread anymore and stylable requires only
 `className` to be used.
 
 However, if you were relying on the props spread pattern, in v3 you
@@ -122,12 +122,12 @@ changd in v3:
 
 ```diff
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
--import * as style from './Component.st.css';
+-import style from './Component.st.css';
 +import * as style from './Component.st.css';
 const stylableDOMUtil = new StylableDOMUtil(style);
 ```
 
-Just as before, `StyalbleDOMUtil` accepts an argument, which is all that
+Just as before, `StylableDOMUtil` accepts an argument, which is all that
 `.st.css` file exports
 
 Prior to v3 it was only one thing - `style` function
