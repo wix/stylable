@@ -702,7 +702,7 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) { // 3rd party request
                         importObj.fromRelative = importPath;
                         importObj.from = importPath;
                     } else {
@@ -710,8 +710,8 @@ export class StylableProcessor {
                         const dirPath = path.dirname(this.meta.source);
                         importObj.from =
                             path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
-                                ? path.posix.join(dirPath, importPath)
-                                : path.join(dirPath, importPath);
+                                ? path.posix.resolve(dirPath, importPath)
+                                : path.resolve(dirPath, importPath);
                     }
                     fromExists = true;
                     break;
