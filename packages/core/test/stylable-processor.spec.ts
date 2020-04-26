@@ -146,6 +146,30 @@ describe('Stylable postcss process', () => {
         });
     });
 
+    it('collect :import with absolute paths', () => {
+        const result = processSource(
+            `
+            :import {
+                -st-from: "/abs/path";
+                -st-named: abs;
+            }
+        `,
+            { from: '/path/to/style.css' }
+        );
+
+        expect(result.imports.length).to.eql(1);
+
+        expect(result.mappedSymbols.abs).to.deep.include({
+            _kind: 'import',
+            type: 'named'
+        });
+        expect((result.mappedSymbols.abs as ImportSymbol).import).to.include({
+            context: '/path/to',
+            defaultExport: '',
+            from: '/abs/path',
+        });
+    });
+
     it('collect :vars', () => {
         const result = processSource(
             `
