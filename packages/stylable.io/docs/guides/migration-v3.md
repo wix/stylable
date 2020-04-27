@@ -100,7 +100,7 @@ There are subtle but very important nuances in this change.
    This way one or more props would be applied to the component. Thus, code that looks like this:
 
      ```jsx
-     <div {...style('root', {}, { className: 'additional-class', dataHook: 'test' })} />
+     <div {...style('root', {}, { className: 'additional-class', 'data-hook': 'test' })} />
      ```
 
      once evaluated, would behave like this:
@@ -108,7 +108,7 @@ There are subtle but very important nuances in this change.
      ```jsx
      <div
        className="root additional-class"
-       dataHook="test"
+       data-hook="test"
      />
      ```
 
@@ -127,7 +127,7 @@ There are subtle but very important nuances in this change.
      Therefore, with Stylable v3 it is up to you to apply any additional props:
 
      ```jsx
-     <div className={st(classes.root, states, 'additional-class')} dataHook="test" hello="world" />
+     <div className={st(classes.root, states, 'additional-class')} data-hook="test" hello="world" />
      ```
 
 2. Stylable v1 `style()` would accept unscoped css class name as a string  
