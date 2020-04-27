@@ -51,7 +51,7 @@ required changes and provide typings for other Stylable use cases.
 
 ## Update `.st.css` file imports
 
-Prior to v3 all `.st.css` files would export `style` function. In v3
+Prior to v2 all `.st.css` files would export `style` function. In v2
 this has changed: `.st.css` files now export an object.
 
 List of all exported keys:
