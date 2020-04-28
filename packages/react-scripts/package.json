@@ -19,7 +19,7 @@
     "html-webpack-plugin": "^4.2.0",
     "object-assign": "^4.1.1",
     "react-dev-utils": "^10.2.1",
-    "terser-webpack-plugin": "^2.3.5",
+    "terser-webpack-plugin": "^2.3.6",
     "tslib": "^1.11.1",
     "typescript": "~3.8.3",
     "url-loader": "^4.1.0",
