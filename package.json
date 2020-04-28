@@ -37,7 +37,7 @@
     "@types/mocha": "^7.0.2",
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",
-    "@types/postcss-nested": "^4.1.0",
+    "@types/postcss-nested": "^4.2.3",
     "@types/puppeteer": "^2.0.1",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
