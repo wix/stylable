@@ -60,7 +60,7 @@
     "file-loader": "^6.0.0",
     "gh-pages": "^2.2.0",
     "glob": "^7.1.6",
-    "html-webpack-plugin": "^4.2.0",
+    "html-webpack-plugin": "^4.2.1",
     "jsdom": "^16.2.2",
     "lerna": "^3.20.2",
     "mocha": "^7.1.2",
