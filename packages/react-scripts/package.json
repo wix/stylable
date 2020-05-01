@@ -16,7 +16,7 @@
     "dotenv-expand": "^5.1.0",
     "file-loader": "^6.0.0",
     "fs-extra": "^9.0.0",
-    "html-webpack-plugin": "^4.2.1",
+    "html-webpack-plugin": "^4.3.0",
     "object-assign": "^4.1.1",
     "react-dev-utils": "^10.2.1",
     "terser-webpack-plugin": "^2.3.6",
