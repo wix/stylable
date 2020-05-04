@@ -20,7 +20,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
     "murmurhash": "^1.0.0",
-    "postcss": "^7.0.27",
+    "postcss": "^7.0.29",
     "postcss-js": "^2.0.3",
     "postcss-nested": "^4.2.1",
     "postcss-safe-parser": "^4.0.2",
