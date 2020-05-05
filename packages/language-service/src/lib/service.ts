@@ -31,7 +31,7 @@ import { getRefs, getRenameRefs } from './provider';
 import { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
 
-interface Config {
+export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
     stylable: Stylable;
 }
@@ -43,7 +43,7 @@ export class StylableLanguageService {
     protected stylable: Stylable;
     protected tsLanguageService: ExtendedTsLanguageService;
 
-    constructor({ fs, stylable }: Config) {
+    constructor({ fs, stylable }: StylableLanguageServiceOptions) {
         this.fs = fs;
         this.stylable = stylable;
 

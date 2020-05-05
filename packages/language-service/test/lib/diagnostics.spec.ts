@@ -9,7 +9,7 @@ function createDiagnostics(files: { [filePath: string]: string }, filePath: stri
 
     const stylableLSP = new StylableLanguageService({
         fs,
-        stylable: new Stylable('/', fs as any, require),
+        stylable: new Stylable('/', fs, require),
     });
 
     return stylableLSP.diagnose(filePath);

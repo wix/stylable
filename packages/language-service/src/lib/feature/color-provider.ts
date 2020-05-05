@@ -1,5 +1,5 @@
 import { IFileSystem } from '@file-services/types';
-import { evalDeclarationValue, Stylable, StylableMeta, valueMapping } from '@stylable/core';
+import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
 import { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -29,11 +29,11 @@ export function resolveDocumentColors(
     if (meta) {
         const lines = src.split('\n');
         lines.forEach((line, ind) => {
-            const valueRegex = /value\(([\w-]+)\)/g;
+            const valueRegex = /value\((.*?)\)/g;
             let regexResult = valueRegex.exec(line);
             while (regexResult !== null) {
                 const result = regexResult[1];
-                const sym = meta.mappedSymbols[result];
+                const sym = meta.mappedSymbols[result.trim()];
                 let color: Color | null = null;
                 if (sym && sym._kind === 'var') {
                     const doc = TextDocument.create(
@@ -77,7 +77,8 @@ export function resolveDocumentColors(
                             ind,
                             regexResult.index +
                                 regexResult[0].indexOf(regexResult[1]) +
-                                result.length
+                                result.length +
+                                ')'.length
                         )
                     );
                     colorComps.push({ color, range } as ColorInformation);
@@ -85,69 +86,6 @@ export function resolveDocumentColors(
 
                 regexResult = valueRegex.exec(line);
             }
-        });
-
-        meta.imports.forEach((imp) => {
-            let impMeta: StylableMeta | undefined;
-            try {
-                impMeta = processor.process(imp.from);
-            } catch {
-                /**/
-            }
-
-            if (!impMeta) {
-                return;
-            }
-
-            const vars = impMeta.vars;
-            vars.forEach((v) => {
-                const doc = TextDocument.create(
-                    '',
-                    'css',
-                    0,
-                    '.gaga {border: ' +
-                        evalDeclarationValue(stylable.resolver, v.text, impMeta!, v.node) +
-                        '}'
-                );
-                const color = cssService.findColor(doc);
-                if (color) {
-                    meta.rawAst.walkDecls(valueMapping.named, (decl) => {
-                        const lines = decl.value.split('\n');
-                        const reg = new RegExp('\\b' + v.name + '\\b', 'g');
-
-                        const lineIndex = lines.findIndex((l) => reg.test(l));
-                        if (lineIndex > -1 && lines[lineIndex].includes(v.name)) {
-                            let extraLines = 0;
-                            let extraChars = 0;
-                            if (decl.raws.between) {
-                                extraLines = decl.raws.between.split('\n').length - 1;
-                                const betweens = decl.raws.between.split('\n');
-                                extraChars = betweens[betweens.length - 1]!.length;
-                            }
-                            const varStart = lineIndex // replace with value parser
-                                ? lines[lineIndex].indexOf(v.name) // replace with regex
-                                : extraLines
-                                ? lines[lineIndex].indexOf(v.name) + extraChars
-                                : lines[lineIndex].indexOf(v.name) +
-                                  valueMapping.named.length +
-                                  decl.source!.start!.column +
-                                  extraChars -
-                                  1;
-                            const range = new ProviderRange(
-                                new ProviderPosition(
-                                    decl.source!.start!.line - 1 + lineIndex + extraLines,
-                                    varStart
-                                ),
-                                new ProviderPosition(
-                                    decl.source!.start!.line - 1 + lineIndex + extraLines,
-                                    v.name.length + varStart
-                                )
-                            );
-                            colorComps.push({ color, range } as ColorInformation);
-                        }
-                    });
-                }
-            });
         });
 
         const cleanDocument = cssService.createSanitizedDocument(
@@ -170,13 +108,6 @@ export function getColorPresentation(
     const src = document.getText();
     const res = fixAndProcess(src, new ProviderPosition(0, 0), params.textDocument.uri);
     const meta = res.processed.meta!;
-
-    const word = src
-        .split('\n')
-        [params.range.start.line].slice(params.range.start.character, params.range.end.character);
-    if (word.startsWith('value(')) {
-        return [];
-    }
 
     const wordStart = new ProviderPosition(
         params.range.start.line + 1,

@@ -2,3 +2,7 @@
     -st-from: "./substring-var-top.st.css";
     -st-named: colcol;
 }
+
+.root {
+    color: value(colcol);
+}
