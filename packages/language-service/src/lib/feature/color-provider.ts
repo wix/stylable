@@ -29,11 +29,11 @@ export function resolveDocumentColors(
     if (meta) {
         const lines = src.split('\n');
         lines.forEach((line, ind) => {
-            const valueRegex = /value\(([\w-]+)\)/g;
+            const valueRegex = /value\((.*?)\)/g;
             let regexResult = valueRegex.exec(line);
             while (regexResult !== null) {
                 const result = regexResult[1];
-                const sym = meta.mappedSymbols[result];
+                const sym = meta.mappedSymbols[result.trim()];
                 let color: Color | null = null;
                 if (sym && sym._kind === 'var') {
                     const doc = TextDocument.create(
