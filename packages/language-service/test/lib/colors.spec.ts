@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import { Color } from 'vscode-languageserver-protocol';
 import { createRange } from '../../src/lib/completion-providers';
-import { getDocColorPresentation, getDocumentColors } from '../../test-kit/asserters';
+import {
+    getDocColorPresentation,
+    getDocumentColors,
+    getNonStVarsDocumentColors,
+} from '../../test-kit/asserters';
+import { createStylableTestLSP } from '../../test-kit/stylable-fixtures-lsp';
 
 export function createColor(red: number, green: number, blue: number, alpha: number): Color {
     return { red, green, blue, alpha } as Color;
@@ -69,6 +74,30 @@ describe('Colors', () => {
                     color: createColor(1, 1, 1, 1),
                 },
             ]);
+        });
+
+        describe('colorStylableVars', () => {
+            const stylableLSP = createStylableTestLSP({ colorStylableVars: false });
+
+            it('should not return colors for value() when configured to false', () => {
+                const res = getNonStVarsDocumentColors(
+                    'colors/single-var-color.st.css',
+                    stylableLSP
+                );
+
+                expect(res).to.eql([
+                    {
+                        range: createRange(1, 12, 1, 31),
+                        color: createColor(0, 1, 0, 0.8),
+                    },
+                ]);
+            });
+
+            it('should not resolve information for an imported color', () => {
+                const res = getNonStVarsDocumentColors('colors/imported-color.st.css', stylableLSP);
+
+                expect(res).to.eql([]);
+            });
         });
     });
 
