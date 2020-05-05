@@ -1,6 +1,6 @@
 import fs from '@file-services/node';
 import { Stylable } from '@stylable/core';
-import { StylableLanguageService, StylableLanguageServiceOptions } from '../src/lib/service';
+import { StylableLanguageService } from '../src/lib/service';
 
 export const CASES_PATH = fs.join(
     fs.dirname(fs.findClosestFileSync(__dirname, 'package.json')!),
@@ -15,15 +15,5 @@ function requireModule(request: string) {
 
 export const stylableLSP = new StylableLanguageService({
     fs,
-    stylable: new Stylable(CASES_PATH, fs as any, requireModule),
+    stylable: new Stylable(CASES_PATH, fs, requireModule),
 });
-
-export function createStylableTestLSP(
-    config: Partial<StylableLanguageServiceOptions>
-): StylableLanguageService {
-    return new StylableLanguageService({
-        fs,
-        stylable: new Stylable(CASES_PATH, fs as any, requireModule),
-        ...config,
-    });
-}
