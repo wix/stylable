@@ -34,7 +34,6 @@ import { typescriptSupport } from './typescript-support';
 export interface StylableLanguageServiceOptions {
     fs: IFileSystem;
     stylable: Stylable;
-    colorStylableVars?: boolean;
 }
 
 export class StylableLanguageService {
@@ -43,20 +42,14 @@ export class StylableLanguageService {
     protected provider: Provider;
     protected stylable: Stylable;
     protected tsLanguageService: ExtendedTsLanguageService;
-    protected config: {
-        colorStylableVars: boolean;
-    };
 
-    constructor({ fs, stylable, colorStylableVars = true }: StylableLanguageServiceOptions) {
+    constructor({ fs, stylable }: StylableLanguageServiceOptions) {
         this.fs = fs;
         this.stylable = stylable;
 
         this.tsLanguageService = typescriptSupport(this.fs);
         this.provider = new Provider(this.stylable, this.tsLanguageService);
         this.cssService = new CssService(this.fs);
-        this.config = {
-            colorStylableVars,
-        };
     }
 
     public getStylable() {
@@ -160,13 +153,7 @@ export class StylableLanguageService {
                 stylableFile.stat.mtime.getTime(),
                 stylableFile.content
             );
-            return resolveDocumentColors(
-                this.stylable,
-                this.cssService,
-                doc,
-                this.fs,
-                this.config.colorStylableVars
-            );
+            return resolveDocumentColors(this.stylable, this.cssService, doc, this.fs);
         }
 
         return [];
@@ -336,13 +323,7 @@ export class StylableLanguageService {
     }
 
     public resolveDocumentColors(document: TextDocument) {
-        return resolveDocumentColors(
-            this.stylable,
-            this.cssService,
-            document,
-            this.fs,
-            this.config.colorStylableVars
-        );
+        return resolveDocumentColors(this.stylable, this.cssService, document, this.fs);
     }
 
     public getColorPresentation(document: TextDocument, params: ColorPresentationParams) {

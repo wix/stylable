@@ -15,7 +15,6 @@ import { URI } from 'vscode-uri';
 import { ProviderPosition } from '../src/lib/completion-providers';
 import { createMeta, ProviderLocation } from '../src/lib/provider';
 import { pathFromPosition } from '../src/lib/utils/postcss-ast-utils';
-import { StylableLanguageService } from '../src';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 
 export function getCaretPosition(src: string) {
@@ -70,17 +69,6 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
     const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
 
     return stylableLSP.resolveDocumentColors(doc);
-}
-
-export function getNonStVarsDocumentColors(
-    fileName: string,
-    configuredStylableLSP: StylableLanguageService
-): ColorInformation[] {
-    const fullPath = path.join(CASES_PATH, fileName);
-    const src: string = fs.readFileSync(fullPath).toString();
-    const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
-
-    return configuredStylableLSP.resolveDocumentColors(doc);
 }
 
 export function getDocColorPresentation(
