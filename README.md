@@ -16,14 +16,14 @@ Learn more in our [Documentation Center](https://stylable.io/).
 
 There are two options for installing Stylable:
 
--   Create a new project based on Stylable [react-scripts](./packages/react-scripts), using [create-react-app](https://github.com/facebook/create-react-app)
+-   Create a new project using [create-stylable-app](./packages/create-stylable-app)
 -   Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Demos
 
--   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using [@stylable/react-scripts](./packages/react-scripts)
+-   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using our deprecated [@stylable/react-scripts](https://www.npmjs.com/package/@stylable/react-scripts)
 -   [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
 -   [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
@@ -46,7 +46,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | Package Name                                | Published Name             |                                                           Latest Version                                                            | Description                                                               |
 | ------------------------------------------- | -------------------------- | :---------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------- |
 | [cli](./packages/cli)                       | `@stylable/cli`            |            [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)            | Used for managing Stylable stylesheets in a project                       |
-| [react-scripts](./packages/react-scripts)   | `@stylable/react-scripts`  |  [![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)  | `create-react-app` boilerplate generator scripts                          |
+| [create-stylable-app](./packages/create-stylable-app)   | `create-stylable-app`  |  [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)  | Boilerplate generator CLI                          |
 | [schema-extract](./packages/schema-extract) | `@stylable/schema-extract` | [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract) | JSON Schema convertor for Stylable stylesheets                            |
 | [language-service](./packages/language-service) | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
 | [stylable.io](./packages/stylable.io)       | -                          |                                                                  -                                                                  | source package for the [stylable.io](http://stylable.io) official website |
