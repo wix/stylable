@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Migrating to Stylable v3</title>
+
+	<!-— facebook open graph tags -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://stylable.io/">
+	<meta property="og:title" content="Stylable - scoped CSS for components">
+	<meta property="og:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	 
+	<!-— twitter card tags additive with the og: tags -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:domain" content="stylable.io">
+	<meta name="twitter:title" content="Stylable - scoped CSS for components">
+	<meta name="twitter:description" content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time.">
+	<meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png">
+	<meta name="twitter:url" content="https://stylable.io/">
+
+    <link rel="stylesheet" href="../../css/normalize.css">
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4">
+    <link rel="stylesheet" href="../../css/highlight.css">
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png">
+    <link type="text/css" rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <label class="menu-icon" for="menu">
+    </label>
+        <a href="../.."><span class="logo"></span></a>
+
+        <ul class="main-nav">
+            <li><a href="https://github.com/wix/stylable" target="_blank"><img src="/images/logo-git.svg" alt="Stylable on GitHub"></a></li>
+            <li><a href="https://twitter.com/stylableio" target="_blank"><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"></a></li>
+        </ul>
+    </div>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+    <script>
+       window.dataLayer = window.dataLayer || [];
+       function gtag(){dataLayer.push(arguments);}
+       gtag('js', new Date());
+       gtag('config', 'UA-109043375-1');
+    </script>
+</header>
+
+
+<input id="menu" type="checkbox" class="hidden-control hidden-control_menu">    
+<div class="main-content">
+    <nav class="docs-nav">
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header"></div>
+        <ul>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Discover</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>
+            
+                <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Guides</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>
+            
+                <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>
+            
+                <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>
+            
+                <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>
+            
+                <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>
+            
+                <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>
+            
+                <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>
+            
+        </ul>
+    </div>
+    
+    <div class="docs-nav-section">
+        <div class="docs-nav-section-header">Specification Reference</div>
+        <ul>
+            
+                <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>
+            
+                <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>
+            
+                <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>
+            
+                <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>
+            
+                <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>
+            
+                <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>
+            
+                <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>
+            
+                <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>
+            
+                <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>
+            
+                <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>
+            
+                <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>
+            
+                <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>
+            
+        </ul>
+    </div>
+    
+</nav>
+
+<section class="docs-content">
+    <h1>Migrating to Stylable v3</h1>
+    <p>This guide is intended to help migrate Stylable version 1 to Stylable version 2 or 3.
+It is mainly geared towards Stylable integration in React.</p>
+
+<h1 id="suggested-steps-of-migration">Suggested steps of migration</h1>
+
+<p>Follow these steps for a smooth transition. Each step is explained in
+more detail below.</p>
+
+<ol>
+  <li>Update dependencies</li>
+  <li>Update global typings</li>
+  <li>Update <code class="highlighter-rouge">.st.css</code> file imports</li>
+  <li>Update usage in React components</li>
+  <li>Update tests</li>
+</ol>
+
+<h2 id="update-dependencies">Update dependencies</h2>
+
+<p>Ensure you have v3 Stylable dependencies available. You may need to
+update your <code class="highlighter-rouge">package.json</code> or ensure that other dependencies bring you
+v3 Stylable:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">@stylable/cli</code></li>
+  <li><code class="highlighter-rouge">@stylable/core</code></li>
+  <li><code class="highlighter-rouge">@stylable/runtime</code></li>
+  <li><code class="highlighter-rouge">@stylable/node</code></li>
+  <li><code class="highlighter-rouge">@stylable/webpack-plugin</code></li>
+</ul>
+
+<blockquote>
+  <p>Note: all Stylable packages in v3 are scoped under <code class="highlighter-rouge">@stylable</code> namespace. 
+if you have dependency like <code class="highlighter-rouge">stylable</code> (without namespace),
+it is a different one and should be changed to namespaced version.</p>
+</blockquote>
+
+<h1 id="update-global-typings">Update global typings</h1>
+
+<p>If TypeScript is in the toolbelt, we recommend to update global typings
+(usually a file named <code class="highlighter-rouge">global.d.ts</code>) with <code class="highlighter-rouge">.st.css</code> module declaration:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">declare</span> <span class="nx">module</span> <span class="s1">'*.st.css'</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">stylesheet</span><span class="p">:</span> <span class="k">import</span><span class="p">(</span><span class="s1">'@stylable/runtime'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
+  <span class="k">export</span> <span class="o">=</span> <span class="nx">stylesheet</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This way TypeScript compiler will help moving through most of the
+required changes and provide typings for other Stylable use cases.</p>
+
+<h2 id="update-stcss-file-imports">Update <code class="highlighter-rouge">.st.css</code> file imports</h2>
+
+<p>Prior to v2 all <code class="highlighter-rouge">.st.css</code> files would export <code class="highlighter-rouge">style</code> function. In v2
+this has changed: <code class="highlighter-rouge">.st.css</code> files now export an object.</p>
+
+<p>List of all exported keys:</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span>
+  <span class="nx">st</span><span class="p">,</span> <span class="c1">// alias to `style`</span>
+  <span class="nx">classes</span><span class="p">,</span>
+  <span class="nx">cssStates</span><span class="p">,</span>
+  <span class="nx">keyframes</span><span class="p">,</span>
+  <span class="nx">namespace</span><span class="p">,</span>
+  <span class="nx">stVars</span><span class="p">,</span>
+  <span class="nx">style</span><span class="p">,</span>
+  <span class="nx">vars</span><span class="p">,</span>
+<span class="p">}</span> <span class="k">from</span> <span class="s1">'./style.st.css'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>This means that all imports of <code class="highlighter-rouge">.st.css</code> files have to be changed, for example:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gd">-import style from './Component.st.css';
+</span><span class="gi">+import { st, classes, /* ... */ } from './Component.st.css';
+</span></code></pre></div></div>
+
+<p>However, most often <code class="highlighter-rouge">{ st, classes }</code> is enough:</p>
+
+<p><code class="highlighter-rouge">import { st, classes } from './Component.st.css';</code></p>
+
+<blockquote>
+  <p>Note: <code class="highlighter-rouge">.st.css</code> files export <code class="highlighter-rouge">style</code> function and an alias to it -
+<code class="highlighter-rouge">st</code>. It is recommended to use <code class="highlighter-rouge">st</code> in order to avoid name clashing
+with other variables (for example, some other inline styles)</p>
+</blockquote>
+
+<h2 id="update-usage-in-react-components">Update usage in React components</h2>
+
+<p>Once <code class="highlighter-rouge">.st.css</code> imports are updated, React components should be updated too:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gd">-&lt;div {...style('root', states, props)} /&gt; /&gt;
+</span><span class="gi">+&lt;div className={st(classes.root, states, props.className)} /&gt;
+</span></code></pre></div></div>
+
+<p>There are subtle but very important nuances in this change.</p>
+
+<ol>
+  <li>
+    <p>Stylable v1 used spread pattern. It would take the output of <code class="highlighter-rouge">style('root', states, this.props)</code> function and spread it on component.</p>
+
+    <p>This way one or more props would be applied to the component. Thus, code that looks like this:</p>
+
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">div</span> <span class="p">{...</span><span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{</span> <span class="na">className</span><span class="p">:</span> <span class="s1">'additional-class'</span><span class="p">,</span> <span class="s1">'data-hook'</span><span class="p">:</span> <span class="s1">'test'</span> <span class="p">})}</span> <span class="sr">/</span><span class="err">&gt;
+</span></code></pre></div>    </div>
+
+    <p>once evaluated, would behave like this:</p>
+
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">div</span>
+    <span class="nx">className</span><span class="o">=</span><span class="s2">"root additional-class"</span>
+    <span class="nx">data</span><span class="o">-</span><span class="nx">hook</span><span class="o">=</span><span class="s2">"test"</span>
+  <span class="o">/&gt;</span>
+</code></pre></div>    </div>
+
+    <p>Stylable v2 and v3 usage is like so:</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  className={st(classes.root, states, this.props.className)}
+</code></pre></div>    </div>
+
+    <p>There is no more props spread anymore and Stylable requires only
+  <code class="highlighter-rouge">className</code> to be used.</p>
+
+    <p>However, if you were relying on the props spread pattern, in v2 and v3 you
+  might find some props missing.</p>
+
+    <p>Therefore, with Stylable v3 it is up to you to apply any additional props:</p>
+
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">st</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="nx">states</span><span class="p">,</span> <span class="s1">'additional-class'</span><span class="p">)}</span> <span class="nx">data</span><span class="o">-</span><span class="nx">hook</span><span class="o">=</span><span class="s2">"test"</span> <span class="nx">hello</span><span class="o">=</span><span class="s2">"world"</span> <span class="o">/&gt;</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Stylable v1 <code class="highlighter-rouge">style()</code> would accept unscoped css class name as a string<br />
+ This is no longer acceptable in Stylable v2 or v3, for example:</p>
+
+    <div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code> -&lt;div {...style('root', state, { className: 'additional-class-name' })} /&gt;
+ +&lt;div className={style(classes.root, 'additional-class-name')} /&gt;
+</code></pre></div>    </div>
+
+    <p>note that <code class="highlighter-rouge">classes.root</code> comes from <code class="highlighter-rouge">.st.css</code>, which is the correct
+ way to import class names.</p>
+
+    <p>Similar scoping is applied to css variables too, imported from <code class="highlighter-rouge">vars</code></p>
+  </li>
+</ol>
+
+<p>Note: find more details and examples in React integration guide https://Stylable.io/docs/getting-started/react-integration</p>
+
+<h2 id="update-tests">Update tests</h2>
+
+<p>If you were using <code class="highlighter-rouge">@stylable/dom-test-kit</code> in Stylable v1, it’s usage is
+slightly different in v2 and v3:</p>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import { StylableDOMUtil } from '@Stylable/dom-test-kit';
+<span class="gd">-import style from './Component.st.css';
+</span><span class="gi">+import * as styleSheet from './Component.st.css';
+</span>
+<span class="gd">-const StylableDOMUtil = new StylableDOMUtil(style);
+</span><span class="gi">+const StylableDOMUtil = new StylableDOMUtil(styleSheet);
+</span></code></pre></div></div>
+
+<p>Stylable v2 and v3, <code class="highlighter-rouge">StylableDOMUtil</code> expects to receive argument which
+is the whole stylesheet exported from <code class="highlighter-rouge">.st.css</code></p>
+
+<p>Prior to v2 it was only one thing - <code class="highlighter-rouge">style</code> function.</p>
+
+</section>
+
+
+</div>
+
+
+<script src="../../js/vendor/prism/prism.js"></script>
+<script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+<script>
+	tippy('.code [title]', {
+		duration: 0
+	});
+</script>
+
+<script src="https://static.parastorage.com/unpkg/react@16.2.0//umd/react.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/react-dom@16.2.0//umd/react-dom.production.min.js"></script>
+<script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+</body>
+</html>
