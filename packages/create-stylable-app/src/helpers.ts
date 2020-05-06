@@ -62,16 +62,19 @@ export async function executeWithProgress(
     dotIntervalMs = 5000
 ) {
     let dotInterval: ReturnType<typeof setInterval> | undefined;
-    if (dotIntervalMs) {
-        dotInterval = setInterval(() => process.stdout.write('.'), dotIntervalMs);
+    try {
+        if (dotIntervalMs) {
+            dotInterval = setInterval(() => process.stdout.write('.'), dotIntervalMs);
+        }
+        process.stdout.write(message);
+        if (dotInterval === undefined) {
+            process.stdout.write('\n');
+        }
+        await action();
+    } finally {
+        if (dotInterval !== undefined) {
+            clearInterval(dotInterval);
+            process.stdout.write('\n');
+        }
     }
-    process.stdout.write(message);
-    if (dotInterval === undefined) {
-        process.stdout.write('\n');
-    }
-    await action();
-    if (dotInterval !== undefined) {
-        clearInterval(dotInterval);
-    }
-    process.stdout.write('\n');
 }
