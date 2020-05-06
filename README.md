@@ -23,7 +23,7 @@ For details on both options, see [Install & Configure](https://stylable.io/docs/
 
 ## Demos
 
--   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using our deprecated [@stylable/react-scripts](https://www.npmjs.com/package/@stylable/react-scripts)
+-   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small application showcasing Stylable
 -   [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
 -   [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
