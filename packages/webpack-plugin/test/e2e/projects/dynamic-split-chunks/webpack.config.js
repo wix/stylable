@@ -8,8 +8,10 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             useEntryModuleInjection: true,
+            includeDynamicModulesInCSS: true,
+            skipDynamicCSSEmit: true,
             outputCSS: true,
-            includeCSSInJS: false
+            includeCSSInJS: false,
         }),
         new HtmlWebpackPlugin(),
     ],
