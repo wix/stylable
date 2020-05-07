@@ -6,8 +6,8 @@ export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,
     loadConfig: (filePath: string) => object,
     { dirname, relative }: Pick<typeof nodePath, 'relative' | 'dirname'>,
-    hashSalt: string = '',
-    prefix: string = '',
+    hashSalt = '',
+    prefix = '',
     normalizeVersion = (semver: string) => semver
 ): typeof processNamespace {
     return (namespace: string, stylesheetPath: string) => {
