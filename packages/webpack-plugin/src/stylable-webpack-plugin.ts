@@ -159,7 +159,7 @@ export class StylableWebpackPlugin {
         const rootContext = (compilation as any).options.context;
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);
-        const onUrl: OnUrlCallback  = (node) => {
+        const onUrl: OnUrlCallback = (node) => {
             if (node.url !== undefined && isAsset(node.url)) {
                 const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
                 const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
@@ -322,6 +322,9 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation
     ) {
         if (this.options.includeDynamicModulesInCSS) {
+            if (!chunk.isOnlyInitial() && this.options.skipDynamicCSSEmit) {
+                return;
+            }
             const stModules = getModuleInGraph(chunk, (module) => module.type === 'stylable');
             if (stModules.size !== 0) {
                 const cssSources = renderStaticCSS(
@@ -333,9 +336,7 @@ export class StylableWebpackPlugin {
                     chunk,
                     hash: compilation.hash,
                 });
-                compilation.assets[cssBundleFilename] = new RawSource(
-                    cssSources.join(EOL + EOL + EOL)
-                );
+                compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL));
                 chunk.files.push(cssBundleFilename);
             }
         } else {

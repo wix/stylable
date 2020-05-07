@@ -49,6 +49,7 @@ export function normalizeOptions(
         },
         unsafeBuildNamespace: false,
         includeDynamicModulesInCSS: true,
+        skipDynamicCSSEmit: true,
         useEntryModuleInjection: false,
         experimentalHMR: false,
         plugins: [],
