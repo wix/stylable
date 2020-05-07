@@ -3,7 +3,11 @@ import { dirname, join } from 'path';
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { compileAsEntry, exec } from './compile-as-entry';
-import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
+import {
+    ComponentConfig,
+    ComponentMetadataBuilder,
+    ComponentsMetadata,
+} from './component-metadata-builder';
 
 import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
@@ -21,6 +25,7 @@ export interface MetadataOptions {
         componentConfig: ComponentConfig
     ) => string;
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
+    beforeEmit?: (builder: ComponentsMetadata) => ComponentsMetadata;
 }
 
 export class StylableMetadataPlugin {
@@ -109,10 +114,14 @@ export class StylableMetadataPlugin {
 
         if (builder.hasPackages()) {
             builder.createIndex();
-            const jsonMode = !this.options.mode || this.options.mode === 'json';
-            const jsonSource = JSON.stringify(builder.build(), null, 2);
+            const metadata = this.options.beforeEmit
+                ? this.options.beforeEmit(builder.build())
+                : builder.build();
 
-            let fileContent = jsonSource
+            const jsonSource = JSON.stringify(metadata, null, 2);
+            const jsonMode = !this.options.mode || this.options.mode === 'json';
+
+            let fileContent = jsonSource;
             switch (this.options.mode) {
                 case 'cjs':
                     fileContent = `module.exports = ${fileContent}`;
@@ -124,7 +133,11 @@ export class StylableMetadataPlugin {
                     fileContent = `define(() => { return ${fileContent}; });`;
                     break;
             }
-            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
+            const fileName = `${this.options.name}${
+                this.options.useContentHashFileName
+                    ? `.${hashContent(fileContent, this.options.contentHashLength)}`
+                    : ''
+            }.metadata.json${!jsonMode ? '.js' : ''}`;
             compilation.assets[fileName] = new RawSource(fileContent);
         }
     }

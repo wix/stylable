@@ -1,6 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
+import { ComponentsMetadata } from '@stylable/webpack-extensions/src';
 
 const project = 'metadata-plugin-project';
 
@@ -116,6 +117,27 @@ describe(`(${project})`, () => {
             );
             const s = projectRunnerJs.getBuildAsset(file!);
             expectMetadataJSON(JSON.parse(s));
+        });
+    });
+
+    describe('before emit option', () => {
+        const projectRunnerJs = StylableProjectRunner.mochaSetup(
+            {
+                projectDir: join(__dirname, 'projects', project),
+                puppeteerOptions: {
+                    // headless: false
+                },
+                configName: 'webpack-before-emit.config',
+            },
+            before,
+            afterEach,
+            after
+        );
+
+        it('contains metadata file with override from beforeEmit', () => {
+            const s = projectRunnerJs.getBuildAsset('test.metadata.json');
+            const metadata = JSON.parse(s) as ComponentsMetadata;
+            expect(metadata.packages.test).to.equal('/test');
         });
     });
 
