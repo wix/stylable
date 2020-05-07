@@ -10,7 +10,7 @@ function selfTest(
     }
     const checks: Array<[string, string]> = [];
 
-    result.walkRules(rule => {
+    result.walkRules((rule) => {
         const p = rule.prev();
         if (p && p.type === 'comment') {
             const m = p.text.match(/@check\s+(.*)/);
@@ -145,7 +145,7 @@ describe('Stylable scope-selector v2', () => {
                         .y{
                             -st-extends: root;
                         }
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -155,9 +155,9 @@ describe('Stylable scope-selector v2', () => {
                         }
                         .x{}
                         .base {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         selfTest(result);
@@ -202,7 +202,7 @@ describe('Stylable scope-selector v2', () => {
 
                         .local {}
                      
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -214,9 +214,9 @@ describe('Stylable scope-selector v2', () => {
                             -st-states: testInner;
                         }
                         .otherBase {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         selfTest(result);
@@ -265,7 +265,7 @@ describe('Stylable scope-selector v2', () => {
                             -st-extends: Mid;
                         }
                      
-                    `
+                    `,
                 },
                 '/middle.st.css': {
                     namespace: 'mid',
@@ -287,7 +287,7 @@ describe('Stylable scope-selector v2', () => {
                         .base {}
 
                         Base{}
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -299,9 +299,9 @@ describe('Stylable scope-selector v2', () => {
                             -st-states: testInner;
                         }
                         .otherBase {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         selfTest(result);
@@ -334,7 +334,7 @@ describe('Stylable scope-selector v2', () => {
                             -st-extends: Mid;
                         }
                      
-                    `
+                    `,
                 },
                 '/middle.st.css': {
                     namespace: 'mid',
@@ -352,7 +352,7 @@ describe('Stylable scope-selector v2', () => {
                             -st-states: teststate;
                         }
 
-                    `
+                    `,
                 },
                 '/base.st.css': {
                     namespace: 'base',
@@ -363,9 +363,9 @@ describe('Stylable scope-selector v2', () => {
                         .base{
                             -st-states: testInner;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         selfTest(result);
@@ -396,9 +396,9 @@ describe('Stylable scope-selector v2', () => {
 
                         }
                      
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         selfTest(result);

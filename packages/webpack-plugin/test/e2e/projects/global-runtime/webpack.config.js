@@ -7,12 +7,12 @@ module.exports = {
     devtool: 'source-map',
     entry: {
         main: './src/index.js',
-        main2: './src/index2.js'
+        main2: './src/index2.js',
     },
     plugins: [
         new StylableWebpackPlugin({
-            runtimeMode: 'shared'
+            runtimeMode: 'shared',
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

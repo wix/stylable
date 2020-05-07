@@ -1,7 +1,10 @@
+import { dirname } from 'path';
 import postcss from 'postcss';
+
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
+import { ImportSymbol } from './stylable-meta';
 import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
@@ -20,7 +23,7 @@ export const mixinWarnings = {
     },
     UNKNOWN_MIXIN_SYMBOL(name: string) {
         return `cannot mixin unknown symbol "${name}"`;
-    }
+    },
 };
 
 export function appendMixins(
@@ -34,11 +37,11 @@ export function appendMixins(
     if (!rule.mixins || rule.mixins.length === 0) {
         return;
     }
-    rule.mixins.forEach(mix => {
+    rule.mixins.forEach((mix) => {
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
     rule.mixins.length = 0;
-    rule.walkDecls(valueMapping.mixin, node => node.remove());
+    rule.walkDecls(valueMapping.mixin, (node) => node.remove());
 }
 
 export function appendMixin(
@@ -81,7 +84,7 @@ export function appendMixin(
                     }
                 } else {
                     transformer.diagnostics.error(rule, mixinWarnings.JS_MIXIN_NOT_A_FUNC(), {
-                        word: mix.mixin.type
+                        word: mix.mixin.type,
                     });
                 }
             } else {
@@ -114,11 +117,11 @@ function checkRecursive(
                 ? meta.root
                 : 'default'
             : mix.mixin.type;
-    const isRecursive = path.indexOf(symbolName + ' from ' + meta.source) !== -1;
+    const isRecursive = path.includes(symbolName + ' from ' + meta.source);
     if (isRecursive) {
         // Todo: add test verifying word
         transformer.diagnostics.warn(rule, mixinWarnings.CIRCULAR_MIXIN(path), {
-            word: symbolName
+            word: symbolName,
         });
         return true;
     }
@@ -133,10 +136,10 @@ function handleJSMixin(
     rule: postcss.Rule,
     variableOverride?: Record<string, string>
 ) {
-    const res = mixinFunction((mix.mixin.options as any[]).map(v => v.value));
+    const res = mixinFunction((mix.mixin.options as any[]).map((v) => v.value));
     const mixinRoot = cssObjectToAst(res).root;
 
-    mixinRoot.walkDecls(decl => {
+    mixinRoot.walkDecls((decl) => {
         if (!isValidDeclaration(decl)) {
             decl.value = String(decl);
         }
@@ -144,7 +147,12 @@ function handleJSMixin(
 
     transformer.transformAst(mixinRoot, meta, undefined, variableOverride, [], true);
 
-    fixRelativeUrls(mixinRoot, mix, meta);
+    const mixinPath = (mix.ref as ImportSymbol).import.from;
+    fixRelativeUrls(
+        mixinRoot,
+        transformer.fileProcessor.resolvePath(mixinPath, dirname(meta.source)),
+        meta.source
+    );
 
     mergeRules(mixinRoot, rule);
 }
@@ -193,7 +201,7 @@ function createMixinRootFromCSSResolve(
         true
     );
 
-    fixRelativeUrls(mixinRoot, mix, meta);
+    fixRelativeUrls(mixinRoot, mixinMeta.source, meta.source);
 
     return mixinRoot;
 }
@@ -237,7 +245,7 @@ function handleImportedCSSMixin(
         mergeRules(roots[0], rule);
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
-        roots.forEach(root => mixinRoot.prepend(...root.nodes!));
+        roots.forEach((root) => mixinRoot.prepend(...root.nodes!));
         mergeRules(mixinRoot, rule);
     } else {
         const mixinDecl = getMixinDeclaration(rule);
@@ -305,7 +313,7 @@ function createInheritedMeta(resolvedClass: CSSResolve) {
 function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefined {
     return (
         rule.nodes &&
-        (rule.nodes.find(node => {
+        (rule.nodes.find((node) => {
             return node.type === 'decl' && node.prop === valueMapping.mixin;
         }) as postcss.Declaration)
     );

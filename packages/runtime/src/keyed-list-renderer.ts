@@ -23,10 +23,9 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
     };
 
     const render = (container: C, data: I[] = []) => {
-        let node: O;
         if (data.length) {
+            let node: O | undefined;
             let next: O | undefined = first;
-            // tslint:disable-next-line:prefer-for-of
             for (let i = 0; i < data.length; i++) {
                 node = renderNode(data[i]);
                 if (node !== next) {
@@ -39,7 +38,7 @@ export function createDOMListRenderer<I, O extends Element, C extends Element = 
 
             while (node!.nextElementSibling) {
                 if (nodeRenderer.hasKey(node!.nextElementSibling as O)) {
-                    container.removeChild(node!.nextElementSibling!);
+                    container.removeChild(node!.nextElementSibling);
                 } else {
                     break;
                 }

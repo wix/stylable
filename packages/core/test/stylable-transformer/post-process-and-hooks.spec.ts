@@ -18,13 +18,13 @@ describe('post-process-and-hooks', () => {
                             color: value(param);
                             background: value(param1);
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             },
             undefined,
             undefined,
-            res => {
+            (res) => {
                 return { ...res, postProcessed: true };
             }
         );
@@ -48,15 +48,15 @@ describe('post-process-and-hooks', () => {
                         .container {
                             color: fn1(fn2(1));
                         }
-                        `
+                        `,
                     },
                     '/function.js': {
                         content: `
                         module.exports.fn1 = function(x){return 'fn1'}
                         module.exports.fn2 = function(x){return 'fn2'}
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             },
             undefined,
             (_resolved, fn) => {
@@ -89,9 +89,9 @@ describe('post-process-and-hooks', () => {
                             color: value(param);
                             background: value(param1);
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             },
             undefined,
             (resolved, name, isLocal) => {
@@ -128,7 +128,7 @@ describe('post-process-and-hooks', () => {
                         .root {
                             -st-mixin: Style(param value(myColor), param1 value(myBG));
                         }
-                    `
+                    `,
                     },
                     '/style.st.css': {
                         namespace: 'style',
@@ -148,7 +148,7 @@ describe('post-process-and-hooks', () => {
                             background: value(param1);
                             font-family: value(param2);
                         }
-                    `
+                    `,
                     },
                     '/style1.st.css': {
                         namespace: 'style1',
@@ -159,9 +159,9 @@ describe('post-process-and-hooks', () => {
                         .x {
                             border: 4px solid value(var1);
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             },
             undefined,
             (resolved, name, isLocal, path) => {
@@ -179,7 +179,7 @@ describe('post-process-and-hooks', () => {
             ['red', 'myColor', true, []],
             ['green', 'myBG', true, []],
             ['Ariel', 'param2', true, [`default from /entry.st.css`]],
-            ['Ariel', 'param2', true, [`default from /entry.st.css`]]
+            ['Ariel', 'param2', true, [`default from /entry.st.css`]],
         ];
 
         t.transform(t.fileProcessor.process('/entry.st.css'));

@@ -15,6 +15,5 @@ function requireModule(request: string) {
 
 export const stylableLSP = new StylableLanguageService({
     fs,
-    stylable: new Stylable(CASES_PATH, fs as any, requireModule)
+    stylable: new Stylable(CASES_PATH, fs, requireModule),
 });
-

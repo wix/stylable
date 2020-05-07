@@ -4,7 +4,7 @@ import {
     pseudoStates,
     SelectorAstNode,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import cloneDeep from 'lodash.clonedeep';
 import postcss from 'postcss';
@@ -60,7 +60,7 @@ export function applyStylableForceStateSelectors(
         onMapping(key, value) {
             mapping[key] = value;
             mapping[value] = key;
-        }
+        },
     });
     return mapping;
 }
@@ -76,7 +76,7 @@ export interface AddForceStateSelectorsContext {
 }
 
 export function addForceStateSelectors(ast: postcss.Root, context: AddForceStateSelectorsContext) {
-    ast.walkRules(rule => {
+    ast.walkRules((rule) => {
         const selectorAst = parseSelector(rule.selector);
 
         const overrideSelectors = selectorAst.nodes.reduce((selectors, selector) => {
@@ -99,7 +99,7 @@ function isNative(name: string) {
 
 function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
     let hasStates = false;
-    traverseNode(selector, node => {
+    traverseNode(selector, (node) => {
         if (node.type === 'pseudo-class') {
             return (hasStates = true);
         } else if (node.type === 'class' && context.isStateClassName(node.name)) {
@@ -113,7 +113,7 @@ function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsCon
 }
 
 function transformStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
-    traverseNode(selector, node => {
+    traverseNode(selector, (node) => {
         if (node.type === 'pseudo-class') {
             node.type = 'attribute';
             node.content = isNative(node.name)

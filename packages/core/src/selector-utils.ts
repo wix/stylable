@@ -37,7 +37,7 @@ export function stringifySelector(ast: SelectorAstNode): string {
 export function traverseNode(
     node: SelectorAstNode,
     visitor: Visitor,
-    index: number = 0,
+    index = 0,
     nodes: SelectorAstNode[] = [node]
 ): boolean | void {
     if (!node) {
@@ -67,7 +67,7 @@ export function createChecker(types: Array<string | string[]>) {
         return (node: SelectorAstNode) => {
             const matcher = types[index];
             if (Array.isArray(matcher)) {
-                return matcher.indexOf(node.type) !== -1;
+                return matcher.includes(node.type);
             } else if (matcher !== node.type) {
                 return false;
             }
@@ -114,14 +114,14 @@ export function isRootValid(ast: SelectorAstNode, rootName: string) {
 export const createSimpleSelectorChecker = createChecker([
     'selectors',
     'selector',
-    ['element', 'class']
+    ['element', 'class'],
 ]);
 
 export function isSimpleSelector(selectorAst: SelectorAstNode) {
     const isSimpleSelectorASTNode = createSimpleSelectorChecker();
     const isSimple = traverseNode(
         selectorAst,
-        node => isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
+        (node) => isSimpleSelectorASTNode(node) !== false /*stop on complex selector */
     );
 
     return isSimple;
@@ -185,7 +185,7 @@ export function separateChunks2(selectorNode: SelectorAstNode) {
     const selectors: SelectorChunk2[][] = [];
     selectorNode.nodes.map(({ nodes, before }) => {
         selectors.push([{ type: 'selector', nodes: [], before }]);
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             if (node.type === 'operator') {
                 const chunks = selectors[selectors.length - 1];
                 chunks.push({ ...node, nodes: [] });
@@ -218,7 +218,7 @@ export function getOriginDefinition(resolved: Array<CSSResolve<ClassSymbol | Ele
 export function separateChunks(selectorNode: SelectorAstNode) {
     const selectors: SelectorChunk[][] = [];
 
-    traverseNode(selectorNode, node => {
+    traverseNode(selectorNode, (node) => {
         if (node.type === 'selectors') {
             // skip
         } else if (node.type === 'selector') {
@@ -245,8 +245,8 @@ export function filterChunkNodesByType(
     chunk: SelectorChunk,
     typeOptions: string[]
 ): Array<Partial<SelectorAstNode>> {
-    return chunk.nodes.filter(node => {
-        return node.type && typeOptions.indexOf(node.type) !== -1;
+    return chunk.nodes.filter((node) => {
+        return node.type && typeOptions.includes(node.type);
     });
 }
 
@@ -257,12 +257,12 @@ function isPseudoDiff(a: nodeWithPseudo, b: nodeWithPseudo) {
     if (!aNodes || !bNodes || aNodes.length !== bNodes.length) {
         return false;
     }
-    return aNodes!.every((node, index) => isNodeMatch(node, bNodes![index]));
+    return aNodes.every((node, index) => isNodeMatch(node, bNodes[index]));
 }
 
 function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): nodeWithPseudo[] {
     const nodesWithPseudos: nodeWithPseudo[] = [];
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
         if (node.type === 'class' || node.type === 'element') {
             nodesWithPseudos.push({ ...node, pseudo: [] });
         } else if (node.type === 'pseudo-element') {
@@ -271,8 +271,11 @@ function groupClassesAndPseudoElements(nodes: Array<Partial<SelectorAstNode>>): 
     });
 
     const nodesNoDuplicates: nodeWithPseudo[] = [];
-    nodesWithPseudos.forEach(node => {
-        if (node.pseudo.length || !nodesWithPseudos.find(n => isNodeMatch(n, node) && node !== n)) {
+    nodesWithPseudos.forEach((node) => {
+        if (
+            node.pseudo.length ||
+            !nodesWithPseudos.find((n) => isNodeMatch(n, node) && node !== n)
+        ) {
             nodesNoDuplicates.push(node);
         }
     });
@@ -284,7 +287,7 @@ const containsInTheEnd = (
     currentMatchingElements: nodeWithPseudo[]
 ) => {
     const offset = originalElements.length - currentMatchingElements.length;
-    let arraysEqual: boolean = false;
+    let arraysEqual = false;
     if (offset >= 0 && currentMatchingElements.length > 0) {
         arraysEqual = true;
         for (let i = 0; i < currentMatchingElements.length; i++) {
@@ -311,14 +314,14 @@ export function matchSelectorTarget(sourceSelector: string, targetSelector: stri
         filterChunkNodesByType(lastChunkA, ['class', 'element', 'pseudo-element'])
     );
 
-    return b.some(compoundSelector => {
+    return b.some((compoundSelector) => {
         const lastChunkB = getLastChunk(compoundSelector);
         let relevantChunksB = groupClassesAndPseudoElements(
             filterChunkNodesByType(lastChunkB, ['class', 'element', 'pseudo-element'])
         );
 
-        relevantChunksB = relevantChunksB.filter(nodeB =>
-            relevantChunksA.find(nodeA => isNodeMatch(nodeA, nodeB))
+        relevantChunksB = relevantChunksB.filter((nodeB) =>
+            relevantChunksA.find((nodeA) => isNodeMatch(nodeA, nodeB))
         );
         return containsInTheEnd(relevantChunksA, relevantChunksB);
     });
@@ -368,24 +371,24 @@ export function createWarningRule(
         nodes: [
             postcss.decl({
                 prop: 'content',
-                value: message
+                value: message,
             }),
             postcss.decl({
                 prop: 'display',
-                value: `block !important`
+                value: `block !important`,
             }),
             postcss.decl({
                 prop: 'font-family',
-                value: `monospace !important`
+                value: `monospace !important`,
             }),
             postcss.decl({
                 prop: 'background-color',
-                value: `red !important`
+                value: `red !important`,
             }),
             postcss.decl({
                 prop: 'color',
-                value: `white !important`
-            })
-        ]
+                value: `white !important`,
+            }),
+        ],
     });
 }

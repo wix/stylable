@@ -8,9 +8,9 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             unsafeMuteDiagnostics: {
-                DUPLICATE_MODULE_NAMESPACE: true
-            }
+                DUPLICATE_MODULE_NAMESPACE: true,
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

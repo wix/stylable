@@ -1,16 +1,19 @@
-import { safeListeningHttpServer } from 'create-listening-server';
-import express from 'express';
-import http from 'http';
+import { spawn } from 'child_process';
 import { join, normalize } from 'path';
 import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
+import { createTempDirectorySync } from 'create-temp-directory';
+import { nodeFs } from '@file-services/node';
+import { symlinkSync } from 'fs';
+import { deferred } from 'promise-assist';
 
 export interface Options {
     projectDir: string;
     port?: number;
     puppeteerOptions: puppeteer.LaunchOptions;
+    webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
 }
@@ -23,13 +26,30 @@ export class ProjectRunner {
         runnerOptions: Options,
         before: MochaHook,
         afterEach: MochaHook,
-        after: MochaHook
+        after: MochaHook,
+        watch = false
     ) {
+        const disposeAfterEach: Set<() => void> = new Set();
+        if (watch) {
+            const projectToCopy = runnerOptions.projectDir;
+            const tempDir = createTempDirectorySync('local-test');
+            tempDir.path = nodeFs.realpathSync(tempDir.path);
+            const projectPath = join(tempDir.path, 'project');
+            disposeAfterEach.add(tempDir.remove);
+            nodeFs.copyDirectorySync(projectToCopy, projectPath);
+            symlinkSync(
+                join(__dirname, '../../../node_modules'),
+                join(tempDir.path, 'node_modules'),
+                'junction'
+            );
+            runnerOptions.projectDir = projectPath;
+        }
+
         const projectRunner = new this(runnerOptions);
 
-        before('bundle and serve project', async function() {
+        before('bundle and serve project', async function () {
             this.timeout(40000);
-            await projectRunner.bundle();
+            watch ? await projectRunner.watch() : await projectRunner.bundle();
             await projectRunner.serve();
         });
 
@@ -52,66 +72,107 @@ export class ProjectRunner {
     public stats: webpack.Stats | null;
     public throwOnBuildError: boolean;
     public serverUrl: string;
-    public server!: http.Server | null;
+    public server!: { close(): void } | null;
     public browser!: puppeteer.Browser | null;
+    public compiler!: webpack.Compiler | null;
+    public watchingHandle!: webpack.Watching | null;
     constructor({
         projectDir,
         port = 3000,
         puppeteerOptions = {},
         throwOnBuildError = true,
-        configName = 'webpack.config'
+        webpackOptions,
+        configName = 'webpack.config',
     }: Options) {
         this.projectDir = projectDir;
         this.outputDir = join(this.projectDir, 'dist');
-        this.webpackConfig = this.loadTestConfig(configName);
+        this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
-        this.puppeteerOptions = puppeteerOptions;
+        this.puppeteerOptions = { ...puppeteerOptions, pipe: true };
         this.pages = [];
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
     }
-    public loadTestConfig(configName?: string) {
-        return require(join(this.projectDir, configName || 'webpack.config'));
+    public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        return {
+            ...require(join(this.projectDir, configName || 'webpack.config')),
+            ...webpackOptions,
+        };
     }
     public async bundle() {
-        const webpackConfig = this.webpackConfig;
-        if (webpackConfig.output && webpackConfig.output.path) {
-            throw new Error('Test project should not specify output.path option');
-        } else {
-            webpackConfig.output = {
-                ...webpackConfig.output,
-                path: this.outputDir
-            };
-        }
+        const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
+        this.compiler = compiler;
         compiler.run = compiler.run.bind(compiler);
         const promisedRun = promisify(compiler.run);
         this.stats = await promisedRun();
-        if (this.throwOnBuildError && this.stats.compilation.errors.length) {
-            throw new Error(this.stats.compilation.errors.join('\n'));
+        if (this.throwOnBuildError && this.stats.hasErrors()) {
+            throw new Error(this.stats.toString({ colors: true }));
         }
+    }
+    public async watch() {
+        const webpackConfig = this.getWebpackConfig();
+        const compiler = webpack(webpackConfig);
+        this.compiler = compiler;
+
+        const firstCompile = deferred<webpack.Stats>();
+
+        this.watchingHandle = compiler.watch({}, (err, stats) => {
+            if (!this.stats) {
+                if (this.throwOnBuildError && stats.compilation.errors.length) {
+                    err = new Error(stats.compilation.errors.join('\n'));
+                }
+                if (err) {
+                    firstCompile.reject(err);
+                } else {
+                    firstCompile.resolve(stats);
+                }
+            }
+            this.stats = stats;
+        });
+
+        await firstCompile.promise;
     }
 
     public async serve() {
-        const app = express();
-        app.use(express.static(this.outputDir, { cacheControl: false, etag: false }));
-        const { httpServer, port } = await safeListeningHttpServer(this.port, app);
-        this.port = port;
-        this.serverUrl = `http://localhost:${port}`;
-        this.server = httpServer;
+        return new Promise((res) => {
+            const child = spawn(
+                'node',
+                [
+                    '-r',
+                    '@ts-tools/node/r',
+                    './isolated-server',
+                    this.outputDir,
+                    this.port.toString(),
+                ],
+                {
+                    cwd: __dirname,
+                    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+                }
+            );
+            child.once('message', (port) => {
+                this.serverUrl = `http://localhost:${port}`;
+                this.server = {
+                    close() {
+                        child.kill();
+                    },
+                };
+                res();
+            });
+        });
     }
 
     public async openInBrowser() {
         if (!this.browser) {
             this.browser = await puppeteer.launch(this.puppeteerOptions);
         }
-        const page = await this.browser!.newPage();
+        const page = await this.browser.newPage();
         this.pages.push(page);
 
         await page.setCacheEnabled(false);
         const responses: puppeteer.Response[] = [];
-        page.on('response', response => {
+        page.on('response', (response) => {
             responses.push(response);
         });
         await page.goto(this.serverUrl, { waitUntil: 'networkidle0' });
@@ -162,9 +223,29 @@ export class ProjectRunner {
             this.browser = null;
         }
         if (this.server) {
-            await this.server.close();
+            this.server.close();
             this.server = null;
         }
+        if (this.compiler) {
+            this.compiler = null;
+        }
+        if (this.watchingHandle) {
+            await new Promise((res) => this.watchingHandle?.close(res));
+            this.watchingHandle = null;
+        }
         await rimraf(this.outputDir);
+    }
+
+    private getWebpackConfig() {
+        const webpackConfig = this.webpackConfig;
+        if (webpackConfig.output && webpackConfig.output.path) {
+            throw new Error('Test project should not specify output.path option');
+        } else {
+            webpackConfig.output = {
+                ...webpackConfig.output,
+                path: this.outputDir,
+            };
+        }
+        return webpackConfig;
     }
 }

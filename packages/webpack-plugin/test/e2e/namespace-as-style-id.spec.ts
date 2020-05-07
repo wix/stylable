@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -20,7 +20,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).backgroundColor;
+            return getComputedStyle(document.documentElement).backgroundColor;
         });
 
         expect(backgroundColor).to.eql('rgb(255, 0, 0)');
@@ -31,7 +31,7 @@ describe(`(${project})`, () => {
         const res = await page.evaluate(() => {
             return {
                 id: (window as any).$id,
-                namespace: (window as any).$namespace
+                namespace: (window as any).$namespace,
             };
         });
 

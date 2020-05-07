@@ -59,14 +59,14 @@ describe('StylableOptimizer', () => {
             [index]: {
                 content: `
                     .x{color: red}
-                `
-            }
+                `,
+            },
         };
 
         const stylable = createStylableInstance({ files });
         const result = stylable.transform(files[index].content, index);
         const usageMapping = {
-            [result.meta.namespace]: false
+            [result.meta.namespace]: false,
         };
 
         new StylableOptimizer().optimize(
@@ -89,8 +89,8 @@ describe('StylableOptimizer', () => {
                     @media screen {
                         .x{/* empty */}
                     }
-                `
-            }
+                `,
+            },
         };
 
         const stylable = createStylableInstance({ files });

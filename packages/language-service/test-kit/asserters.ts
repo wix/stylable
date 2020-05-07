@@ -7,9 +7,10 @@ import {
     ColorPresentation,
     Location,
     ParameterInformation,
-    SignatureHelp
+    SignatureHelp,
 } from 'vscode-languageserver';
-import { Range, TextDocument, TextDocumentIdentifier } from 'vscode-languageserver-types';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { ProviderPosition } from '../src/lib/completion-providers';
 import { createMeta, ProviderLocation } from '../src/lib/provider';
@@ -32,25 +33,19 @@ export function getPath(fileName: string): NodeBase[] {
     return pathFromPosition(proc.meta!.rawAst, new ProviderPosition(pos.line + 1, pos.character));
 }
 
-export async function getDefinition(fileName: string): Promise<ProviderLocation[]> {
+export function getDefinition(fileName: string): ProviderLocation[] {
     const fullPath = path.join(CASES_PATH, fileName);
     let src: string = fs.readFileSync(fullPath).toString();
     const pos = getCaretPosition(src);
     src = src.replace('|', '');
-    const res = await stylableLSP.getDefinitionLocation(src, pos, fullPath);
+    const res = stylableLSP.getDefinitionLocation(src, pos, fullPath);
     return res;
 }
 
-export async function getDefFromLoc({
-    filePath,
-    pos
-}: {
-    filePath: string;
-    pos: ProviderPosition;
-}) {
+export function getDefFromLoc({ filePath, pos }: { filePath: string; pos: ProviderPosition }) {
     const fullPath = path.join(CASES_PATH, filePath);
     const src: string = fs.readFileSync(fullPath).toString();
-    const res = await stylableLSP.getDefinitionLocation(src, pos, fullPath);
+    const res = stylableLSP.getDefinitionLocation(src, pos, fullPath);
     return res;
 }
 
@@ -88,6 +83,6 @@ export function getDocColorPresentation(
     return stylableLSP.getColorPresentation(doc, {
         textDocument: TextDocumentIdentifier.create(doc.uri),
         color,
-        range
+        range,
     });
 }

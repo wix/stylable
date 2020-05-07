@@ -20,13 +20,13 @@ export class Snippet {
 export const importDirectives = {
     from: valueMapping.from,
     default: valueMapping.default,
-    named: valueMapping.named
+    named: valueMapping.named,
 };
 
 export const rulesetDirectives = {
     extends: valueMapping.extends,
     mixin: valueMapping.mixin,
-    states: valueMapping.states
+    states: valueMapping.states,
 };
 
 export const topLevelDirectives = {
@@ -35,7 +35,7 @@ export const topLevelDirectives = {
     customSelector: '@custom-selector :--' as '@custom-selector :--',
     vars: ':vars' as ':vars',
     import: ':import' as ':import',
-    stScope: '@st-scope' as '@st-scope'
+    stScope: '@st-scope' as '@st-scope',
 };
 
 // syntactic
@@ -175,7 +175,7 @@ export function globalCompletion(rng: ProviderRange) {
 }
 
 // semantic
-export function classCompletion(className: string, rng: ProviderRange, removeDot: boolean = false) {
+export function classCompletion(className: string, rng: ProviderRange, removeDot = false) {
     return new Completion(
         (removeDot ? '' : '.') + className,
         'Stylable class or tag',

@@ -4,7 +4,7 @@ import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { ParsedValue, StateParsedValue } from './types';
 
-const valueParser = require('postcss-value-parser');
+const postcssValueParser = require('postcss-value-parser');
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -12,7 +12,7 @@ export const valueParserWarnings = {
     },
     CSS_MIXIN_FORCE_NAMED_PARAMS() {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
-    }
+    },
 };
 
 export interface MappedStates {
@@ -40,13 +40,13 @@ export interface ExtendsValue {
     args: ArgValue[][] | null;
 }
 
-type ReportWarning = (message: string, options?: { word: string }) => void;
+export type ReportWarning = (message: string, options?: { word: string }) => void;
 
 export const rootValueMapping = {
     vars: ':vars' as ':vars',
     import: ':import' as ':import',
     stScope: 'st-scope' as 'st-scope',
-    namespace: 'namespace' as 'namespace'
+    namespace: 'namespace' as 'namespace',
 };
 
 export const valueMapping = {
@@ -57,12 +57,14 @@ export const valueMapping = {
     states: '-st-states' as '-st-states',
     extends: '-st-extends' as '-st-extends',
     mixin: '-st-mixin' as '-st-mixin',
-    global: '-st-global' as '-st-global'
+    global: '-st-global' as '-st-global',
 };
 
 export type stKeys = keyof typeof valueMapping;
 
-export const stValues: string[] = Object.keys(valueMapping).map(key => valueMapping[key as stKeys]);
+export const stValues: string[] = Object.keys(valueMapping).map(
+    (key) => valueMapping[key as stKeys]
+);
 export const stValuesMap: Record<string, boolean> = Object.keys(valueMapping).reduce((acc, key) => {
     acc[valueMapping[key as stKeys]] = true;
     return acc;
@@ -88,7 +90,7 @@ export const SBTypesParsers = {
         return processPseudoStates(value, decl, diagnostics);
     },
     '-st-extends'(value: string) {
-        const ast = valueParser(value);
+        const ast = postcssValueParser(value);
         const types: ExtendsValue[] = [];
 
         ast.walk((node: any) => {
@@ -97,14 +99,14 @@ export const SBTypesParsers = {
 
                 types.push({
                     symbolName: node.value,
-                    args
+                    args,
                 });
 
                 return false;
             } else if (node.type === 'word') {
                 types.push({
                     symbolName: node.value,
-                    args: null
+                    args: null,
                 });
             }
             return undefined;
@@ -112,13 +114,13 @@ export const SBTypesParsers = {
 
         return {
             ast,
-            types
+            types,
         };
     },
     '-st-named'(value: string) {
         const namedMap: { [key: string]: string } = {};
         if (value) {
-            value.split(',').forEach(name => {
+            value.split(',').forEach((name) => {
                 const parts = name.trim().split(/\s+as\s+/);
                 if (parts.length === 1) {
                     namedMap[parts[0]] = parts[0];
@@ -135,7 +137,7 @@ export const SBTypesParsers = {
         strategy: (type: string) => 'named' | 'args',
         diagnostics?: Diagnostics
     ) {
-        const ast = valueParser(mixinNode.value);
+        const ast = postcssValueParser(mixinNode.value);
         const mixins: Array<{
             type: string;
             options: Array<{ value: string }> | Record<string, string>;
@@ -152,22 +154,22 @@ export const SBTypesParsers = {
             if (node.type === 'function') {
                 mixins.push({
                     type: node.value,
-                    options: strategies[strat](node, reportWarning)
+                    options: strategies[strat](node, reportWarning),
                 });
             } else if (node.type === 'word') {
                 mixins.push({
                     type: node.value,
-                    options: strat === 'named' ? {} : []
+                    options: strat === 'named' ? {} : [],
                 });
             } else if (node.type === 'string' && diagnostics) {
                 diagnostics.error(mixinNode, valueParserWarnings.VALUE_CANNOT_BE_STRING(), {
-                    word: mixinNode.value
+                    word: mixinNode.value,
                 });
             }
         });
 
         return mixins;
-    }
+    },
 };
 
 export function getNamedArgs(node: ParsedValue) {
@@ -192,7 +194,7 @@ export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
     _reportWarning?: ReportWarning,
-    perserveQuotes: boolean = false
+    perserveQuotes = false
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -205,12 +207,15 @@ export function getFormatterArgs(
             currentArg = '';
         } else if (currentNode.type === 'comment') {
             if (allowComments) {
-                currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
+                currentArg +=
+                    currentNode.resolvedValue || postcssValueParser.stringify(currentNode);
             }
         } else if (currentNode.type === 'string') {
-            currentArg += perserveQuotes ? valueParser.stringify(currentNode) : currentNode.value;
+            currentArg += perserveQuotes
+                ? postcssValueParser.stringify(currentNode)
+                : currentNode.value;
         } else {
-            currentArg += currentNode.resolvedValue || valueParser.stringify(currentNode);
+            currentArg += currentNode.resolvedValue || postcssValueParser.stringify(currentNode);
         }
     }
     checkEmptyArg();
@@ -229,14 +234,14 @@ export function getFormatterArgs(
     function checkEmptyArg() {
         if (currentArg.trim() === '' && _reportWarning) {
             _reportWarning(
-                `${valueParser.stringify(node)}: argument at index ${argIndex} is empty`
+                `${postcssValueParser.stringify(node)}: argument at index ${argIndex} is empty`
             );
         }
     }
 }
 
 export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
-    return valueParser.stringify(nodes, (node: ParsedValue) => {
+    return postcssValueParser.stringify(nodes, (node: ParsedValue) => {
         if (node.resolvedValue !== undefined) {
             return node.resolvedValue;
         } else {
@@ -270,13 +275,13 @@ export function groupValues(nodes: any[], divType = 'div') {
 export const strategies = {
     named: (node: any, reportWarning?: ReportWarning) => {
         const named: Record<string, string> = {};
-        getNamedArgs(node).forEach(mixinArgsGroup => {
+        getNamedArgs(node).forEach((mixinArgsGroup) => {
             const argsDivider = mixinArgsGroup[1];
             if (mixinArgsGroup.length < 3 || (argsDivider && argsDivider.type !== 'space')) {
                 if (reportWarning) {
                     const argValue = mixinArgsGroup[0];
                     reportWarning(valueParserWarnings.CSS_MIXIN_FORCE_NAMED_PARAMS(), {
-                        word: argValue.value
+                        word: argValue.value,
                     });
                 }
                 return;
@@ -286,12 +291,12 @@ export const strategies = {
         return named;
     },
     args: (node: any, reportWarning?: ReportWarning) => {
-        return getFormatterArgs(node, true, reportWarning).map(value => ({ value }));
-    }
+        return getFormatterArgs(node, true, reportWarning).map((value) => ({ value }));
+    },
 };
 
 function stringifyParam(nodes: any) {
-    return valueParser.stringify(nodes, (n: any) => {
+    return postcssValueParser.stringify(nodes, (n: any) => {
         if (n.type === 'div') {
             return null;
         } else if (n.type === 'string') {
@@ -305,7 +310,7 @@ function stringifyParam(nodes: any) {
 export function listOptions(node: any) {
     return groupValues(node.nodes)
         .map((nodes: any) =>
-            valueParser.stringify(nodes, (n: any) => {
+            postcssValueParser.stringify(nodes, (n: any) => {
                 if (n.type === 'div') {
                     return null;
                 } else if (n.type === 'string') {
@@ -321,13 +326,13 @@ export function listOptions(node: any) {
 export function validateAllowedNodesUntil(
     node: ParsedValue,
     i: number,
-    untilType: string = 'div',
+    untilType = 'div',
     allowed = ['comment']
 ) {
     i = 1;
     let current = node.nodes[i];
     while (current && current.type !== untilType) {
-        if (allowed.indexOf(current.type) === -1) {
+        if (!allowed.includes(current.type)) {
             return false;
         }
         i++;

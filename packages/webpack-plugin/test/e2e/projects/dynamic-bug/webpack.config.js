@@ -5,7 +5,7 @@ module.exports = {
     mode: 'development',
     entry: {
         entryA: './src/index-a.js',
-        entryB: './src/index-b.js'
+        entryB: './src/index-b.js',
     },
     // mode: 'production',
     context: __dirname,
@@ -14,7 +14,7 @@ module.exports = {
     optimization: {
         splitChunks: {
             chunks: 'all',
-            maxInitialRequests: 1
-        }
-    }
+            maxInitialRequests: 1,
+        },
+    },
 };

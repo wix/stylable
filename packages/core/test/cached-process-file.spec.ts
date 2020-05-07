@@ -13,9 +13,12 @@ describe('cachedProcessFile', () => {
             },
             statSync() {
                 return {
-                    mtime: new Date(0)
+                    mtime: new Date(0),
                 } as any;
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         };
 
         const p = cachedProcessFile(
@@ -23,7 +26,7 @@ describe('cachedProcessFile', () => {
                 return content + '!';
             },
             fs,
-            x => x
+            (x) => x
         );
 
         expect(p.process(file)).to.equal('content!');
@@ -41,9 +44,12 @@ describe('cachedProcessFile', () => {
             },
             statSync() {
                 return {
-                    mtime: new Date(0)
+                    mtime: new Date(0),
                 };
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         };
 
         const p = cachedProcessFile(
@@ -53,7 +59,7 @@ describe('cachedProcessFile', () => {
                 return processed;
             },
             fs,
-            x => x
+            (x) => x
         );
 
         expect(p.process(file)).to.equal(p.process(file));
@@ -71,15 +77,18 @@ describe('cachedProcessFile', () => {
             },
             statSync() {
                 return {
-                    mtime: new Date(0)
+                    mtime: new Date(0),
                 };
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         };
 
         const p = cachedProcessFile(
             () => null,
             fs,
-            x => x
+            (x) => x
         );
         p.process(file);
         p.process(file);
@@ -100,9 +109,12 @@ describe('cachedProcessFile', () => {
             },
             statSync() {
                 return {
-                    mtime: readCount === 0 ? new Date(0) : new Date(1)
+                    mtime: readCount === 0 ? new Date(0) : new Date(1),
                 };
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         };
 
         const p = cachedProcessFile(
@@ -111,7 +123,7 @@ describe('cachedProcessFile', () => {
                 return null;
             },
             fs,
-            x => x
+            (x) => x
         );
 
         p.process(file);
@@ -134,9 +146,12 @@ describe('cachedProcessFile', () => {
             },
             statSync() {
                 return {
-                    mtime: readCount === 0 ? new Date(0) : new Date(1)
+                    mtime: readCount === 0 ? new Date(0) : new Date(1),
                 };
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         };
 
         const p = cachedProcessFile(
@@ -145,7 +160,7 @@ describe('cachedProcessFile', () => {
                 return null;
             },
             fs,
-            x => x
+            (x) => x
         );
 
         p.process(file);

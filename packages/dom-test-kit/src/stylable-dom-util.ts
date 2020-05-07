@@ -3,7 +3,7 @@ import {
     parseSelector,
     pseudoStates,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import { RuntimeStylesheet, StateValue } from '@stylable/runtime';
 
@@ -33,7 +33,8 @@ export class StylableDOMUtil {
         const ast = parseSelector(selector);
         traverseNode(ast, (node: any) => {
             if (node.type === 'class') {
-                node.name = this.stylesheet.classes[node.name] || node.name;
+                const className: string = this.stylesheet.classes[node.name] || node.name;
+                node.name = className.includes(' ') ? className.split(' ')[0] : className;
             } else if (node.type === 'pseudo-class') {
                 const param = node.content;
                 if (!param) {
@@ -82,7 +83,7 @@ export class StylableDOMUtil {
         const baseState = this.getBaseStateWithParam(stateName);
 
         let paramValue = '';
-        element.classList.forEach(cls => {
+        element.classList.forEach((cls) => {
             if (!paramValue) {
                 paramValue = this.getStateValueFromClassName(cls, baseState);
             }

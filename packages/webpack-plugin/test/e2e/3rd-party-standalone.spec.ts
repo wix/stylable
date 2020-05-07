@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -27,7 +27,7 @@ describe(`(${project})`, () => {
             //     id: './node_modules/test-components/index.st.css',
             //     depth: '2'
             // },
-            { id: './src/index.st.css', depth: '3' }
+            { id: './src/index.st.css', depth: '3' },
         ]);
     });
 

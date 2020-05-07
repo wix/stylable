@@ -3,81 +3,81 @@ import { safeParse } from '../src/parser';
 import { createSubsetAst, scopeSelector } from '../src/stylable-utils';
 
 describe('scopeSelector', () => {
-    const tests = [
+    const tests: Array<{ root: string; child: string; selector: string; only?: boolean }> = [
         {
             root: '.a',
             child: '.x',
-            selector: '.a .x'
+            selector: '.a .x',
         },
         {
             root: '.a',
             child: '.x:hover',
-            selector: '.a .x:hover'
+            selector: '.a .x:hover',
         },
         {
             root: '.a',
             child: '&',
-            selector: '.a'
+            selector: '.a',
         },
         {
             root: '.a:hover',
             child: '&',
-            selector: '.a:hover'
+            selector: '.a:hover',
         },
         {
             root: '.a.x',
             child: '&',
-            selector: '.a.x'
+            selector: '.a.x',
         },
         {
             root: '.a.x .b:hover',
             child: '&',
-            selector: '.a.x .b:hover'
+            selector: '.a.x .b:hover',
         },
         {
             root: '.a',
             child: '&.x',
-            selector: '.a.x'
+            selector: '.a.x',
         },
         {
             root: '.a',
             child: '&.x .y',
-            selector: '.a.x .y'
+            selector: '.a.x .y',
         },
         {
             root: '.a .b',
             child: '&.x .y',
-            selector: '.a .b.x .y'
+            selector: '.a .b.x .y',
         },
         {
             root: '.a',
             child: '& &',
-            selector: '.a .a'
+            selector: '.a .a',
         },
         {
             root: '.a, .b',
             child: '& & &',
-            selector: '.a .a .a, .b .b .b'
+            selector: '.a .a .a, .b .b .b',
         },
         {
             root: '.a:hover, .b:focus',
             child: '& & &',
-            selector: '.a:hover .a:hover .a:hover, .b:focus .b:focus .b:focus'
+            selector: '.a:hover .a:hover .a:hover, .b:focus .b:focus .b:focus',
         },
         {
             root: '.a',
             child: ':global(.x) &',
-            selector: ':global(.x) .a'
-        }
+            selector: ':global(.x) .a',
+        },
     ];
 
-    tests.forEach(test => {
-        const _it = (test as any).only ? it.only : it;
-        _it(`apply "${test.root}" on "${test.child}" should output "${test.selector}"`, () => {
-            const res = scopeSelector(test.root, test.child);
-            expect(res.selector).to.equal(test.selector);
+    for (const { only, root, selector, child } of tests) {
+        const test = only ? it.only : it;
+        test(`apply "${root}" on "${child}" should output "${selector}"`, () => {
+            const res = scopeSelector(root, child);
+            expect(res.selector).to.equal(selector);
         });
-    });
+    }
 });
 
 describe('createSubsetAst', () => {
@@ -141,7 +141,7 @@ describe('createSubsetAst', () => {
             { selector: '& &.x:hover' },
             { selector: '&.x.y' },
             { selector: '&&' }, // TODO: check if possible
-            { selector: '&' }
+            { selector: '&' },
         ];
 
         testMatcher(expected, res.nodes!);
@@ -182,8 +182,8 @@ describe('createSubsetAst', () => {
             {
                 type: 'atrule',
                 params: '(max-width: 300px)',
-                nodes: [{ selector: '&' }, { selector: '&:hover' }]
-            }
+                nodes: [{ selector: '&' }, { selector: '&:hover' }],
+            },
         ];
 
         testMatcher(expected, res.nodes!);

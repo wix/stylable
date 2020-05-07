@@ -33,7 +33,7 @@ export class RemoveUnusedCSSModules {
         if (stylableBootstrap) {
             bootstraps.push(stylableBootstrap);
         }
-        bootstraps.forEach(bootstrap => {
+        bootstraps.forEach((bootstrap) => {
             bootstrap.dependencies = bootstrap.dependencies.filter((dep: any) => {
                 return !removed.has(dep.module);
             });

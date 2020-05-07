@@ -14,7 +14,7 @@ export function compileAsEntry(
 ): Promise<string> {
     const pluginName = 'compileAsEntry';
     const outputOptions = {
-        filename: '*'
+        filename: '*',
     };
     const childCompiler = compilation.createChildCompiler(
         `${'pluginName'} ${request}`,
@@ -31,9 +31,9 @@ export function compileAsEntry(
         (compilation: webpack.compilation.Compilation) => {
             source = compilation.assets['*'] && compilation.assets['*'].source();
             // Remove all chunk assets
-            compilation.chunks.forEach(chunk => {
+            compilation.chunks.forEach((chunk) => {
                 chunk.files.forEach((file: string) => {
-                    delete compilation.assets[file]; // eslint-disable-line no-param-reassign
+                    delete compilation.assets[file];
                 });
             });
         }
@@ -65,7 +65,7 @@ export function compileAsEntry(
 
 export const exec = (code: string, filename: string, context: string) => {
     const module = new NativeModule(filename);
-    module.paths = (NativeModule as any)._nodeModulePaths(context);
+    module.paths = NativeModule._nodeModulePaths(context);
     module.filename = filename;
     module._compile(code, filename);
     return module.exports;

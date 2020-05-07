@@ -4,7 +4,7 @@ import {
     flatMatch,
     generateStylableResult,
     processSource,
-    shouldReportNoDiagnostics
+    shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
@@ -31,8 +31,8 @@ describe('@st-scope', () => {
                 {
                     type: 'atrule',
                     name: 'st-scope',
-                    params: '.root'
-                }
+                    params: '.root',
+                },
             ]);
         });
 
@@ -51,8 +51,8 @@ describe('@st-scope', () => {
                 {
                     type: 'atrule',
                     name: 'st-scope',
-                    params: '.newClass'
-                }
+                    params: '.newClass',
+                },
             ]);
         });
 
@@ -88,18 +88,38 @@ describe('@st-scope', () => {
                         @st-scope .root {
                             .part {}
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
 
-            expect(meta.outputAst!.nodes).to.flatMatch([
-                {
-                    selector: '.entry__root .entry__part'
-                }
-            ]);
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+                '.entry__root .entry__part'
+            );
+        });
+
+        it('should scope rule with multiple selectors to root', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope .root {
+                            .part, .otherPart, .oneMorePart {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+                '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart'
+            );
         });
 
         it('should scope "part" class using a default import', () => {
@@ -116,19 +136,19 @@ describe('@st-scope', () => {
                         @st-scope Comp {
                             .part {}
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: `.root {}`
-                    }
-                }
+                        content: `.root {}`,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
 
             expect(meta.outputAst!.first).to.flatMatch({
-                selector: '.imported__root .entry__part'
+                selector: '.imported__root .entry__part',
             });
         });
 
@@ -146,19 +166,19 @@ describe('@st-scope', () => {
                         @st-scope .root {
                             Comp {}
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: `.root {}`
-                    }
-                }
+                        content: `.root {}`,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
 
             expect(meta.outputAst!.first).to.flatMatch({
-                selector: '.entry__root .imported__root'
+                selector: '.entry__root .imported__root',
             });
         });
 
@@ -176,7 +196,7 @@ describe('@st-scope', () => {
                         .root {
                             -st-mixin: mymix;
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -185,9 +205,9 @@ describe('@st-scope', () => {
                             .mymix {
                                 color: red;
                             }
-                        }`
-                    }
-                }
+                        }`,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
@@ -214,7 +234,7 @@ describe('@st-scope', () => {
                         .root:myState {
                             color: red;
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -223,9 +243,9 @@ describe('@st-scope', () => {
                             .mymix {
                                 -st-states: myState;
                             }
-                        }`
-                    }
-                }
+                        }`,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
@@ -246,9 +266,9 @@ describe('@st-scope', () => {
                                 .part {}
                             }
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             shouldReportNoDiagnostics(meta);
@@ -272,22 +292,22 @@ describe('@st-scope', () => {
                         |@st-scope $.root .part$ {
                             .scopedPart {}
                         }|
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root .part'),
                     file: '/entry.st.css',
-                    severity: 'warning'
+                    severity: 'warning',
                 },
                 {
                     message: transformerWarnings.UNKNOWN_SCOPING_PARAM('.root .part'),
                     file: '/entry.st.css',
-                    severity: 'error'
-                }
+                    severity: 'error',
+                },
             ]);
 
             expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal(
@@ -297,8 +317,8 @@ describe('@st-scope', () => {
                 {
                     type: 'atrule',
                     name: 'st-scope',
-                    params: '.root .part'
-                }
+                    params: '.root .part',
+                },
             ]);
         });
 
@@ -313,8 +333,8 @@ describe('@st-scope', () => {
                     {
                         message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root::before'),
                         file: 'entry.st.css',
-                        severity: 'warning'
-                    }
+                        severity: 'warning',
+                    },
                 ]
             );
         });
@@ -333,21 +353,21 @@ describe('@st-scope', () => {
                         |@st-scope $importedPart$ {
                             .part {}
                         }|
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: `.importedPart {}`
-                    }
-                }
+                        content: `.importedPart {}`,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: transformerWarnings.SCOPE_PARAM_NOT_ROOT('importedPart'),
                     file: '/entry.st.css',
-                    severity: 'error'
-                }
+                    severity: 'error',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('importedPart .entry__part');
         });
@@ -366,7 +386,7 @@ describe('@st-scope', () => {
                         |@st-scope $someVar$ {
                             .part {}
                         }|
-                        `
+                        `,
                     },
                     '/imported.js': {
                         namespace: 'imported',
@@ -374,17 +394,17 @@ describe('@st-scope', () => {
                             module.exports = {
                                 someVar: 'someValue'
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: transformerWarnings.SCOPE_PARAM_NOT_CSS('someVar'),
                     file: '/entry.st.css',
-                    severity: 'error'
-                }
+                    severity: 'error',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('someVar .entry__part');
         });
@@ -399,17 +419,17 @@ describe('@st-scope', () => {
                         |@st-scope {
                             .part {}
                         }|
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.MISSING_SCOPING_PARAM(),
                     file: '/entry.st.css',
-                    severity: 'warning'
-                }
+                    severity: 'warning',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
         });
@@ -424,16 +444,16 @@ describe('@st-scope', () => {
                         |@st-scope $unknown$ {
                             .part {}
                         }|
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: transformerWarnings.UNKNOWN_SCOPING_PARAM('unknown'),
                     file: '/entry.st.css',
-                    severity: 'error'
-                }
+                    severity: 'error',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('unknown .entry__part');
         });
@@ -452,17 +472,17 @@ describe('@st-scope', () => {
 
                             .part {}
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.NO_VARS_DEF_IN_ST_SCOPE(),
                     file: '/entry.st.css',
-                    severity: 'warning'
-                }
+                    severity: 'warning',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
         });
@@ -482,17 +502,17 @@ describe('@st-scope', () => {
 
                             .part {}
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.NO_IMPORT_IN_ST_SCOPE(),
                     file: '/entry.st.css',
-                    severity: 'warning'
-                }
+                    severity: 'warning',
+                },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__root .entry__part');
         });
@@ -514,17 +534,17 @@ describe('@st-scope', () => {
                                 }
                             }|
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             };
 
             expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE(),
                     file: '/entry.st.css',
-                    severity: 'warning'
-                }
+                    severity: 'warning',
+                },
             ]);
         });
     });

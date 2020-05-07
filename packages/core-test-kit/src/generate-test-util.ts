@@ -11,7 +11,7 @@ import {
     StylableMeta,
     StylableResolver,
     StylableResults,
-    StylableTransformer
+    StylableTransformer,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import postcss from 'postcss';
@@ -56,7 +56,7 @@ export function generateInfra(
             return meta;
         },
         fs,
-        x => x
+        (x) => (x.startsWith('./') || isAbsolute(x) ? x : '/node_modules/' + x)
     );
 
     const resolver = new StylableResolver(fileProcessor, requireModule);
@@ -79,7 +79,7 @@ export function createTransformer(
         keepValues: false,
         replaceValueHook,
         postProcessor,
-        mode: config.mode
+        mode: config.mode,
     });
 }
 
@@ -123,7 +123,7 @@ export function createTransform(
             fileProcessor,
             requireModule,
             diagnostics: new Diagnostics(),
-            keepValues: false
+            keepValues: false,
         }).transform(meta).meta;
     };
 }
@@ -147,7 +147,7 @@ export function createStylableInstance(config: Config) {
 
     const stylable = new Stylable(
         '/',
-        fs as any,
+        fs,
         requireModule,
         '__',
         (meta, path) => {

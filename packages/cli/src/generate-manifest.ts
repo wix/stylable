@@ -4,7 +4,7 @@ import { ensureDirectory, tryRun } from './build-tools';
 export function generateManifest(
     rootDir: string,
     filesToBuild: string[],
-    manifestOutputPath: string = '',
+    manifestOutputPath = '',
     stylable: Stylable,
     log: (...args: string[]) => void,
     fs: any
@@ -26,7 +26,7 @@ export function generateManifest(
                 return manifest;
             },
             {
-                namespaceMapping: {}
+                namespaceMapping: {},
             }
         );
         log('[Build]', 'creating manifest file: ');

@@ -1,10 +1,9 @@
+import cloneDeepWith from 'lodash.clonedeepwith';
+import postcssValueParser from 'postcss-value-parser';
 import { StylableMeta } from './stylable-meta';
 import { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
 import { ParsedValue } from './types';
-
-const cloneDeepWith = require('lodash.clonedeepwith');
-const valueParser = require('postcss-value-parser');
 
 export interface Box<Type extends string, Value extends any> {
     type: Type;
@@ -17,14 +16,16 @@ export function box<Type extends string, Value extends any>(
 ): Box<Type, Value> {
     return {
         type,
-        value
+        value,
     };
 }
 
-export function unbox<B extends Box<string, unknown>>(boxed: B) {
+const { hasOwnProperty } = Object.prototype;
+
+export function unbox<B extends Box<string, unknown>>(boxed: B | string): any {
     if (typeof boxed === 'string') {
         return boxed;
-    } else if (typeof boxed === 'object' && boxed.type && boxed.hasOwnProperty('value')) {
+    } else if (typeof boxed === 'object' && boxed.type && hasOwnProperty.call(boxed, 'value')) {
         return cloneDeepWith(boxed.value, unbox);
     }
 }
@@ -57,20 +58,20 @@ export const stTypes: CustomTypes = {
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.args(node, customTypes);
         },
-        createValue: args => {
+        createValue: (args) => {
             return args;
         },
-        getValue: (value, index) => value[parseInt(index, 10)]
+        getValue: (value, index) => value[parseInt(index, 10)],
     }).register('stArray'),
     stMap: createCustomValue<BoxedValueMap, BoxedValueMap>({
         processArgs: (node, customTypes) => {
             return CustomValueStrategy.named(node, customTypes);
         },
-        createValue: args => {
+        createValue: (args) => {
             return args;
         },
-        getValue: (value, index) => value[index]
-    }).register('stMap')
+        getValue: (value, index) => value[index],
+    }).register('stMap'),
 };
 
 export const CustomValueStrategy = {
@@ -78,11 +79,12 @@ export const CustomValueStrategy = {
         const pathArgs = getFormatterArgs(fnNode);
         const outputArray = [];
         for (const arg of pathArgs) {
-            const parsedArg = valueParser(arg).nodes[0];
+            const parsedArg = postcssValueParser(arg).nodes[0];
             const ct = parsedArg.type === 'function' && parsedArg.value;
-            const resolvedValue = customTypes[ct]
-                ? customTypes[ct].evalVarAst(parsedArg, customTypes)
-                : arg;
+            const resolvedValue =
+                typeof ct === 'string' && customTypes[ct]
+                    ? customTypes[ct].evalVarAst(parsedArg, customTypes)
+                    : arg;
             outputArray.push(resolvedValue);
         }
         return outputArray;
@@ -99,7 +101,7 @@ export const CustomValueStrategy = {
             if (valueNodes.length === 0) {
                 // TODO: error
             } else if (valueNodes.length === 1) {
-                const valueNode = valueNodes[0] as ParsedValue;
+                const valueNode = valueNodes[0];
                 resolvedValue = valueNode.resolvedValue;
 
                 if (!resolvedValue) {
@@ -119,7 +121,7 @@ export const CustomValueStrategy = {
             }
         }
         return outputMap;
-    }
+    },
 };
 
 export interface JSValueExtension<Value> {
@@ -164,7 +166,7 @@ export function createCustomValue<Value, Args>({
     processArgs,
     createValue,
     flattenValue,
-    getValue
+    getValue,
 }: ExtensionApi<Value, Args>): JSValueExtension<Value> {
     return {
         _kind: 'CustomValue',
@@ -184,7 +186,7 @@ export function createCustomValue<Value, Args>({
                         if (flattenValue) {
                             const { delimiter, parts } = flattenValue(obj);
                             return parts
-                                .map(v => getBoxValue([], v, fallbackNode, customTypes))
+                                .map((v) => getBoxValue([], v, fallbackNode, customTypes))
                                 .join(delimiter);
                         } else {
                             // TODO: add diagnostics
@@ -193,9 +195,9 @@ export function createCustomValue<Value, Args>({
                     }
                     const value = getValue(obj.value, path[0]);
                     return getBoxValue(path.slice(1), value, fallbackNode, customTypes);
-                }
+                },
             };
-        }
+        },
     };
 }
 

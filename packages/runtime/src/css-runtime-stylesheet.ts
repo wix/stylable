@@ -24,7 +24,7 @@ export function create(
         st: style,
         $id: id,
         $depth: depth,
-        $css: css
+        $css: css,
     };
 
     if (renderer) {
@@ -76,8 +76,8 @@ export function create(
     function style() {
         const classNames = [];
 
-        // tslint:disable-next-line:prefer-for-of
         for (let i = 0; i < arguments.length; i++) {
+            // eslint-disable-next-line prefer-rest-params
             const item = arguments[i];
 
             if (item) {

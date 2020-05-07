@@ -37,6 +37,6 @@ export function timedCache<T extends (...args: string[]) => string>(
 
     return {
         get: get as T,
-        cache
+        cache,
     };
 }

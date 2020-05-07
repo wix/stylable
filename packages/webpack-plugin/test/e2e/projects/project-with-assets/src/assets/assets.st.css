@@ -1,6 +1,6 @@
 
 .bg {
-    background: url('./asset.jpg'), url('/asset-in-root.png');
+    background: url('./asset.png'), url('/asset-in-root.png');
 }
 
 .bg-data-url {

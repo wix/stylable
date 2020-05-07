@@ -1,4 +1,3 @@
-import { ParsedValue } from '@stylable/core';
 import ts from 'typescript';
 import {
     Command,
@@ -9,7 +8,7 @@ import {
     ParameterInformation,
     Position,
     Range,
-    TextEdit
+    TextEdit,
 } from 'vscode-languageserver';
 import { ColorPresentationRequest, DocumentColorRequest } from 'vscode-languageserver-protocol';
 
@@ -35,9 +34,4 @@ export interface LSPTypeHelpers {
 export interface ExtendedTsLanguageService {
     setOpenedFiles: (files: string[]) => void;
     ts: ts.LanguageService;
-}
-
-export interface ParsedFuncOrDivValue extends ParsedValue {
-    before: string;
-    after: string;
 }

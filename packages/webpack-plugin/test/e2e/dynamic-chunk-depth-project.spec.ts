@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,7 +23,7 @@ describe(`(${project})`, () => {
 
         expect(styleElements).to.eql([
             { id: './src/button.st.css', depth: '1' },
-            { id: './src/gallery.st.css', depth: '2' }
+            { id: './src/gallery.st.css', depth: '2' },
         ]);
     });
 });

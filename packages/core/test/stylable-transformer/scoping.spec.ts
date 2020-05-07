@@ -15,9 +15,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             header::before {}
                             div::after {}
                             form::focused {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('header::before');
@@ -38,7 +38,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             }
                             Container::inner {}
                             Container::inner::deep {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -50,15 +50,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner {
                                 -st-extends: Deep;
                             }
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'ns2',
                         content: `
                             .deep {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root .ns1__inner');
@@ -80,7 +80,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             }
                             Container {}
 
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -88,9 +88,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-global: ".x";
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
@@ -112,7 +112,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             }
                             .app::inner {}
                             .app::inner::deep {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -124,15 +124,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner {
                                 -st-extends: Deep;
                             }
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'ns2',
                         content: `
                             .deep {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns1__inner');
@@ -155,15 +155,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: Inner;
                             }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
                         content: `
-                        `
-                    }
+                        `,
+                    },
                 },
-                mode: 'development'
+                mode: 'development',
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
@@ -206,7 +206,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                         }
                         .root {
                             -st-mixin: Variant;
-                        }`
+                        }`,
                     },
                     '/variant.st.css': {
                         namespace: 'variant',
@@ -218,15 +218,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: Comp;
                             }
-                        `
+                        `,
                     },
                     '/comp.st.css': {
                         namespace: 'comp',
                         content: `
-                        `
-                    }
+                        `,
+                    },
                 },
-                mode: 'development'
+                mode: 'development',
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
@@ -247,7 +247,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: root1;
                             }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -255,10 +255,10 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root1 {
                                 color: green;
                             }
-                        `
-                    }
+                        `,
+                    },
                 },
-                mode: 'production'
+                mode: 'production',
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
@@ -280,7 +280,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Container;
                             }
                             .app:hover::inner {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -295,7 +295,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner {
 
                             }
-                        `
+                        `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
@@ -306,9 +306,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .deep {
 
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -331,7 +331,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Inner;
                             }
                             .app::deep {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -343,15 +343,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: Deep;
                             }
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'ns2',
                         content: `
                             .deep {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns2__deep');
@@ -372,7 +372,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Container;
                             }
                             .app::deep {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'ns1',
@@ -385,15 +385,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Deep;
                             }
                             .deep {}
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'ns2',
                         content: `
                             .deep {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns1__deep');
@@ -414,15 +414,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Inner;
                             }
                             .root::inner, .inner { }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
                             .inner {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -443,16 +443,16 @@ describe('Stylable postcss transform (Scoping)', () => {
                             }
                             Inner {}
                             Inner::a {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'inner',
                         content: `
                             .root { -st-global: ".x";}
                             .a { -st-global: ".y";}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
@@ -471,7 +471,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-default: Inner;
                             }
                             Inner::deep::up { }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'Inner',
@@ -483,16 +483,16 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .deep {
                                 -st-extends: deep;
                             }
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'Deep',
                         content: `
                             .root {}
                             .up{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal(
@@ -515,7 +515,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Inner;
                             }
                             .x::y {}
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'Inner',
@@ -525,15 +525,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-named: y;
                             }
                             .y {}
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'Deep',
                         content: `
                             .y{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry__x .Deep__y');
@@ -559,7 +559,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root::optionY:hovered {
                                 z-index: 2;
                             }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'Inner',
@@ -573,7 +573,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-extends: Deep;
                             }
-                        `
+                        `,
                     },
                     '/deep.st.css': {
                         namespace: 'Deep',
@@ -585,7 +585,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                         .x{
                             -st-extends: Comp;
                         }
-                    `
+                    `,
                     },
                     '/comp.st.css': {
                         namespace: 'Comp',
@@ -600,7 +600,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                         .y {
                             -st-extends: Y;
                         }
-                        `
+                        `,
                     },
                     '/y.st.css': {
                         namespace: 'Y',
@@ -608,9 +608,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                         .root {
                             -st-states:hovered;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -642,7 +642,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 color: gold;
                             }
                             .deep {} /* should not pick this class */
-                        `
+                        `,
                     },
                     '/inner3.st.css': {
                         namespace: 'ns3',
@@ -655,7 +655,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: deepClass;
                             }
                             .deep {} /* should not pick this class */
-                        `
+                        `,
                     },
                     '/inner2.st.css': {
                         namespace: 'ns2',
@@ -668,7 +668,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Comp;
                             }
                             .deep {} /* should not pick this class */
-                        `
+                        `,
                     },
                     '/inner1.st.css': {
                         namespace: 'ns1',
@@ -684,7 +684,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Comp;
                                 color: beige;
                             }
-                        `
+                        `,
                     },
                     '/inner0.st.css': {
                         namespace: 'ns0',
@@ -692,9 +692,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .deepest {
                                 color: red;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
@@ -718,7 +718,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-mixin: Variant;
                             }
-                        `
+                        `,
                     },
                     '/variant.st.css': {
                         namespace: 'variant',
@@ -731,16 +731,16 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-extends: Comp;
                             }
                             .root::partA, .root::partB {}
-                        `
+                        `,
                     },
                     '/comp.st.css': {
                         namespace: 'comp',
                         content: `
                             .partA {}
                             .partB {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -760,9 +760,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {}
                             .b, .c {}
                             .d .e {}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
@@ -780,9 +780,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {}
                             .root .a {}
                             .root .b, .c{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
@@ -805,9 +805,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-global: ".y";
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
@@ -827,9 +827,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-global: ".z";
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x.y');
@@ -846,9 +846,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-extends: root;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
@@ -864,9 +864,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a, .b {
                                 -st-extends: root;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
         });
 
@@ -884,13 +884,13 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-extends: Imported;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: ''
-                    }
-                }
+                        content: '',
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
@@ -910,7 +910,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-extends: Imported;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -918,9 +918,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .root {
                                 -st-global: ".x";
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
@@ -941,7 +941,7 @@ describe('Stylable postcss transform (Scoping)', () => {
 
                             .Imported{}
                             .inner-class{}
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -949,9 +949,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner-class {
 
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector, 'root alias').to.equal(
@@ -977,7 +977,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner-class{
                                 -st-extends: inner-class
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -985,9 +985,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner-class {
 
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector, 'class alias').to.equal(
@@ -1010,7 +1010,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner-class::base {
 
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -1022,7 +1022,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .inner-class {
                                 -st-extends: Base;
                             }
-                        `
+                        `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
@@ -1030,9 +1030,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .base {
 
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector, 'class alias').to.equal(
@@ -1053,9 +1053,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .b {
                                 -st-extends: a;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__b');
@@ -1075,7 +1075,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                             .a {
                                 -st-extends: b;
                             }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'ns1',
@@ -1083,9 +1083,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                         .b {
 
                         }
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__a');
@@ -1103,15 +1103,15 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 -st-named: b;
                             }
                             .b {}
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'ns1',
                         content: `
 
-                    `
-                    }
-                }
+                    `,
+                    },
+                },
             });
 
             expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__b');
@@ -1141,9 +1141,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 animation-name: name;
                             }
 
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             expect((result.nodes![0] as postcss.AtRule).params).to.equal('entry__name');
             expect((result.nodes![1] as postcss.AtRule).params).to.equal('entry__name2');
@@ -1170,9 +1170,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                                 0% {}
                                 100% {}
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const at = result.nodes![0] as postcss.AtRule;

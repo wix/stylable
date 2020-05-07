@@ -5,5 +5,5 @@ module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({ legacyRuntime: true }), new HtmlWebpackPlugin()]
+    plugins: [new StylableWebpackPlugin({ legacyRuntime: true }), new HtmlWebpackPlugin()],
 };

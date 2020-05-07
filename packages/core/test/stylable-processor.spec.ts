@@ -12,7 +12,7 @@ describe('Stylable postcss process', () => {
         expect(namespace).to.equal('s0');
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: 'missing source filename'
+            message: 'missing source filename',
         });
     });
 
@@ -21,7 +21,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.INVALID_NAMESPACE_DEF()
+            message: processorWarnings.INVALID_NAMESPACE_DEF(),
         });
     });
 
@@ -30,7 +30,7 @@ describe('Stylable postcss process', () => {
 
         expect(diagnostics.reports[0]).to.include({
             type: 'error',
-            message: processorWarnings.EMPTY_NAMESPACE_DEF()
+            message: processorWarnings.EMPTY_NAMESPACE_DEF(),
         });
     });
 
@@ -54,10 +54,26 @@ describe('Stylable postcss process', () => {
             @namespace "name";
         `,
             { from },
-            s => 'Test-' + s
+            (s) => 'Test-' + s
         );
 
         expect(result.namespace).to.equal('Test-name');
+    });
+
+    it('use filename as default namespace prefix', () => {
+        const from = resolve('/path/to/style.st.css');
+        const distFrom = resolve('/dist/path/to/style.st.css');
+
+        const result = processSource(
+            `
+            /* st-namespace-reference="../../../path/to/style.st.css" */\n
+        `,
+            { from: distFrom }
+        );
+
+        // assure namesapce generated with st-namespace-reference
+        // is identical between source and dist with the relative correction
+        expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
     it('use filename as default namespace prefix', () => {
@@ -95,38 +111,62 @@ describe('Stylable postcss process', () => {
 
         expect(result.mappedSymbols.a).to.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
 
         expect(result.mappedSymbols.c).to.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
 
         expect(result.mappedSymbols.name).to.include({
             _kind: 'import',
-            type: 'default'
+            type: 'default',
         });
 
         expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             fromRelative: '../some/global/path',
             defaultExport: 'name',
-            named: {}
+            named: {},
+        });
+    });
+
+    it('collect :import with absolute paths', () => {
+        const result = processSource(
+            `
+            :import {
+                -st-from: "/abs/path";
+                -st-named: abs;
+            }
+        `,
+            { from: '/path/to/style.css' }
+        );
+
+        expect(result.imports.length).to.eql(1);
+
+        expect(result.mappedSymbols.abs).to.deep.include({
+            _kind: 'import',
+            type: 'named'
+        });
+        expect((result.mappedSymbols.abs as ImportSymbol).import).to.include({
+            context: '/path/to',
+            defaultExport: '',
+            from: '/abs/path',
         });
     });
 
@@ -205,10 +245,10 @@ describe('Stylable postcss process', () => {
                     import: {
                         // from: '/path/to/file.css',
                         fromRelative: './file.css',
-                        defaultExport: 'Style'
-                    }
-                }
-            }
+                        defaultExport: 'Style',
+                    },
+                },
+            },
         });
     });
 
@@ -240,8 +280,8 @@ describe('Stylable postcss process', () => {
             root: {
                 _kind: 'class',
                 name: 'root',
-                '-st-root': true
-            }
+                '-st-root': true,
+            },
         });
     });
 

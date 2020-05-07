@@ -38,6 +38,15 @@ const argv = require('yargs')
     .describe('stcss', 'output stylable sources (.st.css)')
     .default('stcss', false)
 
+    .option('useNamespaceReference')
+    .boolean('useNamespaceReference')
+    .alias('useNamespaceReference', 'unsr')
+    .describe(
+        'useNamespaceReference',
+        'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace'
+    )
+    .default('useNamespaceReference', false)
+
     .option('compat')
     .boolean('compat')
     .describe('compat', 'use legacy v1 runtime api')
@@ -142,7 +151,8 @@ const {
     minify,
     manifestFilepath,
     manifest,
-    require: requires
+    require: requires,
+    useNamespaceReference,
 } = argv;
 
 log('[Arguments]', argv);
@@ -158,7 +168,7 @@ const stylable = Stylable.create({
     fileSystem: fs,
     requireModule: require,
     projectRoot: rootDir,
-    resolveNamespace: require(namespaceResolver).resolveNamespace
+    resolveNamespace: require(namespaceResolver).resolveNamespace,
 });
 
 build({
@@ -181,7 +191,8 @@ build({
     optimize,
     compat,
     minify,
-    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined
+    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
+    useSourceNamespace: useNamespaceReference,
 });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {

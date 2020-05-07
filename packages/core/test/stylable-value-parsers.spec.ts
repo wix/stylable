@@ -17,7 +17,7 @@ describe('stylable-value-parsers', () => {
 
     it('named arguments with one simple param', () => {
         expect(parseMixin('Button(color red)')).to.eql([
-            { type: 'Button', options: { color: 'red' } }
+            { type: 'Button', options: { color: 'red' } },
         ]);
     });
 
@@ -25,8 +25,8 @@ describe('stylable-value-parsers', () => {
         expect(parseMixin('Button(color red, color2 green)')).to.eql([
             {
                 type: 'Button',
-                options: { color: 'red', color2: 'green' }
-            }
+                options: { color: 'red', color2: 'green' },
+            },
         ]);
     });
 
@@ -34,8 +34,8 @@ describe('stylable-value-parsers', () => {
         expect(parseMixin('Button(color red,)')).to.eql([
             {
                 type: 'Button',
-                options: { color: 'red' }
-            }
+                options: { color: 'red' },
+            },
         ]);
     });
 
@@ -43,8 +43,8 @@ describe('stylable-value-parsers', () => {
         expect(parseMixin('Button(color red, size 2px,)')).to.eql([
             {
                 type: 'Button',
-                options: { color: 'red', size: '2px' }
-            }
+                options: { color: 'red', size: '2px' },
+            },
         ]);
     });
 
@@ -52,8 +52,8 @@ describe('stylable-value-parsers', () => {
         expect(parseMixin('Button(border 1px solid red)')).to.eql([
             {
                 type: 'Button',
-                options: { border: '1px solid red' }
-            }
+                options: { border: '1px solid red' },
+            },
         ]);
     });
 });

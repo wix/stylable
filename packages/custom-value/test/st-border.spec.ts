@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
         const { myBorder, myColor } = await page.evaluate(() => {
             return {
                 myBorder: (window as any).myBorder,
-                myColor: (window as any).myColor
+                myColor: (window as any).myColor,
             };
         });
 
@@ -40,7 +40,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const border = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).border;
+            return getComputedStyle(document.documentElement).border;
         });
 
         expect(border).to.eql('1px solid rgb(0, 128, 0)');

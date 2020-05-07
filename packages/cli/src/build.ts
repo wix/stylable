@@ -2,7 +2,7 @@ import { isAsset, Stylable } from '@stylable/core';
 import { createModuleSource } from '@stylable/module-utils';
 import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { basename, dirname, join, resolve } from 'path';
+import { basename, dirname, join, relative, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { Generator } from './default-generator';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
@@ -27,13 +27,14 @@ export interface BuildOptions {
     includeCSSInJS?: boolean;
     outputCSS?: boolean;
     outputSources?: boolean;
+    useSourceNamespace?: boolean;
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
     compat?: boolean;
 }
 
-export async function build({
+export function build({
     extension,
     fs,
     stylable,
@@ -49,11 +50,12 @@ export async function build({
     outputCSS,
     outputCSSNameTemplate,
     outputSources,
+    useSourceNamespace,
     injectCSSRequest,
     optimize,
     minify,
     compat,
-    manifest
+    manifest,
 }: BuildOptions) {
     const generatorModule = generatorPath
         ? require(resolve(generatorPath))
@@ -73,7 +75,7 @@ export async function build({
     } else {
         log('[Build]', `Building ${filesToBuild.length} stylable files.`);
     }
-    filesToBuild.forEach(filePath => {
+    filesToBuild.forEach((filePath) => {
         indexFile
             ? generateFileIndexEntry(
                   filePath,
@@ -98,6 +100,7 @@ export async function build({
                   outputCSS,
                   outputCSSNameTemplate,
                   outputSources,
+                  useSourceNamespace,
                   injectCSSRequest,
                   optimize,
                   minify,
@@ -130,29 +133,28 @@ function buildSingleFile(
     diagnosticsMsg: string[],
     projectAssets: string[],
     moduleFormats: string[],
-    includeCSSInJS: boolean = false,
-    outputCSS: boolean = false,
-    outputCSSNameTemplate: string = '[filename].css',
-    outputSources: boolean = false,
-    injectCSSRequest: boolean = false,
-    optimize: boolean = false,
-    minify: boolean = false,
-    compat: boolean = false
+    includeCSSInJS = false,
+    outputCSS = false,
+    outputCSSNameTemplate = '[filename].css',
+    outputSources = false,
+    useSourceNamespace = false,
+    injectCSSRequest = false,
+    optimize = false,
+    minify = false,
+    compat = false
 ) {
-    // testBuild(filePath, fullSrcDir, fs);
-
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
     const fileDirectory = dirname(filePath);
     const outDirPath = dirname(outPath);
     const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css')
+        filename: basename(outSrcPath, '.st.css'),
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
 
     log('[Build]', filePath + ' --> ' + outPath);
     tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
-    const content = tryRun(
+    let content: string = tryRun(
         () => fs.readFileSync(filePath).toString(),
         `Read File Error: ${filePath}`
     );
@@ -165,7 +167,7 @@ function buildSingleFile(
                 removeEmptyNodes: true,
                 removeStylableDirectives: true,
                 classNameOptimizations: false,
-                removeUnusedComponents: false
+                removeUnusedComponents: false,
             },
             res,
             {}
@@ -174,11 +176,20 @@ function buildSingleFile(
     handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
     // st.css
     if (outputSources) {
+        if (useSourceNamespace && !content.includes('st-namespace-reference')) {
+            const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
+                /\\/gm,
+                '/'
+            );
+            const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
+            content = srcNamespaceAnnotation + content;
+        }
+
         log('[Build]', 'output .st.css source');
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }
     // st.css.js
-    moduleFormats.forEach(format => {
+    moduleFormats.forEach((format) => {
         log('[Build]', 'moduleFormat', format);
         const code = tryRun(
             () =>

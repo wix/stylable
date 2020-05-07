@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,7 +23,7 @@ describe(`(${project})`, () => {
             const computedStyle = getComputedStyle(document.body, '::before');
             return {
                 color: computedStyle.backgroundColor,
-                content: computedStyle.content
+                content: computedStyle.content,
             };
         });
 

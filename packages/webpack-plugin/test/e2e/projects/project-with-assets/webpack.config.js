@@ -1,6 +1,5 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
 module.exports = {
     mode: 'development',
     context: __dirname,
@@ -12,14 +11,14 @@ module.exports = {
                 test: /\.(png|jpg|gif)$/,
                 use: [
                     {
-                        loader: 'url-loader',
+                        loader: require.resolve('url-loader'),
                         options: {
                             limit: 300,
-                            name: '[name].[ext]'
-                        }
-                    }
-                ]
-            }
-        ]
-    }
+                            name: '[name].[ext]',
+                        },
+                    },
+                ],
+            },
+        ],
+    },
 };

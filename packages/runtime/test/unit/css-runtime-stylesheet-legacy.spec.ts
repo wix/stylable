@@ -9,7 +9,7 @@ describe('Stylable runtime stylesheet (LEGACY)', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -27,7 +27,7 @@ describe('Stylable runtime stylesheet (LEGACY)', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -38,7 +38,7 @@ describe('Stylable runtime stylesheet (LEGACY)', () => {
         expect(stylesheet('root global')).to.eql({ className: 'entry__root global' });
         expect(stylesheet('root global', {}, { className: 'parent', ['data-test']: true })).to.eql({
             className: 'entry__root global parent',
-            ['data-test']: true
+            ['data-test']: true,
         });
     });
 
@@ -49,7 +49,7 @@ describe('Stylable runtime stylesheet (LEGACY)', () => {
                 classes: { root: 'entry__root' },
                 keyframes: {},
                 vars: {},
-                stVars: {}
+                stVars: {},
             },
             '',
             0,
@@ -58,7 +58,7 @@ describe('Stylable runtime stylesheet (LEGACY)', () => {
         );
 
         expect(stylesheet('root', { loading: true, col: 3 })).to.eql({
-            className: 'entry__root entry--loading entry---col-1-3'
+            className: 'entry__root entry--loading entry---col-1-3',
         });
     });
 });

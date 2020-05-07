@@ -65,3 +65,5 @@ export interface IStylableNamespaceOptimizer {
     namespaceMapping: Record<string, string>;
     getNamespace(meta: StylableMeta, ..._env: any[]): string;
 }
+
+export type ModuleResolver = (directoryPath: string, request: string) => string;

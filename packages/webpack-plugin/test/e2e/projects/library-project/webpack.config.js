@@ -7,14 +7,14 @@ module.exports = {
     devtool: 'source-map',
     output: {
         library: 'Library',
-        libraryTarget: 'umd'
+        libraryTarget: 'umd',
     },
     plugins: [
         new StylableWebpackPlugin({
             bootstrap: {
-                autoInit: false
-            }
+                autoInit: false,
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

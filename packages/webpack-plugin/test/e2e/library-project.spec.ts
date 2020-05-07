@@ -10,14 +10,14 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
         after
     );
 
-    it('eval bundle exports', async () => {
+    it('eval bundle exports', () => {
         const global = { Library: {} };
 
         new Function('window', projectRunner.getBuildAsset('main.js'))(global);

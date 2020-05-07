@@ -1,7 +1,7 @@
 import {
     expectWarningsFromTransform,
     generateStylableResult,
-    processSource
+    processSource,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
@@ -28,12 +28,12 @@ describe('css custom-properties (vars)', () => {
             expect(cssVars).to.eql({
                 '--myVar': {
                     _kind: 'cssVar',
-                    name: '--myVar'
+                    name: '--myVar',
                 },
                 '--myOtherVar': {
                     _kind: 'cssVar',
-                    name: '--myOtherVar'
-                }
+                    name: '--myOtherVar',
+                },
             });
         });
 
@@ -53,8 +53,8 @@ describe('css custom-properties (vars)', () => {
                 '--myVar': {
                     _kind: 'cssVar',
                     name: '--myVar',
-                    global: true
-                }
+                    global: true,
+                },
             });
         });
 
@@ -75,8 +75,8 @@ describe('css custom-properties (vars)', () => {
             expect(cssVars).to.eql({
                 '--myVar': {
                     _kind: 'cssVar',
-                    name: '--myVar'
-                }
+                    name: '--myVar',
+                },
             });
         });
     });
@@ -95,9 +95,9 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             --myVar: blue;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -122,9 +122,9 @@ describe('css custom-properties (vars)', () => {
                             --myVar: blue;
                             color: var(--myVar);
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -149,9 +149,9 @@ describe('css custom-properties (vars)', () => {
                             --myVar: solid;
                             border: 2px var(--myVar, black) black;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -180,9 +180,9 @@ describe('css custom-properties (vars)', () => {
                             --myVar: solid blue;
                             border: 2px var(--myVar, value(borderStyle) value(borderColor));
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -211,9 +211,9 @@ describe('css custom-properties (vars)', () => {
                             --base: purple;
                             background: var(--top, var(--mid, var(--base), value(myColor)), value(myColor));
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -243,16 +243,16 @@ describe('css custom-properties (vars)', () => {
                                 --myVar: black;
                                 background: var(--myVar, print(green));
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function(arg) {
                                 return arg;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
@@ -274,9 +274,9 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 --myVar: value(myColor);
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
@@ -298,16 +298,16 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 --myVar: print(green);
                             }
-                        `
+                        `,
                     },
                     '/formatter.js': {
                         content: `
                             module.exports = function(arg) {
                                 return arg;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
@@ -327,9 +327,9 @@ describe('css custom-properties (vars)', () => {
                             --var1: red;
                             --var2: green;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -355,9 +355,9 @@ describe('css custom-properties (vars)', () => {
                             --color: blue;
                             border: var(--size) var( --type ) var(--color);
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -380,9 +380,9 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             color: var(--myVar, green);
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             const decl = (meta.outputAst!.nodes![0] as postcss.Rule)
@@ -409,7 +409,7 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             color: var(--myVar);
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -417,9 +417,9 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             --myVar: blue;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -447,7 +447,7 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             color: var(--renamed);
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -455,9 +455,9 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             --myVar: blue;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -486,7 +486,7 @@ describe('css custom-properties (vars)', () => {
                             --myVar: green;
                             color: var(--myVar);
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -494,9 +494,9 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             --myVar: blue;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -524,7 +524,7 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 prop1: var(--baseVar);
                             }
-                            `
+                            `,
                     },
                     '/mid.st.css': {
                         namespace: 'mid',
@@ -533,7 +533,7 @@ describe('css custom-properties (vars)', () => {
                                 -st-from: "./base.st.css";
                                 -st-named: --baseVar;
                             }
-                            `
+                            `,
                     },
                     '/base.st.css': {
                         namespace: 'base',
@@ -541,9 +541,9 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 --baseVar: red;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             });
 
             expect(
@@ -581,9 +581,9 @@ describe('css custom-properties (vars)', () => {
                             color: value(arg1);
                             background: var(--myGlobal, value(arg2));
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect(
@@ -613,9 +613,9 @@ describe('css custom-properties (vars)', () => {
                                 --myVar1: green;
                                 --myVar2: red;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 expect(
                     res.meta.diagnostics.reports,
@@ -645,9 +645,9 @@ describe('css custom-properties (vars)', () => {
                                 --myVar: blue;
                                 --myScopedVar: green;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 expect(
                     res.meta.diagnostics.reports,
@@ -675,9 +675,9 @@ describe('css custom-properties (vars)', () => {
                                 --myVar: blue;
                                 color: var(--myVar);
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 expect(
                     res.meta.diagnostics.reports,
@@ -711,7 +711,7 @@ describe('css custom-properties (vars)', () => {
                                 --localScoped: blue;
                                 --localGlobal: red;
                             }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             namespace: 'imported',
@@ -722,9 +722,9 @@ describe('css custom-properties (vars)', () => {
                                 --importedScoped: red;
                                 --importedGlobal: blue;
                             }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 expect(
                     res.meta.diagnostics.reports,
@@ -756,16 +756,16 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             |color: var($illegalVar$)|;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             const res = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.ILLEGAL_CSS_VAR_USE('illegalVar'),
-                    file: '/entry.st.css'
-                }
+                    file: '/entry.st.css',
+                },
             ]);
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
                 .nodes![0] as postcss.Declaration;
@@ -782,16 +782,16 @@ describe('css custom-properties (vars)', () => {
                         .root {
                             |color: var($--value illegalHere, red$)|;
                         }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             const res = expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.ILLEGAL_CSS_VAR_ARGS('--value illegalHere, red'),
-                    file: '/entry.st.css'
-                }
+                    file: '/entry.st.css',
+                },
             ]);
 
             const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
@@ -810,13 +810,13 @@ describe('css custom-properties (vars)', () => {
                             -st-from: "./imported.st.css";
                             |-st-named: $--unknownVar$;|
                         }
-                        `
+                        `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
-                        content: ``
-                    }
-                }
+                        content: ``,
+                    },
+                },
             };
 
             expectWarningsFromTransform(config, [
@@ -825,8 +825,8 @@ describe('css custom-properties (vars)', () => {
                         '--unknownVar',
                         './imported.st.css'
                     ),
-                    file: '/entry.st.css'
-                }
+                    file: '/entry.st.css',
+                },
             ]);
         });
 
@@ -838,16 +838,16 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'entry',
                         content: `
                         |@st-global-custom-property $illegalVar$|;
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.ILLEGAL_GLOBAL_CSS_VAR('illegalVar'),
-                    file: '/entry.st.css'
-                }
+                    file: '/entry.st.css',
+                },
             ]);
         });
 
@@ -859,16 +859,16 @@ describe('css custom-properties (vars)', () => {
                         namespace: 'entry',
                         content: `
                         |@st-global-custom-property $--var1 --var2$|;
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             };
 
             expectWarningsFromTransform(config, [
                 {
                     message: processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA('--var1 --var2'),
-                    file: '/entry.st.css'
-                }
+                    file: '/entry.st.css',
+                },
             ]);
         });
 
@@ -887,7 +887,7 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 prop1: var(--myVar);
                             }
-                            `
+                            `,
                     },
                     '/imported.st.css': {
                         namespace: 'imported',
@@ -895,13 +895,13 @@ describe('css custom-properties (vars)', () => {
                             .root {
                                 --myVar: red;
                             }
-                            `
-                    }
-                }
+                            `,
+                    },
+                },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
-                { message: processorWarnings.REDECLARE_SYMBOL('--myVar'), file: '/entry.st.css' }
+                { message: processorWarnings.REDECLARE_SYMBOL('--myVar'), file: '/entry.st.css' },
             ]);
 
             const baseDecl = (meta.outputAst!.nodes![0] as postcss.Rule)

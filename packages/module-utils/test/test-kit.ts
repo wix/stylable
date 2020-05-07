@@ -10,7 +10,7 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
     }
     const _module = {
         id,
-        exports: {}
+        exports: {},
     };
 
     const fn = new Function('module', 'exports', 'require', source);
@@ -22,7 +22,7 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
  * This function mocks the runtime and only provide the create function
  */
 export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
-    return evalModule(fullPath, source, id => {
+    return evalModule(fullPath, source, (id) => {
         if (id === '@stylable/runtime') {
             return { create };
         }
@@ -40,9 +40,9 @@ export function moduleFactoryTestKit(
     const fs = createMemoryFileSystemWithFiles(files);
     const factory = stylableModuleFactory(
         {
-            resolveNamespace: namespace => namespace,
+            resolveNamespace: (namespace) => namespace,
             fileSystem: fs,
-            projectRoot: '/'
+            projectRoot: '/',
         },
         options
     );
@@ -50,6 +50,6 @@ export function moduleFactoryTestKit(
     return {
         fs,
         factory,
-        evalStylableModule
+        evalStylableModule,
     };
 }

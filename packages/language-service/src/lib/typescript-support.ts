@@ -16,14 +16,14 @@ export function typescriptSupport(fileSystem: IFileSystem) {
             outDir: 'dist',
             lib: [],
             module: ts.ModuleKind.CommonJS,
-            typeRoots: ['./node_modules/@types']
+            typeRoots: ['./node_modules/@types'],
         }),
         ''
     );
     const tsLanguageService = ts.createLanguageService(tsLanguageServiceHost);
     const wrappedTs: ExtendedTsLanguageService = {
         setOpenedFiles: (files: string[]) => (openedFiles = files),
-        ts: tsLanguageService
+        ts: tsLanguageService,
     };
     return wrappedTs;
 }

@@ -1,0 +1,9 @@
+:import {
+    -st-from: "./mixin-b.st.css";
+    -st-named: b;
+}
+
+.a {
+    -st-mixin: b;
+    font-size: 3em;
+}

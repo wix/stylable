@@ -19,12 +19,12 @@ describe('SBTypesParsers.extends', () => {
                     [
                         { type: 'word', value: '1px' },
                         { type: 'space', value: ' ' },
-                        { type: 'word', value: 'solid' }
+                        { type: 'word', value: 'solid' },
                     ],
-                    [{ type: 'word', value: 'red' }]
+                    [{ type: 'word', value: 'red' }],
                 ],
-                symbolName: 'Button'
-            }
+                symbolName: 'Button',
+            },
         ]);
     });
 
@@ -35,16 +35,16 @@ describe('SBTypesParsers.extends', () => {
                     [
                         { type: 'word', value: '1px' },
                         { type: 'space', value: ' ' },
-                        { type: 'word', value: 'solid' }
+                        { type: 'word', value: 'solid' },
                     ],
-                    [{ type: 'word', value: 'red' }]
+                    [{ type: 'word', value: 'red' }],
                 ],
-                symbolName: 'Button'
+                symbolName: 'Button',
             },
             {
                 args: null,
-                symbolName: 'Mixin'
-            }
+                symbolName: 'Mixin',
+            },
         ]);
     });
 });

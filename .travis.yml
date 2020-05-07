@@ -15,7 +15,19 @@ node_js:
 env:
   - YARN_GPG=no
 
-# Travis uses inconsistent yarn versions across platforms. force latest.
+# Travis uses inconsistent yarn versions across platforms.
 before_install:
-  - curl -o- -L https://yarnpkg.com/install.sh | bash -s
+  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.22.4
   - export PATH=$HOME/.yarn/bin:$PATH
+
+before_deploy:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: npx pleb publish
+  on:
+    branch: master
+    node_js: 12
+    condition: $TRAVIS_OS_NAME = linux

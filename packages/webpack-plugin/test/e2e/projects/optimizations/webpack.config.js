@@ -14,9 +14,9 @@ module.exports = {
                 classNameOptimizations: true,
                 shortNamespaces: true,
                 removeEmptyNodes: true,
-                minify: true
-            }
+                minify: true,
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

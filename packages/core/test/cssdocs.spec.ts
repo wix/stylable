@@ -11,9 +11,9 @@ describe('cssDocs comments metadata', () => {
                     namespace: 'entry',
                     content: `
                         .root {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
@@ -32,9 +32,9 @@ describe('cssDocs comments metadata', () => {
                          * this is my description
                          */
                         .root {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
@@ -57,9 +57,9 @@ describe('cssDocs comments metadata', () => {
                          * @field3 data field 3
                          */
                         .root {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
@@ -70,8 +70,8 @@ describe('cssDocs comments metadata', () => {
                 description: 'this is a description tag',
                 field1: 'data field 1',
                 field2: 'data field 2 is a multi line input',
-                field3: 'data field 3'
-            }
+                field3: 'data field 3',
+            },
         });
     });
 
@@ -87,16 +87,16 @@ describe('cssDocs comments metadata', () => {
                          * @description this is a description tag
                          */
                         .root {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.root);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
-            tags: { description: 'this is a description tag' }
+            tags: { description: 'this is a description tag' },
         });
     });
 
@@ -112,16 +112,16 @@ describe('cssDocs comments metadata', () => {
                          * @description this is a description tag
                          */
                         Part {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.Part);
 
         expect(cssDoc).to.eql({
             description: 'this is a description text',
-            tags: { description: 'this is a description tag' }
+            tags: { description: 'this is a description tag' },
         });
     });
 
@@ -138,16 +138,16 @@ describe('cssDocs comments metadata', () => {
                              */
                             myVar: some value;
                         }
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.myVar);
 
         expect(cssDoc).to.eql({
             description: 'this is a var description text',
-            tags: {}
+            tags: {},
         });
     });
 
@@ -167,9 +167,9 @@ describe('cssDocs comments metadata', () => {
                              */
                             myVar: some value;
                         }
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const cssDoc = getCssDocsForSymbol(meta, meta.mappedSymbols.myVar);
@@ -178,8 +178,8 @@ describe('cssDocs comments metadata', () => {
             description: 'this is a var description text',
             tags: {
                 field1: 'data field 1',
-                field2: 'data field 2 is a multi line input'
-            }
+                field2: 'data field 2 is a multi line input',
+            },
         });
     });
 });

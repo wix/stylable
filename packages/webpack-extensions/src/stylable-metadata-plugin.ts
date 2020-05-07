@@ -6,9 +6,12 @@ import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
 import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
+import { hashContent } from './hash-content-util';
 
 export interface MetadataOptions {
     name: string;
+    useContentHashFileName?: boolean;
+    contentHashLength?: number;
     version: string;
     configExtension?: string;
     context?: string;
@@ -23,7 +26,7 @@ export interface MetadataOptions {
 export class StylableMetadataPlugin {
     constructor(private options: MetadataOptions) {}
     public apply(compiler: webpack.Compiler) {
-        compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', compilation => {
+        compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', (compilation) => {
             compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
                 await this.createMetadataAssets(compilation);
             });
@@ -46,7 +49,7 @@ export class StylableMetadataPlugin {
         }
     }
     private async createMetadataAssets(compilation: webpack.compilation.Compilation) {
-        const stylableModules = compilation.modules.filter(m => m.type === 'stylable');
+        const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
 
         const builder = new ComponentMetadataBuilder(
             this.options.context || compilation.compiler.options.context || process.cwd(),
@@ -108,8 +111,8 @@ export class StylableMetadataPlugin {
             builder.createIndex();
             const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
-            const fileName = `${this.options.name}.metadata.json${!jsonMode ? '.js' : ''}`;
-            let fileContent = jsonSource;
+
+            let fileContent = jsonSource
             switch (this.options.mode) {
                 case 'cjs':
                     fileContent = `module.exports = ${fileContent}`;
@@ -121,6 +124,7 @@ export class StylableMetadataPlugin {
                     fileContent = `define(() => { return ${fileContent}; });`;
                     break;
             }
+            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
             compilation.assets[fileName] = new RawSource(fileContent);
         }
     }
@@ -169,14 +173,11 @@ export class StylableMetadataPlugin {
                 }
                 builder.addSource(variantPath, content, {
                     namespace:
-                        name
-                            .replace(/\\/g, '/')
-                            .replace(/\//g, '_')
-                            .replace('.st.css', '') +
+                        name.replace(/\\/g, '/').replace(/\//g, '_').replace('.st.css', '') +
                         '-' +
                         namespace,
                     variant: true,
-                    depth
+                    depth,
                 });
             });
         }

@@ -8,9 +8,9 @@ describe('Stylable postcss transform (General)', () => {
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
-                    content: ''
-                }
-            }
+                    content: '',
+                },
+            },
         });
 
         expect(result.toString()).to.equal('');
@@ -26,12 +26,12 @@ describe('Stylable postcss transform (General)', () => {
                             -st-from: "../test.st.css";
                             -st-default: name;
                         }
-                    `
+                    `,
                 },
                 '/a/test.st.css': {
-                    content: ''
-                }
-            }
+                    content: '',
+                },
+            },
         });
 
         expect(result.nodes!.length, 'remove all imports').to.equal(0);
@@ -46,9 +46,9 @@ describe('Stylable postcss transform (General)', () => {
                         :vars {
                             myvar: red;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect(result.nodes!.length, 'remove all vars').to.equal(0);
@@ -68,9 +68,9 @@ describe('Stylable postcss transform (General)', () => {
                             color: red;
                             color: blue;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const rule = result.nodes![0] as postcss.Rule;

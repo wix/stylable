@@ -11,7 +11,7 @@ export const resolverWarnings = {
     },
     UNKNOWN_IMPORTED_SYMBOL(name: string, path: string) {
         return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
-    }
+    },
 };
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
@@ -56,7 +56,7 @@ export class StylableResolver {
         } else {
             let _module;
             try {
-                _module = this.requireModule(from);
+                _module = this.requireModule(this.fileProcessor.resolvePath(from));
             } catch {
                 return null;
             }
@@ -109,7 +109,7 @@ export class StylableResolver {
             resolved.symbol.alias &&
             !resolved.symbol[valueMapping.extends]
         ) {
-            if (path.indexOf(resolved.symbol) !== -1) {
+            if (path.includes(resolved.symbol)) {
                 return { _kind: 'css', symbol: resolved.symbol, meta: resolved.meta };
             }
             path.push(resolved.symbol);
@@ -126,7 +126,7 @@ export class StylableResolver {
             return null;
         }
         if (symbol._kind === 'element' || symbol._kind === 'class') {
-            if (path.indexOf(symbol) !== -1) {
+            if (path.includes(symbol)) {
                 return { meta, symbol, _kind: 'css' };
             }
             path.push(symbol);
@@ -135,7 +135,7 @@ export class StylableResolver {
                 ? this.resolveSymbolOrigin(symbol.alias, meta, path)
                 : { meta, symbol, _kind: 'css' };
         } else if (symbol._kind === 'cssVar') {
-            if (path.indexOf(symbol) !== -1) {
+            if (path.includes(symbol)) {
                 return { meta, symbol, _kind: 'css' };
             }
         } else if (symbol._kind === 'import') {
@@ -183,7 +183,7 @@ export class StylableResolver {
             return {
                 _kind: 'css',
                 symbol: finalSymbol,
-                meta: finalMeta
+                meta: finalMeta,
             };
         } else {
             return null;
@@ -195,7 +195,7 @@ export class StylableResolver {
     public resolveExtends(
         meta: StylableMeta,
         className: string,
-        isElement: boolean = false,
+        isElement = false,
         transformer?: StylableTransformer,
         reportError?: (
             res: CSSResolve | JSResolve | null,
@@ -226,7 +226,7 @@ export class StylableResolver {
         let current = {
             _kind: 'css' as const,
             symbol: bucket[className],
-            meta
+            meta,
         };
         const extendPath: Array<CSSResolve<ClassSymbol | ElementSymbol>> = [];
 
@@ -252,7 +252,7 @@ export class StylableResolver {
                         current = {
                             _kind,
                             meta,
-                            symbol
+                            symbol,
                         };
                     } else {
                         if (reportError) {
@@ -279,7 +279,7 @@ export class StylableResolver {
                 const fromDecl =
                     importObj.rule.nodes &&
                     importObj.rule.nodes.find(
-                        decl => decl.type === 'decl' && decl.prop === valueMapping.from
+                        (decl) => decl.type === 'decl' && decl.prop === valueMapping.from
                     );
 
                 if (fromDecl) {
@@ -297,7 +297,7 @@ export class StylableResolver {
                     const namedDecl =
                         importObj.rule.nodes &&
                         importObj.rule.nodes.find(
-                            decl => decl.type === 'decl' && decl.prop === valueMapping.named
+                            (decl) => decl.type === 'decl' && decl.prop === valueMapping.named
                         );
 
                     if (!resolvedSymbol!.symbol && namedDecl) {

@@ -16,7 +16,7 @@ export function matchRuleAndDeclaration(
         );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    const actualDecl = rule.nodes!.map(x => x.toString()).join(';');
+    const actualDecl = rule.nodes!.map((x) => x.toString()).join(';');
     if (actualDecl !== decl) {
         throw new Error(
             `${
@@ -30,7 +30,7 @@ export function matchAllRulesAndDeclarations(
     parent: postcss.Container,
     all: string[][],
     msg?: string,
-    offset: number = 0
+    offset = 0
 ) {
     all.forEach((_, i) => matchRuleAndDeclaration(parent, i + offset, _[0], _[1], msg));
 }

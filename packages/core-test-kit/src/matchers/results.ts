@@ -5,7 +5,7 @@ import postcss from 'postcss';
 export function mediaQuery(chai: any, util: any) {
     const { flag } = util;
 
-    chai.Assertion.addMethod('mediaQuery', function(this: any, index: number) {
+    chai.Assertion.addMethod('mediaQuery', function (this: any, index: number) {
         const actual = flag(this, 'object') as StylableResults;
 
         if (!actual.meta || !actual.exports) {
@@ -40,7 +40,7 @@ export function mediaQuery(chai: any, util: any) {
 export function styleRules(chai: any, util: any) {
     const { flag } = util;
 
-    chai.Assertion.addMethod('styleRules', function(
+    chai.Assertion.addMethod('styleRules', function (
         this: any,
         styleRules: string[] | { [key: number]: string }
     ) {

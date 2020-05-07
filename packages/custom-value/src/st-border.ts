@@ -2,7 +2,7 @@ import {
     BoxedValueArray,
     BoxedValueMap,
     createCustomValue,
-    CustomValueStrategy
+    CustomValueStrategy,
 } from '@stylable/core';
 
 export const stBorder = createCustomValue<BoxedValueMap, BoxedValueArray>({
@@ -13,7 +13,7 @@ export const stBorder = createCustomValue<BoxedValueMap, BoxedValueArray>({
         return {
             size,
             style,
-            color
+            color,
         };
     },
     getValue: (value, index) => {
@@ -22,7 +22,7 @@ export const stBorder = createCustomValue<BoxedValueMap, BoxedValueArray>({
     flattenValue: ({ value: { size, style, color } }) => {
         return {
             delimiter: ' ',
-            parts: [size, style, color]
+            parts: [size, style, color],
         };
-    }
+    },
 });

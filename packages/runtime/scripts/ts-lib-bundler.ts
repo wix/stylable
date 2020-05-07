@@ -25,16 +25,16 @@ export function useModule(outModule: string, libExports: string[], allowOverride
         {
             set(t, k, v, r) {
                 return t.hasOwnProperty(k) ? (exportErrors.push(k), true) : Reflect.set(t, k, v, r);
-            }
+            },
         }
     );
     new Function('$', `(${outModule})($)`)(_exports);
-    const missing = libExports.filter(exportSymbol => !_exports[exportSymbol]);
+    const missing = libExports.filter((exportSymbol) => !_exports[exportSymbol]);
     if (missing.length) {
         throw new Error(`missing lib exports ["${missing.join('", "')}"]`);
     }
 
-    exportErrors = exportErrors.filter(k => !allowOverride.some(o => o === k));
+    exportErrors = exportErrors.filter((k) => !allowOverride.some((o) => o === k));
 
     if (exportErrors.length) {
         throw new Error(`duplicate export ["${exportErrors.join('", "')}"]`);
@@ -54,19 +54,19 @@ function getBundleFilesFromEntry(entry: string, includeEntry = true) {
     const entryFile = includeEntry ? undefined : program.getSourceFile(entry);
     const names = program
         .getSourceFiles()
-        .filter(s => s !== entryFile)
-        .map(s => s.fileName)
-        .filter(f => !f.endsWith('.d.ts'));
+        .filter((s) => s !== entryFile)
+        .map((s) => s.fileName)
+        .filter((f) => !f.endsWith('.d.ts'));
     return names;
 }
 
 function bundleFiles(name: string, files: string[]) {
     const libCode = files
-        .map(filePath => {
+        .map((filePath) => {
             const source = fs.readFileSync(filePath, 'utf8');
             const res = ts.transpileModule(source, {
                 fileName: filePath,
-                transformers: { after: [cleanup()] }
+                transformers: { after: [cleanup()] },
             });
 
             return res.outputText

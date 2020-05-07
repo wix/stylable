@@ -12,12 +12,12 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             transformHooks: {
-                postProcessor: stylableResult => {
+                postProcessor: (stylableResult) => {
                     autoprefixProcessor.process(stylableResult.meta.outputAst).sync();
                     return stylableResult;
-                }
-            }
+                },
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

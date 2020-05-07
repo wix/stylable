@@ -9,14 +9,14 @@ function createResolveExtendsResults(
     fs: MinimalFS,
     fileToProcess: string,
     classNameToLookup: string,
-    isElement: boolean = false
+    isElement = false
 ) {
     const processFile = cachedProcessFile<StylableMeta>(
         (fullpath, content) => {
             return process(safeParse(content, { from: fullpath }));
         },
         fs,
-        x => x
+        (x) => x
     );
 
     const resolver = new StylableResolver(processFile, (module: string) => module && '');
@@ -37,7 +37,7 @@ describe('stylable-resolver', () => {
                         .root {
                             color:red;
                         }
-                    `
+                    `,
                 },
                 '/extended-button.st.css': {
                     content: `
@@ -49,9 +49,9 @@ describe('stylable-resolver', () => {
                             -st-extends:Button;
                             width: 100px;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'myClass');
@@ -69,7 +69,7 @@ describe('stylable-resolver', () => {
                         .root {
                             color:red;
                         }
-                    `
+                    `,
                 },
                 '/extended-button.st.css': {
                     content: `
@@ -80,14 +80,14 @@ describe('stylable-resolver', () => {
                         Button {
                             width: 100px;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
-        expect(results[0].symbol!.name).to.equal('Button');
-        expect(results[1].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('Button');
+        expect(results[1].symbol.name).to.equal('root');
         expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
@@ -104,7 +104,7 @@ describe('stylable-resolver', () => {
                         .root {
                             -st-extends: Button
                         }
-                    `
+                    `,
                 },
                 '/extended-button.st.css': {
                     content: `
@@ -118,14 +118,14 @@ describe('stylable-resolver', () => {
                         Button {
                             width: 100px;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const results = createResolveExtendsResults(fs, '/extended-button.st.css', 'Button', true);
-        expect(results[0].symbol!.name).to.equal('Button');
-        expect(results[1].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('Button');
+        expect(results[1].symbol.name).to.equal('root');
         expect(results[1].meta.source).to.equal('/button.st.css');
     });
 
@@ -135,9 +135,9 @@ describe('stylable-resolver', () => {
                 '/button.st.css': {
                     content: `
                         .gaga
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
         const results = createResolveExtendsResults(fs, '/button.st.css', 'gaga');
         expect(results).to.eql([]);
@@ -155,7 +155,7 @@ describe('stylable-resolver', () => {
                         .root {
                             -st-extends: Comp;
                         }
-                    `
+                    `,
                 },
                 '/index.st.css': {
                     content: `
@@ -164,20 +164,20 @@ describe('stylable-resolver', () => {
                             -st-default: Comp;
                         }
                         Comp{}
-                    `
+                    `,
                 },
                 '/button.st.css': {
                     content: `
                         .root{}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'root');
 
-        expect(results[0].symbol!.name).to.equal('root');
-        expect(results[1].symbol!.name).to.equal('Comp');
-        expect(results[2].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('root');
+        expect(results[1].symbol.name).to.equal('Comp');
+        expect(results[2].symbol.name).to.equal('root');
 
         expect(results[0].meta.source).to.equal('/entry.st.css');
         expect(results[1].meta.source).to.equal('/index.st.css');
@@ -202,21 +202,21 @@ describe('stylable-resolver', () => {
                         .target { 
                             -st-extends: alias;
                         }
-                    `
+                    `,
                 },
                 '/inner.st.css': {
                     content: `
                         .alias {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const results = createResolveExtendsResults(fs, '/entry.st.css', 'target');
 
-        expect(results[0].symbol!.name).to.equal('target');
-        expect(results[1].symbol!.name).to.equal('alias');
-        expect(results[2].symbol!.name).to.equal('root');
+        expect(results[0].symbol.name).to.equal('target');
+        expect(results[1].symbol.name).to.equal('alias');
+        expect(results[2].symbol.name).to.equal('root');
 
         expect(results[0].meta.source).to.equal('/entry.st.css');
         expect(results[1].meta.source).to.equal('/entry.st.css');
@@ -233,14 +233,14 @@ describe('stylable-resolver', () => {
                             -st-default: Button;
                         }
                         .x {-st-extends: Button}
-                    `
+                    `,
                 },
                 '/button.st.css': {
                     content: `
                         .root{}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -262,16 +262,16 @@ describe('stylable-resolver', () => {
                         }
                         Button {}
                         ButtonX {}
-                    `
+                    `,
                 },
                 '/button.st.css': {
                     content: `
                         .root{}
                         .label{}
                         ButtonX{}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const btnMeta = fileProcessor.process('/button.st.css');
@@ -296,7 +296,7 @@ describe('stylable-resolver', () => {
                             -st-named: ButtonX;
                         }
                         ButtonX {}
-                    `
+                    `,
                 },
                 '/button.st.css': {
                     content: `
@@ -305,14 +305,14 @@ describe('stylable-resolver', () => {
                             -st-default: ButtonX;
                         }
                         ButtonX{}
-                    `
+                    `,
                 },
                 '/button-x.st.css': {
                     content: `
                         .x-label{}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -334,9 +334,9 @@ describe('stylable-resolver', () => {
                             -st-named: a;
                         }
                         .a {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -357,9 +357,9 @@ describe('stylable-resolver', () => {
                             -st-named: a;
                         }
                         .a {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -381,7 +381,7 @@ describe('stylable-resolver', () => {
                         }
                         .a{}
                         .b{}
-                    `
+                    `,
                 },
                 '/a.st.css': {
                     content: `
@@ -391,7 +391,7 @@ describe('stylable-resolver', () => {
                         }
                         .a{}
                         .b{}
-                    `
+                    `,
                 },
                 '/a1.st.css': {
                     content: `
@@ -401,12 +401,12 @@ describe('stylable-resolver', () => {
                         }
                         .a{}
                         .b{-st-extends: Comp}
-                    `
+                    `,
                 },
                 '/comp.st.css': {
-                    content: ``
-                }
-            }
+                    content: ``,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -431,14 +431,14 @@ describe('stylable-resolver', () => {
                         .a {
                            -st-extends: a;
                         }
-                    `
+                    `,
                 },
                 '/a.st.css': {
                     content: `
                         .a{}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const entryMeta = fileProcessor.process('/entry.st.css');
@@ -448,9 +448,6 @@ describe('stylable-resolver', () => {
 
     it('should resolve 4th party according to context', () => {
         const stylable = createStylableInstance({
-            resolve: {
-                symlinks: false
-            },
             files: {
                 '/entry.st.css': {
                     namespace: 'entry',
@@ -462,7 +459,7 @@ describe('stylable-resolver', () => {
                         .root {
                             -st-extends: A;
                         }
-                    `
+                    `,
                 },
                 '/node_modules/a/index.st.css': {
                     namespace: 'A',
@@ -474,17 +471,20 @@ describe('stylable-resolver', () => {
                         .root {
                             -st-extends: B;
                         }
-                    `
+                    `,
                 },
                 '/node_modules/a/node_modules/b/index.st.css': {
                     namespace: 'B',
-                    content: ``
-                }
-            }
+                    content: ``,
+                },
+            },
         });
 
         const { meta } = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
+
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
+        expect(meta.diagnostics.reports).to.eql([]);
+        expect(meta.transformDiagnostics!.reports).to.eql([]);
     });
 });

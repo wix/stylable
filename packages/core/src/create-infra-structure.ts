@@ -3,10 +3,7 @@ import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-fi
 import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
-
-// importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
-// this allows @stylable/core to be bundled for browser usage without special custom configuration
-const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
+import { createDefaultResolver } from './module-resolver';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -19,17 +16,12 @@ export function createInfrastructure(
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta,
     resolveOptions: any = {},
     resolveNamespace?: typeof processNamespace,
-    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>
+    timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
+    resolveModule = createDefaultResolver(fileSystem, resolveOptions)
 ): StylableInfrastructure {
-    const eResolver = ResolverFactory.createResolver({
-        useSyncFileSystemCalls: true,
-        fileSystem,
-        ...resolveOptions
-    });
-
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        if (!path.isAbsolute(moduleId) && moduleId.charAt(0) !== '.') {
-            moduleId = eResolver.resolveSync({}, context, moduleId);
+        if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
+            moduleId = resolveModule(context, moduleId);
         }
         return moduleId;
     };
@@ -39,7 +31,7 @@ export function createInfrastructure(
             timeout: 1,
             useTimer: true,
             createKey: (args: string[]) => args.join(';'),
-            ...timedCacheOptions
+            ...timedCacheOptions,
         });
         resolvePath = cacheManager.get;
     }
@@ -60,11 +52,14 @@ export function createInfrastructure(
                 const stat = fileSystem.statSync(resolvedPath);
                 if (!stat.mtime) {
                     return {
-                        mtime: new Date(0)
+                        mtime: new Date(0),
                     };
                 }
                 return stat;
-            }
+            },
+            readlinkSync() {
+                throw new Error(`not implemented`);
+            },
         },
         (path, context) => resolvePath(context || projectRoot, path)
     );
@@ -75,6 +70,6 @@ export function createInfrastructure(
 
     return {
         resolvePath,
-        fileProcessor
+        fileProcessor,
     };
 }

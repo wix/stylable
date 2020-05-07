@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -37,8 +37,8 @@ describe(`(${project})`, () => {
                 depth: '3',
 
                 css:
-                    '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}'
-            }
+                    '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}',
+            },
         ]);
     });
 
@@ -52,18 +52,18 @@ describe(`(${project})`, () => {
             stVars,
             namespace,
             global1ClassColor,
-            global2ClassColor
+            global2ClassColor,
         } = await page.evaluate(() => {
             return {
                 backgroundColor: getComputedStyle(document.body).backgroundColor,
-                fontFamily: getComputedStyle(document.documentElement!).fontFamily,
+                fontFamily: getComputedStyle(document.documentElement).fontFamily,
                 classes: (window as any).stylableClasses,
                 namespace: (window as any).namespace,
                 stVars: (window as any).stVars,
                 global1ClassColor: getComputedStyle(document.querySelector('.global1')!)
                     .backgroundColor,
                 global2ClassColor: getComputedStyle(document.querySelector('.global2')!)
-                    .backgroundColor
+                    .backgroundColor,
             };
         });
 

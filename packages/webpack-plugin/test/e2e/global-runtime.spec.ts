@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,7 +23,7 @@ describe(`(${project})`, () => {
 
         expect(styleElements).to.eql([
             { id: './src/index.st.css', depth: '1' },
-            { id: './src/index2.st.css', depth: '1' }
+            { id: './src/index2.st.css', depth: '1' },
         ]);
     });
 
@@ -35,14 +35,14 @@ describe(`(${project})`, () => {
                 index: getComputedStyle(document.querySelector('[data-name="index"]')!)
                     .backgroundColor,
                 index2: getComputedStyle(document.querySelector('[data-name="index2"]')!)
-                    .backgroundColor
+                    .backgroundColor,
             };
         });
 
         expect(res).to.eql({
             runtimes: 1,
             index: 'rgb(255, 0, 0)',
-            index2: 'rgb(0, 128, 0)'
+            index2: 'rgb(0, 128, 0)',
         });
     });
 });
