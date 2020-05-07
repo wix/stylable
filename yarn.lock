@@ -1069,6 +1069,11 @@
     "@types/express-serve-static-core" "*"
     "@types/serve-static" "*"
 
+"@types/find-config@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/find-config/-/find-config-1.0.0.tgz#6e211985148a166cdaf31f9ad6b6bacdae198c4e"
+  integrity sha512-wyNkArpclTc8XHMiAApJ3z3Ix3ERq8Qh6TrTcwIwAEwN4AgNbdhmf2jb+yIncsQwKjIV9S5qAkaiYxne7JpqKQ==
+
 "@types/flat@^0.0.28":
   version "0.0.28"
   resolved "https://registry.yarnpkg.com/@types/flat/-/flat-0.0.28.tgz#5c788149d85a6cf8ff5f5f000acdd912cdea4274"
