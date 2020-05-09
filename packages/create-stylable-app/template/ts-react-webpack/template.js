@@ -10,7 +10,7 @@ module.exports = {
         'eslint-config-prettier',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
-        'eslint',
+        'eslint@6',
         'file-loader',
         'html-webpack-plugin',
         'rimraf',
