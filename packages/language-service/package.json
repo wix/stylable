@@ -19,7 +19,7 @@
     "@file-services/typescript": "^2.2.0",
     "@stylable/core": "^3.4.5",
     "css-selector-tokenizer": "^0.7.2",
-    "postcss": "^7.0.29",
+    "postcss": "^7.0.30",
     "postcss-value-parser": "^4.1.0",
     "vscode-css-languageservice": "^4.1.2",
     "vscode-languageserver": "^6.1.1",
