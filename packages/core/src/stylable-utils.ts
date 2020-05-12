@@ -243,9 +243,9 @@ export function removeUnusedRules(
 
     if (isUnusedImport) {
         const symbols = Object.keys(_import.named).concat(_import.defaultExport); // .filter(Boolean);
-        ast.walkRules((rule: SRule) => {
+        ast.walkRules((rule) => {
             let shouldOutput = true;
-            traverseNode(rule.selectorAst, (node) => {
+            traverseNode((rule as SRule).selectorAst, (node) => {
                 // TODO: remove.
                 if (symbols.includes(node.name)) {
                     return (shouldOutput = false);
@@ -266,7 +266,7 @@ export function removeUnusedRules(
                 return undefined;
             });
             // TODO: optimize the multiple selectors
-            if (!shouldOutput && rule.selectorAst.nodes.length <= 1) {
+            if (!shouldOutput && (rule as SRule).selectorAst.nodes.length <= 1) {
                 rule.remove();
             }
         });

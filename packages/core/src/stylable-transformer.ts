@@ -193,7 +193,7 @@ export class StylableTransformer {
         const keyframeMapping = this.scopeKeyframes(ast, meta);
         const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
 
-        ast.walkRules((rule: SRule) => {
+        ast.walkRules((rule) => {
             if (isChildOfAtRule(rule, 'keyframes')) {
                 return;
             }
@@ -246,8 +246,8 @@ export class StylableTransformer {
                 this.addDevRules(meta);
             }
         }
-        ast.walkRules((rule: SRule) =>
-            appendMixins(this, rule, meta, variableOverride || {}, cssVarsMapping, path)
+        ast.walkRules((rule) =>
+            appendMixins(this, rule as SRule, meta, variableOverride || {}, cssVarsMapping, path)
         );
 
         if (metaExports) {

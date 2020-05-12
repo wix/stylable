@@ -147,10 +147,10 @@ export class StylableProcessor {
 
         const stubs = this.insertCustomSelectorsStubs();
 
-        root.walkRules((rule: SRule) => {
+        root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
-                this.handleRule(rule, isChildOfAtRule(rule, rootValueMapping.stScope));
+                this.handleRule(rule as SRule, isChildOfAtRule(rule, rootValueMapping.stScope));
             }
         });
 
@@ -702,7 +702,8 @@ export class StylableProcessor {
                         this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                     }
 
-                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) { // 3rd party request
+                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+                        // 3rd party request
                         importObj.fromRelative = importPath;
                         importObj.from = importPath;
                     } else {
