@@ -16,8 +16,7 @@
   "files": [
     "cjs",
     "src",
-    "runtime.lib.js",
-    "runtime-legacy.lib.js"
+    "runtime.lib.js"
   ],
   "engines": {
     "node": ">=10"
