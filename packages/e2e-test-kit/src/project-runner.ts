@@ -188,7 +188,11 @@ export class ProjectRunner {
     }
 
     public getBuildAsset(assetPath: string) {
-        return this.stats!.compilation.assets[normalize(assetPath)].source();
+        return this.getBuildAssets()[normalize(assetPath)].source();
+    }
+
+    public getBuildAssets() {
+        return this.stats!.compilation.assets;
     }
 
     public evalAssetModule(source: string, publicPath = ''): any {

@@ -103,3 +103,5 @@ export function create(
 export function createRenderable(css: string, depth: number | string, id: number | string) {
     return { $css: css, $depth: depth, $id: id, $theme: true };
 }
+
+export { create as createNew };

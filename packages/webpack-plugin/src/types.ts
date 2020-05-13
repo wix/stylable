@@ -13,6 +13,7 @@ export interface StylableWebpackPluginOptions {
     filename: string;
     useWeakDeps: boolean;
     includeDynamicModulesInCSS: boolean;
+    skipDynamicCSSEmit: boolean;
     createRuntimeChunk: boolean;
     outputCSS: boolean;
     includeCSSInJS: boolean;
