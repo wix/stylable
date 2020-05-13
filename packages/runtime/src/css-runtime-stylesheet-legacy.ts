@@ -1,12 +1,6 @@
 import { RuntimeRenderer } from './css-runtime-renderer';
-import { create as createNew } from './css-runtime-stylesheet';
+import { createNew } from './css-runtime-stylesheet';
 import { AttributeMap, InheritedAttributes, StateMap, StylableExports } from './types';
-
-// If you see this code and don't know anything about it don't change it.
-// Because Barak made a custom bundler we can only support one api export name.
-// In order to create legacy api support we allow duplicate export that we know we can override in the bundle.
-
-const newCreate = createNew;
 
 export function create(
     namespace: string,
@@ -16,7 +10,7 @@ export function create(
     id: string | number,
     renderer: RuntimeRenderer | null
 ) {
-    const stylesheet = newCreate(namespace, exports, css, depth, id, renderer);
+    const stylesheet = createNew(namespace, exports, css, depth, id, renderer);
 
     function $cssStates(stateMapping: StateMap) {
         return {

@@ -28,8 +28,6 @@ export function createInfrastructure(
 
     if (timedCacheOptions) {
         const cacheManager = timedCache(resolvePath, {
-            timeout: 1,
-            useTimer: true,
             createKey: (args: string[]) => args.join(';'),
             ...timedCacheOptions,
         });
