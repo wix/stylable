@@ -20,14 +20,13 @@ export function bundle({ name, entry, includeEntry, header }: Options) {
 
 export function useModule(outModule: string, libExports: string[], allowOverride: string[] = []) {
     let exportErrors: Array<string | number | symbol> = [];
-    const _exports: any = new Proxy(
-        {},
-        {
-            set(t, k, v, r) {
-                return t.hasOwnProperty(k) ? (exportErrors.push(k), true) : Reflect.set(t, k, v, r);
-            },
-        }
-    );
+    const _exports = new Proxy({} as Record<keyof any, unknown>, {
+        set(t, k, v, r) {
+            return t[k as string] !== undefined
+                ? (exportErrors.push(k), true)
+                : Reflect.set(t, k, v, r);
+        },
+    });
     new Function('$', `(${outModule})($)`)(_exports);
     const missing = libExports.filter((exportSymbol) => !_exports[exportSymbol]);
     if (missing.length) {
