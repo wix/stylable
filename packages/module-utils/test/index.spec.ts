@@ -40,23 +40,7 @@ describe('Module Factory', () => {
             },
         });
     });
-    it('should create a module with legacy runtime', () => {
-        const testFile = path.join(path.resolve('/'), '/entry.st.css');
-        const { fs, factory, evalStylableModule } = moduleFactoryTestKit(
-            {
-                [testFile]: '.root {}',
-            },
-            { injectCSS: false, legacyRuntime: true }
-        );
 
-        const moduleSource = factory(fs.readFileSync(testFile, 'utf8'), testFile);
-
-        const exports: any = evalStylableModule(moduleSource, testFile);
-        expect(exports).to.equal(exports.default);
-        expect(exports('root')).to.eql({
-            className: 'entry__root',
-        });
-    });
     it('should create a module with cross file use', () => {
         const rootPath = path.resolve('/');
         const testFile = path.join(rootPath, '/entry.st.css');

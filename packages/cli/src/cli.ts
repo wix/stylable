@@ -47,11 +47,6 @@ const argv = require('yargs')
     )
     .default('useNamespaceReference', false)
 
-    .option('compat')
-    .boolean('compat')
-    .describe('compat', 'use legacy v1 runtime api')
-    .default('compat', false)
-
     .option('namespaceResolver')
     .alias('namespaceResolver', 'nsr')
     .describe(
@@ -147,7 +142,6 @@ const {
     injectCSSRequest,
     cssFilename,
     optimize,
-    compat,
     minify,
     manifestFilepath,
     manifest,
@@ -189,7 +183,6 @@ build({
     injectCSSRequest,
     outputCSSNameTemplate: cssFilename,
     optimize,
-    compat,
     minify,
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,

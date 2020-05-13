@@ -168,35 +168,6 @@ describe('Stylable Cli', () => {
         ).equal(true);
     });
 
-    it('compat mode', () => {
-        populateDirectorySync(tempDir.path, {
-            'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`,
-        });
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
-        const { stderr, stdout } = runCli([
-            '--rootDir',
-            tempDir.path,
-            '--nsr',
-            nsr,
-            '--outDir',
-            './dist',
-            '--cjs',
-            '--css',
-            '--compat',
-        ]);
-
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
-
-        const dirContent = loadDirSync(tempDir.path);
-        const file = join('dist', 'style.st.css.js');
-        const m = evalStylableModule<{ namespace: string; default: any }>(dirContent[file], file);
-        expect(typeof m).equal('function');
-
-        expect(m).equal(m.default);
-    });
-
     it('manifest', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
