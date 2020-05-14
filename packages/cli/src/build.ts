@@ -31,7 +31,6 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
-    compat?: boolean;
 }
 
 export function build({
@@ -54,7 +53,6 @@ export function build({
     injectCSSRequest,
     optimize,
     minify,
-    compat,
     manifest,
 }: BuildOptions) {
     const generatorModule = generatorPath
@@ -103,8 +101,7 @@ export function build({
                   useSourceNamespace,
                   injectCSSRequest,
                   optimize,
-                  minify,
-                  compat
+                  minify
               );
     });
 
@@ -140,8 +137,7 @@ function buildSingleFile(
     useSourceNamespace = false,
     injectCSSRequest = false,
     optimize = false,
-    minify = false,
-    compat = false
+    minify = false
 ) {
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
@@ -201,8 +197,7 @@ function buildSingleFile(
                     undefined,
                     undefined,
                     injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    compat ? '@stylable/runtime/cjs/index-legacy' : '@stylable/runtime',
-                    compat ? ['module.exports.default = module.exports;'] : []
+                    '@stylable/runtime'
                 ),
             `Transform Error: ${filePath}`
         );

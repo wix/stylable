@@ -1,6 +1,5 @@
 import { createMemoryFileSystemWithFiles } from '@stylable/e2e-test-kit';
 import { create } from '@stylable/runtime';
-import { create as legacyCreate } from '@stylable/runtime/src/index-legacy';
 import { stylableModuleFactory } from '../src';
 import { Options } from '../src/module-factory';
 
@@ -25,9 +24,6 @@ export function evalStylableModule<T = unknown>(source: string, fullPath: string
     return evalModule(fullPath, source, (id) => {
         if (id === '@stylable/runtime') {
             return { create };
-        }
-        if (id === '@stylable/runtime/cjs/index-legacy') {
-            return { create: legacyCreate };
         }
         throw new Error(`Could not find module: ${id}`);
     }) as T;

@@ -11,7 +11,6 @@ export function normalizeOptions(
             delete require.cache[id];
             return require(id);
         },
-        legacyRuntime: false,
         transformHooks: undefined,
         resolveNamespace: undefined,
         createRuntimeChunk: false,

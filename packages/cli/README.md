@@ -37,7 +37,6 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 |minify|`m`|minify generated css|`false`|
 |log||verbose log|`false`|
 |diagnostics||verbose diagnostics|`false`|
-|compat||use legacy v1 runtime api|`false`|
 |help|`h`|Show help|`boolean`|
 
 `*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
