@@ -13,8 +13,7 @@
   "dependencies": {
     "@stylable/core": "^3.4.5",
     "@stylable/module-utils": "^3.4.5",
-    "find-config": "^1.0.0",
-    "murmurhash": "^1.0.0"
+    "find-config": "^1.0.0"
   },
   "files": [
     "cjs",
