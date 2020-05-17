@@ -29,7 +29,7 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
     });
 
-    it.only('Mixin with function arguments with multiple params (comma separated)', () => {
+    it('Mixin with function arguments with multiple params (comma separated)', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
