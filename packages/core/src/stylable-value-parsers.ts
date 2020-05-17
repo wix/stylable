@@ -297,7 +297,9 @@ export const strategies = {
 
 function stringifyParam(nodes: any) {
     return postcssValueParser.stringify(nodes, (n: any) => {
-        if (n.type === 'div') {
+        if(n.type === 'function'){
+            return postcssValueParser.stringify(n);
+        } else if (n.type === 'div') {
             return null;
         } else if (n.type === 'string') {
             return n.value;
