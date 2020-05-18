@@ -1,8 +1,8 @@
 # Experimental Stylable Webpack Loader
 
-This loader designed to work with webpack `mini-css-extract-plugin`. And actually contains two loaders, one for the transformation and the other for the stylable runtime.
+This loader is designed to work with the webpack `mini-css-extract-plugin`. This setup actually uses two loaders internally. One for the transformation and the other for the stylable runtime.
 
-minimal webpack configuration with the loaders:
+Minimal webpack configuration with the loaders:
 
 ```js
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -12,7 +12,7 @@ module.exports = {
     plugins: [new MiniCssExtractPlugin()],
     module: {
         rules: [
-            // load asset from css url()
+            // load asset from CSS url()
             {
                 test: /\.(png|jpg|gif)$/i,
                 use: [
@@ -42,10 +42,9 @@ module.exports = {
 
 ## Disclaimer
 
-This loader is not the recommended way to load stylable files. Use `@stylable/webpack-plugin` for the best integration.
+This loader is experimental and is not the recommended way of integrating Stylable to your project. Use `@stylable/webpack-plugin` for the latest stable integration.
 
-This loader dose not cover:
-
--   Stylable specific optimizations.
--   Can have issues with css loading order (only order by css js imports)
--   Can have issues with update css when js import order changes (mini-css-extract-plugin issues)
+This loader:
+-   Does not perform Stylable specific optimizations
+-   Can have issues with CSS loading order (order being determined by CSS/JS imports)
+-   Can have issues with updating CSS when JS imports change order (existing mini-css-extract-plugin issue)
