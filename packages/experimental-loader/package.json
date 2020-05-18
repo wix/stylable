@@ -1,0 +1,13 @@
+{
+  "name": "@stylable/experimental-loader",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@stylable/module-utils": "^3.4.4",
+    "@stylable/node": "^3.4.4",
+    "@stylable/optimizer": "^3.4.4",
+    "@stylable/runtime": "^3.4.4",
+    "css-loader": "^3.5.3"
+  }
+}

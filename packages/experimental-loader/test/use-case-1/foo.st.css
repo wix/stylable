@@ -1,0 +1,18 @@
+:import {
+  -st-from: "./bar.st.css";
+  -st-default: Bar;
+}
+
+.text {
+  -st-extends: Bar;
+}
+
+.hello {
+  color: red;
+  background: url('./dog.png');
+  height: 500px;
+}
+
+.world {
+  color: blue;
+}
