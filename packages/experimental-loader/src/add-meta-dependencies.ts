@@ -10,13 +10,11 @@ export function addMetaDependencies(
         return;
     }
     visited.add(meta.source);
-    meta.imports.map((imported) => {
+    for (const imported of meta.imports) {
         const res = transformer.resolver.resolveImported(imported, '');
-        if (res) {
-            if (res._kind === 'css') {
-                onMetaDependency(res.meta);
-                addMetaDependencies(res.meta, onMetaDependency, transformer, visited);
-            }
+        if (res?._kind === 'css') {
+            onMetaDependency(res.meta);
+            addMetaDependencies(res.meta, onMetaDependency, transformer, visited);
         }
-    });
+    }
 }

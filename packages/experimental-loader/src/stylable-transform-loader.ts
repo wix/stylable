@@ -1,4 +1,4 @@
-import { Stylable } from '@stylable/core';
+import { Stylable, processNamespace } from '@stylable/core';
 import { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning } from './warning';
@@ -12,10 +12,12 @@ const { getImportCode, getModuleCode } = require('css-loader/dist/utils');
 export let stylable: Stylable;
 
 export interface LoaderOptions {
+    resolveNamespace(namespace: string, filePath: string): string;
     filterUrls(url: string, ctx: loader.LoaderContext): boolean;
 }
 
 const defaultOptions: LoaderOptions = {
+    resolveNamespace: processNamespace,
     filterUrls(_url: string, _ctx: loader.LoaderContext) {
         return true;
     },
@@ -35,21 +37,32 @@ interface LoaderImport {
 }
 
 const stylableLoader: loader.Loader = function (content) {
+    const callback = this.async();
+
+    if (!callback) {
+        throw new Error('Webpack callback is missing from loader API');
+    }
+
     if (typeof content !== 'string') {
         throw new Error('content is not string');
     }
+
+    const { filterUrls, resolveNamespace }: LoaderOptions = {
+        ...defaultOptions,
+        ...getOptions(this),
+    };
 
     stylable =
         stylable ||
         Stylable.create({
             projectRoot: this.rootContext,
             fileSystem: this.fs,
+            mode: this._compiler.options.mode === 'development' ? 'development' : 'production',
+            resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
+            timedCacheOptions: { useTimer: true, timeout: 1000 },
+            resolveNamespace,
         });
-    const options: LoaderOptions = Object.assign({}, defaultOptions, getOptions(this));
-    const callback = this.async();
-    if (!callback) {
-        throw new Error('Webpack callback is missing from loader API');
-    }
+
     const res = stylable.transform(content, this.resourcePath);
 
     const imports: LoaderImport[] = [];
@@ -63,7 +76,7 @@ const stylableLoader: loader.Loader = function (content) {
 
     const plugins = [
         urlParser({
-            filter: (value: string) => isUrlRequest(value) && options.filterUrls(value, this),
+            filter: (value: string) => isUrlRequest(value) && filterUrls(value, this),
             urlHandler: (url: string) => stringifyRequest(this, url),
         }),
     ];

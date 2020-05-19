@@ -40,11 +40,28 @@ module.exports = {
 };
 ```
 
+### Loader Options
+
+```ts
+interface LoaderOptions {
+    resolveNamespace?(namespace: string, filePath: string): string;
+    filterUrls?(url: string, ctx: loader.LoaderContext): boolean;
+}
+```
+
+|Option|Description|
+|------|-----------|
+|resolveNamespace|override default stylesheet namespace process|
+|filterUrls|filter urls from webpack process|
+
+
 ## Disclaimer
 
 This loader is experimental and is not the recommended way of integrating Stylable to your project. Use `@stylable/webpack-plugin` for the latest stable integration.
 
 This loader:
+
 -   Does not perform Stylable specific optimizations
 -   Can have issues with CSS loading order (order being determined by CSS/JS imports)
 -   Can have issues with updating CSS when JS imports change order (existing mini-css-extract-plugin issue)
+-   Only uses stylable single configuration (avoid multiple loader configuration)

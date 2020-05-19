@@ -2,12 +2,25 @@
   "name": "@stylable/experimental-loader",
   "version": "0.0.1",
   "main": "index.js",
-  "license": "MIT",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "test": "mocha \"./test/**/*.spec.ts\"",
+    "prepack": "yarn build"
+  },
   "dependencies": {
-    "@stylable/module-utils": "^3.4.4",
-    "@stylable/node": "^3.4.4",
-    "@stylable/optimizer": "^3.4.4",
-    "@stylable/runtime": "^3.4.4",
+    "@stylable/runtime": "^3.5.0",
+    "@stylable/core": "^3.5.0",
     "css-loader": "^3.5.3"
-  }
+  },
+  "files": [
+    "cjs",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/experimental-loader",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
 }

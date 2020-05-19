@@ -1,12 +1,12 @@
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const HTMLWebpackPlugin = require('html-webpack-plugin');
-const { stylableLoaders } = require('../src');
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import HTMLWebpackPlugin from 'html-webpack-plugin';
+import { stylableLoaders } from '../../../src';
+import { noCollisionNamespace } from '@stylable/core';
+
 module.exports = {
     mode: 'development',
-    entry: {
-        // case1: './use-case-1/foo.js',
-        case2: './use-case-2/app.js',
-    },
+    entry: './index.js',
+    context: __dirname,
     devtool: false,
     plugins: [new MiniCssExtractPlugin(), new HTMLWebpackPlugin()],
     module: {
@@ -30,7 +30,9 @@ module.exports = {
                         loader: MiniCssExtractPlugin.loader,
                         options: { esModule: true, reloadAll: true },
                     },
-                    stylableLoaders.transform(),
+                    stylableLoaders.transform({
+                        resolveNamespace: noCollisionNamespace(),
+                    }),
                 ],
             },
         ],

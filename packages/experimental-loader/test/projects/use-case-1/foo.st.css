@@ -1,11 +1,3 @@
-:import {
-  -st-from: "./bar.st.css";
-  -st-default: Bar;
-}
-
-.text {
-  -st-extends: Bar;
-}
 
 .hello {
   color: red;

@@ -36,6 +36,7 @@
     "@types/lodash.findlast": "^4.6.6",
     "@types/lodash.upperfirst": "^4.3.6",
     "@types/memory-fs": "^0.3.2",
+    "@types/mini-css-extract-plugin": "^0.9.1",
     "@types/mocha": "^7.0.2",
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",

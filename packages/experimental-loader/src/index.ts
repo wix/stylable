@@ -1,8 +1,8 @@
-import { LoaderOptions } from './stylable-loader-transform';
+import { LoaderOptions } from './stylable-transform-loader';
 
 export const stylableLoaders = {
     transform: (options: Partial<LoaderOptions> = {}) => ({
-        loader: require.resolve('./stylable-loader-transform.ts'),
+        loader: require.resolve('./stylable-transform-loader.ts'),
         options,
     }),
     runtime: () => ({ loader: require.resolve('./stylable-runtime-loader.ts') }),
