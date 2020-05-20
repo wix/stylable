@@ -6,6 +6,11 @@
     },
     "extends": ["eslint:recommended", "plugin:react/recommended", "prettier", "prettier/react"],
     "plugins": ["react-hooks"],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
     "rules": {
         "react/prop-types": "off",
         "react-hooks/rules-of-hooks": "error",

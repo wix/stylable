@@ -31,7 +31,7 @@ module.exports = {
             prebuild: 'npm run clean',
             build: 'webpack --mode production --devtool false',
             start: 'webpack-dev-server --open',
-            serve: 'serve ./dist -s',
+            serve: 'serve ./dist',
             lint: 'eslint . --ext .js,.ts,.tsx -f codeframe',
             typecheck: 'tsc --noEmit',
         },
