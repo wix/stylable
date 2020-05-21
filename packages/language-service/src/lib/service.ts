@@ -1,7 +1,7 @@
 import { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
 import { ColorPresentationParams } from 'vscode-languageserver-protocol';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
     ColorInformation,
@@ -13,7 +13,6 @@ import {
     Location,
     ParameterInformation,
     Position,
-    Range,
     SignatureHelp,
     TextEdit,
     WorkspaceEdit,
@@ -26,6 +25,7 @@ import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
+import { format, normalizeVSCodeFormattingOptions, FormatterOptions } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { ExtendedTsLanguageService } from './types';
@@ -174,7 +174,10 @@ export class StylableLanguageService {
                 stylableFile.content
             );
 
-            const range = Range.create(doc.positionAt(offset.start), doc.positionAt(offset.end));
+            const range: Range = {
+                start: doc.positionAt(offset.start),
+                end: doc.positionAt(offset.end),
+            };
 
             return getColorPresentation(this.cssService, doc, { color, range, textDocument: doc });
         }
@@ -233,9 +236,68 @@ export class StylableLanguageService {
         return null;
     }
 
-    public onDocumentFormatting() {
-        // no op
-        return null;
+    public onDocumentFormatting(
+        filePath: string,
+        options: { tabSize: number; insertSpaces: boolean }
+    ): TextEdit[] {
+        const stylableFile = this.readStylableFile(filePath);
+
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            return this.getDocumentFormatting(
+                doc,
+                { start: 0, end: doc.getText().length },
+                normalizeVSCodeFormattingOptions(options)
+            );
+        }
+
+        return [];
+    }
+
+    public onDocumentRangeFormatting(
+        filePath: string,
+        offset: { start: number; end: number },
+        options: { tabSize: number; insertSpaces: boolean }
+    ) {
+        const stylableFile = this.readStylableFile(filePath);
+
+        if (stylableFile && stylableFile.stat.isFile()) {
+            const doc = TextDocument.create(
+                URI.file(filePath).toString(),
+                'stylable',
+                stylableFile.stat.mtime.getTime(),
+                stylableFile.content
+            );
+
+            return this.getDocumentFormatting(
+                doc,
+                offset,
+                normalizeVSCodeFormattingOptions(options)
+            );
+        }
+
+        return [];
+    }
+
+    public getDocumentFormatting(
+        doc: TextDocument,
+        offset: { start: number; end: number },
+        options?: FormatterOptions
+    ): TextEdit[] {
+        const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
+
+        return [
+            {
+                newText: format(doc, range, options),
+                range,
+            },
+        ];
     }
 
     public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {

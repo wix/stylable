@@ -9,7 +9,7 @@ import {
     ParameterInformation,
     SignatureHelp,
 } from 'vscode-languageserver';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { ProviderPosition } from '../src/lib/completion-providers';
@@ -69,6 +69,24 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
     const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
 
     return stylableLSP.resolveDocumentColors(doc);
+}
+
+export function getFormattingEdits(
+    fileName: string,
+    offsetRange?: { start: number; end: number }
+): TextEdit[] {
+    const fullPath = path.join(CASES_PATH, fileName);
+    const src: string = fs.readFileSync(fullPath).toString();
+    const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
+
+    return stylableLSP.getDocumentFormatting(
+        doc,
+        offsetRange || { start: 0, end: doc.getText().length },
+        {
+            indent_with_tabs: false,
+            indent_size: 4,
+        }
+    );
 }
 
 export function getDocColorPresentation(
