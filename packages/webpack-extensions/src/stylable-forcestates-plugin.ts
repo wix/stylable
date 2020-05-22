@@ -19,6 +19,8 @@ const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name: string) =>
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
+const { hasOwnProperty } = Object.prototype;
+
 const MATCH_STATE_CLASS = new RegExp(`^(.+?)${pseudoStates.booleanStateDelimiter}(.+)`);
 const MATCH_STATE_ATTR = new RegExp(`^class~="(.+?)${pseudoStates.booleanStateDelimiter}(.+)"`);
 
@@ -51,11 +53,11 @@ export function applyStylableForceStateSelectors(
         },
         isStateClassName(name) {
             const parts = name.match(MATCH_STATE_CLASS);
-            return parts ? namespaceMapping.hasOwnProperty(parts[1]) : false;
+            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
         },
         isStateAttr(content) {
             const parts = content.match(MATCH_STATE_ATTR);
-            return parts ? namespaceMapping.hasOwnProperty(parts[1]) : false;
+            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
         },
         onMapping(key, value) {
             mapping[key] = value;
@@ -94,7 +96,7 @@ export function addForceStateSelectors(ast: postcss.Root, context: AddForceState
 }
 
 function isNative(name: string) {
-    return nativePseudoClassesMap.hasOwnProperty(name);
+    return hasOwnProperty.call(nativePseudoClassesMap, name);
 }
 
 function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {

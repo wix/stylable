@@ -197,6 +197,7 @@ export class ProjectRunner {
 
     public evalAssetModule(source: string, publicPath = ''): any {
         const _module = { exports: {} };
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const moduleFactory = new Function(
             'module',
             'exports',
