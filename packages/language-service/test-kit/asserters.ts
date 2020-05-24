@@ -72,12 +72,10 @@ export function getDocumentColors(fileName: string): ColorInformation[] {
 }
 
 export function getFormattingEdits(
-    fileName: string,
+    content: string,
     offsetRange?: { start: number; end: number }
 ): TextEdit[] {
-    const fullPath = path.join(CASES_PATH, fileName);
-    const src: string = fs.readFileSync(fullPath).toString();
-    const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
+    const doc = TextDocument.create('', 'stylable', 1, content);
 
     return stylableLSP.getDocumentFormatting(
         doc,
