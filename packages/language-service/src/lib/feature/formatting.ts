@@ -35,7 +35,7 @@ export function normalizeVSCodeFormattingOptions(options: FormattingOptions): Fo
 export function format(doc: TextDocument, range?: Range, options?: FormatterOptions): string {
     const normalizedOptions: FormatterOptions = {
         ...options,
-        space_around_selector_separator: true,
+        space_around_combinator: true
     };
 
     return css(doc.getText(range), normalizedOptions);
