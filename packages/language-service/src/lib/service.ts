@@ -1,7 +1,7 @@
 import { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
 import { ColorPresentationParams } from 'vscode-languageserver-protocol';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
     ColorInformation,
@@ -13,7 +13,6 @@ import {
     Location,
     ParameterInformation,
     Position,
-    Range,
     SignatureHelp,
     TextEdit,
     WorkspaceEdit,
@@ -26,6 +25,11 @@ import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
 import { getColorPresentation, resolveDocumentColors } from './feature/color-provider';
+import {
+    format,
+    lspFormattingOptionsToJsBeautifyOptions,
+    JSBeautifyFormatCSSOptions,
+} from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
 import { ExtendedTsLanguageService } from './types';
@@ -174,7 +178,10 @@ export class StylableLanguageService {
                 stylableFile.content
             );
 
-            const range = Range.create(doc.positionAt(offset.start), doc.positionAt(offset.end));
+            const range: Range = {
+                start: doc.positionAt(offset.start),
+                end: doc.positionAt(offset.end),
+            };
 
             return getColorPresentation(this.cssService, doc, { color, range, textDocument: doc });
         }
@@ -233,9 +240,48 @@ export class StylableLanguageService {
         return null;
     }
 
-    public onDocumentFormatting() {
-        // no op
-        return null;
+    public onDocumentFormatting(
+        filePath: string,
+        options: { tabSize: number; insertSpaces: boolean }
+    ): TextEdit[] {
+        const content = this.fs.readFileSync(filePath, 'utf8');
+        const doc = TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, content);
+
+        return this.getDocumentFormatting(
+            doc,
+            { start: 0, end: doc.getText().length },
+            lspFormattingOptionsToJsBeautifyOptions(options)
+        );
+    }
+
+    public onDocumentRangeFormatting(
+        filePath: string,
+        offset: { start: number; end: number },
+        options: { tabSize: number; insertSpaces: boolean }
+    ) {
+        const content = this.fs.readFileSync(filePath, 'utf8');
+        const doc = TextDocument.create(URI.file(filePath).toString(), 'stylable', 1, content);
+
+        return this.getDocumentFormatting(
+            doc,
+            offset,
+            lspFormattingOptionsToJsBeautifyOptions(options)
+        );
+    }
+
+    public getDocumentFormatting(
+        doc: TextDocument,
+        offset: { start: number; end: number },
+        options?: JSBeautifyFormatCSSOptions
+    ): TextEdit[] {
+        const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
+
+        return [
+            {
+                newText: format(doc, range, options),
+                range,
+            },
+        ];
     }
 
     public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {
@@ -346,24 +392,26 @@ export class StylableLanguageService {
         return [];
     }
 
-    private readStylableFile(filePath: string): StylableFile | null {
-        if (!filePath.endsWith('.st.css') && !filePath.startsWith('untitled:')) {
+    private readStylableFile(filePath: string, includeUntitled = true): StylableFile | null {
+        const supportedFile =
+            filePath.endsWith('.st.css') || (includeUntitled && filePath.startsWith('untitled:'));
+
+        if (!supportedFile) {
             return null;
         }
 
-        let stat;
         try {
-            stat = this.fs.statSync(filePath);
+            const stat = this.fs.statSync(filePath);
+
+            if (stat.isFile()) {
+                const content = this.fs.readFileSync(filePath, 'utf8');
+                return {
+                    content,
+                    stat,
+                };
+            }
         } catch {
             // TODO: add warning?
-        }
-
-        if (stat && stat.isFile()) {
-            const content = this.fs.readFileSync(filePath, 'utf8');
-            return {
-                content,
-                stat,
-            };
         }
 
         return null;
