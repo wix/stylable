@@ -5,14 +5,16 @@
 `@stylable/dom-test-kit` is comprised of a single class, `StylableDOMUtil`, which exposes several DOM related testing utilities.
 
 ## Example
+
 ```css
 /* my-component.st.css */
 .root {}
 
 .part {
-    -st-states: loading;
+  -st-states: loading;
 }
 ```
+
 ```ts
 /* test.ts */
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
@@ -29,21 +31,27 @@ domUtil.hasStyleState(partElement, 'loading');
 > Note: currently all of the provided utilities support only simplified Stylable selectors, consisting only of `class` and `pseudo-class` selectors.
 
 ### `constructor(style: RuntimeStylesheet, root?: Element)`
+
 Initialize the `StylableDOMUtil` by providing a source stylesheet that would function as the base for all testing utilities. You may pass a DOM root element to serve as the default entry point for the `select` methods,
 
 ### `select(selector?: string, element?: Element): Element | null`
+
 Select the first `element` in the DOM that matches the provided Stylable `selector`.
 
 ### `selectAll(selector?: string, element?: Element): Element[] | null`
+
 Select all `elements` in the DOM that match the provided Stylable `selector`.
 
 ### `scopeSelector(selector?: string): string`
+
 Transforms a Stylable `selector` to its target vanilla CSS.
 
 ### `hasStyleState(element: Element, stateName: string, param: StateValue = true): boolean`
+
 Check whether the provided `element` has the corresponding state set. This method can also receive a third optional param to validate the state active value.
 
 ### `getStyleState(element: Element, stateName: string): string | null`
+
 Get an `element` state value if exists, `null` if it does not.
 
 ## License

@@ -1,5 +1,6 @@
-const WBA = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const IgnorePlugin = require('webpack').IgnorePlugin;
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+// const IgnorePlugin = require('webpack').IgnorePlugin;
+
 module.exports = {
     mode: 'production',
     entry: {
@@ -31,6 +32,6 @@ module.exports = {
     },
     plugins: [
         // new IgnorePlugin(/(source-map)|(chalk)|(support-color)/,/node_modules/),
-        new WBA(),
+        new BundleAnalyzerPlugin(),
     ],
 };

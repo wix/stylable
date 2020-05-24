@@ -12,6 +12,7 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
         exports: {},
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const fn = new Function('module', 'exports', 'require', source);
     fn(_module, _module.exports, requireModule);
 

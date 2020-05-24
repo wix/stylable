@@ -1,6 +1,6 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Stylable DOM testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,8 +12,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.5.0",
-    "@stylable/runtime": "^3.5.0"
+    "@stylable/core": "^3.5.2",
+    "@stylable/runtime": "^3.5.2"
   },
   "files": [
     "cjs",

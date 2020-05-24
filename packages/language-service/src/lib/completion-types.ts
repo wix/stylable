@@ -30,12 +30,12 @@ export const rulesetDirectives = {
 };
 
 export const topLevelDirectives = {
-    root: '.root' as '.root',
-    namespace: '@namespace' as '@namespace',
-    customSelector: '@custom-selector :--' as '@custom-selector :--',
-    vars: ':vars' as ':vars',
-    import: ':import' as ':import',
-    stScope: '@st-scope' as '@st-scope',
+    root: '.root' as const,
+    namespace: '@namespace' as const,
+    customSelector: '@custom-selector :--' as const,
+    vars: ':vars' as const,
+    import: ':import' as const,
+    stScope: '@st-scope' as const,
 };
 
 // syntactic
