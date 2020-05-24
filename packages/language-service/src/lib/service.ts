@@ -392,8 +392,11 @@ export class StylableLanguageService {
         return [];
     }
 
-    private readStylableFile(filePath: string, excludeUntitled = true): StylableFile | null {
-        if (!filePath.endsWith('.st.css') || excludeUntitled || !filePath.startsWith('untitled:')) {
+    private readStylableFile(filePath: string, includeUntitled = true): StylableFile | null {
+        const supportedFile =
+            filePath.endsWith('.st.css') || (includeUntitled && filePath.startsWith('untitled:'));
+
+        if (!supportedFile) {
             return null;
         }
 
