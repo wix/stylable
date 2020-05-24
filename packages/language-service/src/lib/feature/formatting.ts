@@ -2,7 +2,7 @@ import { css } from 'js-beautify';
 import { TextDocument, Range } from 'vscode-languageserver-textdocument';
 import { FormattingOptions } from 'vscode-languageserver';
 
-export interface FormatterOptions {
+export interface JSBeautifyFormatCSSOptions {
     indent_size?: number;
     indent_with_tabs?: boolean;
 
@@ -23,7 +23,9 @@ export interface FormatterOptions {
     templating?: string[];
 }
 
-export function normalizeVSCodeFormattingOptions(options: FormattingOptions): FormatterOptions {
+export function lspFormattingOptionsToJsBeautifyOptions(
+    options: FormattingOptions
+): JSBeautifyFormatCSSOptions {
     return {
         indent_size: options.tabSize,
         indent_with_tabs: !options.insertSpaces,
@@ -32,10 +34,15 @@ export function normalizeVSCodeFormattingOptions(options: FormattingOptions): Fo
     };
 }
 
-export function format(doc: TextDocument, range?: Range, options?: FormatterOptions): string {
-    const normalizedOptions: FormatterOptions = {
+export function format(
+    doc: TextDocument,
+    range?: Range,
+    options?: JSBeautifyFormatCSSOptions
+): string {
+    const normalizedOptions: JSBeautifyFormatCSSOptions = {
         ...options,
-        space_around_combinator: true
+        // hard-coded to prevent custom selector values starting with combinators from breaking
+        space_around_combinator: true,
     };
 
     return css(doc.getText(range), normalizedOptions);
