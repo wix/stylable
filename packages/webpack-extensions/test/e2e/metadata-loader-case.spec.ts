@@ -33,19 +33,17 @@ describe(`(${project})`, () => {
             [`/${indexHash}.st.css`]: indexContent.replace('./comp.st.css', `/${compHash}.st.css`),
             [`/${compHash}.st.css`]: compContent,
         };
-        const x = getMetadataFromLibraryBundle().default;
+        const metadata = getMetadataFromLibraryBundle().default;
+
         expect({
-            entry: x.entry,
-            stylesheetMapping: x.stylesheetMapping,
+            entry: metadata.entry,
+            stylesheetMapping: metadata.stylesheetMapping,
         }).to.deep.include({
             entry: `/${indexHash}.st.css`,
             stylesheetMapping,
         });
-        // namespaceMapping: {
-        //     [`/${indexHash}.st.css`]: 'index3785171020',
-        //     [`/${compHash}.st.css`]: 'comp585640222',
-        // },
-        expect(x.namespaceMapping[`/${indexHash}.st.css`]).to.match(/index\d+/);
-        expect(x.namespaceMapping[`/${compHash}.st.css`]).to.match(/comp\d+/);
+
+        expect(metadata.namespaceMapping[`/${indexHash}.st.css`]).to.match(/index\d+/);
+        expect(metadata.namespaceMapping[`/${compHash}.st.css`]).to.match(/comp\d+/);
     });
 });
