@@ -48,26 +48,26 @@ This config is for inline loader alias any other webpack config (module.rules) c
 
 webpack.config.js
 
-```
-    import { metadataLoaderLocation } from "@stylable/webpack-extensions"
+```ts
+import { metadataLoaderLocation } from "@stylable/webpack-extensions"
 
-    const webpackConfig = {
-        ...
-        resolveLoader: {
-            alias: { 'stylable-metadata': metadataLoaderLocation },
-        }
-        ...
+const webpackConfig = {
+    ...
+    resolveLoader: {
+        alias: { 'stylable-metadata': metadataLoaderLocation },
     }
+    ...
+}
 
 ```
 
 Then in the file that you need the metadata:
-```
-    import metadata from "stylable-metadata!./path-to-stylesheet.st.css";
+```ts
+import metadata from "stylable-metadata!./path-to-stylesheet.st.css";
 ```
 
 - Note: when using inline loader it's possible to config the loader via `stylable.config.js`
-```
+```ts
 module.exports.metadataLoader = {
     exposeNamespaceMapping: true    
 }
@@ -77,7 +77,7 @@ module.exports.metadataLoader = {
 For typescript support it's really depend on the loader config but it's possible to declare modules with the loader interface:
 
 globals.d.ts
-```
+```ts
 declare module 'stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
     const stylesheetMetadata: {
         entry: string;
