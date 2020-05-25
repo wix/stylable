@@ -43,6 +43,7 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
+const { hasOwnProperty } = Object.prototype;
 const USE_SCOPE_SELECTOR_2 = true;
 
 const isVendorPrefixed = require('is-vendor-prefixed');
@@ -1097,7 +1098,7 @@ export class StylableTransformer {
             let found = false;
             for (const { symbol, meta } of currentAnchor.resolved) {
                 const states = symbol[valueMapping.states];
-                if (states && states.hasOwnProperty(name)) {
+                if (states && hasOwnProperty.call(states, name)) {
                     found = true;
 
                     setStateToNode(

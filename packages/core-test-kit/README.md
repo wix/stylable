@@ -7,7 +7,9 @@
 ### What's in this test-kit?
 
 #### Matchers
+
 An assortment of `Chai` matchers used by Stylable.
+
 - `flat-match` - flattens and matches passed arguments
 - `results` - test Stylable transpiled style rules output
 
@@ -20,7 +22,9 @@ A collection of tools aimed at testing Stylable diagnostics messages (warnings a
 Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
 
 #### Match rules
+
 Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDeclarations`) used for testing Stylable generated AST representing CSS rules and declarations.
 
 ## License
-Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).  
+
+Copyright (c) 2019 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

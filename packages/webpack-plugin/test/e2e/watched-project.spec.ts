@@ -1,6 +1,7 @@
-import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
-import { expect } from 'chai';
+import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { expect } from 'chai';
+import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 
 const project = 'watched-project';
 
@@ -36,7 +37,7 @@ describe(`(${project})`, () => {
             });
         });
 
-        require('fs').writeFileSync(
+        writeFileSync(
             join(projectRunner.projectDir, 'src', 'mixin-b.st.css'),
             '.b{ color: green; }'
         );

@@ -116,7 +116,7 @@ describe('completion inside @st-scope', () => {
                 label: 'color',
                 documentation: {
                     kind: 'markdown',
-                    value: `Color of an element's text\n\nSyntax: <color>\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)`,
+                    value: `Sets the color of an element's text\n\nSyntax: <color>\n\n[MDN Reference](https://developer.mozilla.org/docs/Web/CSS/color)`,
                 },
                 textEdit: {
                     range: createRange(4, 8, 4, 8),

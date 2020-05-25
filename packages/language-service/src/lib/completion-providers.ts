@@ -56,6 +56,8 @@ import { ExtendedTsLanguageService } from './types';
 import { isComment, isDeclaration } from './utils/postcss-ast-utils';
 import { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
 
+const { hasOwnProperty } = Object.prototype;
+
 export interface ProviderOptions {
     meta: StylableMeta;
     fs: IFileSystem;
@@ -1112,7 +1114,10 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
                                 (k.slice(0, -1).startsWith(lastSelectoid.replace(':', '')) ||
                                     // selectoid is a CSS native pseudo-sclass
                                     nativePseudoClasses.includes(lastSelectoid.replace(':', '')) ||
-                                    allStates.hasOwnProperty(lastSelectoid.replace(':', ''))) &&
+                                    hasOwnProperty.call(
+                                        allStates,
+                                        lastSelectoid.replace(':', '')
+                                    )) &&
                                 chunkyStates.every((cs) => cs !== k)
                             ) {
                                 const symbolStates = symbol[valueMapping.states];
@@ -1144,7 +1149,8 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
 
             const lastState = lastSelectoid.replace(':', '');
             const realState =
-                allStates.hasOwnProperty(lastState) || nativePseudoClasses.includes(lastState);
+                hasOwnProperty.call(allStates, lastState) ||
+                nativePseudoClasses.includes(lastState);
 
             return states.reduce((acc: Completion[], st) => {
                 acc.push(
