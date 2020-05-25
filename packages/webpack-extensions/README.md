@@ -21,6 +21,24 @@ Generate component metadata for tooling.
 
 Generate css that allow to force css state on dom node.
 
+## stylable-metadata-loader
+
+Generate structure for imported stylesheet that contains the depended st.css files mapped by content hash. also remap imports to use the files content hash. This structure is used to create in memory file system for stylable to transpile overrides separated from the main build process.
+
+loader options:
+```ts
+interface LoaderOptions {
+    exposeNamespaceMapping: boolean;
+    resolveNamespace(namespace: string, filePath: string): string;
+}
+```
+Things to note:
+
+1. JS imports are not supported yet.
+2. namespaces will be different if not taken into account in the in memory transpilation(*)
+
+* use exposeNamespaceMapping to expose namespaces from the metadata build
+
 ## Contributing
 
 Read our [contributing guidelines](../../CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
