@@ -20,6 +20,7 @@ describe(`(${project})`, () => {
     it('should create metadata for stylesheet entry contains every import as source and map imports to hashes', () => {
         const bundleContent = projectRunner.getBuildAsset('main.js');
 
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\n return metadata;');
 
         const stylesheetMapping = {
