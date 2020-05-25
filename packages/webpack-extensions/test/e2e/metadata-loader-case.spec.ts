@@ -1,6 +1,8 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
+import { readFileSync } from 'fs';
+import { hashContent } from '../../src/hash-content-util';
 
 const project = 'metadata-loader-case';
 
@@ -23,19 +25,22 @@ describe(`(${project})`, () => {
         // eslint-disable-next-line @typescript-eslint/no-implied-eval
         const getMetadataFromLibraryBundle = new Function(bundleContent + '\n return metadata;');
 
+        const compContent = readFileSync(join(projectRunner.projectDir, 'comp.st.css'), 'utf-8');
+        const indexContent = readFileSync(join(projectRunner.projectDir, 'index.st.css'), 'utf-8');
+        const indexHash = hashContent(indexContent);
+        const compHash = hashContent(compContent);
         const stylesheetMapping = {
-            '/3c91ff3ced60dda25a000b51e53ee7355e33ff3f.st.css':
-                '\r\n:import {\r\n    -st-from: "/0065767b52a0aa0f8fdc809ef770921f2b2661a0.st.css";\r\n    -st-default: Comp;\r\n}\r\n\r\n.root {\r\n    -st-extends: Comp;\r\n    color: green;\r\n}',
-            '/0065767b52a0aa0f8fdc809ef770921f2b2661a0.st.css': '.root {\r\n    color: red\r\n}',
+            [`/${indexHash}.st.css`]: indexContent.replace('./comp.st.css', `/${compHash}.st.css`),
+            [`/${compHash}.st.css`]: compContent,
         };
 
         expect(getMetadataFromLibraryBundle()).to.deep.include({
             default: {
-                entry: '/3c91ff3ced60dda25a000b51e53ee7355e33ff3f.st.css',
+                entry: `/${indexHash}.st.css`,
                 stylesheetMapping,
                 namespaceMapping: {
-                    '/3c91ff3ced60dda25a000b51e53ee7355e33ff3f.st.css': 'index3785171020',
-                    '/0065767b52a0aa0f8fdc809ef770921f2b2661a0.st.css': 'comp585640222',
+                    [`/${indexHash}.st.css`]: 'index3785171020',
+                    [`/${compHash}.st.css`]: 'comp585640222',
                 },
             },
         });
