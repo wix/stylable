@@ -22,7 +22,7 @@ Generate component metadata for tooling.
 
 Generate css that allow to force css state on dom node.
 
-## stylable-metadata-loader
+## `stylable-metadata-loader`
 
 Generate structure for imported stylesheet that contains the depended st.css files mapped by content hash. also remap imports to use the files content hash. This structure is used to create in memory file system for stylable to transpile overrides separated from the main build process.
 
