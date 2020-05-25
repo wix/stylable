@@ -10,9 +10,11 @@ import {
 import { loader as webpackLoader } from 'webpack';
 import { hashContent } from './hash-content-util';
 import { Rule, ChildNode } from 'postcss';
+import findConfig from 'find-config';
 import { getOptions } from 'loader-utils';
 
 let stylable: Stylable;
+const getLocalConfig = loadLocalConfigLoader();
 
 export interface LoaderOptions {
     exposeNamespaceMapping: boolean;
@@ -22,6 +24,7 @@ export interface LoaderOptions {
 export interface Metadata {
     entry: string;
     stylesheetMapping: Record<string, string>;
+    namespaceMapping?: Record<string, string>;
 }
 
 const defaultOptions: LoaderOptions = {
@@ -29,12 +32,13 @@ const defaultOptions: LoaderOptions = {
     exposeNamespaceMapping: false,
 };
 
-export const loader = __filename;
+export const metadataLoaderLocation = __filename;
 
 export default function metadataLoader(this: webpackLoader.LoaderContext, content: string) {
     const { resolveNamespace, exposeNamespaceMapping }: LoaderOptions = {
         ...defaultOptions,
         ...getOptions(this),
+        ...getLocalConfig(this.rootContext),
     };
 
     stylable =
@@ -62,7 +66,7 @@ export default function metadataLoader(this: webpackLoader.LoaderContext, conten
     const namespaceMapping = exposeNamespaceMapping
         ? createNamespaceMapping(usedMeta, hashes)
         : undefined;
-        
+
     return (
         'export default ' +
         JSON.stringify({
@@ -71,6 +75,23 @@ export default function metadataLoader(this: webpackLoader.LoaderContext, conten
             entry: `/${ensureHash(meta, hashes)}.st.css`,
         })
     );
+}
+
+function loadLocalConfigLoader() {
+    const localConfig = new Map<string, Partial<LoaderOptions>>();
+    return (cwd: string): Partial<LoaderOptions> => {
+        if (localConfig.has(cwd)) {
+            return localConfig.get(cwd)!;
+        }
+        let config: Partial<LoaderOptions>;
+        try {
+            config = findConfig.require('stylable.config', { cwd }).metadataLoader;
+        } catch (e) {
+            config = {};
+        }
+        localConfig.set(cwd, config);
+        return config;
+    };
 }
 
 function createNamespaceMapping(
