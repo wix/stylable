@@ -21,8 +21,7 @@
         {
             "files": ["*.ts", "*.tsx"],
             "parserOptions": {
-                "project": "./tsconfig.json",
-                "warnOnUnsupportedTypeScriptVersion": false
+                "project": "./tsconfig.json"
             },
             "extends": [
                 "plugin:@typescript-eslint/recommended",
