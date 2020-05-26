@@ -129,6 +129,9 @@ const stylableLoader: loader.Loader = function (content) {
                 module.exports = exports;
                 `
             );
+        })
+        .catch(() => {
+            throw new Error('Failed to process css urls');
         });
 };
 
