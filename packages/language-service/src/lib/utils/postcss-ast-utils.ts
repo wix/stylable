@@ -69,28 +69,30 @@ export function isAfterRuleset(position: ProviderPosition, node: postcss.NodeBas
     return false;
 }
 
+const { hasOwnProperty } = Object.prototype;
+
 export function isContainer(node: postcss.NodeBase): node is postcss.ContainerBase {
-    return node.hasOwnProperty('nodes');
+    return hasOwnProperty.call(node, 'nodes');
 }
 
 export function isSelector(node: postcss.NodeBase): node is postcss.Rule {
-    return node.hasOwnProperty('selector');
+    return hasOwnProperty.call(node, 'selector');
 }
 
 export function isVars(node: postcss.NodeBase) {
-    return node.hasOwnProperty('selector') && (node as postcss.Rule).selector === ':vars';
+    return hasOwnProperty.call(node, 'selector') && (node as postcss.Rule).selector === ':vars';
 }
 
 export function isDeclaration(node: postcss.NodeBase): node is postcss.Declaration {
-    return node.hasOwnProperty('prop');
+    return hasOwnProperty.call(node, 'prop');
 }
 
 export function isComment(node: postcss.NodeBase): node is postcss.Comment {
-    return node.hasOwnProperty('type') && (node as postcss.Comment).type === 'comment';
+    return hasOwnProperty.call(node, 'type') && (node as postcss.Comment).type === 'comment';
 }
 
 export function isRoot(node: postcss.NodeBase): node is postcss.Root {
-    return node.hasOwnProperty('type') && (node as postcss.Root).type === 'root';
+    return hasOwnProperty.call(node, 'type') && (node as postcss.Root).type === 'root';
 }
 
 export function pathFromPosition(

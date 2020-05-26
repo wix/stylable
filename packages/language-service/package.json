@@ -1,6 +1,6 @@
 {
   "name": "@stylable/language-service",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -17,11 +17,12 @@
   "dependencies": {
     "@file-services/node": "^2.2.0",
     "@file-services/typescript": "^2.2.0",
-    "@stylable/core": "^3.5.0",
+    "@stylable/core": "^3.6.0",
     "css-selector-tokenizer": "^0.7.2",
-    "postcss": "^7.0.30",
+    "js-beautify": "^1.11.0",
+    "postcss": "^7.0.31",
     "postcss-value-parser": "^4.1.0",
-    "vscode-css-languageservice": "^4.1.2",
+    "vscode-css-languageservice": "^4.2.0",
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
     "vscode-uri": "^2.1.1"

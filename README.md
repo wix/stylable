@@ -4,9 +4,9 @@
 
 **Stylable** enables you to write reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
--   Scopes styles to components so they don't "leak" and clash with other styles.
--   Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
--   Cuts down on the resulting CSS bundles using "rule-shaking" and other optimizations
+- Scopes styles to components so they don't "leak" and clash with other styles.
+- Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
+- Cuts down on the resulting CSS bundles using "rule-shaking" and other optimizations
 
 At build time, the preprocessor converts the Stylable CSS into a minimal, flat, static, valid vanilla CSS that works cross-browser.
 
@@ -16,16 +16,16 @@ Learn more in our [Documentation Center](https://stylable.io/).
 
 There are two options for installing Stylable:
 
--   Create a new project using [create-stylable-app](./packages/create-stylable-app)
--   Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
+- Create a new project using [create-stylable-app](./packages/create-stylable-app)
+- Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Demos
 
--   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small application showcasing Stylable
--   [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
--   [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
+- [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small application showcasing Stylable
+- [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
+- [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
 ## Repository Structure
 
@@ -43,13 +43,13 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 
 ### Tooling & Utilities
 
-| Package Name                                | Published Name             |                                                           Latest Version                                                            | Description                                                               |
-| ------------------------------------------- | -------------------------- | :---------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------- |
-| [cli](./packages/cli)                       | `@stylable/cli`            |            [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)            | Used for managing Stylable stylesheets in a project                       |
-| [create-stylable-app](./packages/create-stylable-app)   | `create-stylable-app`  |  [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)  | Boilerplate generator CLI                          |
-| [schema-extract](./packages/schema-extract) | `@stylable/schema-extract` | [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract) | JSON Schema convertor for Stylable stylesheets                            |
-| [language-service](./packages/language-service) | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
-| [stylable.io](./packages/stylable.io)       | -                          |                                                                  -                                                                  | source package for the [stylable.io](http://stylable.io) official website |
+| Package Name                                          | Published Name               |                                                             Latest Version                                                              | Description                                                                                |
+| ----------------------------------------------------- | ---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------ |
+| [cli](./packages/cli)                                 | `@stylable/cli`              |              [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)              | Used for managing Stylable stylesheets in a project                                        |
+| [create-stylable-app](./packages/create-stylable-app) | `create-stylable-app`        |        [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)        | Boilerplate generator CLI                                                                  |
+| [schema-extract](./packages/schema-extract)           | `@stylable/schema-extract`   |   [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)   | JSON Schema convertor for Stylable stylesheets                                             |
+| [language-service](./packages/language-service)       | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
+| [stylable.io](./packages/stylable.io)                 | -                            |                                                                    -                                                                    | source package for the [stylable.io](http://stylable.io) official website                  |
 
 ### Integrations
 

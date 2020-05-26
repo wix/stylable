@@ -43,21 +43,21 @@ export interface ExtendsValue {
 export type ReportWarning = (message: string, options?: { word: string }) => void;
 
 export const rootValueMapping = {
-    vars: ':vars' as ':vars',
-    import: ':import' as ':import',
-    stScope: 'st-scope' as 'st-scope',
-    namespace: 'namespace' as 'namespace',
+    vars: ':vars' as const,
+    import: ':import' as const,
+    stScope: 'st-scope' as const,
+    namespace: 'namespace' as const,
 };
 
 export const valueMapping = {
-    from: '-st-from' as '-st-from',
-    named: '-st-named' as '-st-named',
-    default: '-st-default' as '-st-default',
-    root: '-st-root' as '-st-root',
-    states: '-st-states' as '-st-states',
-    extends: '-st-extends' as '-st-extends',
-    mixin: '-st-mixin' as '-st-mixin',
-    global: '-st-global' as '-st-global',
+    from: '-st-from' as const,
+    named: '-st-named' as const,
+    default: '-st-default' as const,
+    root: '-st-root' as const,
+    states: '-st-states' as const,
+    extends: '-st-extends' as const,
+    mixin: '-st-mixin' as const,
+    global: '-st-global' as const,
 };
 
 export type stKeys = keyof typeof valueMapping;
@@ -297,7 +297,7 @@ export const strategies = {
 
 function stringifyParam(nodes: any) {
     return postcssValueParser.stringify(nodes, (n: any) => {
-        if(n.type === 'function'){
+        if (n.type === 'function') {
             return postcssValueParser.stringify(n);
         } else if (n.type === 'div') {
             return null;

@@ -177,6 +177,7 @@ export function renderStaticCSS(
         });
         return (module as any).generator.toCSS(module, (assetModule: any) => {
             const source = assetModule.originalSource().source();
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval
             const getStaticPath = new Function(
                 '__webpack_public_path__',
                 'var module = {}; return ' + source.replace('export default', 'module.exports = ')

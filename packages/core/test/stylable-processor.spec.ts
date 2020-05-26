@@ -161,7 +161,7 @@ describe('Stylable postcss process', () => {
 
         expect(result.mappedSymbols.abs).to.deep.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
         expect((result.mappedSymbols.abs as ImportSymbol).import).to.include({
             context: '/path/to',

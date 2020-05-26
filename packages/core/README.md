@@ -7,6 +7,7 @@
 ## Running Stylable
 
 Follow these instructions in order to run Stylable in development mode, this allows you to run the package tests with hot-loading enabled.
+
 1. Clone this repo
 2. `cd stylable`
 3. `yarn`
@@ -22,4 +23,5 @@ Stylable's workflow contains two main parts that together perform the CSS transp
 - `stylable-transformer` - Processes each stylesheet using the previously created data including other file dependencies. Transforms our Stylable CSS into vanilla CSS.
 
 ## License
+
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

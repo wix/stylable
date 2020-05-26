@@ -27,6 +27,7 @@ export function useModule(outModule: string, libExports: string[], allowOverride
                 : Reflect.set(t, k, v, r);
         },
     });
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     new Function('$', `(${outModule})($)`)(_exports);
     const missing = libExports.filter((exportSymbol) => !_exports[exportSymbol]);
     if (missing.length) {
