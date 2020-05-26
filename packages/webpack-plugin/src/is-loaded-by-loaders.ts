@@ -1,18 +1,22 @@
 import { StylableModule } from './types';
 
 export function isLoadedByLoaders(module: StylableModule, warn: (m: StylableModule) => void) {
-    let isRawOnly = false;
+    let isSupportedLoader = false;
     if (module.loaders.length === 0) {
         return false;
     }
     try {
-        isRawOnly =
+        const loaderPath = module.loaders[0].loader
+        isSupportedLoader =
             module.loaders.length === 1 &&
-            module.loaders[0].loader === require.resolve('raw-loader');
+            (
+                (loaderPath.includes('stylable-') && loaderPath.includes('-loader')) ||
+                loaderPath === require.resolve('raw-loader')
+            );
     } catch {
         /* */
     }
-    if (!isRawOnly) {
+    if (!isSupportedLoader) {
         warn(module);
     }
     module.type = 'stylable-raw';
