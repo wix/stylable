@@ -5,7 +5,7 @@ export function addMetaDependencies(
     onMetaDependency: (meta: StylableMeta) => void,
     transformer: StylableTransformer,
     visited = new Set<string>()
-) {
+): void {
     if (visited.has(meta.source)) {
         return;
     }

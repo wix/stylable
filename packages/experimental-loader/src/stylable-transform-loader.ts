@@ -132,4 +132,5 @@ const stylableLoader: loader.Loader = function (content) {
         });
 };
 
+export const loaderPath = __filename;
 export default stylableLoader;

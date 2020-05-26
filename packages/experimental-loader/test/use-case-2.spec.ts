@@ -2,7 +2,7 @@ import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit'
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'use-case-1';
+const project = 'use-case-2';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
@@ -21,35 +21,33 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const cssLinks = await page.evaluate(browserFunctions.getCSSLinks);
 
-        expect(cssLinks).to.eql(['main.css']);
+        expect(cssLinks).to.eql(['compA.css', 'compB.css']);
     });
 
     it('css applied correctly', async () => {
         const { page } = await projectRunner.openInBrowser();
         const styles = await page.evaluate(() => {
-            const hello = getComputedStyle(document.querySelector('.foo__hello')!);
-            const world = getComputedStyle(document.querySelector('.foo__world')!);
+            const compA = getComputedStyle(document.querySelectorAll('.a__root')[0]!);
+            const compB = getComputedStyle(document.querySelector('.b__root')!);
 
             return {
-                hello: {
-                    color: hello.color,
-                    height: hello.height,
-                    imageAsset: hello.backgroundImage.match(/(\w+\.png)/)![1],
+                compB: {
+                    color: compB.color,
+                    backgroundColor: compB.backgroundColor,
                 },
-                world: {
-                    color: world.color,
+                compA: {
+                    color: compA.color,
                 },
             };
         });
 
         expect(styles).to.deep.include({
-            hello: {
+            compB: {
                 color: 'rgb(255, 0, 0)',
-                height: '500px',
-                imageAsset: 'c1581c599fef18f7460cd972e77273fd.png',
+                backgroundColor: 'rgb(255, 255, 0)',
             },
-            world: {
-                color: 'rgb(0, 0, 255)',
+            compA: {
+                color: 'rgb(128, 0, 128)',
             },
         });
     });

@@ -1,9 +1,10 @@
-import { LoaderOptions } from './stylable-transform-loader';
+import { LoaderOptions, loaderPath as transformLoaderPath } from './stylable-transform-loader';
+import { loaderPath as runtimeLoaderPath } from './stylable-runtime-loader';
 
 export const stylableLoaders = {
     transform: (options: Partial<LoaderOptions> = {}) => ({
-        loader: require.resolve('./stylable-transform-loader.ts'),
+        loader: transformLoaderPath,
         options,
     }),
-    runtime: () => ({ loader: require.resolve('./stylable-runtime-loader.ts') }),
+    runtime: () => ({ loader: runtimeLoaderPath }),
 };

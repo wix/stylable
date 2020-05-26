@@ -1,12 +1,13 @@
 import { loader } from 'webpack';
 
-function evalStylableExtractModule(source: string): [string, object] {
+function evalStylableExtractModule(source: string): [string, Record<string, unknown>] {
     if (!source) {
         throw new Error('No source is provided to evalModule');
     }
     const _module = {
         exports: {},
     };
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const fn = new Function(
         'module',
         'exports',
@@ -14,7 +15,7 @@ function evalStylableExtractModule(source: string): [string, object] {
         source.replace('export default ', 'module.exports = ')
     );
     fn(_module, _module.exports);
-    return _module.exports as [string, object];
+    return _module.exports as [string, Record<string, unknown>];
 }
 
 const stylableRuntimeLoader: loader.Loader = function loader(content) {
@@ -36,4 +37,6 @@ const stylableRuntimeLoader: loader.Loader = function loader(content) {
   );
   `;
 };
+
+export const loaderPath = __filename;
 export default stylableRuntimeLoader;
