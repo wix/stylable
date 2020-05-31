@@ -42,6 +42,22 @@ Things to note:
 
 - use exposeNamespaceMapping to expose namespaces from the metadata build
 
+#### example output:
+```js
+{
+    entry: "entry_hash",
+    stylesheetMapping: {
+        "/entry_hash.st.css": ":import{-st-from: '/imported_hash.st.css'} entry_content",
+        "/imported_hash.st.css": "imported_content"
+    },
+    namespaceMapping: {
+        "/entry_hash.st.css": "entry_namespace",
+        "/imported_hash.st.css": "imported_namespace"
+    }
+}
+```
+
+
 #### Usage in webpack:
 
 This config is for inline loader alias any other webpack config (module.rules) can work too.
