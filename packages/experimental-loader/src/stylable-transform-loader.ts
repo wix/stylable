@@ -1,4 +1,5 @@
 import { Stylable, processNamespace } from '@stylable/core';
+import { StylableOptimizer } from '@stylable/optimizer';
 import { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning } from './warning';
@@ -36,6 +37,7 @@ interface LoaderImport {
     };
 }
 
+const optimizer = new StylableOptimizer();
 const stylableLoader: loader.Loader = function (content) {
     const callback = this.async();
 
@@ -51,13 +53,14 @@ const stylableLoader: loader.Loader = function (content) {
         ...defaultOptions,
         ...getOptions(this),
     };
+    const mode = this._compiler.options.mode === 'development' ? 'development' : 'production';
 
     stylable =
         stylable ||
         Stylable.create({
             projectRoot: this.rootContext,
             fileSystem: this.fs,
-            mode: this._compiler.options.mode === 'development' ? 'development' : 'production',
+            mode,
             resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
             timedCacheOptions: { useTimer: true, timeout: 1000 },
             resolveNamespace,
@@ -80,6 +83,10 @@ const stylableLoader: loader.Loader = function (content) {
             urlHandler: (url: string) => stringifyRequest(this, url),
         }),
     ];
+
+    if (mode !== 'development') {
+        optimizer.removeStylableDirectives(res.meta.outputAst!);
+    }
 
     postcss(plugins)
         .process(res.meta.outputAst!, {
