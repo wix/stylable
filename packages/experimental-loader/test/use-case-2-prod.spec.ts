@@ -4,7 +4,7 @@ import { join } from 'path';
 
 const project = 'use-case-2';
 
-describe(`(${project})`, () => {
+describe(`(${project}) (production)`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
