@@ -59,10 +59,9 @@ export default function metadataLoader(this: webpackLoader.LoaderContext, conten
     addWebpackWatchDependencies(this, usedMeta);
 
     const hashes = createContentHashPerMeta(usedMeta.keys());
-    ``;
+
     const stylesheetMapping = rewriteImports(usedMeta, hashes);
 
-    //`:import {-st-from: ${JSON.stringify(stylesheetMapping)}; -st-default: ${CompName};} ${CompName}{}`
     const namespaceMapping = exposeNamespaceMapping
         ? createNamespaceMapping(usedMeta, hashes)
         : undefined;
@@ -124,7 +123,7 @@ function rewriteImports(
         const rawAst = meta.rawAst.clone();
         for (const { resolved, stImport } of resolvedImports) {
             if (resolved && resolved._kind === 'css') {
-                const rawRule = rawAst.nodes?.find(nodeByLocation(stImport.rule));
+                const rawRule = rawAst.nodes?.find(ruleByLocation(stImport.rule));
                 if (!rawRule) {
                     throw new Error(
                         'Could not find source node for ' +
@@ -153,7 +152,7 @@ function rewriteImports(
     return sourcesByHash;
 }
 
-function nodeByLocation(ruleA: Rule) {
+function ruleByLocation(ruleA: Rule) {
     return (ruleB: ChildNode) => {
         return (
             ruleB.source?.start?.column === ruleA.source?.start?.column &&
