@@ -10,7 +10,7 @@ module.exports = {
         'eslint-config-prettier',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
-        'eslint@6',
+        'eslint',
         'file-loader',
         'html-webpack-plugin',
         'rimraf',
@@ -32,7 +32,7 @@ module.exports = {
             build: 'webpack --mode production --devtool false',
             start: 'webpack-dev-server --open',
             serve: 'serve ./dist',
-            lint: 'eslint . --ext .js,.ts,.tsx -f codeframe',
+            lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',
         },
         prettier: {

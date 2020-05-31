@@ -69,6 +69,7 @@ export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
             if (!id.match(/\.js$/)) {
                 id += '.js';
             }
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval
             const fn = new Function('module', 'exports', 'require', files[id].content);
             fn(_module, _module.exports, requireModule);
         } catch (e) {

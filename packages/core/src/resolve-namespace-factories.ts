@@ -32,7 +32,7 @@ export function noCollisionNamespace({
     used: usedNamespaces = new Map<
         string,
         { prefix: string; namespace: string; stylesheetPath: string }
-    >()
+    >(),
 } = {}): typeof processNamespace {
     return (namespace, stylesheetPath) => {
         const ns = prefix + namespace;

@@ -1,11 +1,9 @@
-export function filterAssetResponses(responses: any, assetNames: string[]) {
+import type { Response } from 'puppeteer';
+
+export function filterAssetResponses(responses: Response[], assetNames: string[]) {
     return assetNames
-        .map((fileName) => {
-            return responses.find((res: any) => {
-                return res.url().endsWith(fileName);
-            });
-        })
-        .filter(Boolean);
+        .map((fileName) => responses.find((res) => res.url().endsWith(fileName)))
+        .filter(Boolean) as Response[];
 }
 
 function getStyleElementsMetadata(getCss: boolean) {

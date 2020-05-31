@@ -20,7 +20,7 @@ export function timedCache<T extends (...args: string[]) => string>(
         }
         shouldClean = true;
         const current = Date.now();
-        if (current - prevTime > timeout && !useTimer) {
+        if (current - prevTime >= timeout && !useTimer) {
             cache.clear();
         }
         prevTime = current;

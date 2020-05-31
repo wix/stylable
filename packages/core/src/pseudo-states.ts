@@ -21,6 +21,8 @@ import { stripQuotation } from './utils';
 const isVendorPrefixed = require('is-vendor-prefixed');
 const postcssValueParser = require('postcss-value-parser');
 
+const { hasOwnProperty } = Object.prototype;
+
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
 export const stateWithParamDelimiter = booleanStateDelimiter + stateMiddleDelimiter;
@@ -286,7 +288,7 @@ export function transformPseudoStateSelector(
             const states = currentSymbol[valueMapping.states];
             const extend = currentSymbol[valueMapping.extends];
             const alias = currentSymbol.alias;
-            if (states && states.hasOwnProperty(name)) {
+            if (states && hasOwnProperty.call(states, name)) {
                 found = true;
                 setStateToNode(
                     states,
