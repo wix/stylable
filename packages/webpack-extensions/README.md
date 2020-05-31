@@ -24,10 +24,11 @@ Generate css that allow to force css state on dom node.
 
 ## `stylable-metadata-loader`
 
-Generate structure for imported stylesheet that contains the depended st.css files mapped by content hash. also remap imports to use the files content hash. This structure is used to create in memory file system for stylable to transpile overrides separated from the main build process.
+Use this loader to generates a mapping of imported stylesheets that contains imported `.st.css` files (dependencies) mapped by a hash of their content. It also remaps any imports within the content to use the files content hash as the imported filepath. 
 
-loader options:
+This structure is used to create an in-memory file system representation for Stylable to transpile overrides apart from the main build process.
 
+### Loader options
 ```ts
 interface LoaderOptions {
   exposeNamespaceMapping: boolean;
@@ -35,36 +36,34 @@ interface LoaderOptions {
 }
 ```
 
-Things to note:
+### Notes 
+1. JS imports are currently not supported (mixins and formatters)
+2. Namespaces can be different if not taken into account during the in memory transpilation (for path based namespace resolvers)
 
-1. JS imports are not supported yet.
-2. namespaces will be different if not taken into account in the in memory transpilation(\*)
+> Use `exposeNamespaceMapping` to expose original namespaces from the metadata build
 
-- use exposeNamespaceMapping to expose namespaces from the metadata build
-
-#### example output:
+#### Example output
 ```js
 {
-    entry: "entry_hash",
+    entry: "<entry_hash>",
     stylesheetMapping: {
-        "/entry_hash.st.css": ":import{-st-from: '/imported_hash.st.css'} entry_content",
-        "/imported_hash.st.css": "imported_content"
+        "/<entry_hash>.st.css": ":import { -st-from: '/<imported_hash>.st.css' } <rest_of_entry_content>",
+        "/<imported_hash>.st.css": "<imported_content>"
     },
     namespaceMapping: {
-        "/entry_hash.st.css": "entry_namespace",
-        "/imported_hash.st.css": "imported_namespace"
+        "/<entry_hash>.st.css": "<entry_namespace>",
+        "/<imported_hash>.st.css": "<imported_namespace>"
     }
 }
 ```
 
 
-#### Usage in webpack:
+#### Usage in webpack
+The config below shows an inline loader alias configuration, any other webpack config (using `module.rules`) can also be used.
 
-This config is for inline loader alias any other webpack config (module.rules) can work too.
-
-webpack.config.js
 
 ```ts
+// webpack.config.js
 import { metadataLoaderLocation } from "@stylable/webpack-extensions"
 
 const webpackConfig = {
@@ -74,26 +73,29 @@ const webpackConfig = {
     }
     ...
 }
-
 ```
 
-Then in the file that you need the metadata:
+#### Metadata consumption usage
+To use this loader, import the stylesheet using the previously configured loader.
 ```ts
 import metadata from "stylable-metadata!./path-to-stylesheet.st.css";
 ```
 
-- Note: when using inline loader it's possible to config the loader via `stylable.config.js`
+> Note: when using an inline loader configuration it is possible to configure the loader via the `stylable.config.js` configuration file
 ```ts
+// stylable.config.js
 module.exports.metadataLoader = {
     exposeNamespaceMapping: true    
 }
 ```
+
 #### Typescript types
+The definition for typings for this loader depends on the loader configuration used, but you can declare modules with one of the following loader interfaces:
 
-For typescript support it's really depend on the loader config but it's possible to declare modules with the loader interface:
-
-globals.d.ts
 ```ts
+// globals.d.ts
+
+// when exposing namespaceMapping
 declare module 'stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
     const stylesheetMetadata: {
         entry: string;
@@ -103,6 +105,7 @@ declare module 'stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
     export = stylesheetMetadata;
 }
 
+// when not exposing namespaceMapping
 declare module 'stylable-metadata!*.st.css' {
     const stylesheetMetadata: {
         entry: string;
@@ -111,6 +114,7 @@ declare module 'stylable-metadata!*.st.css' {
     export = stylesheetMetadata;
 }
 ```
+
 ## Contributing
 
 Read our [contributing guidelines](../../CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
