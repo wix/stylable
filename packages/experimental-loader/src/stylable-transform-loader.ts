@@ -5,6 +5,7 @@ import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning } from './warning';
 import postcss from 'postcss';
 import { addMetaDependencies } from './add-meta-dependencies';
+import { getStylable } from './cached-stylable-factory';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
@@ -37,7 +38,9 @@ interface LoaderImport {
     };
 }
 
+const timedCacheOptions = { useTimer: true, timeout: 1000 };
 const optimizer = new StylableOptimizer();
+
 const stylableLoader: loader.Loader = function (content) {
     const callback = this.async();
 
@@ -55,19 +58,16 @@ const stylableLoader: loader.Loader = function (content) {
     };
     const mode = this._compiler.options.mode === 'development' ? 'development' : 'production';
 
-    stylable =
-        stylable ||
-        Stylable.create({
-            projectRoot: this.rootContext,
-            fileSystem: this.fs,
-            mode,
-            resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
-            timedCacheOptions: { useTimer: true, timeout: 1000 },
-            resolveNamespace,
-        });
+    stylable = getStylable(this._compiler, {
+        projectRoot: this.rootContext,
+        fileSystem: this.fs,
+        mode,
+        resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
+        timedCacheOptions,
+        resolveNamespace,
+    });
 
     const res = stylable.transform(content, this.resourcePath);
-
     const imports: LoaderImport[] = [];
     const urlReplacements: UrlReplacement[] = [];
 
@@ -83,7 +83,6 @@ const stylableLoader: loader.Loader = function (content) {
             urlHandler: (url: string) => stringifyRequest(this, url),
         }),
     ];
-
     if (mode !== 'development') {
         optimizer.removeStylableDirectives(res.meta.outputAst!);
     }
