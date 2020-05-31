@@ -11,8 +11,8 @@ export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
     }
     public getNamespace(meta: StylableMeta, ..._env: any[]) {
         return (
-            this.namespaceMapping[meta.source] ||
-            (this.namespaceMapping[meta.source] = this.namespacePrefix + this.index++)
+            this.namespaceMapping[meta.namespace] ||
+            (this.namespaceMapping[meta.namespace] = this.namespacePrefix + this.index++)
         );
     }
 }
