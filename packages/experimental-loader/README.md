@@ -51,17 +51,19 @@ interface LoaderOptions {
 
 |Option|Description|
 |------|-----------|
-|resolveNamespace|override default stylesheet namespace process|
-|filterUrls|filter urls from webpack process|
+|`resolveNamespace`|override default stylesheet namespace process|
+|`filterUrls`|filter urls from webpack process|
 
 
 ## Disclaimer
 
-This loader is experimental and is not the recommended way of integrating Stylable to your project. Use `@stylable/webpack-plugin` for the latest stable integration.
+This loader is experimental and is not the recommended way of integrating Stylable into your project. Use `@stylable/webpack-plugin` for the latest stable integration.
+
+
+## Known issues
 
 This loader:
 
 -   Does not perform Stylable specific optimizations
--   Can have issues with CSS loading order (order being determined by CSS/JS imports)
+-   Can have issues with CSS loading order (order being determined by JS imports)
 -   Can have issues with updating CSS when JS imports change order (existing mini-css-extract-plugin issue)
--   Only uses stylable single configuration (avoid multiple loader configuration)

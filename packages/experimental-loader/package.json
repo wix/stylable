@@ -1,7 +1,8 @@
 {
   "name": "@stylable/experimental-loader",
-  "version": "0.0.1",
-  "main": "index.js",
+  "version": "3.6.1",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
