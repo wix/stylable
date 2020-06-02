@@ -35,9 +35,9 @@ import {
 } from './types';
 import { isImportedByNonStylable, rewriteUrl, isStylableModule } from './utils';
 import { dirname } from 'path';
+import findConfig from 'find-config';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
-const findConfig = require('find-config');
 const MultiModule = require('webpack/lib/MultiModule');
 const last = <T>(_: T[]): any => _[_.length - 1];
 
@@ -156,6 +156,9 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation,
         module: StylableModule
     ) {
+        if(!module.buildInfo.stylableTransformedAst) {
+            return;
+        }
         const rootContext = (compilation as any).options.context;
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);

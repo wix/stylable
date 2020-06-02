@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, renameSync } from 'fs';
 import { join } from 'path';
 import { expect } from 'chai';
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
@@ -47,5 +47,23 @@ describe(`(${project})`, () => {
         expect(styleElements2[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
             /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/
         );
+    });
+
+    it('allow stylable imports with missing files', async () => {
+        renameSync(
+            join(projectRunner.projectDir, 'src', 'index.st.css'),
+            join(projectRunner.projectDir, 'src', 'xxx.st.css')
+        );
+
+        const recompile = new Promise((res) => {
+            projectRunner.compiler?.hooks.done.tap('Test', () => {
+                res();
+            });
+        });
+        
+        await recompile;
+        // if we got here we finished to recompile with the missing file.
+        // when this test is broken the compiler had en error and exit the process.
+        expect('finish recompile');
     });
 });
