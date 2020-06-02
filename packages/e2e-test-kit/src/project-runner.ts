@@ -77,7 +77,7 @@ export class ProjectRunner {
     public browser!: puppeteer.Browser | null;
     public compiler!: webpack.Compiler | null;
     public watchingHandle!: webpack.Watching | null;
-    public log: typeof console.log
+    public log: typeof console.log;
     constructor({
         projectDir,
         port = 3000,
@@ -168,11 +168,18 @@ export class ProjectRunner {
                 this.log(`Server Running (port: ${port})`);
                 this.serverUrl = `http://localhost:${port}`;
                 this.server = {
-                    close() {
-                        child.kill();
+                    close: () => {
+                        try {
+                            child.kill();
+                        } catch (e) {
+                            this.log("Kill Server Error:" + e);
+                        }
                     },
                 };
                 res();
+            });
+            child.once('exit', (e) => {
+                this.log('Static Server Error: ' + e);
             });
         });
     }
@@ -259,7 +266,6 @@ export class ProjectRunner {
         }
         await rimraf(this.outputDir);
         this.log(`Finished Destroy`);
-
     }
 
     private getWebpackConfig() {
