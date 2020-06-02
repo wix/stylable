@@ -1,0 +1,28 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: '03:00'
+  open-pull-requests-limit: 10
+  versioning-strategy: increase
+  ignore:
+  - dependency-name: terser-webpack-plugin
+    versions:
+    - "> 2.3.6"
+  - dependency-name: "@types/node"
+    versions:
+    - "> 10.17.24"
+  - dependency-name: "@types/node"
+    versions:
+    - ">= 11.a, < 12"
+  - dependency-name: "@types/node"
+    versions:
+    - ">= 12.a, < 13"
+  - dependency-name: "@types/node"
+    versions:
+    - ">= 9.a, < 10"
+  - dependency-name: workbox-webpack-plugin
+    versions:
+    - "> 4.3.1"
