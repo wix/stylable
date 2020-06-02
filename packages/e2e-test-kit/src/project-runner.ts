@@ -178,7 +178,7 @@ export class ProjectRunner {
                 };
                 res();
             });
-            child.once('exit', (e) => {
+            child.once('error', (e) => {
                 this.log('Static Server Error: ' + e);
             });
         });

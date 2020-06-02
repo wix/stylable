@@ -99,13 +99,14 @@ const stylableLoader: loader.Loader = function (content) {
             }
 
             for (const message of result.messages) {
-                // eslint-disable-next-line default-case
                 switch (message.type) {
                     case 'import':
                         imports.push(message.value);
                         break;
                     case 'url-replacement':
                         urlReplacements.push(message.value);
+                        break;
+                    default:
                         break;
                 }
             }
