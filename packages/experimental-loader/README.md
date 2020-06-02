@@ -71,5 +71,6 @@ This loader is experimental and is not the recommended way of integrating Stylab
 This loader:
 
 -   Does not perform Stylable specific optimizations
--   Can have issues with CSS loading order (order being determined by JS imports)
+-   Can have issues with CSS loading order (order being determined by JS imports) [issue](https://github.com/webpack-contrib/mini-css-extract-plugin/issues/530)
 -   Can have issues with updating CSS when JS imports change order (existing mini-css-extract-plugin issue)
+
