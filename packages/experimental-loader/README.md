@@ -1,6 +1,12 @@
 # Experimental Stylable Webpack Loader
 
-This loader is designed to work with the webpack `mini-css-extract-plugin`. This setup actually uses two loaders internally. One for the transformation and the other for the stylable runtime.
+This loader is designed to work with the webpack `mini-css-extract-plugin`. This setup actually uses two loaders internally.
+
+`stylable-transform-loader` - responsible for the stylable transform and generate `css-loader` compatible output that the `mini-css-extract-plugin` can also digest.
+
+`stylable-runtime-loader` - because stylable has richer module api then css modules and `css-loader` loader flow dose not support it. we are using this loader to warp the raw stylable locals data with the runtime stylesheet.
+
+
 
 Minimal webpack configuration with the loaders:
 
