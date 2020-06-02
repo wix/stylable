@@ -14,6 +14,7 @@ describe(`(${project}) (production)`, () => {
             webpackOptions: {
                 mode: 'production',
             },
+            log: true
         },
         before,
         afterEach,
@@ -27,8 +28,8 @@ describe(`(${project}) (production)`, () => {
         expect(cssLinks).to.eql(['compA.css', 'compB.css']);
     });
 
-    it('not output dev st directives', async () => {
-        const css = await projectRunner.getBuildAsset('compB.css');
+    it('not output dev st directives', () => {
+        const css = projectRunner.getBuildAsset('compB.css');
 
         expect(css).to.not.include('-st-extends');
         expect(css).to.not.include('class extending component');

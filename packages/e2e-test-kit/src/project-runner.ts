@@ -16,6 +16,7 @@ export interface Options {
     webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
+    log?: boolean;
 }
 
 type MochaHook = import('mocha').HookFunction;
@@ -76,6 +77,7 @@ export class ProjectRunner {
     public browser!: puppeteer.Browser | null;
     public compiler!: webpack.Compiler | null;
     public watchingHandle!: webpack.Watching | null;
+    public log: typeof console.log
     constructor({
         projectDir,
         port = 3000,
@@ -83,6 +85,7 @@ export class ProjectRunner {
         throwOnBuildError = true,
         webpackOptions,
         configName = 'webpack.config',
+        log = false,
     }: Options) {
         this.projectDir = projectDir;
         this.outputDir = join(this.projectDir, 'dist');
@@ -93,6 +96,11 @@ export class ProjectRunner {
         this.pages = [];
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
+        this.log = log
+            ? console.log.bind(console, '[ProjectRunner]')
+            : () => {
+                  /*noop*/
+              };
     }
     public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
         return {
@@ -101,6 +109,7 @@ export class ProjectRunner {
         };
     }
     public async bundle() {
+        this.log('Bundle Start');
         const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
@@ -110,8 +119,10 @@ export class ProjectRunner {
         if (this.throwOnBuildError && this.stats.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }
+        this.log('Bundle Finished');
     }
     public async watch() {
+        this.log('Watch Start');
         const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
@@ -133,9 +144,11 @@ export class ProjectRunner {
         });
 
         await firstCompile.promise;
+        this.log('Finished Initial Compile');
     }
 
     public async serve() {
+        this.log('Start Serve');
         return new Promise((res) => {
             const child = spawn(
                 'node',
@@ -152,6 +165,7 @@ export class ProjectRunner {
                 }
             );
             child.once('message', (port) => {
+                this.log(`Server Running (port: ${port})`);
                 this.serverUrl = `http://localhost:${port}`;
                 this.server = {
                     close() {
@@ -223,13 +237,17 @@ export class ProjectRunner {
     }
 
     public async destroy() {
+        this.log(`Start Destroy Process`);
+
         if (this.browser) {
             await this.browser.close();
             this.browser = null;
+            this.log(`Browser closed`);
         }
         if (this.server) {
             this.server.close();
             this.server = null;
+            this.log(`Server closed`);
         }
         if (this.compiler) {
             this.compiler = null;
@@ -237,8 +255,11 @@ export class ProjectRunner {
         if (this.watchingHandle) {
             await new Promise((res) => this.watchingHandle?.close(res));
             this.watchingHandle = null;
+            this.log(`Watch closed`);
         }
         await rimraf(this.outputDir);
+        this.log(`Finished Destroy`);
+
     }
 
     private getWebpackConfig() {
