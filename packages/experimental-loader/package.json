@@ -10,8 +10,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/runtime": "^3.5.0",
-    "@stylable/core": "^3.5.0",
+    "@stylable/optimizer": "^3.6.1",
+    "@stylable/runtime": "^3.6.1",
+    "@stylable/core": "^3.6.1",
     "css-loader": "^3.5.3"
   },
   "files": [
