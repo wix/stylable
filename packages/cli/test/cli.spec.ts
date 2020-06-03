@@ -6,8 +6,8 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
 
-function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
-    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs]);
+function runCli(cliArgs: string[] = []) {
+    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs], { encoding: 'utf8' });
 }
 
 interface Files {
@@ -58,8 +58,8 @@ describe('Stylable Cli', () => {
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
         const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -87,6 +87,23 @@ describe('Stylable Cli', () => {
         ]);
     });
 
+    it('fails when provided unknown cli flags', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root {color:red}`,
+        });
+
+        const { status, output } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            './dist',
+            '--unknownFlag',
+        ]);
+
+        expect(status, output.join('')).to.not.equal(0);
+    });
+
     it('single file build with all targets', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
@@ -108,8 +125,8 @@ describe('Stylable Cli', () => {
         ]);
         const dirContent = loadDirSync(tempDir.path);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
         expect(Object.keys(dirContent)).to.eql([
             join('dist', 'style.css'),
             join('dist', 'style.st.css'),
@@ -129,8 +146,8 @@ describe('Stylable Cli', () => {
         const nsr = require.resolve('@stylable/node');
         const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -157,8 +174,8 @@ describe('Stylable Cli', () => {
             '--useNamespaceReference',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent[join('dist', 'style.st.css')];
@@ -184,8 +201,8 @@ describe('Stylable Cli', () => {
             '--manifest',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'stylable.manifest.json');
@@ -212,8 +229,8 @@ describe('Stylable Cli', () => {
             '/x/y/m.json',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'x/y/m.json');
@@ -235,7 +252,7 @@ describe('Stylable Cli', () => {
             requireHook,
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).to.contain('I HAVE BEEN REQUIRED');
+        expect(stderr).equal('');
+        expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
 });
