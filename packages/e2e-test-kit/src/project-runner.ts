@@ -148,7 +148,7 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        this.log('Start Serve');
+        this.log('Start Server');
         return new Promise((res) => {
             const child = spawn(
                 'node',
