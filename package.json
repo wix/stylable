@@ -59,7 +59,7 @@
     "create-listening-server": "^1.0.0",
     "create-temp-directory": "^1.1.1",
     "css-loader": "^3.5.3",
-    "eslint": "^7.1.0",
+    "eslint": "^7.2.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-react": "^7.20.0",
     "eslint-plugin-react-hooks": "^4.0.4",
