@@ -10,6 +10,7 @@ import { getStylable } from './cached-stylable-factory';
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode } = require('css-loader/dist/utils');
+const decache = require('decache');
 
 export let stylable: Stylable;
 
@@ -39,6 +40,10 @@ interface LoaderImport {
 }
 
 const timedCacheOptions = { useTimer: true, timeout: 1000 };
+const requireModule = (id: string) => {
+    decache(id);
+    return require(id);
+};
 const optimizer = new StylableOptimizer();
 
 const stylableLoader: loader.Loader = function (content) {
@@ -65,6 +70,7 @@ const stylableLoader: loader.Loader = function (content) {
         resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
         timedCacheOptions,
         resolveNamespace,
+        requireModule,
     });
 
     const res = stylable.transform(content, this.resourcePath);
