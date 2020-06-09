@@ -2,7 +2,7 @@ import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit'
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'use-case-2-prod';
+const project = 'two-components-dynamic-order';
 
 describe(`(${project}) (production)`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
@@ -13,8 +13,7 @@ describe(`(${project}) (production)`, () => {
             },
             webpackOptions: {
                 mode: 'production',
-            },
-            log: true
+            }
         },
         before,
         afterEach,

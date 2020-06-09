@@ -2,7 +2,7 @@ import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit'
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'use-case-1';
+const project = 'basic-integration';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
