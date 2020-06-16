@@ -1,11 +1,13 @@
 import hash from 'murmurhash';
-import * as nodePath from 'path'; /* type */
 import { processNamespace } from './stylable-processor';
 
 export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,
     loadConfig: (filePath: string) => object,
-    { dirname, relative }: Pick<typeof nodePath, 'relative' | 'dirname'>,
+    {
+        dirname,
+        relative,
+    }: { dirname(path: string): string; relative(from: string, to: string): string },
     hashSalt = '',
     prefix = '',
     normalizeVersion = (semver: string) => semver

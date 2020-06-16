@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "3.6.2",
+  "version": "3.6.3",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -14,7 +14,7 @@
   "dependencies": {
     "css-selector-tokenizer": "^0.7.2",
     "deindent": "^0.1.0",
-    "enhanced-resolve": "^4.1.1",
+    "enhanced-resolve": "^4.2.0",
     "is-vendor-prefixed": "^3.3.1",
     "jest-docblock": "^26.0.0",
     "lodash.clonedeep": "^4.5.0",
