@@ -28,7 +28,7 @@ export function isAsset(url: string) {
 export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
     const isAbs = path.isAbsolute(resourcePath);
     let abs: string;
-    if (isExternal(resourcePath)) {
+    if (isExternal(resourcePath) || (!isAbs && !resourcePath.startsWith('.'))) {
         abs = resourcePath;
     } else if (isAbs && resourcePath.startsWith('/')) {
         abs = path.join(rootContext, resourcePath);
@@ -69,28 +69,53 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
     }
 }
 
-export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
-    ast.walkDecls((decl) =>
-        processDeclarationUrls(
-            decl,
-            (node) => {
-                if (isAsset(node.url!)) {
-                    if (node.url!.startsWith('.')) {
-                        node.url =
-                            './' +
-                            path
-                                .join(
-                                    path.relative(
-                                        path.dirname(targetPath),
-                                        path.dirname(originPath)
-                                    ),
-                                    node.url!
-                                )
-                                .replace(/\\/gm, '/');
-                    }
-                }
-            },
-            true
-        )
-    );
+function handleAssetUrl(
+    node: ParsedValue,
+    originPath: string,
+    targetPath: string,
+    _resolvePath: (path: string, context: string) => string
+) {
+    if (node.url && isAsset(node.url)) {
+        if (node.url.startsWith('.')) {
+            const url = path
+                .join(path.relative(path.dirname(targetPath), path.dirname(originPath)), node.url)
+                .replace(/\\/gm, '/');
+            node.url = url.startsWith('.') ? url : './' + url;
+        }
+    }
 }
+
+function handleAssetUrlWithNodeModulesRequests(
+    node: ParsedValue,
+    originPath: string,
+    targetPath: string,
+    resolvePath: (path: string, context: string) => string
+) {
+    if (node.url && node.url.startsWith('~')) {
+        node.url = path.relative(path.dirname(targetPath), resolvePath(node.url.slice(1), originPath));
+    } else {
+        handleAssetUrl(node, originPath, targetPath, resolvePath);
+    }
+}
+
+function fixRelativeUrlFactory(handleAsset: typeof handleAssetUrl) {
+    return function fixRelativeUrls(
+        ast: postcss.Root,
+        originPath: string,
+        targetPath: string,
+        resolvePath: (path: string, context: string) => string
+    ) {
+        ast.walkDecls((decl) =>
+            processDeclarationUrls(
+                decl,
+                (node) => handleAsset(node, originPath, targetPath, resolvePath),
+                true
+            )
+        );
+    };
+}
+
+export const fixRelativeUrls = fixRelativeUrlFactory(handleAssetUrl);
+export const fixRelativeUrlsWithNodeModules = fixRelativeUrlFactory(
+    handleAssetUrlWithNodeModulesRequests
+);
