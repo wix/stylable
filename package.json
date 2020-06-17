@@ -30,7 +30,7 @@
     "@types/js-beautify": "^1.11.0",
     "@types/jsdom": "^16.2.3",
     "@types/json-schema": "^7.0.5",
-    "@types/loader-utils": "^2.0.0",
+    "@types/loader-utils": "^2.0.1",
     "@types/lodash.camelcase": "^4.3.6",
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/lodash.clonedeepwith": "^4.5.6",
