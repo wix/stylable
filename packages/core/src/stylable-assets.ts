@@ -1,10 +1,9 @@
 import path from 'path';
 import postcss from 'postcss';
-import urlRegex from 'url-regex';
+import isUrl from 'is-url-superb';
 import { ParsedValue } from './types';
 
 const { parseValues, stringifyValues } = require('css-selector-tokenizer');
-const isUrl = urlRegex({ exact: true, strict: true });
 
 export type OnUrlCallback = (node: ParsedValue) => void;
 
@@ -18,7 +17,7 @@ export function collectAssets(ast: postcss.Root) {
 }
 
 export function isExternal(url: string) {
-    return url === '' || url.startsWith('data:') || isUrl.test(url);
+    return url === '' || url.startsWith('data:') || isUrl(url);
 }
 
 export function isAsset(url: string) {
