@@ -1,15 +1,6 @@
 import { expect } from 'chai';
 import { normalize } from 'path';
-import { createMemoryFs } from '@file-services/memory';
-import {
-    collectAssets,
-    isAsset,
-    makeAbsolute,
-    safeParse,
-    fixRelativeUrls,
-    createDefaultResolver,
-    fixRelativeUrlsWithNodeModules,
-} from '../src';
+import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, safeParse } from '../src';
 const css = `
     .a{
         background: url("./a.png")
@@ -71,9 +62,7 @@ describe('stylable assets', () => {
     it('fixRelativeUrls', () => {
         const ast = safeParse(css);
 
-        fixRelativeUrls(ast, '/root', '/root/module', (path: string, _context: string) => {
-            return path;
-        });
+        fixRelativeUrls(ast, '/root', '/root/module');
         const [relative, absolute, external, data, url] = collectAssets(ast);
 
         expect(relative).to.equal('../a.png');
@@ -81,40 +70,5 @@ describe('stylable assets', () => {
         expect(external).to.equal('~some-package/c.png');
         expect(data).to.equal('data:xxx');
         expect(url).to.equal('http://d.ddd');
-    });
-
-    it('fixRelativeUrlsWithNodeModules', () => {
-        const ast = safeParse(`
-        .b{
-            background: url("~base/asset.png")
-        }
-        `);
-        const fs = createMemoryFs({
-            '/': {
-                node_modules: {
-                    base: {
-                        'asset.png': '',
-                    },
-                    mixin: {
-                        'mix.st.css': '',
-                    },
-                },
-                src: {
-                    'index.st.css': '',
-                },
-            },
-        });
-
-        const resolver = createDefaultResolver(fs, {});
-
-        fixRelativeUrlsWithNodeModules(
-            ast,
-            '/node_modules/mixin/mix.st.css',
-            '/src/index.st.css',
-            (path: string, context: string) => resolver(context, path)
-        );
-        const [thirdParty] = collectAssets(ast);
-
-        expect(thirdParty).to.equal('../node_modules/base/asset.png');
     });
 });

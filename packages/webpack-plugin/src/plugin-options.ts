@@ -52,6 +52,7 @@ export function normalizeOptions(
         useEntryModuleInjection: false,
         experimentalHMR: false,
         plugins: [],
+        resolveExternalAssetRequests: true
     };
 
     return {

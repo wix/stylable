@@ -39,7 +39,6 @@ import {
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-import { fixRelativeUrls } from './stylable-assets';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
@@ -106,7 +105,7 @@ export interface TransformerOptions {
     delimiter?: string;
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
-    processMixinUrls?: typeof fixRelativeUrls;
+    resolveExternalAssetRequests?: boolean;
     postProcessor?: postProcessor;
     mode?: EnvMode;
 }
@@ -154,7 +153,7 @@ export class StylableTransformer {
     public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
-    public fixRelativeUrls: typeof fixRelativeUrls;
+    public resolveExternalAssetRequests: boolean;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
     private metaParts = new WeakMap<StylableMeta, MetaParts>();
@@ -166,7 +165,7 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.fixRelativeUrls = options.processMixinUrls || fixRelativeUrls;
+        this.resolveExternalAssetRequests = options.resolveExternalAssetRequests ?? true;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
         this.mode = options.mode || 'production';
     }
@@ -214,7 +213,10 @@ export class StylableTransformer {
                 variableOverride,
                 this.replaceValueHook,
                 this.diagnostics,
-                path.slice()
+                path.slice(),
+                undefined,
+                undefined,
+                this.resolveExternalAssetRequests
             );
         });
 
@@ -241,7 +243,9 @@ export class StylableTransformer {
                         this.replaceValueHook,
                         this.diagnostics,
                         path.slice(),
-                        cssVarsMapping
+                        cssVarsMapping,
+                        undefined,
+                        this.resolveExternalAssetRequests
                     );
             }
         });

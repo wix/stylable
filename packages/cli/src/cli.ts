@@ -110,6 +110,10 @@ const { argv } = yargs
         description: 'verbose log',
         default: false,
     })
+    .option('resolveExternalAssetRequests', {
+        description: 'resolve 3rd party url requests ("~")',
+        default: true,
+    })
     .option('diagnostics', {
         description: 'verbose diagnostics',
         default: false,
@@ -143,6 +147,7 @@ const {
     manifest,
     require: requires,
     useNamespaceReference,
+    resolveExternalAssetRequests,
 } = argv;
 
 log('[Arguments]', argv);
@@ -159,6 +164,7 @@ const stylable = Stylable.create({
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
+    resolveExternalAssetRequests,
 });
 
 build({

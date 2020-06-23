@@ -69,53 +69,29 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
     }
 }
 
-function handleAssetUrl(
-    node: ParsedValue,
-    originPath: string,
-    targetPath: string,
-    _resolvePath: (path: string, context: string) => string
-) {
-    if (node.url && isAsset(node.url)) {
-        if (node.url.startsWith('.')) {
-            const url = path
-                .join(path.relative(path.dirname(targetPath), path.dirname(originPath)), node.url)
-                .replace(/\\/gm, '/');
-            node.url = url.startsWith('.') ? url : './' + url;
-        }
-    }
+export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
+    ast.walkDecls((decl) =>
+        processDeclarationUrls(
+            decl,
+            (node) => {
+                if (node.url && isAsset(node.url)) {
+                    if (node.url.startsWith('.')) {
+                        const url = path
+                            .join(
+                                path.relative(path.dirname(targetPath), path.dirname(originPath)),
+                                node.url
+                            )
+                            .replace(/\\/gm, '/');
+                        node.url = assureRelativeUrlPrefix(url);
+                    }
+                }
+            },
+
+            true
+        )
+    );
 }
 
-function handleAssetUrlWithNodeModulesRequests(
-    node: ParsedValue,
-    originPath: string,
-    targetPath: string,
-    resolvePath: (path: string, context: string) => string
-) {
-    if (node.url && node.url.startsWith('~')) {
-        node.url = path.relative(path.dirname(targetPath), resolvePath(node.url.slice(1), originPath));
-    } else {
-        handleAssetUrl(node, originPath, targetPath, resolvePath);
-    }
+export function assureRelativeUrlPrefix(url: string) {
+    return url.startsWith('.') ? url : './' + url;
 }
-
-function fixRelativeUrlFactory(handleAsset: typeof handleAssetUrl) {
-    return function fixRelativeUrls(
-        ast: postcss.Root,
-        originPath: string,
-        targetPath: string,
-        resolvePath: (path: string, context: string) => string
-    ) {
-        ast.walkDecls((decl) =>
-            processDeclarationUrls(
-                decl,
-                (node) => handleAsset(node, originPath, targetPath, resolvePath),
-                true
-            )
-        );
-    };
-}
-
-export const fixRelativeUrls = fixRelativeUrlFactory(handleAssetUrl);
-export const fixRelativeUrlsWithNodeModules = fixRelativeUrlFactory(
-    handleAssetUrlWithNodeModulesRequests
-);

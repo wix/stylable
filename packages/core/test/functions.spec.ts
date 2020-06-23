@@ -296,7 +296,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                         '/style.st.css': {
                             content: `
                                 @font-face {
-                                    src: url(/test.st.css) format('woff');
+                                    src: url(/test.woff) format('woff');
                                 }
                             `,
                         },
@@ -304,7 +304,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
+                expect(rule.nodes![0].toString()).to.equal("src: url(/test.woff) format('woff')");
             });
 
             it('should perserve native format function quotation with stylable var', () => {
@@ -317,7 +317,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                     fontType: "'woff'";
                                 }
                                 @font-face {
-                                    src: url(/test.st.css) format(value(fontType));
+                                    src: url(/test.woff) format(value(fontType));
                                 }
                             `,
                         },
@@ -325,7 +325,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 });
 
                 const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal("src: url(/test.st.css) format('woff')");
+                expect(rule.nodes![0].toString()).to.equal("src: url(/test.woff) format('woff')");
             });
 
             xit('should allow using formatters inside a url native function', () => {
@@ -374,6 +374,46 @@ describe('Stylable functions (native, formatter and variable)', () => {
 
                 const rule = result.nodes![0] as postcss.Rule;
                 expect(rule.nodes![0].toString()).to.equal('background: url("some-static-url")');
+            });
+
+            it('should resolve a 3rd party asset request (~)', () => {
+                const result = generateStylableRoot({
+                    entry: `/style.st.css`,
+                    files: {
+                        node_modules: {
+                            'external-package': {
+                                'asset.png': '',
+                            },
+                        },
+                        '/style.st.css': {
+                            content: `
+                                .container {
+                                    background: url(~external-package/asset.png);
+                                    background: url( ~external-package/asset.png);
+                                    background: url(~external-package/asset.png) #00D no-repeat fixed;
+                                    list-style: square url(~external-package/asset.png);
+                                    background: url(
+                                          ~external-package/asset.png
+                                          );
+
+                                }
+                            `,
+                        },
+                    } as any,
+                });
+
+                const rules = (result.nodes![0] as postcss.Rule).nodes!.map((node) =>
+                    node.toString()
+                );
+                expect(rules, 'failed resolving third party asset').to.eql([
+                    'background: url(./node_modules/external-package/asset.png)',
+                    'background: url( ./node_modules/external-package/asset.png)',
+                    'background: url(./node_modules/external-package/asset.png) #00D no-repeat fixed',
+                    'list-style: square url(./node_modules/external-package/asset.png)',
+                    `background: url(
+                                          ./node_modules/external-package/asset.png
+                                          )`,
+                ]);
             });
         });
 

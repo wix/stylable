@@ -1,7 +1,9 @@
+import { dirname, relative } from 'path';
 import postcss from 'postcss';
 import { resolveCustomValues, stTypes } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
+import { assureRelativeUrlPrefix } from './stylable-assets';
 import { StylableMeta } from './stylable-processor';
 import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { replaceValueHook, StylableTransformer } from './stylable-transformer';
@@ -62,7 +64,9 @@ export function resolveArgumentsValue(
             transformer.replaceValueHook,
             diagnostics,
             path,
-            cssVarsMapping
+            cssVarsMapping,
+            undefined,
+            transformer.resolveExternalAssetRequests
         );
     }
     return resolvedArgs;
@@ -78,7 +82,8 @@ export function processDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = []
+    args: string[] = [],
+    resolveExternalUrl?: boolean
 ): { topLevelType: any; outputValue: string; typeError: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
@@ -103,7 +108,9 @@ export function processDeclarationValue(
                                     valueHook,
                                     diagnostics,
                                     passedThrough.concat(createUniqID(meta.source, varName)),
-                                    cssVarsMapping
+                                    cssVarsMapping,
+                                    undefined,
+                                    resolveExternalUrl
                                 )
                             );
                         if (variableOverride && variableOverride[varName]) {
@@ -133,7 +140,8 @@ export function processDeclarationValue(
                                 diagnostics,
                                 passedThrough.concat(createUniqID(meta.source, varName)),
                                 cssVarsMapping,
-                                getArgs
+                                getArgs,
+                                resolveExternalUrl
                             );
 
                             const { outputValue, topLevelType, typeError } = resolved;
@@ -174,7 +182,8 @@ export function processDeclarationValue(
                                                 createUniqID(meta.source, varName)
                                             ),
                                             cssVarsMapping,
-                                            getArgs
+                                            getArgs,
+                                            resolveExternalUrl
                                         );
                                         parsedNode.resolvedValue = valueHook
                                             ? valueHook(
@@ -238,8 +247,23 @@ export function processDeclarationValue(
                     } else if (value === 'url') {
                         // postcss-value-parser treats url differently:
                         // https://github.com/TrySound/postcss-value-parser/issues/34
+
+                        const url = parsedNode.nodes[0];
+                        if (
+                            resolveExternalUrl &&
+                            url.type === 'word' &&
+                            url.value.startsWith('~')
+                        ) {
+                            const sourceDir = dirname(meta.source);
+                            url.value = assureRelativeUrlPrefix(
+                                relative(
+                                    sourceDir,
+                                    resolver.resolvePath(url.value.slice(1), sourceDir)
+                                ).replace(/\\/gm, '/')
+                            );
+                        }
                     } else if (value === 'format') {
-                        // perserve native format function quotation
+                        // preserve native format function quotation
                         parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
                     } else {
                         const formatterRef = meta.mappedSymbols[value];
@@ -339,7 +363,8 @@ export function evalDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = []
+    args: string[] = [],
+    resolveExternalUrl?: boolean
 ): string {
     return processDeclarationValue(
         resolver,
@@ -351,7 +376,8 @@ export function evalDeclarationValue(
         diagnostics,
         passedThrough,
         cssVarsMapping,
-        args
+        args,
+        resolveExternalUrl
     ).outputValue;
 }
 

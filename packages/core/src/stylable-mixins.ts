@@ -3,6 +3,7 @@ import postcss from 'postcss';
 
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
+import { fixRelativeUrls } from './stylable-assets';
 import { ImportSymbol } from './stylable-meta';
 import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve } from './stylable-resolver';
@@ -147,11 +148,10 @@ function handleJSMixin(
     transformer.transformAst(mixinRoot, meta, undefined, variableOverride, [], true);
 
     const mixinPath = (mix.ref as ImportSymbol).import.from;
-    transformer.fixRelativeUrls(
+    fixRelativeUrls(
         mixinRoot,
         transformer.fileProcessor.resolvePath(mixinPath, dirname(meta.source)),
-        meta.source,
-        transformer.fileProcessor.resolvePath
+        meta.source
     );
 
     mergeRules(mixinRoot, rule);
@@ -201,12 +201,7 @@ function createMixinRootFromCSSResolve(
         true
     );
 
-    transformer.fixRelativeUrls(
-        mixinRoot,
-        mixinMeta.source,
-        meta.source,
-        transformer.fileProcessor.resolvePath
-    );
+    fixRelativeUrls(mixinRoot, mixinMeta.source, meta.source);
 
     return mixinRoot;
 }

@@ -2,7 +2,6 @@ import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { safeParse } from './parser';
-import { fixRelativeUrls } from './stylable-assets';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
@@ -32,7 +31,7 @@ export interface StylableConfig {
     resolveNamespace?: typeof processNamespace;
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
-    processMixinUrls?: typeof fixRelativeUrls;
+    resolveExternalAssetRequests?: boolean;
 }
 
 export class Stylable {
@@ -56,7 +55,7 @@ export class Stylable {
             config.resolveNamespace,
             config.timedCacheOptions,
             config.resolveModule,
-            config.processMixinUrls
+            config.resolveExternalAssetRequests
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -79,7 +78,7 @@ export class Stylable {
             useTimer: true,
         },
         protected resolveModule?: ModuleResolver,
-        protected processMixinUrls?: typeof fixRelativeUrls
+        protected resolveExternalAssetRequests: boolean = true
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -103,7 +102,6 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             mode: this.mode,
-            processMixinUrls: this.processMixinUrls,
             ...options,
         });
     }

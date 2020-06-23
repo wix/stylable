@@ -5,7 +5,6 @@ import {
     makeAbsolute,
     processDeclarationUrls,
     OnUrlCallback,
-    fixRelativeUrlsWithNodeModules,
 } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -123,7 +122,7 @@ export class StylableWebpackPlugin {
             this.options.resolveNamespace || resolveNamespace,
             undefined,
             resolveModule,
-            fixRelativeUrlsWithNodeModules
+            this.options.resolveExternalAssetRequests
         );
         this.stylable = stylable;
     }
@@ -166,9 +165,7 @@ export class StylableWebpackPlugin {
         const moduleDir = dirname(module.resource);
         const onUrl: OnUrlCallback = (node) => {
             if (node.url !== undefined && isAsset(node.url)) {
-                const resourcePath = node.url.startsWith('~')
-                    ? this.stylable.resolvePath(dirname(module.resource), node.url.slice(1))
-                    : makeAbsolute(node.url, rootContext, moduleDir);
+                const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
                 const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
                 if (assetModule) {
                     replacements.push(assetModule);

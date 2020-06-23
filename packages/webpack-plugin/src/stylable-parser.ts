@@ -51,7 +51,7 @@ export class StylableParser {
 
         currentModule.addDependency(new StylableExportsDependency(['default']));
 
-        handleUrlDependencies(this.stylable, res, currentModule, context);
+        handleUrlDependencies(res, currentModule, context);
 
         meta.imports.forEach((stylableImport) => {
             if (isStylableImport(stylableImport)) {
@@ -111,29 +111,17 @@ function addStylableFileDependencyChain(
     }
 }
 
-function handleUrlDependencies(
-    stylable: Stylable,
-    res: StylableResults,
-    currentModule: StylableModule,
-    context: any
-) {
+function handleUrlDependencies(res: StylableResults, currentModule: StylableModule, context: any) {
     const urls: string[] = [];
     res.meta.outputAst!.walkDecls((node) =>
         processDeclarationUrls(node, (node) => node.url && urls.push(node.url), false)
     );
-    addUrlDependencies(stylable, urls, currentModule, context);
+    addUrlDependencies(urls, currentModule, context);
 }
 
-function addUrlDependencies(
-    stylable: Stylable,
-    urls: string[],
-    stylableModule: StylableModule,
-    rootContext: string
-) {
+function addUrlDependencies(urls: string[], stylableModule: StylableModule, rootContext: string) {
     urls.filter((url) => isAsset(url)).forEach((asset) => {
-        const absPath = asset.startsWith('~')
-            ? stylable.resolvePath(path.dirname(stylableModule.resource), asset.slice(1))
-            : makeAbsolute(asset, rootContext, path.dirname(stylableModule.resource));
+        const absPath = makeAbsolute(asset, rootContext, path.dirname(stylableModule.resource));
 
         stylableModule.buildInfo.fileDependencies.add(absPath);
         stylableModule.addDependency(new StylableAssetDependency(absPath));
