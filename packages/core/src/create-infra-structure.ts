@@ -4,6 +4,7 @@ import { safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
 import { createDefaultResolver } from './module-resolver';
+import { Diagnostics } from './diagnostics';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -17,7 +18,8 @@ export function createInfrastructure(
     resolveOptions: any = {},
     resolveNamespace?: typeof processNamespace,
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
-    resolveModule = createDefaultResolver(fileSystem, resolveOptions)
+    resolveModule = createDefaultResolver(fileSystem, resolveOptions),
+    diagnostics = new Diagnostics()
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
@@ -38,7 +40,7 @@ export function createInfrastructure(
         (from, content) => {
             return process(
                 safeParse(content, { from: resolvePath(projectRoot, from) }),
-                undefined,
+                diagnostics,
                 resolveNamespace
             );
         },

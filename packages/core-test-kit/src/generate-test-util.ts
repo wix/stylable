@@ -1,5 +1,4 @@
 import {
-    cachedProcessFile,
     createMinimalFS,
     Diagnostics,
     FileProcessor,
@@ -12,6 +11,7 @@ import {
     StylableResolver,
     StylableResults,
     StylableTransformer,
+    createInfrastructure,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import postcss from 'postcss';
@@ -48,17 +48,19 @@ export function generateInfra(
     fileProcessor: FileProcessor<StylableMeta>;
 } {
     const { fs, requireModule } = createMinimalFS(config);
-
-    const fileProcessor = cachedProcessFile<StylableMeta>(
-        (from, content) => {
-            const meta = process(postcss.parse(content, { from }), diagnostics);
-            meta.namespace = config.files[from].namespace || meta.namespace;
+    const { fileProcessor } = createInfrastructure(
+        '/',
+        fs,
+        (meta, filePath) => {
+            meta.namespace = config.files[filePath].namespace || meta.namespace;
             return meta;
         },
-        fs,
-        (x) => (x.startsWith('./') || isAbsolute(x) ? x : '/node_modules/' + x)
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        diagnostics
     );
-
     const resolver = new StylableResolver(fileProcessor, requireModule);
 
     return { resolver, requireModule, fileProcessor };
