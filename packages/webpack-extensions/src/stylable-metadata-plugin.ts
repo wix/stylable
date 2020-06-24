@@ -45,6 +45,9 @@ export class StylableMetadataPlugin {
         try {
             return JSON.parse(fs.readFileSync(resource).toString());
         } catch (e) {
+            if (e instanceof SyntaxError) {
+                throw new SyntaxError(`${e.message} in ${resource}`);
+            }
             return null;
         }
     }
@@ -112,7 +115,7 @@ export class StylableMetadataPlugin {
             const jsonMode = !this.options.mode || this.options.mode === 'json';
             const jsonSource = JSON.stringify(builder.build(), null, 2);
 
-            let fileContent = jsonSource
+            let fileContent = jsonSource;
             switch (this.options.mode) {
                 case 'cjs':
                     fileContent = `module.exports = ${fileContent}`;
@@ -124,7 +127,11 @@ export class StylableMetadataPlugin {
                     fileContent = `define(() => { return ${fileContent}; });`;
                     break;
             }
-            const fileName = `${this.options.name}${this.options.useContentHashFileName ? `.${hashContent(fileContent, this.options.contentHashLength )}` : ''}.metadata.json${!jsonMode ? '.js' : ''}`
+            const fileName = `${this.options.name}${
+                this.options.useContentHashFileName
+                    ? `.${hashContent(fileContent, this.options.contentHashLength)}`
+                    : ''
+            }.metadata.json${!jsonMode ? '.js' : ''}`;
             compilation.assets[fileName] = new RawSource(fileContent);
         }
     }

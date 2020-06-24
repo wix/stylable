@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ className }) => {
                 >
                     Stylable!
                 </a>{' '}
-                <img className={classes.icon} src={stylableLogo} width={50} height={50} />
+                <img className={classes.icon} src={stylableLogo} width={50} height={50} alt="" />
             </h1>
         </header>
     );
