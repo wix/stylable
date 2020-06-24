@@ -105,7 +105,6 @@ export interface TransformerOptions {
     delimiter?: string;
     keepValues?: boolean;
     replaceValueHook?: replaceValueHook;
-    resolveExternalAssetRequests?: boolean;
     postProcessor?: postProcessor;
     mode?: EnvMode;
 }
@@ -153,7 +152,6 @@ export class StylableTransformer {
     public delimiter: string;
     public keepValues: boolean;
     public replaceValueHook: replaceValueHook | undefined;
-    public resolveExternalAssetRequests: boolean;
     public postProcessor: postProcessor | undefined;
     public mode: EnvMode;
     private metaParts = new WeakMap<StylableMeta, MetaParts>();
@@ -165,7 +163,6 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.resolveExternalAssetRequests = options.resolveExternalAssetRequests ?? true;
         this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
         this.mode = options.mode || 'production';
     }
@@ -215,8 +212,7 @@ export class StylableTransformer {
                 this.diagnostics,
                 path.slice(),
                 undefined,
-                undefined,
-                this.resolveExternalAssetRequests
+                undefined
             );
         });
 
@@ -244,8 +240,7 @@ export class StylableTransformer {
                         this.diagnostics,
                         path.slice(),
                         cssVarsMapping,
-                        undefined,
-                        this.resolveExternalAssetRequests
+                        undefined
                     );
             }
         });

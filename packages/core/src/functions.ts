@@ -65,8 +65,7 @@ export function resolveArgumentsValue(
             diagnostics,
             path,
             cssVarsMapping,
-            undefined,
-            transformer.resolveExternalAssetRequests
+            undefined
         );
     }
     return resolvedArgs;
@@ -82,8 +81,7 @@ export function processDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = [],
-    resolveExternalUrl?: boolean
+    args: string[] = []
 ): { topLevelType: any; outputValue: string; typeError: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
@@ -109,8 +107,7 @@ export function processDeclarationValue(
                                     diagnostics,
                                     passedThrough.concat(createUniqID(meta.source, varName)),
                                     cssVarsMapping,
-                                    undefined,
-                                    resolveExternalUrl
+                                    undefined
                                 )
                             );
                         if (variableOverride && variableOverride[varName]) {
@@ -140,8 +137,7 @@ export function processDeclarationValue(
                                 diagnostics,
                                 passedThrough.concat(createUniqID(meta.source, varName)),
                                 cssVarsMapping,
-                                getArgs,
-                                resolveExternalUrl
+                                getArgs
                             );
 
                             const { outputValue, topLevelType, typeError } = resolved;
@@ -182,8 +178,7 @@ export function processDeclarationValue(
                                                 createUniqID(meta.source, varName)
                                             ),
                                             cssVarsMapping,
-                                            getArgs,
-                                            resolveExternalUrl
+                                            getArgs
                                         );
                                         parsedNode.resolvedValue = valueHook
                                             ? valueHook(
@@ -249,11 +244,7 @@ export function processDeclarationValue(
                         // https://github.com/TrySound/postcss-value-parser/issues/34
 
                         const url = parsedNode.nodes[0];
-                        if (
-                            resolveExternalUrl &&
-                            url.type === 'word' &&
-                            url.value.startsWith('~')
-                        ) {
+                        if (url.type === 'word' && url.value.startsWith('~')) {
                             const sourceDir = dirname(meta.source);
                             url.value = assureRelativeUrlPrefix(
                                 relative(
@@ -363,8 +354,7 @@ export function evalDeclarationValue(
     diagnostics?: Diagnostics,
     passedThrough: string[] = [],
     cssVarsMapping?: Record<string, string>,
-    args: string[] = [],
-    resolveExternalUrl?: boolean
+    args: string[] = []
 ): string {
     return processDeclarationValue(
         resolver,
@@ -376,8 +366,7 @@ export function evalDeclarationValue(
         diagnostics,
         passedThrough,
         cssVarsMapping,
-        args,
-        resolveExternalUrl
+        args
     ).outputValue;
 }
 

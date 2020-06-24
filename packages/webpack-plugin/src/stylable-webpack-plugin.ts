@@ -121,8 +121,7 @@ export class StylableWebpackPlugin {
             compiler.options.mode as any,
             this.options.resolveNamespace || resolveNamespace,
             undefined,
-            resolveModule,
-            this.options.resolveExternalAssetRequests
+            resolveModule
         );
         this.stylable = stylable;
     }

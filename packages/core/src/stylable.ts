@@ -31,7 +31,6 @@ export interface StylableConfig {
     resolveNamespace?: typeof processNamespace;
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
-    resolveExternalAssetRequests?: boolean;
 }
 
 export class Stylable {
@@ -54,8 +53,7 @@ export class Stylable {
             config.mode,
             config.resolveNamespace,
             config.timedCacheOptions,
-            config.resolveModule,
-            config.resolveExternalAssetRequests
+            config.resolveModule
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -77,8 +75,7 @@ export class Stylable {
             timeout: 1,
             useTimer: true,
         },
-        protected resolveModule?: ModuleResolver,
-        protected resolveExternalAssetRequests: boolean = true
+        protected resolveModule?: ModuleResolver
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,

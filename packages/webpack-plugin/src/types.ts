@@ -51,7 +51,6 @@ export interface StylableWebpackPluginOptions {
     plugins?: Array<{ apply: (compiler: webpack.Compiler, stylablePlugin: any) => void }>;
     resolveNamespace?(): string;
     requireModule(path: string): any;
-    resolveExternalAssetRequests: boolean;
 }
 
 export interface StylableGeneratorOptions {

@@ -380,11 +380,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 const result = generateStylableRoot({
                     entry: `/style.st.css`,
                     files: {
-                        node_modules: {
-                            'external-package': {
-                                'asset.png': '',
-                            },
-                        },
+                        '/node_modules/external-package/asset.png': { content: '' },
                         '/style.st.css': {
                             content: `
                                 .container {
@@ -399,7 +395,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                                 }
                             `,
                         },
-                    } as any,
+                    },
                 });
 
                 const rules = (result.nodes![0] as postcss.Rule).nodes!.map((node) =>
