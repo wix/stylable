@@ -45,7 +45,7 @@ describe('stylable assets', () => {
         expect(collectAssets(ast).map((_) => makeAbsolute(_, '/root', '/root/module'))).to.eql([
             normalize('/root/module/a.png'),
             normalize('/root/b.png'),
-            normalize('~some-package/c.png'),
+            '~some-package/c.png',
             'data:xxx',
             'http://d.ddd',
         ]);
