@@ -12,7 +12,7 @@ The `url()` function has no notion of external packages or dependencies.
 
 ### Resolving 3rd-party assets
 
-In order to import `url()` assets from 3rd-party dependencies, Stylable supports the `~` URL prefix.
+In order to import `url()` assets from dependencies inside your `node_modules` directory, Stylable supports the `~` URL prefix.
 
 ```css
 .root {
