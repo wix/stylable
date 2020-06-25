@@ -12,7 +12,7 @@
   "dependencies": {
     "@stylable/core": "^3.6.3",
     "@stylable/optimizer": "^3.6.3",
-    "@stylable/runtime": "^3.6.3",
+    "@stylable/runtime": "^3.6.2",
     "css-loader": "^3.5.3",
     "decache": "^4.6.0"
   },

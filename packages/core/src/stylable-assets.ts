@@ -1,10 +1,9 @@
 import path from 'path';
 import postcss from 'postcss';
-import urlRegex from 'url-regex';
+import isUrl from 'is-url-superb';
 import { ParsedValue } from './types';
 
 const { parseValues, stringifyValues } = require('css-selector-tokenizer');
-const isUrl = urlRegex({ exact: true, strict: true });
 
 export type OnUrlCallback = (node: ParsedValue) => void;
 
@@ -18,7 +17,7 @@ export function collectAssets(ast: postcss.Root) {
 }
 
 export function isExternal(url: string) {
-    return url === '' || url.startsWith('data:') || isUrl.test(url);
+    return url === '' || url.startsWith('data:') || isUrl(url);
 }
 
 export function isAsset(url: string) {
@@ -28,7 +27,7 @@ export function isAsset(url: string) {
 export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
     const isAbs = path.isAbsolute(resourcePath);
     let abs: string;
-    if (isExternal(resourcePath)) {
+    if (isExternal(resourcePath) || resourcePath.startsWith('~')) {
         abs = resourcePath;
     } else if (isAbs && resourcePath.startsWith('/')) {
         abs = path.join(rootContext, resourcePath);
@@ -74,23 +73,24 @@ export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPat
         processDeclarationUrls(
             decl,
             (node) => {
-                if (isAsset(node.url!)) {
-                    if (node.url!.startsWith('.')) {
-                        node.url =
-                            './' +
-                            path
-                                .join(
-                                    path.relative(
-                                        path.dirname(targetPath),
-                                        path.dirname(originPath)
-                                    ),
-                                    node.url!
-                                )
-                                .replace(/\\/gm, '/');
+                if (node.url && isAsset(node.url)) {
+                    if (node.url.startsWith('.')) {
+                        const url = path
+                            .join(
+                                path.relative(path.dirname(targetPath), path.dirname(originPath)),
+                                node.url
+                            )
+                            .replace(/\\/gm, '/');
+                        node.url = assureRelativeUrlPrefix(url);
                     }
                 }
             },
+
             true
         )
     );
+}
+
+export function assureRelativeUrlPrefix(url: string) {
+    return !url.startsWith('./') && !url.startsWith('../') ? './' + url : url;
 }

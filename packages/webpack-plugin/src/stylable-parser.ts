@@ -122,6 +122,7 @@ function handleUrlDependencies(res: StylableResults, currentModule: StylableModu
 function addUrlDependencies(urls: string[], stylableModule: StylableModule, rootContext: string) {
     urls.filter((url) => isAsset(url)).forEach((asset) => {
         const absPath = makeAbsolute(asset, rootContext, path.dirname(stylableModule.resource));
+
         stylableModule.buildInfo.fileDependencies.add(absPath);
         stylableModule.addDependency(new StylableAssetDependency(absPath));
     });

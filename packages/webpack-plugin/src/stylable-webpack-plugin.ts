@@ -156,7 +156,7 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation,
         module: StylableModule
     ) {
-        if(!module.buildInfo.stylableTransformedAst) {
+        if (!module.buildInfo.stylableTransformedAst) {
             return;
         }
         const rootContext = (compilation as any).options.context;
