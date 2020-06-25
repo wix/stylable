@@ -53,12 +53,13 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 
 ### Integrations
 
-| Package Name                                        | Published Name                 |                                                               Latest Version                                                                | Description                                     |
-| --------------------------------------------------- | ------------------------------ | :-----------------------------------------------------------------------------------------------------------------------------------------: | ----------------------------------------------- |
-| [jest](./packages/jest)                             | `@stylable/jest`               |               [![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)               | Jest Stylable processor plugin                  |
-| [node](./packages/node)                             | `@stylable/node`               |               [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)               | `require` hook and Node module factory          |
-| [webpack-extensions](./packages/webpack-extensions) | `@stylable/webpack-extensions` | [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions) | Experimental features for `webpack` integration |
-| [webpack-plugin](./packages/webpack-plugin)         | `@stylable/webpack-plugin`     |     [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)     | `webpack` (`v4.x`) integration plugin           |
+| Package Name                                          | Published Name                  |                                                                Latest Version                                                                 | Description                                                        |
+| ----------------------------------------------------- | ------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------ |
+| [jest](./packages/jest)                               | `@stylable/jest`                |                [![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)                | Jest Stylable processor plugin                                     |
+| [node](./packages/node)                               | `@stylable/node`                |                [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)                | `require` hook and Node module factory                             |
+| [webpack-extensions](./packages/webpack-extensions)   | `@stylable/webpack-extensions`  |  [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)  | Experimental features for `webpack` integration                    |
+| [webpack-plugin](./packages/webpack-plugin)           | `@stylable/webpack-plugin`      |      [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)      | `webpack` (`v4.x`) integration plugin                              |
+| [experimental-loader](./packages/experimental-loader) | `@stylable/experimental-loader` | [![npm version](https://img.shields.io/npm/v/@stylable/experimental-loader.svg)](https://www.npmjs.com/package/@stylable/experimental-loader) | experimental `webpack` loader - not recommended for production use |
 
 ### Test-kits
 

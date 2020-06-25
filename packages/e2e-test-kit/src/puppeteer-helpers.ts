@@ -20,6 +20,12 @@ function getStyleElementsMetadata(getCss: boolean) {
     });
 }
 
+function getCSSLinks() {
+    const styleElements = Array.from(document.head.getElementsByTagName('link'));
+    return styleElements.map((cssLink) => cssLink.getAttribute('href'));
+}
+
 export const browserFunctions = {
     getStyleElementsMetadata,
+    getCSSLinks,
 };

@@ -1,0 +1,29 @@
+{
+  "name": "@stylable/experimental-loader",
+  "version": "3.6.3",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "test": "mocha \"./test/**/*.spec.ts\" --timeout 20000",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@stylable/core": "^3.6.3",
+    "@stylable/optimizer": "^3.6.3",
+    "@stylable/runtime": "^3.6.2",
+    "css-loader": "^3.5.3",
+    "decache": "^4.6.0"
+  },
+  "files": [
+    "cjs",
+    "src"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/experimental-loader",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}
