@@ -5,6 +5,11 @@ This loader supports working with `mini-css-extract-plugin`. Internally, this se
 - `stylable-transform-loader` - responsible for Stylable transformations and generates the `css-loader` compatible output that the `mini-css-extract-plugin` expects
 - `stylable-runtime-loader` - Stylable offers a richer module API compared to css modules. The `css-loader` flow does not support this API, and so we are using this loader to convert the raw Stylable locals data to the appropriate runtime stylesheet
 
+## Disclaimer
+
+This loader is **experimental** and currently **not the recommended way** of integrating Stylable into your project.  
+Use `@stylable/webpack-plugin` for the latest stable integration.
+
 ## Example
 
 A minimal webpack configuration using the two Stylable loaders in conjuction with the `mini-css-extract-plugin` loader:
@@ -59,12 +64,7 @@ interface LoaderOptions {
 | `resolveNamespace` | override default stylesheet namespace process |
 | `filterUrls`       | filter urls from webpack process              |
 
-## Disclaimer
-
-This loader is **experimental** and is currently **not the recommended way** of integrating Stylable into your project.  
-Use `@stylable/webpack-plugin` for the latest stable integration.
-
-### Known issues
+## Known issues
 
 As opposed to the current webpack-plugin integration, some behaviors are still missing, or lacking:
 
