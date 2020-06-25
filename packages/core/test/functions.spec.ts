@@ -385,6 +385,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             content: `
                                 .container {
                                     background: url(~external-package/asset.png);
+                                    background: url("~external-package/asset.png");
                                     background: url( ~external-package/asset.png);
                                     background: url(~external-package/asset.png) #00D no-repeat fixed;
                                     list-style: square url(~external-package/asset.png);
@@ -403,6 +404,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 );
                 expect(rules, 'failed resolving third party asset').to.eql([
                     'background: url(./node_modules/external-package/asset.png)',
+                    'background: url("./node_modules/external-package/asset.png")',
                     'background: url( ./node_modules/external-package/asset.png)',
                     'background: url(./node_modules/external-package/asset.png) #00D no-repeat fixed',
                     'list-style: square url(./node_modules/external-package/asset.png)',

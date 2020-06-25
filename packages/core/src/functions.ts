@@ -244,7 +244,10 @@ export function processDeclarationValue(
                         // https://github.com/TrySound/postcss-value-parser/issues/34
 
                         const url = parsedNode.nodes[0];
-                        if (url.type === 'word' && url.value.startsWith('~')) {
+                        if (
+                            (url.type === 'word' || url.type === 'string') &&
+                            url.value.startsWith('~')
+                        ) {
                             const sourceDir = dirname(meta.source);
                             url.value = assureRelativeUrlPrefix(
                                 relative(
