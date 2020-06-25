@@ -70,3 +70,5 @@
     title: Scoping
   - id: references/namespace
     title: Namespace
+  - id: references/using-external-assets
+    title: Using External Assets

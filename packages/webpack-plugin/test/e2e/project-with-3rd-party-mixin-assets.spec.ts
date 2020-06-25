@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset1.png', 'asset2.png'];
+        const expectedAssets = ['asset1.png', 'asset2.png', 'asset.png', 'deep.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 

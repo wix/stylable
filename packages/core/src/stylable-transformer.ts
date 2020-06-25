@@ -210,7 +210,9 @@ export class StylableTransformer {
                 variableOverride,
                 this.replaceValueHook,
                 this.diagnostics,
-                path.slice()
+                path.slice(),
+                undefined,
+                undefined
             );
         });
 
@@ -237,7 +239,8 @@ export class StylableTransformer {
                         this.replaceValueHook,
                         this.diagnostics,
                         path.slice(),
-                        cssVarsMapping
+                        cssVarsMapping,
+                        undefined
                     );
             }
         });

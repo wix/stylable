@@ -27,7 +27,7 @@ export function isAsset(url: string) {
 export function makeAbsolute(resourcePath: string, rootContext: string, moduleContext: string) {
     const isAbs = path.isAbsolute(resourcePath);
     let abs: string;
-    if (isExternal(resourcePath)) {
+    if (isExternal(resourcePath) || resourcePath.startsWith('~')) {
         abs = resourcePath;
     } else if (isAbs && resourcePath.startsWith('/')) {
         abs = path.join(rootContext, resourcePath);
@@ -73,23 +73,24 @@ export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPat
         processDeclarationUrls(
             decl,
             (node) => {
-                if (isAsset(node.url!)) {
-                    if (node.url!.startsWith('.')) {
-                        node.url =
-                            './' +
-                            path
-                                .join(
-                                    path.relative(
-                                        path.dirname(targetPath),
-                                        path.dirname(originPath)
-                                    ),
-                                    node.url!
-                                )
-                                .replace(/\\/gm, '/');
+                if (node.url && isAsset(node.url)) {
+                    if (node.url.startsWith('.')) {
+                        const url = path
+                            .join(
+                                path.relative(path.dirname(targetPath), path.dirname(originPath)),
+                                node.url
+                            )
+                            .replace(/\\/gm, '/');
+                        node.url = assureRelativeUrlPrefix(url);
                     }
                 }
             },
+
             true
         )
     );
+}
+
+export function assureRelativeUrlPrefix(url: string) {
+    return !url.startsWith('./') && !url.startsWith('../') ? './' + url : url;
 }
