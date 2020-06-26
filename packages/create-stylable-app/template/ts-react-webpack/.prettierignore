@@ -1,2 +1,3 @@
-*.st.css
+dist
 tsconfig.json
+*.st.css
