@@ -13,7 +13,7 @@ describe(`(${project}) (production)`, () => {
             },
             webpackOptions: {
                 mode: 'production',
-            }
+            },
         },
         before,
         afterEach,
@@ -33,7 +33,6 @@ describe(`(${project}) (production)`, () => {
         expect(css).to.not.include('-st-extends');
         expect(css).to.not.include('class extending component');
     });
-
 
     it('css applied correctly', async () => {
         const { page } = await projectRunner.openInBrowser();

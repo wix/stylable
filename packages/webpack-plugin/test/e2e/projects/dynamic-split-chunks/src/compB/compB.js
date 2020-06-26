@@ -1,5 +1,5 @@
-import { classes } from "./compB.st.css";
+import { classes } from './compB.st.css';
 
-export function compB(){
-    return `<div class="${classes.root}">CompB</div>`
-} 
+export function compB() {
+    return `<div class="${classes.root}">CompB</div>`;
+}

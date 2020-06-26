@@ -36,10 +36,5 @@ module.exports = {
             lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',
         },
-        prettier: {
-            printWidth: 100,
-            singleQuote: true,
-            tabWidth: 4,
-        },
     },
 };

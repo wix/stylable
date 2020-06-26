@@ -6,13 +6,11 @@ export function isLoadedByLoaders(module: StylableModule, warn: (m: StylableModu
         return false;
     }
     try {
-        const loaderPath = module.loaders[0].loader
+        const loaderPath = module.loaders[0].loader;
         isSupportedLoader =
             module.loaders.length === 1 &&
-            (
-                (loaderPath.includes('stylable-') && loaderPath.includes('-loader')) ||
-                loaderPath === require.resolve('raw-loader')
-            );
+            ((loaderPath.includes('stylable-') && loaderPath.includes('-loader')) ||
+                loaderPath === require.resolve('raw-loader'));
     } catch {
         /* */
     }

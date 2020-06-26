@@ -60,7 +60,7 @@ describe(`(${project})`, () => {
                 res();
             });
         });
-        
+
         await recompile;
         // if we got here we finished to recompile with the missing file.
         // when this test is broken the compiler had en error and exit the process.

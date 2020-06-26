@@ -172,7 +172,7 @@ export class ProjectRunner {
                         try {
                             child.kill();
                         } catch (e) {
-                            this.log("Kill Server Error:" + e);
+                            this.log('Kill Server Error:' + e);
                         }
                     },
                 };
