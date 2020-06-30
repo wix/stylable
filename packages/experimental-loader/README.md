@@ -56,6 +56,7 @@ module.exports = {
 interface LoaderOptions {
   resolveNamespace?(namespace: string, filePath: string): string;
   filterUrls?(url: string, ctx: loader.LoaderContext): boolean;
+  exportsOnly: boolean;
 }
 ```
 
@@ -63,6 +64,20 @@ interface LoaderOptions {
 | ------------------ | --------------------------------------------- |
 | `resolveNamespace` | override default stylesheet namespace process |
 | `filterUrls`       | filter urls from webpack process              |
+| `exportsOnly`      | only export the runtime stylesheet            |
+
+## SSR (exportsOnly)
+
+Sometimes for server pre-rendering build, you don't want to extract css for stylable files and only export the runtime stylesheet. For that case you only need the `transform` loader and enable `exportsOnly` mode.
+
+```js
+{
+  test: /\.st\.css$/i,
+  use: [
+    stylableLoaders.transform({ exportsOnly: true }),
+  ],
+}
+```
 
 ## Known issues
 

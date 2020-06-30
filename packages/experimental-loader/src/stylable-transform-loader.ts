@@ -6,6 +6,7 @@ import { Warning } from './warning';
 import postcss from 'postcss';
 import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
+import { createRuntimeTargetCode } from './create-runtime-target-code';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
@@ -17,10 +18,12 @@ export let stylable: Stylable;
 export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
     filterUrls(url: string, ctx: loader.LoaderContext): boolean;
+    exportsOnly: boolean;
 }
 
 const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
+    exportsOnly: false,
     filterUrls(_url: string, _ctx: loader.LoaderContext) {
         return true;
     },
@@ -57,7 +60,7 @@ const stylableLoader: loader.Loader = function (content) {
         throw new Error('content is not string');
     }
 
-    const { filterUrls, resolveNamespace }: LoaderOptions = {
+    const { filterUrls, resolveNamespace, exportsOnly }: LoaderOptions = {
         ...defaultOptions,
         ...getOptions(this),
     };
@@ -74,8 +77,6 @@ const stylableLoader: loader.Loader = function (content) {
     });
 
     const res = stylable.transform(content, this.resourcePath);
-    const imports: LoaderImport[] = [];
-    const urlReplacements: UrlReplacement[] = [];
 
     addMetaDependencies(
         res.meta,
@@ -83,12 +84,20 @@ const stylableLoader: loader.Loader = function (content) {
         stylable.createTransformer()
     );
 
+    if (exportsOnly) {
+        return callback(null, createRuntimeTargetCode(res.meta.namespace, res.exports));
+    }
+
+    const imports: LoaderImport[] = [];
+    const urlReplacements: UrlReplacement[] = [];
+
     const plugins = [
         urlParser({
             filter: (value: string) => isUrlRequest(value) && filterUrls(value, this),
             urlHandler: (url: string) => stringifyRequest(this, url),
         }),
     ];
+
     if (mode !== 'development') {
         optimizer.removeStylableDirectives(res.meta.outputAst!);
     }
