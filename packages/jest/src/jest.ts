@@ -3,7 +3,11 @@ import { Options, stylableModuleFactory } from '@stylable/module-utils';
 import fs from 'fs';
 
 const stylableRuntimePath = require.resolve('@stylable/runtime');
-const { version } = require('@stylable/runtime/package.json') as { version: string };
+const stylableCorePath = require.resolve('@stylable/core');
+const { version: runtimeVersion } = require('@stylable/runtime/package.json') as {
+    version: string;
+};
+const { version: coreVersion } = require('@stylable/core/package.json') as { version: string };
 
 export function processFactory(
     stylableConfig?: Partial<StylableConfig>,
@@ -36,6 +40,8 @@ export function getCacheKey(
         (instrument ? 'instrument' : '') +
         filename +
         stylableRuntimePath +
-        version
+        runtimeVersion +
+        stylableCorePath +
+        coreVersion
     );
 }
