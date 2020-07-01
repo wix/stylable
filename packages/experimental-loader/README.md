@@ -68,7 +68,7 @@ interface LoaderOptions {
 
 ## SSR (exportsOnly)
 
-Sometimes for server pre-rendering build, you don't want to extract css for stylable files and only export the runtime stylesheet. For that case you only need the `transform` loader and enable `exportsOnly` mode.
+When building Stylable for consumption in a server-side renderer build, you may want to extract only the exports of the runtime stylesheets and not the content of their CSS. In such a case you would only be required to use the `transform` loader and  the `exportsOnly` option.
 
 ```js
 {
