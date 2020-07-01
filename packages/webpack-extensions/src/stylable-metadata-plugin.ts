@@ -9,7 +9,7 @@ import {
     ComponentsMetadata,
 } from './component-metadata-builder';
 
-import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
+import { getCSSComponentLogicModule, StylableModule } from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
 
 export interface MetadataOptions {
@@ -25,7 +25,10 @@ export interface MetadataOptions {
         componentConfig: ComponentConfig
     ) => string;
     mode?: 'json' | 'cjs' | 'amd:static' | 'amd:factory';
-    beforeEmit?: (builder: ComponentsMetadata) => ComponentsMetadata;
+    beforeEmit?: (
+        builder: ComponentMetadataBuilder,
+        stylableModules: StylableModule[]
+    ) => ComponentsMetadata;
 }
 
 export class StylableMetadataPlugin {
@@ -57,7 +60,9 @@ export class StylableMetadataPlugin {
         }
     }
     private async createMetadataAssets(compilation: webpack.compilation.Compilation) {
-        const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
+        const stylableModules: StylableModule[] = compilation.modules.filter(
+            (m) => m.type === 'stylable'
+        );
 
         const builder = new ComponentMetadataBuilder(
             this.options.context || compilation.compiler.options.context || process.cwd(),
@@ -118,7 +123,7 @@ export class StylableMetadataPlugin {
         if (builder.hasPackages()) {
             builder.createIndex();
             const metadata = this.options.beforeEmit
-                ? this.options.beforeEmit(builder.build())
+                ? this.options.beforeEmit(builder, stylableModules)
                 : builder.build();
 
             const jsonSource = JSON.stringify(metadata, null, 2);

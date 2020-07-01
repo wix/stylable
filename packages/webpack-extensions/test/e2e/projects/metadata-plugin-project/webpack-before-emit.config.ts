@@ -16,7 +16,8 @@ module.exports = {
         new StylableMetadataPlugin({
             name: 'test',
             version: '1.0.0',
-            beforeEmit(metadata) {
+            beforeEmit(builder) {
+                const metadata = builder.build();
                 metadata.packages['test'] = '/test';
                 return metadata;
             },
