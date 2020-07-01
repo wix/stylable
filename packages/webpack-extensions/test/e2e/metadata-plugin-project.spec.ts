@@ -1,7 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
-import { ComponentsMetadata } from '@stylable/webpack-extensions/src';
+import { ComponentsMetadata } from '../../src';
 
 const project = 'metadata-plugin-project';
 
