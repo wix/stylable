@@ -50,6 +50,9 @@ export class StylableMetadataPlugin {
         try {
             return JSON.parse(fs.readFileSync(resource).toString());
         } catch (e) {
+            if (e instanceof SyntaxError) {
+                throw new SyntaxError(`${e.message} in ${resource}`);
+            }
             return null;
         }
     }

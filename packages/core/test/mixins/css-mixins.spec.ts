@@ -29,6 +29,39 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
     });
 
+    it('Mixin with function arguments with multiple params (comma separated)', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    content: `
+                        :import {
+                            -st-from: "./formatter";
+                            -st-default: formatter;
+                        }
+                        
+                        .container {
+                            -st-mixin: Text(ZZZ formatter(color-1, color-2));
+                        }
+                        
+                        .Text {
+                            color: value(ZZZ);
+                        }
+                    `,
+                },
+                '/formatter.js': {
+                    content: `
+                        module.exports = function() {
+                            return \`\${[...arguments].join(', ')}\`;
+                        }
+                    `,
+                },
+            },
+        });
+        const rule = result.nodes![0] as postcss.Rule;
+        expect(rule.nodes![0].toString()).to.equal('color: color-1, color-2');
+    });
+
     it('transform state form imported element', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,

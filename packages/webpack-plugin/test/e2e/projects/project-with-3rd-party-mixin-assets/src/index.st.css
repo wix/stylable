@@ -3,15 +3,7 @@
     -st-default: Comp;
 }
 
-:import {
-    -st-from: "test-components/mix.js";
-    -st-named: Mixin;
-}
-
 .css {
     -st-mixin: Comp;
-}
-
-.js {
-    -st-mixin: Mixin;
+    border-image: url(~external-assets/asset.png);
 }

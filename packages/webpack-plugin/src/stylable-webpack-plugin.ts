@@ -13,7 +13,7 @@ import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { getModuleInGraph, hasStylableModuleInGraph } from './get-module-in-graph';
 import { normalizeOptions } from './plugin-options';
-import { RUNTIME_SOURCE, RUNTIME_SOURCE_LEGACY, WEBPACK_STYLABLE } from './runtime-dependencies';
+import { RUNTIME_SOURCE, WEBPACK_STYLABLE } from './runtime-dependencies';
 import { StylableBootstrapModule } from './stylable-bootstrap-module';
 import { StylableAssetDependency, StylableImportDependency } from './stylable-dependencies';
 import { StylableGenerator } from './stylable-generator';
@@ -35,9 +35,9 @@ import {
 } from './types';
 import { isImportedByNonStylable, rewriteUrl, isStylableModule } from './utils';
 import { dirname } from 'path';
+import findConfig from 'find-config';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
-const findConfig = require('find-config');
 const MultiModule = require('webpack/lib/MultiModule');
 const last = <T>(_: T[]): any => _[_.length - 1];
 
@@ -156,10 +156,13 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation,
         module: StylableModule
     ) {
+        if (!module.buildInfo.stylableTransformedAst) {
+            return;
+        }
         const rootContext = (compilation as any).options.context;
         const replacements: WebpackAssetModule[] = [];
         const moduleDir = dirname(module.resource);
-        const onUrl: OnUrlCallback  = (node) => {
+        const onUrl: OnUrlCallback = (node) => {
             if (node.url !== undefined && isAsset(node.url)) {
                 const resourcePath = makeAbsolute(node.url, rootContext, moduleDir);
                 const assetModule = compilation.modules.find((_) => _.resource === resourcePath);
@@ -322,6 +325,9 @@ export class StylableWebpackPlugin {
         compilation: webpack.compilation.Compilation
     ) {
         if (this.options.includeDynamicModulesInCSS) {
+            if (!chunk.isOnlyInitial() && this.options.skipDynamicCSSEmit) {
+                return;
+            }
             const stModules = getModuleInGraph(chunk, (module) => module.type === 'stylable');
             if (stModules.size !== 0) {
                 const cssSources = renderStaticCSS(
@@ -333,9 +339,7 @@ export class StylableWebpackPlugin {
                     chunk,
                     hash: compilation.hash,
                 });
-                compilation.assets[cssBundleFilename] = new RawSource(
-                    cssSources.join(EOL + EOL + EOL)
-                );
+                compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL));
                 chunk.files.push(cssBundleFilename);
             }
         } else {
@@ -474,19 +478,15 @@ export class StylableWebpackPlugin {
                     return source;
                 }
 
-                const runtimeSource = this.options.legacyRuntime
-                    ? RUNTIME_SOURCE_LEGACY
-                    : RUNTIME_SOURCE;
-
                 if (this.options.runtimeMode === 'isolated') {
-                    return `${runtimeSource};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
+                    return `${RUNTIME_SOURCE};\n${WEBPACK_STYLABLE} = StylableRuntime();\n${source}`;
                 } else {
                     const id = this.options.globalRuntimeId;
                     const globalObj = compilation.outputOptions.globalObject;
 
                     const injected = `${globalObj}["${id}"] = ${WEBPACK_STYLABLE} = ${globalObj}["${id}"] || StylableRuntime();\n${source}`;
                     if (this.options.runtimeMode === 'shared') {
-                        return `${runtimeSource};\n${injected}`;
+                        return `${RUNTIME_SOURCE};\n${injected}`;
                     } else {
                         // external
                         return injected;

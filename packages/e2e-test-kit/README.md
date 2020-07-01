@@ -11,7 +11,9 @@ Used to setup an E2E test project with `@stylable/webpack-plugin` and `puppeteer
 You can find a set of example configuration setups [here](./packages/webpack-plugin/test/e2e).
 
 ### `getStyleElementsMetadata`
+
 A puppeteer helper function aimed at extracting Stylable styling from the DOM for testing purposes.
 
 ## License
+
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by a [BSD license](./LICENSE).

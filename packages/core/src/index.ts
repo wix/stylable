@@ -18,6 +18,7 @@ export * from './state-validators';
 export * from './selector-utils';
 export * from './native-reserved-lists';
 export * from './cssdocs';
+export * from './resolve-namespace-factories';
 export * from './module-resolver';
 
 import * as pseudoStates from './pseudo-states';

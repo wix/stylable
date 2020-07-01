@@ -43,6 +43,7 @@ import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
+const { hasOwnProperty } = Object.prototype;
 const USE_SCOPE_SELECTOR_2 = true;
 
 const isVendorPrefixed = require('is-vendor-prefixed');
@@ -193,7 +194,7 @@ export class StylableTransformer {
         const keyframeMapping = this.scopeKeyframes(ast, meta);
         const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
 
-        ast.walkRules((rule: SRule) => {
+        ast.walkRules((rule) => {
             if (isChildOfAtRule(rule, 'keyframes')) {
                 return;
             }
@@ -209,7 +210,9 @@ export class StylableTransformer {
                 variableOverride,
                 this.replaceValueHook,
                 this.diagnostics,
-                path.slice()
+                path.slice(),
+                undefined,
+                undefined
             );
         });
 
@@ -236,7 +239,8 @@ export class StylableTransformer {
                         this.replaceValueHook,
                         this.diagnostics,
                         path.slice(),
-                        cssVarsMapping
+                        cssVarsMapping,
+                        undefined
                     );
             }
         });
@@ -246,8 +250,8 @@ export class StylableTransformer {
                 this.addDevRules(meta);
             }
         }
-        ast.walkRules((rule: SRule) =>
-            appendMixins(this, rule, meta, variableOverride || {}, cssVarsMapping, path)
+        ast.walkRules((rule) =>
+            appendMixins(this, rule as SRule, meta, variableOverride || {}, cssVarsMapping, path)
         );
 
         if (metaExports) {
@@ -1097,7 +1101,7 @@ export class StylableTransformer {
             let found = false;
             for (const { symbol, meta } of currentAnchor.resolved) {
                 const states = symbol[valueMapping.states];
-                if (states && states.hasOwnProperty(name)) {
+                if (states && hasOwnProperty.call(states, name)) {
                     found = true;
 
                     setStateToNode(

@@ -9,10 +9,10 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import webpack from 'webpack';
 
 export interface StylableWebpackPluginOptions {
-    legacyRuntime: boolean;
     filename: string;
     useWeakDeps: boolean;
     includeDynamicModulesInCSS: boolean;
+    skipDynamicCSSEmit: boolean;
     createRuntimeChunk: boolean;
     outputCSS: boolean;
     includeCSSInJS: boolean;

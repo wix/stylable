@@ -314,4 +314,7 @@ export class StylableResolver {
             }
         }
     }
+    public resolvePath(path: string, context?: string) {
+        return this.fileProcessor.resolvePath(path, context);
+    }
 }

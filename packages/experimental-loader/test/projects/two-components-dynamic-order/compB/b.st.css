@@ -1,0 +1,9 @@
+:import {
+    -st-from: "../compA/a.st.css";
+    -st-default: A;
+}
+
+.root {
+    -st-extends: A;
+    color: red;
+}
