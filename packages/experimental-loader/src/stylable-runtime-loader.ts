@@ -1,6 +1,8 @@
 import { loader } from 'webpack';
+import { StylableExports } from '@stylable/core';
+import { createRuntimeTargetCode } from './create-runtime-target-code';
 
-function evalStylableExtractModule(source: string): [string, Record<string, unknown>] {
+function evalStylableExtractModule(source: string): [string, StylableExports] {
     if (!source) {
         throw new Error('No source is provided to evalModule');
     }
@@ -15,7 +17,7 @@ function evalStylableExtractModule(source: string): [string, Record<string, unkn
         source.replace('export default ', 'module.exports = ')
     );
     fn(_module, _module.exports);
-    return _module.exports as [string, Record<string, unknown>];
+    return _module.exports as [string, StylableExports];
 }
 
 const stylableRuntimeLoader: loader.Loader = function loader(content) {
@@ -25,17 +27,7 @@ const stylableRuntimeLoader: loader.Loader = function loader(content) {
 
     const [namespace, mapping] = evalStylableExtractModule(content);
 
-    return `
-  const rt = require("@stylable/runtime/cjs/css-runtime-stylesheet.js");
-
-  module.exports = rt.create(
-      ${JSON.stringify(namespace)},
-      ${JSON.stringify(mapping)},
-      "",
-      -1,
-      module.id,
-  );
-  `;
+    return createRuntimeTargetCode(namespace, mapping);
 };
 
 export const loaderPath = __filename;
