@@ -1,6 +1,6 @@
 {
   "name": "@stylable/node",
-  "version": "3.7.0",
+  "version": "3.7.1",
   "description": "Integrate Stylable into your node application",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
