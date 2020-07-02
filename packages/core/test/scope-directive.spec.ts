@@ -47,8 +47,8 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
             const rule = meta.ast.nodes![0] as SRule;
-            expect(rule.stScope).to.equal('.root');
-            expect(rule.clone().stScope, 'clone rules preserve stScope').to.equal('.root');
+            expect(rule.stScopeSelector).to.equal('.root');
+            expect(rule.clone().stScopeSelector, 'clone rules preserve stScope').to.equal('.root');
         });
 
         it('should parse "@st-scope" directives with a new class', () => {

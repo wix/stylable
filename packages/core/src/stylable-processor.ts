@@ -185,7 +185,7 @@ export class StylableProcessor {
                         selector: scopeSelector(scopingRule.selector, rule.selector, false)
                             .selector,
                     });
-                    (scopedRule as SRule).stScope = atRule.params;
+                    (scopedRule as SRule).stScopeSelector = atRule.params;
                     rule.replaceWith(scopedRule);
                 });
             }
@@ -792,7 +792,7 @@ export interface SRule extends postcss.Rule {
     isSimpleSelector: boolean;
     selectorType: 'class' | 'element' | 'complex';
     mixins?: RefedMixin[];
-    stScope?: string;
+    stScopeSelector?: string;
 }
 
 // TODO: maybe put under stylable namespace object in v2
