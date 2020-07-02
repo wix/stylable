@@ -8,7 +8,7 @@ import {
 } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
 import { AtRule, Declaration, Rule } from 'postcss';
-import { processorWarnings } from '../src';
+import { processorWarnings, SRule } from '../src';
 import { transformerWarnings } from '../src/stylable-transformer';
 // import { generateStylableResult, processSource } from './utils/generate-test-util';
 
@@ -34,6 +34,19 @@ describe('@st-scope', () => {
                     params: '.root',
                 },
             ]);
+        });
+        it('should annotate rules under "@st-scope"', () => {
+            const meta = processSource(
+                `
+                @st-scope .root{
+                    .part {}
+                }
+            `,
+                { from: 'path/to/style.css' }
+            );
+
+            shouldReportNoDiagnostics(meta);
+            expect((meta.ast.nodes![0] as SRule).stScope).to.equal('.root');
         });
 
         it('should parse "@st-scope" directives with a new class', () => {
