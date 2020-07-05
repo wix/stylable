@@ -1,0 +1,9 @@
+:import {
+    -st-from: "test-components/index.st.css";
+    -st-named: Button;
+}
+
+Button {
+    font-size: 2em;
+    background: green;
+}

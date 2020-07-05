@@ -59,7 +59,7 @@ describe('@custom-selector', () => {
                         Comp::root-icon{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
@@ -69,9 +69,9 @@ describe('@custom-selector', () => {
                         :--root-icon, .class {
                             color: red;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -93,7 +93,7 @@ describe('@custom-selector', () => {
                         Comp::root-icon::top{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
@@ -110,7 +110,7 @@ describe('@custom-selector', () => {
                         .icon {
                             -st-extends: Child;
                         }
-                    `
+                    `,
                 },
                 '/child.st.css': {
                     namespace: 'child',
@@ -118,9 +118,9 @@ describe('@custom-selector', () => {
                         .top {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -142,15 +142,15 @@ describe('@custom-selector', () => {
                         Comp::class-icon{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
                     content: `
                         @custom-selector :--class-icon .icon, .class;
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -171,7 +171,7 @@ describe('@custom-selector', () => {
                         Interface::cc{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/interface.st.css': {
                     namespace: 'interface',
@@ -184,16 +184,16 @@ describe('@custom-selector', () => {
                             -st-global: ".xxx"
                         }
                         @custom-selector :--cc Controls;
-                    `
+                    `,
                 },
                 '/controls.st.css': {
                     namespace: 'controls',
                     content: `
                         .root {
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -214,7 +214,7 @@ describe('@custom-selector', () => {
                         Interface::cc{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/interface.st.css': {
                     namespace: 'interface',
@@ -230,15 +230,15 @@ describe('@custom-selector', () => {
                             -st-extends: Controls
                         }
 
-                    `
+                    `,
                 },
                 '/controls.st.css': {
                     namespace: 'controls',
                     content: `
                         @custom-selector :--cc .root cc;
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -259,16 +259,16 @@ describe('@custom-selector', () => {
                         Variant::input{
                             color: blue;
                         }
-                    `
+                    `,
                 },
                 '/variant.st.css': {
                     namespace: 'variant',
                     content: `
                         @custom-selector :--input .x .input;
                         .input {}
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const r = ast.nodes![0] as postcss.Rule;
@@ -295,7 +295,7 @@ describe('@custom-selector', () => {
                             .root :not(::option){
                                 z-index: 1;
                             }
-                        `
+                        `,
                     },
                     '/inner.st.css': {
                         namespace: 'Inner',
@@ -308,9 +308,9 @@ describe('@custom-selector', () => {
                             .a{}
                             .b{}
                             .option{}
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
 
             expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -333,15 +333,15 @@ describe('@custom-selector', () => {
                             Comp::class-icon Comp::class-icon {
                                 color: blue;
                             }
-                        `
+                        `,
                     },
                     '/comp.st.css': {
                         namespace: 'comp',
                         content: `
                             @custom-selector :--class-icon .icon, .class;
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             const r = ast.nodes![0] as postcss.Rule;
             expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
@@ -360,9 +360,9 @@ describe('@custom-selector', () => {
                             .root:has(:--A, .z, :--B) {
                                 color: blue;
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             const r = ast.nodes![0] as postcss.Rule;
             expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');

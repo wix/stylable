@@ -4,7 +4,7 @@ import {
     pseudoStates,
     SelectorAstNode,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import cloneDeep from 'lodash.clonedeep';
 import postcss from 'postcss';
@@ -18,6 +18,8 @@ const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name: string) =>
 }, {} as Record<string, boolean>);
 
 export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
+
+const { hasOwnProperty } = Object.prototype;
 
 const MATCH_STATE_CLASS = new RegExp(`^(.+?)${pseudoStates.booleanStateDelimiter}(.+)`);
 const MATCH_STATE_ATTR = new RegExp(`^class~="(.+?)${pseudoStates.booleanStateDelimiter}(.+)"`);
@@ -51,16 +53,16 @@ export function applyStylableForceStateSelectors(
         },
         isStateClassName(name) {
             const parts = name.match(MATCH_STATE_CLASS);
-            return parts ? namespaceMapping.hasOwnProperty(parts[1]) : false;
+            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
         },
         isStateAttr(content) {
             const parts = content.match(MATCH_STATE_ATTR);
-            return parts ? namespaceMapping.hasOwnProperty(parts[1]) : false;
+            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
         },
         onMapping(key, value) {
             mapping[key] = value;
             mapping[value] = key;
-        }
+        },
     });
     return mapping;
 }
@@ -76,7 +78,7 @@ export interface AddForceStateSelectorsContext {
 }
 
 export function addForceStateSelectors(ast: postcss.Root, context: AddForceStateSelectorsContext) {
-    ast.walkRules(rule => {
+    ast.walkRules((rule) => {
         const selectorAst = parseSelector(rule.selector);
 
         const overrideSelectors = selectorAst.nodes.reduce((selectors, selector) => {
@@ -94,12 +96,12 @@ export function addForceStateSelectors(ast: postcss.Root, context: AddForceState
 }
 
 function isNative(name: string) {
-    return nativePseudoClassesMap.hasOwnProperty(name);
+    return hasOwnProperty.call(nativePseudoClassesMap, name);
 }
 
 function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
     let hasStates = false;
-    traverseNode(selector, node => {
+    traverseNode(selector, (node) => {
         if (node.type === 'pseudo-class') {
             return (hasStates = true);
         } else if (node.type === 'class' && context.isStateClassName(node.name)) {
@@ -113,7 +115,7 @@ function hasStates(selector: SelectorAstNode, context: AddForceStateSelectorsCon
 }
 
 function transformStates(selector: SelectorAstNode, context: AddForceStateSelectorsContext) {
-    traverseNode(selector, node => {
+    traverseNode(selector, (node) => {
         if (node.type === 'pseudo-class') {
             node.type = 'attribute';
             node.content = isNative(node.name)

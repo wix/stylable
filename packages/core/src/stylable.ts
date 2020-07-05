@@ -8,10 +8,10 @@ import {
     StylableResults,
     StylableTransformer,
     TransformerOptions,
-    TransformHooks
+    TransformHooks,
 } from './stylable-transformer';
 import { TimedCacheOptions } from './timed-cache';
-import { IStylableOptimizer } from './types';
+import { IStylableOptimizer, ModuleResolver } from './types';
 
 export interface StylableConfig {
     projectRoot: string;
@@ -30,6 +30,7 @@ export interface StylableConfig {
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
+    resolveModule?: ModuleResolver;
 }
 
 export class Stylable {
@@ -37,7 +38,7 @@ export class Stylable {
         return new this(
             config.projectRoot,
             config.fileSystem,
-            id => {
+            (id) => {
                 if (config.requireModule) {
                     return config.requireModule(id);
                 }
@@ -51,7 +52,8 @@ export class Stylable {
             config.optimizer,
             config.mode,
             config.resolveNamespace,
-            config.timedCacheOptions
+            config.timedCacheOptions,
+            config.resolveModule
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -71,8 +73,9 @@ export class Stylable {
         protected resolveNamespace?: typeof processNamespace,
         protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
             timeout: 1,
-            useTimer: true
-        }
+            useTimer: true,
+        },
+        protected resolveModule?: ModuleResolver
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -80,7 +83,8 @@ export class Stylable {
             onProcess,
             resolveOptions,
             this.resolveNamespace,
-            timedCacheOptions
+            timedCacheOptions,
+            resolveModule
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
@@ -95,7 +99,7 @@ export class Stylable {
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
             mode: this.mode,
-            ...options
+            ...options,
         });
     }
     public transform(meta: StylableMeta): StylableResults;

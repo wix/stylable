@@ -15,8 +15,8 @@ describe('Colors', () => {
             expect(res).to.eql([
                 {
                     range: createRange(1, 11, 1, 14),
-                    color: createColor(1, 0, 0, 1)
-                }
+                    color: createColor(1, 0, 0, 1),
+                },
             ]);
         });
 
@@ -25,13 +25,13 @@ describe('Colors', () => {
 
             expect(res).to.eql([
                 {
-                    range: createRange(5, 11, 5, 23),
-                    color: createColor(0, 1, 0, 0.8)
+                    range: createRange(5, 11, 5, 24),
+                    color: createColor(0, 1, 0, 0.8),
                 },
                 {
                     range: createRange(1, 12, 1, 31),
-                    color: createColor(0, 1, 0, 0.8)
-                }
+                    color: createColor(0, 1, 0, 0.8),
+                },
             ]);
         });
 
@@ -40,9 +40,9 @@ describe('Colors', () => {
 
             expect(res).to.eql([
                 {
-                    range: createRange(2, 15, 2, 21),
-                    color: createColor(0, 1, 0, 0.8)
-                }
+                    range: createRange(6, 11, 6, 24),
+                    color: createColor(0, 1, 0, 0.8),
+                },
             ]);
         });
 
@@ -50,6 +50,25 @@ describe('Colors', () => {
             const res = getDocumentColors('colors/substring-var-import.st.css');
 
             expect(res.length).to.eql(1);
+        });
+
+        it('should resolve information colors in a @st-scope', () => {
+            const res = getDocumentColors('st-scope/single-variable-color.st.css');
+
+            expect(res).to.eql([
+                {
+                    range: createRange(6, 15, 6, 29),
+                    color: createColor(1, 0, 0, 1),
+                },
+                {
+                    range: createRange(1, 13, 1, 16),
+                    color: createColor(1, 0, 0, 1),
+                },
+                {
+                    range: createRange(7, 26, 7, 33),
+                    color: createColor(1, 1, 1, 1),
+                },
+            ]);
         });
     });
 
@@ -60,39 +79,47 @@ describe('Colors', () => {
                 red: 0,
                 green: 1,
                 blue: 0,
-                alpha: 0.8
+                alpha: 0.8,
             };
+
             const res = getDocColorPresentation('colors/color-presentation.st.css', color, range);
+
             expect(res.length).to.equal(3);
-            expect(res.filter(cp => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
+            expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
 
-        it('should not return presentation in variable usage', () => {
-            const range = createRange(5, 11, 5, 23);
+        it('should return presentation in variable usage', () => {
+            const range = createRange(5, 11, 5, 24);
             const color = {
                 red: 0,
                 green: 1,
                 blue: 0,
-                alpha: 0.8
+                alpha: 0.8,
             };
+
             const res = getDocColorPresentation('colors/color-presentation.st.css', color, range);
-            expect(res.length).to.equal(0);
+
+            expect(res.length).to.equal(3);
+            expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
 
-        it('should not return presentation in -st-named', () => {
-            const range = createRange(2, 15, 2, 21);
+        it('should return presentation for imports variables', () => {
+            const range = createRange(7, 11, 7, 24);
             const color = {
                 red: 0,
                 green: 1,
                 blue: 0,
-                alpha: 0.8
+                alpha: 0.8,
             };
+
             const res = getDocColorPresentation(
                 'colors/color-presentation-import.st.css',
                 color,
                 range
             );
-            expect(res.length).to.equal(0);
+
+            expect(res.length).to.equal(3);
+            expect(res.filter((cp) => cp.label === 'rgba(0, 255, 0, 0.8)').length).to.equal(1);
         });
     });
 });

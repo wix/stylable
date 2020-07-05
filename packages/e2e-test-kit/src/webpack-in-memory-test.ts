@@ -5,11 +5,11 @@ const webpack = require('webpack');
 const _eval = require('node-eval');
 
 const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
-const content = readdirSync(runtimeDir).map(f => {
+const content = readdirSync(runtimeDir).map((f) => {
     const fullpath = join(runtimeDir, f);
     return {
         content: readFileSync(fullpath, 'utf-8'),
-        fullpath
+        fullpath,
     };
 });
 
@@ -22,9 +22,9 @@ export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: str
         memfs.writeFileSync(r, files[k] || '\n');
     }
 
-    for (const k in content) {
-        memfs.mkdirpSync(dirname(content[k].fullpath));
-        memfs.writeFileSync(content[k].fullpath, content[k].content || '\n');
+    for (const entry of content) {
+        memfs.mkdirpSync(dirname(entry.fullpath));
+        memfs.writeFileSync(entry.fullpath, entry.content || '\n');
     }
 
     return memfs;
@@ -38,7 +38,7 @@ export function webpackTest({ files, config }: any) {
         apply(compiler: any) {
             compiler.inputFileSystem = memfs;
             compiler.outputFileSystem = memfs;
-        }
+        },
     });
 
     const compiler = webpack(config);
@@ -46,10 +46,10 @@ export function webpackTest({ files, config }: any) {
     return { compiler, evalCssJSModule, fs: memfs };
 }
 
-export function evalCssJSModule(source: string, filename: string = 'file.js') {
+export function evalCssJSModule(source: string, filename = 'file.js') {
     return _eval(source, filename, {
         require(id: string) {
             return { id };
-        }
+        },
     });
 }

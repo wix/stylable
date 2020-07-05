@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', 'hooked-project'),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -23,7 +23,7 @@ describe(`(${project})`, () => {
 
         expect(styleElements[0]).to.include({
             id: './src/index.st.css',
-            depth: '1'
+            depth: '1',
         });
 
         expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
@@ -34,7 +34,7 @@ describe(`(${project})`, () => {
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).backgroundColor;
+            return getComputedStyle(document.documentElement).backgroundColor;
         });
 
         expect(backgroundColor).to.eql('rgb(1, 0, 0)');

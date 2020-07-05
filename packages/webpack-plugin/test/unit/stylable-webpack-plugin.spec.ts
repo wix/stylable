@@ -10,7 +10,7 @@ describe('StylableWebpackPlugin Unit', () => {
                     options(options: any) {
                         expect(options.test, 'top level option').to.equal(true);
                         return { ...options, fromConfig: true };
-                    }
+                    },
                 };
             }
         }
@@ -33,16 +33,16 @@ describe('StylableWebpackPlugin Unit', () => {
                 removeStylableDirectives: true,
                 removeUnusedComponents: true,
                 removeEmptyNodes: true,
-                minify: true
-            }
+                minify: true,
+            },
         });
     });
     it('user options are stronger then default production mode', () => {
         const plugin = new StylableWebpackPlugin({
             outputCSS: false,
             optimize: {
-                removeComments: false
-            }
+                removeComments: false,
+            },
         });
         plugin.normalizeOptions('production');
         expect(plugin.options).to.deep.include({
@@ -55,8 +55,8 @@ describe('StylableWebpackPlugin Unit', () => {
                 removeStylableDirectives: true,
                 removeUnusedComponents: true,
                 removeEmptyNodes: true,
-                minify: true
-            }
+                minify: true,
+            },
         });
     });
 });

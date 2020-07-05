@@ -11,7 +11,6 @@ export function normalizeOptions(
             delete require.cache[id];
             return require(id);
         },
-        legacyRuntime: false,
         transformHooks: undefined,
         resolveNamespace: undefined,
         createRuntimeChunk: false,
@@ -24,12 +23,12 @@ export function normalizeOptions(
         bootstrap: {
             autoInit: true,
             getAutoInitModule: undefined,
-            ...options.bootstrap
+            ...options.bootstrap,
         },
         generate: {
             runtimeStylesheetId: 'module', // 'namespace'
             afterTransform: null,
-            ...options.generate
+            ...options.generate,
         },
         optimizeStylableModulesPerChunks: true,
         optimizer: undefined,
@@ -41,17 +40,18 @@ export function normalizeOptions(
             shortNamespaces: isProd,
             removeEmptyNodes: isProd,
             minify: isProd,
-            ...options.optimize
+            ...options.optimize,
         },
         unsafeMuteDiagnostics: {
             DUPLICATE_MODULE_NAMESPACE: false,
-            ...options.unsafeMuteDiagnostics
+            ...options.unsafeMuteDiagnostics,
         },
         unsafeBuildNamespace: false,
         includeDynamicModulesInCSS: true,
+        skipDynamicCSSEmit: false,
         useEntryModuleInjection: false,
         experimentalHMR: false,
-        plugins: []
+        plugins: [],
     };
 
     return {
@@ -60,6 +60,6 @@ export function normalizeOptions(
         optimize: defaults.optimize,
         bootstrap: defaults.bootstrap,
         generate: defaults.generate,
-        unsafeMuteDiagnostics: defaults.unsafeMuteDiagnostics
+        unsafeMuteDiagnostics: defaults.unsafeMuteDiagnostics,
     } as any;
 }

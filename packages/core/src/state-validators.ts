@@ -17,7 +17,7 @@ const validationErrors = {
             `expected "${actualParam}" to be of length longer than or equal to ${length}`,
         MAX_LENGTH_VALIDATION_FAILED: (length: string, actualParam: string) =>
             `expected "${actualParam}" to be of length shorter than or equal to ${length}`,
-        UKNOWN_VALIDATOR: (name: string) => `encountered unknown string validator "${name}"`
+        UKNOWN_VALIDATOR: (name: string) => `encountered unknown string validator "${name}"`,
     },
     number: {
         NUMBER_TYPE_VALIDATION_FAILED: (actualParam: string) =>
@@ -28,17 +28,17 @@ const validationErrors = {
             `expected "${actualParam}" to be lesser then or equal to ${max}`,
         MULTIPLE_OF_VALIDATION_FAILED: (actualParam: string, multipleOf: string) =>
             `expected "${actualParam}" to be a multiple of ${multipleOf}`,
-        UKNOWN_VALIDATOR: (name: string) => `encountered unknown number validator "${name}"`
+        UKNOWN_VALIDATOR: (name: string) => `encountered unknown number validator "${name}"`,
     },
     enum: {
         ENUM_TYPE_VALIDATION_FAILED: (actualParam: string, options: string[]) =>
             `expected "${actualParam}" to be one of the options: "${options.join(', ')}"`,
-        NO_OPTIONS_DEFINED: () => `expected enum to be defined with one option or more`
+        NO_OPTIONS_DEFINED: () => `expected enum to be defined with one option or more`,
     },
     tag: {
         NO_SPACES_ALLOWED: (actualParam: string) =>
-            `expected "${actualParam}" to be a single value with no spaces`
-    }
+            `expected "${actualParam}" to be a single value with no spaces`,
+    },
 };
 
 export type SubValidator = (value: string, ...rest: string[]) => StateResult;
@@ -71,7 +71,7 @@ export const systemValidators: Record<string, StateParamType> = {
             }
 
             if (validators.length > 0) {
-                validators.forEach(validatorMeta => {
+                validators.forEach((validatorMeta) => {
                     if (typeof validatorMeta === 'object') {
                         if (this.subValidators && this.subValidators[validatorMeta.name]) {
                             const subValidator = this.subValidators[validatorMeta.name];
@@ -104,7 +104,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.string.REGEX_VALIDATION_FAILED(regex, value)]
+                        : [validationErrors.string.REGEX_VALIDATION_FAILED(regex, value)],
                 };
             },
             contains: (value: string, checkedValue: string) => {
@@ -114,7 +114,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.string.CONTAINS_VALIDATION_FAILED(checkedValue, value)]
+                        : [validationErrors.string.CONTAINS_VALIDATION_FAILED(checkedValue, value)],
                 };
             },
             minLength: (value: string, length: string) => {
@@ -124,7 +124,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.string.MIN_LENGTH_VALIDATION_FAILED(length, value)]
+                        : [validationErrors.string.MIN_LENGTH_VALIDATION_FAILED(length, value)],
                 };
             },
             maxLength: (value: string, length: string) => {
@@ -134,10 +134,10 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.string.MAX_LENGTH_VALIDATION_FAILED(length, value)]
+                        : [validationErrors.string.MAX_LENGTH_VALIDATION_FAILED(length, value)],
                 };
-            }
-        }
+            },
+        },
     },
     number: {
         validate(
@@ -155,7 +155,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     errors.push(validationErrors.number.NUMBER_TYPE_VALIDATION_FAILED(value));
                 }
             } else if (validators.length > 0) {
-                validators.forEach(validatorMeta => {
+                validators.forEach((validatorMeta) => {
                     if (typeof validatorMeta === 'object') {
                         if (this.subValidators && this.subValidators[validatorMeta.name]) {
                             const subValidator = this.subValidators[validatorMeta.name];
@@ -187,7 +187,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.number.MIN_VALIDATION_FAILED(value, minValue)]
+                        : [validationErrors.number.MIN_VALIDATION_FAILED(value, minValue)],
                 };
             },
             max: (value: string, maxValue: string) => {
@@ -197,7 +197,7 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.number.MAX_VALIDATION_FAILED(value, maxValue)]
+                        : [validationErrors.number.MAX_VALIDATION_FAILED(value, maxValue)],
                 };
             },
             multipleOf: (value: string, multipleOf: string) => {
@@ -207,10 +207,15 @@ export const systemValidators: Record<string, StateParamType> = {
                     res: value,
                     errors: valid
                         ? null
-                        : [validationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(value, multipleOf)]
+                        : [
+                              validationErrors.number.MULTIPLE_OF_VALIDATION_FAILED(
+                                  value,
+                                  multipleOf
+                              ),
+                          ],
                 };
-            }
-        }
+            },
+        },
     },
     enum: {
         validate(
@@ -226,7 +231,7 @@ export const systemValidators: Record<string, StateParamType> = {
             const stringOptions: string[] = [];
 
             if (options.length) {
-                const isOneOf = options.some(option => {
+                const isOneOf = options.some((option) => {
                     if (typeof option === 'string') {
                         stringOptions.push(option);
                         return resolveParam(option) === value;
@@ -243,7 +248,7 @@ export const systemValidators: Record<string, StateParamType> = {
             }
 
             return { res, errors: errors.length ? errors : null };
-        }
+        },
     },
     tag: {
         validate(
@@ -260,6 +265,6 @@ export const systemValidators: Record<string, StateParamType> = {
             }
 
             return { res: value, errors: errors.length ? errors : null };
-        }
-    }
+        },
+    },
 };

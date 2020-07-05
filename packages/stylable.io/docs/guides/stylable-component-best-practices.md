@@ -79,7 +79,7 @@ Styling pseudo-elements in a component creates a selector that takes more specif
 /* 
 > directly style navBtn - a type of button
 selector: .comp__gallery .gallery__navBtn
-specificity: 0,0,4,0 
+specificity: 0,0,2,0 
 */
 .gallery::navBtn {} 
 ```
@@ -98,14 +98,13 @@ specificity: 0,0,1,1
 
 ## Justify your CSS declarations in comments
 
-A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify each of them with a comment per this example.
+A good way to validate minimal CSS is to add comments. There should be a few words clarifying why a certain declaration or ruleset combination is found in the stylesheet. We recommend you justify any special overrides or interactions with a comment per this example.
 
 ```css
 .link {
+    display: block;
     /* override default anchor color */
     color: currentColor;
-    /* cover entire line */
-    display: block;
 }
 ```
 
@@ -113,15 +112,16 @@ This helps with maintenance and development since we don't test CSS as thoroughl
 
 ## Use consistent variables from a central location
 
-Import variables from the [project commons stylesheet](../guides/project-commons.md).
+Import CSS or Stylable variables from the [project commons stylesheet](../guides/project-commons.md).
 
 ```css
 :import {
     -st-from: "./project.st.css";
-    -st-named: color1;
+    -st-named: color1, --font-small;
 }
 .item {
     background: value(color1);
+    font-size: var(--font-small);
 }
 ```
 

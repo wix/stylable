@@ -14,11 +14,11 @@ module.exports = {
                         loader: require.resolve('url-loader'),
                         options: {
                             limit: 300,
-                            name: '[name].[ext]'
-                        }
-                    }
-                ]
-            }
-        ]
-    }
+                            name: '[name].[ext]',
+                        },
+                    },
+                ],
+            },
+        ],
+    },
 };

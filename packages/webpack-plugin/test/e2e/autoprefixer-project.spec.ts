@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -26,8 +26,8 @@ describe(`(${project})`, () => {
                 id: './src/index.st.css',
                 depth: '1',
                 css:
-                    '::-webkit-input-placeholder {\n  color: gray;\n}\n::-moz-placeholder {\n  color: gray;\n}\n:-ms-input-placeholder {\n  color: gray;\n}\n::-ms-input-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}'
-            }
+                    '::-moz-placeholder {\n  color: gray;\n}\n:-ms-input-placeholder {\n  color: gray;\n}\n::-ms-input-placeholder {\n  color: gray;\n}\n::placeholder {\n  color: gray;\n}',
+            },
         ]);
     });
 });

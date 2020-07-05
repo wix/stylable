@@ -1,9 +1,7 @@
-import { ParsedValue, StateParsedValue, systemValidators } from '@stylable/core';
+import postcssValueParser from 'postcss-value-parser';
 import { ParameterInformation, SignatureHelp, SignatureInformation } from 'vscode-languageserver';
+import { StateParsedValue, systemValidators } from '@stylable/core';
 import { ProviderPosition } from '../completion-providers';
-import { ParsedFuncOrDivValue } from '../types';
-
-const pvp = require('postcss-value-parser');
 
 // Goes over an '-st-states' declaration value
 // parses the state and position to resolve if inside a state with a parameter
@@ -18,8 +16,8 @@ export function resolveStateTypeOrValidator(
 ): string | boolean | null {
     const valueStartChar = line.indexOf(':') + 1;
     const value = line.slice(valueStartChar);
-    const stateParts: ParsedValue[] = pvp(value).nodes;
-    let requiredHinting: boolean = false;
+    const { nodes: stateParts } = postcssValueParser(value);
+    let requiredHinting = false;
     const validator = { length: 0, requiredHinting: false };
     let stateTypeValidatorToHint: string | null = null;
     let length = valueStartChar;
@@ -27,7 +25,7 @@ export function resolveStateTypeOrValidator(
     for (const statePart of stateParts) {
         length += statePart.value.length;
 
-        if (isParsedNodeFunction(statePart)) {
+        if (statePart.type === 'function') {
             const stateNodes = statePart.nodes;
             length++; // opening state parenthesis
 
@@ -60,7 +58,7 @@ export function resolveStateTypeOrValidator(
             }
 
             length++; // closing state parenthesis
-        } else if (isParsedNodeDiv(statePart)) {
+        } else if (statePart.type === 'div') {
             length = length + statePart.before.length + statePart.after.length;
         }
     }
@@ -74,7 +72,7 @@ export function resolveStateTypeOrValidator(
 }
 
 function resolveStateType(
-    stateNodes: ParsedValue[],
+    stateNodes: postcssValueParser.Node[],
     length: number,
     requiredHinting: boolean,
     pos: ProviderPosition,
@@ -84,7 +82,7 @@ function resolveStateType(
     for (const typeNode of stateNodes) {
         ({ length, requiredHinting } = resolvePosInState(pos.character, length, typeNode.value));
 
-        if (!requiredHinting && isParsedNodeFunction(typeNode)) {
+        if (!requiredHinting && typeNode.type === 'function') {
             length++; // opening type parenthesis
             validator = resolvePosInState(pos.character, length, typeNode.before);
             stateTypeValidatorToHint = isValidatorsHintingRequired(
@@ -93,7 +91,7 @@ function resolveStateType(
                 typeNode.value
             );
             length = validator.length;
-            typeNode.nodes.forEach((valNode: ParsedValue) => {
+            typeNode.nodes.forEach((valNode) => {
                 ({ validator, length, stateTypeValidatorToHint } = resolveStateValidator(
                     pos,
                     length,
@@ -119,7 +117,7 @@ function resolveStateType(
 function resolveStateValidator(
     pos: ProviderPosition,
     length: number,
-    valNode: ParsedValue,
+    valNode: postcssValueParser.Node,
     stateTypeValidatorToHint: string | null,
     typeNode: any
 ) {
@@ -129,7 +127,7 @@ function resolveStateValidator(
         stateTypeValidatorToHint,
         typeNode.value
     );
-    if (isParsedNodeFunction(valNode)) {
+    if (valNode.type === 'function') {
         length++; // opening arg parenthesis
         const argsLength = valNode.nodes.reduce((sum: number, node: any) => {
             const quotes = (node.quote && 2) || 0;
@@ -158,13 +156,13 @@ export function createStateValidatorSignature(type: string) {
         const validatorsString = Object.keys(valiadtors).join(', ');
         const sigInfo: SignatureInformation = {
             label: `Supported "${type}" validator types:\n- "${validatorsString}"`,
-            parameters: [{ label: validatorsString }] as ParameterInformation[]
+            parameters: [{ label: validatorsString }] as ParameterInformation[],
         };
 
         return {
             activeParameter: 0,
             activeSignature: 0,
-            signatures: [sigInfo]
+            signatures: [sigInfo],
         } as SignatureHelp;
     } else {
         return null;
@@ -175,12 +173,12 @@ export function createStateTypeSignature() {
     const stateTypes = Object.keys(systemValidators).join(' | ');
     const sigInfo: SignatureInformation = {
         label: `Supported state types:\n- "${stateTypes}"`,
-        parameters: [{ label: stateTypes }] as ParameterInformation[]
+        parameters: [{ label: stateTypes }] as ParameterInformation[],
     };
     return {
         activeParameter: 0,
         activeSignature: 0,
-        signatures: [sigInfo]
+        signatures: [sigInfo],
     } as SignatureHelp;
 }
 
@@ -195,14 +193,6 @@ function resolvePosInState(character: number, length: number, arg: string) {
     return { length, requiredHinting };
 }
 
-export function isParsedNodeFunction(node: ParsedValue): node is ParsedFuncOrDivValue {
-    return node.type === 'function';
-}
-
-export function isParsedNodeDiv(node: ParsedValue): node is ParsedFuncOrDivValue {
-    return node.type === 'div';
-}
-
 export function isBetweenLengths(location: number, length: number, modifier: { length: number }) {
     return location >= length && location <= length + modifier.length;
 }
@@ -210,7 +200,7 @@ export function isBetweenLengths(location: number, length: number, modifier: { l
 export function resolveStateParams(stateDef: StateParsedValue) {
     const typeArguments: string[] = [];
     if (stateDef.arguments.length > 0) {
-        stateDef.arguments.forEach(arg => {
+        stateDef.arguments.forEach((arg) => {
             if (typeof arg === 'object') {
                 if (arg.args.length > 0) {
                     typeArguments.push(`${arg.name}(${arg.args.join(', ')})`);

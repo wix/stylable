@@ -1,9 +1,8 @@
-import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
-import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import postcss from 'postcss';
-
-const valueParser = require('postcss-value-parser');
+import postcssValueParser from 'postcss-value-parser';
+import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
+import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 
 describe('Generator variables interpolation', () => {
     it('should inline value() usage with and without quotes', () => {
@@ -21,9 +20,9 @@ describe('Generator variables interpolation', () => {
                             color: value(param);
                             background: value(param1);
                         }
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const rule = result.nodes![0] as postcss.Rule;
@@ -43,9 +42,9 @@ describe('Generator variables interpolation', () => {
                             xxl: "(max-width: 301px)";
                         }
                         @media value(xxl) {}
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         expect((result.nodes![0] as postcss.AtRule).params).to.equal('(max-width: 301px)');
@@ -65,9 +64,9 @@ describe('Generator variables interpolation', () => {
                         .container {
                             color: value(param);
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const rule = result.nodes![0] as postcss.Rule;
@@ -90,9 +89,9 @@ describe('Generator variables interpolation', () => {
                         .container {
                             color: value(param1);
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         const rule = result.nodes![0] as postcss.Rule;
@@ -118,7 +117,7 @@ describe('Generator variables interpolation', () => {
                             color: value(param);
                             background-color: value(param2)
                         }
-                    `
+                    `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -127,9 +126,9 @@ describe('Generator variables interpolation', () => {
                             param1: red;
                             param2: blue;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
         const rule = result.nodes![0] as postcss.Rule;
 
@@ -155,7 +154,7 @@ describe('Generator variables interpolation', () => {
                             color: value(param);
                             background-color: value(param2)
                         }
-                    `
+                    `,
                 },
                 '/imported.st.css': {
                     namespace: 'imported',
@@ -168,7 +167,7 @@ describe('Generator variables interpolation', () => {
                             param1: value(param0);
                             param2: blue;
                         }
-                    `
+                    `,
                 },
                 '/deep.st.css': {
                     namespace: 'deep',
@@ -176,9 +175,9 @@ describe('Generator variables interpolation', () => {
                         :vars {
                             param0: red;
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
         const rule = result.nodes![0] as postcss.Rule;
 
@@ -199,9 +198,9 @@ describe('Generator variables interpolation', () => {
                         .container {
                             color: xxx(value(param));
                         }
-                        `
-                }
-            }
+                        `,
+                },
+            },
         });
 
         const rule = meta.outputAst!.nodes![0] as postcss.Rule;
@@ -268,7 +267,7 @@ describe('Generator variables interpolation', () => {
                             .root {
                                 border: value(customValue);
                             }
-                        `
+                        `,
                     },
                     '/imported.js': {
                         namespace: 'imported',
@@ -286,9 +285,9 @@ describe('Generator variables interpolation', () => {
                                     }
                                 }
                             }
-                        `
-                    }
-                }
+                        `,
+                    },
+                },
             });
             const root = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -316,9 +315,9 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(otherColor);
                                     color: value(colors, text);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -347,9 +346,9 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(designs, bg);
                                     color: value(designs, box, border);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -372,7 +371,7 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(colors, bg);
                                     color: value(colors, text, body);
                                 }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             namespace: 'imported',
@@ -386,9 +385,9 @@ describe('Generator variables interpolation', () => {
                                         )
                                     );
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -414,9 +413,9 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(colors, bg);
                                     color: value(colors, value(content));
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -441,7 +440,7 @@ describe('Generator variables interpolation', () => {
                                 .root {
                                     background-color: value(colors, value(key));
                                 }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             namespace: 'imported',
@@ -452,9 +451,9 @@ describe('Generator variables interpolation', () => {
                                         text green
                                     );
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
                 expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
@@ -482,9 +481,9 @@ describe('Generator variables interpolation', () => {
                                 .part {
                                     border: value(borders, border2);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const root = meta.outputAst!.nodes![0] as postcss.Rule;
                 const part = meta.outputAst!.nodes![1] as postcss.Rule;
@@ -511,9 +510,9 @@ describe('Generator variables interpolation', () => {
                                     border-color: value(colors, 0);
                                     color: value(colors, 1);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -537,7 +536,7 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(colors, 0);
                                     color: value(colors, 1);
                                 }
-                            `
+                            `,
                         },
                         '/imported.st.css': {
                             namespace: 'imported',
@@ -545,9 +544,9 @@ describe('Generator variables interpolation', () => {
                                 :vars {
                                     colors: stArray(red, green);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -587,9 +586,9 @@ describe('Generator variables interpolation', () => {
                                 .root {
                                     border: value(borders, 0, size) value(borders, 0, style) value(borders, 0, color);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -620,9 +619,9 @@ describe('Generator variables interpolation', () => {
                                     background-color: value(colors, reds, 0);
                                     color: value(colors, reds, 1);
                                 }
-                            `
-                        }
-                    }
+                            `,
+                        },
+                    },
                 });
                 const rule = meta.outputAst!.nodes![0] as postcss.Rule;
 
@@ -641,14 +640,14 @@ describe('Generator variables interpolation', () => {
                 { typeDef, path }: { typeDef: string; path: string[] },
                 {
                     matchValue,
-                    match
+                    match,
                 }: {
                     matchValue(value: GetCustomTypeExtensionValueType<T>): void;
                     match(value: string): void;
                 }
             ) {
                 describe('Api Test: ' + desc, () => {
-                    const valueAst = valueParser(typeDef).nodes[0];
+                    const valueAst = postcssValueParser(typeDef).nodes[0];
                     const typeExtension = stTypes[valueAst.value];
 
                     it('should create a runtime value from ast', () => {
@@ -671,8 +670,8 @@ describe('Generator variables interpolation', () => {
                 'basic stMap functionality',
                 { typeDef: 'stMap(k1 v1, k2 v2)', path: ['k1'] },
                 {
-                    matchValue: map => expect(map).to.eql({ k1: 'v1', k2: 'v2' }),
-                    match: value => expect(value).to.equal('v1')
+                    matchValue: (map) => expect(map).to.eql({ k1: 'v1', k2: 'v2' }),
+                    match: (value) => expect(value).to.equal('v1'),
                 }
             );
 
@@ -680,20 +679,20 @@ describe('Generator variables interpolation', () => {
                 'nested stMap functionality',
                 {
                     typeDef: 'stMap(k1 v1, k2 stMap(k3 v3, k4 stMap(k5 v5) ))',
-                    path: ['k2', 'k4', 'k5']
+                    path: ['k2', 'k4', 'k5'],
                 },
                 {
-                    matchValue: map =>
+                    matchValue: (map) =>
                         expect(map).to.deep.include({
                             k1: 'v1',
                             k2: box('stMap', {
                                 k3: 'v3',
                                 k4: box('stMap', {
-                                    k5: 'v5'
-                                })
-                            })
+                                    k5: 'v5',
+                                }),
+                            }),
                         }),
-                    match: value => expect(value).to.equal('v5')
+                    match: (value) => expect(value).to.equal('v5'),
                 }
             );
 
@@ -701,8 +700,8 @@ describe('Generator variables interpolation', () => {
                 'basic stArray functionality',
                 { typeDef: 'stArray(v0, v1)', path: ['1'] },
                 {
-                    matchValue: array => expect(array).to.eql(['v0', 'v1']),
-                    match: value => expect(value).to.equal('v1')
+                    matchValue: (array) => expect(array).to.eql(['v0', 'v1']),
+                    match: (value) => expect(value).to.equal('v1'),
                 }
             );
 
@@ -710,8 +709,8 @@ describe('Generator variables interpolation', () => {
                 'nested stArray functionality',
                 { typeDef: 'stArray(v0, stArray(v1))', path: ['1', '0'] },
                 {
-                    matchValue: array => expect(array).to.eql(['v0', box('stArray', ['v1'])]),
-                    match: value => expect(value).to.equal('v1')
+                    matchValue: (array) => expect(array).to.eql(['v0', box('stArray', ['v1'])]),
+                    match: (value) => expect(value).to.equal('v1'),
                 }
             );
 
@@ -719,9 +718,9 @@ describe('Generator variables interpolation', () => {
                 'complex nested stArray/stMap/stArray functionality',
                 { typeDef: 'stArray(v0, stMap(k2 stArray(v2))', path: ['1', 'k2', '0'] },
                 {
-                    matchValue: array =>
+                    matchValue: (array) =>
                         expect(array).to.eql(['v0', box('stMap', { k2: box('stArray', ['v2']) })]),
-                    match: value => expect(value).to.equal('v2')
+                    match: (value) => expect(value).to.equal('v2'),
                 }
             );
 
@@ -729,12 +728,12 @@ describe('Generator variables interpolation', () => {
                 'complex nested stMap/stArray/stMap functionality',
                 { typeDef: 'stMap(k0 v0, k1 stArray(v2, stMap(k3 v3)))', path: ['k1', '1', 'k3'] },
                 {
-                    matchValue: array =>
+                    matchValue: (array) =>
                         expect(array).to.eql({
                             k0: 'v0',
-                            k1: box('stArray', ['v2', box('stMap', { k3: 'v3' })])
+                            k1: box('stArray', ['v2', box('stMap', { k3: 'v3' })]),
                         }),
-                    match: value => expect(value).to.equal('v3')
+                    match: (value) => expect(value).to.equal('v3'),
                 }
             );
         });

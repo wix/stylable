@@ -10,8 +10,8 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             optimize: {
-                shortNamespaces: true
-            }
+                shortNamespaces: true,
+            },
         }),
         new StylableMetadataPlugin({
             name: 'test',
@@ -19,8 +19,8 @@ module.exports = {
             renderSnapshot(_exp, res) {
                 return `<snapshot>${basename(res.resource)}</snapshot>`;
             },
-            mode: 'cjs'
+            mode: 'cjs',
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

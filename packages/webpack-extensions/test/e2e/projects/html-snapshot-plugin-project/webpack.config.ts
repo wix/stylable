@@ -11,15 +11,15 @@ module.exports = {
     plugins: [
         new StylableWebpackPlugin({
             optimize: {
-                shortNamespaces: true
-            }
+                shortNamespaces: true,
+            },
         }),
         new HTMLSnapshotPlugin({
             outDir: 'snapshots',
             render(module) {
                 return renderToStaticMarkup(el(module.Index));
-            }
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

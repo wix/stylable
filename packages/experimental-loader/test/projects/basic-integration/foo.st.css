@@ -1,0 +1,14 @@
+:import {
+    -st-from: "./formatter.js";
+    -st-named: echo;
+}
+
+.hello {
+  color: echo(red);
+  background: url('./dog.png');
+  height: 500px;
+}
+
+.world {
+  color: echo(blue);
+}

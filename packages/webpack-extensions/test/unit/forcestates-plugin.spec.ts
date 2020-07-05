@@ -5,7 +5,7 @@ import postcss from 'postcss';
 import {
     applyStylableForceStateSelectors,
     createDataAttr,
-    OVERRIDE_STATE_PREFIX
+    OVERRIDE_STATE_PREFIX,
 } from '@stylable/webpack-extensions';
 
 describe('stylable-forcestates-plugin', () => {
@@ -23,13 +23,13 @@ describe('stylable-forcestates-plugin', () => {
                     .root:myState {
                         color: green;
                     }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         applyStylableForceStateSelectors(res.meta.outputAst!, {
-            entry: true
+            entry: true,
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
@@ -49,13 +49,13 @@ describe('stylable-forcestates-plugin', () => {
                     .root:hover {
                         color: green;
                     }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         applyStylableForceStateSelectors(res.meta.outputAst!, {
-            entry: true
+            entry: true,
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
@@ -77,13 +77,13 @@ describe('stylable-forcestates-plugin', () => {
                     .root:myState(value) {
                         color: green;
                     }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         applyStylableForceStateSelectors(res.meta.outputAst!, {
-            entry: true
+            entry: true,
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
@@ -109,13 +109,13 @@ describe('stylable-forcestates-plugin', () => {
                     .root:myState(some value) {
                         color: green;
                     }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         applyStylableForceStateSelectors(res.meta.outputAst!, {
-            entry: true
+            entry: true,
         });
 
         expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(

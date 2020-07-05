@@ -1,5 +1,5 @@
-module.exports.Mixin = function(args) {
+module.exports.Mixin = function (args) {
     return {
-        arguments: JSON.stringify(args)
+        arguments: JSON.stringify(args),
     };
 };

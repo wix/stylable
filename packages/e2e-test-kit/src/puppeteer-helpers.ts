@@ -1,19 +1,17 @@
-export function filterAssetResponses(responses: any, assetNames: string[]) {
+import type { Response } from 'puppeteer';
+
+export function filterAssetResponses(responses: Response[], assetNames: string[]) {
     return assetNames
-        .map(fileName => {
-            return responses.find((res: any) => {
-                return res.url().endsWith(fileName);
-            });
-        })
-        .filter(Boolean);
+        .map((fileName) => responses.find((res) => res.url().endsWith(fileName)))
+        .filter(Boolean) as Response[];
 }
 
 function getStyleElementsMetadata(getCss: boolean) {
-    const styleElements = Array.from(document.head!.getElementsByTagName('style'));
-    return styleElements.map(styleEl => {
+    const styleElements = Array.from(document.head.getElementsByTagName('style'));
+    return styleElements.map((styleEl) => {
         const data: { id?: string; depth?: string; css?: string } = {
             id: styleEl.getAttribute('st-id')!,
-            depth: styleEl.getAttribute('st-depth')!
+            depth: styleEl.getAttribute('st-depth')!,
         };
         if (getCss) {
             data.css = styleEl.textContent!.replace(/\r?\n/g, '\n');
@@ -22,6 +20,12 @@ function getStyleElementsMetadata(getCss: boolean) {
     });
 }
 
+function getCSSLinks() {
+    const styleElements = Array.from(document.head.getElementsByTagName('link'));
+    return styleElements.map((cssLink) => cssLink.getAttribute('href'));
+}
+
 export const browserFunctions = {
-    getStyleElementsMetadata
+    getStyleElementsMetadata,
+    getCSSLinks,
 };

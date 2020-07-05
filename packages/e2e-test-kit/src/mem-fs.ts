@@ -42,7 +42,7 @@ export function memoryFS() {
         const result = fn.apply(mfs, args);
         Object.keys(lastModified).reduce<any>((memo, filePath) => {
             const mtime = lastModified[filePath];
-            if (filePath.indexOf(dir) !== 0) {
+            if (!filePath.startsWith(dir)) {
                 memo[filePath] = mtime;
             }
             return memo;

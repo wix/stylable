@@ -2,3 +2,7 @@
     -st-from: "./single-var-color.st.css";
     -st-named: color1;
 }
+
+.root {
+    color: value(color1);
+}

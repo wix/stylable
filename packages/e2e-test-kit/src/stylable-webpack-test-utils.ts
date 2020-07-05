@@ -15,7 +15,7 @@ export interface MinimalStylableModule extends MinimalModule {
 
 export function findModule(modules: MinimalModule[], contextPath: string) {
     return modules.find(
-        module => module.type === 'stylable' && normalizeModuleResource(module) === contextPath
+        (module) => module.type === 'stylable' && normalizeModuleResource(module) === contextPath
     );
 }
 
@@ -26,6 +26,7 @@ export function normalizeModuleResource(m: MinimalModule) {
 export function evalAssetModule(assetModule: MinimalModule, publicPath = ''): any {
     const code = assetModule.originalSource().source();
     const _module = { exports: {} };
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const moduleFactory = new Function('module', 'exports', '__webpack_public_path__', code);
     moduleFactory(_module, _module.exports, publicPath);
     return _module.exports;
@@ -43,6 +44,7 @@ export function evalStylableModule(
     // evalStylableModule(assetsModule, requireAssetsFactory(assetsModules));
 
     const _module = { exports: { default: undefined } };
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const moduleFactory = new Function('module', 'exports', '__webpack_require__', code);
     const customRequire = (id: string) => {
         if (id.match(/@stylable\/runtime$/)) {
@@ -70,11 +72,11 @@ export function configLoadAssets() {
                 {
                     loader: 'url-loader',
                     options: {
-                        limit: 300
-                    }
-                }
-            ]
-        }
+                        limit: 300,
+                    },
+                },
+            ],
+        },
     ];
 }
 

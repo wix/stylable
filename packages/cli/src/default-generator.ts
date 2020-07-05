@@ -11,7 +11,7 @@ function filename2varname(filePath: string) {
 export class Generator {
     public generateImport(filePath: string) {
         return {
-            default: filename2varname(filePath)
+            default: filename2varname(filePath),
         };
     }
 }

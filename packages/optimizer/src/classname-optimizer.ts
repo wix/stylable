@@ -3,7 +3,7 @@ import {
     parseSelector,
     pseudoStates,
     stringifySelector,
-    traverseNode
+    traverseNode,
 } from '@stylable/core';
 import postcss from 'postcss';
 
@@ -11,7 +11,7 @@ export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
     public context: { names: Record<string, string> };
     constructor() {
         this.context = {
-            names: {}
+            names: {},
         };
     }
     public rewriteSelector(
@@ -20,9 +20,9 @@ export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
         globals: Record<string, boolean> = {}
     ) {
         const ast = parseSelector(selector);
-        traverseNode(ast, node => {
+        traverseNode(ast, (node) => {
             if (node.type === 'class' && !globals[node.name]) {
-                const isState = Object.keys(usageMapping).some(namespace => {
+                const isState = Object.keys(usageMapping).some((namespace) => {
                     return node.name.startsWith(
                         '' + namespace + pseudoStates.booleanStateDelimiter
                     );
@@ -49,14 +49,14 @@ export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
         usageMapping: Record<string, boolean>,
         globals?: Record<string, boolean>
     ) {
-        ast.walkRules(rule => {
+        ast.walkRules((rule) => {
             rule.selector = this.rewriteSelector(rule.selector, usageMapping, globals);
         });
-        classes.forEach(originName => {
+        classes.forEach((originName) => {
             if (exported[originName]) {
                 exported[originName] = exported[originName]
                     .split(' ')
-                    .map(renderedNamed => {
+                    .map((renderedNamed) => {
                         return (
                             this.context.names[renderedNamed] || this.generateName(renderedNamed)
                         );

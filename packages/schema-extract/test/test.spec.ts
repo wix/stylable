@@ -8,7 +8,7 @@ import {
     stylableElement,
     stylableModule,
     StylableModuleSchema,
-    stylableVar
+    stylableVar,
 } from '../src';
 import { mockNamespace } from './mock-namespace';
 
@@ -25,9 +25,9 @@ describe('Stylable JSON Schema Extractor', () => {
                 namespace: 'entry',
                 properties: {
                     root: {
-                        $ref: stylableClass
-                    }
-                }
+                        $ref: stylableClass,
+                    },
+                },
             });
         });
 
@@ -35,7 +35,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema('Comp{}', '/entry.st.css', '/', path);
 
             expect(res.properties!.Comp).to.eql({
-                $ref: stylableElement
+                $ref: stylableElement,
             });
         });
 
@@ -43,7 +43,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema(':vars { myVar: red; }', '/entry.st.css', '/', path);
 
             expect(res.properties!.myVar).to.eql({
-                $ref: stylableVar
+                $ref: stylableVar,
             });
         });
 
@@ -51,7 +51,7 @@ describe('Stylable JSON Schema Extractor', () => {
             const res = extractSchema('.root { --myVar: red; }', '/entry.st.css', '/', path);
 
             expect(res.properties!['--myVar']).to.eql({
-                $ref: stylableCssVar
+                $ref: stylableCssVar,
             });
         });
     });
@@ -80,13 +80,13 @@ describe('Stylable JSON Schema Extractor', () => {
                     root: {
                         $ref: stylableClass,
                         extends: {
-                            $ref: '/imported.st.css#root'
-                        }
+                            $ref: '/imported.st.css#root',
+                        },
                     },
                     Comp: {
-                        $ref: '/imported.st.css#root'
-                    }
-                }
+                        $ref: '/imported.st.css#root',
+                    },
+                },
             });
         });
 
@@ -110,15 +110,15 @@ describe('Stylable JSON Schema Extractor', () => {
                 moduleDependencies: ['/imported.st.css'],
                 properties: {
                     root: {
-                        $ref: stylableClass
+                        $ref: stylableClass,
                     },
                     part: {
                         $ref: '/imported.st.css#part',
                         extends: {
-                            $ref: '/imported.st.css#part'
-                        }
-                    }
-                }
+                            $ref: '/imported.st.css#part',
+                        },
+                    },
+                },
             });
         });
 
@@ -139,9 +139,9 @@ describe('Stylable JSON Schema Extractor', () => {
                 namespace: 'entry',
                 properties: {
                     root: {
-                        $ref: stylableClass
-                    }
-                }
+                        $ref: stylableClass,
+                    },
+                },
             });
         });
 
@@ -169,15 +169,15 @@ describe('Stylable JSON Schema Extractor', () => {
                 moduleDependencies: ['/imported1.st.css', '/imported2.st.css'],
                 properties: {
                     root: {
-                        $ref: stylableClass
+                        $ref: stylableClass,
                     },
                     Comp1: {
-                        $ref: '/imported1.st.css#root'
+                        $ref: '/imported1.st.css#root',
                     },
                     Comp2: {
-                        $ref: '/imported2.st.css#root'
-                    }
-                }
+                        $ref: '/imported2.st.css#root',
+                    },
+                },
             });
         });
     });
@@ -194,10 +194,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         someState: {
-                            type: 'boolean'
-                        }
-                    }
-                }
+                            type: 'boolean',
+                        },
+                    },
+                },
             });
         });
 
@@ -213,10 +213,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     states: {
                         someState: {
                             type: 'string',
-                            default: 'myState'
-                        }
-                    }
-                }
+                            default: 'myState',
+                        },
+                    },
+                },
             });
         });
 
@@ -232,10 +232,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     states: {
                         size: {
                             type: 'string',
-                            enum: ['small', 'medium', 'large']
-                        }
-                    }
-                }
+                            enum: ['small', 'medium', 'large'],
+                        },
+                    },
+                },
             });
         });
 
@@ -250,10 +250,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         size: {
-                            type: 'number'
-                        }
-                    }
-                }
+                            type: 'number',
+                        },
+                    },
+                },
             });
         });
 
@@ -268,10 +268,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         size: {
-                            type: 'tag'
-                        }
-                    }
-                }
+                            type: 'tag',
+                        },
+                    },
+                },
             });
         });
 
@@ -286,10 +286,10 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         state: {
-                            type: 'mapped'
-                        }
-                    }
-                }
+                            type: 'mapped',
+                        },
+                    },
+                },
             });
         });
     });
@@ -310,9 +310,9 @@ describe('Stylable JSON Schema Extractor', () => {
                     root: {
                         $ref: stylableClass,
                         extends: {
-                            $ref: 'extended'
-                        }
-                    }
+                            $ref: 'extended',
+                        },
+                    },
                 });
         });
 
@@ -331,9 +331,9 @@ describe('Stylable JSON Schema Extractor', () => {
                     root: {
                         $ref: stylableClass,
                         extends: {
-                            $ref: 'Element'
-                        }
-                    }
+                            $ref: 'Element',
+                        },
+                    },
                 });
         });
 
@@ -358,9 +358,9 @@ describe('Stylable JSON Schema Extractor', () => {
                     root: {
                         $ref: stylableClass,
                         extends: {
-                            $ref: '/imported.st.css#root'
-                        }
-                    }
+                            $ref: '/imported.st.css#root',
+                        },
+                    },
                 });
             });
 
@@ -382,9 +382,9 @@ describe('Stylable JSON Schema Extractor', () => {
                         root: {
                             $ref: stylableClass,
                             extends: {
-                                $ref: '/imported.st.css#part'
-                            }
-                        }
+                                $ref: '/imported.st.css#part',
+                            },
+                        },
                     });
             });
 
@@ -406,9 +406,9 @@ describe('Stylable JSON Schema Extractor', () => {
                         root: {
                             $ref: stylableClass,
                             extends: {
-                                $ref: '/imported.st.css#part'
-                            }
-                        }
+                                $ref: '/imported.st.css#part',
+                            },
+                        },
                     });
             });
 
@@ -428,9 +428,9 @@ describe('Stylable JSON Schema Extractor', () => {
                     root: {
                         $ref: stylableClass,
                         extends: {
-                            $ref: 'mock-package/imported.st.css#root'
-                        }
-                    }
+                            $ref: 'mock-package/imported.st.css#root',
+                        },
+                    },
                 });
             });
 
@@ -452,9 +452,9 @@ describe('Stylable JSON Schema Extractor', () => {
                         root: {
                             $ref: stylableClass,
                             extends: {
-                                $ref: 'mock-package/imported.st.css#part'
-                            }
-                        }
+                                $ref: 'mock-package/imported.st.css#part',
+                            },
+                        },
                     });
             });
 
@@ -476,9 +476,9 @@ describe('Stylable JSON Schema Extractor', () => {
                         root: {
                             $ref: stylableClass,
                             extends: {
-                                $ref: 'mock-package/imported.st.css#part'
-                            }
-                        }
+                                $ref: 'mock-package/imported.st.css#part',
+                            },
+                        },
                     });
             });
         });
@@ -528,38 +528,38 @@ describe('Stylable JSON Schema Extractor', () => {
                     $ref: stylableClass,
                     states: {
                         userSelected: {
-                            type: 'boolean'
-                        }
+                            type: 'boolean',
+                        },
                     },
                     extends: {
-                        $ref: '/imported.st.css#root'
+                        $ref: '/imported.st.css#root',
                     },
                     description: 'a description for root',
-                    docTags: { tag: 'a tag for root' }
+                    docTags: { tag: 'a tag for root' },
                 },
                 part2: {
                     $ref: '/imported.st.css#part2',
                     description: 'a description for part2',
-                    docTags: { tag: 'a tag for part2' }
+                    docTags: { tag: 'a tag for part2' },
                 },
                 myColor: {
                     $ref: stylableVar,
                     description: 'a var description',
-                    docTags: { tag: 'a var tag' }
+                    docTags: { tag: 'a var tag' },
                 },
                 otherPart: {
                     $ref: stylableClass,
                     states: {
                         size: {
                             type: 'string',
-                            enum: ['s', 'm', 'l']
-                        }
+                            enum: ['s', 'm', 'l'],
+                        },
                     },
                     extends: {
-                        $ref: '/imported.st.css#part1'
-                    }
-                }
-            }
+                        $ref: '/imported.st.css#part1',
+                    },
+                },
+            },
         };
 
         expect(res).to.eql(expected);

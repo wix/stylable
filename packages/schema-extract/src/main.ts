@@ -9,7 +9,7 @@ import {
     StylableMeta,
     StylableProcessor,
     valueMapping,
-    VarSymbol
+    VarSymbol,
 } from '@stylable/core';
 import {
     MinimalPath,
@@ -18,7 +18,7 @@ import {
     stylableCssVar,
     StylableModuleSchema,
     StylableSymbolSchema,
-    stylableVar
+    stylableVar,
 } from './types';
 
 export function extractSchema(
@@ -42,7 +42,7 @@ export function generateSchema(
     const schema: StylableModuleSchema = {
         $id: `/${path.relative(basePath, filePath).replace(/\\/g, '/')}`,
         $ref: 'stylable/module',
-        namespace: meta.namespace
+        namespace: meta.namespace,
     };
 
     for (const entry of Object.keys(meta.mappedSymbols)) {
@@ -82,13 +82,13 @@ export function generateSchema(
                 generateCssDocs(meta, symbol, schemaEntry);
             } else if (symbol._kind === 'var') {
                 schema.properties[entry] = {
-                    $ref: stylableVar
+                    $ref: stylableVar,
                 };
 
                 generateCssDocs(meta, symbol, schema.properties[entry] as StylableSymbolSchema);
             } else if (symbol._kind === 'cssVar') {
                 schema.properties[entry] = {
-                    $ref: stylableCssVar
+                    $ref: stylableCssVar,
                 };
             }
         }
@@ -124,7 +124,7 @@ function addModuleDependency(
         schema.moduleDependencies = [];
     }
     const importedPath = normalizeImportPath(filePath, importPath, basePath, path);
-    if (schema.moduleDependencies.indexOf(importedPath) === -1) {
+    if (!schema.moduleDependencies.includes(importedPath)) {
         schema.moduleDependencies.push(importedPath);
     }
 }

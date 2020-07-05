@@ -9,14 +9,14 @@ describe('StylableClassNameOptimizer  Unit', () => {
         const exports = {
             classname: 'namespace__classname',
             thing: 'namespace__thing',
-            composed: 'namespace__composed namespace__classname'
+            composed: 'namespace__composed namespace__classname',
         };
 
         optimizer.optimizeAstAndExports(ast, exports, undefined, { namespace: true });
         expect(exports, 'exports rewrite').to.eql({
             classname: 's0',
             thing: 's1',
-            composed: 's2 s0'
+            composed: 's2 s0',
         });
         expect(ast.toString(), 'ast optimized').to.equal('.s0{} .s1{} .s2{}');
     });
@@ -29,17 +29,17 @@ describe('StylableClassNameOptimizer  Unit', () => {
         const exports = {
             classname: 'namespace__classname',
             thing: 'namespace__thing',
-            imported: 'otherNamespace__imported'
+            imported: 'otherNamespace__imported',
         };
 
         optimizer.optimizeAstAndExports(ast, exports, undefined, {
             namespace: true,
-            otherNamespace: true
+            otherNamespace: true,
         });
         expect(exports, 'exports rewrite').to.eql({
             classname: 's0',
             thing: 's1',
-            imported: 's2'
+            imported: 's2',
         });
         expect(ast.toString(), 'ast optimized').to.equal(
             '.s0{} .namespace--state{} .namespace---otherState-5-value{} .s1{} .s2{} .otherNamespace--state{}'

@@ -1,14 +1,6 @@
-// import { flatMatch, processSource } from '@stylable/core-test-kit';
-import * as chai from 'chai';
+import { expect } from 'chai';
+import postcssValueParser from 'postcss-value-parser';
 import { getFormatterArgs } from '../src/stylable-value-parsers';
-
-const valueParser = require('postcss-value-parser');
-
-const expect = chai.expect;
-
-function getFunctionNode(src: string) {
-    return valueParser(src).nodes[0];
-}
 
 function test(
     desc: string,
@@ -18,12 +10,14 @@ function test(
     expectedWarnings?: string[]
 ) {
     it(desc, () => {
-        const warns: string[] = [];
-        expect(
-            getFormatterArgs(getFunctionNode(src), allowComments, msg => warns.push(msg))
-        ).to.eql(expected);
+        const actualWarnings: string[] = [];
+        const [firstNode] = postcssValueParser(src).nodes;
+        const formatterArgs = getFormatterArgs(firstNode, allowComments, (msg) =>
+            actualWarnings.push(msg)
+        );
+        expect(formatterArgs).to.eql(expected);
         if (expectedWarnings) {
-            expect(expectedWarnings).to.eql(warns);
+            expect(expectedWarnings).to.eql(actualWarnings);
         }
     });
 }
@@ -57,13 +51,13 @@ describe('Value argument parsing (split by comma)', () => {
 
         test('should process a function with string argument', 'func("A")', ['A']);
         test('should process a function with string argument and extra value', 'func("A" 10px)', [
-            'A 10px'
+            'A 10px',
         ]);
     });
 
     describe('invalid inputs', () => {
         test('should process a function with only a comment after a comma', 'func(a, /* BLAH*/)', [
-            'a'
+            'a',
         ]);
         test(
             'should process only comments in args',
@@ -81,7 +75,7 @@ describe('Value argument parsing (split by comma)', () => {
             false,
             [
                 'func(a,/**/ /**/,): argument at index 1 is empty',
-                'func(a,/**/ /**/,): argument at index 2 is empty'
+                'func(a,/**/ /**/,): argument at index 2 is empty',
             ]
         );
     });

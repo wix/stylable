@@ -1,14 +1,3 @@
-export function hasKeys(o: {}) {
-    for (const k in o) {
-        if (o.hasOwnProperty(k)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-export const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
-
 // export function scope(name: string, namespace: string, separator: string = '-') {
 //     return namespace ? namespace + separator + name : name;
 // }
@@ -25,7 +14,8 @@ export function string2varname(str: string) {
     return str.replace(/[^0-9a-zA-Z_]/gm, '').replace(/^[^a-zA-Z_]+/gm, '');
 }
 
-const deprecatedCache: { [id: string]: boolean } = {};
+const deprecatedCache: { [message: string]: boolean } = {};
+
 export function deprecated(staticMessage: string) {
     if (!deprecatedCache[staticMessage]) {
         deprecatedCache[staticMessage] = true;

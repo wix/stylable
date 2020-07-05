@@ -19,13 +19,13 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             api.register(a);
@@ -38,13 +38,13 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 1,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             api.register(a);
@@ -57,19 +57,19 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 1,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: 1,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             api.register(a);
@@ -83,25 +83,25 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 1,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: 1,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             const d = {
                 $id: '/d.st.css',
                 $depth: 0,
-                $css: `.d{}`
+                $css: `.d{}`,
             };
 
             api.register(a);
@@ -116,25 +116,25 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 3,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 2,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: 1,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             const d = {
                 $id: '/d.st.css',
                 $depth: 0,
-                $css: `.d{}`
+                $css: `.d{}`,
             };
 
             api.register(a);
@@ -149,19 +149,19 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 1,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: -1,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             api.register(a);
@@ -175,19 +175,19 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: Infinity,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: Infinity,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             api.register(a);
@@ -203,19 +203,19 @@ describe('css-runtime-renderer', () => {
             const a0 = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const a1 = {
                 $id: '/a.st.css',
                 $depth: 1,
-                $css: `.a{z-index:1}`
+                $css: `.a{z-index:1}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             api.register(a0);
@@ -224,7 +224,7 @@ describe('css-runtime-renderer', () => {
 
             expect(api.styles).eql([b, a1]);
             expect(api.stylesMap).includes({
-                '/a.st.css': a1
+                '/a.st.css': a1,
             });
         });
     });
@@ -234,25 +234,25 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 2,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: 0,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             const d = {
                 $id: '/d.st.css',
                 $depth: 1,
-                $css: `.d{}`
+                $css: `.d{}`,
             };
 
             expect(api.sortStyles([a, b, c, d])).to.eql([a, c, d, b]);
@@ -262,25 +262,25 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 2,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             const c = {
                 $id: '/c.st.css',
                 $depth: 0,
-                $css: `.c{}`
+                $css: `.c{}`,
             };
 
             const d = {
                 $id: '/d.st.css',
                 $depth: 1,
-                $css: `.d{}`
+                $css: `.d{}`,
             };
 
             api.register(a);
@@ -306,7 +306,7 @@ describe('css-runtime-renderer', () => {
             expect(api.window).to.equal(null);
             expect(api.renderer).to.equal(null);
 
-            api.init(window);
+            api.init((window as unknown) as Window);
 
             expect(typeof api.renderer!.render).to.equal('function');
             expect(api.window).to.equal(window);
@@ -325,19 +325,19 @@ describe('css-runtime-renderer', () => {
             const a = {
                 $id: '/a.st.css',
                 $depth: 0,
-                $css: `.a{}`
+                $css: `.a{}`,
             };
 
             const b = {
                 $id: '/b.st.css',
                 $depth: 0,
-                $css: `.b{}`
+                $css: `.b{}`,
             };
 
             api.register(a);
             api.register(b);
 
-            api.init(window);
+            api.init((window as unknown) as Window);
             const head = document.head;
             expect(head.children.length).to.equal(2);
             assertStyle(head.children[0], { key: '/a.st.css', $css: '.a{}' });
@@ -357,12 +357,12 @@ describe('css-runtime-renderer', () => {
                 $id: '/a.st.css',
                 $depth: 0,
                 $css: `.a{}`,
-                $theme: true
+                $theme: true,
             };
 
             api.register(a);
 
-            api.init(window);
+            api.init((window as unknown) as Window);
             const head = document.head;
             expect(head.children.length).to.equal(1);
         });

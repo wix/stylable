@@ -1,22 +1,12 @@
-import { processNamespace } from '@stylable/core';
-import hash from 'murmurhash';
+import { packageNamespaceFactory } from '@stylable/core';
 import { dirname, relative } from 'path';
-const findConfig = require('find-config');
+import findConfig from 'find-config';
 
 export function resolveNamespaceFactory(
-    hashSalt: string = '',
-    prefix: string = ''
-): typeof processNamespace {
-    return (namespace: string, stylesheetPath: string) => {
-        const configPath = findConfig('package.json', { cwd: dirname(stylesheetPath) });
-        const config = require(configPath);
-        const fromRoot = relative(dirname(configPath), stylesheetPath).replace(/\\/g, '/');
-        return (
-            prefix +
-            namespace +
-            hash.v3(hashSalt + config.name + '@' + config.version + '/' + fromRoot)
-        );
-    };
+    hashSalt = '',
+    prefix = ''
+): ReturnType<typeof packageNamespaceFactory> {
+    return packageNamespaceFactory(findConfig, require, { dirname, relative }, hashSalt, prefix);
 }
 
-export const resolveNamespace = resolveNamespaceFactory();
+export const resolveNamespace: ReturnType<typeof packageNamespaceFactory> = resolveNamespaceFactory();

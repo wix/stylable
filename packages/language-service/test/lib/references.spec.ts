@@ -14,7 +14,7 @@ describe('References', () => {
         it('should return all instances of local class when called from selector ', () => {
             const refs = getReferences('references/local-class-from-selector.st.css', {
                 line: 5,
-                character: 16
+                character: 16,
             });
             expect(refs.length).to.equal(6);
             expect(refs[0].range).to.deep.equal(createRange(0, 3, 0, 7));
@@ -23,7 +23,7 @@ describe('References', () => {
             expect(refs[3].range).to.deep.equal(createRange(10, 22, 10, 26));
             expect(refs[4].range).to.deep.equal(createRange(15, 4, 15, 8));
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
-            refs.forEach(ref => {
+            refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
                     getCasePath('references/local-class-from-selector.st.css')
                 );
@@ -32,7 +32,7 @@ describe('References', () => {
         it('should return all instances of local class when called from -st-mixin ', () => {
             const refs = getReferences('references/local-class-from-selector.st.css', {
                 line: 15,
-                character: 6
+                character: 6,
             });
             expect(refs.length).to.equal(6);
             expect(refs[0].range).to.deep.equal(createRange(0, 3, 0, 7));
@@ -41,7 +41,7 @@ describe('References', () => {
             expect(refs[3].range).to.deep.equal(createRange(10, 22, 10, 26));
             expect(refs[4].range).to.deep.equal(createRange(15, 4, 15, 8));
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
-            refs.forEach(ref => {
+            refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
                     getCasePath('references/local-class-from-selector.st.css')
                 );
@@ -50,7 +50,7 @@ describe('References', () => {
         it('should return all instances of local class when called from -st-extends ', () => {
             const refs = getReferences('references/local-class-from-selector.st.css', {
                 line: 10,
-                character: 25
+                character: 25,
             });
             expect(refs.length).to.equal(6);
             expect(refs[0].range).to.deep.equal(createRange(0, 3, 0, 7));
@@ -59,7 +59,7 @@ describe('References', () => {
             expect(refs[3].range).to.deep.equal(createRange(10, 22, 10, 26));
             expect(refs[4].range).to.deep.equal(createRange(15, 4, 15, 8));
             expect(refs[5].range).to.deep.equal(createRange(16, 4, 16, 8));
-            refs.forEach(ref => {
+            refs.forEach((ref) => {
                 expect(ref.uri).to.equal(
                     getCasePath('references/local-class-from-selector.st.css')
                 );
@@ -71,7 +71,7 @@ describe('References', () => {
         it('Should return all instances of local variable when called from varaiable definition', () => {
             const refs = getReferences('references/local-var-from-def.st.css', {
                 line: 2,
-                character: 7
+                character: 7,
             });
             expect(refs.length).to.equal(2);
             expect(refs[0].range).to.deep.equal(createRange(2, 4, 2, 10));
@@ -81,7 +81,7 @@ describe('References', () => {
         it('Should return all instances of local variable when called from varaiable usage', () => {
             const refs = getReferences('references/local-var-from-def.st.css', {
                 line: 6,
-                character: 33
+                character: 33,
             });
             expect(refs.length).to.equal(2);
             expect(refs[0].range).to.deep.equal(createRange(2, 4, 2, 10));
@@ -124,7 +124,7 @@ describe('References', () => {
                     { path: path1, line: 13, character: 18 },
                     { path: path2, line: 11, character: 9 },
                     { path: path3, line: 5, character: 9 },
-                    { path: path3, line: 2, character: 16 }
+                    { path: path3, line: 2, character: 16 },
                 ];
                 const vscodePath1 = getCasePath(path1);
                 const vscodePath2 = getCasePath(path2);
@@ -135,7 +135,7 @@ describe('References', () => {
                 const exp4 = { uri: vscodePath3, range: createRange(5, 7, 5, 10) };
                 const exp5 = { uri: vscodePath3, range: createRange(2, 15, 2, 18) };
                 const bad1 = { uri: vscodePath2, range: createRange(17, 1, 17, 4) };
-                positions.forEach(pos => {
+                positions.forEach((pos) => {
                     const refs = getReferences(pos.path, pos);
                     expect(refs.length).to.equal(5);
                     expect(refs).to.deep.include(exp1);
@@ -153,7 +153,7 @@ describe('References', () => {
                     { path: path1, line: 8, character: 3 },
                     { path: path3, line: 2, character: 19 },
                     { path: path3, line: 14, character: 16 },
-                    { path: path3, line: 5, character: 13 }
+                    { path: path3, line: 5, character: 13 },
                 ];
                 const vscodePath1 = getCasePath(path1);
                 const vscodePath3 = getCasePath(path3);
@@ -161,7 +161,7 @@ describe('References', () => {
                 const exp2 = { uri: vscodePath3, range: createRange(2, 19, 2, 22) };
                 const exp3 = { uri: vscodePath3, range: createRange(14, 15, 14, 18) };
                 const exp4 = { uri: vscodePath3, range: createRange(5, 12, 5, 15) };
-                positions.forEach(pos => {
+                positions.forEach((pos) => {
                     const refs = getReferences(pos.path, pos);
                     expect(refs.length).to.equal(4);
                     expect(refs).to.deep.include(exp1);
@@ -177,7 +177,7 @@ describe('References', () => {
                     { path: path2, line: 13, character: 15 },
                     { path: path3, line: 2, character: 24 },
                     { path: path3, line: 5, character: 19 },
-                    { path: path3, line: 10, character: 18 }
+                    { path: path3, line: 10, character: 18 },
                 ];
                 const vscodePath1 = getCasePath(path1);
                 const vscodePath2 = getCasePath(path2);
@@ -190,7 +190,7 @@ describe('References', () => {
 
                 const bad1 = { uri: vscodePath1, range: createRange(16, 9, 16, 12) };
 
-                positions.slice(0, 1).forEach(pos => {
+                positions.slice(0, 1).forEach((pos) => {
                     const refs = getReferences(pos.path, pos);
                     expect(refs.length).to.equal(5);
                     expect(refs).to.deep.include(exp1);
@@ -218,9 +218,9 @@ describe('References', () => {
                 { path: path1, line: 5, character: 20 },
                 { path: path2, line: 5, character: 15 },
                 { path: path3, line: 7, character: 30 },
-                { path: path3, line: 18, character: 18 }
+                { path: path3, line: 18, character: 18 },
             ];
-            positions.forEach(pos => {
+            positions.forEach((pos) => {
                 it(
                     "Should find all references to topState on element 'one' in " +
                         pos.path +
@@ -245,9 +245,9 @@ describe('References', () => {
                 { path: path1, line: 9, character: 20 },
                 { path: path2, line: 7, character: 15 },
                 { path: path3, line: 9, character: 20 },
-                { path: path3, line: 20, character: 28 }
+                { path: path3, line: 20, character: 28 },
             ];
-            positions.forEach(pos => {
+            positions.forEach((pos) => {
                 it(
                     "Should find all references to topState on element 'two' in " +
                         pos.path +
@@ -272,9 +272,9 @@ describe('References', () => {
                 { path: path3, line: 13, character: 20 },
                 { path: path3, line: 16, character: 20 },
                 { path: path4, line: 10, character: 18 },
-                { path: path5, line: 10, character: 25 }
+                { path: path5, line: 10, character: 25 },
             ];
-            positions.forEach(pos => {
+            positions.forEach((pos) => {
                 it(
                     'Should find all references to extendState in ' +
                         pos.path +
@@ -293,6 +293,25 @@ describe('References', () => {
                         expect(refs).to.deep.include(exp4);
                     }
                 );
+            });
+        });
+    });
+
+    describe('inside an @st-scope', () => {
+        it('should return all instances of local class when called from selector ', () => {
+            const refs = getReferences('st-scope/local-class-from-selector.st.css', {
+                line: 6,
+                character: 20,
+            });
+            expect(refs.length).to.equal(6);
+            expect(refs[0].range).to.deep.equal(createRange(1, 7, 1, 11));
+            expect(refs[1].range).to.deep.equal(createRange(6, 5, 6, 9));
+            expect(refs[2].range).to.deep.equal(createRange(6, 18, 6, 22));
+            expect(refs[3].range).to.deep.equal(createRange(11, 26, 11, 30));
+            expect(refs[4].range).to.deep.equal(createRange(16, 8, 16, 12));
+            expect(refs[5].range).to.deep.equal(createRange(17, 8, 17, 12));
+            refs.forEach((ref) => {
+                expect(ref.uri).to.equal(getCasePath('st-scope/local-class-from-selector.st.css'));
             });
         });
     });

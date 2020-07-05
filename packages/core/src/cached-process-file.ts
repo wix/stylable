@@ -7,7 +7,8 @@ export interface CacheItem<T> {
 
 export interface MinimalFS {
     statSync: (fullpath: string) => { mtime: Date };
-    readFileSync: (fullpath: string, encoding: string) => string;
+    readFileSync: (fullpath: string, encoding: 'utf8') => string;
+    readlinkSync(path: string): string;
 }
 
 export interface FileProcessor<T> {
@@ -27,7 +28,7 @@ export function cachedProcessFile<T = any>(
     const cache: { [key: string]: CacheItem<T> } = {};
     const postProcessors: Array<(value: T, path: string) => T> = [];
 
-    function process(fullpath: string, ignoreCache: boolean = false, context?: string) {
+    function process(fullpath: string, ignoreCache = false, context?: string) {
         const resolvedPath = resolvePath(fullpath, context);
         const stat = fs.statSync(resolvedPath);
         const cached = cache[resolvedPath];
@@ -60,8 +61,8 @@ export function cachedProcessFile<T = any>(
         cache[fullpath] = {
             value,
             stat: {
-                mtime
-            }
+                mtime,
+            },
         };
     }
 
@@ -71,6 +72,6 @@ export function cachedProcessFile<T = any>(
         cache,
         process,
         add,
-        resolvePath
+        resolvePath,
     };
 }

@@ -4,9 +4,9 @@
 
 **Stylable** enables you to write reusable, highly-performant components. Each component exposes a style API that maps its internal parts so you can reuse components across teams without sacrificing stylability.
 
--   Scopes styles to components so they don't "leak" and clash with other styles.
--   Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
--   Cuts down on the resulting CSS bundles using "rule-shaking" and other optimizations
+- Scopes styles to components so they don't "leak" and clash with other styles.
+- Enables custom pseudo-classes and pseudo-elements that abstract the internal structure of a component. These can then be styled externally.
+- Cuts down on the resulting CSS bundles using "rule-shaking" and other optimizations
 
 At build time, the preprocessor converts the Stylable CSS into a minimal, flat, static, valid vanilla CSS that works cross-browser.
 
@@ -16,16 +16,16 @@ Learn more in our [Documentation Center](https://stylable.io/).
 
 There are two options for installing Stylable:
 
--   Create a new project based on Stylable [react-scripts](./packages/react-scripts), using [create-react-app](https://github.com/facebook/create-react-app)
--   Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
+- Create a new project using [create-stylable-app](./packages/create-stylable-app)
+- Install Stylable and its [webpack plugin](./packages/webpack-plugin) to an existing webpack based project
 
 For details on both options, see [Install & Configure](https://stylable.io/docs/getting-started/install-configure).
 
 ## Demos
 
--   [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small app showcasing Stylable, created using [@stylable/react-scripts](./packages/react-scripts)
--   [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
--   [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
+- [Mr. Potato Bruce](https://github.com/wix/potato-bruce) - A small application showcasing Stylable
+- [Manual Vue Integration](https://github.com/wix-playground/stylable-vue-example) - Simple example showing how to manually integrate Stylable into a Vue project (proof of concept)
+- [Various webpack project setups](./packages/webpack-plugin/test/e2e/projects) - An example of possible webpack configurations
 
 ## Repository Structure
 
@@ -43,22 +43,23 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 
 ### Tooling & Utilities
 
-| Package Name                                | Published Name             |                                                           Latest Version                                                            | Description                                                               |
-| ------------------------------------------- | -------------------------- | :---------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------- |
-| [cli](./packages/cli)                       | `@stylable/cli`            |            [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)            | Used for managing Stylable stylesheets in a project                       |
-| [react-scripts](./packages/react-scripts)   | `@stylable/react-scripts`  |  [![npm version](https://img.shields.io/npm/v/@stylable/react-scripts.svg)](https://www.npmjs.com/package/@stylable/react-scripts)  | `create-react-app` boilerplate generator scripts                          |
-| [schema-extract](./packages/schema-extract) | `@stylable/schema-extract` | [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract) | JSON Schema convertor for Stylable stylesheets                            |
-| [language-service](./packages/language-service) | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
-| [stylable.io](./packages/stylable.io)       | -                          |                                                                  -                                                                  | source package for the [stylable.io](http://stylable.io) official website |
+| Package Name                                          | Published Name               |                                                             Latest Version                                                              | Description                                                                                |
+| ----------------------------------------------------- | ---------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------------------------------ |
+| [cli](./packages/cli)                                 | `@stylable/cli`              |              [![npm version](https://img.shields.io/npm/v/@stylable/cli.svg)](https://www.npmjs.com/package/@stylable/cli)              | Used for managing Stylable stylesheets in a project                                        |
+| [create-stylable-app](./packages/create-stylable-app) | `create-stylable-app`        |        [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)        | Boilerplate generator CLI                                                                  |
+| [schema-extract](./packages/schema-extract)           | `@stylable/schema-extract`   |   [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)   | JSON Schema convertor for Stylable stylesheets                                             |
+| [language-service](./packages/language-service)       | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
+| [stylable.io](./packages/stylable.io)                 | -                            |                                                                    -                                                                    | source package for the [stylable.io](http://stylable.io) official website                  |
 
 ### Integrations
 
-| Package Name                                        | Published Name                 |                                                               Latest Version                                                                | Description                                     |
-| --------------------------------------------------- | ------------------------------ | :-----------------------------------------------------------------------------------------------------------------------------------------: | ----------------------------------------------- |
-| [jest](./packages/jest)                             | `@stylable/jest`               |               [![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)               | Jest Stylable processor plugin                  |
-| [node](./packages/node)                             | `@stylable/node`               |               [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)               | `require` hook and Node module factory          |
-| [webpack-extensions](./packages/webpack-extensions) | `@stylable/webpack-extensions` | [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions) | Experimental features for `webpack` integration |
-| [webpack-plugin](./packages/webpack-plugin)         | `@stylable/webpack-plugin`     |     [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)     | `webpack` (`v4.x`) integration plugin           |
+| Package Name                                          | Published Name                  |                                                                Latest Version                                                                 | Description                                                        |
+| ----------------------------------------------------- | ------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------: | ------------------------------------------------------------------ |
+| [jest](./packages/jest)                               | `@stylable/jest`                |                [![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)                | Jest Stylable processor plugin                                     |
+| [node](./packages/node)                               | `@stylable/node`                |                [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)                | `require` hook and Node module factory                             |
+| [webpack-extensions](./packages/webpack-extensions)   | `@stylable/webpack-extensions`  |  [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)  | Experimental features for `webpack` integration                    |
+| [webpack-plugin](./packages/webpack-plugin)           | `@stylable/webpack-plugin`      |      [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)      | `webpack` (`v4.x`) integration plugin                              |
+| [experimental-loader](./packages/experimental-loader) | `@stylable/experimental-loader` | [![npm version](https://img.shields.io/npm/v/@stylable/experimental-loader.svg)](https://www.npmjs.com/package/@stylable/experimental-loader) | experimental `webpack` loader - not recommended for production use |
 
 ### Test-kits
 

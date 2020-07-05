@@ -9,7 +9,7 @@ const Lib = {
     },
     async loadGallery() {
         return import(/* webpackChunkName: Gallery */ './gallery');
-    }
+    },
 };
 
 Lib.loadButton();

@@ -1,4 +1,4 @@
-import { resolve, sep } from 'path';
+import { dirname } from 'path';
 const deindent = require('deindent');
 
 import { MinimalFS } from './cached-process-file';
@@ -12,34 +12,37 @@ export interface MinimalFSSetup {
     trimWS?: boolean;
 }
 
-export function createMinimalFS(config: MinimalFSSetup) {
-    const files = config.files;
-
-    for (const file in files) {
-        if (files[file].mtime === undefined) {
-            files[file].mtime = new Date();
-            files[resolve(file)] = files[file];
+export function createMinimalFS({ files, trimWS }: MinimalFSSetup) {
+    const creationDate = new Date();
+    const filePaths = new Map<string, { content: string; mtime: Date }>(
+        Object.entries(files).map(([filePath, { content, mtime = creationDate }]) => [
+            filePath,
+            { content, mtime },
+        ])
+    );
+    const directoryPaths = new Set<string>();
+    for (const filePath of filePaths.keys()) {
+        for (const directoryPath of getParentPaths(dirname(filePath))) {
+            directoryPaths.add(directoryPath);
         }
     }
-    function isDir(path: string) {
-        return Object.keys(files).some(p => {
-            return p.startsWith(path[path.length - 1] === sep ? path : path + sep);
-        });
-    }
+
     const fs: MinimalFS = {
         readFileSync(path: string) {
             if (!files[path]) {
                 throw new Error('Cannot find file: ' + path);
             }
-            if (config.trimWS) {
+            if (trimWS) {
                 return deindent(files[path].content).trim();
             }
             return files[path].content;
         },
         statSync(path: string) {
-            const isDirectory = isDir(path);
-            if (!files[path] && !isDirectory) {
-                throw new Error('Cannot find file: ' + path);
+            const isDirectory = directoryPaths.has(path);
+            const fileEntry = filePaths.get(path);
+
+            if (!fileEntry && !isDirectory) {
+                throw new Error(`ENOENT: no such file or directory, stat ${path}`);
             }
 
             return {
@@ -47,22 +50,26 @@ export function createMinimalFS(config: MinimalFSSetup) {
                     return isDirectory;
                 },
                 isFile() {
-                    return true;
+                    return !!fileEntry;
                 },
-                mtime: isDirectory ? new Date() : files[path].mtime!
+                mtime: fileEntry ? fileEntry.mtime : new Date(),
             };
-        }
+        },
+        readlinkSync() {
+            throw new Error(`not implemented`);
+        },
     };
 
     const requireModule = function require(id: string): any {
         const _module = {
             id,
-            exports: {}
+            exports: {},
         };
         try {
             if (!id.match(/\.js$/)) {
                 id += '.js';
             }
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval
             const fn = new Function('module', 'exports', 'require', files[id].content);
             fn(_module, _module.exports, requireModule);
         } catch (e) {
@@ -78,6 +85,21 @@ export function createMinimalFS(config: MinimalFSSetup) {
     return {
         fs,
         requireModule,
-        resolvePath
+        resolvePath,
     };
+}
+
+function getParentPaths(initialDirectoryPath: string) {
+    const parentPaths: string[] = [];
+
+    let currentPath = initialDirectoryPath;
+    let lastPath: string | undefined;
+
+    while (currentPath !== lastPath) {
+        parentPaths.push(currentPath);
+        lastPath = currentPath;
+        currentPath = dirname(currentPath);
+    }
+
+    return parentPaths;
 }

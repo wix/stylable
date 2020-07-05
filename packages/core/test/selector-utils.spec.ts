@@ -4,7 +4,7 @@ import {
     matchSelectorTarget,
     parseSelector,
     SelectorChunk,
-    separateChunks
+    separateChunks,
 } from '../src/selector-utils';
 
 describe('Selector Utils', () => {
@@ -16,7 +16,7 @@ describe('Selector Utils', () => {
         {
             title: 'empty selector',
             selector: '',
-            expected: [[{ type: 'selector', nodes: [] }]]
+            expected: [[{ type: 'selector', nodes: [] }]],
         },
         {
             title: 'class in first chunk',
@@ -25,10 +25,10 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'x' }]
-                    }
-                ]
-            ]
+                        nodes: [{ type: 'class', name: 'x' }],
+                    },
+                ],
+            ],
         },
         {
             title: 'handle spacing',
@@ -37,15 +37,15 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'x' }]
+                        nodes: [{ type: 'class', name: 'x' }],
                     },
                     {
                         type: 'spacing',
                         value: ' ',
-                        nodes: [{ type: 'class', name: 'y' }]
-                    }
-                ]
-            ]
+                        nodes: [{ type: 'class', name: 'y' }],
+                    },
+                ],
+            ],
         },
         {
             title: 'handle operator',
@@ -54,15 +54,15 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'x' }]
+                        nodes: [{ type: 'class', name: 'x' }],
                     },
                     {
                         type: 'operator',
                         operator: '+',
-                        nodes: [{ type: 'class', name: 'y' }]
-                    }
-                ]
-            ]
+                        nodes: [{ type: 'class', name: 'y' }],
+                    },
+                ],
+            ],
         },
         {
             title: 'handle multiple selector',
@@ -71,16 +71,16 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'x' }]
-                    }
+                        nodes: [{ type: 'class', name: 'x' }],
+                    },
                 ],
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'y' }]
-                    }
-                ]
-            ]
+                        nodes: [{ type: 'class', name: 'y' }],
+                    },
+                ],
+            ],
         },
         {
             title: 'handle chunks with several nodes',
@@ -89,19 +89,19 @@ describe('Selector Utils', () => {
                 [
                     {
                         type: 'selector',
-                        nodes: [{ type: 'class', name: 'x' }]
-                    }
+                        nodes: [{ type: 'class', name: 'x' }],
+                    },
                 ],
                 [
                     {
                         type: 'selector',
                         nodes: [
                             { type: 'class', name: 'y' },
-                            { type: 'pseudo-element', name: 'z' }
-                        ]
-                    }
-                ]
-            ]
+                            { type: 'pseudo-element', name: 'z' },
+                        ],
+                    },
+                ],
+            ],
         },
         {
             title: 'handle 2 selectors',
@@ -112,16 +112,16 @@ describe('Selector Utils', () => {
                         type: 'selector',
                         nodes: [
                             { type: 'class', name: 'x' },
-                            { type: 'class', name: 'y' }
-                        ]
-                    }
-                ]
-            ]
-        }
+                            { type: 'class', name: 'y' },
+                        ],
+                    },
+                ],
+            ],
+        },
     ];
 
     describe('separateChunks', () => {
-        seperateChunksTestVectors.forEach(test => {
+        seperateChunksTestVectors.forEach((test) => {
             it(test.title, () => {
                 expect(separateChunks(parseSelector(test.selector))).to.eql(test.expected);
             });
@@ -190,13 +190,13 @@ describe('Selector Utils', () => {
         it('should filter and return only selector nodes which match types specified in array', () => {
             expect(
                 filterChunkNodesByType({ nodes: [{ name: '0', type: 'a' }], type: 'dont-care' }, [
-                    'a'
+                    'a',
                 ])
             ).to.eql([
                 {
                     name: '0',
-                    type: 'a'
-                }
+                    type: 'a',
+                },
             ]);
             expect(
                 filterChunkNodesByType(
@@ -204,15 +204,15 @@ describe('Selector Utils', () => {
                         nodes: [
                             { name: '0', type: 'a' },
                             { name: '1', type: 'b' },
-                            { name: '2', type: 'c' }
+                            { name: '2', type: 'c' },
                         ],
-                        type: 'dont-care'
+                        type: 'dont-care',
                     },
                     ['b', 'a']
                 )
             ).to.eql([
                 { name: '0', type: 'a' },
-                { name: '1', type: 'b' }
+                { name: '1', type: 'b' },
             ]);
         });
     });

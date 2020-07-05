@@ -27,9 +27,9 @@ export class HTMLSnapshotPlugin {
         this.getLogicModule = options.getLogicModule || getCSSComponentLogicModule;
     }
     public apply(compiler: webpack.Compiler) {
-        compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', compilation => {
+        compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', (compilation) => {
             compilation.hooks.additionalAssets.tapPromise('HTMLSnapshotPlugin', async () => {
-                const stylableModules = compilation.modules.filter(m => m.type === 'stylable');
+                const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
                 for (const module of stylableModules) {
                     await this.snapShotStylableModule(compilation, module);
                 }

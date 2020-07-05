@@ -6,8 +6,8 @@ import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
 
-function runCli(cliArgs: string[] = []): { stderr: any; stdout: any } {
-    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs]);
+function runCli(cliArgs: string[] = []) {
+    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs], { encoding: 'utf8' });
 }
 
 interface Files {
@@ -24,7 +24,7 @@ function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
         } else if (stat.isDirectory()) {
             return {
                 ...acc,
-                ...loadDirSync(rootPath, fullPath)
+                ...loadDirSync(rootPath, fullPath),
             };
         } else {
             throw new Error('Not Implemented');
@@ -52,19 +52,19 @@ describe('Stylable Cli', () => {
     it('single file build with test namespace-resolver', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
 
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
         const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
             evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'] as string,
+                dirContent['style.st.css.js'],
                 'style.st.css.js'
             ).namespace
         ).equal('test-ns-0');
@@ -73,7 +73,7 @@ describe('Stylable Cli', () => {
     it('single file build with outDir', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
 
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
@@ -83,14 +83,31 @@ describe('Stylable Cli', () => {
         expect(Object.keys(dirContent)).to.eql([
             join('dist', 'style.st.css.js'),
             'package.json',
-            'style.st.css'
+            'style.st.css',
         ]);
+    });
+
+    it('fails when provided unknown cli flags', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root {color:red}`,
+        });
+
+        const { status, output } = runCli([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            './dist',
+            '--unknownFlag',
+        ]);
+
+        expect(status, output.join('')).to.not.equal(0);
     });
 
     it('single file build with all targets', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
 
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
@@ -104,80 +121,74 @@ describe('Stylable Cli', () => {
             '--stcss',
             '--esm',
             '--cjs',
-            '--css'
+            '--css',
         ]);
         const dirContent = loadDirSync(tempDir.path);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
         expect(Object.keys(dirContent)).to.eql([
             join('dist', 'style.css'),
             join('dist', 'style.st.css'),
             join('dist', 'style.st.css.js'),
             join('dist', 'style.st.css.mjs'),
             'package.json',
-            'style.st.css'
+            'style.st.css',
         ]);
     });
 
     it('single file build with default ns-resolver', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
 
         const nsr = require.resolve('@stylable/node');
         const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
 
         expect(
             evalStylableModule<{ namespace: string }>(
-                dirContent['style.st.css.js'] as string,
+                dirContent['style.st.css.js'],
                 'style.st.css.js'
             ).namespace
         ).equal(resolveNamespace('style', join(tempDir.path, 'style.st.css')));
     });
 
-    it('compat mode', () => {
+    it('build .st.css source files with namespace reference', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+
         const { stderr, stdout } = runCli([
             '--rootDir',
             tempDir.path,
-            '--nsr',
-            nsr,
             '--outDir',
-            './dist',
-            '--cjs',
-            '--css',
-            '--compat'
+            'dist',
+            '--stcss',
+            '--useNamespaceReference',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
-        const file = join('dist', 'style.st.css.js');
-        const m = evalStylableModule<{ namespace: string; default: any }>(
-            dirContent[file] as string,
-            file
-        );
-        expect(typeof m).equal('function');
+        const stylesheetContent = dirContent[join('dist', 'style.st.css')];
 
-        expect(m).equal(m.default);
+        expect(
+            stylesheetContent.startsWith('/* st-namespace-reference="../style.st.css" */')
+        ).equal(true);
     });
 
     it('manifest', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
         const { stderr, stdout } = runCli([
@@ -187,11 +198,11 @@ describe('Stylable Cli', () => {
             nsr,
             '--outDir',
             './dist',
-            '--manifest'
+            '--manifest',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'stylable.manifest.json');
@@ -203,7 +214,7 @@ describe('Stylable Cli', () => {
     it('manifestFilepath', () => {
         populateDirectorySync(tempDir.path, {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
-            'style.st.css': `.root{color:red}`
+            'style.st.css': `.root{color:red}`,
         });
         const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
         const { stderr, stdout } = runCli([
@@ -215,11 +226,11 @@ describe('Stylable Cli', () => {
             './dist',
             '--manifest',
             '--manifestFilepath',
-            '/x/y/m.json'
+            '/x/y/m.json',
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).equal('');
+        expect(stderr).equal('');
+        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'x/y/m.json');
@@ -238,10 +249,10 @@ describe('Stylable Cli', () => {
             '--nsr',
             nsr,
             '-r',
-            requireHook
+            requireHook,
         ]);
 
-        expect(stderr.toString('utf8')).equal('');
-        expect(stdout.toString('utf8')).to.contain('I HAVE BEEN REQUIRED');
+        expect(stderr).equal('');
+        expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
 });

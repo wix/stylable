@@ -1,7 +1,7 @@
 import {
     browserFunctions,
     filterAssetResponses,
-    StylableProjectRunner
+    StylableProjectRunner,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
@@ -14,7 +14,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -29,7 +29,7 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset1.png', 'asset2.png'];
+        const expectedAssets = ['asset1.png', 'asset2.png', 'asset.png', 'deep.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 

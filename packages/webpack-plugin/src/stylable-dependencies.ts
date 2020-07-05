@@ -20,7 +20,7 @@ export class StylableExportsDependency extends NullDependency {
 
     public getExports() {
         return {
-            exports: this.exports
+            exports: this.exports,
         };
     }
 }
@@ -59,13 +59,21 @@ export class StylableImportDependency extends ModuleDependency {
         return {
             weak: this.weak,
             module: this.module,
-            importedNames: this.defaultImport ? ['default'].concat(this.names) : this.names.slice()
+            importedNames: this.defaultImport ? ['default'].concat(this.names) : this.names.slice(),
         };
     }
 
     public updateHash(hash: any) {
         super.updateHash(hash);
-        hash.update('stylable ' + (this.module && this.module.hash));
+        const buildInfo = this.module?.buildInfo;
+        if (buildInfo) {
+            if (buildInfo.stylableTransformedAst) {
+                hash.update('stylable ' + buildInfo.stylableTransformedAst.toString());
+            }
+            if (buildInfo.stylableMeta) {
+                hash.update('stylable namespace' + buildInfo.stylableMeta.namespace);
+            }
+        }
     }
 }
 

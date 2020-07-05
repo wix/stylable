@@ -23,7 +23,7 @@ describe('scoping-edge-cases', () => {
 
                         }
 
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
@@ -35,7 +35,7 @@ describe('scoping-edge-cases', () => {
                         .part {
                             -st-extends: Inner;
                         }
-                    `
+                    `,
                 },
                 '/inner.st.css': {
                     namespace: 'inner',
@@ -43,9 +43,9 @@ describe('scoping-edge-cases', () => {
                         .inner {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(
@@ -74,7 +74,7 @@ describe('scoping-edge-cases', () => {
 
                         }
 
-                    `
+                    `,
                 },
                 '/comp.st.css': {
                     namespace: 'comp',
@@ -89,7 +89,7 @@ describe('scoping-edge-cases', () => {
                         .part {
                             -st-extends: Inner;
                         }
-                    `
+                    `,
                 },
                 '/inner.st.css': {
                     namespace: 'inner',
@@ -100,9 +100,9 @@ describe('scoping-edge-cases', () => {
                         .inner {
 
                         }
-                    `
-                }
-            }
+                    `,
+                },
+            },
         });
 
         expect((result.nodes![1] as postcss.Rule).selector).to.equal(

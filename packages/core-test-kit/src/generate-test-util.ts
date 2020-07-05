@@ -1,5 +1,4 @@
 import {
-    cachedProcessFile,
     createMinimalFS,
     Diagnostics,
     FileProcessor,
@@ -11,7 +10,8 @@ import {
     StylableMeta,
     StylableResolver,
     StylableResults,
-    StylableTransformer
+    StylableTransformer,
+    createInfrastructure,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import postcss from 'postcss';
@@ -48,17 +48,19 @@ export function generateInfra(
     fileProcessor: FileProcessor<StylableMeta>;
 } {
     const { fs, requireModule } = createMinimalFS(config);
-
-    const fileProcessor = cachedProcessFile<StylableMeta>(
-        (from, content) => {
-            const meta = process(postcss.parse(content, { from }), diagnostics);
-            meta.namespace = config.files[from].namespace || meta.namespace;
+    const { fileProcessor } = createInfrastructure(
+        '/',
+        fs,
+        (meta, filePath) => {
+            meta.namespace = config.files[filePath].namespace || meta.namespace;
             return meta;
         },
-        fs,
-        x => (x.startsWith('./') || isAbsolute(x) ? x : '/node_modules/' + x)
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        diagnostics
     );
-
     const resolver = new StylableResolver(fileProcessor, requireModule);
 
     return { resolver, requireModule, fileProcessor };
@@ -79,7 +81,7 @@ export function createTransformer(
         keepValues: false,
         replaceValueHook,
         postProcessor,
-        mode: config.mode
+        mode: config.mode,
     });
 }
 
@@ -123,7 +125,7 @@ export function createTransform(
             fileProcessor,
             requireModule,
             diagnostics: new Diagnostics(),
-            keepValues: false
+            keepValues: false,
         }).transform(meta).meta;
     };
 }
@@ -147,7 +149,7 @@ export function createStylableInstance(config: Config) {
 
     const stylable = new Stylable(
         '/',
-        fs as any,
+        fs,
         requireModule,
         '__',
         (meta, path) => {

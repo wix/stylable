@@ -9,9 +9,9 @@ module.exports = {
         new StylableWebpackPlugin({
             optimize: {
                 removeUnusedComponents: false,
-                shortNamespaces: false
-            }
+                shortNamespaces: false,
+            },
         }),
-        new HtmlWebpackPlugin()
-    ]
+        new HtmlWebpackPlugin(),
+    ],
 };

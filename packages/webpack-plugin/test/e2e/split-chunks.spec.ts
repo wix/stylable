@@ -11,7 +11,7 @@ describe(`(${project})`, () => {
             puppeteerOptions: {
                 // headless: false,
                 // devtools: true
-            }
+            },
         },
         before,
         afterEach,
@@ -25,23 +25,23 @@ describe(`(${project})`, () => {
         expect(styleElements).to.eql([
             {
                 depth: '1',
-                id: './node_modules/lib/test.st.css'
+                id: './node_modules/lib/test.st.css',
             },
             {
                 depth: '2',
-                id: './node_modules/lib/index.st.css'
+                id: './node_modules/lib/index.st.css',
             },
             {
                 depth: '3',
-                id: './src/index.st.css'
-            }
+                id: './src/index.st.css',
+            },
         ]);
     });
 
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const backgroundColor = await page.evaluate(() => {
-            return getComputedStyle(document.documentElement!).backgroundColor;
+            return getComputedStyle(document.documentElement).backgroundColor;
         });
 
         expect(backgroundColor).to.eql('rgb(255, 0, 0)');

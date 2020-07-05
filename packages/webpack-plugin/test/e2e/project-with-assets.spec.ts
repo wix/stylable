@@ -1,7 +1,7 @@
 import {
     browserFunctions,
     filterAssetResponses,
-    StylableProjectRunner
+    StylableProjectRunner,
 } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
@@ -14,7 +14,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
                 // headless: false
-            }
+            },
         },
         before,
         afterEach,
@@ -51,8 +51,8 @@ describe(`(${project}) production mode`, () => {
                 // headless: false
             },
             webpackOptions: {
-                mode: 'production'
-            }
+                mode: 'production',
+            },
         },
         before,
         afterEach,

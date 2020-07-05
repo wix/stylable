@@ -1,6 +1,5 @@
 import { createMemoryFileSystemWithFiles } from '@stylable/e2e-test-kit';
 import { create } from '@stylable/runtime';
-import { create as legacyCreate } from '@stylable/runtime/src/index-legacy';
 import { stylableModuleFactory } from '../src';
 import { Options } from '../src/module-factory';
 
@@ -10,9 +9,10 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
     }
     const _module = {
         id,
-        exports: {}
+        exports: {},
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     const fn = new Function('module', 'exports', 'require', source);
     fn(_module, _module.exports, requireModule);
 
@@ -22,12 +22,9 @@ function evalModule(id: string, source: string, requireModule: (s: string) => an
  * This function mocks the runtime and only provide the create function
  */
 export function evalStylableModule<T = unknown>(source: string, fullPath: string): T {
-    return evalModule(fullPath, source, id => {
+    return evalModule(fullPath, source, (id) => {
         if (id === '@stylable/runtime') {
             return { create };
-        }
-        if (id === '@stylable/runtime/cjs/index-legacy') {
-            return { create: legacyCreate };
         }
         throw new Error(`Could not find module: ${id}`);
     }) as T;
@@ -40,9 +37,9 @@ export function moduleFactoryTestKit(
     const fs = createMemoryFileSystemWithFiles(files);
     const factory = stylableModuleFactory(
         {
-            resolveNamespace: namespace => namespace,
+            resolveNamespace: (namespace) => namespace,
             fileSystem: fs,
-            projectRoot: '/'
+            projectRoot: '/',
         },
         options
     );
@@ -50,6 +47,6 @@ export function moduleFactoryTestKit(
     return {
         fs,
         factory,
-        evalStylableModule
+        evalStylableModule,
     };
 }

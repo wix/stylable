@@ -7,7 +7,7 @@ import { attachHook } from '../src';
 describe('require hook', () => {
     afterEach(() => {
         delete require.extensions['.css'];
-        readdirSync(join(__dirname, 'fixtures')).forEach(name => {
+        readdirSync(join(__dirname, 'fixtures')).forEach((name) => {
             delete require.cache[join(__dirname, 'fixtures', name)];
         });
     });

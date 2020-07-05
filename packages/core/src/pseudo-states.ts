@@ -9,7 +9,7 @@ import {
     ElementSymbol,
     SRule,
     StylableMeta,
-    StylableSymbol
+    StylableSymbol,
 } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
@@ -19,7 +19,9 @@ import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');
-const valueParser = require('postcss-value-parser');
+const postcssValueParser = require('postcss-value-parser');
+
+const { hasOwnProperty } = Object.prototype;
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -38,7 +40,7 @@ export const stateErrors = {
             ', '
         )}"`,
     STATE_STARTS_WITH_HYPHEN: (name: string) =>
-        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`
+        `state "${name}" declaration cannot begin with a "${stateMiddleDelimiter}" chararcter`,
 };
 
 // PROCESS
@@ -49,7 +51,7 @@ export function processPseudoStates(
     diagnostics: Diagnostics
 ) {
     const mappedStates: MappedStates = {};
-    const ast = valueParser(value);
+    const ast = postcssValueParser(value);
     const statesSplitByComma = groupValues(ast.nodes);
 
     statesSplitByComma.forEach((workingState: ParsedValue[]) => {
@@ -57,7 +59,7 @@ export function processPseudoStates(
 
         if (stateDefinition.value.startsWith('-')) {
             diagnostics.error(decl, stateErrors.STATE_STARTS_WITH_HYPHEN(stateDefinition.value), {
-                word: stateDefinition.value
+                word: stateDefinition.value,
             });
         }
 
@@ -84,7 +86,7 @@ function resolveStateType(
         resolveBooleanState(mappedStates, stateDefinition);
 
         diagnostics.warn(decl, stateErrors.NO_STATE_TYPE_GIVEN(stateDefinition.value), {
-            word: decl.value
+            word: decl.value,
         });
 
         return;
@@ -102,7 +104,7 @@ function resolveStateType(
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
         arguments: [],
-        defaultValue: valueParser.stringify(stateDefault).trim()
+        defaultValue: postcssValueParser.stringify(stateDefault).trim(),
     };
 
     if (isCustomMapping(stateDefinition)) {
@@ -135,7 +137,7 @@ function resolveArguments(
 ) {
     const separatedByComma = groupValues(paramType.nodes);
 
-    separatedByComma.forEach(group => {
+    separatedByComma.forEach((group) => {
         const validator = group[0];
         if (validator.type === 'function') {
             const args = listOptions(validator);
@@ -148,7 +150,7 @@ function resolveArguments(
             } else {
                 stateType.arguments.push({
                     name: validator.value,
-                    args
+                    args,
                 });
             }
         } else if (validator.type === 'string' || validator.type === 'word') {
@@ -212,7 +214,7 @@ export function validateStateDefinition(
                                         `pseudo-state "${stateName}" default value "${state.defaultValue}" failed validation:`
                                     );
                                     diagnostics.warn(decl, res.errors.join('\n'), {
-                                        word: decl.value
+                                        word: decl.value,
                                     });
                                 }
                             }
@@ -234,11 +236,11 @@ export function validateStateArgument(
     diagnostics: Diagnostics,
     rule?: postcss.Rule,
     validateDefinition?: boolean,
-    validateValue: boolean = true
+    validateValue = true
 ) {
     const resolvedValidations: StateResult = {
         res: resolveParam(meta, resolver, diagnostics, rule, value || stateAst.defaultValue),
-        errors: null
+        errors: null,
     };
 
     const { type: paramType } = stateAst;
@@ -286,7 +288,7 @@ export function transformPseudoStateSelector(
             const states = currentSymbol[valueMapping.states];
             const extend = currentSymbol[valueMapping.extends];
             const alias = currentSymbol.alias;
-            if (states && states.hasOwnProperty(name)) {
+            if (states && hasOwnProperty.call(states, name)) {
                 found = true;
                 setStateToNode(
                     states,
@@ -335,7 +337,7 @@ export function transformPseudoStateSelector(
     }
 
     if (!found && rule) {
-        if (nativePseudoClasses.indexOf(name) === -1 && !isVendorPrefixed(name)) {
+        if (!nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
             diagnostics.warn(rule, stateErrors.UNKNOWN_STATE_USAGE(name), { word: name });
         }
     }

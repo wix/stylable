@@ -1,0 +1,39 @@
+{
+  "name": "create-stylable-app",
+  "version": "3.7.1",
+  "description": "Quickly create a Stylable application",
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
+  "bin": {
+    "create-stylable-app": "./bin/create-stylable-app.js"
+  },
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "validate-npm-package-name": "^3.0.0"
+  },
+  "files": [
+    "bin",
+    "cjs",
+    "src",
+    "template"
+  ],
+  "keywords": [
+    "stylable",
+    "create",
+    "application"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/create-stylable-app",
+  "homepage": "https://stylable.io",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

@@ -20,15 +20,14 @@ describe('Signature Help', () => {
                         activeParameter: prefix.match(/,/g) ? prefix.match(/,/g)!.length : 0,
                         signatures: [
                             SignatureInformation.create(
-                                // tslint:disable-next-line: max-line-length
                                 "paramfulMixin(numParam: string, strParam: string, aliasedParam: string, enumParam: 'a' | 'b'): object",
                                 undefined,
                                 ParameterInformation.create('numParam: string'),
                                 ParameterInformation.create('strParam: string'),
                                 ParameterInformation.create('aliasedParam: string'),
                                 ParameterInformation.create("enumParam: 'a' | 'b'")
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -47,7 +46,7 @@ describe('Signature Help', () => {
             const exp: SignatureHelp = {
                 activeSignature: 0,
                 activeParameter: 0,
-                signatures: [SignatureInformation.create('paramlessMixin(): object', undefined)]
+                signatures: [SignatureInformation.create('paramlessMixin(): object', undefined)],
             };
 
             expect(sig).to.not.equal(null);
@@ -75,8 +74,8 @@ describe('Signature Help', () => {
                                 'mixin(pct: string): object',
                                 undefined,
                                 ParameterInformation.create('pct: string')
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -108,8 +107,8 @@ describe('Signature Help', () => {
                                 ParameterInformation.create('strParam: string', 'A string param'),
                                 ParameterInformation.create('numParam: string', 'A num param'),
                                 ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param')
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -129,8 +128,8 @@ describe('Signature Help', () => {
                 activeSignature: 0,
                 activeParameter: 0,
                 signatures: [
-                    SignatureInformation.create('aBareMixin(): object', 'A mixin with no params')
-                ]
+                    SignatureInformation.create('aBareMixin(): object', 'A mixin with no params'),
+                ],
             };
 
             expect(sig).to.not.equal(null);
@@ -155,15 +154,14 @@ describe('Signature Help', () => {
                         activeParameter: prefix.match(/,/g) ? prefix.match(/,/g)!.length : 0,
                         signatures: [
                             SignatureInformation.create(
-                                // tslint:disable-next-line: max-line-length
                                 "paramfulMixin(numParam: string, strParam: string, aliasedParam: string, enumParam: 'a'|'b'): object",
                                 undefined,
                                 ParameterInformation.create('numParam: stNumber<0,200>'),
                                 ParameterInformation.create('strParam: styl.stString'),
                                 ParameterInformation.create('aliasedParam: lalaString'),
                                 ParameterInformation.create("enumParam: 'a'|'b'")
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -182,7 +180,7 @@ describe('Signature Help', () => {
             const exp: SignatureHelp = {
                 activeSignature: 0,
                 activeParameter: 0,
-                signatures: [SignatureInformation.create('paramlessMixin(): object', undefined)]
+                signatures: [SignatureInformation.create('paramlessMixin(): object', undefined)],
             };
 
             expect(sig).to.not.equal(null);
@@ -221,7 +219,7 @@ describe('Signature Help', () => {
             describe('type hinting', () => {
                 const types = ['string', 'number', 'enum', 'tag'];
 
-                types.forEach(str =>
+                types.forEach((str) =>
                     str.split('').forEach((_c, i) => {
                         const prefix = str.slice(0, i);
                         it(
@@ -243,8 +241,8 @@ describe('Signature Help', () => {
                                             ParameterInformation.create(
                                                 'string | number | enum | tag'
                                             )
-                                        )
-                                    ]
+                                        ),
+                                    ],
                                 };
 
                                 expect(sig).to.not.equal(null);
@@ -267,8 +265,8 @@ describe('Signature Help', () => {
                                 'Supported state types:\n- "string | number | enum | tag"',
                                 undefined,
                                 ParameterInformation.create('string | number | enum | tag')
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -279,7 +277,7 @@ describe('Signature Help', () => {
             describe('string validator hinting', () => {
                 const validators = ['regex', 'contains', 'minLength', 'maxLength'];
 
-                validators.forEach(validator =>
+                validators.forEach((validator) =>
                     validator.split('').forEach((_c, i) => {
                         const prefix = validator.slice(0, i);
                         it(
@@ -296,14 +294,13 @@ describe('Signature Help', () => {
                                     activeParameter: 0,
                                     signatures: [
                                         SignatureInformation.create(
-                                            // tslint:disable-next-line: max-line-length
                                             'Supported "string" validator types:\n- "regex, contains, minLength, maxLength"',
                                             undefined,
                                             ParameterInformation.create(
                                                 'regex, contains, minLength, maxLength'
                                             )
-                                        )
-                                    ]
+                                        ),
+                                    ],
                                 };
 
                                 expect(sig).to.not.equal(null);
@@ -326,8 +323,8 @@ describe('Signature Help', () => {
                                 'Supported state types:\n- "string | number | enum | tag"',
                                 undefined,
                                 ParameterInformation.create('string | number | enum | tag')
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);
@@ -357,8 +354,8 @@ describe('Signature Help', () => {
                                     'hello(string)',
                                     undefined,
                                     ParameterInformation.create('string')
-                                )
-                            ]
+                                ),
+                            ],
                         };
 
                         expect(sig).to.not.equal(null);
@@ -385,8 +382,8 @@ describe('Signature Help', () => {
                                     'shmover(number)',
                                     undefined,
                                     ParameterInformation.create('number')
-                                )
-                            ]
+                                ),
+                            ],
                         };
 
                         expect(sig).to.not.equal(null);
@@ -398,7 +395,6 @@ describe('Signature Help', () => {
             str.split('').forEach((_c, i) => {
                 const prefix = str.slice(0, i);
                 it(
-                    // tslint:disable-next-line: max-line-length
                     'Provides signature help and identifies imported state type definition and validators, with prefix ' +
                         prefix,
                     () => {
@@ -415,8 +411,8 @@ describe('Signature Help', () => {
                                     'shmover(number(min(3), max(42)))',
                                     undefined,
                                     ParameterInformation.create('number(min(3), max(42))')
-                                )
-                            ]
+                                ),
+                            ],
                         };
 
                         expect(sig).to.not.equal(null);
@@ -450,8 +446,8 @@ describe('Signature Help', () => {
                                 ParameterInformation.create('strParam: string', 'A string param'),
                                 ParameterInformation.create('numParam: string', 'A num param'),
                                 ParameterInformation.create("enumParam: 'a'|'b'", 'An enum param')
-                            )
-                        ]
+                            ),
+                        ],
                     };
 
                     expect(sig).to.not.equal(null);

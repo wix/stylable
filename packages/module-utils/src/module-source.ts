@@ -11,7 +11,7 @@ export function generateModuleSource(
     depth: string,
     exportsArgument: string,
     afterModule: string,
-    renderableOnly: boolean = false
+    renderableOnly = false
 ): string {
     const { exports, meta } = stylableResult;
     const localsExports = JSON.stringify(exports);
@@ -35,13 +35,13 @@ ${afterModule}
 
 export function createModuleSource(
     stylableResult: StylableResults,
-    moduleFormat: string = 'cjs',
+    moduleFormat = 'cjs',
     includeCSSInJS: boolean,
     moduleId = JSON.stringify(stylableResult.meta.namespace),
     renderableOnly = false,
     depth: string | number = '-1',
     staticRequests: string[] = [],
-    runtimeRequest: string = '@stylable/runtime',
+    runtimeRequest = '@stylable/runtime',
     afterModule: string[] = []
 ) {
     // TODO: calc depth for node as well
@@ -51,43 +51,47 @@ export function createModuleSource(
         // TODO: better error
         throw new Error('Configuration conflict (renderableOnly && !includeCSSInJS)');
     }
+    const cssString = includeCSSInJS
+        ? JSON.stringify(stylableResult.meta.outputAst!.toString())
+        : '""';
 
     switch (moduleFormat) {
         case 'dts':
             return generateTypescriptDefinition();
-        case 'esm':
+        case 'esm': {
             const importKey = renderableOnly ? 'createRenderable' : 'create';
             return generateModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map(request => `import ${JSON.stringify(request)}`),
-                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`
+                    ...staticRequests.map((request) => `import ${JSON.stringify(request)}`),
+                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`,
                 ],
                 `$`,
                 `create`,
                 `createRenderable`,
-                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                cssString,
                 depth,
                 'const { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css }', // = $
                 [
                     `export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
-                    ...afterModule
+                    ...afterModule,
                 ].join('\n'),
                 renderableOnly
             );
+        }
         case 'cjs':
             return generateModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map(request => `require(${JSON.stringify(request)})`),
-                    `const runtime = require(${JSON.stringify(runtimeRequest)})`
+                    ...staticRequests.map((request) => `require(${JSON.stringify(request)})`),
+                    `const runtime = require(${JSON.stringify(runtimeRequest)})`,
                 ],
                 `runtime.$`,
                 `runtime.create`,
                 `runtime.createRenderable`,
-                includeCSSInJS ? JSON.stringify(stylableResult.meta.outputAst!.toString()) : '""',
+                cssString,
                 depth,
                 'module.exports',
                 afterModule.join('\n'),

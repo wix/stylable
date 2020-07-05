@@ -44,7 +44,7 @@ export const nativePseudoClasses = [
     'scope',
     'target',
     'valid',
-    'visited'
+    'visited',
 ];
 
 export const nativePseudoElements = [
@@ -59,7 +59,7 @@ export const nativePseudoElements = [
     'placeholder',
     'selection',
     'slotted',
-    'spelling-error'
+    'spelling-error',
 ];
 
 export const reservedKeyFrames = [
@@ -90,7 +90,7 @@ export const reservedKeyFrames = [
     'both',
     /* single-animation-play-state */
     'running',
-    'paused'
+    'paused',
 ];
 
 export const nativeFunctionsDic = {
@@ -155,7 +155,7 @@ export const nativeFunctionsDic = {
     translateY: true,
     translateZ: true,
     url: true,
-    var: true
+    var: true,
 };
 
 export type nativeFunctions = keyof typeof nativeFunctionsDic;
