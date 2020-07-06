@@ -23,7 +23,7 @@
     "murmurhash": "^1.0.0",
     "postcss": "^7.0.32",
     "postcss-js": "^2.0.3",
-    "postcss-nested": "^4.2.1",
+    "postcss-nested": "^4.2.2",
     "postcss-safe-parser": "^4.0.2",
     "postcss-selector-matches": "^4.0.0",
     "postcss-value-parser": "^4.1.0"
