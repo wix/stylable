@@ -52,7 +52,7 @@
     "@types/webpack": "^4.41.18",
     "@types/webpack-sources": "^1.4.0",
     "@types/yargs": "^15.0.5",
-    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/eslint-plugin": "^3.6.0",
     "@typescript-eslint/parser": "^3.5.0",
     "autoprefixer": "^9.8.4",
     "chai": "^4.2.0",
