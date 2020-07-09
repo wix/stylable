@@ -6,8 +6,7 @@ module.exports = {
     context: __dirname,
     devtool: 'source-map',
     plugins: [new StylableWebpackPlugin({
-        outputCSS: true,
-        includeCSSInJS: false,
+        outputCSS: true, // enable emit css in dev mode
         filename: 'output.[contenthash:5].css'
     }), new HtmlWebpackPlugin()],
 };

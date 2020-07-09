@@ -36,7 +36,7 @@ import {
 import { isImportedByNonStylable, rewriteUrl, isStylableModule } from './utils';
 import { dirname } from 'path';
 import findConfig from 'find-config';
-import { hashContent } from '@stylable/webpack-extensions/src';
+import { hashContent } from './hash-content-util';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const MultiModule = require('webpack/lib/MultiModule');
