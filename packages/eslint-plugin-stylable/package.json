@@ -1,0 +1,35 @@
+{
+  "name": "eslint-plugin-stylable",
+  "version": "3.7.2",
+  "description": "eslint plugin for stylable usages",
+  "main": "index.js",
+  "scripts": {
+    "build": "ts-build ./src --cjs",
+    "test": "mocha \"tests/**/*.spec.ts?(x)\""
+  },
+  "dependencies": {
+    "@file-services/node": "^2.2.0",
+    "@stylable/core": "^3.7.2",
+    "@typescript-eslint/experimental-utils": "^3.6.0"
+  },
+  "keywords": [
+    "eslint",
+    "stylable",
+    "plugin",
+    "eslintplugin",
+    "eslint-plugin",
+    "lint"
+  ],
+  "files": [
+    "cjs",
+    "index.js",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "author": "Wix.com",
+  "license": "MIT",
+  "devDependencies": {
+    "create-temp-directory": "^1.1.1"
+  }
+}
