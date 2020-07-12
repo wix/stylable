@@ -1,0 +1,11 @@
+:import {
+    -st-from: "./test.st.css";
+    -st-named: NotFound;
+}
+
+.root {
+    -st-extends: NotFound;
+    background-color: green; 
+}
+
+.root:unknown-state {}
