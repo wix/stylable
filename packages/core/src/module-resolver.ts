@@ -2,8 +2,8 @@
 // this allows @stylable/core to be bundled for browser usage without special custom configuration
 const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
 
-import { ModuleResolver } from './types';
-import { MinimalFS } from './cached-process-file';
+import type { ModuleResolver } from './types';
+import type { MinimalFS } from './cached-process-file';
 
 const resolverContext = {};
 

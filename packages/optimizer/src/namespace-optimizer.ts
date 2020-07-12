@@ -1,4 +1,4 @@
-import { IStylableNamespaceOptimizer, StylableMeta } from '@stylable/core';
+import type { IStylableNamespaceOptimizer, StylableMeta } from '@stylable/core';
 
 export class StylableNamespaceOptimizer implements IStylableNamespaceOptimizer {
     public index: number;

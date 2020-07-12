@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import { StylableModule } from './types';
+import type webpack from 'webpack';
+import type { StylableModule } from './types';
 
 const earlyReturn = Symbol('earlyReturn');
 

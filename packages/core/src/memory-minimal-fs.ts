@@ -1,7 +1,7 @@
 import { dirname } from 'path';
 const deindent = require('deindent');
 
-import { MinimalFS } from './cached-process-file';
+import type { MinimalFS } from './cached-process-file';
 
 export interface File {
     content: string;

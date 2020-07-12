@@ -1,5 +1,5 @@
-import { loader } from 'webpack';
-import { StylableExports } from '@stylable/core';
+import type { loader } from 'webpack';
+import type { StylableExports } from '@stylable/core';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 
 function evalStylableExtractModule(source: string): [string, StylableExports] {

@@ -1,4 +1,4 @@
-import { StylableMeta, StylableTransformer } from '@stylable/core';
+import type { StylableMeta, StylableTransformer } from '@stylable/core';
 
 export function addMetaDependencies(
     meta: StylableMeta,

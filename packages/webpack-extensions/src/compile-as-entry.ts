@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import type webpack from 'webpack';
 
 const NativeModule = require('module');
 const NodeTemplatePlugin = require('webpack/lib/node/NodeTemplatePlugin');

@@ -1,7 +1,7 @@
 import { relative } from 'path';
 import { join } from 'path';
 import { addDotSlash, createImportForComponent, ensureDirectory, tryRun } from './build-tools';
-import { Generator } from './default-generator';
+import type { Generator } from './default-generator';
 
 export function generateFileIndexEntry(
     filePath: string,

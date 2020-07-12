@@ -1,6 +1,6 @@
-import postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
-import { SelectorAstNode } from './selector-utils';
+import type postcss from 'postcss';
+import type { Diagnostics } from './diagnostics';
+import type { SelectorAstNode } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';

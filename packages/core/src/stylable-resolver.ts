@@ -1,8 +1,8 @@
-import { FileProcessor } from './cached-process-file';
-import { Diagnostics } from './diagnostics';
-import { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
-import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
-import { StylableTransformer } from './stylable-transformer';
+import type { FileProcessor } from './cached-process-file';
+import type { Diagnostics } from './diagnostics';
+import type { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
+import type { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 
 export const resolverWarnings = {

@@ -1,4 +1,4 @@
-import { StateArguments } from './types';
+import type { StateArguments } from './types';
 
 export interface StateResult {
     res: string;

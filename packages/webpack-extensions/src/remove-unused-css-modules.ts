@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import type webpack from 'webpack';
 
 export class RemoveUnusedCSSModules {
     public apply(compiler: webpack.Compiler) {

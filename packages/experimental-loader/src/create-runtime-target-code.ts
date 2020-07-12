@@ -1,4 +1,4 @@
-import { StylableExports } from '@stylable/core';
+import type { StylableExports } from '@stylable/core';
 
 export function createRuntimeTargetCode(namespace: string, mapping: StylableExports) {
     return `

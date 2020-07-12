@@ -4,7 +4,7 @@ import {
     processSource,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 import { processorWarnings, resolverWarnings } from '../src';
 
 describe('css custom-properties (vars)', () => {

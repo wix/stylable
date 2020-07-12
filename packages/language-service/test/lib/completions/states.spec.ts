@@ -1,5 +1,5 @@
 import { createRange, ProviderRange } from '../../../src/lib/completion-providers';
-import { Completion } from '../../../src/lib/completion-types';
+import type { Completion } from '../../../src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
 describe('States', () => {

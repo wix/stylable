@@ -1,6 +1,6 @@
 import { Diagnostic as StylableDiagnostic, process, safeParse, Stylable } from '@stylable/core';
 import { Diagnostic, Range } from 'vscode-languageserver-types';
-import { CssService } from './css-service';
+import type { CssService } from './css-service';
 
 export function createDiagnosis(
     content: string,

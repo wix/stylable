@@ -1,6 +1,6 @@
 import postcss from 'postcss';
-import { ClassSymbol, ElementSymbol } from './stylable-meta';
-import { CSSResolve } from './stylable-resolver';
+import type { ClassSymbol, ElementSymbol } from './stylable-meta';
+import type { CSSResolve } from './stylable-resolver';
 import { valueMapping } from './stylable-value-parsers';
 const tokenizer = require('css-selector-tokenizer');
 

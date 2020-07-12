@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import type postcss from 'postcss';
 
 export type DiagnosticType = 'error' | 'warning';
 

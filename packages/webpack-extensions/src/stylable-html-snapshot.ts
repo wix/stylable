@@ -1,5 +1,5 @@
 import { basename, join } from 'path';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { compileAsEntry, exec } from './compile-as-entry';
 

@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 import postcssNested from 'postcss-nested';
-import { CSSObject } from './types';
+import type { CSSObject } from './types';
 const postcssJS = require('postcss-js');
 const safeParser = require('postcss-safe-parser');
 

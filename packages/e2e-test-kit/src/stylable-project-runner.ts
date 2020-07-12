@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { ProjectRunner } from './project-runner';
 
 export class StylableProjectRunner extends ProjectRunner {

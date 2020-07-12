@@ -1,6 +1,6 @@
-import { IFileSystem, IFileSystemStats } from '@file-services/types';
+import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
-import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
@@ -20,7 +20,7 @@ import {
 import { URI } from 'vscode-uri';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';
-import { Completion } from './completion-types';
+import type { Completion } from './completion-types';
 import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
@@ -32,7 +32,7 @@ import {
 } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
-import { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
 
 export interface StylableLanguageServiceOptions {

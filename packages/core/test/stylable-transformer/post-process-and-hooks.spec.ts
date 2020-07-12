@@ -1,6 +1,6 @@
 import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 
 describe('post-process-and-hooks', () => {
     it("should call postProcess after transform and use it's return value", () => {

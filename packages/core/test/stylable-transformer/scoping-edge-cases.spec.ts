@@ -1,6 +1,6 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 
 describe('scoping-edge-cases', () => {
     it('root scoping always uses origin meta', () => {

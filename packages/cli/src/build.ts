@@ -4,7 +4,7 @@ import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
-import { Generator } from './default-generator';
+import type { Generator } from './default-generator';
 import { generateFileIndexEntry, generateIndexFile } from './generate-index';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';

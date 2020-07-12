@@ -1,4 +1,4 @@
-import { StylableModule } from './types';
+import type { StylableModule } from './types';
 
 const NullDependency = require('webpack/lib/dependencies/NullDependency');
 const ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');

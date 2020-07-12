@@ -1,6 +1,6 @@
 import { Stylable, processNamespace, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { loader } from 'webpack';
+import type { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning } from './warning';
 import postcss from 'postcss';

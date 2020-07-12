@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';

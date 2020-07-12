@@ -1,5 +1,5 @@
-import ts from 'typescript';
-import {
+import type ts from 'typescript';
+import type {
     Command,
     CompletionItem,
     Diagnostic,
@@ -10,7 +10,10 @@ import {
     Range,
     TextEdit,
 } from 'vscode-languageserver';
-import { ColorPresentationRequest, DocumentColorRequest } from 'vscode-languageserver-protocol';
+import type {
+    ColorPresentationRequest,
+    DocumentColorRequest,
+} from 'vscode-languageserver-protocol';
 
 export interface NotificationTypes {
     // TODO: remove me?

@@ -1,4 +1,4 @@
-import { NodeRenderer, RenderableStylesheet } from './types';
+import type { NodeRenderer, RenderableStylesheet } from './types';
 
 export interface CachedNodeRendererOptions {
     createElement: typeof document.createElement;

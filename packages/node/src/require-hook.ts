@@ -1,4 +1,4 @@
-import { StylableConfig } from '@stylable/core';
+import type { StylableConfig } from '@stylable/core';
 import { stylableModuleFactory } from '@stylable/module-utils';
 import fs from 'fs';
 import { resolveNamespace } from './resolve-namespace';

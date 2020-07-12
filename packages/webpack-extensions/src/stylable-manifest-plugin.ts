@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { Stylable } from '@stylable/core';

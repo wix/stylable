@@ -1,10 +1,10 @@
 import { EOL } from 'os';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { WEBPACK_STYLABLE } from './runtime-dependencies';
 import { StylableImportDependency } from './stylable-dependencies';
 import { getStylableModulesFromDependencies, renderStaticCSS } from './stylable-module-helpers';
-import { StylableModule, StylableWebpackPluginOptions } from './types';
+import type { StylableModule, StylableWebpackPluginOptions } from './types';
 const Module = require('webpack/lib/Module');
 
 export class StylableBootstrapModule extends Module {

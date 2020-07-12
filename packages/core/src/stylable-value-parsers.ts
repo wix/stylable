@@ -1,8 +1,8 @@
-import postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
+import type postcss from 'postcss';
+import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
-import { ParsedValue, StateParsedValue } from './types';
+import type { ParsedValue, StateParsedValue } from './types';
 
 const postcssValueParser = require('postcss-value-parser');
 

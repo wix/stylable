@@ -7,7 +7,7 @@ import {
     traverseNode,
 } from '@stylable/core';
 import cloneDeep from 'lodash.clonedeep';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 
 // This transformation is applied on target AST code
 // Not Stylable source AST

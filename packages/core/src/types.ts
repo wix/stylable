@@ -1,7 +1,7 @@
-import postcss from 'postcss';
-import { Box } from './custom-values';
-import { StylableMeta } from './stylable-meta';
-import { StylableResults } from './stylable-transformer';
+import type postcss from 'postcss';
+import type { Box } from './custom-values';
+import type { StylableMeta } from './stylable-meta';
+import type { StylableResults } from './stylable-transformer';
 
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;

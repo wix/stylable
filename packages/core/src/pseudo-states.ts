@@ -1,21 +1,21 @@
-import postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
+import type postcss from 'postcss';
+import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
-import { SelectorAstNode } from './selector-utils';
+import type { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
-import {
+import type {
     ClassSymbol,
     ElementSymbol,
     SRule,
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-import { StylableResolver } from './stylable-resolver';
+import type { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, StateParsedValue } from './types';
+import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const isVendorPrefixed = require('is-vendor-prefixed');

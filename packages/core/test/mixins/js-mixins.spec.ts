@@ -4,7 +4,7 @@ import {
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('simple mixin', () => {

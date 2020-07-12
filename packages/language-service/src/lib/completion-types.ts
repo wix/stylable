@@ -1,5 +1,5 @@
 import { valueMapping } from '@stylable/core';
-import { ProviderRange } from './completion-providers';
+import type { ProviderRange } from './completion-providers';
 
 export class Completion {
     constructor(

@@ -1,8 +1,8 @@
 import cloneDeep from 'lodash.clonedeep';
 import { isAbsolute } from 'path';
 import postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
-import {
+import type { Diagnostics } from './diagnostics';
+import type {
     DeclStylableProps,
     Imported,
     SDecl,
@@ -19,7 +19,7 @@ import {
     stringifySelector,
     traverseNode,
 } from './selector-utils';
-import { ImportSymbol } from './stylable-meta';
+import type { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 

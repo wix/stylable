@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import { ShallowPartial, StylableWebpackPluginOptions } from './types';
+import type webpack from 'webpack';
+import type { ShallowPartial, StylableWebpackPluginOptions } from './types';
 
 export function normalizeOptions(
     options: ShallowPartial<StylableWebpackPluginOptions>,

@@ -1,7 +1,11 @@
 import postcssValueParser from 'postcss-value-parser';
-import { ParameterInformation, SignatureHelp, SignatureInformation } from 'vscode-languageserver';
+import type {
+    ParameterInformation,
+    SignatureHelp,
+    SignatureInformation,
+} from 'vscode-languageserver';
 import { StateParsedValue, systemValidators } from '@stylable/core';
-import { ProviderPosition } from '../completion-providers';
+import type { ProviderPosition } from '../completion-providers';
 
 // Goes over an '-st-states' declaration value
 // parses the state and position to resolve if inside a state with a parameter

@@ -1,6 +1,6 @@
 import { StylableManifestPlugin } from '../../../../src/stylable-manifest-plugin';
 import { stylableLoaders } from '@stylable/experimental-loader';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 
 const config: Configuration = {
     mode: 'development',

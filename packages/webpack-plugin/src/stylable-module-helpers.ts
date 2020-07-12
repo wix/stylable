@@ -1,6 +1,6 @@
 import path from 'path';
-import webpack from 'webpack';
-import { CalcResult, StylableModule } from './types';
+import type webpack from 'webpack';
+import type { CalcResult, StylableModule } from './types';
 
 type MultiMap<K extends object, V> = Map<K, V> | WeakMap<K, V>;
 

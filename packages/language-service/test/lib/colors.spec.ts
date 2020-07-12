@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Color } from 'vscode-languageserver-protocol';
+import type { Color } from 'vscode-languageserver-protocol';
 import { createRange } from '../../src/lib/completion-providers';
 import { getDocColorPresentation, getDocumentColors } from '../../test-kit/asserters';
 

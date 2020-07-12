@@ -1,5 +1,5 @@
-import { StylableResults } from '@stylable/core';
-import { FileSystem } from '@stylable/node';
+import type { StylableResults } from '@stylable/core';
+import type { FileSystem } from '@stylable/node';
 import { dirname } from 'path';
 
 export function handleDiagnostics(

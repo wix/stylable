@@ -1,5 +1,5 @@
 import { Stylable, StylableMeta, processNamespace } from '@stylable/core';
-import { loader as webpackLoader } from 'webpack';
+import type { loader as webpackLoader } from 'webpack';
 import findConfig from 'find-config';
 import { getOptions } from 'loader-utils';
 import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';

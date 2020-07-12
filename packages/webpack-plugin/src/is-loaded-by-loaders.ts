@@ -1,4 +1,4 @@
-import { StylableModule } from './types';
+import type { StylableModule } from './types';
 
 export function isLoadedByLoaders(module: StylableModule, warn: (m: StylableModule) => void) {
     let isSupportedLoader = false;

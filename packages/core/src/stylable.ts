@@ -1,4 +1,4 @@
-import { FileProcessor, MinimalFS } from './cached-process-file';
+import type { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { safeParse } from './parser';
@@ -10,8 +10,8 @@ import {
     TransformerOptions,
     TransformHooks,
 } from './stylable-transformer';
-import { TimedCacheOptions } from './timed-cache';
-import { IStylableOptimizer, ModuleResolver } from './types';
+import type { TimedCacheOptions } from './timed-cache';
+import type { IStylableOptimizer, ModuleResolver } from './types';
 
 export interface StylableConfig {
     projectRoot: string;

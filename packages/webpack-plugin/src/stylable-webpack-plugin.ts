@@ -9,7 +9,7 @@ import {
 import { resolveNamespace } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { EOL } from 'os';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { getModuleInGraph, hasStylableModuleInGraph } from './get-module-in-graph';
 import { normalizeOptions } from './plugin-options';
@@ -26,7 +26,7 @@ import {
     StylableAutoInitDependency,
     StylableAutoInitDependencyTemplate,
 } from './stylable-auto-init-dependency';
-import {
+import type {
     CalcResult,
     ShallowPartial,
     StylableModule,

@@ -1,5 +1,5 @@
 import hash from 'murmurhash';
-import { processNamespace } from './stylable-processor';
+import type { processNamespace } from './stylable-processor';
 
 export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,

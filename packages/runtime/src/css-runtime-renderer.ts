@@ -1,6 +1,6 @@
 import { CacheStyleNodeRenderer } from './cached-node-renderer';
 import { createDOMListRenderer, DOMListRenderer } from './keyed-list-renderer';
-import { RenderableStylesheet } from './types';
+import type { RenderableStylesheet } from './types';
 
 declare global {
     interface Window {

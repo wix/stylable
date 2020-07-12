@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import { StylableModule } from './types';
+import type webpack from 'webpack';
+import type { StylableModule } from './types';
 
 export function isImportedByNonStylable(module: { reasons: Array<{ module: { type: string } }> }) {
     return module.reasons.some(({ module }) => module && module.type !== 'stylable');

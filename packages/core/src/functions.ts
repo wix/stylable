@@ -1,12 +1,12 @@
 import { dirname, relative } from 'path';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 import { resolveCustomValues, stTypes } from './custom-values';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
-import { StylableMeta } from './stylable-processor';
-import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
-import { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import type { StylableMeta } from './stylable-processor';
+import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
+import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
 import {
     getFormatterArgs,
@@ -14,7 +14,7 @@ import {
     strategies,
     valueMapping,
 } from './stylable-value-parsers';
-import { ParsedValue } from './types';
+import type { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 const postcssValueParser = require('postcss-value-parser');

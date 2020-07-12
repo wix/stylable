@@ -1,9 +1,9 @@
-import { Stylable, StylableMeta, StylableResults } from '@stylable/core';
+import type { Stylable, StylableMeta, StylableResults } from '@stylable/core';
 import { generateModuleSource } from '@stylable/module-utils';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { OriginalSource, ReplaceSource } from 'webpack-sources';
 import { WEBPACK_STYLABLE } from './runtime-dependencies';
-import { StylableGeneratorOptions, StylableModule, WebpackAssetModule } from './types';
+import type { StylableGeneratorOptions, StylableModule, WebpackAssetModule } from './types';
 export class StylableGenerator {
     constructor(
         private stylable: Stylable,

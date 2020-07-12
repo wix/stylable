@@ -1,12 +1,12 @@
-import {
+import type {
     Stylable,
     StylableMeta,
     StylableResults,
     TransformHooks,
     StylableExports,
 } from '@stylable/core';
-import { StylableOptimizer } from '@stylable/optimizer';
-import webpack from 'webpack';
+import type { StylableOptimizer } from '@stylable/optimizer';
+import type webpack from 'webpack';
 
 export interface StylableWebpackPluginOptions {
     filename: string;

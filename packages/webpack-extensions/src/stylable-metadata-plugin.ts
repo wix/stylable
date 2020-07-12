@@ -1,6 +1,6 @@
 import { findFiles } from '@stylable/node';
 import { dirname, join } from 'path';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';

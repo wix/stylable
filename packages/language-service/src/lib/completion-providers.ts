@@ -1,7 +1,7 @@
 import path from 'path';
-import postcss from 'postcss';
+import type postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import ts from 'typescript';
+import type ts from 'typescript';
 
 import {
     ClassSymbol,
@@ -21,7 +21,7 @@ import {
     VarSymbol,
 } from '@stylable/core';
 
-import { IFileSystem } from '@file-services/types';
+import type { IFileSystem } from '@file-services/types';
 import {
     classCompletion,
     codeMixinCompletion,
@@ -52,9 +52,9 @@ import {
     isDirective,
     isInValue,
 } from './provider';
-import { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types';
 import { isComment, isDeclaration } from './utils/postcss-ast-utils';
-import { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
+import type { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
 
 const { hasOwnProperty } = Object.prototype;
 

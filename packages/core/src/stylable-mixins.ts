@@ -4,10 +4,10 @@ import postcss from 'postcss';
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
 import { fixRelativeUrls } from './stylable-assets';
-import { ImportSymbol } from './stylable-meta';
-import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
-import { CSSResolve } from './stylable-resolver';
-import { StylableTransformer } from './stylable-transformer';
+import type { ImportSymbol } from './stylable-meta';
+import type { RefedMixin, SRule, StylableMeta } from './stylable-processor';
+import type { CSSResolve } from './stylable-resolver';
+import type { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 

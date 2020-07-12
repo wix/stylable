@@ -1,7 +1,7 @@
 import { createMemoryFileSystemWithFiles } from '@stylable/e2e-test-kit';
 import { create } from '@stylable/runtime';
 import { stylableModuleFactory } from '../src';
-import { Options } from '../src/module-factory';
+import type { Options } from '../src/module-factory';
 
 function evalModule(id: string, source: string, requireModule: (s: string) => any) {
     if (!source) {

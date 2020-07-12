@@ -7,7 +7,7 @@ import {
     shouldReportNoDiagnostics,
 } from '@stylable/core-test-kit';
 import { expect, use } from 'chai';
-import { AtRule, Declaration, Rule } from 'postcss';
+import type { AtRule, Declaration, Rule } from 'postcss';
 import { processorWarnings, SRule } from '../src';
 import { transformerWarnings } from '../src/stylable-transformer';
 // import { generateStylableResult, processSource } from './utils/generate-test-util';

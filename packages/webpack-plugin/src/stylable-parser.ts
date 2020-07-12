@@ -7,14 +7,14 @@ import {
     StylableResults,
 } from '@stylable/core';
 import path from 'path';
-import webpack from 'webpack';
+import type webpack from 'webpack';
 import { isLoadedByLoaders } from './is-loaded-by-loaders';
 import {
     StylableAssetDependency,
     StylableExportsDependency,
     StylableImportDependency,
 } from './stylable-dependencies';
-import { StylableModule } from './types';
+import type { StylableModule } from './types';
 
 const stylableExtension = /\.st\.css$/;
 export class StylableParser {

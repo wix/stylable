@@ -1,11 +1,11 @@
-import { IFileSystem } from '@file-services/types';
+import type { IFileSystem } from '@file-services/types';
 import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
-import { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
-import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import type { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
+import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import { ProviderPosition, ProviderRange } from '../completion-providers';
-import { CssService } from '../css-service';
+import type { CssService } from '../css-service';
 import { fixAndProcess } from '../provider';
 
 export function resolveDocumentColors(
