@@ -1,6 +1,6 @@
 # Stylable eslint plugin
 
-Add stylable lint rules to find usages of unused locals symbol when using stylesheet api  
+Add stylable lint rules to find usages of unused locals symbol when using the stylesheet api.
 
 ## Install
 
