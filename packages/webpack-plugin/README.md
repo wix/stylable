@@ -36,6 +36,7 @@ Below you can see the various possible configuration parameters and their defaul
 |filename	| string | -	| [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
 |includeCSSInJS |	boolean	| true | false | Include target CSS in the JavaScript modules (used by runtime renderer) |
 | createRuntimeChunk | boolean | false | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
+| experimentalHMR | boolean | false | false | Enables experimental HMR for rendered css in dev mode |
 | bootstrap.autoInit | boolean | true | true | Initialize the rendering of the CSS in the browser |
 | optimize.removeUnusedComponents | boolean | true | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
 | optimize.removeComments | boolean | false | true | Remove CSS comments from the target |
@@ -43,6 +44,8 @@ Below you can see the various possible configuration parameters and their defaul
 | optimize.classNameOptimizations | boolean | false | true | Shorten all class names and replace them in the JavaScript modules |
 | optimize.shortNamespaces | boolean | false | true | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
 | optimize.minify | boolean | false | true | Minify each css asset. |
+| generate.alwaysWarn | boolean | false | false | Always warn on stylable errors |
+| generate.runtimeStylesheetId | string 'module' or 'namespace' | module | module | set the id of the runtime stylesheet |
 
 ### Sample production configuration
 ```js
