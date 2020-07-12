@@ -26,6 +26,7 @@ export function normalizeOptions(
             ...options.bootstrap,
         },
         generate: {
+            alwaysWarn: true,
             runtimeStylesheetId: 'module', // 'namespace'
             afterTransform: null,
             ...options.generate,
