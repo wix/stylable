@@ -22,6 +22,6 @@ or
 ### Options
 
 | Option	| Type  | Default | Description |
-|-----------|:-----:|:-------:|:-----------:|
+|-----------|:-----:|:-------:|-------------|
 | resolveOptions | object | {} | stylable resolver options |
 | exposeDiagnosticsReports | boolean | false | expose st.css diagnostics at the import location |
