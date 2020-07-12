@@ -1,5 +1,4 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     mode: 'development',
@@ -7,6 +6,5 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({ generate: { alwaysWarn: false } }),
-        new HtmlWebpackPlugin(),
     ],
 };
