@@ -39,7 +39,9 @@ function populateDirectorySync(rootDir: string, files: Files) {
     }
 }
 
-describe('Stylable Cli', () => {
+describe('Stylable Cli', function () {
+    this.timeout(10_000);
+
     let tempDir: ITempDirectory;
 
     beforeEach(async () => {

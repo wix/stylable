@@ -311,7 +311,7 @@ describe('css-runtime-renderer', () => {
             expect(typeof api.renderer!.render).to.equal('function');
             expect(api.window).to.equal(window);
             expect(api.id).to.equal(0);
-        }).timeout(25000);
+        })
 
         it('init should render once', () => {
             const { window } = new JSDOM(`

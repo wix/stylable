@@ -3,11 +3,13 @@ import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-
 import { expect } from 'chai';
 import { resolve } from 'path';
 import { build } from '../src';
-const log = () => {
-    /**/
-};
 
-describe('build index', () => {
+describe('build index', function () {
+    this.timeout(10_000);
+    const log = () => {
+        /**/
+    };
+
     it('should create index file importing all matched stylesheets in srcDir', () => {
         const fs = createFS({
             '/compA.st.css': `

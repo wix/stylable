@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000",
+    "test": "mocha \"test/**/*.spec.ts?(x)\"",
     "prepack": "yarn build"
   },
   "peerDependencies": {

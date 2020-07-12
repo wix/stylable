@@ -33,7 +33,7 @@ describe('Signature Help', () => {
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
                 }
-            ).timeout(5000);
+            );
         });
     });
 
@@ -51,7 +51,7 @@ describe('Signature Help', () => {
 
             expect(sig).to.not.equal(null);
             expect(sig).to.deep.equal(exp);
-        }).timeout(5000);
+        });
     });
 
     xdescribe('TS Paramful Mixin - Default Import', () => {
@@ -81,7 +81,7 @@ describe('Signature Help', () => {
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
                 }
-            ).timeout(5000);
+            );
         });
     });
 
@@ -114,7 +114,7 @@ describe('Signature Help', () => {
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
                 }
-            ).timeout(5000);
+            );
         });
     });
 
@@ -134,7 +134,7 @@ describe('Signature Help', () => {
 
             expect(sig).to.not.equal(null);
             expect(sig).to.deep.equal(exp);
-        }).timeout(5000);
+        });
     });
 
     xdescribe('JS Paramful Mixin with .d.ts', () => {
@@ -167,7 +167,7 @@ describe('Signature Help', () => {
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
                 }
-            ).timeout(5000);
+            );
         });
     });
 
@@ -185,7 +185,7 @@ describe('Signature Help', () => {
 
             expect(sig).to.not.equal(null);
             expect(sig).to.deep.equal(exp);
-        }).timeout(5000);
+        });
     });
 
     describe('No signature', () => {
@@ -453,7 +453,7 @@ describe('Signature Help', () => {
                     expect(sig).to.not.equal(null);
                     expect(sig).to.deep.equal(exp);
                 }
-            ).timeout(5000);
+            );
         });
     });
 });

@@ -5,11 +5,14 @@ import { expect } from 'chai';
 import { resolve } from 'path';
 import { build } from '../src';
 
-const log = () => {
-    /**/
-};
 
-describe('build stand alone', () => {
+describe('build stand alone', function () {
+    this.timeout(10_000);
+    
+    const log = () => {
+        /**/
+    };
+    
     it('should create modules and copy source css files', () => {
         const fs = createFS({
             '/main.st.css': `

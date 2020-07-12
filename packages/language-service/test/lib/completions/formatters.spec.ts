@@ -2,7 +2,9 @@ import { createRange, ProviderRange } from '../../../src/lib/completion-provider
 import { Completion } from '../../../src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
-describe('Formatters', () => {
+describe('Formatters', function () {
+    this.timeout(20_000);
+
     const ts_formatter_1 = 'paramlessFormatter';
     const ts_formatter_2 = 'formatterWithParams';
     const js_formatter_1 = 'aFormatter';
@@ -43,7 +45,7 @@ describe('Formatters', () => {
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
                     }
-                ).timeout(10000);
+                );
 
                 it(
                     'should complete imported TS formatters after value, with prefix ' + prefix,
@@ -70,7 +72,7 @@ describe('Formatters', () => {
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
                     }
-                ).timeout(10000);
+                );
             });
         });
     });
@@ -98,7 +100,7 @@ describe('Formatters', () => {
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
                     }
-                ).timeout(10000);
+                );
 
                 it(
                     'should complete imported JS formatters after value, with prefix ' + prefix,
@@ -119,7 +121,7 @@ describe('Formatters', () => {
                         asserter.suggested(exp);
                         asserter.notSuggested(notExp);
                     }
-                ).timeout(10000);
+                );
             });
         });
 

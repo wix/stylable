@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . -f codeframe",
     "pretest": "yarn typecheck && yarn lint",
-    "test": "lerna run test --stream",
+    "test": "yarn test:parallel",
+    "test:mocha": "mocha \"packages/**/*.{unit,spec}.{ts,tsx}\"",
+    "test:parallel": "yarn test:mocha --parallel",
     "prettify": "npx prettier \"packages/**/*.{js,ts,tsx}\" --write"
   },
   "devDependencies": {

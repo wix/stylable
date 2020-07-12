@@ -49,7 +49,7 @@ export class ProjectRunner {
         const projectRunner = new this(runnerOptions);
 
         before('bundle and serve project', async function () {
-            this.timeout(40000);
+            this.timeout(40_000);
             watch ? await projectRunner.watch() : await projectRunner.bundle();
             await projectRunner.serve();
         });

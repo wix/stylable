@@ -2,7 +2,9 @@ import { createRange, ProviderRange } from '../../../src/lib/completion-provider
 import { Completion } from '../../../src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
-describe('Mixins', () => {
+describe('Mixins', function () {
+    this.timeout(20_000);
+
     describe('CSS Class Mixins', () => {
         const createComp = (str: string, rng: ProviderRange, path: string) =>
             asserters.cssMixinCompletion(str, rng, path);
@@ -187,7 +189,7 @@ describe('Mixins', () => {
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
                         }
-                    ).timeout(10000);
+                    );
 
                     it(
                         'should complete imported TS mixins after value, with prefix ' + prefix,
@@ -216,7 +218,7 @@ describe('Mixins', () => {
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
                         }
-                    ).timeout(10000);
+                    );
                 });
             });
         });
@@ -248,7 +250,7 @@ describe('Mixins', () => {
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
                         }
-                    ).timeout(10000);
+                    );
 
                     it(
                         'should complete imported JS mixins after value, with prefix ' + prefix,
@@ -271,7 +273,7 @@ describe('Mixins', () => {
                             asserter.suggested(exp);
                             asserter.notSuggested(notExp);
                         }
-                    ).timeout(10000);
+                    );
                 });
             });
 
