@@ -31,8 +31,8 @@ export default createRule({
 
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {
             if (
-                (meta.transformDiagnostics && meta.transformDiagnostics.reports.length) ||
-                (meta.diagnostics && meta.diagnostics.reports.length)
+                (meta.transformDiagnostics?.reports.length) ||
+                (meta.diagnostics?.reports.length)
             ) {
                 context.report({
                     messageId: 'diagnostics',
