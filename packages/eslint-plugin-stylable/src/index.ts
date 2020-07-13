@@ -1,6 +1,6 @@
-import baseStylable from './stylable-es-lint';
+import unknownLocals from './stylable-es-lint';
 export default {
     rules: {
-        'unknown-locals': baseStylable,
+        'unknown-locals': unknownLocals,
     },
 };
