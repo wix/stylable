@@ -1,6 +1,6 @@
 # Stylable eslint plugin
 
-Add stylable lint rules to find usages of unused locals symbol when using the stylesheet api.
+Adds Stylable lint rules that warn about usages of unknown stylesheet locals (classes, css vars, Stylable vars and keyframes).
 
 ## Install
 
@@ -10,7 +10,7 @@ or
 
 ## Config
 
-.eslint config
+`.eslintrc` config
 
 ```json
   "plugins": ["stylable"],
@@ -23,5 +23,5 @@ or
 
 | Option	| Type  | Default | Description |
 |-----------|:-----:|:-------:|-------------|
-| resolveOptions | object | {} | stylable resolver options |
-| exposeDiagnosticsReports | boolean | false | expose st.css diagnostics at the import location |
+| `resolveOptions` | `object` | `{}` | Stylable resolver options |
+| `exposeDiagnosticsReports` | `boolean` | `false` | expose Stylable transpilation diagnostics on the import statement |
