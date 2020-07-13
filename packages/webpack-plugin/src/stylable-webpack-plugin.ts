@@ -36,7 +36,6 @@ import {
 import { isImportedByNonStylable, rewriteUrl, isStylableModule } from './utils';
 import { dirname } from 'path';
 import findConfig from 'find-config';
-import { hashContent } from '@stylable/webpack-extensions/src';
 
 const { connectChunkAndModule } = require('webpack/lib/GraphHelpers');
 const MultiModule = require('webpack/lib/MultiModule');
@@ -336,14 +335,11 @@ export class StylableWebpackPlugin {
                     compilation.mainTemplate,
                     chunk.hash || compilation.hash
                 );
-                const source = cssSources.join(EOL);
-                
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
-                    contentHash: hashContent(source),
                 });
-                compilation.assets[cssBundleFilename] = new RawSource(source);
+                compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL));
                 chunk.files.push(cssBundleFilename);
             }
         } else {
@@ -353,13 +349,11 @@ export class StylableWebpackPlugin {
                     compilation.mainTemplate,
                     compilation.hash
                 );
-                const source = cssSources.join(EOL)
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
-                    contentHash: hashContent(source),
                 });
-                compilation.assets[cssBundleFilename] = new RawSource(source);
+                compilation.assets[cssBundleFilename] = new RawSource(cssSources.join(EOL));
                 chunk.files.push(cssBundleFilename);
             }
         }
