@@ -1,22 +1,23 @@
+import { nodeFs } from '@file-services/node';
+import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
 import {
     ESLintUtils,
     AST_NODE_TYPES,
     ASTUtils,
     TSESTree as esTree,
 } from '@typescript-eslint/experimental-utils';
+
 const { isIdentifier, isMemberOrOptionalMemberExpression } = ASTUtils;
-import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
-import { nodeFs } from '@file-services/node';
 
 const createRule = ESLintUtils.RuleCreator((ruleName) => {
-    return `${ruleName}`;
+    return `${ruleName}`; // TODO: create documentation site links
 });
 
 type Options = [{ exposeDiagnosticsReports: boolean; resolveOptions: {} }];
 
 export default createRule({
     name: 'unknown-locals',
-    defaultOptions: [{ exposeDiagnosticsReports: false }], // TODO: allow to pass resolve config
+    defaultOptions: [{ exposeDiagnosticsReports: false, resolveOptions: {} }], // TODO: allow to pass resolve config
     create(context, options) {
         const [{ exposeDiagnosticsReports, resolveOptions }] = options as Options;
         const moduleResolver = createDefaultResolver(nodeFs, resolveOptions);
@@ -29,13 +30,16 @@ export default createRule({
         });
 
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {
-            if (meta.transformDiagnostics && meta.transformDiagnostics.reports.length) {
+            if (
+                (meta.transformDiagnostics && meta.transformDiagnostics.reports.length) ||
+                (meta.diagnostics && meta.diagnostics.reports.length)
+            ) {
                 context.report({
                     messageId: 'diagnostics',
                     node,
                     data: {
                         diagnostics: meta.diagnostics.reports
-                            .concat(meta.transformDiagnostics.reports)
+                            .concat(meta.transformDiagnostics?.reports ?? [])
                             .map((report) => report.message)
                             .join('\n'),
                     },
