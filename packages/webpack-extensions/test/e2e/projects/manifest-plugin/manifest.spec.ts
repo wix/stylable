@@ -45,8 +45,8 @@ describe(`(${__dirname})`, () => {
                 [`/${commonHash}.st.css`]: commonContent,
             },
             namespaceMapping: {
-                [`/${commonHash}.st.css`]: 'common1577161073',
-                [`/${compHash}.st.css`]: 'Buttoncomp2249022160',
+                [`/${commonHash}.st.css`]: 'common911354609',
+                [`/${compHash}.st.css`]: 'Buttoncomp1090430236',
             },
         });
     });
