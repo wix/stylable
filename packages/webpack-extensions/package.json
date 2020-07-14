@@ -18,6 +18,7 @@
     "@stylable/core": "^3.7.2",
     "@stylable/node": "^3.7.2",
     "@stylable/webpack-plugin": "^3.7.2",
+    "@stylable/experimental-loader": "^3.7.2",
     "loader-utils": "^2.0.0",
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.13.1",

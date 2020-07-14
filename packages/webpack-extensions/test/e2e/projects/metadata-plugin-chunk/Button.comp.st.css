@@ -1,0 +1,8 @@
+:import {
+    -st-from: "./common.st.css";
+    -st-named: myColor;
+}
+
+.root {
+    color: value(myColor)
+}
