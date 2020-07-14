@@ -1,0 +1,8 @@
+:import {
+    -st-from: "";
+    -st-default: NotFound;
+}
+
+.root {
+    -st-extends: Unknown;
+}
