@@ -49,22 +49,22 @@ tester.run('basic unknown locals discovery', StylableLint, {
         },
         {
             filename,
-            code: "import {classes as XYZ} from './index.st.css'; ()=> {const a = XYZ.zzz}",
+            code: "import {classes as XYZ} from './index.st.css'; ()=> {const a = XYZ.part}",
             errors: [{ messageId: 'unknown-local' }],
         },
         {
             filename,
-            code: "import {keyframes as XYZ} from './index.st.css'; const a = XYZ.zzz",
+            code: "import {keyframes as XYZ} from './index.st.css'; const a = XYZ.part",
             errors: [{ messageId: 'unknown-local' }],
         },
         {
             filename,
-            code: "import {vars as XYZ} from './index.st.css'; const a = XYZ.zzz",
+            code: "import {vars as XYZ} from './index.st.css'; const a = XYZ.part",
             errors: [{ messageId: 'unknown-local' }],
         },
         {
             filename,
-            code: "import {stVars as XYZ} from './index.st.css'; const a = XYZ.zzz",
+            code: "import {stVars as XYZ} from './index.st.css'; const a = XYZ.part",
             errors: [{ messageId: 'unknown-local' }],
         },
     ],
@@ -75,7 +75,7 @@ tester.run('basic unknown locals discovery', StylableLint, {
         },
         {
             filename,
-            code: "import {classes as XYZ} from './index.st.css'; (XYZ)=> {const a = XYZ.zzz}",
+            code: "import {classes as XYZ} from './index.st.css'; (XYZ)=> {const a = XYZ.part}",
         },
         {
             filename,
