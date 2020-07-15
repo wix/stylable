@@ -10,9 +10,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/node": "^2.2.0",
+    "@file-services/node": "^3.0.0",
     "@stylable/core": "^3.7.2",
-    "@typescript-eslint/experimental-utils": "^3.6.0"
+    "@typescript-eslint/experimental-utils": "^3.6.1"
   },
   "devDependencies": {
     "create-temp-directory": "^1.1.1"
