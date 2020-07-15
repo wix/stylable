@@ -27,6 +27,7 @@ export interface StylableWebpackPluginOptions {
         globalInjection?: (p: string) => string;
     };
     generate: {
+        alwaysWarn: boolean,
         runtimeStylesheetId: 'module' | 'namespace';
         afterTransform: any;
     };
@@ -58,6 +59,7 @@ export interface StylableGeneratorOptions {
     experimentalHMR: boolean;
     runtimeStylesheetId: 'module' | 'namespace';
     afterTransform: any;
+    alwaysWarn: boolean
 }
 
 export type ShallowPartial<T> = {
