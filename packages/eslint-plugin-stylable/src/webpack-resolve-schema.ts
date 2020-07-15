@@ -1,3 +1,5 @@
+// TODO: Finalize schema for resolveOptions in the ESlist config meta, this code is taken from webpack schema.
+
 export const resolverDefs = {
     Resolve: {
         description: 'Options for the resolver.',
