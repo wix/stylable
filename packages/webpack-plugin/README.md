@@ -44,8 +44,8 @@ Below you can see the various possible configuration parameters and their defaul
 | optimize.classNameOptimizations | boolean | false | true | Shorten all class names and replace them in the JavaScript modules |
 | optimize.shortNamespaces | boolean | false | true | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
 | optimize.minify | boolean | false | true | Minify each css asset. |
-| generate.alwaysWarn | boolean | false | false | Always warn on stylable errors |
-| generate.runtimeStylesheetId | string 'module' or 'namespace' | module | module | set the id of the runtime stylesheet |
+| generate.alwaysWarn | boolean | true | true | emit Stylable diagnostics errors as webpack warnings |
+| generate.runtimeStylesheetId | 'module' \| 'namespace' | module | module | set the id of the runtime stylesheet |
 
 ### Sample production configuration
 ```js
