@@ -9,7 +9,7 @@ import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
@@ -41,7 +41,7 @@ export function appendMixins(
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
     rule.mixins.length = 0;
-    rule.walkDecls(valueMapping.mixin, (node) => node.remove());
+    rule.walkDecls(mixinDeclRegExp, (node) => node.remove());
 }
 
 export function appendMixin(
@@ -269,8 +269,14 @@ function handleLocalClassMixin(
     path: string[],
     rule: SRule
 ) {
-    const isRootMixin = mix.ref.name === meta.root;
+    const isPartial = mix.mixin.partial;
     const namedArgs = mix.mixin.options as Record<string, string>;
+    const overrideKeys = Object.keys(namedArgs);
+
+    if (isPartial && overrideKeys.length === 0) {
+        return;
+    }
+    const isRootMixin = mix.ref.name === meta.root;
     const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
     const resolvedArgs = resolveArgumentsValue(
         namedArgs,
@@ -289,6 +295,10 @@ function handleLocalClassMixin(
         undefined,
         isRootMixin
     );
+
+    if (isPartial) {
+        filterPartialMixinDecl(mixinRoot, overrideKeys);
+    }
 
     transformer.transformAst(
         mixinRoot,
@@ -314,7 +324,24 @@ function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefine
     return (
         rule.nodes &&
         (rule.nodes.find((node) => {
-            return node.type === 'decl' && node.prop === valueMapping.mixin;
+            return (
+                node.type === 'decl' &&
+                (node.prop === valueMapping.mixin || node.prop === valueMapping.partialMixin)
+            );
         }) as postcss.Declaration)
     );
+}
+
+function filterPartialMixinDecl(mixinRoot: postcss.Root, overrideKeys: string[]) {
+    const regexp = new RegExp(`value\\((\\s*${overrideKeys.join('\\s*)|(\\s*')}\\s*)\\)`);
+
+    mixinRoot.walkDecls((decl) => {
+        if (!decl.value.match(regexp)) {
+            const parent = decl.parent; // ref the parent before remove
+            decl.remove();
+            if (parent.nodes?.length === 0) {
+                parent.remove();
+            }
+        }
+    });
 }

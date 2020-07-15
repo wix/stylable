@@ -20,7 +20,7 @@ import {
     traverseNode,
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
@@ -140,7 +140,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
         let mixinEntry: postcss.Declaration | null = null;
 
-        rule.walkDecls(valueMapping.mixin, (decl) => {
+        rule.walkDecls(mixinDeclRegExp, (decl) => {
             mixinEntry = decl;
         });
         if (!mixinEntry) {

@@ -6,6 +6,10 @@ const parseMixin = (mixinValue: string) => {
     return SBTypesParsers[valueMapping.mixin](postcss.decl({ value: mixinValue }), () => 'named');
 };
 
+const parsePartialMixin = (mixinValue: string) => {
+    return SBTypesParsers[valueMapping.partialMixin](postcss.decl({ value: mixinValue }), () => 'named');
+};
+
 describe('stylable-value-parsers', () => {
     it('named arguments with no params', () => {
         expect(parseMixin('Button')).to.eql([{ type: 'Button', options: {} }]);
@@ -53,6 +57,16 @@ describe('stylable-value-parsers', () => {
             {
                 type: 'Button',
                 options: { border: '1px solid red' },
+            },
+        ]);
+    });
+
+    it('partial mixin annotation', () => {
+        expect(parsePartialMixin('Button(border 1px solid red)')).to.eql([
+            {
+                type: 'Button',
+                options: { border: '1px solid red' },
+                partial: true 
             },
         ]);
     });

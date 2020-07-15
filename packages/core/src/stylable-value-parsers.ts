@@ -29,6 +29,7 @@ export interface TypedClass {
 export interface MixinValue {
     type: string;
     options: Array<{ value: string }> | Record<string, string>;
+    partial?: boolean;
 }
 
 export interface ArgValue {
@@ -57,8 +58,12 @@ export const valueMapping = {
     states: '-st-states' as const,
     extends: '-st-extends' as const,
     mixin: '-st-mixin' as const,
+    partialMixin: '-st-partial-mixin' as const,
     global: '-st-global' as const,
 };
+
+
+export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
 
 export type stKeys = keyof typeof valueMapping;
 
@@ -138,10 +143,7 @@ export const SBTypesParsers = {
         diagnostics?: Diagnostics
     ) {
         const ast = postcssValueParser(mixinNode.value);
-        const mixins: Array<{
-            type: string;
-            options: Array<{ value: string }> | Record<string, string>;
-        }> = [];
+        const mixins: Array<MixinValue> = [];
 
         function reportWarning(message: string, options?: { word: string }) {
             if (diagnostics) {
@@ -169,6 +171,16 @@ export const SBTypesParsers = {
         });
 
         return mixins;
+    },
+    '-st-partial-mixin'(
+        mixinNode: postcss.Declaration,
+        strategy: (type: string) => 'named' | 'args',
+        diagnostics?: Diagnostics
+    ) {
+        return SBTypesParsers['-st-mixin'](mixinNode, strategy, diagnostics).map((mixin) => {
+            mixin.partial = true;
+            return mixin;
+        });
     },
 };
 

@@ -42,7 +42,6 @@ import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
-const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
@@ -89,6 +88,9 @@ export const processorWarnings = {
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
+    },
+    ILLEGAL_PARTIAL_MIXIN(type: string) {
+        return `"${valueMapping.partialMixin}" can only be used when override arguments are provided, missing overrides on "${type}"`;
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
@@ -603,9 +605,9 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-        } else if (decl.prop === valueMapping.mixin) {
+        } else if (decl.prop === valueMapping.mixin || decl.prop === valueMapping.partialMixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(
+            SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
                     const mixinRefSymbol = this.meta.mappedSymbols[type];
@@ -621,11 +623,19 @@ export class StylableProcessor {
                 this.diagnostics
             ).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
-
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
                 ) {
+                    if (mixin.partial && Object.keys(mixin.options).length === 0) {
+                        this.diagnostics.warn(
+                            decl,
+                            processorWarnings.ILLEGAL_PARTIAL_MIXIN(mixin.type),
+                            {
+                                word: mixin.type,
+                            }
+                        );
+                    }
                     const refedMixin = {
                         mixin,
                         ref: mixinRefSymbol,
