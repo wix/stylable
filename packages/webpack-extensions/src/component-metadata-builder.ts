@@ -142,9 +142,12 @@ export class ComponentMetadataBuilder {
     private resourcePackageName(localResourcePath: string) {
         const i = localResourcePath.lastIndexOf(NODE_MODULES_FOLDER);
         if (i !== -1) {
-            const [packageName] = localResourcePath
+            const [packageName, subName] = localResourcePath
                 .slice(i + NODE_MODULES_FOLDER.length)
                 .split('/');
+            if (packageName.startsWith('@')) {
+                return packageName + '/' + subName;
+            }
             return packageName;
         } else {
             return this.output.name;
