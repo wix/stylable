@@ -57,6 +57,7 @@ interface LoaderOptions {
   resolveNamespace?(namespace: string, filePath: string): string;
   filterUrls?(url: string, ctx: loader.LoaderContext): boolean;
   exportsOnly?: boolean;
+  alwaysEmitErrors?: boolean;
 }
 ```
 
