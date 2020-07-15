@@ -31,10 +31,7 @@ or
 `.eslintrc` config
 
 ```json
-  "plugins": ["stylable"],
-  "rules": {
-    "stylable/unknown-locals": "error",
-  }
+  "extends": ["plugin:stylable/recommended"]
 ```
 
 ### Options
