@@ -57,6 +57,7 @@ interface LoaderOptions {
   resolveNamespace?(namespace: string, filePath: string): string;
   filterUrls?(url: string, ctx: loader.LoaderContext): boolean;
   exportsOnly?: boolean;
+  alwaysEmitErrors?: boolean;
 }
 ```
 
@@ -65,6 +66,7 @@ interface LoaderOptions {
 | `resolveNamespace` | override default stylesheet namespace process |
 | `filterUrls`       | filter urls from webpack process              |
 | `exportsOnly`      | only export the runtime stylesheet            |
+| `alwaysEmitErrors` | always emit Stylable diagnostics as errors    |
 
 ## SSR (exportsOnly)
 

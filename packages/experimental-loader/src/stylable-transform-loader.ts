@@ -1,4 +1,4 @@
-import { Stylable, processNamespace } from '@stylable/core';
+import { Stylable, processNamespace, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
@@ -19,11 +19,13 @@ export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
     filterUrls(url: string, ctx: loader.LoaderContext): boolean;
     exportsOnly: boolean;
+    alwaysEmitErrors: boolean;
 }
 
 const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
     exportsOnly: false,
+    alwaysEmitErrors: false,
     filterUrls(_url: string, _ctx: loader.LoaderContext) {
         return true;
     },
@@ -60,7 +62,7 @@ const stylableLoader: loader.Loader = function (content) {
         throw new Error('content is not string');
     }
 
-    const { filterUrls, resolveNamespace, exportsOnly }: LoaderOptions = {
+    const { filterUrls, resolveNamespace, exportsOnly, alwaysEmitErrors }: LoaderOptions = {
         ...defaultOptions,
         ...getOptions(this),
     };
@@ -77,6 +79,8 @@ const stylableLoader: loader.Loader = function (content) {
     });
 
     const res = stylable.transform(content, this.resourcePath);
+
+    emitDiagnostics(this, res, alwaysEmitErrors);
 
     addMetaDependencies(
         res.meta,
@@ -159,3 +163,24 @@ const stylableLoader: loader.Loader = function (content) {
 
 export const loaderPath = __filename;
 export default stylableLoader;
+
+function emitDiagnostics(
+    ctx: loader.LoaderContext,
+    res: StylableResults,
+    alwaysEmitErrors: boolean
+) {
+    res.meta.diagnostics?.reports.forEach(({ message, type }) => {
+        if (type === 'error' || alwaysEmitErrors) {
+            ctx.emitError(new Error(message));
+        } else {
+            ctx.emitWarning(new Error(message));
+        }
+    });
+    res.meta.transformDiagnostics?.reports.forEach(({ message, type }) => {
+        if (type === 'error' || alwaysEmitErrors) {
+            ctx.emitError(new Error(message));
+        } else {
+            ctx.emitWarning(new Error(message));
+        }
+    });
+}
