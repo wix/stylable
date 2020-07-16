@@ -21,13 +21,14 @@ export interface StylableWebpackPluginOptions {
     experimentalHMR: boolean;
     runtimeMode: 'isolated' | 'shared' | 'external';
     globalRuntimeId: string;
+    onProcessMeta?: (meta: StylableMeta, filePath: string) => StylableMeta;
+    diagnosticsMode: 'auto' | 'strict' | 'loose';
     bootstrap: {
         autoInit: boolean;
         getAutoInitModule?: any;
         globalInjection?: (p: string) => string;
     };
     generate: {
-        alwaysWarn: boolean,
         runtimeStylesheetId: 'module' | 'namespace';
         afterTransform: any;
     };
@@ -59,7 +60,7 @@ export interface StylableGeneratorOptions {
     experimentalHMR: boolean;
     runtimeStylesheetId: 'module' | 'namespace';
     afterTransform: any;
-    alwaysWarn: boolean
+    diagnosticsMode: 'auto' | 'strict' | 'loose';
 }
 
 export type ShallowPartial<T> = {

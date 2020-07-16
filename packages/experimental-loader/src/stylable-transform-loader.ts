@@ -19,13 +19,13 @@ export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
     filterUrls(url: string, ctx: loader.LoaderContext): boolean;
     exportsOnly: boolean;
-    alwaysEmitErrors: boolean;
+    diagnosticsMode: 'auto' | 'strict' | 'loose';
 }
 
 const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
     exportsOnly: false,
-    alwaysEmitErrors: false,
+    diagnosticsMode: 'auto',
     filterUrls(_url: string, _ctx: loader.LoaderContext) {
         return true;
     },
@@ -62,7 +62,7 @@ const stylableLoader: loader.Loader = function (content) {
         throw new Error('content is not string');
     }
 
-    const { filterUrls, resolveNamespace, exportsOnly, alwaysEmitErrors }: LoaderOptions = {
+    const { filterUrls, resolveNamespace, exportsOnly, diagnosticsMode }: LoaderOptions = {
         ...defaultOptions,
         ...getOptions(this),
     };
@@ -80,7 +80,7 @@ const stylableLoader: loader.Loader = function (content) {
 
     const res = stylable.transform(content, this.resourcePath);
 
-    emitDiagnostics(this, res, alwaysEmitErrors);
+    emitDiagnostics(this, res, diagnosticsMode);
 
     addMetaDependencies(
         res.meta,
@@ -164,23 +164,34 @@ const stylableLoader: loader.Loader = function (content) {
 export const loaderPath = __filename;
 export default stylableLoader;
 
+function reportDiagnostic(
+    ctx: loader.LoaderContext,
+    diagnosticsMode: 'auto' | 'strict' | 'loose',
+    { message, type }: { message: string; type: 'warning' | 'error' }
+) {
+    const error = new Error(message);
+    if (diagnosticsMode === 'auto') {
+        if (type === 'warning') {
+            ctx.emitWarning(error);
+        } else if (type === 'error') {
+            ctx.emitError(error);
+        }
+    } else if (diagnosticsMode === 'strict') {
+        ctx.emitError(error);
+    } else if (diagnosticsMode === 'loose') {
+        ctx.emitWarning(error);
+    }
+}
+
 function emitDiagnostics(
     ctx: loader.LoaderContext,
     res: StylableResults,
-    alwaysEmitErrors: boolean
+    diagnosticsMode: 'auto' | 'strict' | 'loose'
 ) {
-    res.meta.diagnostics?.reports.forEach(({ message, type }) => {
-        if (type === 'error' || alwaysEmitErrors) {
-            ctx.emitError(new Error(message));
-        } else {
-            ctx.emitWarning(new Error(message));
-        }
+    res.meta.diagnostics?.reports.forEach((diagnostic) => {
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
     });
-    res.meta.transformDiagnostics?.reports.forEach(({ message, type }) => {
-        if (type === 'error' || alwaysEmitErrors) {
-            ctx.emitError(new Error(message));
-        } else {
-            ctx.emitWarning(new Error(message));
-        }
+    res.meta.transformDiagnostics?.reports.forEach((diagnostic) => {
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
     });
 }

@@ -95,7 +95,7 @@ export class StylableWebpackPlugin {
             (compiler.inputFileSystem as any).fileSystem || (compiler.inputFileSystem as any),
             this.options.requireModule,
             '__',
-            (meta) => {
+            (meta, filePath) => {
                 if (this.options.unsafeBuildNamespace) {
                     try {
                         meta.namespace = require(meta.source + '.js').namespace;
@@ -112,6 +112,9 @@ export class StylableWebpackPlugin {
                         compiler.context,
                         stylable
                     );
+                }
+                if (this.options.onProcessMeta) {
+                    return this.options.onProcessMeta(meta, filePath);
                 }
                 return meta;
             },
@@ -337,7 +340,7 @@ export class StylableWebpackPlugin {
                     chunk.hash || compilation.hash
                 );
                 const source = cssSources.join(EOL);
-                
+
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
@@ -353,7 +356,7 @@ export class StylableWebpackPlugin {
                     compilation.mainTemplate,
                     compilation.hash
                 );
-                const source = cssSources.join(EOL)
+                const source = cssSources.join(EOL);
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
@@ -411,6 +414,7 @@ export class StylableWebpackPlugin {
                             {
                                 includeCSSInJS: this.options.includeCSSInJS,
                                 experimentalHMR: this.options.experimentalHMR,
+                                diagnosticsMode: this.options.diagnosticsMode,
                                 ...this.options.generate,
                             }
                         );

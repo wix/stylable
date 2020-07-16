@@ -32,20 +32,21 @@ Below you can see the various possible configuration parameters and their defaul
 
 | Option	| Type	| Development Mode Default | Production Mode Default | Description |
 |---------|:-----:|:-----------------:|:----------------:|------------|
-|outputCSS | boolean |	false	| true | Generate CSS asset files per bundle |
-|filename	| string | -	| [name].bundle.css | The name of the CSS bundle file when outputCSS is enabled |
-|includeCSSInJS |	boolean	| true | false | Include target CSS in the JavaScript modules (used by runtime renderer) |
-| createRuntimeChunk | boolean | false | false | Move **all** Stylable modules into a separate chunk with a runtime renderer |
-| experimentalHMR | boolean | false | false | Enables experimental HMR for rendered css in dev mode |
-| bootstrap.autoInit | boolean | true | true | Initialize the rendering of the CSS in the browser |
-| optimize.removeUnusedComponents | boolean | true | true | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
-| optimize.removeComments | boolean | false | true | Remove CSS comments from the target |
-| optimize.removeStylableDirectives | boolean | true | true | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon) |
-| optimize.classNameOptimizations | boolean | false | true | Shorten all class names and replace them in the JavaScript modules |
-| optimize.shortNamespaces | boolean | false | true | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
-| optimize.minify | boolean | false | true | Minify each css asset. |
-| generate.alwaysWarn | boolean | true | true | emit Stylable diagnostics errors as webpack warnings |
-| generate.runtimeStylesheetId | 'module' \| 'namespace' | module | module | set the id of the runtime stylesheet |
+|outputCSS | `boolean` |	`false`	| `true` | Generate CSS asset files per bundle |
+|filename	| `string` | -	| `[name].bundle.css` | The name of the CSS bundle file when outputCSS is enabled |
+|includeCSSInJS |	`boolean`	| `true` | `false` | Include target CSS in the JavaScript modules (used by runtime renderer) |
+| createRuntimeChunk | `boolean` | `false` | `false` | Move **all** Stylable modules into a separate chunk with a runtime renderer |
+| experimentalHMR | `boolean` | `false` | `false` | Enables experimental HMR for rendered css in dev mode |
+| diagnosticsMode | `auto` \| `strict` \| `loose` | `auto` | `auto` | `auto` - errors and warnings emitted as is; `strict` - warnings emitted as errors; `loose` - errors emitted as warnings  |
+| onProcessMeta | `(meta: StylableMeta, path: string) => StylableMeta` \| `undefined` | `undefined` | `undefined` | accepts a function that executes after Stylable's processing step and allows manipulation of its resulting AST and `meta` |
+| bootstrap.autoInit | `boolean` | `true` | `true` | Initialize the rendering of the CSS in the browser |
+| optimize.removeUnusedComponents | `boolean` | `true` | `true` | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
+| optimize.removeComments | `boolean` | `false` | `true` | Remove CSS comments from the target |
+| optimize.removeStylableDirectives | `boolean` | `true` | `true` | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon) |
+| optimize.classNameOptimizations | `boolean` | `false` | `true` | Shorten all class names and replace them in the JavaScript modules |
+| optimize.shortNamespaces | `boolean` | `false` | `true` | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
+| optimize.minify | `boolean` | `false` | `true` | Minify each css asset. |
+| generate.runtimeStylesheetId | `module` \| `namespace` | `module` | `module` | set the id of the runtime stylesheet |
 
 ### Sample production configuration
 ```js

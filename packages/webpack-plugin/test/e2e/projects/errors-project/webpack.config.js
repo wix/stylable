@@ -5,6 +5,6 @@ module.exports = {
     context: __dirname,
     devtool: 'source-map',
     plugins: [
-        new StylableWebpackPlugin({ generate: { alwaysWarn: false } }),
+        new StylableWebpackPlugin({ diagnosticsMode: 'auto' }),
     ],
 };
