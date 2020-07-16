@@ -113,6 +113,9 @@ export class StylableWebpackPlugin {
                         stylable
                     );
                 }
+                if (this.options.onProcessMeta) {
+                    return this.options.onProcessMeta(meta);
+                }
                 return meta;
             },
             undefined,
@@ -337,7 +340,7 @@ export class StylableWebpackPlugin {
                     chunk.hash || compilation.hash
                 );
                 const source = cssSources.join(EOL);
-                
+
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
@@ -353,7 +356,7 @@ export class StylableWebpackPlugin {
                     compilation.mainTemplate,
                     compilation.hash
                 );
-                const source = cssSources.join(EOL)
+                const source = cssSources.join(EOL);
                 const cssBundleFilename = compilation.getPath(this.options.filename, {
                     chunk,
                     hash: compilation.hash,
@@ -411,6 +414,7 @@ export class StylableWebpackPlugin {
                             {
                                 includeCSSInJS: this.options.includeCSSInJS,
                                 experimentalHMR: this.options.experimentalHMR,
+                                diagnosticsMode: this.options.diagnosticsMode,
                                 ...this.options.generate,
                             }
                         );

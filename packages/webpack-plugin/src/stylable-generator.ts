@@ -93,8 +93,16 @@ export class StylableGenerator {
     private reportDiagnostics(meta: StylableMeta) {
         const transformReports = meta.transformDiagnostics ? meta.transformDiagnostics.reports : [];
         meta.diagnostics.reports.concat(transformReports).forEach((report) => {
-            const bucket =
-                report.type === 'warning' || this.options.alwaysWarn ? 'warnings' : 'errors';
+            const mode = this.options.diagnosticsMode;
+
+            let bucket = report.type === 'warning' ? ('warnings' as const) : ('errors' as const);
+
+            if (mode === 'loose') {
+                bucket = 'warnings';
+            } else if (mode === 'strict') {
+                bucket = 'errors';
+            }
+
             if (report.node) {
                 this.compilation[bucket].push(
                     report.node
