@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "description": "eslint plugin for Stylable usages",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@file-services/node": "^3.0.0",
-    "@stylable/core": "^3.8.0",
+    "@stylable/core": "^3.8.1",
     "@typescript-eslint/experimental-utils": "^3.6.1"
   },
   "devDependencies": {
