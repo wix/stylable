@@ -1,0 +1,21 @@
+name: npm
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: 'https://registry.npmjs.org/'
+      - run: npm i -g yarn@1
+      - run: yarn --frozen-lockfile
+      - run: npx pleb@2 publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
