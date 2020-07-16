@@ -5,5 +5,5 @@ module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({generate: { diagnosticsMode: 'loose' }}), new HtmlWebpackPlugin()],
+    plugins: [new StylableWebpackPlugin({ diagnosticsMode: 'loose' }), new HtmlWebpackPlugin()],
 };
