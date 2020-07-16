@@ -21,7 +21,7 @@ export interface StylableWebpackPluginOptions {
     experimentalHMR: boolean;
     runtimeMode: 'isolated' | 'shared' | 'external';
     globalRuntimeId: string;
-    onProcessMeta?: (meta: StylableMeta) => StylableMeta;
+    onProcessMeta?: (meta: StylableMeta, filePath: string) => StylableMeta;
     diagnosticsMode: 'auto' | 'strict' | 'loose';
     bootstrap: {
         autoInit: boolean;

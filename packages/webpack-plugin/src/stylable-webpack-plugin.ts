@@ -95,7 +95,7 @@ export class StylableWebpackPlugin {
             (compiler.inputFileSystem as any).fileSystem || (compiler.inputFileSystem as any),
             this.options.requireModule,
             '__',
-            (meta) => {
+            (meta, filePath) => {
                 if (this.options.unsafeBuildNamespace) {
                     try {
                         meta.namespace = require(meta.source + '.js').namespace;
@@ -114,7 +114,7 @@ export class StylableWebpackPlugin {
                     );
                 }
                 if (this.options.onProcessMeta) {
-                    return this.options.onProcessMeta(meta);
+                    return this.options.onProcessMeta(meta, filePath);
                 }
                 return meta;
             },
