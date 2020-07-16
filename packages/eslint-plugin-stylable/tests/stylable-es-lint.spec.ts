@@ -83,6 +83,10 @@ tester.run('basic unknown locals discovery', StylableLint, {
         },
         {
             filename,
+            code: "import {classes as XYZ} from './index.st.css'; const x = ''; const a = XYZ[x]",
+        },
+        {
+            filename,
             code: "import {keyframes as XYZ} from './index.st.css'; const a = XYZ.test",
         },
         {
