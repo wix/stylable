@@ -89,7 +89,7 @@ export default createRule({
                                 return;
                             }
 
-                            const accessor = getMemberAccessor(parent.property);
+                            const accessor = getMemberAccessor(parent.property, parent.computed);
 
                             if (accessor !== undefined && !exports[exportName][accessor]) {
                                 context.report({
@@ -141,8 +141,8 @@ function getStylableRequest(importStatement: esTree.ImportDeclaration) {
     return;
 }
 
-function getMemberAccessor(property: esTree.Expression) {
-    if (isIdentifier(property)) {
+function getMemberAccessor(property: esTree.Expression, isComputed: boolean) {
+    if (isIdentifier(property) && !isComputed) {
         return property.name;
     } else if (property.type === AST_NODE_TYPES.Literal && typeof property.value === 'string') {
         return property.value;
