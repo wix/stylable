@@ -58,7 +58,8 @@ export class ProjectRunner {
             await projectRunner.closeAllPages();
         });
 
-        after('destroy runner', async () => {
+        after('destroy runner', async function () {
+            this.timeout(20_000);
             await projectRunner.destroy();
         });
 
