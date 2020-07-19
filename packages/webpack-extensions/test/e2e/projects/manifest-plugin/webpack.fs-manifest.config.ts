@@ -10,7 +10,12 @@ const config: Configuration = {
     output: {
         library: 'metadata',
     },
-    plugins: [new StylableManifestPlugin({ package: require('./package.json') })],
+    plugins: [
+        new StylableManifestPlugin({
+            outputType: 'fs-manifest',
+            package: require('./package.json'),
+        }),
+    ],
     resolve: {
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
     },
