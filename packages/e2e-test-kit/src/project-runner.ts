@@ -103,8 +103,9 @@ export class ProjectRunner {
               };
     }
     public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        const config = require(join(this.projectDir, configName || 'webpack.config'));
         return {
-            ...require(join(this.projectDir, configName || 'webpack.config')),
+            ...(config.default || config),
             ...webpackOptions,
         };
     }

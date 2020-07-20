@@ -1,11 +1,11 @@
-import webpack from 'webpack';
-import { RawSource } from 'webpack-sources';
-import { createMetadataForStylesheet } from './create-metadata-stylesheet';
-import { Stylable } from '@stylable/core';
-import { resolveNamespace } from '@stylable/node';
-import { hashContent } from './hash-content-util';
 import { basename } from 'path';
 import { EOL } from 'os';
+import webpack from 'webpack';
+import { RawSource } from 'webpack-sources';
+import { Stylable } from '@stylable/core';
+import { resolveNamespace } from '@stylable/node';
+import { createMetadataForStylesheet } from './create-metadata-stylesheet';
+import { hashContent } from './hash-content-util';
 import { ComponentsMetadata } from './component-metadata-builder';
 import { Metadata, Manifest } from './types';
 
