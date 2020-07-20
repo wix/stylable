@@ -14,7 +14,7 @@
     "express": "^4.17.1",
     "memory-fs": "^0.5.0",
     "node-eval": "^2.0.0",
-    "puppeteer": "^5.1.0",
+    "puppeteer": "^5.2.0",
     "rimraf": "^3.0.2",
     "webpack": "^4.43.0"
   },
