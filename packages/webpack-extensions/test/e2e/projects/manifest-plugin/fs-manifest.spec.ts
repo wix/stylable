@@ -36,21 +36,6 @@ describe(`(${__dirname})`, () => {
         const commonHash = hashContent(commonContent);
         const compHash = hashContent(compContent);
 
-        // {
-        //     componentsIndex: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;} Button{}${EOL}`,
-        //     componentsEntries: { Button: `/${compHash}.st.css` },
-        //     stylesheetMapping: {
-        //         [`/${compHash}.st.css`]: compContent.replace(
-        //             './common.st.css',
-        //             `/${commonHash}.st.css`
-        //         ),
-        //         [`/${commonHash}.st.css`]: commonContent,
-        //     },
-        //     namespaceMapping: {
-        //         [`/${commonHash}.st.css`]: 'common911354609',
-        //         [`/${compHash}.st.css`]: 'Buttoncomp1090430236',
-        //     },
-        // }
         const fsMetadata: ComponentsMetadata = {
             name: 'manifest-plugin-test',
             version: '0.0.0-test',

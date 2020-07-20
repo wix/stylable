@@ -146,7 +146,7 @@ export class StylableManifestPlugin {
     }
 }
 
-/* This supports output of prevues version of the metadata plugin */
+/* This supports the output of previous version of the metadata plugin */
 const convertToFsMetadata = (
     manifest: Manifest,
     packages: Record<string, string>
