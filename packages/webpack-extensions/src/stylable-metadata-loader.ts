@@ -12,12 +12,6 @@ export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
 }
 
-export interface Metadata {
-    entry: string;
-    stylesheetMapping: Record<string, string>;
-    namespaceMapping?: Record<string, string>;
-}
-
 const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
     exposeNamespaceMapping: false,

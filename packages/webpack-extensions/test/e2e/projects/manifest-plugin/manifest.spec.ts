@@ -35,6 +35,8 @@ describe(`(${__dirname})`, () => {
         const compHash = hashContent(compContent);
 
         expect(JSON.parse(source)).to.deep.include({
+            name: 'manifest-plugin-test',
+            version: '0.0.0-test',
             componentsIndex: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;} Button{}${EOL}`,
             componentsEntries: { Button: `/${compHash}.st.css` },
             stylesheetMapping: {

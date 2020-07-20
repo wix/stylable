@@ -1,13 +1,18 @@
-import webpack from 'webpack';
-import { RawSource } from 'webpack-sources';
-import { createMetadataForStylesheet } from './create-metadata-stylesheet';
-import { Stylable } from '@stylable/core';
-import { resolveNamespace } from '@stylable/node';
-import { hashContent } from './hash-content-util';
 import { basename } from 'path';
 import { EOL } from 'os';
+import webpack from 'webpack';
+import { RawSource } from 'webpack-sources';
+import { Stylable } from '@stylable/core';
+import { resolveNamespace } from '@stylable/node';
+import { createMetadataForStylesheet } from './create-metadata-stylesheet';
+import { hashContent } from './hash-content-util';
+import { ComponentsMetadata } from './component-metadata-builder';
+import { Metadata, Manifest } from './types';
 
 export interface Options {
+    outputType: 'manifest' | 'fs-manifest';
+    package: { name: string; version: string };
+    packageAlias: Record<string, string>;
     contentHashLength?: number;
     exposeNamespaceMapping: boolean;
     resolveNamespace(namespace: string, filePath: string): string;
@@ -16,20 +21,13 @@ export interface Options {
     getOutputFileName(contentHash: string): string;
 }
 
-export interface Metadata {
-    entry: string;
-    stylesheetMapping: Record<string, string>;
-    namespaceMapping?: Record<string, string>;
-}
-
-export interface Manifest {
-    stylesheetMapping: Record<string, string>;
-    namespaceMapping: Record<string, string>;
-    componentsEntries: Record<string, string>;
-    componentsIndex: string;
-}
-
 const defaultOptions: Options = {
+    package: {
+        name: 'default-name',
+        version: '0.0.0-default',
+    },
+    outputType: 'manifest',
+    packageAlias: {},
     resolveNamespace,
     exposeNamespaceMapping: true,
     filterComponents(resourcePath) {
@@ -89,6 +87,8 @@ export class StylableManifestPlugin {
                 return manifest;
             },
             {
+                name: this.options.package.name,
+                version: this.options.package.version,
                 componentsIndex: '',
                 componentsEntries: {},
                 stylesheetMapping: {},
@@ -96,6 +96,20 @@ export class StylableManifestPlugin {
             }
         );
 
+        if (this.options.outputType === 'fs-manifest') {
+            this.emitJSONAsset(
+                convertToFsMetadata(manifest, this.options.packageAlias),
+                compilation
+            );
+        } else {
+            this.emitJSONAsset(manifest, compilation);
+        }
+    }
+
+    private emitJSONAsset(
+        manifest: Manifest | ComponentsMetadata,
+        compilation: webpack.compilation.Compilation
+    ) {
         const manifestContent = JSON.stringify(manifest);
 
         const contentHash = hashContent(manifestContent, this.options.contentHashLength);
@@ -131,3 +145,47 @@ export class StylableManifestPlugin {
         });
     }
 }
+
+/* This supports the output of previous version of the metadata plugin */
+const convertToFsMetadata = (
+    manifest: Manifest,
+    packages: Record<string, string>
+): ComponentsMetadata => {
+    const pkg = { name: manifest.name, version: manifest.version };
+
+    const normalizedMetadata: ComponentsMetadata = {
+        ...pkg,
+        fs: {
+            [`/${manifest.name}/package.json`]: {
+                content: JSON.stringify(pkg),
+            },
+            [`/${manifest.name}/index.st.css`]: {
+                metadata: {
+                    /* naive package name to css class might need to support more characters */
+                    namespace: manifest.name.replace(/[@/]/g, '_'),
+                },
+                content: manifest.componentsIndex,
+            },
+        },
+        components: {},
+        packages,
+    };
+    Object.keys(manifest.stylesheetMapping).forEach((filePath) => {
+        normalizedMetadata.fs[filePath] = {
+            metadata: {
+                namespace: manifest.namespaceMapping[filePath],
+            },
+            content: manifest.stylesheetMapping[filePath],
+        };
+    });
+    Object.keys(manifest.componentsEntries).forEach((id) => {
+        const stylesheetPath = manifest.componentsEntries[id];
+        const namespace = manifest.namespaceMapping[stylesheetPath];
+        normalizedMetadata.components[id] = {
+            id,
+            stylesheetPath,
+            namespace,
+        };
+    });
+    return normalizedMetadata;
+};
