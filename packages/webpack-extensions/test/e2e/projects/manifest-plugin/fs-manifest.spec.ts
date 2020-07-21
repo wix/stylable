@@ -47,12 +47,6 @@ describe(`(${__dirname})`, () => {
                 },
             },
             fs: {
-                [`/manifest-plugin-test/package.json`]: {
-                    content: JSON.stringify({
-                        name: 'manifest-plugin-test',
-                        version: '0.0.0-test',
-                    }),
-                },
                 [`/manifest-plugin-test/index.st.css`]: {
                     content: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;} Button{}${EOL}`,
                     metadata: {
