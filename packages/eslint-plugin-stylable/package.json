@@ -12,7 +12,7 @@
   "dependencies": {
     "@file-services/node": "^3.0.0",
     "@stylable/core": "^3.8.1",
-    "@typescript-eslint/experimental-utils": "^3.6.1"
+    "@typescript-eslint/experimental-utils": "^3.7.0"
   },
   "devDependencies": {
     "create-temp-directory": "^1.1.1"
