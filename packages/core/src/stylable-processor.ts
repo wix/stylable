@@ -114,9 +114,6 @@ export const processorWarnings = {
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
-    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) {
-        return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`;
-    },
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter';
     },
@@ -753,17 +750,11 @@ export class StylableProcessor {
 
 export function validateScopingSelector(
     atRule: postcss.AtRule,
-    { selector: scopingSelector, isSimpleSelector }: SRule,
+    { selector: scopingSelector }: SRule,
     diagnostics: Diagnostics
 ) {
     if (!scopingSelector) {
         diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
-    } else if (!isSimpleSelector) {
-        diagnostics.warn(
-            atRule,
-            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector),
-            { word: scopingSelector }
-        );
     }
 }
 
