@@ -1015,17 +1015,17 @@
     "@ts-tools/transpile" "^2.0.0"
     source-map-support "^0.5.16"
 
-"@ts-tools/transpile@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.0.0.tgz#619c3bad28d050d579e7d6b71016e129aad3741d"
-  integrity sha512-Vv9SlCOMPF926iXErWg63zexwkjqfz3eQrgvLnkoyT3g01LG9XPScSEnYzIKJKu2gV2l1TxBMEAXjP1nHn85AA==
+"@ts-tools/transpile@^2.0.0", "@ts-tools/transpile@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.0.1.tgz#ca9abbf6e8ea71cc77407af6a9e4cbabc60737d0"
+  integrity sha512-UYdSkW6HF87PytJG6n8h5hUMfpCuSDTKfrR/3rut1JpM9/AG8sR79D9TUO46aqYUCYpfUy9vwEAA4BkvS+Zs0A==
 
-"@ts-tools/webpack-loader@^1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-1.1.4.tgz#ae3dee6dfe5d47f8aa9ad8962154cfff7464167d"
-  integrity sha512-muXgR0FrGw2SOcwPJ1Pa4ghEWwxfLlI1+n8yUU/GptETDl2/4KTTPS91/Dyq7/iAIOc5Tkwr7ka1c4bWUxeLIw==
+"@ts-tools/webpack-loader@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-2.0.0.tgz#db869590dee793b6b37c76a0cf70b6f9e887a318"
+  integrity sha512-Cdy/WiEYGI0KfQBizC2BFR7U4zI7g+P69cvjiNHTs1KjU5SXc8UjIOjgRA3N7m1FRbbrRCgvy4rrdTj8Hs3t9w==
   dependencies:
-    "@ts-tools/transpile" "^2.0.0"
+    "@ts-tools/transpile" "^2.0.1"
     loader-utils "^2.0.0"
 
 "@types/anymatch@*":

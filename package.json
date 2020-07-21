@@ -19,7 +19,7 @@
     "@file-services/node": "^3.0.0",
     "@ts-tools/build": "^1.2.6",
     "@ts-tools/node": "^1.1.3",
-    "@ts-tools/webpack-loader": "^1.1.4",
+    "@ts-tools/webpack-loader": "^2.0.0",
     "@types/chai": "^4.2.11",
     "@types/chai-subset": "^1.3.3",
     "@types/csso": "^3.5.1",
