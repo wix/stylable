@@ -156,9 +156,6 @@ const convertToFsMetadata = (
     const normalizedMetadata: ComponentsMetadata = {
         ...pkg,
         fs: {
-            [`/${manifest.name}/package.json`]: {
-                content: JSON.stringify(pkg),
-            },
             [`/${manifest.name}/index.st.css`]: {
                 metadata: {
                     /* naive package name to css class might need to support more characters */
