@@ -1,5 +1,4 @@
 import {
-    expectWarnings,
     expectWarningsFromTransform,
     flatMatch,
     generateStylableResult,
