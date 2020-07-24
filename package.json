@@ -50,7 +50,7 @@
     "@types/tapable": "^1.0.6",
     "@types/validate-npm-package-name": "^3.0.0",
     "@types/webpack": "^4.41.21",
-    "@types/webpack-sources": "^1.4.0",
+    "@types/webpack-sources": "^1.4.1",
     "@types/yargs": "^15.0.5",
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
