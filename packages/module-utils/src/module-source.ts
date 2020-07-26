@@ -19,8 +19,8 @@ export function generateModuleSource(
     if (renderableOnly) {
         return `${createRenderableFunction}(${css}, ${depth}, ${moduleId});`;
     }
-    return `
-${beforeModule.join('\n')}
+    return `${beforeModule.join('\n')}
+
 ${exportsArgument} = ${createFunction}(
     ${namespace},
     ${localsExports},
@@ -64,8 +64,8 @@ export function createModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map((request) => `import ${JSON.stringify(request)}`),
-                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)}`,
+                    ...staticRequests.map((request) => `import ${JSON.stringify(request)};`),
+                    `import { $, ${importKey} } from ${JSON.stringify(runtimeRequest)};`,
                 ],
                 `$`,
                 `create`,
@@ -85,8 +85,8 @@ export function createModuleSource(
                 stylableResult,
                 moduleId,
                 [
-                    ...staticRequests.map((request) => `require(${JSON.stringify(request)})`),
-                    `const runtime = require(${JSON.stringify(runtimeRequest)})`,
+                    ...staticRequests.map((request) => `require(${JSON.stringify(request)});`),
+                    `const runtime = require(${JSON.stringify(runtimeRequest)});`,
                 ],
                 `runtime.$`,
                 `runtime.create`,
