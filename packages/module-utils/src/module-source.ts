@@ -28,8 +28,7 @@ ${exportsArgument} = ${createFunction}(
     ${depth},
     ${moduleId},
     ${renderer}
-);
-${afterModule}
+);${afterModule ? '\n\n' + afterModule : ''}
 `;
 }
 
