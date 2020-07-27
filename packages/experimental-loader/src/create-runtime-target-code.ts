@@ -9,7 +9,7 @@ export function createRuntimeTargetCode(namespace: string, mapping: StylableExpo
       ${JSON.stringify(mapping)},
       "",
       -1,
-      module.id,
+      module.id
   );
   `;
 }
