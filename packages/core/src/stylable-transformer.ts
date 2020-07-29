@@ -191,7 +191,7 @@ export class StylableTransformer {
         path: string[] = [],
         mixinTransform = false
     ) {
-        const keyframeMapping = this.scopeKeyframes(ast, meta);
+        const keyframeMapping = this.scopeKeyframes(ast, meta, mixinTransform);
         const cssVarsMapping = this.createCSSVarsMapping(ast, meta);
 
         ast.walkRules((rule) => {
@@ -395,25 +395,39 @@ export class StylableTransformer {
 
         return scopedName;
     }
-    public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
+    public scopeKeyframes(ast: postcss.Root, meta: StylableMeta, mixinTransform: boolean) {
         const keyframesExports: Record<string, KeyFrameWithNode> = {};
 
-        ast.walkAtRules(/keyframes$/, (atRule) => {
-            const name = atRule.params;
+        ast.walkAtRules(/keyframes$/, (keyFrameAtRule) => {
+            const name = keyFrameAtRule.params;
             if (~reservedKeyFrames.indexOf(name)) {
-                this.diagnostics.error(atRule, transformerWarnings.KEYFRAME_NAME_RESERVED(name), {
-                    word: name,
-                });
+                this.diagnostics.error(
+                    keyFrameAtRule,
+                    transformerWarnings.KEYFRAME_NAME_RESERVED(name),
+                    {
+                        word: name,
+                    }
+                );
             }
             if (!keyframesExports[name]) {
                 keyframesExports[name] = {
                     value: this.scope(name, meta.namespace),
-                    node: atRule,
+                    node: keyFrameAtRule,
                 };
             }
-            atRule.params = keyframesExports[name].value;
+            keyFrameAtRule.params = keyframesExports[name].value;
         });
 
+        if (mixinTransform) {
+            // override the keyframes for mixins since they dose not contain the @keyframes definition
+            meta.keyframes.forEach((keyFrameAtRule) => {
+                const name = keyFrameAtRule.params;
+                keyframesExports[name] = {
+                    value: this.scope(name, meta.namespace),
+                    node: keyFrameAtRule,
+                };
+            });
+        }
         ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
             const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach((node) => {
