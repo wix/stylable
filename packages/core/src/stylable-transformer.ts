@@ -419,7 +419,7 @@ export class StylableTransformer {
         });
 
         if (mixinTransform) {
-            // override the keyframes for mixins since they dose not contain the @keyframes definition
+            // override the keyframes for mixins since they do not contain the @keyframes definition
             meta.keyframes.forEach((keyFrameAtRule) => {
                 const name = keyFrameAtRule.params;
                 keyframesExports[name] = {
