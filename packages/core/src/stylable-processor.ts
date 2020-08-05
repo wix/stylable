@@ -75,6 +75,9 @@ export const processorWarnings = {
     REDECLARE_SYMBOL(name: string) {
         return `redeclare symbol "${name}"`;
     },
+    REDECLARE_SYMBOL_KEYFRAMES(name: string) {
+        return `redeclare keyframes symbol "${name}"`;
+    },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
     },
@@ -234,6 +237,13 @@ export class StylableProcessor {
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
+                        const { params: name } = atRule;
+                        this.checkRedeclareKeyframes(name, atRule);
+                        this.meta.mappedKeyframes[name] = {
+                            _kind: 'keyframes',
+                            alias: name,
+                            name: name,
+                        };
                     } else {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
@@ -419,6 +429,16 @@ export class StylableProcessor {
         }
     }
 
+    protected checkRedeclareKeyframes(symbolName: string, node: postcss.Node) {
+        const symbol = this.meta.mappedKeyframes[symbolName];
+        if (symbol) {
+            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
+                word: symbolName,
+            });
+        }
+        return symbol;
+    }
+
     protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
         if (isCompRoot(name) && !this.meta.elements[name]) {
             let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
@@ -487,6 +507,16 @@ export class StylableProcessor {
                 import: importDef,
                 context: path.dirname(this.meta.source),
             };
+        });
+        Object.keys(importDef.keyframes).forEach((name) => {
+            if (!this.checkRedeclareKeyframes(name, importDef.rule)) {
+                this.meta.mappedKeyframes[name] = {
+                    _kind: 'keyframes',
+                    alias: name,
+                    name: importDef.keyframes[name],
+                    import: importDef,
+                };
+            }
         });
     }
 
@@ -686,6 +716,7 @@ export class StylableProcessor {
             from: '',
             fromRelative: '',
             named: {},
+            keyframes: {},
             rule,
             context: path.dirname(this.meta.source),
         };
@@ -729,7 +760,11 @@ export class StylableProcessor {
                     }
                     break;
                 case valueMapping.named:
-                    importObj.named = parseNamed(decl.value);
+                    {
+                        const { keyframesMap, namedMap } = parseNamed(decl.value, decl, this.diagnostics);
+                        importObj.named = namedMap;
+                        importObj.keyframes = keyframesMap;
+                    }
                     break;
                 default:
                     this.diagnostics.warn(

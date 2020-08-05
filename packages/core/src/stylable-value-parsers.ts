@@ -13,6 +13,12 @@ export const valueParserWarnings = {
     CSS_MIXIN_FORCE_NAMED_PARAMS() {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
     },
+    INVALID_NAMED_IMPORT_AS(name: string) {
+        return `Invalid named import "as" with name "${name}"`;
+    },
+    INVALID_NESTED_KEYFRAMES(name: string) {
+        return `Invalid nested keyframes import "${name}"`;
+    },
 };
 
 export interface MappedStates {
@@ -117,20 +123,19 @@ export const SBTypesParsers = {
             types,
         };
     },
-    '-st-named'(value: string) {
-        const namedMap: { [key: string]: string } = {};
+    '-st-named'(value: string, node: postcss.Declaration, diagnostics: Diagnostics) {
+        const namedMap: Record<string, string> = {};
+        const keyframesMap: Record<string, string> = {};
         if (value) {
-            value.split(',').forEach((name) => {
-                const parts = name.trim().split(/\s+as\s+/);
-                if (parts.length === 1) {
-                    namedMap[parts[0]] = parts[0];
-                } else if (parts.length === 2) {
-                    namedMap[parts[1]] = parts[0];
-                }
-            });
+            handleNamedTokens(
+                postcssValueParser(value),
+                { namedMap, keyframesMap },
+                'namedMap',
+                node,
+                diagnostics
+            );
         }
-
-        return namedMap;
+        return { namedMap, keyframesMap };
     },
     '-st-mixin'(
         mixinNode: postcss.Declaration,
@@ -171,6 +176,51 @@ export const SBTypesParsers = {
         return mixins;
     },
 };
+
+function handleNamedTokens(
+    tokens: ParsedValue,
+    buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
+    key: keyof typeof buckets = 'namedMap',
+    node: postcss.Declaration,
+    diagnostics: Diagnostics
+) {
+    const { nodes } = tokens;
+    for (let i = 0; i < nodes.length; i++) {
+        const token = nodes[i];
+        if (token.type === 'word') {
+            const space = nodes[i + 1];
+            const as = nodes[i + 2];
+            const spaceAfter = nodes[i + 3];
+            const asName = nodes[i + 4];
+            if (isImportAs(space, as)) {
+                if (spaceAfter?.type === 'space' && asName?.type === 'word') {
+                    buckets[key][asName.value] = token.value;
+                    i += 4; //ignore next 4 tokens
+                } else {
+                    i += !asName ? 3 : 2;
+                    diagnostics.warn(node, valueParserWarnings.INVALID_NAMED_IMPORT_AS(token.value));
+                    continue;
+                }
+            } else {
+                buckets[key][token.value] = token.value;
+            }
+        } else if (token.type === 'function' && token.value === 'keyframes') {
+            if (key === 'keyframesMap') {
+                diagnostics.warn(
+                    node,
+                    valueParserWarnings.INVALID_NESTED_KEYFRAMES(
+                        postcssValueParser.stringify(token)
+                    )
+                );
+            }
+            handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);
+        }
+    }
+}
+
+function isImportAs(space: ParsedValue, as: ParsedValue) {
+    return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
+}
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
