@@ -560,6 +560,93 @@ describe('Exports to js', () => {
                 name: 'entry__name',
             });
         });
+        it('contain imported keyframe', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: keyframes(name);
+                            }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @keyframes name {
+
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(cssExports.keyframes).to.eql({
+                name: 'imported__name',
+            });
+        });
+        it('contain imported keyframe as alias', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: keyframes(name as myName);
+                            }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @keyframes name {
+
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(cssExports.keyframes).to.eql({
+                myName: 'imported__name',
+            });
+        });
+        it('local keyframes override imported ones', () => {
+            const cssExports = generateStylableExports({
+                entry: '/entry.st.css',
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: "./imported.st.css";
+                                -st-named: keyframes(name);
+                            }
+                            @keyframes name {
+
+                            }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @keyframes name {
+
+                            }
+                        `,
+                    },
+                },
+            });
+
+            expect(cssExports.keyframes).to.eql({
+                name: 'entry__name',
+            });
+        });
     });
 
     describe('css vars', () => {
