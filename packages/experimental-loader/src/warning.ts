@@ -2,6 +2,8 @@
 export class Warning extends Error {
     constructor(warning: { text: string; line: number; column: number }) {
         super(String(warning));
+        Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
+
         const { text, line, column } = warning;
         this.name = 'Warning'; // Based on https://github.com/postcss/postcss/blob/master/lib/warning.es6#L74
         // We don't need `plugin` properties.
@@ -28,6 +30,7 @@ interface PostCSSError {
 export class CssSyntaxError extends Error {
     constructor(error: PostCSSError) {
         super(error.toString());
+        Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
 
         const { reason, line, column } = error;
 

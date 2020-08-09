@@ -12,6 +12,7 @@ import { createRuntimeTargetCode } from './create-runtime-target-code';
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const decache = require('decache');
+const CSS_LOADER_API = require.resolve('css-loader/dist/runtime/api');
 export let stylable: Stylable;
 
 export interface LoaderOptions {
@@ -92,7 +93,7 @@ const stylableLoader: loader.Loader = function (content) {
     const urlPluginImports: LoaderImport[] = [
         {
             importName: '___CSS_LOADER_API_IMPORT___',
-            url: stringifyRequest(this, require.resolve('css-loader/dist/runtime/api')),
+            url: stringifyRequest(this, CSS_LOADER_API),
             index: -1,
         },
     ];
