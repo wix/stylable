@@ -1,9 +1,10 @@
+import { loader } from 'webpack';
+import postcss from 'postcss';
+import decache from 'decache';
 import { Stylable, processNamespace, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning, CssSyntaxError } from './warning';
-import postcss from 'postcss';
 import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
@@ -11,8 +12,8 @@ import { createRuntimeTargetCode } from './create-runtime-target-code';
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
-const decache = require('decache');
-const CSS_LOADER_API = require.resolve('css-loader/dist/runtime/api');
+const cssLoaderRuntimeApiPath = require.resolve('css-loader/dist/runtime/api');
+
 export let stylable: Stylable;
 
 export interface LoaderOptions {
@@ -93,7 +94,7 @@ const stylableLoader: loader.Loader = function (content) {
     const urlPluginImports: LoaderImport[] = [
         {
             importName: '___CSS_LOADER_API_IMPORT___',
-            url: stringifyRequest(this, CSS_LOADER_API),
+            url: stringifyRequest(this, cssLoaderRuntimeApiPath),
             index: -1,
         },
     ];
