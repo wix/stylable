@@ -2,7 +2,7 @@ import { Stylable, processNamespace, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { loader } from 'webpack';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
-import { Warning } from './warning';
+import { Warning, CssSyntaxError } from './warning';
 import postcss from 'postcss';
 import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
@@ -10,9 +10,9 @@ import { createRuntimeTargetCode } from './create-runtime-target-code';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
-const { getImportCode, getModuleCode } = require('css-loader/dist/utils');
+const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const decache = require('decache');
-
+const CSS_LOADER_API = require.resolve('css-loader/dist/runtime/api');
 export let stylable: Stylable;
 
 export interface LoaderOptions {
@@ -31,17 +31,15 @@ const defaultOptions: LoaderOptions = {
     },
 };
 interface UrlReplacement {
-    pluginName: string;
-    type: 'url-replacement';
-    value: { replacementName: string; importName: string; hash: string; needQuotes: boolean };
+    replacementName: string;
+    importName: string;
+    hash: string;
+    needQuotes: boolean;
 }
 interface LoaderImport {
-    pluginName: string;
-    type: 'import';
-    value: {
-        importName: string;
-        url: string;
-    };
+    importName: string;
+    url: string;
+    index: number;
 }
 
 const timedCacheOptions = { useTimer: true, timeout: 1000 };
@@ -92,11 +90,29 @@ const stylableLoader: loader.Loader = function (content) {
         return callback(null, createRuntimeTargetCode(res.meta.namespace, res.exports));
     }
 
-    const imports: LoaderImport[] = [];
+    const urlPluginImports: LoaderImport[] = [
+        {
+            importName: '___CSS_LOADER_API_IMPORT___',
+            url: stringifyRequest(this, CSS_LOADER_API),
+            index: -1,
+        },
+    ];
     const urlReplacements: UrlReplacement[] = [];
+
+    const urlResolver = (this as any).getResolve({
+        conditionNames: ['asset'],
+        mainFields: ['asset'],
+        mainFiles: [],
+        extensions: [],
+    });
 
     const plugins = [
         urlParser({
+            imports: urlPluginImports,
+            replacements: urlReplacements,
+            context: this.context,
+            rootContext: this.rootContext,
+            resolver: urlResolver,
             filter: (value: string) => isUrlRequest(value) && filterUrls(value, this),
             urlHandler: (url: string) => stringifyRequest(this, url),
         }),
@@ -117,31 +133,11 @@ const stylableLoader: loader.Loader = function (content) {
                 this.emitWarning(new Warning(warning));
             }
 
-            for (const message of result.messages) {
-                switch (message.type) {
-                    case 'import':
-                        imports.push(message.value);
-                        break;
-                    case 'url-replacement':
-                        urlReplacements.push(message.value);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            const esModule = false;
-
-            const importCode = getImportCode(this, 'full', imports, esModule);
-            const moduleCode = getModuleCode(
-                result,
-                'full',
-                false /* sourceMap */,
-                [] /* apiImport */,
-                urlReplacements,
-                [] /* icssReplacement */,
-                esModule
-            );
+            const importCode = getImportCode(urlPluginImports.sort(sort), { esModule: false });
+            const moduleCode = getModuleCode(result, [], urlReplacements, {
+                modules: {},
+                sourceMap: false,
+            });
 
             return callback(
                 null,
@@ -150,14 +146,25 @@ const stylableLoader: loader.Loader = function (content) {
                 ${moduleCode}
 
                 // Patch exports with custom stylable API
-                exports.locals = ${JSON.stringify([res.meta.namespace, res.exports])}
+                ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([
+                    res.meta.namespace,
+                    res.exports,
+                ])}
 
-                module.exports = exports;
+                module.exports = ___CSS_LOADER_EXPORT___;
                 `
             );
         })
-        .catch(() => {
-            throw new Error('Failed to process css urls');
+        .catch((error) => {
+            if (error.file) {
+                this.addDependency(error.file);
+            }
+
+            callback(
+                error.name === 'CssSyntaxError'
+                    ? new CssSyntaxError(error)
+                    : new Error('Failed to process css urls. caused by:\n' + error.stack)
+            );
         });
 };
 

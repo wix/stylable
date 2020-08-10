@@ -59,7 +59,7 @@
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
     "create-temp-directory": "^1.1.1",
-    "css-loader": "^3.6.0",
+    "css-loader": "^4.2.1",
     "eslint": "^7.6.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
