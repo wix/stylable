@@ -27,18 +27,14 @@ declare module 'postcss-safe-parser' {
 }
 
 declare module 'postcss-selector-matches/dist/replaceRuleSelector' {
-    function replaceRuleSelector(
+    // library is esm transpiled to cjs! has an actual default export.
+    export default function replaceRuleSelector(
         rule: import('postcss').Rule,
         options: { lineBreak: boolean }
     ): string;
-    export = replaceRuleSelector;
 }
 
 declare module 'node-eval' {
-    function nodeEval(
-        source: string,
-        filename: string,
-        options?: { require?(id: string): any }
-    ): any;
+    function nodeEval(content: string, filename: string, context?: object): any;
     export = nodeEval;
 }
