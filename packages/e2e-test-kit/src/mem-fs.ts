@@ -1,6 +1,6 @@
-const MemoryFS = require('memory-fs');
+import MemoryFS from 'memory-fs';
 
-export function memoryFS() {
+export function memoryFS(): any {
     const mfs = new MemoryFS();
     const lastModified: { [k: string]: Date } = {};
 
@@ -57,7 +57,7 @@ export function memoryFS() {
         return stats;
     }
 
-    function wrap<T extends (...args: any[]) => any>(method: string, fn: T) {
+    function wrap<T extends (...args: any[]) => any>(method: keyof MemoryFS, fn: T) {
         const oldFn = mfs[method];
         mfs[method] = (...args: any[]) => {
             return fn(oldFn, args);

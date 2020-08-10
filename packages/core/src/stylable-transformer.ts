@@ -1,6 +1,7 @@
 import { basename } from 'path';
 import postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
 
 import { FileProcessor } from './cached-process-file';
@@ -45,8 +46,6 @@ import { valueMapping } from './stylable-value-parsers';
 
 const { hasOwnProperty } = Object.prototype;
 const USE_SCOPE_SELECTOR_2 = true;
-
-const isVendorPrefixed = require('is-vendor-prefixed');
 
 export interface ResolvedElement {
     name: string;

@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 import { isAbsolute } from 'path';
 import postcss from 'postcss';
+import replaceRuleSelector from 'postcss-selector-matches/dist/replaceRuleSelector';
 import { Diagnostics } from './diagnostics';
 import {
     DeclStylableProps,
@@ -21,7 +22,6 @@ import {
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
 import { valueMapping } from './stylable-value-parsers';
-const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -49,7 +49,7 @@ export function expandCustomSelectors(
             }
         );
 
-        return (rule.selector = transformMatchesOnRule(rule, false) as string);
+        return (rule.selector = transformMatchesOnRule(rule, false));
     }
     return rule.selector;
 }

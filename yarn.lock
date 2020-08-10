@@ -1065,6 +1065,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/css-selector-tokenizer@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@types/css-selector-tokenizer/-/css-selector-tokenizer-0.7.0.tgz#cc24af7d13199f9bf999d070ecb7194d67cf9c0d"
+  integrity sha512-b3E1Wkvrcs3yFwkOsuo6cbO1YNt1LpBRBlBD7hQS7HlM0U2WNDW7tifZ58PEZ2J62Eoot4I5zSyssEtufvSKKg==
+
 "@types/css-tree@*":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@types/css-tree/-/css-tree-1.0.3.tgz#69112ebce09f582c9e0f32a46de2598930847cd7"

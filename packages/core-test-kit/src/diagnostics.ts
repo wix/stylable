@@ -1,7 +1,7 @@
-import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
 import { expect } from 'chai';
+import deindent from 'deindent';
+import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
 import { Config, generateFromMock } from './generate-test-util';
-const deindent = require('deindent');
 
 export interface Diagnostic {
     severity?: 'warning' | 'error';
