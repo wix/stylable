@@ -35,7 +35,7 @@ export function webpackTest({ files, config }: any) {
     config.context = resolve('/');
 
     config.plugins.unshift({
-        apply(compiler: any) {
+        apply(compiler: webpack.Compiler) {
             compiler.inputFileSystem = memfs;
             compiler.outputFileSystem = memfs;
         },

@@ -1,6 +1,21 @@
 import MemoryFS from 'memory-fs';
 
-export function memoryFS(): any {
+export interface CustomMemoryFs extends MemoryFS {
+    statSync(
+        path: string
+    ): {
+        isFile: () => boolean;
+        isDirectory: () => boolean;
+        isBlockDevice: () => boolean;
+        isCharacterDevice: () => boolean;
+        isSymbolicLink: () => boolean;
+        isFIFO: () => boolean;
+        isSocket: () => boolean;
+        mtime: Date;
+    };
+}
+
+export function memoryFS(): CustomMemoryFs {
     const mfs = new MemoryFS();
     const lastModified: { [k: string]: Date } = {};
 
@@ -64,5 +79,5 @@ export function memoryFS(): any {
         };
     }
 
-    return mfs;
+    return mfs as CustomMemoryFs;
 }
