@@ -1,4 +1,4 @@
-const selectorTokenizer = require('css-selector-tokenizer');
+import cssSelectorTokenizer from 'css-selector-tokenizer';
 
 export interface SelectorQuery {
     _type: string;
@@ -59,7 +59,7 @@ export function parseSelector(
     const res: SelectorQuery[] = [];
     const textArr: string[] = [];
     let cursorTarget = { focusChunk: {} as any, text: textArr, index: -1, internalIndex: 0 };
-    const tokenizedSelectors = selectorTokenizer.parse(inputSelector);
+    const tokenizedSelectors = cssSelectorTokenizer.parse(inputSelector);
 
     if (tokenizedSelectors.type !== 'selectors') {
         throw new Error('not handled');

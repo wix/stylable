@@ -1,4 +1,4 @@
-const { expect } = require('chai');
+import { expect } from 'chai';
 import { create } from '../../src/css-runtime-stylesheet';
 
 describe('Stylable runtime stylesheet', () => {

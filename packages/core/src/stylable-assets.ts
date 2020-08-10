@@ -1,9 +1,10 @@
 import path from 'path';
 import postcss from 'postcss';
 import isUrl from 'is-url-superb';
+import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { ParsedValue } from './types';
 
-const { parseValues, stringifyValues } = require('css-selector-tokenizer');
+const { parseValues, stringifyValues } = cssSelectorTokenizer;
 
 export type OnUrlCallback = (node: ParsedValue) => void;
 
@@ -45,8 +46,8 @@ export function processDeclarationUrls(
     transform: boolean
 ) {
     const ast = parseValues(decl.value);
-    ast.nodes.forEach((node: ParsedValue) => {
-        node.nodes.forEach((node: ParsedValue) => findUrls(node, onUrl));
+    ast.nodes.forEach((node) => {
+        node.nodes.forEach((node) => findUrls(node as ParsedValue, onUrl));
     });
     if (transform) {
         decl.value = stringifyValues(ast);
