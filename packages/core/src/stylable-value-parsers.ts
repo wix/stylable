@@ -1,5 +1,8 @@
 import postcss from 'postcss';
-import postcssValueParser from 'postcss-value-parser';
+import postcssValueParser, {
+    ParsedValue as PostCSSParsedValue,
+    FunctionNode,
+} from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
@@ -177,7 +180,7 @@ export const SBTypesParsers = {
 };
 
 function handleNamedTokens(
-    tokens: ParsedValue,
+    tokens: PostCSSParsedValue | FunctionNode,
     buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
     key: keyof typeof buckets = 'namedMap',
     node: postcss.Declaration,
@@ -197,7 +200,10 @@ function handleNamedTokens(
                     i += 4; //ignore next 4 tokens
                 } else {
                     i += !asName ? 3 : 2;
-                    diagnostics.warn(node, valueParserWarnings.INVALID_NAMED_IMPORT_AS(token.value));
+                    diagnostics.warn(
+                        node,
+                        valueParserWarnings.INVALID_NAMED_IMPORT_AS(token.value)
+                    );
                     continue;
                 }
             } else {
