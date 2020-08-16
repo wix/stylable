@@ -4,7 +4,7 @@ const { normalize } = require('path');
 if (__filename.endsWith(normalize('/packages/eslint-plugin-stylable/index.js'))) {
     require('@ts-tools/node/r');
     require('tsconfig-paths/register');
-    module.exports = require('./src/index').default;
+    module.exports = require('./src/index').stylableEslintPlugin;
 } else {
-    module.exports = require('./cjs/index').default;
+    module.exports = require('./cjs/index').stylableEslintPlugin;
 }
