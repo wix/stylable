@@ -2,6 +2,7 @@ import path from 'path';
 import ts from 'typescript';
 import postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
@@ -66,8 +67,6 @@ import {
     SelectorInternalChunk,
     SelectorQuery,
 } from './utils/selector-analyzer';
-
-const selectorTokenizer = require('css-selector-tokenizer');
 
 function findLast<T>(
     arr: T[],
@@ -613,19 +612,20 @@ export class Provider {
     ): SignatureHelp | null {
         let word = '';
         const posChar = pos.character + 1;
-        const parsed = selectorTokenizer.parse(line);
+        const parsed = cssSelectorTokenizer.parse(line);
         if (parsed.nodes[0].type === 'selector') {
             let length = 0;
-            parsed.nodes[0].nodes.forEach((node: any) => {
+            parsed.nodes[0].nodes.forEach((node) => {
                 if (node.type === 'invalid') {
                     return; // TODO: refactor - handles places outside of a selector
                 } else if (node.type === 'spacing') {
                     length += node.value.length;
-                } else {
+                } else if (node.name !== undefined) {
                     length += node.name.length + 1;
                     if (
                         node.type === 'pseudo-class' &&
                         posChar > length + 1 &&
+                        node.content !== undefined &&
                         posChar <= length + 2 + node.content.length
                     ) {
                         word = node.name;

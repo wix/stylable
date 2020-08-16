@@ -1,9 +1,9 @@
+import { basename } from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { StylableMetadataPlugin } from '@stylable/webpack-extensions';
 import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
-import { basename } from 'path';
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-module.exports = {
+export default {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',

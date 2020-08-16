@@ -1,6 +1,7 @@
 import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
 import { metadataLoaderLocation } from '@stylable/webpack-extensions';
 import { Configuration } from 'webpack';
+
 const config: Configuration = {
     mode: 'development',
     context: __dirname,
@@ -28,4 +29,4 @@ const config: Configuration = {
     },
 };
 
-module.exports = config;
+export default config;

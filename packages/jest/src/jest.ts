@@ -1,6 +1,6 @@
+import fs from 'fs';
 import { StylableConfig } from '@stylable/core';
 import { Options, stylableModuleFactory } from '@stylable/module-utils';
-import fs from 'fs';
 
 const stylableRuntimePath = require.resolve('@stylable/runtime');
 const stylableCorePath = require.resolve('@stylable/core');
