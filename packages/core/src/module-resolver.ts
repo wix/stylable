@@ -1,6 +1,6 @@
 // importing the factory directly, as we feed it our own fs, and don't want graceful-fs to be implicitly imported
 // this allows @stylable/core to be bundled for browser usage without special custom configuration
-const ResolverFactory = require('enhanced-resolve/lib/ResolverFactory') as typeof import('enhanced-resolve').ResolverFactory;
+import ResolverFactory from 'enhanced-resolve/lib/ResolverFactory';
 
 import { ModuleResolver } from './types';
 import { MinimalFS } from './cached-process-file';

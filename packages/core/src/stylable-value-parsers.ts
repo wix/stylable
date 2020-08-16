@@ -1,10 +1,9 @@
 import postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { ParsedValue, StateParsedValue } from './types';
-
-const postcssValueParser = require('postcss-value-parser');
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -284,16 +283,18 @@ export function getFormatterArgs(
     function checkEmptyArg() {
         if (currentArg.trim() === '' && _reportWarning) {
             _reportWarning(
-                `${postcssValueParser.stringify(node)}: argument at index ${argIndex} is empty`
+                `${postcssValueParser.stringify(
+                    node as postcssValueParser.Node
+                )}: argument at index ${argIndex} is empty`
             );
         }
     }
 }
 
 export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
-    return postcssValueParser.stringify(nodes, (node: ParsedValue) => {
-        if (node.resolvedValue !== undefined) {
-            return node.resolvedValue;
+    return postcssValueParser.stringify(nodes as postcssValueParser.Node, (node) => {
+        if ((node as ParsedValue).resolvedValue !== undefined) {
+            return (node as ParsedValue).resolvedValue as string | undefined;
         } else {
             // TODO: warn
             return undefined;

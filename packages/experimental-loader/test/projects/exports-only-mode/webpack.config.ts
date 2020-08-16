@@ -1,13 +1,13 @@
-import HTMLWebpackPlugin from 'html-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { stylableLoaders } from '../../../src';
 import { noCollisionNamespace } from '@stylable/core';
 
-module.exports = {
+export default {
     mode: 'development',
     entry: './index.js',
     context: __dirname,
     devtool: false,
-    plugins: [new HTMLWebpackPlugin()],
+    plugins: [new HtmlWebpackPlugin()],
     module: {
         rules: [
             {
