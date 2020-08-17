@@ -16,7 +16,7 @@ Imported **Stylable** stylesheets contain minimal runtime code to help define th
 ```
 
 ```javascript
-/* index.jsx - stylesheet's runtime api */
+/* index.jsx - stylesheet runtime api */
 import { 
     style,    // runtime utility function 
     st,       // alias for the style function above
@@ -24,6 +24,7 @@ import {
     vars,     // css variables mapping
     stVars,   // stylable build-time variable values
     cssStates // utility function for setting stylable states
+    keyframes // keyframes mapping
 }  from "style.st.css";
 ```
 
