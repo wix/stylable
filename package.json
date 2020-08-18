@@ -39,7 +39,7 @@
     "@types/lodash.upperfirst": "^4.3.6",
     "@types/memory-fs": "^0.3.2",
     "@types/mini-css-extract-plugin": "^0.9.1",
-    "@types/mocha": "^8.0.2",
+    "@types/mocha": "^8.0.3",
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",
     "@types/puppeteer": "^3.0.1",
