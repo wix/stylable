@@ -1155,6 +1155,51 @@ describe('Stylable postcss transform (Scoping)', () => {
             );
         });
 
+        it('scope imported animation and animation name', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './imported.st.css';
+                                -st-named: keyframes(anim1, anim2 as anim3);
+                            }
+
+                            .selector {
+                                animation: 2s anim1 infinite, 1s anim3 infinite;
+                                animation-name: anim1;
+                            }
+
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @keyframes anim1 {
+                                from {}
+                                to {}
+                            }
+
+                            @keyframes anim2 {
+                                from {}
+                                to {}
+                            }
+
+                        `,
+                    },
+                },
+            });
+
+            expect((result.nodes![0] as postcss.Rule).nodes![0].toString()).to.equal(
+                'animation: 2s imported__anim1 infinite, 1s imported__anim2 infinite'
+            );
+            expect((result.nodes![0] as postcss.Rule).nodes![1].toString()).to.equal(
+                'animation-name: imported__anim1'
+            );
+        });
+
         it('not scope rules that are child of keyframe atRule', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,

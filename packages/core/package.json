@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "3.8.1",
+  "version": "3.9.0",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,7 +12,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "css-selector-tokenizer": "^0.7.2",
+    "css-selector-tokenizer": "^0.7.3",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^4.3.0",
     "is-url-superb": "^4.0.0",

@@ -17,6 +17,7 @@ export class StylableMeta {
     public classes: Record<string, ClassSymbol>;
     public elements: Record<string, ElementSymbol>;
     public mappedSymbols: Record<string, StylableSymbol>;
+    public mappedKeyframes: Record<string, KeyframesSymbol>;
     public customSelectors: Record<string, string>;
     public urls: string[];
     public parent?: StylableMeta;
@@ -49,6 +50,7 @@ export class StylableMeta {
         this.mappedSymbols = {
             [RESERVED_ROOT_NAME]: rootSymbol,
         };
+        this.mappedKeyframes = {};
         this.customSelectors = {};
         this.urls = [];
         this.scopes = [];
@@ -62,6 +64,7 @@ export interface Imported {
     from: string;
     defaultExport: string;
     named: Record<string, string>;
+    keyframes: Record<string, string>;
     rule: postcss.Rule;
     fromRelative: string;
     context: string;
@@ -104,13 +107,20 @@ export interface VarSymbol {
     node: postcss.Node;
 }
 
+export interface KeyframesSymbol {
+    _kind: 'keyframes';
+    alias: string;
+    name: string;
+    import?: Imported;
+}
+
 export interface CSSVarSymbol {
     _kind: 'cssVar';
     name: string;
     global?: boolean;
 }
 
-export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol;
+export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol | KeyframesSymbol;
 
 export interface RefedMixin {
     mixin: MixinValue;

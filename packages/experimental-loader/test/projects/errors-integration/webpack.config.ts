@@ -1,6 +1,6 @@
 import { stylableLoaders } from '../../../src';
 
-module.exports = {
+export default {
     mode: 'development',
     entry: './index.js',
     context: __dirname,

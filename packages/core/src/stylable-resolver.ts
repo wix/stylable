@@ -47,7 +47,9 @@ export class StylableResolver {
             let meta;
             try {
                 meta = this.fileProcessor.process(from, false, context);
-                symbol = !name ? meta.mappedSymbols[meta.root] : meta.mappedSymbols[name];
+                symbol = !name
+                    ? meta.mappedSymbols[meta.root]
+                    : meta.mappedSymbols[name] || meta.mappedKeyframes[name];
             } catch (e) {
                 return null;
             }
@@ -71,7 +73,12 @@ export class StylableResolver {
     }
     public resolve(maybeImport: StylableSymbol | undefined): CSSResolve | JSResolve | null {
         if (!maybeImport || maybeImport._kind !== 'import') {
-            if (maybeImport && maybeImport._kind !== 'var' && maybeImport._kind !== 'cssVar') {
+            if (
+                maybeImport &&
+                maybeImport._kind !== 'var' &&
+                maybeImport._kind !== 'cssVar' &&
+                maybeImport._kind !== 'keyframes'
+            ) {
                 if (maybeImport.alias && !maybeImport[valueMapping.extends]) {
                     maybeImport = maybeImport.alias;
                 } else if (maybeImport[valueMapping.extends]) {
@@ -87,6 +94,30 @@ export class StylableResolver {
             return null;
         }
         return this.resolveImport(maybeImport);
+    }
+    public resolveKeyframes(meta: StylableMeta, name: string) {
+        const initSymbol = meta.mappedKeyframes[name];
+        let current = {
+            meta,
+            symbol: initSymbol,
+        };
+
+        while (current.symbol?.import) {
+            const res = this.resolveImported(current.symbol.import, current.symbol.name);
+            if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
+                const { meta, symbol } = res;
+                current = {
+                    meta,
+                    symbol,
+                };
+            } else {
+                return undefined;
+            }
+        }
+        if (current.symbol) {
+            return current;
+        }
+        return undefined;
     }
     public deepResolve(
         maybeImport: StylableSymbol | undefined,

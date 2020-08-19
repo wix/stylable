@@ -1,6 +1,7 @@
 import { basename } from 'path';
 import postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
 
 import { FileProcessor } from './cached-process-file';
@@ -45,8 +46,6 @@ import { valueMapping } from './stylable-value-parsers';
 
 const { hasOwnProperty } = Object.prototype;
 const USE_SCOPE_SELECTOR_2 = true;
-
-const isVendorPrefixed = require('is-vendor-prefixed');
 
 export interface ResolvedElement {
     name: string;
@@ -282,12 +281,10 @@ export class StylableTransformer {
         }
     }
     public exportKeyframes(
-        keyframeMapping: Record<string, KeyFrameWithNode>,
+        keyframeMapping: Record<string, string>,
         keyframesExport: Record<string, string>
     ) {
-        for (const keyframeName of Object.keys(keyframeMapping)) {
-            keyframesExport[keyframeName] = keyframeMapping[keyframeName].value;
-        }
+        Object.assign(keyframesExport, keyframeMapping);
     }
     public exportRootClass(meta: StylableMeta, classesExport: Record<string, string>) {
         const classExports: Record<string, string> = {};
@@ -387,8 +384,6 @@ export class StylableTransformer {
         return scopedName;
     }
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
-        const keyframesExports: Record<string, KeyFrameWithNode> = {};
-
         ast.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
             if (~reservedKeyFrames.indexOf(name)) {
@@ -396,21 +391,24 @@ export class StylableTransformer {
                     word: name,
                 });
             }
-            if (!keyframesExports[name]) {
-                keyframesExports[name] = {
-                    value: this.scope(name, meta.namespace),
-                    node: atRule,
-                };
+            atRule.params = this.scope(name, meta.namespace);
+        });
+
+        const keyframesExports: Record<string, string> = {};
+
+        Object.keys(meta.mappedKeyframes).forEach((key) => {
+            const res = this.resolver.resolveKeyframes(meta, key);
+            if (res) {
+                keyframesExports[key] = this.scope(res.symbol.alias, res.meta.namespace);
             }
-            atRule.params = keyframesExports[name].value;
         });
 
         ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
             const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach((node) => {
-                const alias = keyframesExports[node.value] && keyframesExports[node.value].value;
-                if (node.type === 'word' && Boolean(alias)) {
-                    node.value = alias;
+                const scoped = keyframesExports[node.value];
+                if (scoped) {
+                    node.value = scoped;
                 }
             });
             decl.value = parsed.toString();

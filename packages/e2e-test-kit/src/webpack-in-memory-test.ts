@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
+import webpack from 'webpack';
+import nodeEval from 'node-eval';
 import { memoryFS } from './mem-fs';
-const webpack = require('webpack');
-const _eval = require('node-eval');
 
 const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
 const content = readdirSync(runtimeDir).map((f) => {
@@ -35,7 +35,7 @@ export function webpackTest({ files, config }: any) {
     config.context = resolve('/');
 
     config.plugins.unshift({
-        apply(compiler: any) {
+        apply(compiler: webpack.Compiler) {
             compiler.inputFileSystem = memfs;
             compiler.outputFileSystem = memfs;
         },
@@ -47,7 +47,7 @@ export function webpackTest({ files, config }: any) {
 }
 
 export function evalCssJSModule(source: string, filename = 'file.js') {
-    return _eval(source, filename, {
+    return nodeEval(source, filename, {
         require(id: string) {
             return { id };
         },
