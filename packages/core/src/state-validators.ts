@@ -181,7 +181,7 @@ export const systemValidators: Record<string, StateParamType> = {
         },
         subValidators: {
             min: (value: string, minValue: string) => {
-                const valid = Number(value) > Number(minValue);
+                const valid = Number(value) >= Number(minValue);
 
                 return {
                     res: value,
@@ -191,7 +191,7 @@ export const systemValidators: Record<string, StateParamType> = {
                 };
             },
             max: (value: string, maxValue: string) => {
-                const valid = Number(value) < Number(maxValue);
+                const valid = Number(value) <= Number(maxValue);
 
                 return {
                     res: value,

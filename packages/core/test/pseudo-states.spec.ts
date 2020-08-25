@@ -1254,6 +1254,50 @@ describe('pseudo-states', () => {
                             1: '.entry__my-class[class~="entry---state1-2-40"] {}',
                         });
                     });
+
+                    it('should not warn when value equals to min validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(min(3)));
+                                    }
+                                    |.my-class:state1(3)| {}
+                                    `,
+                                },
+                            },
+                        };
+
+                        const res = expectWarningsFromTransform(config, []);
+                        expect(res).to.have.styleRules({
+                            1: '.entry__my-class[class~="entry---state1-1-3"] {}',
+                        });
+                    });
+
+                    it('should not warn when value equals to max validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class{
+                                        -st-states: state1(number(max(3)));
+                                    }
+                                    |.my-class:state1(3)| {}
+                                    `,
+                                },
+                            },
+                        };
+
+                        const res = expectWarningsFromTransform(config, []);
+                        expect(res).to.have.styleRules({
+                            1: '.entry__my-class[class~="entry---state1-1-3"] {}',
+                        });
+                    });
                 });
             });
 
