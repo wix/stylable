@@ -945,6 +945,28 @@ describe('pseudo-states', () => {
                         });
                     });
 
+                    it('should not warn when passing a value whose length equals minLength validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(minLength(7)));
+                                    }
+                                    |.my-class:state1(hello!!)| {}
+                                    `,
+                                },
+                            },
+                        };
+
+                        const res = expectWarningsFromTransform(config, []);
+                        expect(res).to.have.styleRules({
+                            1: '.entry__my-class[class~="entry---state1-7-hello!!"] {}',
+                        });
+                    });
+
                     it('should transform and warn when passing an invalid value to a maxLength validator', () => {
                         const config = {
                             entry: `/entry.st.css`,
@@ -972,6 +994,28 @@ describe('pseudo-states', () => {
                         ]);
                         expect(res).to.have.styleRules({
                             1: '.entry__my-class.entry---state1-4-user {}',
+                        });
+                    });
+
+                    it('should not warn when passing a value whose length equals maxLength validator', () => {
+                        const config = {
+                            entry: `/entry.st.css`,
+                            files: {
+                                '/entry.st.css': {
+                                    namespace: 'entry',
+                                    content: `
+                                    .my-class {
+                                        -st-states: state1(string(maxLength(3)));
+                                    }
+                                    |.my-class:state1(abc)| {}
+                                    `,
+                                },
+                            },
+                        };
+
+                        const res = expectWarningsFromTransform(config, []);
+                        expect(res).to.have.styleRules({
+                            1: '.entry__my-class.entry---state1-3-abc {}',
                         });
                     });
 

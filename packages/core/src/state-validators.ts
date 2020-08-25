@@ -118,7 +118,7 @@ export const systemValidators: Record<string, StateParamType> = {
                 };
             },
             minLength: (value: string, length: string) => {
-                const valid = value.length > Number(length);
+                const valid = value.length >= Number(length);
 
                 return {
                     res: value,
@@ -128,7 +128,7 @@ export const systemValidators: Record<string, StateParamType> = {
                 };
             },
             maxLength: (value: string, length: string) => {
-                const valid = value.length < Number(length);
+                const valid = value.length <= Number(length);
 
                 return {
                     res: value,
