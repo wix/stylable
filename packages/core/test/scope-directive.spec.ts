@@ -153,7 +153,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('* .part');
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('* .entry__part');
         });
 
         it('should support :global() selector', () => {
