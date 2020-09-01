@@ -153,9 +153,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
-                '* .part'
-            );
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('* .part');
         });
 
         it('should support :global() selector', () => {
@@ -175,11 +173,8 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
-                '.my-class .entry__part'
-            );
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('.my-class .entry__part');
         });
-
 
         it('should selectors with internal parts', () => {
             const { meta } = generateStylableResult({
@@ -494,7 +489,7 @@ describe('@st-scope', () => {
     });
 
     describe('diagnostics', () => {
-        it.only('should warn about invalid scoping selector', () => {
+        it('should warn about invalid scoping selector', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
@@ -515,8 +510,16 @@ describe('@st-scope', () => {
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
+                {
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    file: '/entry.st.css',
+                    severity: 'warning',
+                    skipLocationCheck: true,
+                },
             ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
+            expect((meta.outputAst!.first as Rule).selector).to.equal(
+                '.entry__root::unknownPart .entry__part'
+            );
         });
         it('should warn about a missing scoping parameter', () => {
             const config = {
