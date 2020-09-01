@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "test": "mocha \"tests/**/*.spec.ts?(x)\"",
+    "test": "mocha \"tests/**/*.spec.ts?(x)\" --timeout 5000",
     "prepack": "yarn build"
   },
   "dependencies": {
