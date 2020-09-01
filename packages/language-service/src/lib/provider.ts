@@ -19,6 +19,7 @@ import {
     StylableMeta,
     StylableTransformer,
     valueMapping,
+    JSResolve,
 } from '@stylable/core';
 import {
     Location,
@@ -177,7 +178,7 @@ export class Provider {
                     break;
                 }
                 case 'import': {
-                    let rslvd = null;
+                    let rslvd: CSSResolve | JSResolve | null = null;
                     try {
                         rslvd = this.stylable.resolver.resolve(symb);
                     } catch {
@@ -187,7 +188,7 @@ export class Provider {
                     let filePath: string;
 
                     if (rslvd && rslvd._kind !== 'js') {
-                        filePath = (rslvd as CSSResolve).meta.source;
+                        filePath = rslvd.meta.source;
                     } else {
                         filePath = this.stylable.resolvePath(undefined, symb.import.from);
                     }
@@ -276,7 +277,7 @@ export class Provider {
         state: string
     ): CSSResolve | null {
         const importedSymbol = origMeta.classes[elementName][valueMapping.extends];
-        let res;
+        let res: CSSResolve | JSResolve | null = null;
 
         if (importedSymbol && importedSymbol._kind === 'import') {
             res = this.stylable.resolver.resolveImport(importedSymbol);
@@ -285,15 +286,15 @@ export class Provider {
         if (
             !!res &&
             res._kind === 'css' &&
-            Object.keys(res.symbol[valueMapping.states]).includes(state)
+            Object.keys((res.symbol as ClassSymbol)[valueMapping.states]!).includes(state)
         ) {
-            return res as CSSResolve;
+            return res;
         } else if (
             !!res &&
             res._kind === 'css' &&
             !!(origMeta.mappedSymbols[elementName] as ClassSymbol)[valueMapping.extends]
         ) {
-            return this.findMyState(res.meta!, res.symbol.name, state);
+            return this.findMyState(res.meta, res.symbol.name, state);
         } else {
             return null;
         }

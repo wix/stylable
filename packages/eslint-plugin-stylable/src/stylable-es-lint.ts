@@ -7,7 +7,7 @@ import {
     TSESTree as esTree,
 } from '@typescript-eslint/experimental-utils';
 
-const { isIdentifier, isMemberOrOptionalMemberExpression } = ASTUtils;
+const { isIdentifier } = ASTUtils;
 
 const createRule = ESLintUtils.RuleCreator((ruleName) => {
     return `${ruleName}`; // TODO: create documentation site links
@@ -30,10 +30,7 @@ export default createRule({
         });
 
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {
-            if (
-                (meta.transformDiagnostics?.reports.length) ||
-                (meta.diagnostics?.reports.length)
-            ) {
+            if (meta.transformDiagnostics?.reports.length || meta.diagnostics?.reports.length) {
                 context.report({
                     messageId: 'diagnostics',
                     node,
@@ -85,7 +82,7 @@ export default createRule({
 
                         variable.references.forEach((ref) => {
                             const parent = ref.identifier.parent;
-                            if (!parent || !isMemberOrOptionalMemberExpression(parent)) {
+                            if (!parent || parent.type !== AST_NODE_TYPES.MemberExpression) {
                                 return;
                             }
 

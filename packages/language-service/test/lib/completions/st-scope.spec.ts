@@ -127,7 +127,7 @@ describe('completion inside @st-scope', () => {
                     title: 'Suggest',
                     command: 'editor.action.triggerSuggest',
                 },
-                sortText: 'd_0089',
+                sortText: 'd_a1',
             });
         });
 

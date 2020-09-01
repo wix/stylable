@@ -16,6 +16,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org/'
       - run: npm i -g yarn@1
       - run: yarn --frozen-lockfile
-      - run: npx pleb@2 publish
+      - run: npx pleb publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
