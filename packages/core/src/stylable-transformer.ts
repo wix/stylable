@@ -1080,7 +1080,7 @@ export class StylableTransformer {
                 if (
                     !nativePseudoElements.includes(name) &&
                     !isVendorPrefixed(name) &&
-                    !this.shouldIgnoreStScopeDiagnostic(context)
+                    !this.isDuplicateStScopeDiagnostic(context)
                 ) {
                     this.diagnostics.warn(
                         context.rule,
@@ -1115,7 +1115,7 @@ export class StylableTransformer {
                 !found &&
                 !nativePseudoClasses.includes(name) &&
                 !isVendorPrefixed(name) &&
-                !this.shouldIgnoreStScopeDiagnostic(context)
+                !this.isDuplicateStScopeDiagnostic(context)
             ) {
                 this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(name), {
                     word: name,
@@ -1148,8 +1148,9 @@ export class StylableTransformer {
             }
         }
     }
-    private shouldIgnoreStScopeDiagnostic(context: ScopeContext) {
-        const transformedScope = context.originMeta.transformedScopes?.[(context.rule as any).stScopeSelector];
+    private isDuplicateStScopeDiagnostic(context: ScopeContext) {
+        const transformedScope =
+            context.originMeta.transformedScopes?.[(context.rule as any).stScopeSelector];
         if (transformedScope && context.chunks && context.chunk) {
             const currentChunkSelector = stringifySelector({
                 type: 'selector',
@@ -1157,14 +1158,16 @@ export class StylableTransformer {
                 name: '',
             });
             const i = context.chunks.indexOf(context.chunk);
-            for (const stScopeSelector of transformedScope) {
-                if (i <= stScopeSelector.length) {
-                    for (const chunk of stScopeSelector) {
+            for (const stScopeSelectorChunks of transformedScope) {
+                // if we are in a chunk index that is in the rage of the @st-scope param
+                if (i <= stScopeSelectorChunks.length) {
+                    for (const chunk of stScopeSelectorChunks) {
                         const scopeChunkSelector = stringifySelector({
                             type: 'selector',
                             nodes: chunk.nodes,
                             name: '',
                         });
+                        // if the two chunks match the error is already reported by the @st-scope validation
                         if (scopeChunkSelector === currentChunkSelector) {
                             return true;
                         }
@@ -1367,11 +1370,11 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
         transformedScopes[rule.selector] = separateChunks2(transformer.scopeSelectorAst(context));
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        ruleReports.forEach(({ message, type }) => {
+        ruleReports.forEach(({ message, type, options: { word } = {} }) => {
             if (type === 'error') {
-                transformer.diagnostics.error(scope, message, { word: scope.params });
+                transformer.diagnostics.error(scope, message, { word: word || scope.params });
             } else {
-                transformer.diagnostics.warn(scope, message, { word: scope.params });
+                transformer.diagnostics.warn(scope, message, { word: word || scope.params });
             }
         });
     }
