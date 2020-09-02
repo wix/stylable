@@ -165,7 +165,7 @@ export class StylableTransformer {
         };
         const ast = this.resetTransformProperties(meta);
         this.resolver.validateImports(meta, this.diagnostics);
-        validateScopes(this, meta);
+        meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
         meta.transformDiagnostics = this.diagnostics;
@@ -945,14 +945,16 @@ export class StylableTransformer {
         _classesExport?: Record<string, string>,
         _calcPaths = false,
         rule?: postcss.Rule
-    ): { selector: string; elements: ResolvedElement[][] } {
+    ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorAstNode } {
         const context = new ScopeContext(
             originMeta,
             parseSelector(selector),
             rule || postcss.rule({ selector })
         );
+        const targetSelectorAst = this.scopeSelectorAst(context);
         return {
-            selector: stringifySelector(this.scopeSelectorAst(context)),
+            targetSelectorAst,
+            selector: stringifySelector(targetSelectorAst),
             elements: context.elements,
         };
     }
@@ -982,7 +984,7 @@ export class StylableTransformer {
                 // loop over each node in a chunk
                 for (const node of chunk.nodes) {
                     context.node = node;
-                    // transfrom node
+                    // transform node
                     this.handleChunkNode(context);
                 }
             }
@@ -1034,7 +1036,6 @@ export class StylableTransformer {
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = currentAnchor.resolved[i];
                 if (!symbol[valueMapping.root]) {
-                    // debugger
                     continue;
                 }
 
@@ -1047,7 +1048,7 @@ export class StylableTransformer {
                 const requestedPart = meta.classes[name];
 
                 if (symbol.alias || !requestedPart) {
-                    // skip alias since thay cannot add parts
+                    // skip alias since they cannot add parts
                     continue;
                 }
 
@@ -1076,7 +1077,11 @@ export class StylableTransformer {
                     resolved: [],
                 });
 
-                if (!nativePseudoElements.includes(name) && !isVendorPrefixed(name)) {
+                if (
+                    !nativePseudoElements.includes(name) &&
+                    !isVendorPrefixed(name) &&
+                    !this.shouldIgnoreStScopeDiagnostic(context)
+                ) {
                     this.diagnostics.warn(
                         context.rule,
                         transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name),
@@ -1106,7 +1111,12 @@ export class StylableTransformer {
                     break;
                 }
             }
-            if (!found && !nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
+            if (
+                !found &&
+                !nativePseudoClasses.includes(name) &&
+                !isVendorPrefixed(name) &&
+                !this.shouldIgnoreStScopeDiagnostic(context)
+            ) {
                 this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(name), {
                     word: name,
                 });
@@ -1138,6 +1148,33 @@ export class StylableTransformer {
             }
         }
     }
+    private shouldIgnoreStScopeDiagnostic(context: ScopeContext) {
+        const transformedScope = context.originMeta.transformedScopes?.[(context.rule as any).stScopeSelector];
+        if (transformedScope && context.chunks && context.chunk) {
+            const currentChunkSelector = stringifySelector({
+                type: 'selector',
+                nodes: context.chunk.nodes,
+                name: '',
+            });
+            const i = context.chunks.indexOf(context.chunk);
+            for (const stScopeSelector of transformedScope) {
+                if (i <= stScopeSelector.length) {
+                    for (const chunk of stScopeSelector) {
+                        const scopeChunkSelector = stringifySelector({
+                            type: 'selector',
+                            nodes: chunk.nodes,
+                            name: '',
+                        });
+                        if (scopeChunkSelector === currentChunkSelector) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private handleCustomSelector(
         customSelector: string,
         meta: StylableMeta,
@@ -1179,7 +1216,6 @@ export class StylableTransformer {
             );
         }
     }
-
     private scopeClassNode(symbol: any, meta: any, node: any, originMeta: any) {
         if (symbol[valueMapping.global]) {
             const globalMappedNodes = symbol[valueMapping.global];
@@ -1280,6 +1316,7 @@ export class StylableTransformer {
     }
     private resetTransformProperties(meta: StylableMeta) {
         meta.globals = {};
+        meta.transformedScopes = null;
         return (meta.outputAst = meta.ast.clone());
     }
 }
@@ -1321,9 +1358,13 @@ export function removeSTDirective(root: postcss.Root) {
 }
 
 function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
+    const transformedScopes: Record<string, SelectorChunk2[][]> = {};
     for (const scope of meta.scopes) {
         const len = transformer.diagnostics.reports.length;
-        transformer.scopeRule(meta, postcss.rule({ selector: scope.params }));
+        const rule = postcss.rule({ selector: scope.params });
+
+        const context = new ScopeContext(meta, parseSelector(rule.selector), rule);
+        transformedScopes[rule.selector] = separateChunks2(transformer.scopeSelectorAst(context));
         const ruleReports = transformer.diagnostics.reports.splice(len);
 
         ruleReports.forEach(({ message, type }) => {
@@ -1334,6 +1375,7 @@ function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
             }
         });
     }
+    return transformedScopes;
 }
 
 function removeFirstRootInEachSelectorChunk(

@@ -510,6 +510,32 @@ describe('@st-scope', () => {
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal(
+                '.entry__root::unknownPart .entry__part'
+            );
+        });
+        it('should warn on invalid scoped selector', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-scope .root::unknownPart {
+                            .part::unknownPart {}
+                        }|
+                        `,
+                    },
+                },
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                {
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    file: '/entry.st.css',
+                    severity: 'warning',
+                },
                 {
                     message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
@@ -518,7 +544,7 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal(
-                '.entry__root::unknownPart .entry__part'
+                '.entry__root::unknownPart .entry__part::unknownPart'
             );
         });
         it('should warn about a missing scoping parameter', () => {
