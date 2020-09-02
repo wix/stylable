@@ -109,7 +109,7 @@
 
 <p>Any <a href="./class-selectors">CSS class</a> is accessible as a pseudo-element of an <a href="./extend-stylesheet">extending stylesheet</a>.</p>
 
-<p>When you define a CSS class inside a component, in this case a <code class="highlighter-rouge">playButton</code> in a <code class="highlighter-rouge">VideoPlayer</code>, that class may be targeted as a pseudo-element of any class that extends the component <code class="highlighter-rouge">videoPlayer</code>.</p>
+<p>When you define a CSS class inside a component, in this case a <code class="language-plaintext highlighter-rouge">playButton</code> in a <code class="language-plaintext highlighter-rouge">VideoPlayer</code>, that class may be targeted as a pseudo-element of any class that extends the component <code class="language-plaintext highlighter-rouge">videoPlayer</code>.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* video-player.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"VideoPlayer"</span><span class="p">;</span>
@@ -122,9 +122,9 @@
 
 <h2 id="style-custom-pseudo-elements">Style custom pseudo-elements</h2>
 
-<p>Use <code class="highlighter-rouge">::</code> to access an internal part of a component after a <a href="./tag-selectors#component-element">custom tag selector</a> or after an <a href="./extend-stylesheet">extended class selector</a>.</p>
+<p>Use <code class="language-plaintext highlighter-rouge">::</code> to access an internal part of a component after a <a href="./tag-selectors#component-element">custom tag selector</a> or after an <a href="./extend-stylesheet">extended class selector</a>.</p>
 
-<p>In this example, you <a href="./imports">import</a> a <code class="highlighter-rouge">VideoPlayer</code> component into your stylesheet, and style an internal part called <code class="highlighter-rouge">playButton</code> overriding its original styling.</p>
+<p>In this example, you <a href="./imports">import</a> a <code class="language-plaintext highlighter-rouge">VideoPlayer</code> component into your stylesheet, and style an internal part called <code class="language-plaintext highlighter-rouge">playButton</code> overriding its original styling.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
@@ -151,16 +151,16 @@
 
 <blockquote>
   <p><strong>Note</strong>  <br />
-Custom pseudo-elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: <code class="highlighter-rouge">.myGallery::navBtn::label</code>.</p>
+Custom pseudo-elements are not limited to the end of a selector like native pseudo-elements, and they can be chained. For example, you can access the label of a navigation button from a gallery: <code class="language-plaintext highlighter-rouge">.myGallery::navBtn::label</code>.</p>
 </blockquote>
 
 <h2 id="extend-stylesheet-pseudo-elements">Extend stylesheet pseudo-elements</h2>
 
 <p>When a Stylable stylesheet <a href="./root">root</a> extends another stylesheet, pseudo-elements are automatically exposed on the extending stylesheet and available inline.</p>
 
-<p>In this example, the class <code class="highlighter-rouge">playButton</code> is available from the original component file <code class="highlighter-rouge">video-player.css</code>, and extended and styled in the <code class="highlighter-rouge">super-video-player.css</code> stylesheet as a custom pseudo-element on the <code class="highlighter-rouge">root</code> class.</p>
+<p>In this example, the class <code class="language-plaintext highlighter-rouge">playButton</code> is available from the original component file <code class="language-plaintext highlighter-rouge">video-player.css</code>, and extended and styled in the <code class="language-plaintext highlighter-rouge">super-video-player.css</code> stylesheet as a custom pseudo-element on the <code class="language-plaintext highlighter-rouge">root</code> class.</p>
 
-<p>The <code class="highlighter-rouge">page.css</code> stylesheet can then extend <code class="highlighter-rouge">super-video-player.css</code> and on the <code class="highlighter-rouge">.mainPlayer</code> class, style <code class="highlighter-rouge">playButton</code> differently.</p>
+<p>The <code class="language-plaintext highlighter-rouge">page.css</code> stylesheet can then extend <code class="language-plaintext highlighter-rouge">super-video-player.css</code> and on the <code class="language-plaintext highlighter-rouge">.mainPlayer</code> class, style <code class="language-plaintext highlighter-rouge">playButton</code> differently.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* super-video-player.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span><span class="p">;</span>
@@ -213,7 +213,7 @@ Custom pseudo-elements are not limited to the end of a selector like native pseu
 You can also override native pseudo-elements using <strong>Stylable’s</strong> custom pseudo-elements but this is not recommended as it can lead to code that’s confusing and hard to maintain.</p>
 </blockquote>
 
-<p>In this example, <code class="highlighter-rouge">root</code> extends <code class="highlighter-rouge">VideoPlayer</code> and so any class placed on the <code class="highlighter-rouge">root</code> overrides the pseudo-element.</p>
+<p>In this example, <code class="language-plaintext highlighter-rouge">root</code> extends <code class="language-plaintext highlighter-rouge">VideoPlayer</code> and so any class placed on the <code class="language-plaintext highlighter-rouge">root</code> overrides the pseudo-element.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"SuperVideoPlayer"</span><span class="p">;</span>

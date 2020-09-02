@@ -112,7 +112,7 @@
 <ul>
   <li>You must provide a type definition.</li>
   <li>Optionally you can provide validation arguments to the type defined</li>
-  <li>Optionally you can provide each state definition with a <code class="highlighter-rouge">default value</code>, enabling it to be used without providing a parameter argument.</li>
+  <li>Optionally you can provide each state definition with a <code class="language-plaintext highlighter-rouge">default value</code>, enabling it to be used without providing a parameter argument.</li>
 </ul>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
@@ -131,7 +131,7 @@
 
 <blockquote>
   <p><strong>Note</strong> <br />
-When defining a <code class="highlighter-rouge">default value</code>, you can use <a href="./variables">variables</a> and <a href="./formatters">formatters</a>.</p>
+When defining a <code class="language-plaintext highlighter-rouge">default value</code>, you can use <a href="./variables">variables</a> and <a href="./formatters">formatters</a>.</p>
 </blockquote>
 
 <h2 id="tag">Tag</h2>
@@ -150,7 +150,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Setting the state <strong>tag values</strong> in the view <code class="highlighter-rouge">&lt;span className={style(classes.root, {cart: "shirt"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span className="style__root style---cart-5-shirt" /&gt;</code>.</p>
+<p>Setting the state <strong>tag values</strong> in the view <code class="language-plaintext highlighter-rouge">&lt;span className={style(classes.root, {cart: "shirt"})}&gt;</code> resolves to <code class="language-plaintext highlighter-rouge">&lt;span className="style__root style---cart-5-shirt" /&gt;</code>.</p>
 
 <h2 id="enum">Enum</h2>
 
@@ -171,7 +171,7 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Setting the state’s <strong>enum value</strong> in the view <code class="highlighter-rouge">&lt;span className={style(classes.root, {size: "medium"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span className="style--size-medium" /&gt;</code>.</p>
+<p>Setting the state’s <strong>enum value</strong> in the view <code class="language-plaintext highlighter-rouge">&lt;span className={style(classes.root, {size: "medium"})}&gt;</code> resolves to <code class="language-plaintext highlighter-rouge">&lt;span className="style--size-medium" /&gt;</code>.</p>
 
 <h2 id="string">String</h2>
 
@@ -188,13 +188,13 @@ When defining a <code class="highlighter-rouge">default value</code>, you can us
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Setting the state <strong>string value</strong> in the view <code class="highlighter-rouge">&lt;span className={style(classes.root, {selected: "username"})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span className="style--selected-username" /&gt;</code>.</p>
+<p>Setting the state <strong>string value</strong> in the view <code class="language-plaintext highlighter-rouge">&lt;span className={style(classes.root, {selected: "username"})}&gt;</code> resolves to <code class="language-plaintext highlighter-rouge">&lt;span className="style--selected-username" /&gt;</code>.</p>
 
 <h3 id="string-validation-optional">String validation [optional]</h3>
 
 <p>You can optionally pass a regular expression string as an argument to add validation for the pseudo-class selector <strong>string argument</strong>. The regular expression must be within quotes.</p>
 
-<p>You can optionally pass a regular expression function (<code class="highlighter-rouge">regex()</code>) to the string type to add regular expression validation for the pseudo-class selector. 
+<p>You can optionally pass a regular expression function (<code class="language-plaintext highlighter-rouge">regex()</code>) to the string type to add regular expression validation for the pseudo-class selector. 
 This function accepts a single expression to be tested against the selector parameter. The expression must be within quotes.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
@@ -209,7 +209,7 @@ This function accepts a single expression to be tested against the selector para
 <span class="nc">.root</span><span class="nd">:selected</span><span class="o">(</span><span class="nt">index</span><span class="o">)</span> <span class="p">{}</span>
 </code></pre></div></div>
 
-<p>String type can also accept several other validations, including <code class="highlighter-rouge">minLength(number)</code>, <code class="highlighter-rouge">maxLength(number)</code> and <code class="highlighter-rouge">contains(string)</code>.</p>
+<p>String type can also accept several other validations, including <code class="language-plaintext highlighter-rouge">minLength(number)</code>, <code class="language-plaintext highlighter-rouge">maxLength(number)</code> and <code class="language-plaintext highlighter-rouge">contains(string)</code>.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
     <span class="c">/* validates the targeting string arguments with multiple validations */</span>
@@ -241,12 +241,12 @@ This function accepts a single expression to be tested against the selector para
     <span class="py">-st-states</span><span class="p">:</span> <span class="n">column</span><span class="p">(</span> <span class="n">number</span> <span class="p">)</span>
 <span class="p">}</span>
 
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">5</span><span class="o">)</span> <span class="p">{</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{</span>
     <span class="c">/* target an element with a state value that is exactly the number argument "5" */</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Setting the state <strong>number value</strong> in the view <code class="highlighter-rouge">&lt;span className={style(classes.root, {column: 5})}&gt;</code> resolves to <code class="highlighter-rouge">&lt;span className="style--column-5" /&gt;</code>.</p>
+<p>Setting the state <strong>number value</strong> in the view <code class="language-plaintext highlighter-rouge">&lt;span className={style(classes.root, {column: 5})}&gt;</code> resolves to <code class="language-plaintext highlighter-rouge">&lt;span className="style--column-5" /&gt;</code>.</p>
 
 <h3 id="number-validation-optional">Number validation [optional]</h3>
 
@@ -258,17 +258,17 @@ This function accepts a single expression to be tested against the selector para
 <span class="p">}</span>
 
 <span class="c">/* valid arguments */</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">2</span><span class="o">),</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">4</span><span class="o">),</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">6</span><span class="o">)</span> <span class="p">{}</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">2</span><span class="o">),</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">4</span><span class="o">),</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">6</span><span class="o">)</span> <span class="p">{}</span>
 
 <span class="c">/* invalid because not a "multipleOf(2)" */</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">3</span><span class="o">),</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">5</span><span class="o">)</span> <span class="p">{}</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">3</span><span class="o">),</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">5</span><span class="o">)</span> <span class="p">{}</span>
 
 <span class="c">/* invalid because of "min(2)" and "max(6)" validations */</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">1</span><span class="o">),</span>
-<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="nt">7</span><span class="o">)</span> <span class="p">{}</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">1</span><span class="o">),</span>
+<span class="nc">.root</span><span class="nd">:column</span><span class="o">(</span><span class="err">7</span><span class="o">)</span> <span class="p">{}</span>
 </code></pre></div></div>
 
 <h2 id="future-intent">Future intent</h2>
@@ -278,7 +278,7 @@ This function accepts a single expression to be tested against the selector para
   <li><a href="https://github.com/wix/stylable/issues/270">Custom pseudo-class type “nth”</a></li>
   <li><a href="https://github.com/wix/stylable/issues/269">Multiple named parameters</a></li>
   <li><a href="https://github.com/wix/stylable/issues/271">Custom pseudo-class string prefixes</a></li>
-  <li>Lang type - use attribute selector <code class="highlighter-rouge">[state|="en"]</code> to support language code</li>
+  <li>Lang type - use attribute selector <code class="language-plaintext highlighter-rouge">[state|="en"]</code> to support language code</li>
 </ul>
 
 </section>

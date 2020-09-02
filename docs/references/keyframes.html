@@ -103,7 +103,7 @@
 
 <section class="docs-content">
   <h1>Keyframes</h1>
-  <p>In CSS, <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes"><code class="highlighter-rouge">@keyframes</code></a> exhibit a behavior similar to classes where all names are global and can potentially clash in the DOM.</p>
+  <p>In CSS, <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes"><code class="language-plaintext highlighter-rouge">@keyframes</code></a> exhibit a behavior similar to classes where all names are global and can potentially clash in the DOM.</p>
 
 <p>To avoid this issue, <strong>Stylable</strong> performs automatic namespacing of keyframes based on the stylesheet in which they were created.</p>
 
@@ -137,7 +137,7 @@
 
 <p><strong>Stylable</strong> automatically exports all keyframes created within a stylesheet. <strong>Stylable</strong> will also re-export any imported keyframes.</p>
 
-<p>To import any such symbol in a different stylesheet, <strong>Stylable</strong> uses a utility function, <code class="highlighter-rouge">keyframes([NAME1, NAME2, ...])</code> to specifically target keyframes imports.</p>
+<p>To import any such symbol in a different stylesheet, <strong>Stylable</strong> uses a utility function, <code class="language-plaintext highlighter-rouge">keyframes([NAME1, NAME2, ...])</code> to specifically target keyframes imports.</p>
 
 <h3 id="example-1">Example</h3>
 
@@ -168,7 +168,7 @@
 
 <h3 id="keyframes-aliasing">Keyframes aliasing</h3>
 
-<p>To create a local alias of a keyframe, Stylable supports the same <code class="highlighter-rouge">[NAME] as [NEW_NAME]</code> syntax inside the keyframe import utility, as it does for any named import.</p>
+<p>To create a local alias of a keyframe, Stylable supports the same <code class="language-plaintext highlighter-rouge">[NAME] as [NEW_NAME]</code> syntax inside the keyframe import utility, as it does for any named import.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./animations.st.css"</span><span class="p">;</span>
@@ -181,7 +181,7 @@
 
 <h2 id="runtime-mapping">Runtime mapping</h2>
 
-<p>The <strong>Stylable</strong> runtime stylesheet exposes the <code class="highlighter-rouge">keyframes</code> key which contains a mapping of source keyframe names to their namespaced target name.
+<p>The <strong>Stylable</strong> runtime stylesheet exposes the <code class="language-plaintext highlighter-rouge">keyframes</code> key which contains a mapping of source keyframe names to their namespaced target name.
 You can use these keyframes to apply animations via inline styling.</p>
 
 <h3 id="example-2">Example</h3>
@@ -194,7 +194,7 @@ You can use these keyframes to apply animations via inline styling.</p>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">keyframes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">keyframes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./entry.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
      <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> <span class="na">animationName</span><span class="p">:</span> <span class="nx">keyframes</span><span class="p">.</span><span class="nx">slide</span> <span class="p">}}</span> <span class="sr">/</span><span class="err">&gt;

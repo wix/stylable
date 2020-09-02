@@ -113,7 +113,7 @@
 
 <p>As a best practice, we recommend following this folder structure:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/
     |
     --- components/
     |   |
@@ -131,22 +131,22 @@
 </code></pre></div></div>
 
 <ul>
-  <li>The <code class="highlighter-rouge">src/components</code> folder contains:
+  <li>The <code class="language-plaintext highlighter-rouge">src/components</code> folder contains:
     <ul>
       <li>a project stylesheet describing the project CSS API</li>
       <li>a folder for each component with its stylable stylesheet</li>
     </ul>
   </li>
-  <li>The <code class="highlighter-rouge">src/themes</code> folder contains the relevant theme files.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">src/themes</code> folder contains the relevant theme files.</li>
 </ul>
 
 <blockquote>
-  <p><strong>Note:</strong> Although you may think the project file should be at the <code class="highlighter-rouge">src</code> level, we recommend you to create the <code class="highlighter-rouge">project.st.css</code> file at the same level as your components because there are many links between this file and your component files.</p>
+  <p><strong>Note:</strong> Although you may think the project file should be at the <code class="language-plaintext highlighter-rouge">src</code> level, we recommend you to create the <code class="language-plaintext highlighter-rouge">project.st.css</code> file at the same level as your components because there are many links between this file and your component files.</p>
 </blockquote>
 
-<h2 id="the-projectstcss-file">The <code class="highlighter-rouge">project.st.css</code> file</h2>
+<h2 id="the-projectstcss-file">The <code class="language-plaintext highlighter-rouge">project.st.css</code> file</h2>
 
-<p>As a first step, create a <a href="./project-commons">project commons stylesheet</a> named <code class="highlighter-rouge">project.st.css</code> in the <code class="highlighter-rouge">src/components</code> directory. This exposes the API for the project.</p>
+<p>As a first step, create a <a href="./project-commons">project commons stylesheet</a> named <code class="language-plaintext highlighter-rouge">project.st.css</code> in the <code class="language-plaintext highlighter-rouge">src/components</code> directory. This exposes the API for the project.</p>
 
 <blockquote>
   <p><strong>Note</strong>:
@@ -162,7 +162,7 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
   <li>The component API should contain the minimum styling required for the component to function. For example some components may require layout.</li>
   <li>The effect of CSS combinations is not always easy to understood and styles are generally less tested, therefore, we recommend adding comments that explain the reason for unclear CSS.</li>
   <li>Reusable <a href="../references/variables">vars</a> should be declared outside of the component. The component can use vars for common values that are less likely to be override-able.</li>
-  <li>Use <a href="./component-variants">component variants</a> and <a href="./shared-classes">shared classes</a> from the project file (<code class="highlighter-rouge">project.st.css</code>).</li>
+  <li>Use <a href="./component-variants">component variants</a> and <a href="./shared-classes">shared classes</a> from the project file (<code class="language-plaintext highlighter-rouge">project.st.css</code>).</li>
 </ul>
 
 <p>More best practices for themable components can be found in the <a href="./stylable-component-best-practices"><strong>Stylable</strong> component best practices guide</a>.</p>
@@ -191,13 +191,13 @@ It is recommended to leave the project’s CSS rulesets empty with no declaratio
 
 <h2 id="theme">Theme</h2>
 
-<p>The <strong>Stylable</strong> library can include multiple theme files that render a different look and feel per theme. A theme imports the <code class="highlighter-rouge">project.st.css</code> file as <a href="../references/theme">theme</a> to override variables, variants and classes from the library.</p>
+<p>The <strong>Stylable</strong> library can include multiple theme files that render a different look and feel per theme. A theme imports the <code class="language-plaintext highlighter-rouge">project.st.css</code> file as <a href="../references/theme">theme</a> to override variables, variants and classes from the library.</p>
 
 <p>In the following code, you can see a theme file customizing the library:</p>
 <ul>
-  <li>override <code class="highlighter-rouge">color1</code> and <code class="highlighter-rouge">color2</code></li>
-  <li>CSS for <code class="highlighter-rouge">cancelButton</code> variant component</li>
-  <li>CSS for <code class="highlighter-rouge">emphsisBox</code> shared class</li>
+  <li>override <code class="language-plaintext highlighter-rouge">color1</code> and <code class="language-plaintext highlighter-rouge">color2</code></li>
+  <li>CSS for <code class="language-plaintext highlighter-rouge">cancelButton</code> variant component</li>
+  <li>CSS for <code class="language-plaintext highlighter-rouge">emphsisBox</code> shared class</li>
 </ul>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* backoffice-theme.st.css */</span>

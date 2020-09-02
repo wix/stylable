@@ -103,9 +103,9 @@
 
 <section class="docs-content">
   <h1>CSS Custom Properties (CSS vars)</h1>
-  <p><code class="highlighter-rouge">CSS Custom Properties</code> is a new feature introduced to the CSS language, providing the ability to define and re-use variables across stylesheets.</p>
+  <p><code class="language-plaintext highlighter-rouge">CSS Custom Properties</code> is a new feature introduced to the CSS language, providing the ability to define and re-use variables across stylesheets.</p>
 
-<p>CSS Custom Properties are defined using the <code class="highlighter-rouge">--*</code> property syntax, and accessed using the <code class="highlighter-rouge">var(--*)</code> CSS function.</p>
+<p>CSS Custom Properties are defined using the <code class="language-plaintext highlighter-rouge">--*</code> property syntax, and accessed using the <code class="language-plaintext highlighter-rouge">var(--*)</code> CSS function.</p>
 
 <p>To learn more about this language feature, check out the following resources</p>
 <ul>
@@ -173,23 +173,23 @@
 
 <p>Override any variable by redefining its value using an inline style attribute.</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">vars</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">vars</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./entry.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
      <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> 
-        <span class="p">[</span><span class="nx">vars</span><span class="p">.</span><span class="nx">myVar</span><span class="p">]:</span> <span class="s1">'pink'</span><span class="p">,</span>  
-        <span class="na">background</span><span class="p">:</span> <span class="s1">'gold'</span> <span class="p">}}</span> 
+        <span class="p">[</span><span class="nx">vars</span><span class="p">.</span><span class="nx">myVar</span><span class="p">]:</span> <span class="dl">'</span><span class="s1">pink</span><span class="dl">'</span><span class="p">,</span>  
+        <span class="na">background</span><span class="p">:</span> <span class="dl">'</span><span class="s1">gold</span><span class="dl">'</span> <span class="p">}}</span> 
 <span class="sr">/</span><span class="err">&gt;
 </span></code></pre></div></div>
 
 <p>Output:</p>
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s2">"entry__root"</span> 
-    <span class="nx">style</span><span class="o">=</span><span class="s2">"--entry-color: green; --entry-border-size: 5px; background: gold;"</span> <span class="o">/&gt;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="dl">"</span><span class="s2">entry__root</span><span class="dl">"</span> 
+    <span class="nx">style</span><span class="o">=</span><span class="dl">"</span><span class="s2">--entry-color: green; --entry-border-size: 5px; background: gold;</span><span class="dl">"</span> <span class="o">/&gt;</span>
 </code></pre></div></div>
 
 <h2 id="using-global-css-variables">Using global CSS variables</h2>
 
-<p>In cases where you have no control over the name of the CSS variable used, use the <code class="highlighter-rouge">@st-global-custom-property</code> directive to define CSS variables that will not be scoped, and will maintain their exact given name.</p>
+<p>In cases where you have no control over the name of the CSS variable used, use the <code class="language-plaintext highlighter-rouge">@st-global-custom-property</code> directive to define CSS variables that will not be scoped, and will maintain their exact given name.</p>
 
 <p>This is mostly useful when working with 3rd-party libraries, where you only attempt to affect it externally.</p>
 
@@ -201,12 +201,12 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./entry.st.css'</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./entry.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="p">{</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">}</span>
      <span class="nx">style</span><span class="o">=</span><span class="p">{{</span> 
-         <span class="s1">'--color'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> 
-         <span class="s1">'--bg'</span><span class="p">:</span> <span class="s1">'yellow'</span> <span class="p">}}</span>
+         <span class="dl">'</span><span class="s1">--color</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">red</span><span class="dl">'</span><span class="p">,</span> 
+         <span class="dl">'</span><span class="s1">--bg</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">yellow</span><span class="dl">'</span> <span class="p">}}</span>
 <span class="sr">/</span><span class="err">&gt;
 </span></code></pre></div></div>
 

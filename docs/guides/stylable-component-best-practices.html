@@ -111,11 +111,11 @@
 
 <p>Try avoiding size declaration just because it offers an easier API. To override a component specifying size limitations, you would need to override multiple CSS declarations.</p>
 
-<p>If you do set a default size or size limitations, use <code class="highlighter-rouge">em/rem</code> units to resize to the HTML context.</p>
+<p>If you do set a default size or size limitations, use <code class="language-plaintext highlighter-rouge">em/rem</code> units to resize to the HTML context.</p>
 
 <h2 id="give-meaningful-names">Give meaningful names</h2>
 
-<p>Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a <a href="../references/pseudo-elements"><code class="highlighter-rouge">pseudo-element</code></a> and should be considered part of the component API.</p>
+<p>Give meaningful class names that will make sense as part of a selector. Any CSS class selector can be targeted from the outside as a <a href="../references/pseudo-elements"><code class="language-plaintext highlighter-rouge">pseudo-element</code></a> and should be considered part of the component API.</p>
 
 <p>Use camelCase and avoid hyphens (-) and capital letters at the beginning.</p>
 
@@ -130,9 +130,9 @@
 
 <h2 id="avoid-global-settings-in-your-stylesheet">Avoid global settings in your stylesheet</h2>
 
-<p>Try avoiding global-related selectors like <code class="highlighter-rouge">@media</code> or matching DOM outside of the component scope like <code class="highlighter-rouge">body</code>. These would potentially cause side-effects if others use them.</p>
+<p>Try avoiding global-related selectors like <code class="language-plaintext highlighter-rouge">@media</code> or matching DOM outside of the component scope like <code class="language-plaintext highlighter-rouge">body</code>. These would potentially cause side-effects if others use them.</p>
 
-<p><a href="../references/tag-selectors">Tag selectors</a> should be avoided inside a component because they affect any nested component or element. The exception to this is when specifically targeting the tag with <strong>child selector</strong> (for example <code class="highlighter-rouge">.root &gt; p</code>) and not a <strong>descendent selector</strong> (for example <code class="highlighter-rouge">.root p</code>).</p>
+<p><a href="../references/tag-selectors">Tag selectors</a> should be avoided inside a component because they affect any nested component or element. The exception to this is when specifically targeting the tag with <strong>child selector</strong> (for example <code class="language-plaintext highlighter-rouge">.root &gt; p</code>) and not a <strong>descendent selector</strong> (for example <code class="language-plaintext highlighter-rouge">.root p</code>).</p>
 
 <h2 id="keep-your-layout-minimal">Keep your layout minimal</h2>
 
@@ -154,7 +154,7 @@
 
 <p>Browsers add a default user agent stylesheet to provide the HTML with a default “style”.</p>
 
-<p>It is tempting to “clean up” a <code class="highlighter-rouge">button</code>’s default style in the component. But, we want our component to “blend in” in every context it’s used. A button tag in our component should look like other button tags in the context of the application where it is used.</p>
+<p>It is tempting to “clean up” a <code class="language-plaintext highlighter-rouge">button</code>’s default style in the component. But, we want our component to “blend in” in every context it’s used. A button tag in our component should look like other button tags in the context of the application where it is used.</p>
 
 <p>As such, when building a component, it is best to set CSS only for behaviors that <strong>must</strong> be overridden for the component to function.</p>
 
@@ -166,7 +166,7 @@
 
 <p>It takes a more complex selector to override a high specificity selector that was defined in a component stylesheet.</p>
 
-<p>Override CSS only for behaviors that <strong>must</strong> be overridden for the component to function and minimize the use of <code class="highlighter-rouge">tag selectors</code> and <code class="highlighter-rouge">pseudo-elements</code> of nested components.</p>
+<p>Override CSS only for behaviors that <strong>must</strong> be overridden for the component to function and minimize the use of <code class="language-plaintext highlighter-rouge">tag selectors</code> and <code class="language-plaintext highlighter-rouge">pseudo-elements</code> of nested components.</p>
 
 <p>Styling pseudo-elements in a component creates a selector that takes more specificity to override</p>
 
@@ -189,7 +189,7 @@ specificity: 0,0,1,1
 
 <blockquote>
   <p><strong>Note</strong>:
-For the <code class="highlighter-rouge">button</code> selector, we manually added the <code class="highlighter-rouge">.root</code> class to avoid overriding <code class="highlighter-rouge">button</code> outside of this scope.</p>
+For the <code class="language-plaintext highlighter-rouge">button</code> selector, we manually added the <code class="language-plaintext highlighter-rouge">.root</code> class to avoid overriding <code class="language-plaintext highlighter-rouge">button</code> outside of this scope.</p>
 </blockquote>
 
 <h2 id="justify-your-css-declarations-in-comments">Justify your CSS declarations in comments</h2>

@@ -105,19 +105,19 @@
   <h1>Imports</h1>
   <p><strong>Stylable</strong> enables you to import other stylesheets and modules in a way that is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import">JS Imports</a>. You can then use the stylesheet or module as it’s been defined, or just one or more of its named values, in your own <strong>Stylable</strong> stylesheet.</p>
 
-<p>You use the <strong>Stylable</strong> syntax beginning with <code class="highlighter-rouge">-st-</code> for the <code class="highlighter-rouge">:import</code> config:</p>
+<p>You use the <strong>Stylable</strong> syntax beginning with <code class="language-plaintext highlighter-rouge">-st-</code> for the <code class="language-plaintext highlighter-rouge">:import</code> config:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">-st-from:</code> Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.</li>
-  <li><code class="highlighter-rouge">-st-default:</code> Imports the default export of the module named in <code class="highlighter-rouge">-st-from:</code>. Use with the name by which to identify the imported value in the scoped stylesheet.</li>
-  <li><code class="highlighter-rouge">-st-named:</code> List of the named exports to import into the local scoped stylesheet from the file named in <code class="highlighter-rouge">-st-from:</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">-st-from:</code> Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.</li>
+  <li><code class="language-plaintext highlighter-rouge">-st-default:</code> Imports the default export of the module named in <code class="language-plaintext highlighter-rouge">-st-from:</code>. Use with the name by which to identify the imported value in the scoped stylesheet.</li>
+  <li><code class="language-plaintext highlighter-rouge">-st-named:</code> List of the named exports to import into the local scoped stylesheet from the file named in <code class="language-plaintext highlighter-rouge">-st-from:</code>.</li>
 </ul>
 
 <blockquote>
   <p><strong>Note</strong></p>
   <ul>
-    <li><code class="highlighter-rouge">:import</code> is a Stylable directive and not a selector.</li>
-    <li>Using <code class="highlighter-rouge">import</code> as part of a complex selector or inside a CSS ruleset does not import.</li>
+    <li><code class="language-plaintext highlighter-rouge">:import</code> is a Stylable directive and not a selector.</li>
+    <li>Using <code class="language-plaintext highlighter-rouge">import</code> as part of a complex selector or inside a CSS ruleset does not import.</li>
     <li>Multiple imports may conflict and the last one in the file wins.</li>
   </ul>
 </blockquote>
@@ -128,7 +128,7 @@
 
 <h3 id="import-the-default-export-of-a-local-reference-stylesheet-for-use-in-the-scoped-stylesheet">Import the default export of a local reference stylesheet for use in the scoped stylesheet</h3>
 
-<p>Import the <code class="highlighter-rouge">toggle-button.css</code> stylesheet from a local location. Assign the name <code class="highlighter-rouge">ToggleButton</code> to the default export of that stylesheet for use in this scoped stylesheet.</p>
+<p>Import the <code class="language-plaintext highlighter-rouge">toggle-button.css</code> stylesheet from a local location. Assign the name <code class="language-plaintext highlighter-rouge">ToggleButton</code> to the default export of that stylesheet for use in this scoped stylesheet.</p>
 
 <blockquote>
   <p><strong>Note</strong><br />
@@ -143,12 +143,12 @@ Generally when importing a <strong>default</strong> value from a css file, you c
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./toggle-button.css</span><span class="dl">'</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3 id="import-named-exports-from-a-local-js-module">Import named exports from a local JS module</h3>
 
-<p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. These named exports are now imported into this scoped stylesheet.</p>
+<p>The values <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="language-plaintext highlighter-rouge">my-mixins.js</code>. These named exports are now imported into this scoped stylesheet.</p>
 
 <blockquote>
   <p><strong>Note</strong><br />
@@ -163,12 +163,12 @@ When importing named values, they are generally used as class or tag selectors a
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./my-mixins</span><span class="dl">"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h3 id="import-named-exports-from-a-local-js-module-and-locally-refer-to-one-of-the-export-values-as-a-different-name">Import named exports from a local JS module and locally refer to one of the export values as a different name</h3>
 
-<p>The values <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="highlighter-rouge">my-mixins.js</code>. The value <code class="highlighter-rouge">gridMixin</code> is used as is and <code class="highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="highlighter-rouge">gridMixin</code> and <code class="highlighter-rouge">tooltip</code> in this stylesheet.</p>
+<p>The values <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="language-plaintext highlighter-rouge">my-mixins.js</code>. The value <code class="language-plaintext highlighter-rouge">gridMixin</code> is used as is and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="language-plaintext highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltip</code> in this stylesheet.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
@@ -178,7 +178,7 @@ When importing named values, they are generally used as class or tag selectors a
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="k">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"./my-mixins"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="k">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./my-mixins</span><span class="dl">"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h2 id="import-stylesheet">Import stylesheet</h2>

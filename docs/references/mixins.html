@@ -141,7 +141,7 @@ If you need to return only a single declaration value using code, we recommend i
 <span class="p">}</span>  
 </code></pre></div></div>
 
-<p>Here is an example of a <strong>Stylable</strong> CSS file that is imported and mixed into the classes of a different stylesheet. The <code class="highlighter-rouge">.rootMixedIn</code> class as a stylesheet and <code class="highlighter-rouge">classMixedIn</code> as a class.</p>
+<p>Here is an example of a <strong>Stylable</strong> CSS file that is imported and mixed into the classes of a different stylesheet. The <code class="language-plaintext highlighter-rouge">.rootMixedIn</code> class as a stylesheet and <code class="language-plaintext highlighter-rouge">classMixedIn</code> as a class.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS mixin file - mixins.st.css */</span>
 <span class="nc">.root</span> <span class="p">{</span>
@@ -186,9 +186,9 @@ If you need to return only a single declaration value using code, we recommend i
 <h3 id="css-mixin-with-parameters-and-variables">CSS mixin with parameters and variables</h3>
 
 <p>CSS mixins can accept named parameters in the following format:
- <code class="highlighter-rouge">mixin(variableName valueOverride, variableName2 valueOverride2)</code>. 
+ <code class="language-plaintext highlighter-rouge">mixin(variableName valueOverride, variableName2 valueOverride2)</code>. 
 Multiple variables can be comma separated or written on multiple lines:
- <code class="highlighter-rouge">mixin (
+ <code class="language-plaintext highlighter-rouge">mixin (
      variableName valueOverride,
      variableName2 valueOverride2
  )</code></p>
@@ -265,8 +265,8 @@ Multiple variables can be comma separated or written on multiple lines:
 
 <p>Mixins can return multiple style-rules that are mixed into the target stylesheet. These style-rules can be written with the following syntax options:</p>
 <ul>
-  <li><code class="highlighter-rouge">selector</code> - resulting ruleset is appended as a descendent selector to its mixed in target (in below example <code class="highlighter-rouge">.otherClass</code>)</li>
-  <li><code class="highlighter-rouge">&amp;selector</code> - resulting ruleset references the parent selector into which it was mixed in (in below example <code class="highlighter-rouge">&amp;:hover</code>, the parent selector is <code class="highlighter-rouge">.codeMixedIn</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">selector</code> - resulting ruleset is appended as a descendent selector to its mixed in target (in below example <code class="language-plaintext highlighter-rouge">.otherClass</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">&amp;selector</code> - resulting ruleset references the parent selector into which it was mixed in (in below example <code class="language-plaintext highlighter-rouge">&amp;:hover</code>, the parent selector is <code class="language-plaintext highlighter-rouge">.codeMixedIn</code>)</li>
 </ul>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* file my-mixin.js */</span>
@@ -276,11 +276,11 @@ Multiple variables can be comma separated or written on multiple lines:
     <span class="k">return</span> <span class="p">{</span>
         <span class="na">color</span><span class="p">:</span> <span class="nx">color</span><span class="p">,</span>
         <span class="na">background</span><span class="p">:</span> <span class="nx">bgColor</span><span class="p">,</span>
-        <span class="s2">"&amp;:hover"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="na">color</span><span class="p">:</span> <span class="s2">"gold"</span>
+        <span class="dl">"</span><span class="s2">&amp;:hover</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">color</span><span class="p">:</span> <span class="dl">"</span><span class="s2">gold</span><span class="dl">"</span>
         <span class="p">},</span>
-        <span class="s2">".otherClass"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="na">color</span><span class="p">:</span> <span class="s2">"purple"</span>
+        <span class="dl">"</span><span class="s2">.otherClass</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">color</span><span class="p">:</span> <span class="dl">"</span><span class="s2">purple</span><span class="dl">"</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">};</span>
@@ -317,10 +317,10 @@ Multiple variables can be comma separated or written on multiple lines:
 
 <p>Mixins can add CSS declarations to the CSS ruleset to which they are applied.</p>
 
-<p>Rules are added at the position in the CSS where the <code class="highlighter-rouge">-st-mixin</code> is declared.
+<p>Rules are added at the position in the CSS where the <code class="language-plaintext highlighter-rouge">-st-mixin</code> is declared.
 Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.</p>
 
-<p>You can apply multiple mixins from either CSS or JavaScript, or both separated by comma <code class="highlighter-rouge">-st-mixin: mixinA, mixinB</code>.
+<p>You can apply multiple mixins from either CSS or JavaScript, or both separated by comma <code class="language-plaintext highlighter-rouge">-st-mixin: mixinA, mixinB</code>.
 Multiple mixins are applied according to the order that they are declared left to right.</p>
 
 <h2 id="considerations-when-using-mixins">Considerations when using mixins</h2>
@@ -328,7 +328,7 @@ Multiple mixins are applied according to the order that they are declared left t
 <p>Take a look at these considerations before working with <strong>Stylable</strong> mixins.</p>
 
 <h3 id="mixin-usage-with-special-characters">Mixin usage with special characters</h3>
-<p>You can escape special characters by wrapping them with quotes or using a backslash (<code class="highlighter-rouge">\</code>).</p>
+<p>You can escape special characters by wrapping them with quotes or using a backslash (<code class="language-plaintext highlighter-rouge">\</code>).</p>
 
 <p>Example:</p>
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.x</span> <span class="p">{</span> <span class="c">/* use quotations to include comma */</span>

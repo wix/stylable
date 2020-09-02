@@ -103,14 +103,14 @@
 
 <section class="docs-content">
   <h1>Component Variants</h1>
-  <p>When building a <a href="./stylable-component-library">Stylable component library</a> or a <a href="./stylable-application">Stylable application</a>, it is useful to define several semantic “flavors” of some components, for example a <code class="highlighter-rouge">Button</code> component that represents <code class="highlighter-rouge">cancel</code> or a <code class="highlighter-rouge">Gallery</code> component for the <code class="highlighter-rouge">main</code> gallery instance.</p>
+  <p>When building a <a href="./stylable-component-library">Stylable component library</a> or a <a href="./stylable-application">Stylable application</a>, it is useful to define several semantic “flavors” of some components, for example a <code class="language-plaintext highlighter-rouge">Button</code> component that represents <code class="language-plaintext highlighter-rouge">cancel</code> or a <code class="language-plaintext highlighter-rouge">Gallery</code> component for the <code class="language-plaintext highlighter-rouge">main</code> gallery instance.</p>
 
 <h2 id="defining-a-component-variant">Defining a component variant</h2>
 
-<p>In your project’s <a href="./project-commons">Stylable stylesheet</a> used for the commonly used components in your project (usually named <code class="highlighter-rouge">project.st.css</code>) you:</p>
+<p>In your project’s <a href="./project-commons">Stylable stylesheet</a> used for the commonly used components in your project (usually named <code class="language-plaintext highlighter-rouge">project.st.css</code>) you:</p>
 <ol>
   <li>Import a component stylesheet.</li>
-  <li>Define a CSS class with a descriptive name like <code class="highlighter-rouge">cancelButton</code>.</li>
+  <li>Define a CSS class with a descriptive name like <code class="language-plaintext highlighter-rouge">cancelButton</code>.</li>
   <li>Extend the component on the class you just defined.</li>
 </ol>
 
@@ -151,7 +151,7 @@ js value: "comp__cancel project__cancelButton"
 
 <blockquote>
   <p><strong>Note</strong>: <br />
-For the <code class="highlighter-rouge">.cancelButton</code> selector, we manually added the <code class="highlighter-rouge">.root</code> class to avoid overriding <code class="highlighter-rouge">cancelButton</code> outside of this scope.</p>
+For the <code class="language-plaintext highlighter-rouge">.cancelButton</code> selector, we manually added the <code class="language-plaintext highlighter-rouge">.root</code> class to avoid overriding <code class="language-plaintext highlighter-rouge">cancelButton</code> outside of this scope.</p>
 </blockquote>
 
 </section>

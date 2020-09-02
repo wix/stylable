@@ -103,7 +103,7 @@
 
 <section class="docs-content">
   <h1>CSS Class Selectors</h1>
-  <p>You use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors">CSS classes</a> to define the local name of internal component parts. For example, you can define a <code class="highlighter-rouge">.button</code> in a menu component.</p>
+  <p>You use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors">CSS classes</a> to define the local name of internal component parts. For example, you can define a <code class="language-plaintext highlighter-rouge">.button</code> in a menu component.</p>
 
 <p>In <strong>Stylable</strong>, class selectors are scoped to the <a href="./namespace">namespace</a> of the stylesheet.</p>
 
@@ -123,8 +123,8 @@
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
-<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./comp.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>
@@ -139,17 +139,17 @@
 
 <blockquote>
   <p><strong>Note:</strong><br />
-In <strong>Stylable</strong>, as you can see in these examples, <code class="highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
+In <strong>Stylable</strong>, as you can see in these examples, <code class="language-plaintext highlighter-rouge">.root</code> as a class name is reserved for the main <a href="./root">root</a>.<br />
 CSS class can also define <a href="./pseudo-classes">states</a> and <a href="./extend-stylesheet">extend another component</a>.</p>
 </blockquote>
 
 <h2 id="class-selector-export">Class selector export</h2>
 
-<p>Any class defined in a <strong>Stylable</strong> stylesheet is exported as a named export and can be imported by other stylesheets using the directive <code class="highlighter-rouge">-st-named</code>. These classes are also imported using the <a href="../getting-started/react-integration">react-integration</a> and applied to the DOM as needed.</p>
+<p>Any class defined in a <strong>Stylable</strong> stylesheet is exported as a named export and can be imported by other stylesheets using the directive <code class="language-plaintext highlighter-rouge">-st-named</code>. These classes are also imported using the <a href="../getting-started/react-integration">react-integration</a> and applied to the DOM as needed.</p>
 
 <blockquote>
   <p><strong>Note</strong>:
-Classes imported this way should be scoped to your local stylesheet by adding <code class="highlighter-rouge">.root</code> or a local class as a prefix to the selector. Adding the scoping causes the selector to affect only the rendering subtree from this point onwards. If classes are imported without scoping to your local stylesheet, this may cause unexpected effects throughout your project.</p>
+Classes imported this way should be scoped to your local stylesheet by adding <code class="language-plaintext highlighter-rouge">.root</code> or a local class as a prefix to the selector. Adding the scoping causes the selector to affect only the rendering subtree from this point onwards. If classes are imported without scoping to your local stylesheet, this may cause unexpected effects throughout your project.</p>
 </blockquote>
 
 <h3 id="example">Example</h3>

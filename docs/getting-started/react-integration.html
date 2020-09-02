@@ -109,7 +109,7 @@
 
 <p>To manualy integrate <strong>Stylable</strong> to a React component, you <strong>must</strong> first mark the root element of the component:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">style.st.css</span><span class="dl">"</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
@@ -126,20 +126,20 @@
 
 <p>The result of the above generates and adds the props needed to define the root element for styling:</p>
 <ul>
-  <li>Marks component root by setting the root target <code class="highlighter-rouge">className</code></li>
+  <li>Marks component root by setting the root target <code class="language-plaintext highlighter-rouge">className</code></li>
   <li>Sets component states using generated class names</li>
-  <li>Appends <code class="highlighter-rouge">className</code> override from component props to the root <code class="highlighter-rouge">className</code></li>
+  <li>Appends <code class="language-plaintext highlighter-rouge">className</code> override from component props to the root <code class="language-plaintext highlighter-rouge">className</code></li>
   <li>Custom or overridden component states are added via additional class names</li>
 </ul>
 
 <blockquote>
   <p><strong>Note</strong><br />
-To enable external styling, we recommend passing the <code class="highlighter-rouge">className</code> prop. To make the component more stylable, we also recommend also merging the <code class="highlighter-rouge">style</code> prop.</p>
+To enable external styling, we recommend passing the <code class="language-plaintext highlighter-rouge">className</code> prop. To make the component more stylable, we also recommend also merging the <code class="language-plaintext highlighter-rouge">style</code> prop.</p>
 </blockquote>
 
-<p>All nodes, other than <code class="highlighter-rouge">root</code>, can be marked directly with the class mapping and the <a href="../guides/runtime#custom-state-mapping">$cssStates</a> function:</p>
+<p>All nodes, other than <code class="language-plaintext highlighter-rouge">root</code>, can be marked directly with the class mapping and the <a href="../guides/runtime#custom-state-mapping">$cssStates</a> function:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">cssStates</span> <span class="p">}</span> <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span><span class="p">,</span> <span class="nx">cssStates</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">style.st.css</span><span class="dl">"</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>

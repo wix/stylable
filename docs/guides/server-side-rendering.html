@@ -110,15 +110,15 @@
 <p>When creating your library / application you will see that you might need to make some changes to your project publish / consumption process in order to integrate Stylable to your SSR flow.</p>
 
 <h2 id="rendering-stylable-in-the-client">Rendering Stylable in the Client</h2>
-<p>To integrate Stylable into your application, use <code class="highlighter-rouge">@stylable/webpack-plugin</code> and <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">configure</a> it according to your project needs.</p>
+<p>To integrate Stylable into your application, use <code class="language-plaintext highlighter-rouge">@stylable/webpack-plugin</code> and <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">configure</a> it according to your project needs.</p>
 
 <h2 id="transforming-stylable-in-the-server">Transforming Stylable in the Server</h2>
-<p>In order to use Stylable imports from your source files in <code class="highlighter-rouge">nodeJS</code>, you will need to add <code class="highlighter-rouge">@stylable/node</code> as a dependency.</p>
+<p>In order to use Stylable imports from your source files in <code class="language-plaintext highlighter-rouge">nodeJS</code>, you will need to add <code class="language-plaintext highlighter-rouge">@stylable/node</code> as a dependency.</p>
 
-<p>Import and use its <code class="highlighter-rouge">requireHook</code> method before rendering to enable requiring Stylable stylesheets in their <code class="highlighter-rouge">CommonJS</code> module format.</p>
+<p>Import and use its <code class="language-plaintext highlighter-rouge">requireHook</code> method before rendering to enable requiring Stylable stylesheets in their <code class="language-plaintext highlighter-rouge">CommonJS</code> module format.</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// server.js </span>
-<span class="kd">const</span> <span class="p">{</span> <span class="nx">attachHook</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'@stylable/node'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">attachHook</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">@stylable/node</span><span class="dl">'</span><span class="p">);</span>
 
 <span class="nx">attachHook</span><span class="p">();</span> <span class="c1">// enables requiring .st.css files as CommonJS</span>
 
@@ -128,7 +128,7 @@
 <h2 id="matching-namespaces">Matching namespaces</h2>
 <p>In order to ensure full SSR compatibility, <strong>generated namespaces for all stylesheets must match exactly</strong> across all different build targets.</p>
 
-<p>The default Stylable <code class="highlighter-rouge">namespaceResolver</code> uses a combination of file-system path, name and version from the <code class="highlighter-rouge">package.json</code> file to create its namespace. This means that namespaces can be influenced by the published file path structure.</p>
+<p>The default Stylable <code class="language-plaintext highlighter-rouge">namespaceResolver</code> uses a combination of file-system path, name and version from the <code class="language-plaintext highlighter-rouge">package.json</code> file to create its namespace. This means that namespaces can be influenced by the published file path structure.</p>
 
 <p>If you choose to provide an alternative namespace resolver that does not depend on file paths as part of its namespace creation, then you can avoid the problem described below.</p>
 
@@ -136,15 +136,15 @@
 
 <p>When building a library or application for consumption in both client and server environments it is common to output multiple transpilation targets for various module systems.</p>
 
-<p>This means that a published project will usually have both <code class="highlighter-rouge">CommonJS</code> and <code class="highlighter-rouge">ES modules</code>, each with their own transpiled copy of the project, including the Stylable assets.</p>
+<p>This means that a published project will usually have both <code class="language-plaintext highlighter-rouge">CommonJS</code> and <code class="language-plaintext highlighter-rouge">ES modules</code>, each with their own transpiled copy of the project, including the Stylable assets.</p>
 
 <p>This can pose a problem when trying to synchronize namespace creation for SSR.</p>
 
-<h3 id="publishing-ssr-ready-source-files-stcss">Publishing SSR-ready source files (<code class="highlighter-rouge">*.st.css</code>)</h3>
+<h3 id="publishing-ssr-ready-source-files-stcss">Publishing SSR-ready source files (<code class="language-plaintext highlighter-rouge">*.st.css</code>)</h3>
 
-<p>The Stylable CLI offers a feature that allows you to sync your namespace across dist targets by inserting a custom header comment to the start of your <code class="highlighter-rouge">.st.css</code> file. This header comment is used to normalize namespacing paths across different build targets.</p>
+<p>The Stylable CLI offers a feature that allows you to sync your namespace across dist targets by inserting a custom header comment to the start of your <code class="language-plaintext highlighter-rouge">.st.css</code> file. This header comment is used to normalize namespacing paths across different build targets.</p>
 
-<p>When using <code class="highlighter-rouge">@stylable/cli</code> to publish your source stylesheets, use the <code class="highlighter-rouge">useNamespaceReference</code> flag to mark all targets as originating from the same original source.</p>
+<p>When using <code class="language-plaintext highlighter-rouge">@stylable/cli</code> to publish your source stylesheets, use the <code class="language-plaintext highlighter-rouge">useNamespaceReference</code> flag to mark all targets as originating from the same original source.</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stc <span class="nt">--srcDir</span> ./src <span class="nt">--outDir</span> ./dist/cjs <span class="nt">--cjs</span> <span class="nt">--stcss</span> <span class="nt">--useNamespaceReference</span>
 </code></pre></div></div>

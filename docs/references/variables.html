@@ -115,7 +115,7 @@ Variables are scoped to the specific stylesheet and do not conflict with variabl
 
 <h2 id="use-in-stylesheet">Use in stylesheet</h2>
 
-<p>Use the syntax <code class="highlighter-rouge">:vars</code> to define variables, and apply them with a <code class="highlighter-rouge">value()</code>:</p>
+<p>Use the syntax <code class="language-plaintext highlighter-rouge">:vars</code> to define variables, and apply them with a <code class="language-plaintext highlighter-rouge">value()</code>:</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Example1"</span><span class="p">;</span>
@@ -195,17 +195,17 @@ Imported variables are not exported from the stylesheet that has imported them. 
 <h2 id="advanced-variable-types">Advanced variable types</h2>
 <p>You can use Stylable custom types when defining a variable to group multiple values under a shared context. This gives you a better way to define and manage variables in your stylesheet.</p>
 
-<p>Stylable does this by utilizing a type function in the variable definition and passing additional arguments to the <code class="highlighter-rouge">value()</code> function.</p>
+<p>Stylable does this by utilizing a type function in the variable definition and passing additional arguments to the <code class="language-plaintext highlighter-rouge">value()</code> function.</p>
 
 <h3 id="stylable-native-variable-types">Stylable native variable types</h3>
 <p>By default, Stylable exposes two types of variables that are available globally and do not require a special import:</p>
 <ul>
-  <li><code class="highlighter-rouge">stMap</code></li>
-  <li><code class="highlighter-rouge">stArray</code></li>
+  <li><code class="language-plaintext highlighter-rouge">stMap</code></li>
+  <li><code class="language-plaintext highlighter-rouge">stArray</code></li>
 </ul>
 
 <h4 id="stmap">stMap</h4>
-<p>Use the <code class="highlighter-rouge">stMap</code> function to provide an interface similar to a map. You can group variables by context and retrieve them by key.</p>
+<p>Use the <code class="language-plaintext highlighter-rouge">stMap</code> function to provide an interface similar to a map. You can group variables by context and retrieve them by key.</p>
 
 <p>Its definition is comprised of key/value pairs with a space as a delimiter between them, and a comma as a separator between pairs.</p>
 
@@ -222,7 +222,7 @@ Imported variables are not exported from the stylesheet that has imported them. 
 </code></pre></div></div>
 
 <h4 id="starray">stArray</h4>
-<p>Use the <code class="highlighter-rouge">stArray</code> function to provide an interface which is similar to an array. This enables you to group variables by context and retrieve them by their index.</p>
+<p>Use the <code class="language-plaintext highlighter-rouge">stArray</code> function to provide an interface which is similar to an array. This enables you to group variables by context and retrieve them by their index.</p>
 
 <p>Its definition is comprised of values that are zero-based and comma separated.</p>
 
@@ -237,9 +237,9 @@ Imported variables are not exported from the stylesheet that has imported them. 
 
 <h3 id="custom-variable-type">Custom variable type</h3>
 
-<p>Stylable also offers a custom variable type, <code class="highlighter-rouge">stBorder</code>, that must be imported from the <code class="highlighter-rouge">@stylable/custom-value</code> <a href="https://github.com/wix/stylable/tree/master/packages/custom-value">package</a>.</p>
+<p>Stylable also offers a custom variable type, <code class="language-plaintext highlighter-rouge">stBorder</code>, that must be imported from the <code class="language-plaintext highlighter-rouge">@stylable/custom-value</code> <a href="https://github.com/wix/stylable/tree/master/packages/custom-value">package</a>.</p>
 
-<p><code class="highlighter-rouge">stBorder</code> accepts three arguments, <code class="highlighter-rouge">size</code>, <code class="highlighter-rouge">style</code> and <code class="highlighter-rouge">color</code> in that order. When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.</p>
+<p><code class="language-plaintext highlighter-rouge">stBorder</code> accepts three arguments, <code class="language-plaintext highlighter-rouge">size</code>, <code class="language-plaintext highlighter-rouge">style</code> and <code class="language-plaintext highlighter-rouge">color</code> in that order. When using the type, you can either invoke the entire border definition (by not passing an additional argument), or specific parts of it, according to their key.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"@stylable/custom-value"</span><span class="p">;</span>
@@ -257,7 +257,7 @@ Imported variables are not exported from the stylesheet that has imported them. 
 <span class="p">}</span>
 </code></pre></div></div>
 <blockquote>
-  <p>Note: <code class="highlighter-rouge">stBorder</code> is just the first of future custom variable types that will be available in Stylable.</p>
+  <p>Note: <code class="language-plaintext highlighter-rouge">stBorder</code> is just the first of future custom variable types that will be available in Stylable.</p>
 </blockquote>
 
 </section>

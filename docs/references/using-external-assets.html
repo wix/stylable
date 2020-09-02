@@ -105,13 +105,13 @@
   <h1>Using External Assets</h1>
   <p>Stylable supports usage of <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/url()">url functions</a> to use assets as you normally would in CSS.</p>
 
-<p>The value passed to the <code class="highlighter-rouge">url()</code> function is resolved differently in CSS as comapred to the Node request resolution algorithm, used for Stylable stylesheet and symbol resolutions.</p>
+<p>The value passed to the <code class="language-plaintext highlighter-rouge">url()</code> function is resolved differently in CSS as comapred to the Node request resolution algorithm, used for Stylable stylesheet and symbol resolutions.</p>
 
-<p>The <code class="highlighter-rouge">url()</code> function has no notion of external packages or dependencies.</p>
+<p>The <code class="language-plaintext highlighter-rouge">url()</code> function has no notion of external packages or dependencies.</p>
 
 <h3 id="resolving-3rd-party-assets">Resolving 3rd-party assets</h3>
 
-<p>In order to import <code class="highlighter-rouge">url()</code> assets from dependencies inside your <code class="highlighter-rouge">node_modules</code> directory, Stylable supports the <code class="highlighter-rouge">~</code> URL prefix.</p>
+<p>In order to import <code class="language-plaintext highlighter-rouge">url()</code> assets from dependencies inside your <code class="language-plaintext highlighter-rouge">node_modules</code> directory, Stylable supports the <code class="language-plaintext highlighter-rouge">~</code> URL prefix.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.root</span> <span class="p">{</span>
   <span class="c">/* resolves as the node request: "my-package/asset.png" */</span>

@@ -103,14 +103,14 @@
 
 <section class="docs-content">
   <h1>Extend Stylable Stylesheet</h1>
-  <p>Use the <code class="highlighter-rouge">-st-extends</code> directive rule to extend a CSS class with another stylesheet. This enables you to style <a href="./pseudo-classes">pseudo-classes</a> and <a href="./pseudo-elements">pseudo-elements</a> of the extended stylesheet.</p>
+  <p>Use the <code class="language-plaintext highlighter-rouge">-st-extends</code> directive rule to extend a CSS class with another stylesheet. This enables you to style <a href="./pseudo-classes">pseudo-classes</a> and <a href="./pseudo-elements">pseudo-elements</a> of the extended stylesheet.</p>
 
 <blockquote>
   <p><strong>Note</strong><br />
-<code class="highlighter-rouge">-st-extends</code> can be applied only to <a href="./class-selectors">class selectors</a> and <a href="./root">root</a>.</p>
+<code class="language-plaintext highlighter-rouge">-st-extends</code> can be applied only to <a href="./class-selectors">class selectors</a> and <a href="./root">root</a>.</p>
 </blockquote>
 
-<p>In this example, the stylesheet is extending the <code class="highlighter-rouge">toggle-button.st.css</code> stylesheet. The <code class="highlighter-rouge">checkBtn</code> class has a <code class="highlighter-rouge">label</code>, which is a custom pseudo-element, and has a custom pseudo-class, <code class="highlighter-rouge">toggled</code>.</p>
+<p>In this example, the stylesheet is extending the <code class="language-plaintext highlighter-rouge">toggle-button.st.css</code> stylesheet. The <code class="language-plaintext highlighter-rouge">checkBtn</code> class has a <code class="language-plaintext highlighter-rouge">label</code>, which is a custom pseudo-element, and has a custom pseudo-class, <code class="language-plaintext highlighter-rouge">toggled</code>.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* page.st.css */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
@@ -133,10 +133,10 @@
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* page.jsx */</span>
-<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./comp.st.css</span><span class="dl">'</span><span class="p">;</span>
 
-<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="s1">'./toggle-button'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./toggle-button</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Page</span> <span class="p">{</span>
     <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
@@ -159,13 +159,13 @@
 
 <h3 id="extending-a-root">Extending a root</h3>
 
-<p>When extending a <code class="highlighter-rouge">root</code> class, Stylable assumes the component itself will place its own <code class="highlighter-rouge">root</code> class, and as such Stylable exports only the local className during runtime.</p>
+<p>When extending a <code class="language-plaintext highlighter-rouge">root</code> class, Stylable assumes the component itself will place its own <code class="language-plaintext highlighter-rouge">root</code> class, and as such Stylable exports only the local className during runtime.</p>
 
-<p>The extended component will receive the extending (external) class name through its props and concat it to the <code class="highlighter-rouge">root</code> node class list.</p>
+<p>The extended component will receive the extending (external) class name through its props and concat it to the <code class="language-plaintext highlighter-rouge">root</code> node class list.</p>
 
 <h3 id="extending-an-inner-part">Extending an inner part</h3>
 
-<p>Any class other than <code class="highlighter-rouge">root</code> defined in a Stylesheet is considered an inner part. Usually in Stylable extending a class signifies the use of a <a href="../guides/component-variants">variant</a> or composed* utility class.</p>
+<p>Any class other than <code class="language-plaintext highlighter-rouge">root</code> defined in a Stylesheet is considered an inner part. Usually in Stylable extending a class signifies the use of a <a href="../guides/component-variants">variant</a> or composed* utility class.</p>
 
 <p>* - Stylable currently does not support composing multiple classes on the same part. We hope to introduce this capability in the near future.</p>
 
@@ -196,7 +196,7 @@
 </code></pre></div></div>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* runtime JS output*/</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./page.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./page.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">defaultCheckBtn</span><span class="p">)</span> <span class="c1">// "Page__defaultCheckBtn"</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">variantCheckBtn</span><span class="p">)</span> <span class="c1">// "Page__variantCheckBtn ToggleButton__toggleVariant"</span>

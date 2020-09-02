@@ -111,7 +111,7 @@
 
 <h2 id="usage">Usage</h2>
 
-<p>The following code maps the alias name <code class="highlighter-rouge">controlBtn</code> that matches any <code class="highlighter-rouge">.btn</code> CSS class nested under the <code class="highlighter-rouge">.controls</code> CSS class.</p>
+<p>The following code maps the alias name <code class="language-plaintext highlighter-rouge">controlBtn</code> that matches any <code class="language-plaintext highlighter-rouge">.btn</code> CSS class nested under the <code class="language-plaintext highlighter-rouge">.controls</code> CSS class.</p>
 
 <hr />
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
@@ -129,7 +129,7 @@ selector: .Comp__root .Comp__controls .Comp__btn:hover
 
 <h3 id="expose-pseudo-element">Expose pseudo-element</h3>
 
-<p>Custom selectors generate a <a href="./pseudo-elements">pseudo-element</a>. So, for example, <a href="./imports">importing</a> a stylesheet into another stylesheet enables access to the <code class="highlighter-rouge">controlBtn</code> pseudo-element. In this example, the stylesheet <code class="highlighter-rouge">comp.st.css</code> from the previous example is imported into this stylesheet.</p>
+<p>Custom selectors generate a <a href="./pseudo-elements">pseudo-element</a>. So, for example, <a href="./imports">importing</a> a stylesheet into another stylesheet enables access to the <code class="language-plaintext highlighter-rouge">controlBtn</code> pseudo-element. In this example, the stylesheet <code class="language-plaintext highlighter-rouge">comp.st.css</code> from the previous example is imported into this stylesheet.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>
@@ -147,7 +147,7 @@ selector: .Page__root .Comp__root .Comp__controls .Comp__btn
 
 <blockquote>
   <p><strong>Note</strong>:  <br />
-If a <code class="highlighter-rouge">custom-selector</code> alias conflicts with a local CSS class name, the exposed <code class="highlighter-rouge">pseudo-element</code> targets the <code class="highlighter-rouge">custom-selector</code>. However, the exported CSS class is still exported to JavaScript.</p>
+If a <code class="language-plaintext highlighter-rouge">custom-selector</code> alias conflicts with a local CSS class name, the exposed <code class="language-plaintext highlighter-rouge">pseudo-element</code> targets the <code class="language-plaintext highlighter-rouge">custom-selector</code>. However, the exported CSS class is still exported to JavaScript.</p>
 </blockquote>
 
 <h2 id="use-cases">Use cases</h2>
@@ -158,7 +158,7 @@ If a <code class="highlighter-rouge">custom-selector</code> alias conflicts with
 
 <p>Some components might contain nested instances of themselves because they’re a container or a “recursive” component. For example, a tree component might render itself.</p>
 
-<p>If the component exposes any <code class="highlighter-rouge">pseudo-elements</code>, it is a good practice to define them as <code class="highlighter-rouge">custom selectors</code> with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors">child selectors</a> to avoid affecting the inner parts of internal instances.</p>
+<p>If the component exposes any <code class="language-plaintext highlighter-rouge">pseudo-elements</code>, it is a good practice to define them as <code class="language-plaintext highlighter-rouge">custom selectors</code> with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Child_selectors">child selectors</a> to avoid affecting the inner parts of internal instances.</p>
 
 <p>The following example shows how a tree component exposes an icon.</p>
 
@@ -167,7 +167,7 @@ If a <code class="highlighter-rouge">custom-selector</code> alias conflicts with
 <span class="k">@custom-selector</span> <span class="p">:</span><span class="n">--icon</span> <span class="p">.</span><span class="n">root</span> <span class="err">&gt;</span> <span class="p">.</span><span class="nb">icon</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p>Here you can use the icon <code class="highlighter-rouge">custom selector</code> from the outside just like you would use any other <code class="highlighter-rouge">pseudo-element</code>.</p>
+<p>Here you can use the icon <code class="language-plaintext highlighter-rouge">custom selector</code> from the outside just like you would use any other <code class="language-plaintext highlighter-rouge">pseudo-element</code>.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Panel"</span><span class="p">;</span>
@@ -185,9 +185,9 @@ selector: .Panel__root .Tree__root &gt; .Tree__icon
 
 <h3 id="expose-inner-parts-that-are-deeply-defined">Expose inner parts that are deeply defined</h3>
 
-<p>When you want to make internal parts of your component API more accessible, you can describe <code class="highlighter-rouge">pseudo-elements</code> using <code class="highlighter-rouge">custom selectors</code>.</p>
+<p>When you want to make internal parts of your component API more accessible, you can describe <code class="language-plaintext highlighter-rouge">pseudo-elements</code> using <code class="language-plaintext highlighter-rouge">custom selectors</code>.</p>
 
-<p>For example, you can expose a <code class="highlighter-rouge">pseudo-element</code> named <code class="highlighter-rouge">navigationBtn</code> that enables you to style an internal gallery component’s <code class="highlighter-rouge">navBtn</code> element.</p>
+<p>For example, you can expose a <code class="language-plaintext highlighter-rouge">pseudo-element</code> named <code class="language-plaintext highlighter-rouge">navigationBtn</code> that enables you to style an internal gallery component’s <code class="language-plaintext highlighter-rouge">navBtn</code> element.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="nd">:import</span> <span class="p">{</span>
@@ -199,9 +199,9 @@ selector: .Panel__root .Tree__root &gt; .Tree__icon
 
 <h3 id="combination-selector">Combination selector</h3>
 
-<p>You may have a component with several basic CSS classes and with corresponding <code class="highlighter-rouge">pseudo-elements</code>. You could expose a combination <code class="highlighter-rouge">pseudo-element</code>.</p>
+<p>You may have a component with several basic CSS classes and with corresponding <code class="language-plaintext highlighter-rouge">pseudo-elements</code>. You could expose a combination <code class="language-plaintext highlighter-rouge">pseudo-element</code>.</p>
 
-<p>For example, a <code class="highlighter-rouge">pseudo-element</code> named <code class="highlighter-rouge">navBtn</code> matches any <code class="highlighter-rouge">btn</code> CSS class nested in a <code class="highlighter-rouge">nav</code> CSS class.</p>
+<p>For example, a <code class="language-plaintext highlighter-rouge">pseudo-element</code> named <code class="language-plaintext highlighter-rouge">navBtn</code> matches any <code class="language-plaintext highlighter-rouge">btn</code> CSS class nested in a <code class="language-plaintext highlighter-rouge">nav</code> CSS class.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
@@ -241,9 +241,9 @@ selector:
 
 <h4 id="issues-to-consider">Issues to consider</h4>
 
-<p>Aliasing multiple selectors in a <code class="highlighter-rouge">custom selector</code> may generate lots of CSS that could affect performance.</p>
+<p>Aliasing multiple selectors in a <code class="language-plaintext highlighter-rouge">custom selector</code> may generate lots of CSS that could affect performance.</p>
 
-<p>For example, when you import the <code class="highlighter-rouge">Comp</code> stylesheet (the selector described in the previous example) into another stylesheet, in the output the selector is split for each override.</p>
+<p>For example, when you import the <code class="language-plaintext highlighter-rouge">Comp</code> stylesheet (the selector described in the previous example) into another stylesheet, in the output the selector is split for each override.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Page"</span><span class="p">;</span>

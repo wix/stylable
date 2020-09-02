@@ -103,13 +103,13 @@
 
 <section class="docs-content">
   <h1>Root</h1>
-  <p>Every Stylable stylesheet has a reserved class called <code class="highlighter-rouge">root</code> that matches the root node of the component.</p>
+  <p>Every Stylable stylesheet has a reserved class called <code class="language-plaintext highlighter-rouge">root</code> that matches the root node of the component.</p>
 
-<p>The <code class="highlighter-rouge">root</code> class is used to signify a rendering component top-level where a new  scope of namespacing is created. Each component is responsible for placing the <code class="highlighter-rouge">root</code> class on its top-level node for itself.</p>
+<p>The <code class="language-plaintext highlighter-rouge">root</code> class is used to signify a rendering component top-level where a new  scope of namespacing is created. Each component is responsible for placing the <code class="language-plaintext highlighter-rouge">root</code> class on its top-level node for itself.</p>
 
 <p>You can apply default styling and behavior to the component on the root class itself.</p>
 
-<p>If the root class exists and is being used, all other classes defined in the stylesheet are assumed to be nested under the <code class="highlighter-rouge">root</code> class (at any depth).</p>
+<p>If the root class exists and is being used, all other classes defined in the stylesheet are assumed to be nested under the <code class="language-plaintext highlighter-rouge">root</code> class (at any depth).</p>
 
 <h2 id="examples">Examples</h2>
 
@@ -122,11 +122,11 @@
 <span class="nc">.Comp__root</span> <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span> <span class="p">}</span>
 </code></pre></div></div>
 
-<p>The <code class="highlighter-rouge">root</code> class name can be applied to a component node by using our <a href="../getting-started/react-integration">React integration</a>.</p>
+<p>The <code class="language-plaintext highlighter-rouge">root</code> class name can be applied to a component node by using our <a href="../getting-started/react-integration">React integration</a>.</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* comp.jsx */</span>
-<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="s1">'react'</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="s1">'./comp.st.css'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">React</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">style</span><span class="p">,</span> <span class="nx">classes</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./comp.st.css</span><span class="dl">'</span><span class="p">;</span>
 
 <span class="kd">class</span> <span class="nx">Comp</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">render</span> <span class="p">()</span> <span class="p">{</span>

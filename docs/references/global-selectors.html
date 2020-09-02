@@ -103,9 +103,9 @@
 
 <section class="docs-content">
   <h1>Global Selectors</h1>
-  <p>In <strong>Stylable</strong>, selectors are scoped to the stylesheet. But what if you want to target global or other selectors that are not scoped? You can use the <code class="highlighter-rouge">:global()</code> directive selector.</p>
+  <p>In <strong>Stylable</strong>, selectors are scoped to the stylesheet. But what if you want to target global or other selectors that are not scoped? You can use the <code class="language-plaintext highlighter-rouge">:global()</code> directive selector.</p>
 
-<p>In this example <code class="highlighter-rouge">.classB</code> and <code class="highlighter-rouge">.classC</code> are not scoped to <code class="highlighter-rouge">Comp</code> but are part of the selector query.</p>
+<p>In this example <code class="language-plaintext highlighter-rouge">.classB</code> and <code class="language-plaintext highlighter-rouge">.classC</code> are not scoped to <code class="language-plaintext highlighter-rouge">Comp</code> but are part of the selector query.</p>
 
 <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
 <span class="k">@namespace</span> <span class="s1">"Comp"</span><span class="p">;</span>
@@ -122,7 +122,7 @@
 
 <blockquote>
   <p><strong>Note</strong> <br />
-You can also use global to keep pseudo-classes native. You can describe them using the syntax below where <code class="highlighter-rouge">classA</code> is scoped and <code class="highlighter-rouge">:selected</code> is native.</p>
+You can also use global to keep pseudo-classes native. You can describe them using the syntax below where <code class="language-plaintext highlighter-rouge">classA</code> is scoped and <code class="language-plaintext highlighter-rouge">:selected</code> is native.</p>
 
   <div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.classA</span><span class="nd">:global</span><span class="o">(</span><span class="nd">:selected</span><span class="o">)</span> <span class="p">{</span>
     <span class="nl">color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>

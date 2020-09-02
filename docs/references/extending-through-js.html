@@ -237,8 +237,8 @@
 
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*my-formatter.ts*/</span>
 
-<span class="k">import</span> <span class="p">{</span><span class="nx">darken</span> <span class="k">as</span> <span class="nx">polishedDarken</span><span class="p">,</span> <span class="nx">lighten</span> <span class="k">as</span> <span class="nx">polishedLighten</span><span class="p">}</span> <span class="k">from</span> <span class="s1">'polished'</span><span class="p">;</span>
-<span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">darken</span> <span class="k">as</span> <span class="nx">polishedDarken</span><span class="p">,</span> <span class="nx">lighten</span> <span class="k">as</span> <span class="nx">polishedLighten</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">polished</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">stylable</span><span class="dl">"</span><span class="p">;</span>
 
 
 <span class="cm">/**
@@ -266,17 +266,17 @@ Here’s an example creating and using an expandOnHover mixin:</p>
 
 </code></pre></div></div>
 
-<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">,</span> <span class="nx">stCurves</span><span class="p">,</span> <span class="nx">stCssFragment</span><span class="p">}</span> <span class="k">from</span> <span class="s2">"stylable"</span><span class="p">;</span>
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span><span class="nx">stNumber</span><span class="p">,</span> <span class="nx">stColor</span><span class="p">,</span> <span class="nx">stCurves</span><span class="p">,</span> <span class="nx">stCssFragment</span><span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">stylable</span><span class="dl">"</span><span class="p">;</span>
 
 <span class="cm">/**
 * Expand
 */</span>
 <span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span> <span class="nx">durationMS</span><span class="p">:</span><span class="nx">stNumber</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="o">&gt;</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
                                <span class="nx">increaseBy</span><span class="p">:</span><span class="nx">stNumber</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
-                               <span class="nx">animationCurve</span><span class="p">:</span><span class="nx">stCurves</span> <span class="o">=</span> <span class="s1">'easeIn'</span><span class="p">):</span><span class="nx">stCssFragment</span><span class="p">{</span>
+                               <span class="nx">animationCurve</span><span class="p">:</span><span class="nx">stCurves</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">easeIn</span><span class="dl">'</span><span class="p">):</span><span class="nx">stCssFragment</span><span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="na">transition</span><span class="p">:</span><span class="s2">"all "</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="s2">"ms "</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
-        <span class="s2">":hover"</span><span class="p">:{</span>
+        <span class="na">transition</span><span class="p">:</span><span class="dl">"</span><span class="s2">all </span><span class="dl">"</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="dl">"</span><span class="s2">ms </span><span class="dl">"</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
+        <span class="dl">"</span><span class="s2">:hover</span><span class="dl">"</span><span class="p">:{</span>
             <span class="na">transform</span><span class="p">:</span><span class="nx">scale</span><span class="p">(</span><span class="nx">increaseBy</span><span class="p">)</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -312,8 +312,8 @@ Here is a the same formatter and mixin from above, written in js with JS docs.</
 */</span>
 <span class="k">export</span> <span class="kd">function</span> <span class="nx">expandOnHover</span><span class="p">(</span><span class="nx">durationMS</span><span class="p">,</span><span class="nx">increaseBy</span><span class="p">,</span><span class="nx">animationCurve</span><span class="p">){</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="na">transition</span><span class="p">:</span><span class="s2">"all "</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="s2">"ms "</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
-        <span class="s2">":hover"</span><span class="p">:{</span>
+        <span class="na">transition</span><span class="p">:</span><span class="dl">"</span><span class="s2">all </span><span class="dl">"</span><span class="o">+</span><span class="nx">duration</span><span class="o">+</span><span class="dl">"</span><span class="s2">ms </span><span class="dl">"</span><span class="o">+</span><span class="nx">animationCurve</span><span class="p">;,</span>
+        <span class="dl">"</span><span class="s2">:hover</span><span class="dl">"</span><span class="p">:{</span>
             <span class="na">transform</span><span class="p">:</span><span class="nx">scale</span><span class="p">(</span><span class="nx">increaseBy</span><span class="p">)</span>
         <span class="p">}</span>
     <span class="p">}</span>

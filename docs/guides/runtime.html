@@ -122,12 +122,12 @@
     <span class="nx">stVars</span><span class="p">,</span>   <span class="c1">// stylable build-time variable values</span>
     <span class="nx">cssStates</span> <span class="c1">// utility function for setting stylable states</span>
     <span class="nx">keyframes</span> <span class="c1">// keyframes mapping</span>
-<span class="p">}</span>  <span class="k">from</span> <span class="s2">"style.st.css"</span><span class="p">;</span>
+<span class="p">}</span>  <span class="k">from</span> <span class="dl">"</span><span class="s2">style.st.css</span><span class="dl">"</span><span class="p">;</span>
 </code></pre></div></div>
 
 <h2 id="manual-mapping">Manual mapping</h2>
 
-<p>CSS class names, defined in the stylesheet, are exposed on the imported <code class="highlighter-rouge">classes</code> reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.</p>
+<p>CSS class names, defined in the stylesheet, are exposed on the imported <code class="language-plaintext highlighter-rouge">classes</code> reference and mapped to their runtime target value. The expected class name is then used as an element class name in the structure.</p>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span>  <span class="c1">// "style__root"</span>
 <span class="nx">classes</span><span class="p">.</span><span class="nx">label</span> <span class="c1">// "style__label"</span>
@@ -141,7 +141,7 @@ The <a href="../references/root">root class</a> is available even when it is not
 
 <h2 id="custom-state-mapping">Custom state mapping</h2>
 
-<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="highlighter-rouge">cssStates</code> function. The function accepts a map of local state names and generates string with concatenated class names used to mark the element state.</p>
+<p><a href="../references/pseudo-classes">Custom states</a>, which can be targeted from the style, are generated using the <code class="language-plaintext highlighter-rouge">cssStates</code> function. The function accepts a map of local state names and generates string with concatenated class names used to mark the element state.</p>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* { 'data-style-selected':true } */</span>
 <span class="nx">cssStates</span><span class="p">({</span> <span class="na">selected</span><span class="p">:</span><span class="kc">true</span> <span class="p">})</span>
@@ -169,13 +169,13 @@ The <a href="../references/root">root class</a> is available even when it is not
 <span class="cm">/* 'style__label style__icon' */</span>
 
 <span class="c1">// string pass-through</span>
-<span class="nx">style</span><span class="p">(</span><span class="s1">'root'</span><span class="p">)</span> 
+<span class="nx">style</span><span class="p">(</span><span class="dl">'</span><span class="s1">root</span><span class="dl">'</span><span class="p">)</span> 
 <span class="cm">/* 'root' */</span>
 </code></pre></div></div>
 
 <blockquote>
   <p><strong>Note</strong><br />
-Stylable no longer performs auto-scoping for classes, and strings are passed as-is. Use the <code class="highlighter-rouge">classes</code> mapping object to resolve to the scoped class name.</p>
+Stylable no longer performs auto-scoping for classes, and strings are passed as-is. Use the <code class="language-plaintext highlighter-rouge">classes</code> mapping object to resolve to the scoped class name.</p>
 </blockquote>
 
 <h3 id="custom-states">Custom states</h3>
@@ -195,17 +195,17 @@ Stylable no longer performs auto-scoping for classes, and strings are passed as-
 
 <h3 id="merge-props">Merge props</h3>
 
-<p>The third argument (and any arguments after) can be used for any additional classes that need to be applied to the element. In a component root node, it is recommended to pass along the <code class="highlighter-rouge">className</code> prop received through your parent component as props.</p>
+<p>The third argument (and any arguments after) can be used for any additional classes that need to be applied to the element. In a component root node, it is recommended to pass along the <code class="language-plaintext highlighter-rouge">className</code> prop received through your parent component as props.</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// this.props.className = 'app__root app--selected'</span>
 <span class="cm">/*  'style__root app__root app--selected' */</span>
 <span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span>
 
 <span class="cm">/*  'style__root label icon' */</span>
-<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">,</span> <span class="s1">'icon'</span><span class="p">)</span> <span class="c1">// label and icon are global (un-scoped)</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="dl">'</span><span class="s1">label</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">icon</span><span class="dl">'</span><span class="p">)</span> <span class="c1">// label and icon are global (un-scoped)</span>
 
 <span class="cm">/*  'style__root style--selected' */</span>
-<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="s1">'style--selected'</span><span class="p">)</span>
+<span class="nx">style</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="dl">'</span><span class="s1">style--selected</span><span class="dl">'</span><span class="p">)</span>
 </code></pre></div></div>
 
 </section>
