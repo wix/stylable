@@ -36,6 +36,33 @@ describe('stylable-forcestates-plugin', () => {
             '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
         );
     });
+    it('should mark a boolean state as forced using a data-attribute selector (namespace mapping function)', () => {
+        const res = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                    .root {
+                        -st-states: myState;
+                    }
+
+                    .root:myState {
+                        color: green;
+                    }
+                    `,
+                },
+            },
+        });
+
+        applyStylableForceStateSelectors(res.meta.outputAst!, (name) => {
+            return name === 'entry';
+        });
+
+        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+            '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
+        );
+    });
 
     it('should mark a native state as forced using a data-attribute selector', () => {
         const res = generateStylableResult({
