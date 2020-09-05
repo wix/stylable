@@ -17,9 +17,9 @@
   "devDependencies": {
     "@file-services/memory": "^3.1.2",
     "@file-services/node": "^3.1.1",
-    "@ts-tools/build": "^2.1.0",
-    "@ts-tools/node": "^2.1.0",
-    "@ts-tools/webpack-loader": "^2.1.0",
+    "@ts-tools/build": "^2.1.1",
+    "@ts-tools/node": "^2.1.1",
+    "@ts-tools/webpack-loader": "^2.1.1",
     "@types/chai": "^4.2.12",
     "@types/chai-subset": "^1.3.3",
     "@types/css-selector-tokenizer": "^0.7.0",
