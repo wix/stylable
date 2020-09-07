@@ -11,6 +11,7 @@ This enables developers greater freedom in generating CSS from code to provide c
 ## Plugin types
 
  **Stylable** supports the following types of plugins:
+* Values - string values exported from a javascript module.
 * [Formatters]('./formatters.md) - functions for manipulating single CSS declaration values.
 * [Mixins]('./mixins.md) - functions for generating a CSS fragment that can include single or multiple rulesets and declarations. 
 
@@ -48,6 +49,31 @@ Using these types enables the consumers of the plugin to receive code hinting an
 | &nbsp;&nbsp;&nbsp; | max&nbsp;&nbsp; | number |
 | &nbsp;&nbsp;&nbsp; | multiplesOf&nbsp;&nbsp; | number |
 | stEnum&nbsp;&nbsp; | allowedValues&nbsp;&nbsp; | string[] |
+
+
+
+## Extending through values
+
+Values are strings exported via JavaScript modules they can be used inside a Stylable value() function.
+
+```css 
+:import {
+    -st-from: "../my-js-values.js";
+    -st-named: myValue;
+}
+
+.myClass {
+    color: value(myValue);
+}
+```
+
+Uses the following TypeScript code:
+
+```ts
+/*my-js-values.ts*/
+export const myValue = 'red';
+```
+
 
 ## Extending through formatters
 
