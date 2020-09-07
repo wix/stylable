@@ -6,7 +6,75 @@ import {
     applyStylableForceStateSelectors,
     createDataAttr,
     OVERRIDE_STATE_PREFIX,
+    createForceStateMatchers,
+    DOMLocationBasedPseudoClasses,
 } from '@stylable/webpack-extensions';
+
+describe('createForceStateMatchers', () => {
+    it('should remove states from selector', () => {
+        const out = createForceStateMatchers('.x:hover:focus:disabled');
+        expect(out).to.eql([
+            [
+                {
+                    selector: '.x',
+                    states: [
+                        { type: 'pseudo-class', name: 'hover' },
+                        { type: 'pseudo-class', name: 'focus' },
+                        { type: 'pseudo-class', name: 'disabled' },
+                    ],
+                },
+            ],
+        ]);
+    });
+    it('should remove states from selector at all locations', () => {
+        const out = createForceStateMatchers('.x:hover:focus .y:disabled::part:hover');
+        expect(out).to.eql([
+            [
+                {
+                    selector: '.x',
+                    states: [
+                        { type: 'pseudo-class', name: 'hover' },
+                        { type: 'pseudo-class', name: 'focus' },
+                    ],
+                },
+                {
+                    selector: '.x .y',
+                    states: [{ type: 'pseudo-class', name: 'disabled' }],
+                },
+                {
+                    selector: '.x .y::part',
+                    states: [{ type: 'pseudo-class', name: 'hover' }],
+                },
+            ],
+        ]);
+    });
+
+    it('should ignore DOMStructurePseudoClasses from states', () => {
+        const out = createForceStateMatchers(
+            `.x:${Array.from(DOMLocationBasedPseudoClasses).join(':')}`
+        );
+        expect(out).to.eql([
+            [
+                {
+                    selector: `.x:${Array.from(DOMLocationBasedPseudoClasses).join(':')}`,
+                    states: [],
+                },
+            ],
+        ]);
+    });
+
+    it('should ignore :not() nested-pseudo-class states', () => {
+        const out = createForceStateMatchers(`.x:not(.y):hover`);
+        expect(out).to.eql([
+            [
+                {
+                    selector: `.x:not(.y)`,
+                    states: [{ type: 'pseudo-class', name: 'hover' }],
+                },
+            ],
+        ]);
+    });
+});
 
 describe('stylable-forcestates-plugin', () => {
     it('should mark a boolean state as forced using a data-attribute selector', () => {
