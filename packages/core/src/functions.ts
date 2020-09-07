@@ -204,6 +204,18 @@ export function processDeclarationValue(
                                             );
                                         }
                                     }
+                                } else if (
+                                    resolvedVar._kind === 'js' &&
+                                    typeof resolvedVar.symbol === 'string'
+                                ) {
+                                    parsedNode.resolvedValue = valueHook
+                                        ? valueHook(
+                                              resolvedVar.symbol,
+                                              varName,
+                                              false,
+                                              passedThrough
+                                          )
+                                        : resolvedVar.symbol;
                                 } else if (resolvedVar._kind === 'js' && diagnostics && node) {
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.warn(

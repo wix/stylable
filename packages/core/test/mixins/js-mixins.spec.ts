@@ -7,6 +7,95 @@ import { expect } from 'chai';
 import postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
+    it('javascript value', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./values";
+                        -st-named: myValue;
+                    }
+                    .container {
+                        background: value(myValue);
+                    }
+                `,
+                },
+                '/values.js': {
+                    content: `
+                    module.exports.myValue = 'red'; 
+                `,
+                },
+            },
+        });
+        const rule = result.nodes![0] as postcss.Rule;
+        expect(rule.nodes![0].toString()).to.equal('background: red');
+    });
+
+    it('javascript value in var definition', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./values";
+                        -st-named: myValue;
+                    }
+                    :vars {
+                        myCSSValue: value(myValue);
+                    }
+                    .container {
+                        background: value(myCSSValue);
+                    }
+                `,
+                },
+                '/values.js': {
+                    content: `
+                    module.exports.myValue = 'red'; 
+                `,
+                },
+            },
+        });
+        const rule = result.nodes![0] as postcss.Rule;
+        expect(rule.nodes![0].toString()).to.equal('background: red');
+    });
+
+    it('javascript value dose re-export to css', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./x.st.css";
+                        -st-named: myValue;
+                    }
+                    .container {
+                        background: value(myValue);
+                    }
+                `,
+                },
+                '/x.st.css': {
+                    content: `
+                    :import {
+                        -st-from: "./values";
+                        -st-named: myValue;
+                    }
+                `,
+                },
+                '/values.js': {
+                    content: `
+                    module.exports.myValue = 'red'; 
+                `,
+                },
+            },
+        });
+        const rule = result.nodes![0] as postcss.Rule;
+        expect(rule.nodes![0].toString()).to.equal('background: red');
+    });
+
     it('simple mixin', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
@@ -109,7 +198,6 @@ describe('Javascript Mixins', () => {
         expect(rule.nodes![0].toString()).to.equal('color: red');
         expect(rule.nodes![1].toString()).to.equal('color: blue');
     });
-
 
     it('simple mixin and remove all -st-mixins', () => {
         const result = generateStylableRoot({
