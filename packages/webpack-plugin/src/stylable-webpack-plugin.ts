@@ -314,10 +314,8 @@ export class StylableWebpackPlugin {
                     }
                 });
                 if (!shouldKeep) {
-                    if ((m as any).chunksIterable.size === 1) {
-                        if (m.buildInfo.isImportedByNonStylable) {
-                            return;
-                        }
+                    if (m.buildInfo.isImportedByNonStylable) {
+                        return;
                     }
                     chunk.removeModule(m);
                 }
