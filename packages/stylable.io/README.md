@@ -14,7 +14,7 @@ The site is build using [Jekyll](http://jekyllrb.com/). To modify the site, you 
 
 Run 
 ```
-yarn dev
+yarn start
 ```
 
 Deploy
