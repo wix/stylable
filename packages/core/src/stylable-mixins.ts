@@ -176,6 +176,11 @@ function createMixinRootFromCSSResolve(
     );
 
     const namedArgs = mix.mixin.options as Record<string, string>;
+
+    if (mix.mixin.partial) {
+        filterPartialMixinDecl(mixinRoot, Object.keys(namedArgs));
+    }
+
     const resolvedArgs = resolveArgumentsValue(
         namedArgs,
         transformer,
@@ -215,6 +220,13 @@ function handleImportedCSSMixin(
     variableOverride: Record<string, string>,
     cssVarsMapping: Record<string, string>
 ) {
+    const isPartial = mix.mixin.partial;
+    const namedArgs = mix.mixin.options as Record<string, string>;
+    const overrideKeys = Object.keys(namedArgs);
+
+    if (isPartial && overrideKeys.length === 0) {
+        return;
+    }
     let resolvedClass = transformer.resolver.resolve(mix.ref) as CSSResolve;
     const roots = [];
 
