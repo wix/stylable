@@ -8,10 +8,10 @@ import {
 } from '@stylable/core';
 import cloneDeep from 'lodash.clonedeep';
 import postcss from 'postcss';
+export * from './create-forcestate-matchers';
 
 // This transformation is applied on target AST code
 // Not Stylable source AST
-
 const nativePseudoClassesMap = nativePseudoClasses.reduce((acc, name: string) => {
     acc[name] = true;
     return acc;
@@ -21,8 +21,10 @@ export const OVERRIDE_STATE_PREFIX = 'stylable-force-state-';
 
 const { hasOwnProperty } = Object.prototype;
 
-const MATCH_STATE_CLASS = new RegExp(`^(.+?)${pseudoStates.booleanStateDelimiter}(.+)`);
-const MATCH_STATE_ATTR = new RegExp(`^class~="(.+?)${pseudoStates.booleanStateDelimiter}(.+)"`);
+export const MATCH_STATE_CLASS = new RegExp(`^(.+?)${pseudoStates.booleanStateDelimiter}(.+)`);
+export const MATCH_STATE_ATTR = new RegExp(
+    `^class~="(.+?)${pseudoStates.booleanStateDelimiter}(.+)"`
+);
 
 export function createDataAttr(dataAttrPrefix: string, stateName: string, param?: string) {
     const paramWithValueExtraDil = param !== undefined ? pseudoStates.stateMiddleDelimiter : '';
@@ -32,9 +34,14 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
 
 export function applyStylableForceStateSelectors(
     outputAst: postcss.Root,
-    namespaceMapping = {} as Record<string, boolean>,
+    namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
     dataPrefix = OVERRIDE_STATE_PREFIX
 ) {
+    const isKnownNamespace =
+        typeof namespaceMapping === 'function'
+            ? namespaceMapping
+            : (name: string) => hasOwnProperty.call(namespaceMapping, name);
+
     const mapping: Record<string, string> = {};
     addForceStateSelectors(outputAst, {
         getForceStateAttrContentFromNative(name) {
@@ -53,11 +60,11 @@ export function applyStylableForceStateSelectors(
         },
         isStateClassName(name) {
             const parts = name.match(MATCH_STATE_CLASS);
-            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
+            return parts ? isKnownNamespace(parts[1]) : false;
         },
         isStateAttr(content) {
             const parts = content.match(MATCH_STATE_ATTR);
-            return parts ? hasOwnProperty.call(namespaceMapping, parts[1]) : false;
+            return parts ? isKnownNamespace(parts[1]) : false;
         },
         onMapping(key, value) {
             mapping[key] = value;

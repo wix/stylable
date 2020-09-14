@@ -295,7 +295,7 @@ describe('CSS Mixins', () => {
         );
     });
 
-    it.skip('should scope @keyframes from local mixin without duplicating the animation', () => {
+    it('should scope @keyframes from local mixin without duplicating the animation', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -318,6 +318,83 @@ describe('CSS Mixins', () => {
         });
 
         matchRuleAndDeclaration(result, 2, '.entry__container', 'animation: entry__original 2s');
+    });
+
+    it('should scope @keyframes from imported mixin without duplicating the animation', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./imported.st.css";
+                    -st-named: my-mixin;
+                }
+                .container {
+                    -st-mixin: my-mixin;
+                }
+                `,
+                },
+                '/imported.st.css': {
+                    namespace: 'imported',
+                    content: `
+                .my-mixin {
+                    animation: original 2s;
+                }
+                @keyframes original {
+                    0% { color: red; }
+                    100% { color: green; }
+                }
+                `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'animation: imported__original 2s');
+    });
+
+    it('should scope @keyframes from root mixin (duplicate the entire @keyframe with origin context)', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./imported.st.css";
+                    -st-default: Imported;
+                }
+                .container {
+                    -st-mixin: Imported;
+                }
+                `,
+                },
+
+                '/imported.st.css': {
+                    namespace: 'imported',
+                    content: `
+                .my-mixin {
+                    animation: original 2s;
+                }
+                @keyframes original {
+                    0% { color: red; }
+                    100% { color: green; }
+                }
+                `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(
+            result,
+            1,
+            '.entry__container .imported__my-mixin',
+            'animation: imported__original 2s'
+        );
+        result.walkAtRules(/@keyframes/, (rule) => {
+            expect(rule.params).to.equal('imported__original');
+        });
     });
 
     it('apply class mixins from import', () => {

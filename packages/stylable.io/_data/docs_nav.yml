@@ -72,3 +72,5 @@
       title: Namespace
     - id: references/using-external-assets
       title: Using External Assets
+    - id: references/keyframes
+      title: Keyframes

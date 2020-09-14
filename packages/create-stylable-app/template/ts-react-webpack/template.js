@@ -11,6 +11,7 @@ module.exports = {
         'eslint-plugin-jsx-a11y',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
+        'eslint-plugin-stylable',
         'eslint',
         'file-loader',
         'html-webpack-plugin',

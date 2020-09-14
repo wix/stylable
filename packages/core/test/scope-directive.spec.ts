@@ -1,5 +1,4 @@
 import {
-    expectWarnings,
     expectWarningsFromTransform,
     flatMatch,
     generateStylableResult,
@@ -113,6 +112,165 @@ describe('@st-scope', () => {
             expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
                 '.entry__root .entry__part'
             );
+        });
+
+        it('should support multiple selectors', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope .scope1, .scope2 {
+                            .part1, .part2 {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+                '.entry__scope1 .entry__part1, .entry__scope2 .entry__part1, .entry__scope1 .entry__part2, .entry__scope2 .entry__part2'
+            );
+        });
+
+        it('should support * selector', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope * {
+                            .part {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('* .entry__part');
+        });
+
+        it('should support :global() selector', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        @st-scope :global(.my-class) {
+                            .part {}
+                        }
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('.my-class .entry__part');
+        });
+
+        it('should selectors with internal parts', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {-st-from: "./imported.st.css"; -st-default: Imported;}
+                        .root {
+                            -st-extends: Imported;
+                        }
+                        @st-scope .root::part {
+                            .part1, .part2 {}
+                        }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .part{}
+                        `,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![1] as Rule).selector).to.equal(
+                '.entry__root .imported__part .entry__part1, .entry__root .imported__part .entry__part2'
+            );
+        });
+
+        it('should allow named classes as scoping selector', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: importedPart;
+                        }
+                        @st-scope .importedPart {
+                            .part {}
+                        }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `.importedPart {}`,
+                    },
+                },
+            };
+
+            const { meta } = generateStylableResult(config);
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.first as Rule).selector).to.equal(
+                '.imported__importedPart .entry__part'
+            );
+        });
+
+        it('should support complex selector as scope', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        .root {}
+                        .part {}
+                        @st-scope .root .part {
+                            .scopedPart {}
+                        }
+                    `,
+                    },
+                },
+            };
+            const { meta } = generateStylableResult(config);
+
+            shouldReportNoDiagnostics(meta);
+
+            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal(
+                '.entry__root .entry__part .entry__scopedPart'
+            );
+
+            expect(meta.scopes).to.flatMatch([
+                {
+                    type: 'atrule',
+                    name: 'st-scope',
+                    params: '.root .part',
+                },
+            ]);
         });
 
         it('should scope rule with multiple selectors to root', () => {
@@ -232,6 +390,42 @@ describe('@st-scope', () => {
             expect(decl).to.equal(undefined);
         });
 
+        it('scoped classes should be mixable if the scope is the mixin class', () => {
+            const { meta } = generateStylableResult({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        :import {
+                            -st-from: './imported.st.css';
+                            -st-named: mymix;
+                        }
+                        .root {
+                            -st-mixin: mymix;
+                        }
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                        .mymix {}
+                        @st-scope .mymix {
+                            .part {
+                                color: red;
+                            }
+                        }`,
+                    },
+                },
+            });
+
+            shouldReportNoDiagnostics(meta);
+
+            const rule: Rule = meta.outputAst!.nodes![1] as Rule;
+            const decl: Declaration = rule.first as Declaration;
+            expect(decl.value).to.equal('red');
+        });
+
         it('scoped classes should be agnostic about -st-extend', () => {
             const { meta } = generateStylableResult({
                 entry: `/entry.st.css`,
@@ -295,135 +489,64 @@ describe('@st-scope', () => {
     });
 
     describe('diagnostics', () => {
-        it('should warn about multiple params in scope', () => {
+        it('should warn about invalid scoping selector', () => {
             const config = {
                 entry: `/entry.st.css`,
                 files: {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
-                        .root {}
-                        .part {}
-                        |@st-scope $.root .part$ {
-                            .scopedPart {}
+                        |@st-scope .root::unknownPart {
+                            .part {}
                         }|
-                    `,
+                        `,
                     },
                 },
             };
 
             const { meta } = expectWarningsFromTransform(config, [
                 {
-                    message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root .part'),
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
+                    file: '/entry.st.css',
+                    severity: 'warning',
+                },
+            ]);
+            expect((meta.outputAst!.first as Rule).selector).to.equal(
+                '.entry__root::unknownPart .entry__part'
+            );
+        });
+        it('should warn on invalid scoped selector', () => {
+            const config = {
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                        |@st-scope .root::unknownPart {
+                            .part::unknownPart {}
+                        }|
+                        `,
+                    },
+                },
+            };
+
+            const { meta } = expectWarningsFromTransform(config, [
+                {
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
                     severity: 'warning',
                 },
                 {
-                    message: transformerWarnings.UNKNOWN_SCOPING_PARAM('.root .part'),
+                    message: transformerWarnings.UNKNOWN_PSEUDO_ELEMENT('unknownPart'),
                     file: '/entry.st.css',
-                    severity: 'error',
+                    severity: 'warning',
+                    skipLocationCheck: true,
                 },
             ]);
-
-            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal(
-                '.entry__root .entry__part .entry__scopedPart'
-            );
-            expect(meta.scopes).to.flatMatch([
-                {
-                    type: 'atrule',
-                    name: 'st-scope',
-                    params: '.root .part',
-                },
-            ]);
-        });
-
-        it('should warn about disallowed syntax as a scoping parameter', () => {
-            expectWarnings(
-                `
-                |@st-scope $.root::before$ {
-                    .part {}
-                }|
-            `,
-                [
-                    {
-                        message: processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR('.root::before'),
-                        file: 'entry.st.css',
-                        severity: 'warning',
-                    },
-                ]
+            expect((meta.outputAst!.first as Rule).selector).to.equal(
+                '.entry__root::unknownPart .entry__part::unknownPart'
             );
         });
-
-        it('should warn about scoping with a symbol that does not resolve to a stylesheet root', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        :import {
-                            -st-from: './imported.st.css';
-                            -st-named: importedPart;
-                        }
-                        |@st-scope $importedPart$ {
-                            .part {}
-                        }|
-                        `,
-                    },
-                    '/imported.st.css': {
-                        namespace: 'imported',
-                        content: `.importedPart {}`,
-                    },
-                },
-            };
-
-            const { meta } = expectWarningsFromTransform(config, [
-                {
-                    message: transformerWarnings.SCOPE_PARAM_NOT_ROOT('importedPart'),
-                    file: '/entry.st.css',
-                    severity: 'error',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('importedPart .entry__part');
-        });
-
-        it('should warn about scoping with a symbol that originates from a JS file', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        :import {
-                            -st-from: './imported.js';
-                            -st-named: someVar;
-                        }
-                        |@st-scope $someVar$ {
-                            .part {}
-                        }|
-                        `,
-                    },
-                    '/imported.js': {
-                        namespace: 'imported',
-                        content: `
-                            module.exports = {
-                                someVar: 'someValue'
-                            }
-                        `,
-                    },
-                },
-            };
-
-            const { meta } = expectWarningsFromTransform(config, [
-                {
-                    message: transformerWarnings.SCOPE_PARAM_NOT_CSS('someVar'),
-                    file: '/entry.st.css',
-                    severity: 'error',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('someVar .entry__part');
-        });
-
         it('should warn about a missing scoping parameter', () => {
             const config = {
                 entry: `/entry.st.css`,
@@ -447,30 +570,6 @@ describe('@st-scope', () => {
                 },
             ]);
             expect((meta.outputAst!.first as Rule).selector).to.equal('.entry__part');
-        });
-
-        it('should warn about an unknown scoping parameter', () => {
-            const config = {
-                entry: `/entry.st.css`,
-                files: {
-                    '/entry.st.css': {
-                        namespace: 'entry',
-                        content: `
-                        |@st-scope $unknown$ {
-                            .part {}
-                        }|
-                        `,
-                    },
-                },
-            };
-            const { meta } = expectWarningsFromTransform(config, [
-                {
-                    message: transformerWarnings.UNKNOWN_SCOPING_PARAM('unknown'),
-                    file: '/entry.st.css',
-                    severity: 'error',
-                },
-            ]);
-            expect((meta.outputAst!.first as Rule).selector).to.equal('unknown .entry__part');
         });
 
         it('should warn about vars definition inside a scope', () => {

@@ -5,7 +5,7 @@ layout: docs
 ---
 
 **Stylable** scope enables you to wrap several style-rules using a single directive.
-The scoping directive receives a single simple selector ([Tag selector](./tag-selectors.md), [Class selector](./class-selectors.md) or [Component root](./root.md)) to use for its scoping.
+The scoping directive receives any valid Stylable selector to use for its scoping.
 
 Stylable scoping directive is similar in its behavior to CSS nesting, but can only be applied to a single level.
 

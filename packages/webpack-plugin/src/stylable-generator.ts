@@ -9,7 +9,7 @@ export class StylableGenerator {
         private stylable: Stylable,
         private compilation: webpack.compilation.Compilation,
         private normalModuleFactory: any,
-        private options: Partial<StylableGeneratorOptions>
+        private options: StylableGeneratorOptions
     ) {}
 
     public generate(module: StylableModule, _dependencyTemplates: any, runtimeTemplate: any) {
@@ -93,15 +93,25 @@ export class StylableGenerator {
     private reportDiagnostics(meta: StylableMeta) {
         const transformReports = meta.transformDiagnostics ? meta.transformDiagnostics.reports : [];
         meta.diagnostics.reports.concat(transformReports).forEach((report) => {
+            const mode = this.options.diagnosticsMode;
+
+            let bucket = report.type === 'warning' ? ('warnings' as const) : ('errors' as const);
+
+            if (mode === 'loose') {
+                bucket = 'warnings';
+            } else if (mode === 'strict') {
+                bucket = 'errors';
+            }
+
             if (report.node) {
-                this.compilation.warnings.push(
+                this.compilation[bucket].push(
                     report.node
                         .error(report.message, report.options)
                         .toString()
                         .replace('CssSyntaxError', 'Stylable')
                 );
             } else {
-                this.compilation.warnings.push(report.message);
+                this.compilation[bucket].push(report.message);
             }
         });
     }
