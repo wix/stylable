@@ -1,6 +1,6 @@
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {
@@ -27,7 +27,7 @@ describe('@custom-selector', () => {
             { from }
         );
 
-        const r = result.ast.nodes![0] as postcss.Rule;
+        const r = result.ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.root > .icon, .class');
         expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
     });
@@ -74,7 +74,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root > .comp__icon');
     });
 
@@ -123,7 +123,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root > .comp__icon .child__top');
     });
 
@@ -153,7 +153,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
     });
 
@@ -196,7 +196,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.xxx .controls__root');
     });
 
@@ -241,7 +241,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.interface__root .controls__root cc');
     });
 
@@ -271,7 +271,7 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
+        const r = ast.nodes[0] as postcss.Rule;
         expect(r.selector).to.equal('.variant__root .variant__x .variant__input');
     });
 
@@ -313,7 +313,7 @@ describe('@custom-selector', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.entry__root :not( .Inner__a), .entry__root :not( .Inner__b)'
             );
         });
@@ -343,7 +343,7 @@ describe('@custom-selector', () => {
                     },
                 },
             });
-            const r = ast.nodes![0] as postcss.Rule;
+            const r = ast.nodes[0] as postcss.Rule;
             expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
         });
 
@@ -364,7 +364,7 @@ describe('@custom-selector', () => {
                     },
                 },
             });
-            const r = ast.nodes![0] as postcss.Rule;
+            const r = ast.nodes[0] as postcss.Rule;
             expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
         });
     });

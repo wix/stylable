@@ -1,7 +1,7 @@
 import { expectWarningsFromTransform } from '@stylable/core-test-kit';
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { functionWarnings } from '../src';
 import { nativeFunctionsDic } from '../src/native-reserved-lists';
 
@@ -37,8 +37,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('background: green');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('background: green');
         });
 
         it('apply simple js formatter with quote wrapped args', () => {
@@ -80,9 +80,9 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('background: 1 2px solid red 10px');
-            expect(rule.nodes![1].toString()).to.equal('content: url("1"), url("2")');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('background: 1 2px solid red 10px');
+            expect(rule.nodes[1].toString()).to.equal('content: url("1"), url("2")');
         });
 
         it('apply simple js formatter with a single argument', () => {
@@ -110,8 +110,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('background: green');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('background: green');
         });
 
         it('apply simple js formatter with a multiple arguments', () => {
@@ -139,8 +139,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 2px solid green');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: 2px solid green');
         });
 
         it('apply simple js formatter with a nested formatter', () => {
@@ -172,8 +172,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 6px solid green');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: 6px solid green');
         });
 
         it('should parse arguments passed to a formatter, seperated by commas', () => {
@@ -208,8 +208,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 3 2 1');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: 3 2 1');
         });
 
         describe('native', () => {
@@ -241,8 +241,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                             },
                         });
 
-                        const rule = result.nodes![0] as postcss.Rule;
-                        expect(rule.nodes![0].toString()).to.equal(
+                        const rule = result.nodes[0] as postcss.Rule;
+                        expect(rule.nodes[0].toString()).to.equal(
                             `border: ${cssFunc}(${cssFunc}(1))`
                         );
                     });
@@ -285,8 +285,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal('background: calc(42 * 42)');
+                const rule = result.nodes[0] as postcss.Rule;
+                expect(rule.nodes[0].toString()).to.equal('background: calc(42 * 42)');
             });
 
             it('should perserve native format function quotation', () => {
@@ -303,8 +303,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal("src: url(/test.woff) format('woff')");
+                const rule = result.nodes[0] as postcss.Rule;
+                expect(rule.nodes[0].toString()).to.equal("src: url(/test.woff) format('woff')");
             });
 
             it('should perserve native format function quotation with stylable var', () => {
@@ -324,8 +324,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal("src: url(/test.woff) format('woff')");
+                const rule = result.nodes[0] as postcss.Rule;
+                expect(rule.nodes[0].toString()).to.equal("src: url(/test.woff) format('woff')");
             });
 
             xit('should allow using formatters inside a url native function', () => {
@@ -354,8 +354,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal('background: url("some-static-url")');
+                const rule = result.nodes[0] as postcss.Rule;
+                expect(rule.nodes[0].toString()).to.equal('background: url("some-static-url")');
             });
 
             it('should support a native url function', () => {
@@ -372,8 +372,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rule = result.nodes![0] as postcss.Rule;
-                expect(rule.nodes![0].toString()).to.equal('background: url("some-static-url")');
+                const rule = result.nodes[0] as postcss.Rule;
+                expect(rule.nodes[0].toString()).to.equal('background: url("some-static-url")');
             });
 
             it('should resolve a 3rd party asset request (~)', () => {
@@ -399,7 +399,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                     },
                 });
 
-                const rules = (result.nodes![0] as postcss.Rule).nodes!.map((node) =>
+                const rules = (result.nodes[0] as postcss.Rule).nodes.map((node) =>
                     node.toString()
                 );
                 expect(rules, 'failed resolving third party asset').to.eql([
@@ -444,8 +444,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: value(a)');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: value(a)');
         });
 
         it('passes through cyclic vars through multiple files', () => {
@@ -480,8 +480,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('background: 1px value(color2)');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('background: 1px value(color2)');
         });
 
         it('should support using formatters in variable declarations', () => {
@@ -512,8 +512,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 6px');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: 6px');
         });
 
         it('should support using formatters in an imported variable declarations', () => {
@@ -552,8 +552,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('background: green');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('background: green');
         });
 
         it('should support using formatters in a complex multi file scenario', () => {
@@ -614,8 +614,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('border: 3px solid black');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('border: 3px solid black');
         });
 
         it('should support using a formatter in a media query param', () => {
@@ -644,7 +644,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.AtRule;
+            const rule = result.nodes[0] as postcss.AtRule;
             expect(rule.params).to.equal('max-width: 1850px');
         });
 
@@ -676,8 +676,8 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 },
             });
 
-            const rule = result.nodes![0] as postcss.Rule;
-            expect(rule.nodes![0].toString()).to.equal('color: fail(a, red, c)');
+            const rule = result.nodes[0] as postcss.Rule;
+            expect(rule.nodes[0].toString()).to.equal('color: fail(a, red, c)');
         });
     });
 
@@ -813,7 +813,7 @@ describe('Stylable functions (native, formatter and variable)', () => {
                 );
 
                 expect(
-                    ((meta.outputAst!.nodes![0] as postcss.Rule).nodes![0] as postcss.Declaration)
+                    ((meta.outputAst!.nodes[0] as postcss.Rule).nodes[0] as postcss.Declaration)
                         .value
                 ).to.eql('green');
             });

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
+import { Position } from 'postcss';
 import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
 import { Config, generateFromMock } from './generate-test-util';
 
@@ -15,9 +16,9 @@ export function findTestLocations(css: string) {
     let line = 1;
     let column = 1;
     let inWord = false;
-    let start;
-    let end;
-    let word = null;
+    let start: Position | undefined = undefined;
+    let end: Position | undefined = undefined;
+    let word: string | null = null;
     for (let i = 0; i < css.length; i++) {
         const ch = css.charAt(i);
         if (ch === '\n') {
@@ -25,9 +26,9 @@ export function findTestLocations(css: string) {
             column = 1;
         } else if (ch === '|') {
             if (!start) {
-                start = { line, column };
+                start = { line, column, offset: i };
             } else {
-                end = { line, column };
+                end = { line, column, offset: i };
             }
         } else if (ch === '$') {
             inWord = !inWord;
@@ -77,7 +78,15 @@ export function expectWarningsFromTransform(
 ): StylableResults {
     config.trimWS = false;
 
-    const locations: any = {};
+    const locations: Record<
+        string,
+        {
+            start?: Position;
+            end?: Position;
+            word: string | null;
+            css: string;
+        }
+    > = {};
     for (const path in config.files) {
         const source = findTestLocations(deindent(config.files[path].content).trim());
         config.files[path].content = source.css;
@@ -94,10 +103,10 @@ export function expectWarningsFromTransform(
         ).to.equal(diagnostics.reports.length);
     }
 
-    diagnostics.reports.forEach((report, i) => {
+    for (const [i, report] of diagnostics.reports.entries()) {
         const expectedWarning = expectedWarnings[i];
         if (!expectedWarning) {
-            return;
+            continue;
         }
         const path = expectedWarning.file;
 
@@ -117,7 +126,7 @@ export function expectWarningsFromTransform(
                 `diagnostics severity mismatch, expected ${expectedWarning.severity} but received ${report.type}`
             ).to.equal(expectedWarning.severity);
         }
-    });
+    }
 
     expect(
         expectedWarnings.length,

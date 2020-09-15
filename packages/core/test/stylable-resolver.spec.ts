@@ -1,6 +1,6 @@
 import { createStylableInstance, generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { createMinimalFS, process, safeParse, StylableResolver } from '../src';
 import { cachedProcessFile, MinimalFS } from '../src/cached-process-file';
 import { StylableMeta } from '../src/stylable-processor';
@@ -482,7 +482,7 @@ describe('stylable-resolver', () => {
 
         const { meta } = stylable.transform(stylable.process('/node_modules/a/index.st.css'));
 
-        const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+        const rule = meta.outputAst!.nodes[0] as postcss.Rule;
         expect(rule.selector).to.equal('.A__root');
         expect(meta.diagnostics.reports).to.eql([]);
         expect(meta.transformDiagnostics!.reports).to.eql([]);

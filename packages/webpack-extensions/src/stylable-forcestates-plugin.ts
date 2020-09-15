@@ -7,7 +7,7 @@ import {
     traverseNode,
 } from '@stylable/core';
 import cloneDeep from 'lodash.clonedeep';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 export * from './create-forcestate-matchers';
 
 // This transformation is applied on target AST code

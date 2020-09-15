@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { NodeBase } from 'postcss';
+import * as postcss from 'postcss';
 import { ColorInformation } from 'vscode-css-languageservice';
 import {
     Color,
@@ -24,7 +24,7 @@ export function getCaretPosition(src: string) {
     return new ProviderPosition(linesTillCaret.length - 1, character);
 }
 
-export function getPath(fileName: string): NodeBase[] {
+export function getPath(fileName: string): postcss.Node[] {
     const fullPath = path.join(CASES_PATH, fileName);
     let src: string = fs.readFileSync(fullPath).toString();
     const pos = getCaretPosition(src);

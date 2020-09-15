@@ -1,6 +1,6 @@
 import { IFileSystem } from '@file-services/types';
 import path from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {

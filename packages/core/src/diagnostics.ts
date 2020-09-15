@@ -1,12 +1,16 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 export type DiagnosticType = 'error' | 'warning';
+
+export interface DiagnosticOptions {
+    word?: string;
+}
 
 export interface Diagnostic {
     type: DiagnosticType;
     node: postcss.Node;
     message: string;
-    options: postcss.NodeErrorOptions;
+    options: DiagnosticOptions;
 }
 
 export class Diagnostics {
@@ -15,14 +19,14 @@ export class Diagnostics {
         type: DiagnosticType,
         node: postcss.Node,
         message: string,
-        options: postcss.NodeErrorOptions = {}
+        options: DiagnosticOptions = {}
     ) {
         this.reports.push({ type, node, message, options });
     }
-    public error(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
+    public error(node: postcss.Node, message: string, options?: DiagnosticOptions) {
         this.add('error', node, message, options);
     }
-    public warn(node: postcss.Node, message: string, options?: postcss.NodeErrorOptions) {
+    public warn(node: postcss.Node, message: string, options?: DiagnosticOptions) {
         this.add('warning', node, message, options);
     }
 }

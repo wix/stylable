@@ -1,10 +1,13 @@
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { SBTypesParsers, valueMapping } from '../src/stylable-value-parsers';
 import { Diagnostics } from '../src';
 
 const parseMixin = (mixinValue: string) => {
-    return SBTypesParsers[valueMapping.mixin](postcss.decl({ value: mixinValue }), () => 'named');
+    return SBTypesParsers[valueMapping.mixin](
+        postcss.decl({ prop: '', value: mixinValue }),
+        () => 'named'
+    );
 };
 
 const parseNamedImport = (value: string) =>

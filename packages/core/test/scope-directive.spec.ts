@@ -45,7 +45,7 @@ describe('@st-scope', () => {
             );
 
             shouldReportNoDiagnostics(meta);
-            const rule = meta.ast.nodes![0] as SRule;
+            const rule = meta.ast.nodes[0] as SRule;
             expect(rule.stScopeSelector).to.equal('.root');
             expect(rule.clone().stScopeSelector, 'clone rules preserve stScope').to.equal('.root');
         });
@@ -81,7 +81,7 @@ describe('@st-scope', () => {
                 { from: 'path/to/style.css' }
             );
 
-            const rules = meta.ast.nodes!;
+            const rules = meta.ast.nodes;
 
             shouldReportNoDiagnostics(meta);
 
@@ -109,7 +109,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__root .entry__part'
             );
         });
@@ -131,7 +131,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__scope1 .entry__part1, .entry__scope2 .entry__part1, .entry__scope1 .entry__part2, .entry__scope2 .entry__part2'
             );
         });
@@ -153,7 +153,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('* .entry__part');
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal('* .entry__part');
         });
 
         it('should support :global() selector', () => {
@@ -173,7 +173,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal('.my-class .entry__part');
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal('.my-class .entry__part');
         });
 
         it('should selectors with internal parts', () => {
@@ -203,7 +203,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![1] as Rule).selector).to.equal(
+            expect((meta.outputAst!.nodes[1] as Rule).selector).to.equal(
                 '.entry__root .imported__part .entry__part1, .entry__root .imported__part .entry__part2'
             );
         });
@@ -260,7 +260,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![2] as Rule).selector).to.equal(
+            expect((meta.outputAst!.nodes[2] as Rule).selector).to.equal(
                 '.entry__root .entry__part .entry__scopedPart'
             );
 
@@ -290,7 +290,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            expect((meta.outputAst!.nodes![0] as Rule).selector).to.equal(
+            expect((meta.outputAst!.nodes[0] as Rule).selector).to.equal(
                 '.entry__root .entry__part, .entry__root .entry__otherPart, .entry__root .entry__oneMorePart'
             );
         });
@@ -421,7 +421,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const rule: Rule = meta.outputAst!.nodes![1] as Rule;
+            const rule: Rule = meta.outputAst!.nodes[1] as Rule;
             const decl: Declaration = rule.first as Declaration;
             expect(decl.value).to.equal('red');
         });
@@ -459,7 +459,7 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const rule = meta.outputAst!.nodes![1] as Rule;
+            const rule = meta.outputAst!.nodes[1] as Rule;
             expect(rule.selector).to.equal('.entry__root.imported--myState');
         });
 
@@ -482,8 +482,8 @@ describe('@st-scope', () => {
 
             shouldReportNoDiagnostics(meta);
 
-            const atRule = meta.outputAst!.nodes![0] as AtRule;
-            const rule = atRule.nodes![0] as Rule;
+            const atRule = meta.outputAst!.nodes[0] as AtRule;
+            const rule = atRule.nodes[0] as Rule;
             expect(rule.selector).to.equal('.entry__root .entry__part');
         });
     });

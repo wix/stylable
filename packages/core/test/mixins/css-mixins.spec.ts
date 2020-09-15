@@ -5,7 +5,7 @@ import {
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('CSS Mixins', () => {
     it('apply simple class mixins declarations', () => {
@@ -58,8 +58,8 @@ describe('CSS Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('color: color-1, color-2');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('color: color-1, color-2');
     });
 
     it('transform state form imported element', () => {
@@ -872,7 +872,7 @@ describe('CSS Mixins', () => {
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red');
 
-        const media = result.nodes![1] as postcss.AtRule;
+        const media = result.nodes[1] as postcss.AtRule;
         expect(media.params, 'media params').to.equal('(max-width: 300px)');
 
         matchAllRulesAndDeclarations(
@@ -921,7 +921,7 @@ describe('CSS Mixins', () => {
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color:red');
         matchRuleAndDeclaration(result, 1, '.entry__x .imported__y', 'color:green');
-        const media = result.nodes![2] as postcss.AtRule;
+        const media = result.nodes[2] as postcss.AtRule;
         matchRuleAndDeclaration(media, 0, '.entry__x', 'color:yellow', '@media');
         matchRuleAndDeclaration(media, 1, '.entry__x .imported__y', 'color:gold', '@media');
     });
