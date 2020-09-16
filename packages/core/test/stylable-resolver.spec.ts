@@ -465,7 +465,7 @@ describe('stylable-resolver', () => {
                     namespace: 'A',
                     content: `
                         :import {
-                            -st-from: "b/index.st.css"
+                            -st-from: "b/index.st.css";
                             -st-default: B;
                         }
                         .root {
