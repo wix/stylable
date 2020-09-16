@@ -11,12 +11,5 @@ export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
 }
 
 export function safeParse(css: string, options: ProcessOptions = { from: 'style.css' }): Root {
-    try {
-        return safeParser(css, options);
-    } catch (e) {
-        console.error(
-            `postcss-safe-parser FAILED for ${options.from ?? 'style.css'} with content:\n${css}`
-        );
-        throw e;
-    }
+    return safeParser(css, options);
 }
