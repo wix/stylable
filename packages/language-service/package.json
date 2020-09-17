@@ -15,7 +15,7 @@
     "typescript": ">=3.6"
   },
   "dependencies": {
-    "@file-services/node": "^4.0.0",
+    "@file-services/types": "^4.0.0",
     "@file-services/typescript": "^4.0.0",
     "@stylable/core": "^3.10.1",
     "css-selector-tokenizer": "^0.7.3",

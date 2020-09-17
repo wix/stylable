@@ -1,5 +1,5 @@
+import path from 'path';
 import { expect } from 'chai';
-import * as path from 'path';
 import { URI } from 'vscode-uri';
 
 import { createRange } from '../../src/lib/completion-providers';
