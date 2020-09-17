@@ -22,7 +22,7 @@
     "js-beautify": "^1.13.0",
     "postcss": "^7.0.32",
     "postcss-value-parser": "^4.1.0",
-    "vscode-css-languageservice": "^4.3.3",
+    "vscode-css-languageservice": "^4.3.4",
     "vscode-languageserver": "^6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1",
     "vscode-uri": "^2.1.2"
