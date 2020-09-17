@@ -21,7 +21,7 @@ fs.writeFileSync(
     path.join(tmp.path, 'index.st.css'),
     `
 :vars {
-  key: "value"; u
+  key: "value";
 }
 .root {
   --cssVar: green;
