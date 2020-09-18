@@ -23,7 +23,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "webpack-sources": "^1.4.3"
+    "webpack-sources": "^2.0.0"
   },
   "files": [
     "cjs",
