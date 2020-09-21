@@ -1,5 +1,5 @@
-import fs from '@file-services/node';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { NodeBase } from 'postcss';
 import { ColorInformation } from 'vscode-css-languageservice';
 import {

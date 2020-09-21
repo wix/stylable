@@ -1,6 +1,6 @@
-import fs from '@file-services/node';
+import path from 'path';
+import fs from 'fs';
 import { expect } from 'chai';
-import * as path from 'path';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import { ProviderPosition, ProviderRange } from '../src/lib/completion-providers';

@@ -10,7 +10,6 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/node": "^4.0.0",
     "@stylable/core": "^3.10.1",
     "@typescript-eslint/experimental-utils": "^4.1.1"
   },
