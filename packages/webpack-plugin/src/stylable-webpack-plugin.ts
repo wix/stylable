@@ -313,10 +313,7 @@ export class StylableWebpackPlugin {
                         return chunk.containsModule(r.module);
                     }
                 });
-                if (!shouldKeep) {
-                    if (m.buildInfo.isImportedByNonStylable) {
-                        return;
-                    }
+                if (!shouldKeep && !m.buildInfo.isImportedByNonStylable) {
                     chunk.removeModule(m);
                 }
             });
