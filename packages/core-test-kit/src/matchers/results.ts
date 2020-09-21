@@ -2,10 +2,10 @@ import { StylableResults } from '@stylable/core';
 import { expect } from 'chai';
 import postcss from 'postcss';
 
-export function mediaQuery(chai: any, util: any) {
+export function mediaQuery(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
     const { flag } = util;
 
-    chai.Assertion.addMethod('mediaQuery', function (this: any, index: number) {
+    chai.Assertion.addMethod('mediaQuery', function (index: number) {
         const actual = flag(this, 'object') as StylableResults;
 
         if (!actual.meta || !actual.exports) {
@@ -37,7 +37,7 @@ export function mediaQuery(chai: any, util: any) {
     });
 }
 
-export function styleRules(chai: any, util: any) {
+export function styleRules(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
     const { flag } = util;
 
     chai.Assertion.addMethod('styleRules', function (
