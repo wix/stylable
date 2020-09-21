@@ -41,7 +41,6 @@ export function styleRules(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
     const { flag } = util;
 
     chai.Assertion.addMethod('styleRules', function (
-        this: any,
         styleRules: string[] | { [key: number]: string }
     ) {
         const actual = flag(this, 'object') as StylableResults;
