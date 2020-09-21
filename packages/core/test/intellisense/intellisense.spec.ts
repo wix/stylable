@@ -1,6 +1,6 @@
 import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { expandCustomSelectors } from '../../src/stylable-utils';
 
 describe('Stylable intellisense selector meta data', () => {

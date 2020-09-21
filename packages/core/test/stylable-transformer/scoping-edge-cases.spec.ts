@@ -1,6 +1,6 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('scoping-edge-cases', () => {
     it('root scoping always uses origin meta', () => {
@@ -48,7 +48,7 @@ describe('scoping-edge-cases', () => {
             },
         });
 
-        expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((result.nodes[1] as postcss.Rule).selector).to.equal(
             '.style__x .comp__part .inner__inner'
         );
     });
@@ -105,7 +105,7 @@ describe('scoping-edge-cases', () => {
             },
         });
 
-        expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((result.nodes[1] as postcss.Rule).selector).to.equal(
             '.style__x .comp__part .inner__inner, .style__x.style--test'
         );
     });

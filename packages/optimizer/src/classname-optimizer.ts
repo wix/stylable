@@ -5,7 +5,7 @@ import {
     stringifySelector,
     traverseNode,
 } from '@stylable/core';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 export class StylableClassNameOptimizer implements IStylableClassNameOptimizer {
     public context: { names: Record<string, string> };

@@ -1,6 +1,6 @@
 import path from 'path';
 import ts from 'typescript';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
@@ -706,8 +706,8 @@ export class Provider {
             line: position.line + 1,
             character: position.character,
         });
-        const astAtCursor: postcss.NodeBase = path[path.length - 1];
-        const parentAst: postcss.NodeBase | undefined = (astAtCursor as postcss.Declaration).parent
+        const astAtCursor: postcss.Node = path[path.length - 1];
+        const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
         const parentSelector: SRule | null =
@@ -1073,8 +1073,9 @@ function findRefs(
     scannedMeta.rawAst.walkDecls(word, (decl) => {
         // Variable definition
         if (
+            decl.parent &&
             decl.parent.type === 'rule' &&
-            decl.parent.selector === ':vars' &&
+            (decl.parent as postcss.Rule).selector === ':vars' &&
             !!decl.source &&
             !!decl.source.start
         ) {
@@ -1241,7 +1242,8 @@ function newFindRefs(
                 if (valueRegex.test(d.value) && !done) {
                     if (
                         d.prop === valueMapping.named &&
-                        d.parent.nodes!.find((n) => {
+                        d.parent &&
+                        d.parent.nodes.find((n) => {
                             return (
                                 (n as postcss.Declaration).prop === valueMapping.from &&
                                 path.resolve(
@@ -1562,10 +1564,8 @@ export function extractJsModifierReturnType(mixin: string, fileSrc: string): str
     return returnType;
 }
 
-function isInMediaQuery(path: postcss.NodeBase[]) {
-    return path.some(
-        (n) => (n as postcss.Container).type === 'atrule' && (n as postcss.AtRule).name === 'media'
-    );
+function isInMediaQuery(path: postcss.Node[]) {
+    return path.some((n) => n.type === 'atrule' && (n as postcss.AtRule).name === 'media');
 }
 
 export function isDirective(line: string) {

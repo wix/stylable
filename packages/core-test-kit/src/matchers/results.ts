@@ -1,6 +1,6 @@
 import { StylableResults } from '@stylable/core';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 export function mediaQuery(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
     const { flag } = util;

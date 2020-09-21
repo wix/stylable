@@ -1,5 +1,5 @@
 import path from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import ts from 'typescript';
 
@@ -66,7 +66,7 @@ export interface ProviderOptions {
     tsLangService: ExtendedTsLanguageService; // candidate for removal
     resolvedElements: ResolvedElement[][]; // candidate for removal
     parentSelector: SRule | null;
-    astAtCursor: postcss.NodeBase; // candidate for removal
+    astAtCursor: postcss.Node; // candidate for removal
     lineChunkAtCursor: string;
     lastSelectoid: string; // candidate for removal
     fullLineText: string;
@@ -205,7 +205,7 @@ export const ImportInternalDirectivesProvider: CompletionProvider = {
             const res: Completion[] = [];
             importDeclarations.forEach((name) => {
                 if (
-                    parentSelector.nodes!.every(
+                    parentSelector.nodes.every(
                         (n: any) =>
                             (isDeclaration(n) && importDirectives[name] !== n.prop) || isComment(n)
                     ) &&
@@ -245,7 +245,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
             !(parentSelector.selector === ':import' || parentSelector.selector === ':vars')
         ) {
             if (
-                parentSelector.nodes!.every(
+                parentSelector.nodes.every(
                     (n: any) =>
                         (isDeclaration(n) && rulesetDirectives.mixin !== n.prop) || isComment(n)
                 ) &&
@@ -263,8 +263,8 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
                     .filter((d) => d !== 'mixin')
                     .forEach((name) => {
                         if (
-                            parentSelector.nodes!.every(
-                                (n: any) =>
+                            parentSelector.nodes.every(
+                                (n) =>
                                     (isDeclaration(n) && rulesetDirectives[name] !== n.prop) ||
                                     isComment(n)
                             ) &&
@@ -710,9 +710,9 @@ export const NamedCompletionProvider: CompletionProvider & {
                 parentSelector &&
                 parentSelector.selector === ':import' &&
                 (astAtCursor as postcss.Rule).nodes &&
-                (astAtCursor as postcss.Rule).nodes!.length
+                (astAtCursor as postcss.Rule).nodes.length
             ) {
-                importName = ((astAtCursor as postcss.Rule).nodes!.find(
+                importName = ((astAtCursor as postcss.Rule).nodes.find(
                     (n) => (n as postcss.Declaration).prop === valueMapping.from
                 ) as postcss.Declaration).value.replace(/'|"/g, '');
             } else {
@@ -1194,7 +1194,7 @@ export const StateEnumCompletionProvider: CompletionProvider = {
         resolvedElements,
     }: ProviderOptions): Completion[] {
         let acc: Completion[] = [];
-        const ast = astAtCursor as postcss.Node;
+        const ast = astAtCursor;
 
         if (!lineChunkAtCursor.endsWith('::') && (ast.type === 'root' || ast.type === 'atrule')) {
             if (lastSelectoid.startsWith(':')) {

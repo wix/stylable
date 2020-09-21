@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import deindent from 'deindent';
 import { createStylableInstance } from '@stylable/core-test-kit';
 import { removeCommentNodes, StylableOptimizer } from '../src';

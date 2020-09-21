@@ -14,20 +14,20 @@ import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-par
 describe('findTestLocations', () => {
     it('find single location 1', () => {
         const l = findTestLocations('\n  |a|');
-        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
-        expect(l.end, 'end').to.eql({ line: 2, column: 4 });
+        expect(l.start, 'start').to.eql({ line: 2, column: 3, offset: 3 });
+        expect(l.end, 'end').to.eql({ line: 2, column: 4, offset: 5 });
     });
 
     it('find single location 2', () => {
         const l = findTestLocations('\n  |a\n  |');
-        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
-        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
+        expect(l.start, 'start').to.eql({ line: 2, column: 3, offset: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3, offset: 8 });
     });
 
     it('find single location with word', () => {
         const l = findTestLocations('\n  |$a$\n  |');
-        expect(l.start, 'start').to.eql({ line: 2, column: 3 });
-        expect(l.end, 'end').to.eql({ line: 3, column: 3 });
+        expect(l.start, 'start').to.eql({ line: 2, column: 3, offset: 3 });
+        expect(l.end, 'end').to.eql({ line: 3, column: 3, offset: 10 });
         expect(l.word, 'end').to.eql('a');
     });
 

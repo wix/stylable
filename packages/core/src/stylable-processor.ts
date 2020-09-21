@@ -1,6 +1,6 @@
 import hash from 'murmurhash';
 import path from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import {
@@ -758,7 +758,11 @@ export class StylableProcessor {
                     break;
                 case valueMapping.named:
                     {
-                        const { keyframesMap, namedMap } = parseNamed(decl.value, decl, this.diagnostics);
+                        const { keyframesMap, namedMap } = parseNamed(
+                            decl.value,
+                            decl,
+                            this.diagnostics
+                        );
                         importObj.named = namedMap;
                         importObj.keyframes = keyframesMap;
                     }

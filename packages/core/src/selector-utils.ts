@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { ClassSymbol, ElementSymbol } from './stylable-meta';
 import { CSSResolve } from './stylable-resolver';
@@ -347,7 +347,11 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
 }
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return !!rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
+    return (
+        !!rule.parent &&
+        rule.parent.type === 'atrule' &&
+        (rule.parent as postcss.AtRule).name === atRuleName
+    );
 }
 
 export function isCompRoot(name: string) {

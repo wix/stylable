@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
 import { Diagnostics } from './diagnostics';

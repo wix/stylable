@@ -14,7 +14,7 @@ import {
     createInfrastructure,
 } from '@stylable/core';
 import { isAbsolute } from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 export interface File {
     content: string;

@@ -1,6 +1,6 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('Stylable transform elements', () => {
     describe('scoped elements', () => {
@@ -26,8 +26,8 @@ describe('Stylable transform elements', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__root .ns1__root');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns1__root');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns__root .ns1__root');
         });
 
         it('component/tag selector with first Capital letter automatically extend reference with identical name (inner parts)', () => {
@@ -53,7 +53,7 @@ describe('Stylable transform elements', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal(
                 '.inner__root .inner__part'
             );
         });
@@ -91,7 +91,7 @@ describe('Stylable transform elements', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__x');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns__x');
         });
 
         it('should resolve imported named element type when used as element', () => {
@@ -128,7 +128,7 @@ describe('Stylable transform elements', () => {
                 },
             });
 
-            expect((res.nodes![0] as postcss.Rule).selector).to.equal('.base__root');
+            expect((res.nodes[0] as postcss.Rule).selector).to.equal('.base__root');
         });
     });
 });

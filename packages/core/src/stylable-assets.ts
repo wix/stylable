@@ -1,5 +1,5 @@
 import path from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import isUrl from 'is-url-superb';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { ParsedValue } from './types';

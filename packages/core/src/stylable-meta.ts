@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { Diagnostics } from './diagnostics';
 import { SelectorAstNode, SelectorChunk2 } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
@@ -122,7 +122,13 @@ export interface CSSVarSymbol {
     global?: boolean;
 }
 
-export type StylableSymbol = ImportSymbol | VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol | KeyframesSymbol;
+export type StylableSymbol =
+    | ImportSymbol
+    | VarSymbol
+    | ClassSymbol
+    | ElementSymbol
+    | CSSVarSymbol
+    | KeyframesSymbol;
 
 export interface RefedMixin {
     mixin: MixinValue;

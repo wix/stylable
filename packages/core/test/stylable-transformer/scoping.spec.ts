@@ -1,6 +1,6 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { createWarningRule } from '../../src';
 
 describe('Stylable postcss transform (Scoping)', () => {
@@ -20,9 +20,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('header::before');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('div::after');
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal('form::focused');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('header::before');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('div::after');
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal('form::focused');
         });
 
         it('component/tag selector that extends root with inner class targeting', () => {
@@ -61,8 +61,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns1__root .ns1__inner');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns1__root .ns1__inner');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.ns1__root .ns1__inner .ns2__deep'
             );
         });
@@ -93,7 +93,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.x');
         });
 
         it('class selector that extends root with inner class targeting (deep)', () => {
@@ -135,8 +135,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns1__inner');
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns__app .ns1__inner');
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal(
                 '.ns__app .ns1__inner .ns2__deep'
             );
         });
@@ -166,8 +166,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 mode: 'development',
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns__root');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.ns__root:not(.ns1__root)::before'
             );
 
@@ -181,16 +181,16 @@ describe('Stylable postcss transform (Scoping)', () => {
             ).nodes as postcss.Declaration[]).forEach(
                 (decl: postcss.Declaration, index: number) => {
                     expect(
-                        ((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration)
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
                             .prop
                     ).to.eql(decl.prop);
                     expect(
-                        ((result.nodes![1] as postcss.Rule).nodes![index] as postcss.Declaration)
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
                             .value
                     ).to.eql(decl.value);
                 }
             );
-            expect(result.nodes!.length).to.equal(2);
+            expect(result.nodes.length).to.equal(2);
         });
 
         it('should not add a warning rule while in development when apply with mixin', () => {
@@ -229,8 +229,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 mode: 'development',
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
-            expect(result.nodes!.length).to.equal(1);
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect(result.nodes.length).to.equal(1);
         });
 
         it('should NOT add a warning rule while in production mode', () => {
@@ -261,8 +261,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 mode: 'production',
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__root');
-            expect(result.nodes!.length).to.equal(1);
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns__root');
+            expect(result.nodes.length).to.equal(1);
         });
 
         it('class selector that extends root uses pseudo-element after pseudo-class', () => {
@@ -311,7 +311,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.ns__app:hover .ns1__inner'
             );
         });
@@ -354,7 +354,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns2__deep');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns__app .ns2__deep');
         });
 
         it('resolve and transform pseudo-element from deeply override rather then extended type', () => {
@@ -396,7 +396,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__app .ns1__deep');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns__app .ns1__deep');
         });
 
         it('resolve and transform pseudo-element on root - prefer inherited element to override', () => {
@@ -425,7 +425,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.entry__root .inner__inner, .entry__inner'
             );
         });
@@ -455,8 +455,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.x .y');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.x');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.x .y');
         });
 
         it('resolve extend on extended alias', () => {
@@ -495,7 +495,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal(
                 '.Inner__root .Inner__deep .Deep__up'
             );
         });
@@ -536,7 +536,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry__x .Deep__y');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.entry__x .Deep__y');
         });
 
         it('resolve aliased pseudo-element (with @custom-selector )', () => {
@@ -613,10 +613,10 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.entry__root .Deep__x.Comp--hovered'
             );
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal(
                 '.entry__root .Deep__x .Comp__y.Y--hovered'
             );
         });
@@ -697,9 +697,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns4__gaga .ns1__deep');
 
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal(
                 '.ns4__gaga .ns1__deep .ns0__deepest'
             );
         });
@@ -743,7 +743,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.style__root .comp__partA, .style__root .comp__partB'
             );
         });
@@ -765,9 +765,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry__b, .entry__c');
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal('.entry__d .entry__e');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__a');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.entry__b, .entry__c');
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal('.entry__d .entry__e');
         });
 
         it('scope local root class', () => {
@@ -785,9 +785,9 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__root');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.entry__root .entry__a');
-            expect((result.nodes![2] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__root');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.entry__root .entry__a');
+            expect((result.nodes[2] as postcss.Rule).selector).to.equal(
                 '.entry__root .entry__b, .entry__c'
             );
         });
@@ -810,8 +810,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.y');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.x');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.y');
         });
 
         it('scope according to -st-global complex chunk', () => {
@@ -832,8 +832,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.x.y');
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.z');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.x.y');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.z');
         });
 
         it('scope selector that extends local root', () => {
@@ -851,7 +851,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__a');
         });
 
         it.skip('TODO: fix it. scope selector that extends local root', () => {
@@ -893,7 +893,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__a');
         });
 
         it('scope selector that extends a style with -st-global root', () => {
@@ -923,7 +923,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.entry__a');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.entry__a');
         });
 
         it('scope class alias', () => {
@@ -954,10 +954,10 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector, 'root alias').to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector, 'root alias').to.equal(
                 '.imported__root'
             );
-            expect((result.nodes![1] as postcss.Rule).selector, 'class alias').to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector, 'class alias').to.equal(
                 '.imported__inner-class'
             );
         });
@@ -990,7 +990,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector, 'class alias').to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector, 'class alias').to.equal(
                 '.entry__inner-class'
             );
         });
@@ -1035,7 +1035,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector, 'class alias').to.equal(
+            expect((result.nodes[0] as postcss.Rule).selector, 'class alias').to.equal(
                 '.imported__inner-class .base__base'
             );
         });
@@ -1058,7 +1058,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal('.ns__b');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.ns__b');
         });
 
         it('extends class form imported sheet', () => {
@@ -1088,7 +1088,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__a');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns__a');
         });
 
         it('handle not existing imported class', () => {
@@ -1114,7 +1114,7 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).selector).to.equal('.ns__b');
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.ns__b');
         });
     });
 
@@ -1145,12 +1145,12 @@ describe('Stylable postcss transform (Scoping)', () => {
                     },
                 },
             });
-            expect((result.nodes![0] as postcss.AtRule).params).to.equal('entry__name');
-            expect((result.nodes![1] as postcss.AtRule).params).to.equal('entry__name2');
-            expect((result.nodes![2] as postcss.Rule).nodes![0].toString()).to.equal(
+            expect((result.nodes[0] as postcss.AtRule).params).to.equal('entry__name');
+            expect((result.nodes[1] as postcss.AtRule).params).to.equal('entry__name2');
+            expect((result.nodes[2] as postcss.Rule).nodes[0].toString()).to.equal(
                 'animation: 2s entry__name infinite, 1s entry__name2 infinite'
             );
-            expect((result.nodes![2] as postcss.Rule).nodes![1].toString()).to.equal(
+            expect((result.nodes[2] as postcss.Rule).nodes[1].toString()).to.equal(
                 'animation-name: entry__name'
             );
         });
@@ -1192,10 +1192,10 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            expect((result.nodes![0] as postcss.Rule).nodes![0].toString()).to.equal(
+            expect((result.nodes[0] as postcss.Rule).nodes[0].toString()).to.equal(
                 'animation: 2s imported__anim1 infinite, 1s imported__anim2 infinite'
             );
-            expect((result.nodes![0] as postcss.Rule).nodes![1].toString()).to.equal(
+            expect((result.nodes[0] as postcss.Rule).nodes[1].toString()).to.equal(
                 'animation-name: imported__anim1'
             );
         });
@@ -1220,13 +1220,13 @@ describe('Stylable postcss transform (Scoping)', () => {
                 },
             });
 
-            const at = result.nodes![0] as postcss.AtRule;
-            expect((at.nodes![0] as postcss.Rule).selector).to.equal('from');
-            expect((at.nodes![1] as postcss.Rule).selector).to.equal('to');
+            const at = result.nodes[0] as postcss.AtRule;
+            expect((at.nodes[0] as postcss.Rule).selector).to.equal('from');
+            expect((at.nodes[1] as postcss.Rule).selector).to.equal('to');
 
-            const at1 = result.nodes![1] as postcss.AtRule;
-            expect((at1.nodes![0] as postcss.Rule).selector).to.equal('0%');
-            expect((at1.nodes![1] as postcss.Rule).selector).to.equal('100%');
+            const at1 = result.nodes[1] as postcss.AtRule;
+            expect((at1.nodes[0] as postcss.Rule).selector).to.equal('0%');
+            expect((at1.nodes[1] as postcss.Rule).selector).to.equal('100%');
         });
     });
 });
