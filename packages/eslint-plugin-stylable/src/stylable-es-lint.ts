@@ -1,4 +1,5 @@
-import { nodeFs } from '@file-services/node';
+import fs from 'fs';
+import path from 'path';
 import { Stylable, createDefaultResolver, StylableExports, StylableMeta } from '@stylable/core';
 import {
     ESLintUtils,
@@ -20,11 +21,11 @@ export default createRule({
     defaultOptions: [{ exposeDiagnosticsReports: false, resolveOptions: {} }], // TODO: allow to pass resolve config
     create(context, options) {
         const [{ exposeDiagnosticsReports, resolveOptions }] = options as Options;
-        const moduleResolver = createDefaultResolver(nodeFs, resolveOptions);
+        const moduleResolver = createDefaultResolver(fs, resolveOptions);
 
         const stylable = Stylable.create({
-            fileSystem: nodeFs,
-            projectRoot: '/',
+            fileSystem: fs,
+            projectRoot: process.cwd(),
             resolveModule: moduleResolver,
             requireModule: require,
         });
@@ -51,7 +52,7 @@ export default createRule({
                     return;
                 }
                 const fileName = context.getFilename();
-                const dirName = nodeFs.dirname(fileName);
+                const dirName = path.dirname(fileName);
                 const fullPath = moduleResolver(dirName, importRequest);
                 const meta = stylable.process(fullPath, dirName);
                 const { exports } = stylable.transform(meta);

@@ -1,6 +1,6 @@
 import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 import {
     applyStylableForceStateSelectors,
@@ -100,7 +100,7 @@ describe('stylable-forcestates-plugin', () => {
             entry: true,
         });
 
-        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
             '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
         );
     });
@@ -127,7 +127,7 @@ describe('stylable-forcestates-plugin', () => {
             return name === 'entry';
         });
 
-        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
             '.entry__root.entry--myState,.entry__root[stylable-force-state-myState]'
         );
     });
@@ -153,7 +153,7 @@ describe('stylable-forcestates-plugin', () => {
             entry: true,
         });
 
-        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
             '.entry__root:hover,.entry__root[stylable-force-state-hover]'
         );
     });
@@ -181,7 +181,7 @@ describe('stylable-forcestates-plugin', () => {
             entry: true,
         });
 
-        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
             `.entry__root.entry---myState-5-value,.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',
@@ -213,7 +213,7 @@ describe('stylable-forcestates-plugin', () => {
             entry: true,
         });
 
-        expect((res.meta.outputAst!.nodes![1] as postcss.Rule).selector).to.equal(
+        expect((res.meta.outputAst!.nodes[1] as postcss.Rule).selector).to.equal(
             `.entry__root[class~="entry---myState-10-some_value"],.entry__root[${createDataAttr(
                 OVERRIDE_STATE_PREFIX,
                 'myState',

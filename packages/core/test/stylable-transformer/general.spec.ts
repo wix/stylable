@@ -1,6 +1,6 @@
 import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('Stylable postcss transform (General)', () => {
     it('should output empty on empty input', () => {
@@ -34,7 +34,7 @@ describe('Stylable postcss transform (General)', () => {
             },
         });
 
-        expect(result.nodes!.length, 'remove all imports').to.equal(0);
+        expect(result.nodes.length, 'remove all imports').to.equal(0);
     });
 
     it('should not output :vars', () => {
@@ -51,7 +51,7 @@ describe('Stylable postcss transform (General)', () => {
             },
         });
 
-        expect(result.nodes!.length, 'remove all vars').to.equal(0);
+        expect(result.nodes.length, 'remove all vars').to.equal(0);
     });
 
     it('should support multiple selectors/properties with same name', () => {
@@ -73,12 +73,12 @@ describe('Stylable postcss transform (General)', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString(), 'color1').to.equal('color: red');
-        expect(rule.nodes![1].toString(), 'color1').to.equal('color: blue');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString(), 'color1').to.equal('color: red');
+        expect(rule.nodes[1].toString(), 'color1').to.equal('color: blue');
 
-        const rule2 = result.nodes![1] as postcss.Rule;
-        expect(rule2.nodes![0].toString(), 'color1').to.equal('color: red');
-        expect(rule2.nodes![1].toString(), 'color1').to.equal('color: blue');
+        const rule2 = result.nodes[1] as postcss.Rule;
+        expect(rule2.nodes[0].toString(), 'color1').to.equal('color: red');
+        expect(rule2.nodes[1].toString(), 'color1').to.equal('color: blue');
     });
 });

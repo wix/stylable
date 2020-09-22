@@ -1,5 +1,5 @@
 import { dirname } from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
@@ -257,7 +257,7 @@ function handleImportedCSSMixin(
         mergeRules(roots[0], rule);
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
-        roots.forEach((root) => mixinRoot.prepend(...root.nodes!));
+        roots.forEach((root) => mixinRoot.prepend(...root.nodes));
         mergeRules(mixinRoot, rule);
     } else {
         const mixinDecl = getMixinDeclaration(rule);

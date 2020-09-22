@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { Box } from './custom-values';
 import { StylableMeta } from './stylable-meta';
 import { StylableResults } from './stylable-transformer';

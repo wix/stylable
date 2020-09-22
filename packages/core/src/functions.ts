@@ -1,6 +1,6 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { resolveCustomValues } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
@@ -215,7 +215,7 @@ export function processDeclarationValue(
                                     );
                                 }
                             } else {
-                                const namedDecl = varSymbol.import.rule.nodes!.find((node) => {
+                                const namedDecl = varSymbol.import.rule.nodes.find((node) => {
                                     return node.type === 'decl' && node.prop === valueMapping.named;
                                 });
                                 if (namedDecl && diagnostics && node) {

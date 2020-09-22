@@ -144,7 +144,7 @@ describe('createSubsetAst', () => {
             { selector: '&' },
         ];
 
-        testMatcher(expected, res.nodes!);
+        testMatcher(expected, res.nodes);
     });
 
     it('should extract global when creating root chunk', () => {
@@ -160,7 +160,7 @@ describe('createSubsetAst', () => {
 
         const expected = [{ selector: ':global(.x)' }, { selector: ':global(.x) &' }];
 
-        testMatcher(expected, res.nodes!);
+        testMatcher(expected, res.nodes);
     });
 
     it('should parts under @media', () => {
@@ -186,7 +186,7 @@ describe('createSubsetAst', () => {
             },
         ];
 
-        testMatcher(expected, res.nodes!);
+        testMatcher(expected, res.nodes);
     });
 
     it('should not append empty media', () => {
@@ -202,6 +202,6 @@ describe('createSubsetAst', () => {
 
         const expected = [{ selector: '&' }];
 
-        testMatcher(expected, res.nodes!);
+        testMatcher(expected, res.nodes);
     });
 });

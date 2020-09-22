@@ -11,7 +11,7 @@
 
 code[class*='language-'],
 pre[class*='language-'] {
-  color: peru;
+  color: rgb(235, 235, 235);
   font-family: Menlo, Consolas, 'Andale Mono', monospace;
   direction: ltr;
   text-align: left;
@@ -62,14 +62,13 @@ pre[class*='language-'] {
 
 :not(pre) > code[class*='language-'],
 pre[class*='language-'] {
-  background: #f5f2f0;
-  background: #272c35;
+  background: rgb(35, 35, 35);
   border-radius: 2px;
 }
 
 /* Inline code */
 :not(pre) > code[class*='language-'] {
-  padding: 0.1em;
+  padding: 0.25em;
   border-radius: 0.3em;
 }
 

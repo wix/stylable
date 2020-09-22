@@ -1,6 +1,7 @@
+import path from 'path';
+import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 import StylableLint from '../src/stylable-es-lint';
-import { nodeFs } from '@file-services/node';
 import { createTempDirectorySync } from 'create-temp-directory';
 
 // mock afterAll for RuleTester (should be fixed in next version)
@@ -14,13 +15,13 @@ const tester = new ESLintUtils.RuleTester({
 });
 
 const tmp = createTempDirectorySync('stylable-eslint');
-const filename = nodeFs.join(tmp.path, 'index.ts');
+const filename = path.join(tmp.path, 'index.ts');
 
-nodeFs.writeFileSync(
-    nodeFs.join(tmp.path, 'index.st.css'),
+fs.writeFileSync(
+    path.join(tmp.path, 'index.st.css'),
     `
 :vars {
-  key: "value"; 
+  key: "value";
 }
 .root {
   --cssVar: green;

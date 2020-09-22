@@ -4,7 +4,7 @@ import {
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('simple mixin', () => {
@@ -35,8 +35,8 @@ describe('Javascript Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![1].toString()).to.equal('color: red');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[1].toString()).to.equal('color: red');
     });
 
     it('simple mixin with element', () => {
@@ -69,10 +69,10 @@ describe('Javascript Mixins', () => {
             },
         });
 
-        const rule = result.nodes![1] as postcss.Rule;
+        const rule = result.nodes[1] as postcss.Rule;
 
         expect(rule.selector).to.equal('.style__container Test');
-        expect(rule.nodes![0].toString()).to.equal('color: red');
+        expect(rule.nodes[0].toString()).to.equal('color: red');
     });
 
     it('simple mixin with fallback', () => {
@@ -103,13 +103,12 @@ describe('Javascript Mixins', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
         expect(rule.selector).to.equal('.style__container');
-        expect(rule.nodes![0].toString()).to.equal('color: red');
-        expect(rule.nodes![1].toString()).to.equal('color: blue');
+        expect(rule.nodes[0].toString()).to.equal('color: red');
+        expect(rule.nodes[1].toString()).to.equal('color: blue');
     });
-
 
     it('simple mixin and remove all -st-mixins', () => {
         const result = generateStylableRoot({
@@ -139,8 +138,8 @@ describe('Javascript Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('color: red');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('color: red');
     });
 
     it('complex mixin', () => {
@@ -185,23 +184,23 @@ describe('Javascript Mixins', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
         expect(rule.selector, 'rule 1 selector').to.equal('.entry__container');
-        expect(rule.nodes![0].toString(), 'rule 1 decl').to.equal('color: red');
+        expect(rule.nodes[0].toString(), 'rule 1 decl').to.equal('color: red');
 
-        const rule2 = result.nodes![1] as postcss.Rule;
+        const rule2 = result.nodes[1] as postcss.Rule;
         expect(rule2.selector, 'rule 2 selector').to.equal('.entry__container .entry__my-selector');
-        expect(rule2.nodes![0].toString(), 'rule 2 decl').to.equal('color: green');
+        expect(rule2.nodes[0].toString(), 'rule 2 decl').to.equal('color: green');
 
-        const rule3 = result.nodes![2] as postcss.Rule;
+        const rule3 = result.nodes[2] as postcss.Rule;
         expect(rule3.selector, 'rule 3 selector').to.equal(
             '.entry__container .entry__my-selector:hover'
         );
-        expect(rule3.nodes![0].toString(), 'rule 3 decl').to.equal('background: yellow');
+        expect(rule3.nodes[0].toString(), 'rule 3 decl').to.equal('background: yellow');
 
-        const rule4 = result.nodes![3] as postcss.Rule;
+        const rule4 = result.nodes[3] as postcss.Rule;
         expect(rule4.selector, 'rule 4 selector').to.equal('.entry__container:hover');
-        expect(rule4.nodes![0].toString(), 'rule 4 decl').to.equal('color: gold');
+        expect(rule4.nodes[0].toString(), 'rule 4 decl').to.equal('color: gold');
     });
 
     it('mixin on multiple selectors', () => {
@@ -469,7 +468,7 @@ describe('Javascript Mixins', () => {
             },
         });
 
-        const { 0: rule, 1: keyframes } = result.nodes!;
+        const { 0: rule, 1: keyframes } = result.nodes;
         expect((rule as any).nodes.length, 'rule is empty').to.equal(0);
         if (keyframes.type !== 'atrule') {
             throw new Error('expected 2nd rule to be the @keyframes');
