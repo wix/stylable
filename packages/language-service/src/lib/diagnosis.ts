@@ -1,4 +1,4 @@
-import { Diagnostic as StylableDiagnostic, process, safeParse, Stylable } from '@stylable/core';
+import { Diagnostic as StylableDiagnostic, Stylable } from '@stylable/core';
 import { Diagnostic, Range } from 'vscode-languageserver-types';
 import { CssService } from './css-service';
 
@@ -12,24 +12,13 @@ export function createDiagnosis(
     if (!filePath.endsWith('.st.css')) {
         return [];
     }
-    const docPostCSSRoot = safeParse(content, { from: filePath });
 
-    if (docPostCSSRoot.source) {
-        const { input } = docPostCSSRoot.source;
-
-        // postcss runs path.resolve, which messes up in-memory fs implementation on windows
-        Object.defineProperty(input, 'from', { value: filePath });
-        input.file = filePath;
-    }
-
-    const meta = process(docPostCSSRoot);
-
-    stylable.fileProcessor.add(filePath, meta);
+    const meta = stylable.fileProcessor.processContent(content, filePath);
 
     try {
         stylable.transform(meta);
     } catch {
-        /**/
+        /*TODO: report this failure to transform */
     }
 
     const cleanDoc = cssService.createSanitizedDocument(meta.rawAst, filePath, version);
