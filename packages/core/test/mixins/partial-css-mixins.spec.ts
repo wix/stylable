@@ -37,6 +37,41 @@ describe('Partial CSS Mixins', () => {
             'mixin dose not apply'
         );
     });
+    it('multiple value usage in same decl', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                
+                :vars {
+                    c1: red;
+                    c2: blue;
+                    c3: green;
+                }
+
+                .my-mixin {
+                    color: value(c1);
+                    background: value(c1), value(c2);
+                    background: value(c1), value(c3);
+                }
+                .container {
+                    -st-partial-mixin: my-mixin(c1 black, c2 white);
+                }
+            `,
+                },
+            },
+        });
+
+        expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
+        matchRuleAndDeclaration(
+            result.meta.outputAst!,
+            1,
+            '.entry__container',
+            'color: black;background: black, white;background: black, green'
+        );
+    });
     it('only copy used deceleration that the override arguments target (root mixin selector)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
