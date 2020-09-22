@@ -12,7 +12,7 @@ const parseMixin = (mixinValue: string) => {
 
 const parsePartialMixin = (mixinValue: string) => {
     return SBTypesParsers[valueMapping.partialMixin](
-        postcss.decl({ value: mixinValue }),
+        postcss.decl({ prop: valueMapping.partialMixin, value: mixinValue }),
         () => 'named'
     );
 };

@@ -351,7 +351,7 @@ function filterPartialMixinDecl(mixinRoot: postcss.Root, overrideKeys: string[])
         if (!decl.value.match(regexp)) {
             const parent = decl.parent; // ref the parent before remove
             decl.remove();
-            if (parent.nodes?.length === 0) {
+            if (parent?.nodes?.length === 0) {
                 parent.remove();
             }
         }
