@@ -1,0 +1,37 @@
+{
+  "name": "@stylable/rollup",
+  "version": "3.10.1",
+  "description": "Rollup plugin for Stylable modules",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "build": "ts-build ./src --cjs",
+    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000",
+    "prepack": "yarn build"
+  },
+  "peerDependencies": {
+    "@stylable/core": ">=3",
+    "rollup": "~2"
+  },
+  "dependencies": {
+    "@stylable/module-utils": "^3.10.1",
+    "@stylable/node": "^3.10.1",
+    "@stylable/optimizer": "^3.10.1",
+    "@stylable/runtime": "^3.10.0",
+    "find-config": "^1.0.0",
+  },
+  "files": [
+    "cjs",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/rollup",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}
