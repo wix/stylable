@@ -29,8 +29,8 @@ describe('Javascript Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('background: red');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('background: red');
     });
 
     it('javascript value in var definition', () => {
@@ -58,11 +58,11 @@ describe('Javascript Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('background: red');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('background: red');
     });
 
-    it('javascript value dose re-export to css', () => {
+    it('javascript value does re-export to css', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {
@@ -92,8 +92,8 @@ describe('Javascript Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('background: red');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('background: red');
     });
 
     it('simple mixin', () => {
