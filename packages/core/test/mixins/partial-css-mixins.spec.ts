@@ -3,6 +3,7 @@ import {
     generateStylableRoot,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
+import { processorWarnings } from '@stylable/core';
 import { expect } from 'chai';
 
 describe('Partial CSS Mixins', () => {
@@ -26,7 +27,7 @@ describe('Partial CSS Mixins', () => {
 
         const report = result.meta.diagnostics.reports[0];
         expect(report.message).to.equal(
-            `"-st-partial-mixin" can only be used when override arguments are provided, missing overrides on "my-mixin"`
+            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS('my-mixin')
         );
         matchRuleAndDeclaration(
             result.meta.outputAst!,
@@ -36,6 +37,7 @@ describe('Partial CSS Mixins', () => {
             'mixin does not apply'
         );
     });
+
     it('should include any declaration that contains overridden variables', () => {
         const result = generateStylableResult({
             entry: `/entry.st.css`,
@@ -71,6 +73,49 @@ describe('Partial CSS Mixins', () => {
             'color: black;background: black, white;background: black, green'
         );
     });
+
+    it('should work with -st-mixin', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                
+                :vars {
+                    c1: red;
+                    c2: blue;
+                    c3: green;
+                }
+
+                .my-mixin1 {
+                    z-index: 0;
+                    color: value(c1);
+                }
+
+                .my-mixin2 {
+                    z-index: 1;
+                    border: 1px solid value(c1);
+                }
+
+                .container {
+                    -st-mixin: my-mixin1;
+                    -st-partial-mixin: my-mixin2(c1 black);
+                }
+            `,
+                },
+            },
+        });
+
+        expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
+        matchRuleAndDeclaration(
+            result.meta.outputAst!,
+            2,
+            '.entry__container',
+            'z-index: 0;color: red;border: 1px solid black'
+        );
+    });
+
     it('should include any rules and declaration that contains overridden variables (local partial mixin)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
@@ -124,6 +169,7 @@ describe('Partial CSS Mixins', () => {
         // mixin does not change
         matchRuleAndDeclaration(result, 3, '.entry__my-mixin', 'color: red;background: green');
     });
+
     it('should include any rules and declaration that contains overridden variables (imported partial mixin)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,

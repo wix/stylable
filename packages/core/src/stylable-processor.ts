@@ -86,8 +86,8 @@ export const processorWarnings = {
     UNKNOWN_MIXIN(name: string) {
         return `unknown mixin: "${name}"`;
     },
-    OVERRIDE_MIXIN() {
-        return `override mixin on same rule`;
+    OVERRIDE_MIXIN(mixinType: string) {
+        return `override ${mixinType} on same rule`;
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
@@ -677,10 +677,27 @@ export class StylableProcessor {
             });
 
             if (rule.mixins) {
-                this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN());
+                const partials = rule.mixins.filter((r) => r.mixin.partial);
+                const nonPartials = rule.mixins.filter((r) => !r.mixin.partial);
+                const isInPartial = decl.prop === valueMapping.partialMixin;
+                if (
+                    (partials.length && decl.prop === valueMapping.partialMixin) ||
+                    (nonPartials.length && decl.prop === valueMapping.mixin)
+                ) {
+                    this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN(decl.prop));
+                }
+                if (partials.length && nonPartials.length) {
+                    rule.mixins = isInPartial
+                        ? nonPartials.concat(mixins)
+                        : partials.concat(mixins);
+                } else if (partials.length) {
+                    rule.mixins = isInPartial ? mixins : partials.concat(mixins);
+                } else if (nonPartials.length) {
+                    rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
+                }
+            } else if (mixins.length) {
+                rule.mixins = mixins;
             }
-
-            rule.mixins = mixins;
         } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.setClassGlobalMapping(decl, rule);
