@@ -1,13 +1,12 @@
 import {
     generateStylableResult,
     generateStylableRoot,
-    // matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 
 describe('Partial CSS Mixins', () => {
-    it('only use partial mixins with override arguments', () => {
+    it('should warn on partial mixins with no override arguments', () => {
         const result = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -34,10 +33,10 @@ describe('Partial CSS Mixins', () => {
             1,
             '.entry__container',
             '',
-            'mixin dose not apply'
+            'mixin does not apply'
         );
     });
-    it('multiple value usage in same decl', () => {
+    it('should include any declaration that contains overridden variables', () => {
         const result = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -72,7 +71,7 @@ describe('Partial CSS Mixins', () => {
             'color: black;background: black, white;background: black, green'
         );
     });
-    it('only copy used deceleration that the override arguments target (root mixin selector)', () => {
+    it('should include any rules and declaration that contains overridden variables (local partial mixin)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -122,9 +121,10 @@ describe('Partial CSS Mixins', () => {
             '.entry__container .entry__y',
             'border: 1px solid yellow'
         );
+        // mixin does not change
         matchRuleAndDeclaration(result, 3, '.entry__my-mixin', 'color: red;background: green');
     });
-    it('only copy used deceleration that the override arguments target (imported mixin selector)', () => {
+    it('should include any rules and declaration that contains overridden variables (imported partial mixin)', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {

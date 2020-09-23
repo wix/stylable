@@ -92,8 +92,8 @@ export const processorWarnings = {
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
     },
-    ILLEGAL_PARTIAL_MIXIN(type: string) {
-        return `"${valueMapping.partialMixin}" can only be used when override arguments are provided, missing overrides on "${type}"`;
+    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
+        return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
@@ -657,7 +657,7 @@ export class StylableProcessor {
                     if (mixin.partial && Object.keys(mixin.options).length === 0) {
                         this.diagnostics.warn(
                             decl,
-                            processorWarnings.ILLEGAL_PARTIAL_MIXIN(mixin.type),
+                            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
                             {
                                 word: mixin.type,
                             }
