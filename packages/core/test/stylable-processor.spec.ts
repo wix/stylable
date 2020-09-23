@@ -351,7 +351,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        const mixinRule = result.ast.nodes![0] as SRule;
+        const mixinRule = result.ast.nodes[0] as SRule;
         expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin');
     });
     it('should use last mixin deceleration', () => {
@@ -367,7 +367,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        const mixinRule = result.ast.nodes![0] as SRule;
+        const mixinRule = result.ast.nodes[0] as SRule;
         expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin2');
     });
     it('should use last mixin deceleration for -st-partial-mixin', () => {
@@ -383,7 +383,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        const mixinRule = result.ast.nodes![0] as SRule;
+        const mixinRule = result.ast.nodes[0] as SRule;
         expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin2');
     });
     it('should use mixin deceleration in order for mixed -st-mixin and -st-partial-mixin', () => {
@@ -403,8 +403,8 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        const mixinRule1 = result.ast.nodes![0] as SRule;
-        const mixinRule2 = result.ast.nodes![1] as SRule;
+        const mixinRule1 = result.ast.nodes[0] as SRule;
+        const mixinRule2 = result.ast.nodes[1] as SRule;
         expect(mixinRule1.mixins![0].mixin.type).to.eql('my-mixin1');
         expect(mixinRule1.mixins![1].mixin.type).to.eql('my-mixin2');
         expect(mixinRule2.mixins![0].mixin.type).to.eql('my-mixin2');
@@ -427,7 +427,7 @@ describe('Stylable postcss process', () => {
             { from: 'path/to/style.css' }
         );
 
-        const mixinRule = result.ast.nodes![0] as SRule;
+        const mixinRule = result.ast.nodes[0] as SRule;
         expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin3');
         expect(mixinRule.mixins![1].mixin.type).to.eql('my-mixin4');
     });
