@@ -214,6 +214,7 @@ export class StylableTransformer {
             }
 
             switch (decl.prop) {
+                case valueMapping.partialMixin:
                 case valueMapping.mixin:
                     break;
                 case valueMapping.states:

@@ -4,6 +4,7 @@ import {
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
+import { processorWarnings } from '@stylable/core';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
 
@@ -27,6 +28,33 @@ describe('CSS Mixins', () => {
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
+    });
+
+    it('last mixin wins with warning', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                .my-mixin1 {
+                    color: red;
+                }
+                .my-mixin2 {
+                    color: green;
+                }
+                .container {
+                    -st-mixin: my-mixin1;
+                    -st-mixin: my-mixin2;
+                }
+            `,
+                },
+            },
+        });
+
+        const report = result.meta.diagnostics.reports[0];
+        expect(report.message).to.equal(processorWarnings.OVERRIDE_MIXIN('-st-mixin'));
+        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'color: green');
     });
 
     it('Mixin with function arguments with multiple params (comma separated)', () => {

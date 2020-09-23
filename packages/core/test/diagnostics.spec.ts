@@ -821,7 +821,7 @@ describe('diagnostics: warnings and errors', () => {
                 },
             };
             expectWarningsFromTransform(config, [
-                { message: processorWarnings.OVERRIDE_MIXIN(), file: '/main.css' },
+                { message: processorWarnings.OVERRIDE_MIXIN('-st-mixin'), file: '/main.css' },
             ]);
         });
 

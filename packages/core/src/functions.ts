@@ -355,7 +355,7 @@ export function processDeclarationValue(
     return { outputValue, topLevelType, typeError };
     // }
     // TODO: handle calc (parse internals but maintain expression)
-    // TODO: check this thing. native function that accent our function dose not work
+    // TODO: check this thing. native function that accent our function does not work
     // e.g: calc(getVarName())
 }
 
