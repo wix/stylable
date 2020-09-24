@@ -1,6 +1,9 @@
 import ts from 'typescript';
 
 declare module 'typescript' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    export interface NamedTupleMember {}
+
     // needed for custom readDirectory
     export function matchFiles(
         path: string,

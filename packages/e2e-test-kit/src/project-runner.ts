@@ -103,8 +103,9 @@ export class ProjectRunner {
               };
     }
     public loadTestConfig(configName?: string, webpackOptions: webpack.Configuration = {}) {
+        const config = require(join(this.projectDir, configName || 'webpack.config'));
         return {
-            ...require(join(this.projectDir, configName || 'webpack.config')),
+            ...(config.default || config),
             ...webpackOptions,
         };
     }
@@ -206,6 +207,29 @@ export class ProjectRunner {
 
     public getBuildErrorMessages() {
         return this.stats!.compilation.errors.slice();
+    }
+
+    public getBuildErrorMessagesDeep() {
+        function getErrors(compilations: webpack.compilation.Compilation[]) {
+            return compilations.reduce((errors, compilation) => {
+                errors.push(...compilation.errors);
+                errors.push(...getErrors(compilation.children));
+                return errors;
+            }, [] as any[]);
+        }
+
+        return getErrors([this.stats!.compilation]);
+    }
+    public getBuildWarningsMessagesDeep() {
+        function getWarnings(compilations: webpack.compilation.Compilation[]) {
+            return compilations.reduce((warnings, compilation) => {
+                warnings.push(...compilation.warnings);
+                warnings.push(...getWarnings(compilation.children));
+                return warnings;
+            }, [] as any[]);
+        }
+
+        return getWarnings([this.stats!.compilation]);
     }
 
     public getBuildAsset(assetPath: string) {

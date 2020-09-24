@@ -1,6 +1,21 @@
-const MemoryFS = require('memory-fs');
+import MemoryFS from 'memory-fs';
 
-export function memoryFS() {
+export interface CustomMemoryFs extends MemoryFS {
+    statSync(
+        path: string
+    ): {
+        isFile: () => boolean;
+        isDirectory: () => boolean;
+        isBlockDevice: () => boolean;
+        isCharacterDevice: () => boolean;
+        isSymbolicLink: () => boolean;
+        isFIFO: () => boolean;
+        isSocket: () => boolean;
+        mtime: Date;
+    };
+}
+
+export function memoryFS(): CustomMemoryFs {
     const mfs = new MemoryFS();
     const lastModified: { [k: string]: Date } = {};
 
@@ -57,12 +72,12 @@ export function memoryFS() {
         return stats;
     }
 
-    function wrap<T extends (...args: any[]) => any>(method: string, fn: T) {
+    function wrap<T extends (...args: any[]) => any>(method: keyof MemoryFS, fn: T) {
         const oldFn = mfs[method];
         mfs[method] = (...args: any[]) => {
             return fn(oldFn, args);
         };
     }
 
-    return mfs;
+    return mfs as CustomMemoryFs;
 }

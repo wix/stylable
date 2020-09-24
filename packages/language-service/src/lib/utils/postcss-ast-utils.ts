@@ -1,9 +1,9 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { ProviderPosition } from '../completion-providers';
 
 export function isInNode(
     position: ProviderPosition,
-    node: postcss.NodeBase,
+    node: postcss.Node,
     includeSelector = false
 ): boolean {
     if (!node.source) {
@@ -21,8 +21,8 @@ export function isInNode(
     if (!node.source.end) {
         return (
             !isBeforeRuleset(position, node) ||
-            (!!(node as postcss.ContainerBase).nodes &&
-                !!((node as postcss.ContainerBase).nodes!.length > 0))
+            (!!(node as postcss.Container).nodes &&
+                !!((node as postcss.Container).nodes.length > 0))
         );
     }
     if (node.source.end.line < position.line) {
@@ -40,9 +40,9 @@ export function isInNode(
     return true;
 }
 
-export function isBeforeRuleset(position: ProviderPosition, node: postcss.NodeBase) {
-    const part = ((node.source!.input as any).css as string)
-        .split('\n')
+export function isBeforeRuleset(position: ProviderPosition, node: postcss.Node) {
+    const part = node
+        .source!.input.css.split('\n')
         .slice(node.source!.start!.line - 1, node.source!.end ? node.source!.end.line : undefined);
     if (part.findIndex((s) => s.includes('{')) + node.source!.start!.line > position.line) {
         return true;
@@ -53,9 +53,9 @@ export function isBeforeRuleset(position: ProviderPosition, node: postcss.NodeBa
     return false;
 }
 
-export function isAfterRuleset(position: ProviderPosition, node: postcss.NodeBase) {
-    const part = ((node.source!.input as any).css as string)
-        .split('\n')
+export function isAfterRuleset(position: ProviderPosition, node: postcss.Node) {
+    const part = node
+        .source!.input.css.split('\n')
         .slice(node.source!.start!.line - 1, node.source!.end!.line);
     if (part.findIndex((s) => s.includes('}')) + node.source!.start!.line < position.line) {
         return true;
@@ -71,39 +71,39 @@ export function isAfterRuleset(position: ProviderPosition, node: postcss.NodeBas
 
 const { hasOwnProperty } = Object.prototype;
 
-export function isContainer(node: postcss.NodeBase): node is postcss.ContainerBase {
+export function isContainer(node: postcss.Node): node is postcss.Container {
     return hasOwnProperty.call(node, 'nodes');
 }
 
-export function isSelector(node: postcss.NodeBase): node is postcss.Rule {
+export function isSelector(node: postcss.Node): node is postcss.Rule {
     return hasOwnProperty.call(node, 'selector');
 }
 
-export function isVars(node: postcss.NodeBase) {
+export function isVars(node: postcss.Node) {
     return hasOwnProperty.call(node, 'selector') && (node as postcss.Rule).selector === ':vars';
 }
 
-export function isDeclaration(node: postcss.NodeBase): node is postcss.Declaration {
+export function isDeclaration(node: postcss.Node): node is postcss.Declaration {
     return hasOwnProperty.call(node, 'prop');
 }
 
-export function isComment(node: postcss.NodeBase): node is postcss.Comment {
+export function isComment(node: postcss.Node): node is postcss.Comment {
     return hasOwnProperty.call(node, 'type') && (node as postcss.Comment).type === 'comment';
 }
 
-export function isRoot(node: postcss.NodeBase): node is postcss.Root {
+export function isRoot(node: postcss.Node): node is postcss.Root {
     return hasOwnProperty.call(node, 'type') && (node as postcss.Root).type === 'root';
 }
 
 export function pathFromPosition(
-    ast: postcss.NodeBase,
+    ast: postcss.Node,
     position: ProviderPosition,
-    res: postcss.NodeBase[] = [],
+    res: postcss.Node[] = [],
     includeSelector = false
-): postcss.NodeBase[] {
+): postcss.Node[] {
     res.push(ast);
     if (isContainer(ast) && ast.nodes) {
-        const childNode = ast.nodes.find((node: postcss.NodeBase) => {
+        const childNode = ast.nodes.find((node: postcss.Node) => {
             return isInNode(position, node, includeSelector);
         });
         if (childNode) {

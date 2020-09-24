@@ -1,8 +1,8 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
+import cssSelectorTokenizer from 'css-selector-tokenizer';
 import { ClassSymbol, ElementSymbol } from './stylable-meta';
 import { CSSResolve } from './stylable-resolver';
 import { valueMapping } from './stylable-value-parsers';
-const tokenizer = require('css-selector-tokenizer');
 
 export interface SelectorAstNode {
     type: string;
@@ -27,11 +27,11 @@ export type Visitor = (
 type nodeWithPseudo = Partial<SelectorAstNode> & { pseudo: Array<Partial<SelectorAstNode>> };
 
 export function parseSelector(selector: string): SelectorAstNode {
-    return tokenizer.parse(selector);
+    return cssSelectorTokenizer.parse(selector) as SelectorAstNode;
 }
 
 export function stringifySelector(ast: SelectorAstNode): string {
-    return tokenizer.stringify(ast);
+    return cssSelectorTokenizer.stringify(ast as cssSelectorTokenizer.SelectorsNode);
 }
 
 export function traverseNode(
@@ -347,7 +347,11 @@ export function fixChunkOrdering(selectorNode: SelectorAstNode, prefixType: Sele
 }
 
 export function isChildOfAtRule(rule: postcss.Container, atRuleName: string) {
-    return !!rule.parent && rule.parent.type === 'atrule' && rule.parent.name === atRuleName;
+    return (
+        !!rule.parent &&
+        rule.parent.type === 'atrule' &&
+        (rule.parent as postcss.AtRule).name === atRuleName
+    );
 }
 
 export function isCompRoot(name: string) {

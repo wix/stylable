@@ -6,7 +6,7 @@ import {
     traverseNode,
 } from '@stylable/core';
 import csso from 'csso';
-import postcss from 'postcss';
+import postcss, { Declaration, Root, Rule, Node, Comment } from 'postcss';
 import { StylableClassNameOptimizer } from './classname-optimizer';
 import { StylableNamespaceOptimizer } from './namespace-optimizer';
 
@@ -59,9 +59,9 @@ export class StylableOptimizer implements IStylableOptimizer {
             );
         }
     }
-    public removeStylableDirectives(root: postcss.Root, shouldComment = false) {
-        const toRemove: postcss.Node[] = [];
-        root.walkDecls((decl: postcss.Declaration) => {
+    public removeStylableDirectives(root: Root, shouldComment = false) {
+        const toRemove: Node[] = [];
+        root.walkDecls((decl: Declaration) => {
             if (decl.prop.startsWith('-st-')) {
                 toRemove.push(decl);
             }
@@ -76,15 +76,15 @@ export class StylableOptimizer implements IStylableOptimizer {
                   }
         );
     }
-    private removeEmptyNodes(root: postcss.Root) {
+    private removeEmptyNodes(root: Root) {
         removeEmptyNodes(root);
     }
-    private removeComments(root: postcss.Root) {
+    private removeComments(root: Root) {
         removeCommentNodes(root);
     }
     private removeUnusedComponents(
         delimiter: string,
-        outputAst: postcss.Root,
+        outputAst: Root,
         usageMapping: Record<string, boolean>,
         shouldComment = false
     ) {
@@ -132,7 +132,7 @@ export class StylableOptimizer implements IStylableOptimizer {
     }
 }
 
-export function removeCommentNodes(root: postcss.Root) {
+export function removeCommentNodes(root: Root) {
     root.walkComments((comment) => comment.remove());
     root.walkDecls((decl) => {
         const r: any = decl.raws;
@@ -142,10 +142,10 @@ export function removeCommentNodes(root: postcss.Root) {
     });
 }
 
-export function removeEmptyNodes(root: postcss.Root) {
-    const toRemove: postcss.Node[] = [];
+export function removeEmptyNodes(root: Root) {
+    const toRemove: Node[] = [];
 
-    root.walkRules((rule: postcss.Rule) => {
+    root.walkRules((rule: Rule) => {
         const shouldRemove =
             (rule.nodes && rule.nodes.length === 0) ||
             (rule.nodes && rule.nodes.filter((node) => node.type !== 'comment').length === 0);
@@ -159,7 +159,7 @@ export function removeEmptyNodes(root: postcss.Root) {
     });
 }
 
-export function createCommentFromNode(label: string, node: postcss.Node) {
+export function createCommentFromNode(label: string, node: Node) {
     return [
         postcss.comment({
             text: label + ':',
@@ -168,7 +168,7 @@ export function createCommentFromNode(label: string, node: postcss.Node) {
     ];
 }
 
-export function createLineByLineComment(node: postcss.Node) {
+export function createLineByLineComment(node: Node) {
     return node
         .toString()
         .split(/\r?\n/)
@@ -179,16 +179,16 @@ export function createLineByLineComment(node: postcss.Node) {
             let c;
             if (x.trim().startsWith('/*') && x.trim().endsWith('*/')) {
                 c = postcss.comment({ text: x.replace(/\*\//gm, '').replace(/\/\*/gm, '') });
-                // c = postcss.comment({ text: x.replace(/\*\//gm, '').replace(/\/\*/gm, '') });
+                // c = comment({ text: x.replace(/\*\//gm, '').replace(/\/\*/gm, '') });
             } else {
                 c = postcss.comment({ text: x.replace(/\*\//gm, '*//*') });
             }
             return c;
         })
-        .filter(Boolean) as postcss.Comment[];
+        .filter(Boolean) as Comment[];
 }
 
-export function removeRecursiveUpIfEmpty(node: postcss.Node) {
+export function removeRecursiveUpIfEmpty(node: Node) {
     const parent = node.parent;
     node.remove();
     if (parent && parent.nodes && parent.nodes.length === 0) {
@@ -196,7 +196,7 @@ export function removeRecursiveUpIfEmpty(node: postcss.Node) {
     }
 }
 
-export function replaceRecursiveUpIfEmpty(label: string, node: postcss.Node) {
+export function replaceRecursiveUpIfEmpty(label: string, node: Node) {
     const parent = node.parent;
     node.raws = {};
     node.replaceWith(

@@ -4,8 +4,9 @@ import {
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
+import { processorWarnings } from '@stylable/core';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('CSS Mixins', () => {
     it('apply simple class mixins declarations', () => {
@@ -27,6 +28,33 @@ describe('CSS Mixins', () => {
         });
 
         matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
+    });
+
+    it('last mixin wins with warning', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                .my-mixin1 {
+                    color: red;
+                }
+                .my-mixin2 {
+                    color: green;
+                }
+                .container {
+                    -st-mixin: my-mixin1;
+                    -st-mixin: my-mixin2;
+                }
+            `,
+                },
+            },
+        });
+
+        const report = result.meta.diagnostics.reports[0];
+        expect(report.message).to.equal(processorWarnings.OVERRIDE_MIXIN('-st-mixin'));
+        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'color: green');
     });
 
     it('Mixin with function arguments with multiple params (comma separated)', () => {
@@ -58,8 +86,8 @@ describe('CSS Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
-        expect(rule.nodes![0].toString()).to.equal('color: color-1, color-2');
+        const rule = result.nodes[0] as postcss.Rule;
+        expect(rule.nodes[0].toString()).to.equal('color: color-1, color-2');
     });
 
     it('transform state form imported element', () => {
@@ -295,7 +323,7 @@ describe('CSS Mixins', () => {
         );
     });
 
-    it.skip('should scope @keyframes from local mixin without duplicating the animation', () => {
+    it('should scope @keyframes from local mixin without duplicating the animation', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
             files: {
@@ -318,6 +346,83 @@ describe('CSS Mixins', () => {
         });
 
         matchRuleAndDeclaration(result, 2, '.entry__container', 'animation: entry__original 2s');
+    });
+
+    it('should scope @keyframes from imported mixin without duplicating the animation', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./imported.st.css";
+                    -st-named: my-mixin;
+                }
+                .container {
+                    -st-mixin: my-mixin;
+                }
+                `,
+                },
+                '/imported.st.css': {
+                    namespace: 'imported',
+                    content: `
+                .my-mixin {
+                    animation: original 2s;
+                }
+                @keyframes original {
+                    0% { color: red; }
+                    100% { color: green; }
+                }
+                `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry__container', 'animation: imported__original 2s');
+    });
+
+    it('should scope @keyframes from root mixin (duplicate the entire @keyframe with origin context)', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./imported.st.css";
+                    -st-default: Imported;
+                }
+                .container {
+                    -st-mixin: Imported;
+                }
+                `,
+                },
+
+                '/imported.st.css': {
+                    namespace: 'imported',
+                    content: `
+                .my-mixin {
+                    animation: original 2s;
+                }
+                @keyframes original {
+                    0% { color: red; }
+                    100% { color: green; }
+                }
+                `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(
+            result,
+            1,
+            '.entry__container .imported__my-mixin',
+            'animation: imported__original 2s'
+        );
+        result.walkAtRules(/@keyframes/, (rule) => {
+            expect(rule.params).to.equal('imported__original');
+        });
     });
 
     it('apply class mixins from import', () => {
@@ -795,7 +900,7 @@ describe('CSS Mixins', () => {
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red');
 
-        const media = result.nodes![1] as postcss.AtRule;
+        const media = result.nodes[1] as postcss.AtRule;
         expect(media.params, 'media params').to.equal('(max-width: 300px)');
 
         matchAllRulesAndDeclarations(
@@ -844,7 +949,7 @@ describe('CSS Mixins', () => {
 
         matchRuleAndDeclaration(result, 0, '.entry__x', 'color:red');
         matchRuleAndDeclaration(result, 1, '.entry__x .imported__y', 'color:green');
-        const media = result.nodes![2] as postcss.AtRule;
+        const media = result.nodes[2] as postcss.AtRule;
         matchRuleAndDeclaration(media, 0, '.entry__x', 'color:yellow', '@media');
         matchRuleAndDeclaration(media, 1, '.entry__x .imported__y', 'color:gold', '@media');
     });

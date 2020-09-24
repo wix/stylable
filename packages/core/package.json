@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "3.7.2",
+  "version": "3.11.1",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,19 +12,19 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "css-selector-tokenizer": "^0.7.2",
+    "css-selector-tokenizer": "^0.7.3",
     "deindent": "^0.1.0",
-    "enhanced-resolve": "^4.2.0",
+    "enhanced-resolve": "^4.3.0",
     "is-url-superb": "^4.0.0",
     "is-vendor-prefixed": "^3.3.1",
     "jest-docblock": "^26.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
     "murmurhash": "^1.0.0",
-    "postcss": "^7.0.32",
-    "postcss-js": "^2.0.3",
-    "postcss-nested": "^4.2.1",
-    "postcss-safe-parser": "^4.0.2",
+    "postcss": "^8.0.9",
+    "postcss-js": "^3.0.0",
+    "postcss-nested": "^5.0.0",
+    "postcss-safe-parser": "^5.0.1",
     "postcss-selector-matches": "^4.0.0",
     "postcss-value-parser": "^4.1.0"
   },

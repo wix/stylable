@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
@@ -25,10 +25,10 @@ describe('Generator variables interpolation', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-        expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+        expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
     });
 
     it('should resolve value inside @media', () => {
@@ -47,7 +47,7 @@ describe('Generator variables interpolation', () => {
             },
         });
 
-        expect((result.nodes![0] as postcss.AtRule).params).to.equal('(max-width: 301px)');
+        expect((result.nodes[0] as postcss.AtRule).params).to.equal('(max-width: 301px)');
     });
 
     it('should resolve value() usage in variable declaration', () => {
@@ -69,9 +69,9 @@ describe('Generator variables interpolation', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
     });
 
     it('should resolve to recursive entry', () => {
@@ -94,9 +94,9 @@ describe('Generator variables interpolation', () => {
             },
         });
 
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('value(param1)');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('value(param1)');
     });
 
     it('should support imported vars', () => {
@@ -130,10 +130,10 @@ describe('Generator variables interpolation', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-        expect((rule.nodes![1] as postcss.Declaration).value).to.equal('blue');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+        expect((rule.nodes[1] as postcss.Declaration).value).to.equal('blue');
     });
 
     it('should support imported vars (deep)', () => {
@@ -179,10 +179,10 @@ describe('Generator variables interpolation', () => {
                 },
             },
         });
-        const rule = result.nodes![0] as postcss.Rule;
+        const rule = result.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-        expect((rule.nodes![1] as postcss.Declaration).value).to.equal('blue');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+        expect((rule.nodes[1] as postcss.Declaration).value).to.equal('blue');
     });
 
     it('should resolve a variable inside unknown functions', () => {
@@ -203,9 +203,9 @@ describe('Generator variables interpolation', () => {
             },
         });
 
-        const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+        const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('xxx(green)');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('xxx(green)');
         expect(meta.transformDiagnostics!.reports[0].message).to.equal(
             functionWarnings.UNKNOWN_FORMATTER('xxx')
         );
@@ -289,9 +289,9 @@ describe('Generator variables interpolation', () => {
                     },
                 },
             });
-            const root = meta.outputAst!.nodes![0] as postcss.Rule;
+            const root = meta.outputAst!.nodes[0] as postcss.Rule;
 
-            expect((root.nodes![0] as postcss.Declaration).value).to.equal(
+            expect((root.nodes[0] as postcss.Declaration).value).to.equal(
                 'my custom value CustomValue'
             );
         });
@@ -319,10 +319,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
             it('should support stMap type with deep structure', () => {
@@ -350,10 +350,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('green');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('1px solid green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('1px solid green');
             });
 
             it('should support stMap type with imported deep structure', () => {
@@ -389,10 +389,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
             it('should support stMap type with var usage in variable invocation', () => {
@@ -417,10 +417,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
 
             it('should support stMap type with imported var usage in variable invocation', () => {
@@ -455,8 +455,8 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
             });
 
             it('should support stMap type with inner var in definition', () => {
@@ -485,11 +485,11 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const root = meta.outputAst!.nodes![0] as postcss.Rule;
-                const part = meta.outputAst!.nodes![1] as postcss.Rule;
+                const root = meta.outputAst!.nodes[0] as postcss.Rule;
+                const part = meta.outputAst!.nodes[1] as postcss.Rule;
 
-                expect((root.nodes![0] as postcss.Declaration).value).to.equal('2px dashed red');
-                expect((part.nodes![0] as postcss.Declaration).value).to.equal('1px solid green');
+                expect((root.nodes[0] as postcss.Declaration).value).to.equal('2px dashed red');
+                expect((part.nodes[0] as postcss.Declaration).value).to.equal('1px solid green');
             });
         });
 
@@ -514,11 +514,11 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('yellow');
-                expect((rule.nodes![2] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('yellow');
+                expect((rule.nodes[2] as postcss.Declaration).value).to.equal('green');
             });
 
             it('should support imported stArray type', () => {
@@ -548,10 +548,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('red');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('green');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('red');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('green');
             });
         });
 
@@ -590,9 +590,9 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('1px solid red');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('1px solid red');
             });
 
             it('should support an stArray nested inside an stMap type', () => {
@@ -623,10 +623,10 @@ describe('Generator variables interpolation', () => {
                         },
                     },
                 });
-                const rule = meta.outputAst!.nodes![0] as postcss.Rule;
+                const rule = meta.outputAst!.nodes[0] as postcss.Rule;
 
-                expect((rule.nodes![0] as postcss.Declaration).value).to.equal('rgb(100, 0, 0)');
-                expect((rule.nodes![1] as postcss.Declaration).value).to.equal('rgb(255, 0, 0)');
+                expect((rule.nodes[0] as postcss.Declaration).value).to.equal('rgb(100, 0, 0)');
+                expect((rule.nodes[1] as postcss.Declaration).value).to.equal('rgb(255, 0, 0)');
             });
         });
 

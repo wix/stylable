@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 
-export function matchCSSMatchers(chai: any, util: any) {
+export function matchCSSMatchers(chai: Chai.ChaiStatic, util: Chai.ChaiUtils) {
     const { flag } = util;
-    chai.Assertion.addMethod('matchCSS', function (this: any, css: string | string[]) {
+    chai.Assertion.addMethod('matchCSS', function (css: string | string[]) {
         let element = flag(this, 'object');
         if (!Array.isArray(css)) {
             css = [css];

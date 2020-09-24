@@ -1,5 +1,5 @@
 import { dirname } from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 import { resolveArgumentsValue } from './functions';
 import { cssObjectToAst } from './parser';
@@ -9,7 +9,7 @@ import { RefedMixin, SRule, StylableMeta } from './stylable-processor';
 import { CSSResolve } from './stylable-resolver';
 import { StylableTransformer } from './stylable-transformer';
 import { createSubsetAst, isValidDeclaration, mergeRules } from './stylable-utils';
-import { valueMapping } from './stylable-value-parsers';
+import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 
 export const mixinWarnings = {
     FAILED_TO_APPLY_MIXIN(error: string) {
@@ -41,7 +41,7 @@ export function appendMixins(
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
     rule.mixins.length = 0;
-    rule.walkDecls(valueMapping.mixin, (node) => node.remove());
+    rule.walkDecls(mixinDeclRegExp, (node) => node.remove());
 }
 
 export function appendMixin(
@@ -176,6 +176,11 @@ function createMixinRootFromCSSResolve(
     );
 
     const namedArgs = mix.mixin.options as Record<string, string>;
+
+    if (mix.mixin.partial) {
+        filterPartialMixinDecl(mixinRoot, Object.keys(namedArgs));
+    }
+
     const resolvedArgs = resolveArgumentsValue(
         namedArgs,
         transformer,
@@ -215,6 +220,13 @@ function handleImportedCSSMixin(
     variableOverride: Record<string, string>,
     cssVarsMapping: Record<string, string>
 ) {
+    const isPartial = mix.mixin.partial;
+    const namedArgs = mix.mixin.options as Record<string, string>;
+    const overrideKeys = Object.keys(namedArgs);
+
+    if (isPartial && overrideKeys.length === 0) {
+        return;
+    }
     let resolvedClass = transformer.resolver.resolve(mix.ref) as CSSResolve;
     const roots = [];
 
@@ -245,7 +257,7 @@ function handleImportedCSSMixin(
         mergeRules(roots[0], rule);
     } else if (roots.length > 1) {
         const mixinRoot = postcss.root();
-        roots.forEach((root) => mixinRoot.prepend(...root.nodes!));
+        roots.forEach((root) => mixinRoot.prepend(...root.nodes));
         mergeRules(mixinRoot, rule);
     } else {
         const mixinDecl = getMixinDeclaration(rule);
@@ -269,8 +281,14 @@ function handleLocalClassMixin(
     path: string[],
     rule: SRule
 ) {
-    const isRootMixin = mix.ref.name === meta.root;
+    const isPartial = mix.mixin.partial;
     const namedArgs = mix.mixin.options as Record<string, string>;
+    const overrideKeys = Object.keys(namedArgs);
+
+    if (isPartial && overrideKeys.length === 0) {
+        return;
+    }
+    const isRootMixin = mix.ref.name === meta.root;
     const mixinDecl = getMixinDeclaration(rule) || postcss.decl();
     const resolvedArgs = resolveArgumentsValue(
         namedArgs,
@@ -289,6 +307,10 @@ function handleLocalClassMixin(
         undefined,
         isRootMixin
     );
+
+    if (isPartial) {
+        filterPartialMixinDecl(mixinRoot, overrideKeys);
+    }
 
     transformer.transformAst(
         mixinRoot,
@@ -314,7 +336,24 @@ function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefine
     return (
         rule.nodes &&
         (rule.nodes.find((node) => {
-            return node.type === 'decl' && node.prop === valueMapping.mixin;
+            return (
+                node.type === 'decl' &&
+                (node.prop === valueMapping.mixin || node.prop === valueMapping.partialMixin)
+            );
         }) as postcss.Declaration)
     );
+}
+
+function filterPartialMixinDecl(mixinRoot: postcss.Root, overrideKeys: string[]) {
+    const regexp = new RegExp(`value\\((\\s*${overrideKeys.join('\\s*)|(\\s*')}\\s*)\\)`);
+
+    mixinRoot.walkDecls((decl) => {
+        if (!decl.value.match(regexp)) {
+            const parent = decl.parent; // ref the parent before remove
+            decl.remove();
+            if (parent?.nodes?.length === 0) {
+                parent.remove();
+            }
+        }
+    });
 }

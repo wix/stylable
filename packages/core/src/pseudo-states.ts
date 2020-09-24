@@ -1,4 +1,6 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
+import postcssValueParser from 'postcss-value-parser';
+import isVendorPrefixed from 'is-vendor-prefixed';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
 import { nativePseudoClasses } from './native-reserved-lists';
@@ -17,9 +19,6 @@ import { groupValues, listOptions, MappedStates } from './stylable-value-parsers
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
-
-const isVendorPrefixed = require('is-vendor-prefixed');
-const postcssValueParser = require('postcss-value-parser');
 
 const { hasOwnProperty } = Object.prototype;
 
@@ -104,7 +103,9 @@ function resolveStateType(
     const stateType: StateParsedValue = {
         type: stateDefinition.nodes[0].value,
         arguments: [],
-        defaultValue: postcssValueParser.stringify(stateDefault).trim(),
+        defaultValue: postcssValueParser
+            .stringify(stateDefault as postcssValueParser.Node[])
+            .trim(),
     };
 
     if (isCustomMapping(stateDefinition)) {

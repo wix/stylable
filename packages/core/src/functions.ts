@@ -1,6 +1,7 @@
 import { dirname, relative } from 'path';
-import postcss from 'postcss';
-import { resolveCustomValues, stTypes } from './custom-values';
+import postcssValueParser from 'postcss-value-parser';
+import * as postcss from 'postcss';
+import { resolveCustomValues } from './custom-values';
 import { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
@@ -16,8 +17,6 @@ import {
 } from './stylable-value-parsers';
 import { ParsedValue } from './types';
 import { stripQuotation } from './utils';
-
-const postcssValueParser = require('postcss-value-parser');
 
 export type ValueFormatter = (name: string) => string;
 export type ResolvedFormatter = Record<string, JSResolve | CSSResolve | ValueFormatter | null>;
@@ -85,7 +84,7 @@ export function processDeclarationValue(
 ): { topLevelType: any; outputValue: string; typeError: Error } {
     diagnostics = node ? diagnostics : undefined;
     const customValues = resolveCustomValues(meta, resolver);
-    const parsedValue = postcssValueParser(value);
+    const parsedValue: any = postcssValueParser(value);
     parsedValue.walk((parsedNode: ParsedValue) => {
         const { type, value } = parsedNode;
         switch (type) {
@@ -205,6 +204,18 @@ export function processDeclarationValue(
                                             );
                                         }
                                     }
+                                } else if (
+                                    resolvedVar._kind === 'js' &&
+                                    typeof resolvedVar.symbol === 'string'
+                                ) {
+                                    parsedNode.resolvedValue = valueHook
+                                        ? valueHook(
+                                              resolvedVar.symbol,
+                                              varName,
+                                              false,
+                                              passedThrough
+                                          )
+                                        : resolvedVar.symbol;
                                 } else if (resolvedVar._kind === 'js' && diagnostics && node) {
                                     // ToDo: provide actual exported id (default/named as x)
                                     diagnostics.warn(
@@ -216,7 +227,7 @@ export function processDeclarationValue(
                                     );
                                 }
                             } else {
-                                const namedDecl = varSymbol.import.rule.nodes!.find((node) => {
+                                const namedDecl = varSymbol.import.rule.nodes.find((node) => {
                                     return node.type === 'decl' && node.prop === valueMapping.named;
                                 });
                                 if (namedDecl && diagnostics && node) {
@@ -313,9 +324,10 @@ export function processDeclarationValue(
                 }
                 break;
             default: {
-                return postcssValueParser.stringify(parsedNode);
+                return postcssValueParser.stringify(parsedNode as postcssValueParser.Node);
             }
         }
+        return;
     }, true);
 
     let outputValue = '';
@@ -323,7 +335,7 @@ export function processDeclarationValue(
     let typeError = null;
     for (const n of parsedValue.nodes) {
         if (n.type === 'function') {
-            const matchingType = customValues[n.value as keyof typeof stTypes];
+            const matchingType = customValues[n.value];
 
             if (matchingType) {
                 topLevelType = matchingType.evalVarAst(n, customValues);
@@ -343,7 +355,7 @@ export function processDeclarationValue(
     return { outputValue, topLevelType, typeError };
     // }
     // TODO: handle calc (parse internals but maintain expression)
-    // TODO: check this thing. native function that accent our function dose not work
+    // TODO: check this thing. native function that accent our function does not work
     // e.g: calc(getVarName())
 }
 

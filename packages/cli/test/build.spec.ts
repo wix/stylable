@@ -128,7 +128,7 @@ describe('build stand alone', () => {
         const fs = createFS({
             '/comp.st.css': `
                 :import {
-                    -st-from: "./missing-file.st.css"
+                    -st-from: "./missing-file.st.css";
                     -st-default: OtherMissingComp;
                 }
 

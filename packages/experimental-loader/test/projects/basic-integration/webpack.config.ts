@@ -1,14 +1,14 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import HTMLWebpackPlugin from 'html-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { stylableLoaders } from '../../../src';
 import { noCollisionNamespace } from '@stylable/core';
 
-module.exports = {
+export default {
     mode: 'development',
     entry: './index.js',
     context: __dirname,
     devtool: false,
-    plugins: [new MiniCssExtractPlugin(), new HTMLWebpackPlugin()],
+    plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin()],
     module: {
         rules: [
             {

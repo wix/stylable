@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 export function matchRuleAndDeclaration(
     parent: postcss.Container,
@@ -7,7 +7,7 @@ export function matchRuleAndDeclaration(
     decl: string,
     msg?: string
 ) {
-    const rule = parent.nodes![selectorIndex] as postcss.Rule;
+    const rule = parent.nodes[selectorIndex] as postcss.Rule;
     if (rule.selector !== selector) {
         throw new Error(
             `${msg ? msg + ' ' : ''}selector ${selectorIndex}\nactual: ${
@@ -16,7 +16,7 @@ export function matchRuleAndDeclaration(
         );
     }
     // expect(rule.selector, `${msg ? msg + ' ' : ''}selector ${selectorIndex}`).to.equal(selector);
-    const actualDecl = rule.nodes!.map((x) => x.toString()).join(';');
+    const actualDecl = rule.nodes.map((x) => x.toString()).join(';');
     if (actualDecl !== decl) {
         throw new Error(
             `${

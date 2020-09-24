@@ -1,10 +1,12 @@
-import postcss from 'postcss';
+import * as postcss from 'postcss';
+import postcssValueParser, {
+    ParsedValue as PostCSSParsedValue,
+    FunctionNode,
+} from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
 import { ParsedValue, StateParsedValue } from './types';
-
-const postcssValueParser = require('postcss-value-parser');
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {
@@ -12,6 +14,12 @@ export const valueParserWarnings = {
     },
     CSS_MIXIN_FORCE_NAMED_PARAMS() {
         return 'CSS mixins must use named parameters (e.g. "func(name value, [name value, ...])")';
+    },
+    INVALID_NAMED_IMPORT_AS(name: string) {
+        return `Invalid named import "as" with name "${name}"`;
+    },
+    INVALID_NESTED_KEYFRAMES(name: string) {
+        return `Invalid nested keyframes import "${name}"`;
     },
 };
 
@@ -29,6 +37,7 @@ export interface TypedClass {
 export interface MixinValue {
     type: string;
     options: Array<{ value: string }> | Record<string, string>;
+    partial?: boolean;
 }
 
 export interface ArgValue {
@@ -57,8 +66,12 @@ export const valueMapping = {
     states: '-st-states' as const,
     extends: '-st-extends' as const,
     mixin: '-st-mixin' as const,
+    partialMixin: '-st-partial-mixin' as const,
     global: '-st-global' as const,
 };
+
+
+export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
 
 export type stKeys = keyof typeof valueMapping;
 
@@ -117,20 +130,19 @@ export const SBTypesParsers = {
             types,
         };
     },
-    '-st-named'(value: string) {
-        const namedMap: { [key: string]: string } = {};
+    '-st-named'(value: string, node: postcss.Declaration, diagnostics: Diagnostics) {
+        const namedMap: Record<string, string> = {};
+        const keyframesMap: Record<string, string> = {};
         if (value) {
-            value.split(',').forEach((name) => {
-                const parts = name.trim().split(/\s+as\s+/);
-                if (parts.length === 1) {
-                    namedMap[parts[0]] = parts[0];
-                } else if (parts.length === 2) {
-                    namedMap[parts[1]] = parts[0];
-                }
-            });
+            handleNamedTokens(
+                postcssValueParser(value),
+                { namedMap, keyframesMap },
+                'namedMap',
+                node,
+                diagnostics
+            );
         }
-
-        return namedMap;
+        return { namedMap, keyframesMap };
     },
     '-st-mixin'(
         mixinNode: postcss.Declaration,
@@ -138,10 +150,7 @@ export const SBTypesParsers = {
         diagnostics?: Diagnostics
     ) {
         const ast = postcssValueParser(mixinNode.value);
-        const mixins: Array<{
-            type: string;
-            options: Array<{ value: string }> | Record<string, string>;
-        }> = [];
+        const mixins: Array<MixinValue> = [];
 
         function reportWarning(message: string, options?: { word: string }) {
             if (diagnostics) {
@@ -170,7 +179,65 @@ export const SBTypesParsers = {
 
         return mixins;
     },
+    '-st-partial-mixin'(
+        mixinNode: postcss.Declaration,
+        strategy: (type: string) => 'named' | 'args',
+        diagnostics?: Diagnostics
+    ) {
+        return SBTypesParsers['-st-mixin'](mixinNode, strategy, diagnostics).map((mixin) => {
+            mixin.partial = true;
+            return mixin;
+        });
+    },
 };
+
+function handleNamedTokens(
+    tokens: PostCSSParsedValue | FunctionNode,
+    buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
+    key: keyof typeof buckets = 'namedMap',
+    node: postcss.Declaration,
+    diagnostics: Diagnostics
+) {
+    const { nodes } = tokens;
+    for (let i = 0; i < nodes.length; i++) {
+        const token = nodes[i];
+        if (token.type === 'word') {
+            const space = nodes[i + 1];
+            const as = nodes[i + 2];
+            const spaceAfter = nodes[i + 3];
+            const asName = nodes[i + 4];
+            if (isImportAs(space, as)) {
+                if (spaceAfter?.type === 'space' && asName?.type === 'word') {
+                    buckets[key][asName.value] = token.value;
+                    i += 4; //ignore next 4 tokens
+                } else {
+                    i += !asName ? 3 : 2;
+                    diagnostics.warn(
+                        node,
+                        valueParserWarnings.INVALID_NAMED_IMPORT_AS(token.value)
+                    );
+                    continue;
+                }
+            } else {
+                buckets[key][token.value] = token.value;
+            }
+        } else if (token.type === 'function' && token.value === 'keyframes') {
+            if (key === 'keyframesMap') {
+                diagnostics.warn(
+                    node,
+                    valueParserWarnings.INVALID_NESTED_KEYFRAMES(
+                        postcssValueParser.stringify(token)
+                    )
+                );
+            }
+            handleNamedTokens(token, buckets, 'keyframesMap', node, diagnostics);
+        }
+    }
+}
+
+function isImportAs(space: ParsedValue, as: ParsedValue) {
+    return space?.type === 'space' && as?.type === 'word' && as?.value === 'as';
+}
 
 export function getNamedArgs(node: ParsedValue) {
     const args: ParsedValue[][] = [];
@@ -234,16 +301,18 @@ export function getFormatterArgs(
     function checkEmptyArg() {
         if (currentArg.trim() === '' && _reportWarning) {
             _reportWarning(
-                `${postcssValueParser.stringify(node)}: argument at index ${argIndex} is empty`
+                `${postcssValueParser.stringify(
+                    node as postcssValueParser.Node
+                )}: argument at index ${argIndex} is empty`
             );
         }
     }
 }
 
 export function getStringValue(nodes: ParsedValue | ParsedValue[]): string {
-    return postcssValueParser.stringify(nodes, (node: ParsedValue) => {
-        if (node.resolvedValue !== undefined) {
-            return node.resolvedValue;
+    return postcssValueParser.stringify(nodes as postcssValueParser.Node, (node) => {
+        if ((node as ParsedValue).resolvedValue !== undefined) {
+            return (node as ParsedValue).resolvedValue as string | undefined;
         } else {
             // TODO: warn
             return undefined;

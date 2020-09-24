@@ -1,23 +1,23 @@
 import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {
         const from = '/path/to/style.css';
-        const result = processSource(
+        const { customSelectors } = processSource(
             `
             @custom-selector :--icon .root > .icon;
         `,
             { from }
         );
 
-        expect(result.customSelectors[':--icon']).to.equal('.root > .icon');
+        expect(customSelectors[':--icon']).to.equal('.root > .icon');
     });
 
     it('expand custom-selector before process (reflect on ast)', () => {
         const from = '/path/to/style.css';
-        const result = processSource(
+        const { ast, classes } = processSource(
             `
             @custom-selector :--icon .root > .icon;
             :--icon, .class {
@@ -27,21 +27,21 @@ describe('@custom-selector', () => {
             { from }
         );
 
-        const r = result.ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.root > .icon, .class');
-        expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.root > .icon, .class');
+        expect(classes.icon).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand custom-selector before process (reflect on ast when not written)', () => {
         const from = '/path/to/style.css';
-        const result = processSource(
+        const { classes } = processSource(
             `
             @custom-selector :--icon .root > .icon;
         `,
             { from }
         );
 
-        expect(result.classes.icon).to.contain({ _kind: 'class', name: 'icon' });
+        expect(classes.icon).to.contain({ _kind: 'class', name: 'icon' });
     });
 
     it('expand pseudo-element custom-selector in the owner context', () => {
@@ -74,8 +74,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp__root > .comp__icon');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.comp__root > .comp__icon');
     });
 
     it('expand custom-selector in pseudo-element in the owner context', () => {
@@ -123,8 +123,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp__root > .comp__icon .child__top');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.comp__root > .comp__icon .child__top');
     });
 
     it('expand complex custom-selector in pseudo-element', () => {
@@ -153,8 +153,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
     });
 
     it('expand custom-selector when there is global root', () => {
@@ -196,8 +196,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.xxx .controls__root');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.xxx .controls__root');
     });
 
     it('expand custom-selector that uses element in the same name', () => {
@@ -241,8 +241,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.interface__root .controls__root cc');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.interface__root .controls__root cc');
     });
 
     it('target a custom selector with the same name as an inner part as a pseudo element', () => {
@@ -271,8 +271,8 @@ describe('@custom-selector', () => {
             },
         });
 
-        const r = ast.nodes![0] as postcss.Rule;
-        expect(r.selector).to.equal('.variant__root .variant__x .variant__input');
+        const [rule] = ast.nodes as [postcss.Rule];
+        expect(rule.selector).to.equal('.variant__root .variant__x .variant__input');
     });
 
     xdescribe('FUTURE', () => {
@@ -313,7 +313,7 @@ describe('@custom-selector', () => {
                 },
             });
 
-            expect((result.nodes![1] as postcss.Rule).selector).to.equal(
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
                 '.entry__root :not( .Inner__a), .entry__root :not( .Inner__b)'
             );
         });
@@ -343,8 +343,8 @@ describe('@custom-selector', () => {
                     },
                 },
             });
-            const r = ast.nodes![0] as postcss.Rule;
-            expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+            const [rule] = ast.nodes as [postcss.Rule];
+            expect(rule.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
         });
 
         it('expand complex custom-selector in nested-pseudo-class', () => {
@@ -364,8 +364,8 @@ describe('@custom-selector', () => {
                     },
                 },
             });
-            const r = ast.nodes![0] as postcss.Rule;
-            expect(r.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
+            const [rule] = ast.nodes as [postcss.Rule];
+            expect(rule.selector).to.equal('.comp__root .comp__icon,.comp__root .comp__class');
         });
     });
 });

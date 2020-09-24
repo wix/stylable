@@ -4,7 +4,7 @@ import {
     processSource,
 } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import { processorWarnings, resolverWarnings } from '../src';
 
 describe('css custom-properties (vars)', () => {
@@ -105,8 +105,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.prop).to.equal('--entry-myVar');
             expect(decl.value).to.equal('blue');
         });
@@ -132,8 +132,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![1] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[1] as postcss.Declaration;
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--entry-myVar)');
         });
@@ -159,8 +159,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![1] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[1] as postcss.Declaration;
             expect(decl.value).to.equal('2px var(--entry-myVar, black) black');
         });
 
@@ -190,8 +190,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![1] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[1] as postcss.Declaration;
             expect(decl.value).to.equal('2px var(--entry-myVar, dashed black)');
         });
 
@@ -221,8 +221,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![3] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[3] as postcss.Declaration;
             expect(decl.value).to.equal(
                 'var(--entry-top, var(--entry-mid, var(--entry-base), orange), orange)'
             );
@@ -255,8 +255,8 @@ describe('css custom-properties (vars)', () => {
                 },
             });
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![1] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[1] as postcss.Declaration;
             expect(decl.value).to.equal('var(--entry-myVar, green)');
         });
 
@@ -279,8 +279,8 @@ describe('css custom-properties (vars)', () => {
                 },
             });
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.value).to.equal('green');
         });
 
@@ -310,8 +310,8 @@ describe('css custom-properties (vars)', () => {
                 },
             });
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.value).to.equal('green');
         });
 
@@ -337,8 +337,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.value).to.equal('var(--entry-var1) var(--entry-var2)');
         });
 
@@ -365,8 +365,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![3] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[3] as postcss.Declaration;
             expect(decl.value).to.equal('var(--entry-size) var( --entry-type ) var(--entry-color)');
         });
 
@@ -385,8 +385,8 @@ describe('css custom-properties (vars)', () => {
                 },
             });
 
-            const decl = (meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
 
             expect(meta.diagnostics.reports.length).to.equal(0);
             expect(meta.transformDiagnostics!.reports.length).to.equal(0);
@@ -427,8 +427,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--imported-myVar)');
         });
@@ -465,8 +465,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--imported-myVar)');
         });
@@ -504,8 +504,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![1] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[1] as postcss.Declaration;
             expect(decl.prop).to.equal('color');
             expect(decl.value).to.equal('var(--imported-myVar)');
         });
@@ -551,8 +551,8 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const baseDecl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const baseDecl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
 
             expect(baseDecl.prop).to.equal('prop1');
             expect(baseDecl.value).to.equal('var(--base-baseVar)');
@@ -591,9 +591,9 @@ describe('css custom-properties (vars)', () => {
                 'no diagnostics reported for native states'
             ).to.eql([]);
 
-            const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
-            const decl1 = rule.nodes![1] as postcss.Declaration;
-            const decl2 = rule.nodes![2] as postcss.Declaration;
+            const rule = res.meta.outputAst!.nodes[0] as postcss.Rule;
+            const decl1 = rule.nodes[1] as postcss.Declaration;
+            const decl2 = rule.nodes[2] as postcss.Declaration;
             expect(decl1.prop).to.equal('color');
             expect(decl1.value).to.equal('var(--entry-myColor)');
             expect(decl2.value).to.equal('var(--myGlobal, blue)');
@@ -622,10 +622,10 @@ describe('css custom-properties (vars)', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
 
-                const decl1 = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                    .nodes![0] as postcss.Declaration;
-                const decl2 = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                    .nodes![1] as postcss.Declaration;
+                const decl1 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[0] as postcss.Declaration;
+                const decl2 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[1] as postcss.Declaration;
                 expect(decl1.prop).to.equal('--myVar1');
                 expect(decl1.value).to.equal('green');
                 expect(decl2.prop).to.equal('--myVar2');
@@ -654,10 +654,10 @@ describe('css custom-properties (vars)', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
 
-                const globalDecl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                    .nodes![0] as postcss.Declaration;
-                const scopedDecl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                    .nodes![1] as postcss.Declaration;
+                const globalDecl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[0] as postcss.Declaration;
+                const scopedDecl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[1] as postcss.Declaration;
                 expect(globalDecl.prop).to.equal('--myVar');
                 expect(scopedDecl.prop).to.equal('--entry-myScopedVar');
             });
@@ -684,8 +684,8 @@ describe('css custom-properties (vars)', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
 
-                const globalDecl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                    .nodes![1] as postcss.Declaration;
+                const globalDecl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[1] as postcss.Declaration;
                 expect(globalDecl.value).to.equal('var(--myVar)');
             });
 
@@ -731,11 +731,11 @@ describe('css custom-properties (vars)', () => {
                     'no diagnostics reported for native states'
                 ).to.eql([]);
 
-                const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
-                const localScoped = (rule.nodes![0] as postcss.Declaration).value;
-                const localGlobal = (rule.nodes![1] as postcss.Declaration).value;
-                const importedScoped = (rule.nodes![2] as postcss.Declaration).value;
-                const importedGlobal = (rule.nodes![3] as postcss.Declaration).value;
+                const rule = res.meta.outputAst!.nodes[0] as postcss.Rule;
+                const localScoped = (rule.nodes[0] as postcss.Declaration).value;
+                const localGlobal = (rule.nodes[1] as postcss.Declaration).value;
+                const importedScoped = (rule.nodes[2] as postcss.Declaration).value;
+                const importedGlobal = (rule.nodes[3] as postcss.Declaration).value;
 
                 expect(localScoped).to.equal('var(--entry-localScoped)');
                 expect(localGlobal).to.equal('var(--localGlobal)');
@@ -767,8 +767,8 @@ describe('css custom-properties (vars)', () => {
                     file: '/entry.st.css',
                 },
             ]);
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.value).to.equal('var(illegalVar)');
         });
 
@@ -794,8 +794,8 @@ describe('css custom-properties (vars)', () => {
                 },
             ]);
 
-            const decl = (res.meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const decl = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
             expect(decl.value).to.equal('var(--entry-value illegalHere, red)');
         });
 
@@ -904,8 +904,8 @@ describe('css custom-properties (vars)', () => {
                 { message: processorWarnings.REDECLARE_SYMBOL('--myVar'), file: '/entry.st.css' },
             ]);
 
-            const baseDecl = (meta.outputAst!.nodes![0] as postcss.Rule)
-                .nodes![0] as postcss.Declaration;
+            const baseDecl = (meta.outputAst!.nodes[0] as postcss.Rule)
+                .nodes[0] as postcss.Declaration;
 
             expect(baseDecl.prop).to.equal('prop1');
             expect(baseDecl.value).to.equal('var(--imported-myVar)');

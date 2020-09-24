@@ -70,7 +70,7 @@ export class Stylable {
         protected resolveOptions: any = {},
         public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
-        protected resolveNamespace?: typeof processNamespace,
+        public resolveNamespace?: typeof processNamespace,
         protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
             timeout: 1,
             useTimer: true,

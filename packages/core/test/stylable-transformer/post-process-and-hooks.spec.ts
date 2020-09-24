@@ -1,6 +1,6 @@
 import { createTransformer } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 
 describe('post-process-and-hooks', () => {
     it("should call postProcess after transform and use it's return value", () => {
@@ -68,9 +68,9 @@ describe('post-process-and-hooks', () => {
         );
 
         const res = t.transform(t.fileProcessor.process('/entry.st.css'));
-        const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
+        const rule = res.meta.outputAst!.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('hooked_fn1(hooked_fn2(1))');
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('hooked_fn1(hooked_fn2(1))');
     });
 
     it("should call replaceValueHook and use it's return value", () => {
@@ -100,10 +100,10 @@ describe('post-process-and-hooks', () => {
         );
 
         const res = t.transform(t.fileProcessor.process('/entry.st.css'));
-        const rule = res.meta.outputAst!.nodes![0] as postcss.Rule;
+        const rule = res.meta.outputAst!.nodes[0] as postcss.Rule;
 
-        expect((rule.nodes![0] as postcss.Declaration).value).to.equal('__VALUE__0 red-param-true');
-        expect((rule.nodes![1] as postcss.Declaration).value).to.equal(
+        expect((rule.nodes[0] as postcss.Declaration).value).to.equal('__VALUE__0 red-param-true');
+        expect((rule.nodes[1] as postcss.Declaration).value).to.equal(
             '__VALUE__1 green-param1-true'
         );
     });

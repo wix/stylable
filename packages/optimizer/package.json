@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "3.7.2",
+  "version": "3.11.1",
   "description": "Stylable core optimizer",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,9 +12,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.7.2",
+    "@stylable/core": "^3.11.1",
     "csso": "^4.0.3",
-    "postcss": "^7.0.32"
+    "postcss": "^8.0.9"
   },
   "files": [
     "cjs",

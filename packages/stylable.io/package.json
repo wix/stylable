@@ -1,12 +1,12 @@
 {
   "name": "stylable.io",
-  "version": "3.7.1",
+  "version": "3.11.1",
   "description": "The Stylable website https://stylable.io/",
   "private": true,
   "main": "N/A",
   "scripts": {
-    "deploy": "bundle install && bundle exec jekyll build && gh-pages -d ./_site",
-    "dev": "bundle exec jekyll serve"
+    "start": "bundle exec jekyll serve",
+    "deploy": "bundle install && bundle exec jekyll build && gh-pages -d ./_site"
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/stylable.io",
   "license": "UNLICENSED",

@@ -107,7 +107,7 @@ In this example the CSS imports the same formatter as the previous example, `cal
 ## Nested formatters
 You can also nest formatters to provide functions that are modular, composable and reusable. 
 
-In this example the formatter `sin` is nested in the `abs` formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.
+In this example the formatter `divBy2` is nested in the `round` formatter. Both are imported into the CSS file and the output value is calculated from both. The formatters expose to the CSS mathematical calculations that are used in the JavaScript functions.
 
 ```js
 /* ./math.js */

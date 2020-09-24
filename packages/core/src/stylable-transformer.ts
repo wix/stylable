@@ -1,6 +1,7 @@
 import { basename } from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
 
 import { FileProcessor } from './cached-process-file';
@@ -45,8 +46,6 @@ import { valueMapping } from './stylable-value-parsers';
 
 const { hasOwnProperty } = Object.prototype;
 const USE_SCOPE_SELECTOR_2 = true;
-
-const isVendorPrefixed = require('is-vendor-prefixed');
 
 export interface ResolvedElement {
     name: string;
@@ -134,15 +133,6 @@ export const transformerWarnings = {
     UNKNOWN_IMPORT_ALIAS(name: string) {
         return `cannot use alias for unknown import "${name}"`;
     },
-    SCOPE_PARAM_NOT_ROOT(name: string) {
-        return `"@st-scope" parameter "${name}" does not resolve to a stylesheet root`;
-    },
-    SCOPE_PARAM_NOT_CSS(name: string) {
-        return `"@st-scope" parameter "${name}" must be a Stylable stylesheet, instead name originated from a JavaScript file`;
-    },
-    UNKNOWN_SCOPING_PARAM(name: string) {
-        return `"@st-scope" received an unknown symbol: "${name}"`;
-    },
 };
 
 export class StylableTransformer {
@@ -175,7 +165,7 @@ export class StylableTransformer {
         };
         const ast = this.resetTransformProperties(meta);
         this.resolver.validateImports(meta, this.diagnostics);
-        validateScopes(meta, this.resolver, this.diagnostics);
+        meta.transformedScopes = validateScopes(this, meta);
         this.transformAst(ast, meta, metaExports);
         this.transformGlobals(ast, meta);
         meta.transformDiagnostics = this.diagnostics;
@@ -224,6 +214,7 @@ export class StylableTransformer {
             }
 
             switch (decl.prop) {
+                case valueMapping.partialMixin:
                 case valueMapping.mixin:
                     break;
                 case valueMapping.states:
@@ -291,12 +282,10 @@ export class StylableTransformer {
         }
     }
     public exportKeyframes(
-        keyframeMapping: Record<string, KeyFrameWithNode>,
+        keyframeMapping: Record<string, string>,
         keyframesExport: Record<string, string>
     ) {
-        for (const keyframeName of Object.keys(keyframeMapping)) {
-            keyframesExport[keyframeName] = keyframeMapping[keyframeName].value;
-        }
+        Object.assign(keyframesExport, keyframeMapping);
     }
     public exportRootClass(meta: StylableMeta, classesExport: Record<string, string>) {
         const classExports: Record<string, string> = {};
@@ -396,8 +385,6 @@ export class StylableTransformer {
         return scopedName;
     }
     public scopeKeyframes(ast: postcss.Root, meta: StylableMeta) {
-        const keyframesExports: Record<string, KeyFrameWithNode> = {};
-
         ast.walkAtRules(/keyframes$/, (atRule) => {
             const name = atRule.params;
             if (~reservedKeyFrames.indexOf(name)) {
@@ -405,21 +392,24 @@ export class StylableTransformer {
                     word: name,
                 });
             }
-            if (!keyframesExports[name]) {
-                keyframesExports[name] = {
-                    value: this.scope(name, meta.namespace),
-                    node: atRule,
-                };
+            atRule.params = this.scope(name, meta.namespace);
+        });
+
+        const keyframesExports: Record<string, string> = {};
+
+        Object.keys(meta.mappedKeyframes).forEach((key) => {
+            const res = this.resolver.resolveKeyframes(meta, key);
+            if (res) {
+                keyframesExports[key] = this.scope(res.symbol.alias, res.meta.namespace);
             }
-            atRule.params = keyframesExports[name].value;
         });
 
         ast.walkDecls(/animation$|animation-name$/, (decl: postcss.Declaration) => {
             const parsed = postcssValueParser(decl.value);
             parsed.nodes.forEach((node) => {
-                const alias = keyframesExports[node.value] && keyframesExports[node.value].value;
-                if (node.type === 'word' && Boolean(alias)) {
-                    node.value = alias;
+                const scoped = keyframesExports[node.value];
+                if (scoped) {
+                    node.value = scoped;
                 }
             });
             decl.value = parsed.toString();
@@ -956,14 +946,16 @@ export class StylableTransformer {
         _classesExport?: Record<string, string>,
         _calcPaths = false,
         rule?: postcss.Rule
-    ): { selector: string; elements: ResolvedElement[][] } {
+    ): { selector: string; elements: ResolvedElement[][]; targetSelectorAst: SelectorAstNode } {
         const context = new ScopeContext(
             originMeta,
             parseSelector(selector),
             rule || postcss.rule({ selector })
         );
+        const targetSelectorAst = this.scopeSelectorAst(context);
         return {
-            selector: stringifySelector(this.scopeSelectorAst(context)),
+            targetSelectorAst,
+            selector: stringifySelector(targetSelectorAst),
             elements: context.elements,
         };
     }
@@ -993,7 +985,7 @@ export class StylableTransformer {
                 // loop over each node in a chunk
                 for (const node of chunk.nodes) {
                     context.node = node;
-                    // transfrom node
+                    // transform node
                     this.handleChunkNode(context);
                 }
             }
@@ -1045,7 +1037,6 @@ export class StylableTransformer {
             for (let i = lookupStartingPoint; i < len; i++) {
                 const { symbol, meta } = currentAnchor.resolved[i];
                 if (!symbol[valueMapping.root]) {
-                    // debugger
                     continue;
                 }
 
@@ -1058,7 +1049,7 @@ export class StylableTransformer {
                 const requestedPart = meta.classes[name];
 
                 if (symbol.alias || !requestedPart) {
-                    // skip alias since thay cannot add parts
+                    // skip alias since they cannot add parts
                     continue;
                 }
 
@@ -1087,7 +1078,11 @@ export class StylableTransformer {
                     resolved: [],
                 });
 
-                if (!nativePseudoElements.includes(name) && !isVendorPrefixed(name)) {
+                if (
+                    !nativePseudoElements.includes(name) &&
+                    !isVendorPrefixed(name) &&
+                    !this.isDuplicateStScopeDiagnostic(context)
+                ) {
                     this.diagnostics.warn(
                         context.rule,
                         transformerWarnings.UNKNOWN_PSEUDO_ELEMENT(name),
@@ -1117,7 +1112,12 @@ export class StylableTransformer {
                     break;
                 }
             }
-            if (!found && !nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
+            if (
+                !found &&
+                !nativePseudoClasses.includes(name) &&
+                !isVendorPrefixed(name) &&
+                !this.isDuplicateStScopeDiagnostic(context)
+            ) {
                 this.diagnostics.warn(context.rule, stateErrors.UNKNOWN_STATE_USAGE(name), {
                     word: name,
                 });
@@ -1149,6 +1149,36 @@ export class StylableTransformer {
             }
         }
     }
+    private isDuplicateStScopeDiagnostic(context: ScopeContext) {
+        const transformedScope =
+            context.originMeta.transformedScopes?.[(context.rule as any).stScopeSelector];
+        if (transformedScope && context.chunks && context.chunk) {
+            const currentChunkSelector = stringifySelector({
+                type: 'selector',
+                nodes: context.chunk.nodes,
+                name: '',
+            });
+            const i = context.chunks.indexOf(context.chunk);
+            for (const stScopeSelectorChunks of transformedScope) {
+                // if we are in a chunk index that is in the rage of the @st-scope param
+                if (i <= stScopeSelectorChunks.length) {
+                    for (const chunk of stScopeSelectorChunks) {
+                        const scopeChunkSelector = stringifySelector({
+                            type: 'selector',
+                            nodes: chunk.nodes,
+                            name: '',
+                        });
+                        // if the two chunks match the error is already reported by the @st-scope validation
+                        if (scopeChunkSelector === currentChunkSelector) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private handleCustomSelector(
         customSelector: string,
         meta: StylableMeta,
@@ -1190,7 +1220,6 @@ export class StylableTransformer {
             );
         }
     }
-
     private scopeClassNode(symbol: any, meta: any, node: any, originMeta: any) {
         if (symbol[valueMapping.global]) {
             const globalMappedNodes = symbol[valueMapping.global];
@@ -1291,6 +1320,7 @@ export class StylableTransformer {
     }
     private resetTransformProperties(meta: StylableMeta) {
         meta.globals = {};
+        meta.transformedScopes = null;
         return (meta.outputAst = meta.ast.clone());
     }
 }
@@ -1331,44 +1361,25 @@ export function removeSTDirective(root: postcss.Root) {
     });
 }
 
-function validateScopes(meta: StylableMeta, resolver: StylableResolver, diagnostics: Diagnostics) {
+function validateScopes(transformer: StylableTransformer, meta: StylableMeta) {
+    const transformedScopes: Record<string, SelectorChunk2[][]> = {};
     for (const scope of meta.scopes) {
-        const name = scope.params.startsWith('.') ? scope.params.slice(1) : scope.params;
+        const len = transformer.diagnostics.reports.length;
+        const rule = postcss.rule({ selector: scope.params });
 
-        if (!name) {
-            continue;
-        } else if (!meta.mappedSymbols[name]) {
-            diagnostics.error(scope, transformerWarnings.UNKNOWN_SCOPING_PARAM(scope.params), {
-                word: scope.params,
-            });
-            continue;
-        }
+        const context = new ScopeContext(meta, parseSelector(rule.selector), rule);
+        transformedScopes[rule.selector] = separateChunks2(transformer.scopeSelectorAst(context));
+        const ruleReports = transformer.diagnostics.reports.splice(len);
 
-        const resolvedScope = resolver.deepResolve(meta.mappedSymbols[name]);
-
-        if (resolvedScope && resolvedScope._kind === 'css') {
-            const { meta: scopingMeta, symbol: scopingSymbol } = resolvedScope;
-
-            if (scopingSymbol.name !== scopingMeta.root) {
-                diagnostics.error(scope, transformerWarnings.SCOPE_PARAM_NOT_ROOT(scope.params), {
-                    word: scope.params,
-                });
+        ruleReports.forEach(({ message, type, options: { word } = {} }) => {
+            if (type === 'error') {
+                transformer.diagnostics.error(scope, message, { word: word || scope.params });
+            } else {
+                transformer.diagnostics.warn(scope, message, { word: word || scope.params });
             }
-        } else if (resolvedScope && resolvedScope._kind === 'js') {
-            diagnostics.error(scope, transformerWarnings.SCOPE_PARAM_NOT_CSS(scope.params), {
-                word: scope.params,
-            });
-        } else if (
-            meta.classes[name] ||
-            (meta.elements[scope.params] && meta.elements[scope.params].alias)
-        ) {
-            // do nothing valid input
-        } else {
-            diagnostics.error(scope, transformerWarnings.UNKNOWN_SCOPING_PARAM(scope.params), {
-                word: scope.params,
-            });
-        }
+        });
     }
+    return transformedScopes;
 }
 
 function removeFirstRootInEachSelectorChunk(

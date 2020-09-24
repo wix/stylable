@@ -11,6 +11,7 @@ export function normalizeOptions(
             delete require.cache[id];
             return require(id);
         },
+        onProcessMeta: undefined,
         transformHooks: undefined,
         resolveNamespace: undefined,
         createRuntimeChunk: false,
@@ -20,6 +21,7 @@ export function normalizeOptions(
         useWeakDeps: true,
         runtimeMode: 'isolated', // 'shared, external'
         globalRuntimeId: '__stylable__',
+        diagnosticsMode: 'auto',
         bootstrap: {
             autoInit: true,
             getAutoInitModule: undefined,

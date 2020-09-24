@@ -1,6 +1,6 @@
 import hash from 'murmurhash';
 import path from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import { Diagnostics } from './diagnostics';
 import {
@@ -42,7 +42,6 @@ import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
-const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
@@ -75,6 +74,9 @@ export const processorWarnings = {
     REDECLARE_SYMBOL(name: string) {
         return `redeclare symbol "${name}"`;
     },
+    REDECLARE_SYMBOL_KEYFRAMES(name: string) {
+        return `redeclare keyframes symbol "${name}"`;
+    },
     CANNOT_RESOLVE_EXTEND(name: string) {
         return `cannot resolve '${valueMapping.extends}' type for '${name}'`;
     },
@@ -84,11 +86,14 @@ export const processorWarnings = {
     UNKNOWN_MIXIN(name: string) {
         return `unknown mixin: "${name}"`;
     },
-    OVERRIDE_MIXIN() {
-        return `override mixin on same rule`;
+    OVERRIDE_MIXIN(mixinType: string) {
+        return `override ${mixinType} on same rule`;
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
+    },
+    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
+        return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
@@ -125,9 +130,6 @@ export const processorWarnings = {
     },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
-    },
-    SCOPE_PARAM_NOT_SIMPLE_SELECTOR(selector: string) {
-        return `"@st-scope" must receive a simple selector, but instead got: "${selector}"`;
     },
     MISSING_SCOPING_PARAM() {
         return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter';
@@ -233,6 +235,13 @@ export class StylableProcessor {
                 case 'keyframes':
                     if (!isChildOfAtRule(atRule, rootValueMapping.stScope)) {
                         this.meta.keyframes.push(atRule);
+                        const { params: name } = atRule;
+                        this.checkRedeclareKeyframes(name, atRule);
+                        this.meta.mappedKeyframes[name] = {
+                            _kind: 'keyframes',
+                            alias: name,
+                            name: name,
+                        };
                     } else {
                         this.diagnostics.warn(atRule, processorWarnings.NO_KEYFRAMES_IN_ST_SCOPE());
                     }
@@ -432,6 +441,16 @@ export class StylableProcessor {
         }
     }
 
+    protected checkRedeclareKeyframes(symbolName: string, node: postcss.Node) {
+        const symbol = this.meta.mappedKeyframes[symbolName];
+        if (symbol) {
+            this.diagnostics.warn(node, processorWarnings.REDECLARE_SYMBOL_KEYFRAMES(symbolName), {
+                word: symbolName,
+            });
+        }
+        return symbol;
+    }
+
     protected addElementSymbolOnce(name: string, rule: postcss.Rule) {
         if (isCompRoot(name) && !this.meta.elements[name]) {
             let alias = this.meta.mappedSymbols[name] as ImportSymbol | undefined;
@@ -500,6 +519,16 @@ export class StylableProcessor {
                 import: importDef,
                 context: this.dirContext,
             };
+        });
+        Object.keys(importDef.keyframes).forEach((name) => {
+            if (!this.checkRedeclareKeyframes(name, importDef.rule)) {
+                this.meta.mappedKeyframes[name] = {
+                    _kind: 'keyframes',
+                    alias: name,
+                    name: importDef.keyframes[name],
+                    import: importDef,
+                };
+            }
         });
     }
 
@@ -616,9 +645,9 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-        } else if (decl.prop === valueMapping.mixin) {
+        } else if (decl.prop === valueMapping.mixin || decl.prop === valueMapping.partialMixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(
+            SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
                     const mixinRefSymbol = this.meta.mappedSymbols[type];
@@ -634,11 +663,19 @@ export class StylableProcessor {
                 this.diagnostics
             ).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
-
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
                 ) {
+                    if (mixin.partial && Object.keys(mixin.options).length === 0) {
+                        this.diagnostics.warn(
+                            decl,
+                            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
+                            {
+                                word: mixin.type,
+                            }
+                        );
+                    }
                     const refedMixin = {
                         mixin,
                         ref: mixinRefSymbol,
@@ -653,10 +690,27 @@ export class StylableProcessor {
             });
 
             if (rule.mixins) {
-                this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN());
+                const partials = rule.mixins.filter((r) => r.mixin.partial);
+                const nonPartials = rule.mixins.filter((r) => !r.mixin.partial);
+                const isInPartial = decl.prop === valueMapping.partialMixin;
+                if (
+                    (partials.length && decl.prop === valueMapping.partialMixin) ||
+                    (nonPartials.length && decl.prop === valueMapping.mixin)
+                ) {
+                    this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN(decl.prop));
+                }
+                if (partials.length && nonPartials.length) {
+                    rule.mixins = isInPartial
+                        ? nonPartials.concat(mixins)
+                        : partials.concat(mixins);
+                } else if (partials.length) {
+                    rule.mixins = isInPartial ? mixins : partials.concat(mixins);
+                } else if (nonPartials.length) {
+                    rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
+                }
+            } else if (mixins.length) {
+                rule.mixins = mixins;
             }
-
-            rule.mixins = mixins;
         } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.setClassGlobalMapping(decl, rule);
@@ -734,6 +788,7 @@ export class StylableProcessor {
             from: '',
             fromRelative: '',
             named: {},
+            keyframes: {},
             rule,
             context: this.dirContext,
         };
@@ -766,7 +821,15 @@ export class StylableProcessor {
                     }
                     break;
                 case valueMapping.named:
-                    importObj.named = parseNamed(decl.value);
+                    {
+                        const { keyframesMap, namedMap } = parseNamed(
+                            decl.value,
+                            decl,
+                            this.diagnostics
+                        );
+                        importObj.named = namedMap;
+                        importObj.keyframes = keyframesMap;
+                    }
                     break;
                 default:
                     this.diagnostics.warn(
@@ -820,17 +883,11 @@ function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imp
 
 export function validateScopingSelector(
     atRule: postcss.AtRule,
-    { selector: scopingSelector, isSimpleSelector }: SRule,
+    { selector: scopingSelector }: SRule,
     diagnostics: Diagnostics
 ) {
     if (!scopingSelector) {
         diagnostics.warn(atRule, processorWarnings.MISSING_SCOPING_PARAM());
-    } else if (!isSimpleSelector) {
-        diagnostics.warn(
-            atRule,
-            processorWarnings.SCOPE_PARAM_NOT_SIMPLE_SELECTOR(scopingSelector),
-            { word: scopingSelector }
-        );
     }
 }
 

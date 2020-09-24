@@ -1,6 +1,7 @@
 import cloneDeep from 'lodash.clonedeep';
 import { isAbsolute } from 'path';
-import postcss from 'postcss';
+import * as postcss from 'postcss';
+import replaceRuleSelector from 'postcss-selector-matches/dist/replaceRuleSelector';
 import { Diagnostics } from './diagnostics';
 import {
     DeclStylableProps,
@@ -20,8 +21,7 @@ import {
     traverseNode,
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
-import { valueMapping } from './stylable-value-parsers';
-const replaceRuleSelector = require('postcss-selector-matches/dist/replaceRuleSelector');
+import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -49,7 +49,7 @@ export function expandCustomSelectors(
             }
         );
 
-        return (rule.selector = transformMatchesOnRule(rule, false) as string);
+        return (rule.selector = transformMatchesOnRule(rule, false));
     }
     return rule.selector;
 }
@@ -127,7 +127,11 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             mixinRoot = mixinRule;
         } else {
             const parentRule = mixinRule.parent;
-            if (parentRule.type === 'atrule' && parentRule.name === 'keyframes') {
+            if (
+                parentRule &&
+                parentRule.type === 'atrule' &&
+                (parentRule as postcss.AtRule).name === 'keyframes'
+            ) {
                 return;
             }
             const out = scopeSelector(rule.selector, mixinRule.selector);
@@ -140,7 +144,7 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
         let nextRule: postcss.Rule | postcss.AtRule = rule;
         let mixinEntry: postcss.Declaration | null = null;
 
-        rule.walkDecls(valueMapping.mixin, (decl) => {
+        rule.walkDecls(mixinDeclRegExp, (decl) => {
             mixinEntry = decl;
         });
         if (!mixinEntry) {
@@ -155,10 +159,10 @@ export function mergeRules(mixinAst: postcss.Root, rule: postcss.Rule) {
             } else if (node.type === 'decl') {
                 rule.insertBefore(mixinEntry!, node);
             } else if (node.type === 'rule' || node.type === 'atrule') {
-                if (rule.parent.last === nextRule) {
-                    rule.parent.append(node);
+                if (rule.parent!.last === nextRule) {
+                    rule.parent!.append(node);
                 } else {
-                    rule.parent.insertAfter(nextRule, node);
+                    rule.parent!.insertAfter(nextRule, node);
                 }
                 nextRule = node;
             }
@@ -180,7 +184,7 @@ export function createSubsetAst<T extends postcss.Root | postcss.AtRule>(
     const containsPrefix = containsMatchInFirstChunk.bind(null, prefixType);
     const mixinRoot = mixinTarget ? mixinTarget : postcss.root();
 
-    root.nodes!.forEach((node) => {
+    root.nodes.forEach((node) => {
         if (node.type === 'rule') {
             const ast = isRoot
                 ? scopeSelector(selectorPrefix, node.selector, true).selectorAst
@@ -274,8 +278,8 @@ export function removeUnusedRules(
 }
 
 export function findDeclaration(importNode: Imported, test: any) {
-    const fromIndex = importNode.rule.nodes!.findIndex(test);
-    return importNode.rule.nodes![fromIndex] as postcss.Declaration;
+    const fromIndex = importNode.rule.nodes.findIndex(test);
+    return importNode.rule.nodes[fromIndex] as postcss.Declaration;
 }
 
 // TODO: What is this?
@@ -288,7 +292,7 @@ export function findRule(
     root.walkRules(selector, (rule) => {
         const declarationIndex = rule.nodes ? rule.nodes.findIndex(test) : -1;
         if ((rule as SRule).isSimpleSelector && !!~declarationIndex) {
-            found = rule.nodes![declarationIndex];
+            found = rule.nodes[declarationIndex];
         }
     });
     return found;
