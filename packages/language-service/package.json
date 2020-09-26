@@ -15,8 +15,8 @@
     "typescript": ">=3.6"
   },
   "dependencies": {
-    "@file-services/types": "^4.0.0",
-    "@file-services/typescript": "^4.0.0",
+    "@file-services/types": "^4.1.0",
+    "@file-services/typescript": "^4.1.0",
     "@stylable/core": "^3.11.1",
     "css-selector-tokenizer": "^0.7.3",
     "js-beautify": "^1.13.0",
