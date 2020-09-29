@@ -120,7 +120,7 @@ export const processorWarnings = {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
     MISSING_SCOPING_PARAM() {
-        return '"@st-scope" missing scoping selector param';
+        return '"@st-scope" missing scoping selector parameter';
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
