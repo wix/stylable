@@ -19,7 +19,7 @@ export function createInfrastructure(
     resolveNamespace?: typeof processNamespace,
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
     resolveModule = createDefaultResolver(fileSystem, resolveOptions),
-    createDiagnostics?: (from: string) => Diagnostics /* only for tests */
+    createDiagnostics?: (from: string) => Diagnostics
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
