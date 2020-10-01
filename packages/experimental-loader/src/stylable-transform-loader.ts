@@ -1,11 +1,10 @@
 import { loader } from 'webpack';
 import postcss from 'postcss';
 import decache from 'decache';
-import { Stylable, processNamespace, StylableResults } from '@stylable/core';
+import { Stylable, processNamespace, StylableResults, findMetaDependencies } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning, CssSyntaxError } from './warning';
-import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 
@@ -81,7 +80,7 @@ const stylableLoader: loader.Loader = function (content) {
 
     emitDiagnostics(this, res, diagnosticsMode);
 
-    addMetaDependencies(
+    findMetaDependencies(
         res.meta,
         ({ source }) => this.addDependency(source),
         stylable.createTransformer()
