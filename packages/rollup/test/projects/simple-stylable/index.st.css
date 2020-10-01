@@ -1,0 +1,19 @@
+:import {
+    -st-from: "./imported.st.css";
+    -st-named: imported as xxx;
+}
+:import {
+    -st-from: "./imported-too.st.css";
+    -st-named: imported-too;
+}
+
+.imported-too{}
+
+.xxx {
+    font-family: monospace;
+}
+
+.root {
+    font-size: 10em;
+    background: url("./asset.png");
+}

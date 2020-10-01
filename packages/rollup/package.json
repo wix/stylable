@@ -20,6 +20,9 @@
     "@stylable/optimizer": "^3.10.1",
     "@stylable/runtime": "^3.10.0",
     "find-config": "^1.0.0",
+    "magic-string": "^0.25.7",
+    "mime": "^2.4.6",
+    "toky": "^0.0.4"
   },
   "files": [
     "cjs",
@@ -31,6 +34,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "rollup-plugin",
+    "Stylable"
+  ],
   "repository": "https://github.com/wix/stylable/tree/master/packages/rollup",
   "author": "Wix.com",
   "license": "BSD-3-Clause"

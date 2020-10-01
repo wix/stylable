@@ -3,10 +3,11 @@
   "version": "3.10.0",
   "description": "Stylable runtime DOM integration",
   "main": "cjs/index.js",
+  "module": "esm/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs && yarn bundle",
+    "build": "ts-build ./src --cjs && ts-build ./src --esm && yarn bundle",
     "bundle": "node -r @ts-tools/node/r -r tsconfig-paths/register ./scripts/build-runtime.ts",
     "test:unit": "mocha \"test/unit/**/*.spec.ts?(x)\"",
     "test:e2e": "mocha \"test/e2e/**/*.spec.[tj]s?(x)\" --timeout 20000",

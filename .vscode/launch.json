@@ -17,7 +17,8 @@
       "name": "Mocha Current",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": ["${file}", "--timeout", "999999"],
-      "internalConsoleOptions": "openOnSessionStart"
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "node",
