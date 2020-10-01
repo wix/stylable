@@ -10,6 +10,12 @@ const parseMixin = (mixinValue: string) => {
     );
 };
 
+const parsePartialMixin = (mixinValue: string) => {
+    return SBTypesParsers[valueMapping.partialMixin](
+        postcss.decl({ prop: valueMapping.partialMixin, value: mixinValue }),
+        () => 'named'
+    );
+};
 const parseNamedImport = (value: string) =>
     SBTypesParsers[valueMapping.named](value, postcss.decl(), new Diagnostics());
 
@@ -175,5 +181,15 @@ describe('stylable-value-parsers', () => {
                 },
             ]);
         });
+    });
+
+    it('partial mixin annotation', () => {
+        expect(parsePartialMixin('Button(border 1px solid red)')).to.eql([
+            {
+                type: 'Button',
+                options: { border: '1px solid red' },
+                partial: true,
+            },
+        ]);
     });
 });

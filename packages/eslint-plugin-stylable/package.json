@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "3.10.1",
+  "version": "3.11.2",
   "description": "eslint plugin for Stylable usages",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.10.1",
-    "@typescript-eslint/experimental-utils": "^4.2.0"
+    "@stylable/core": "^3.11.2",
+    "@typescript-eslint/experimental-utils": "^4.3.0"
   },
   "devDependencies": {
     "create-temp-directory": "^1.1.1"

@@ -42,7 +42,6 @@ import { deprecated, filename2varname, stripQuotation } from './utils';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
-const parseMixin = SBTypesParsers[valueMapping.mixin];
 const parseStates = SBTypesParsers[valueMapping.states];
 const parseGlobal = SBTypesParsers[valueMapping.global];
 const parseExtends = SBTypesParsers[valueMapping.extends];
@@ -87,11 +86,14 @@ export const processorWarnings = {
     UNKNOWN_MIXIN(name: string) {
         return `unknown mixin: "${name}"`;
     },
-    OVERRIDE_MIXIN() {
-        return `override mixin on same rule`;
+    OVERRIDE_MIXIN(mixinType: string) {
+        return `override ${mixinType} on same rule`;
     },
     OVERRIDE_TYPED_RULE(key: string, name: string) {
         return `override "${key}" on typed rule "${name}"`;
+    },
+    PARTIAL_MIXIN_MISSING_ARGUMENTS(type: string) {
+        return `"${valueMapping.partialMixin}" can only be used with override arguments provided, missing overrides on "${type}"`;
     },
     FROM_PROP_MISSING_IN_IMPORT() {
         return `"${valueMapping.from}" is missing in ${rootValueMapping.import} block`;
@@ -118,7 +120,7 @@ export const processorWarnings = {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
     MISSING_SCOPING_PARAM() {
-        return '"@st-scope" must receive a simple selector or stylesheet "root" as its scoping parameter';
+        return '"@st-scope" missing scoping selector parameter';
     },
     ILLEGAL_GLOBAL_CSS_VAR(name: string) {
         return `"@st-global-custom-property" received the value "${name}", but it must begin with "--" (double-dash)`;
@@ -630,9 +632,9 @@ export class StylableProcessor {
             } else {
                 this.diagnostics.warn(decl, processorWarnings.CANNOT_EXTEND_IN_COMPLEX());
             }
-        } else if (decl.prop === valueMapping.mixin) {
+        } else if (decl.prop === valueMapping.mixin || decl.prop === valueMapping.partialMixin) {
             const mixins: RefedMixin[] = [];
-            parseMixin(
+            SBTypesParsers[decl.prop](
                 decl,
                 (type) => {
                     const mixinRefSymbol = this.meta.mappedSymbols[type];
@@ -648,11 +650,19 @@ export class StylableProcessor {
                 this.diagnostics
             ).forEach((mixin) => {
                 const mixinRefSymbol = this.meta.mappedSymbols[mixin.type];
-
                 if (
                     mixinRefSymbol &&
                     (mixinRefSymbol._kind === 'import' || mixinRefSymbol._kind === 'class')
                 ) {
+                    if (mixin.partial && Object.keys(mixin.options).length === 0) {
+                        this.diagnostics.warn(
+                            decl,
+                            processorWarnings.PARTIAL_MIXIN_MISSING_ARGUMENTS(mixin.type),
+                            {
+                                word: mixin.type,
+                            }
+                        );
+                    }
                     const refedMixin = {
                         mixin,
                         ref: mixinRefSymbol,
@@ -667,10 +677,27 @@ export class StylableProcessor {
             });
 
             if (rule.mixins) {
-                this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN());
+                const partials = rule.mixins.filter((r) => r.mixin.partial);
+                const nonPartials = rule.mixins.filter((r) => !r.mixin.partial);
+                const isInPartial = decl.prop === valueMapping.partialMixin;
+                if (
+                    (partials.length && decl.prop === valueMapping.partialMixin) ||
+                    (nonPartials.length && decl.prop === valueMapping.mixin)
+                ) {
+                    this.diagnostics.warn(decl, processorWarnings.OVERRIDE_MIXIN(decl.prop));
+                }
+                if (partials.length && nonPartials.length) {
+                    rule.mixins = isInPartial
+                        ? nonPartials.concat(mixins)
+                        : partials.concat(mixins);
+                } else if (partials.length) {
+                    rule.mixins = isInPartial ? mixins : partials.concat(mixins);
+                } else if (nonPartials.length) {
+                    rule.mixins = isInPartial ? nonPartials.concat(mixins) : mixins;
+                }
+            } else if (mixins.length) {
+                rule.mixins = mixins;
             }
-
-            rule.mixins = mixins;
         } else if (decl.prop === valueMapping.global) {
             if (rule.isSimpleSelector && rule.selectorType !== 'element') {
                 this.setClassGlobalMapping(decl, rule);

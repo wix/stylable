@@ -15,5 +15,5 @@ export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any
     });
 
     return (directoryPath, request) =>
-        eResolver.resolveSync(resolverContext, directoryPath, request) as string;
+        eResolver.resolveSync(resolverContext, directoryPath, request);
 }

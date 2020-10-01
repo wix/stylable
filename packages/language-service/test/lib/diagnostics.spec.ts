@@ -38,6 +38,25 @@ describe('diagnostics', () => {
         });
     });
 
+    it('should not duplicate diagnostics within multiple runs on the same file', () => {
+        const filePath = '/style.st.css';
+        const files = {
+            [filePath]: '.gaga .root{}',
+        }
+        const fs = createMemoryFs(files);
+
+        const stylableLSP = new StylableLanguageService({
+            fs,
+            stylable: new Stylable('/', fs, require),
+        });
+    
+        const diagnostics1 =  stylableLSP.diagnose(filePath);
+        const diagnostics2 =  stylableLSP.diagnose(filePath);
+
+        expect(diagnostics1).to.have.lengthOf(1)
+        expect(diagnostics2).to.have.lengthOf(1)
+    });
+
     it('should create cross file errors', () => {
         const filePathA = '/style.css';
         const filePathB = '/import-style.st.css';

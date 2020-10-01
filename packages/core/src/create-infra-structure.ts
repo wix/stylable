@@ -19,7 +19,7 @@ export function createInfrastructure(
     resolveNamespace?: typeof processNamespace,
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
     resolveModule = createDefaultResolver(fileSystem, resolveOptions),
-    diagnostics = new Diagnostics()
+    createDiagnostics?: (from: string) => Diagnostics
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
@@ -38,9 +38,10 @@ export function createInfrastructure(
 
     const fileProcessor = cachedProcessFile<StylableMeta>(
         (from, content) => {
+            const resolvedFrom = resolvePath(projectRoot, from);
             return process(
-                safeParse(content, { from: resolvePath(projectRoot, from) }),
-                diagnostics,
+                safeParse(content, { from: resolvedFrom }),
+                createDiagnostics?.(resolvedFrom),
                 resolveNamespace
             );
         },
