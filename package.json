@@ -46,7 +46,7 @@
     "@types/react": "^16.9.50",
     "@types/react-dom": "^16.9.8",
     "@types/rimraf": "^3.0.0",
-    "@types/sinon": "^9.0.7",
+    "@types/sinon": "^9.0.8",
     "@types/sinon-chai": "^3.2.5",
     "@types/tapable": "^1.0.6",
     "@types/validate-npm-package-name": "^3.0.0",
