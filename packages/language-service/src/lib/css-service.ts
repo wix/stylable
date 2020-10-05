@@ -1,7 +1,6 @@
 import { IFileSystem } from '@file-services/types';
 import path from 'path';
 import * as postcss from 'postcss';
-import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
@@ -9,11 +8,13 @@ import {
     ColorPresentation,
     CompletionItem,
     Diagnostic,
+    getCSSLanguageService,
     Hover,
     Location,
     Position,
     Range,
-} from 'vscode-languageserver-types';
+    Stylesheet,
+} from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 import { createMeta } from './provider';
 

@@ -1,5 +1,9 @@
 import { expect } from 'chai';
-import { ParameterInformation, SignatureHelp, SignatureInformation } from 'vscode-languageserver';
+import {
+    ParameterInformation,
+    SignatureHelp,
+    SignatureInformation,
+} from 'vscode-css-languageservice';
 import { getSignatureHelp } from '../../test-kit/asserters';
 
 describe('Signature Help', () => {

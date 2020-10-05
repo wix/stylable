@@ -1,6 +1,6 @@
 import { css } from 'js-beautify';
 import { TextDocument, Range } from 'vscode-languageserver-textdocument';
-import { FormattingOptions } from 'vscode-languageserver';
+import { FormattingOptions } from 'vscode-css-languageservice';
 
 export interface JSBeautifyFormatCSSOptions {
     indent_size?: number;

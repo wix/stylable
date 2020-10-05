@@ -8,9 +8,9 @@ import {
     Location,
     ParameterInformation,
     SignatureHelp,
-} from 'vscode-languageserver';
+    Range,
+} from 'vscode-css-languageservice';
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
-import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
 import { ProviderPosition } from '../src/lib/completion-providers';
 import { createMeta, ProviderLocation } from '../src/lib/provider';
@@ -96,9 +96,5 @@ export function getDocColorPresentation(
     const src: string = fs.readFileSync(fullPath).toString();
     const doc = TextDocument.create(URI.file(fullPath).toString(), 'stylable', 1, src);
 
-    return stylableLSP.getColorPresentation(doc, {
-        textDocument: TextDocumentIdentifier.create(doc.uri),
-        color,
-        range,
-    });
+    return stylableLSP.getColorPresentation(doc, color, range);
 }

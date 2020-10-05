@@ -4,20 +4,11 @@ import {
     CompletionItem,
     Diagnostic,
     Location,
-    NotificationType,
     ParameterInformation,
     Position,
     Range,
     TextEdit,
-} from 'vscode-languageserver';
-import { ColorPresentationRequest, DocumentColorRequest } from 'vscode-languageserver-protocol';
-
-export interface NotificationTypes {
-    // TODO: remove me?
-    openDoc: NotificationType<string, void>;
-    colorRequest: typeof DocumentColorRequest;
-    colorPresentationRequest: typeof ColorPresentationRequest;
-}
+} from 'vscode-css-languageservice';
 
 export interface LSPTypeHelpers {
     // TODO: remove me?

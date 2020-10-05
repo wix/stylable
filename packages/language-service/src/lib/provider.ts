@@ -27,7 +27,7 @@ import {
     Position,
     SignatureHelp,
     SignatureInformation,
-} from 'vscode-languageserver';
+} from 'vscode-css-languageservice';
 import { URI } from 'vscode-uri';
 
 import {

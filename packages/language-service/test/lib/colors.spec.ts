@@ -1,10 +1,10 @@
 import { expect } from 'chai';
-import { Color } from 'vscode-languageserver-protocol';
+import { Color } from 'vscode-css-languageservice';
 import { createRange } from '../../src/lib/completion-providers';
 import { getDocColorPresentation, getDocumentColors } from '../../test-kit/asserters';
 
 export function createColor(red: number, green: number, blue: number, alpha: number): Color {
-    return { red, green, blue, alpha } as Color;
+    return { red, green, blue, alpha };
 }
 
 describe('Colors', () => {

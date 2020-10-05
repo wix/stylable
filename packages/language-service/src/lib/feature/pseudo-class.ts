@@ -1,5 +1,9 @@
 import postcssValueParser from 'postcss-value-parser';
-import { ParameterInformation, SignatureHelp, SignatureInformation } from 'vscode-languageserver';
+import {
+    ParameterInformation,
+    SignatureHelp,
+    SignatureInformation,
+} from 'vscode-css-languageservice';
 import { StateParsedValue, systemValidators } from '@stylable/core';
 import { ProviderPosition } from '../completion-providers';
 

@@ -1,7 +1,6 @@
 import { IFileSystem } from '@file-services/types';
 import { evalDeclarationValue, Stylable, valueMapping } from '@stylable/core';
-import { Color, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
-import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import { Color, Range, ColorInformation, ColorPresentation } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import { ProviderPosition, ProviderRange } from '../completion-providers';
@@ -103,15 +102,16 @@ export function resolveDocumentColors(
 export function getColorPresentation(
     cssService: CssService,
     document: TextDocument,
-    params: ColorPresentationParams
+    color: Color,
+    range: Range
 ): ColorPresentation[] {
     const src = document.getText();
-    const res = fixAndProcess(src, new ProviderPosition(0, 0), params.textDocument.uri);
+    const res = fixAndProcess(src, new ProviderPosition(0, 0), document.uri);
     const meta = res.processed.meta!;
 
     const wordStart = new ProviderPosition(
-        params.range.start.line + 1,
-        params.range.start.character + 1
+        range.start.line + 1,
+        range.start.character + 1
     );
     let noPicker = false;
     meta.rawAst.walkDecls(valueMapping.named, (node) => {
@@ -130,5 +130,5 @@ export function getColorPresentation(
     if (noPicker) {
         return [];
     }
-    return cssService.getColorPresentations(document, params.color, params.range);
+    return cssService.getColorPresentations(document, color, range);
 }
