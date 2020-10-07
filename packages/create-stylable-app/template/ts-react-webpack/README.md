@@ -10,10 +10,12 @@ The following scripts are available:
 
 `npm run serve` - Statically serve the `dist` folder. Uses [serve](https://github.com/zeit/serve).
 
-`npm start` - Starts the application in **development** mode (and opens the web browser). Uses [webpack-dev-server](https://github.com/webpack/webpack-dev-server).
+`npm start` - Start the application in **development** mode (and open the web browser). Uses [webpack-dev-server](https://github.com/webpack/webpack-dev-server).
 
 `npm run clean` - Delete the `dist` folder. Uses [rimraf](https://github.com/isaacs/rimraf).
 
 `npm run typecheck` - Verify syntactic/semantic correctness. Uses [typescript](https://github.com/microsoft/TypeScript).
 
 `npm run lint` - Verify best practices and find common issues. Uses [eslint](https://github.com/eslint/eslint).
+
+`npm test` - Execute `typecheck` and `lint` scripts.
