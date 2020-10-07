@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
+    "test": "tsc -p template/ts-react-webpack --noEmit",
     "prepack": "yarn build"
   },
   "dependencies": {

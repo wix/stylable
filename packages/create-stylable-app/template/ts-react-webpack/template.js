@@ -8,7 +8,6 @@ module.exports = {
         '@typescript-eslint/eslint-plugin',
         '@typescript-eslint/parser',
         'eslint-config-prettier',
-        'eslint-plugin-jsx-a11y',
         'eslint-plugin-react',
         'eslint-plugin-react-hooks',
         'eslint-plugin-stylable',
@@ -36,6 +35,7 @@ module.exports = {
             serve: 'serve ./dist',
             lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',
+            test: 'npm run typecheck && npm run lint'
         },
     },
 };
