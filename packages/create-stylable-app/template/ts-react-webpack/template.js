@@ -20,7 +20,7 @@ module.exports = {
         'ts-loader',
         'typescript',
         'webpack@4',
-        'webpack-cli',
+        'webpack-cli@3',
         'webpack-dev-server',
     ],
     packageJson: {
