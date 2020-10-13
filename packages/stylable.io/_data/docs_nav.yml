@@ -60,6 +60,13 @@
       title: Custom Selectors
     - id: references/mixins
       title: Mixins
+      subitems:
+        - id: css-mixins
+          title: CSS Mixins
+        - id: partial-css-mixins
+          title: Partial CSS Mixins
+        - id: javascript-mixins
+          title: JavaScript Mixins
     - id: references/formatters
       title: Formatters
     - id: references/variables
