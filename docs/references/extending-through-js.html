@@ -111,6 +111,7 @@
 
 <p><strong>Stylable</strong> supports the following types of plugins:</p>
 <ul>
+  <li>Values - string values exported from a javascript module.</li>
   <li><a href="'./formatters">Formatters</a> - functions for manipulating single CSS declaration values.</li>
   <li><a href="'./mixins">Mixins</a> - functions for generating a CSS fragment that can include single or multiple rulesets and declarations.</li>
 </ul>
@@ -213,6 +214,26 @@
     </tr>
   </tbody>
 </table>
+
+<h2 id="extending-through-values">Extending through values</h2>
+
+<p>Values are strings exported via JavaScript modules they can be used inside a Stylable value() function.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"../my-js-values.js"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">myValue</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.myClass</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">myValue</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Uses the following TypeScript code:</p>
+
+<div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*my-js-values.ts*/</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">myValue</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">red</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
 
 <h2 id="extending-through-formatters">Extending through formatters</h2>
 

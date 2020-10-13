@@ -95,7 +95,7 @@
   <div class="docs-nav-section">
     <div class="docs-nav-section-header">Specification Reference</div>
     <ul>
-       <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>  <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>  <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>  <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>  <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>  <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>  <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>  <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>  <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>  <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>  <li class="active"><a href="../../docs/references/mixins" class="active docs-nav-item">Mixins</a></li>  <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>  <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>  <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>  <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>  <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>  <li class=""><a href="../../docs/references/using-external-assets" class=" docs-nav-item">Using External Assets</a></li>  <li class=""><a href="../../docs/references/keyframes" class=" docs-nav-item">Keyframes</a></li> 
+       <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>  <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>  <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>  <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>  <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>  <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>  <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>  <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>  <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>  <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>  <li class="active"><a href="../../docs/references/mixins" class="active docs-nav-item">Mixins</a><ul><li><a href="#css-mixins" class="docs-nav-subitem">CSS Mixins</a></li><li><a href="#partial-css-mixins" class="docs-nav-subitem">Partial CSS Mixins</a></li><li><a href="#javascript-mixins" class="docs-nav-subitem">JavaScript Mixins</a></li></ul></li>  <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>  <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>  <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>  <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>  <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>  <li class=""><a href="../../docs/references/using-external-assets" class=" docs-nav-item">Using External Assets</a></li>  <li class=""><a href="../../docs/references/keyframes" class=" docs-nav-item">Keyframes</a></li> 
     </ul>
   </div>
   
@@ -218,6 +218,69 @@ Multiple variables can be comma separated or written on multiple lines:
 
 <span class="nc">.targetClass</span> <span class="p">{</span>
     <span class="nl">background</span><span class="p">:</span> <span class="no">orange</span><span class="p">;</span> <span class="c">/* from mixin with override */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="partial-css-mixins">Partial CSS mixins</h2>
+
+<p>Partial CSS Mixins (<code class="language-plaintext highlighter-rouge">-st-partial-mixin</code>) is a continuation of the idea of mixins with parameter overrides. (as described above)</p>
+
+<p>Where a regular <code class="language-plaintext highlighter-rouge">-st-mixin</code> includes all declarations inside the targeted mixed-in class, partial mixins enable you to pass through overriding variable values and mix in only declarations that would be affected by such an override.</p>
+
+<p>For a partial mixin to work, at least one overriding variable must be provided, additional ones being optional.</p>
+
+<h3 id="example">Example</h3>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="py">-st-partial-mixin</span><span class="p">:</span> <span class="n">my-mixin</span><span class="p">(</span><span class="n">color1</span> <span class="no">gold</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>A partial mixin will include any declaration in the mixed-in class (or rules containing the mixed-in class) that contains a variable usage that will be overridden. Any other variables not overridden inside the mixed in declaration will retain their original values.</p>
+
+<h3 id="example-1">Example</h3>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="py">size1</span><span class="p">:</span> <span class="m">2px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="nc">.part</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">size1</span><span class="p">)</span> <span class="nb">solid</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="py">-st-partial-mixin</span><span class="p">:</span> <span class="n">my-mixin</span><span class="p">(</span><span class="n">color1</span> <span class="no">gold</span><span class="p">,</span> <span class="n">size1</span> <span class="m">5px</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="nc">.part</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="no">green</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
