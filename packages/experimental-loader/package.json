@@ -13,7 +13,7 @@
     "@stylable/core": "^3.11.2",
     "@stylable/optimizer": "^3.11.2",
     "@stylable/runtime": "^3.11.2",
-    "css-loader": "^4.3.0",
+    "css-loader": "^5.0.0",
     "decache": "^4.6.0"
   },
   "files": [
