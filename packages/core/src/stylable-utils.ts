@@ -22,6 +22,7 @@ import {
 } from './selector-utils';
 import { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
+import {StylableResolver} from './stylable-resolver';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 
@@ -363,6 +364,21 @@ export function generateScopedCSSVar(namespace: string, varName: string) {
 
 export function isCSSVarProp(value: string) {
     return value.startsWith('--');
+}
+
+export function generateScopedVar(resolver: StylableResolver, meta: StylableMeta, symbolName: string) {
+    const importedVar = resolver.deepResolve(meta.mappedSymbols[symbolName]);
+    if (importedVar && importedVar._kind === 'css' && importedVar.symbol && importedVar.symbol._kind === 'cssVar') {
+        return importedVar.symbol.global
+            ? importedVar.symbol.name
+            : generateScopedCSSVar(importedVar.meta.namespace, importedVar.symbol.name.slice(2));
+    }
+    const cssVar = meta.cssVars[symbolName];
+    if (cssVar?.global) {
+        return symbolName;
+    } else {
+        return generateScopedCSSVar(meta.namespace, symbolName.slice(2));
+    }
 }
 
 export function isValidClassName(className: string) {
