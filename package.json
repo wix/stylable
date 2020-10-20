@@ -63,7 +63,7 @@
     "css-loader": "^5.0.0",
     "eslint": "^7.11.0",
     "eslint-config-prettier": "^6.13.0",
-    "eslint-plugin-react": "^7.21.4",
+    "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.1.2",
     "express": "^4.17.1",
     "file-loader": "^6.1.1",
