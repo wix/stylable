@@ -231,7 +231,7 @@ describe('Partial CSS Mixins', () => {
         );
     });
 
-    it('nested partial mixins', () => {
+    it.only('nested partial mixins', () => {
         const result = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -254,12 +254,12 @@ describe('Partial CSS Mixins', () => {
                 }
 
                 .my-mixin2 {
-                    -st-partial-mixin: my-mixin(c1 black, c2 white, c4 value(c4));
+                    -st-partial-mixin: my-mixin(c3 value(c1));
                     background: value(c4);
                 }
 
                 .container {
-                    -st-partial-mixin: my-mixin2(c4 gold);
+                    -st-partial-mixin: my-mixin2(c4 gold, c1 yellow);
                 }
 
             `,
@@ -268,7 +268,7 @@ describe('Partial CSS Mixins', () => {
         });
 
         expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
-        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'background: gold');
+        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'background: red, yellow;background: gold');
     });
 
     it('should follow variable binding and include derived variables', () => {
