@@ -349,6 +349,7 @@ const partialsOnly = ({ mixin: { partial } }: RefedMixin): boolean => {
 const nonPartials = ({ mixin: { partial } }: RefedMixin): boolean => {
     return !partial;
 };
+
 /** we assume that mixinRoot is freshly created nodes from the ast */
 function filterPartialMixinDecl(
     meta: StylableMeta,
