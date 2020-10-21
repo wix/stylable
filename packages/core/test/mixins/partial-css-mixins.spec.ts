@@ -231,7 +231,7 @@ describe('Partial CSS Mixins', () => {
         );
     });
 
-    it.only('nested partial mixins', () => {
+    it('nested partial mixins', () => {
         const result = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
