@@ -29,7 +29,7 @@
     "@types/find-config": "^1.0.0",
     "@types/flat": "^5.0.1",
     "@types/js-beautify": "^1.11.0",
-    "@types/jsdom": "^16.2.4",
+    "@types/jsdom": "^16.2.5",
     "@types/json-schema": "^7.0.6",
     "@types/loader-utils": "^2.0.1",
     "@types/lodash.camelcase": "^4.3.6",
