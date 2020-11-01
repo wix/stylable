@@ -1,5 +1,4 @@
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-// const IgnorePlugin = require('webpack').IgnorePlugin;
 
 module.exports = {
     mode: 'production',
@@ -31,7 +30,6 @@ module.exports = {
         ],
     },
     plugins: [
-        // new IgnorePlugin(/(source-map)|(chalk)|(support-color)/,/node_modules/),
         new BundleAnalyzerPlugin(),
     ],
 };

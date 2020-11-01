@@ -18,8 +18,8 @@ module.exports = {
         'serve',
         'ts-loader',
         'typescript',
-        'webpack@4',
-        'webpack-cli@3',
+        'webpack',
+        'webpack-cli',
         'webpack-dev-server',
     ],
     packageJson: {
