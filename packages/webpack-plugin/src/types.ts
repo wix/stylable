@@ -1,100 +1,26 @@
-import {
-    Stylable,
-    StylableMeta,
-    StylableResults,
-    TransformHooks,
-    StylableExports,
-} from '@stylable/core';
-import { StylableOptimizer } from '@stylable/optimizer';
-import webpack from 'webpack';
+import { Stylable } from "@stylable/core";
+import { Compilation, Compiler, Dependency } from "webpack";
 
-export interface StylableWebpackPluginOptions {
-    filename: string;
-    useWeakDeps: boolean;
-    includeDynamicModulesInCSS: boolean;
-    skipDynamicCSSEmit: boolean;
-    createRuntimeChunk: boolean;
-    outputCSS: boolean;
-    includeCSSInJS: boolean;
-    useEntryModuleInjection: boolean;
-    transformHooks?: TransformHooks;
-    experimentalHMR: boolean;
-    runtimeMode: 'isolated' | 'shared' | 'external';
-    globalRuntimeId: string;
-    onProcessMeta?: (meta: StylableMeta, filePath: string) => StylableMeta;
-    diagnosticsMode: 'auto' | 'strict' | 'loose';
-    bootstrap: {
-        autoInit: boolean;
-        getAutoInitModule?: any;
-        globalInjection?: (p: string) => string;
-    };
-    generate: {
-        runtimeStylesheetId: 'module' | 'namespace';
-        afterTransform: any;
-    };
-    optimizer?: StylableOptimizer;
-    optimizeStylableModulesPerChunks: boolean;
-    optimize: {
-        removeUnusedComponents: boolean;
-        removeComments: boolean;
-        removeStylableDirectives: boolean;
-        classNameOptimizations: boolean;
-        shortNamespaces: boolean;
-        removeEmptyNodes: boolean;
-        minify: boolean;
-    };
-    unsafeMuteDiagnostics: {
-        DUPLICATE_MODULE_NAMESPACE: boolean;
-    };
-    unsafeBuildNamespace?: boolean;
-    afterTransform?:
-        | ((results: StylableResults, module: StylableModule, stylable: Stylable) => void)
-        | null;
-    plugins?: Array<{ apply: (compiler: webpack.Compiler, stylablePlugin: any) => void }>;
-    resolveNamespace?(): string;
-    requireModule(path: string): any;
+export interface StylableBuildMeta {
+  css: string;
+  urls: string[];
+  cssDepth: number;
+  cssInjection: "js" | "css" | "mini-css";
+  isUsed: undefined | boolean;
 }
 
-export interface StylableGeneratorOptions {
-    includeCSSInJS: boolean;
-    experimentalHMR: boolean;
-    runtimeStylesheetId: 'module' | 'namespace';
-    afterTransform: any;
-    diagnosticsMode: 'auto' | 'strict' | 'loose';
+export type LoaderData = Pick<StylableBuildMeta, "css" | "urls">;
+
+export interface StylableLoaderContext {
+  resourcePath: string;
+  stylable: Stylable;
+  assetsMode: "loader" | "url";
+  flagStylableModule: (loaderData: LoaderData) => void;
 }
 
-export type ShallowPartial<T> = {
-    [P in keyof T]?: T[P] extends new () => any ? T[P] : Partial<T[P]>;
-};
-
-export interface CalcResult {
-    depth: number;
-    cssDependencies: StylableModule[];
-}
-
-export type WebpackAssetModule = webpack.compilation.Module & { request: string };
-
-export interface StylableModule extends webpack.compilation.Module {
-    context: string;
-    dependencies?: StylableModule[];
-    module?: StylableModule;
-    resource: string;
-    reasons: Array<{ module: StylableModule }>;
-    request: string;
-    loaders: webpack.NewLoader[];
-    addDependency(dep: webpack.compilation.Dependency & any): void;
-    buildInfo: {
-        fileDependencies: Set<string>;
-        optimize: StylableWebpackPluginOptions['optimize'];
-        isImportedByNonStylable: boolean;
-        runtimeInfo: CalcResult;
-        stylableMeta: StylableMeta;
-        usageMapping: Record<string, boolean>;
-        usedStylableModules: StylableModule[];
-        stylableTransformedAst: Required<StylableMeta>['outputAst'];
-        stylableTransformedExports: StylableExports;
-        stylableTransformed: boolean;
-        stylableAssetReplacement: WebpackAssetModule[];
-    };
-    originalSource(): string;
-}
+/* webpack missing types */
+export type webpackCreateHash = Compiler["webpack"]["util"]["createHash"];
+export type webpackOutputOptions = Compilation["runtimeTemplate"]["outputOptions"];
+export type CompilationParams = Parameters<Compiler["newCompilation"]>[0];
+export type NormalModuleFactory = CompilationParams["normalModuleFactory"];
+export type DependencyClass = new () => Dependency;
