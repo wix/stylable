@@ -3,6 +3,15 @@ declare module 'deindent' {
     export = deindent;
 }
 
+// TODO: revisit
+declare module 'mini-css-extract-plugin' {
+    class MiniCssExtractPlugin {
+        static loader: string
+        apply(compiler: any): void;
+    }
+    export = MiniCssExtractPlugin;
+}
+
 declare module 'enhanced-resolve/lib/ResolverFactory' {
     const ResolverFactory: typeof import('enhanced-resolve').ResolverFactory;
     export = ResolverFactory;
