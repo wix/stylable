@@ -12,7 +12,6 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/path": "^4.1.0",
     "css-selector-tokenizer": "^0.7.3",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^4.3.0",

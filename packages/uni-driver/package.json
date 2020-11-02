@@ -8,7 +8,7 @@
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
     "test": "mocha \"./test/**/*.spec.ts\"",
-    "start": "webpack-dev-server --hot --inline",
+    "start": "webpack serve",
     "prepack": "yarn build"
   },
   "files": [
