@@ -1,24 +1,24 @@
-import { loader } from 'webpack';
 import postcss from 'postcss';
 import decache from 'decache';
 import { Stylable, processNamespace, StylableResults } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { getOptions, isUrlRequest, stringifyRequest } from 'loader-utils';
 import { Warning, CssSyntaxError } from './warning';
 import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
+import type { LoaderContext, Loader } from 'typings/webpack5';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const cssLoaderRuntimeApiPath = require.resolve('css-loader/dist/runtime/api');
+const { getOptions, isUrlRequest, stringifyRequest } = require('loader-utils');
 
 export let stylable: Stylable;
 
 export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
-    filterUrls(url: string, ctx: loader.LoaderContext): boolean;
+    filterUrls(url: string, ctx: LoaderContext): boolean;
     exportsOnly: boolean;
     diagnosticsMode: 'auto' | 'strict' | 'loose';
 }
@@ -27,7 +27,7 @@ const defaultOptions: LoaderOptions = {
     resolveNamespace: processNamespace,
     exportsOnly: false,
     diagnosticsMode: 'auto',
-    filterUrls(_url: string, _ctx: loader.LoaderContext) {
+    filterUrls(_url: string, _ctx: LoaderContext) {
         return true;
     },
 };
@@ -50,7 +50,7 @@ const requireModule = (id: string) => {
 };
 const optimizer = new StylableOptimizer();
 
-const stylableLoader: loader.Loader = function (content) {
+const stylableLoader: Loader = function (content) {
     const callback = this.async();
 
     if (!callback) {
@@ -173,7 +173,7 @@ export const loaderPath = __filename;
 export default stylableLoader;
 
 function reportDiagnostic(
-    ctx: loader.LoaderContext,
+    ctx: LoaderContext,
     diagnosticsMode: 'auto' | 'strict' | 'loose',
     { message, type }: { message: string; type: 'warning' | 'error' }
 ) {
@@ -192,7 +192,7 @@ function reportDiagnostic(
 }
 
 function emitDiagnostics(
-    ctx: loader.LoaderContext,
+    ctx: LoaderContext,
     res: StylableResults,
     diagnosticsMode: 'auto' | 'strict' | 'loose'
 ) {

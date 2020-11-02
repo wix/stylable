@@ -8,6 +8,7 @@ export default {
     entry: './app.js',
     context: __dirname,
     devtool: false,
+    output: { publicPath: '' },
     plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin()],
     module: {
         rules: [
