@@ -1,7 +1,7 @@
 import { getImports } from "./loader-utils";
 import { StylableLoaderContext } from "./types";
 
-export default async function (this: StylableLoaderContext, source: string) {
+export default function (this: StylableLoaderContext, source: string) {
   const { meta, exports } = this.stylable.transform(source, this.resourcePath);
 
   const { urls, imports } = getImports(

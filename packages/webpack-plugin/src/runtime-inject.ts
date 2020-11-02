@@ -59,7 +59,7 @@ export class InjectDependencyTemplate {
         module.buildMeta.stylable,
         this.staticPublicPath,
         (resourcePath) => {
-          let assetModule = this.assetsModules.get(resourcePath);
+          const assetModule = this.assetsModules.get(resourcePath);
           if (!assetModule) {
             throw new Error("Missing asset module for " + resourcePath);
           }

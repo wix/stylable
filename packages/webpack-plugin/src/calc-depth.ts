@@ -17,7 +17,7 @@ export function calcDepth(
   moduleGraph: ModuleGraph,
   visited = new Map<string, DepthResults>()
 ) {
-  let id = start.resource;
+  const id = start.resource;
   let results = visited.get(id);
   if (results) {
     return results;

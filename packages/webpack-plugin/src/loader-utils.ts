@@ -36,9 +36,6 @@ function handleUrlDependencies(meta: StylableMeta, rootContext: string) {
         if (url && isAsset(url)) {
           node.url = `__stylable_url_asset_${urls.length}__`;
           (node as any).stringType = '"';
-          if(url.startsWith('/')){
-            
-          }
           urls.push(makeAbsolute(url, rootContext, moduleContext));
         }
       },
