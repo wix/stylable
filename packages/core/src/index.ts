@@ -20,6 +20,8 @@ export * from './native-reserved-lists';
 export * from './cssdocs';
 export * from './resolve-namespace-factories';
 export * from './module-resolver';
+export * from './report-diagnostic';
+export * from './visit-meta-css-dependencies';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

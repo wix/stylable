@@ -1,19 +1,18 @@
-import { getImports } from "./loader-utils";
-import { StylableLoaderContext } from "./types";
+import { getImports } from './loader-utils';
+import { StylableLoaderContext } from './types';
+import { emitDiagnostics } from '@stylable/core';
 
 export default function (this: StylableLoaderContext, source: string) {
-  const { meta, exports } = this.stylable.transform(source, this.resourcePath);
+    const { meta, exports } = this.stylable.transform(source, this.resourcePath);
 
-  const { urls, imports } = getImports(
-    meta,
-    this.stylable.projectRoot,
-    this.assetsMode
-  );
+    const { urls, imports } = getImports(meta, this.stylable.projectRoot, this.assetsMode);
 
-  this.flagStylableModule({ css: meta.outputAst!.toString(), urls });
+    this.flagStylableModule({ css: meta.outputAst!.toString(), urls });
 
-  return `
-${imports.join("\n")}
+    emitDiagnostics(this, meta, this.diagnosticsMode);
+
+    return `
+${imports.join('\n')}
 export const namespace = ${JSON.stringify(meta.namespace)};
 export const classes = ${JSON.stringify(exports.classes)}; 
 export const keyframes = ${JSON.stringify(exports.keyframes)}; 

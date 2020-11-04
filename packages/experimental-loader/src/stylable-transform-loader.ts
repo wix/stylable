@@ -1,9 +1,13 @@
 import postcss from 'postcss';
 import decache from 'decache';
-import { Stylable, processNamespace, StylableResults } from '@stylable/core';
+import {
+    Stylable,
+    processNamespace,
+    emitDiagnostics,
+    visitMetaCSSDependencies,
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
-import { addMetaDependencies } from './add-meta-dependencies';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 import type { LoaderContext, Loader } from 'typings/webpack5';
@@ -77,18 +81,18 @@ const stylableLoader: Loader = function (content) {
         requireModule,
     });
 
-    const res = stylable.transform(content, this.resourcePath);
+    const { meta, exports } = stylable.transform(content, this.resourcePath);
 
-    emitDiagnostics(this, res, diagnosticsMode);
+    emitDiagnostics(this, meta, diagnosticsMode);
 
-    addMetaDependencies(
-        res.meta,
+    visitMetaCSSDependencies(
+        meta,
         ({ source }) => this.addDependency(source),
         stylable.createTransformer()
     );
 
     if (exportsOnly) {
-        return callback(null, createRuntimeTargetCode(res.meta.namespace, res.exports));
+        return callback(null, createRuntimeTargetCode(meta.namespace, exports));
     }
 
     const urlPluginImports: LoaderImport[] = [
@@ -120,11 +124,11 @@ const stylableLoader: Loader = function (content) {
     ];
 
     if (mode !== 'development') {
-        optimizer.removeStylableDirectives(res.meta.outputAst!);
+        optimizer.removeStylableDirectives(meta.outputAst!);
     }
 
     postcss(plugins)
-        .process(res.meta.outputAst!, {
+        .process(meta.outputAst!, {
             from: this.resourcePath,
             to: this.resourcePath,
             map: false,
@@ -147,10 +151,7 @@ const stylableLoader: Loader = function (content) {
                 ${moduleCode}
 
                 // Patch exports with custom stylable API
-                ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([
-                    res.meta.namespace,
-                    res.exports,
-                ])}
+                ___CSS_LOADER_EXPORT___.locals = ${JSON.stringify([meta.namespace, exports])}
 
                 module.exports = ___CSS_LOADER_EXPORT___;
                 `
@@ -171,35 +172,3 @@ const stylableLoader: Loader = function (content) {
 
 export const loaderPath = __filename;
 export default stylableLoader;
-
-function reportDiagnostic(
-    ctx: LoaderContext,
-    diagnosticsMode: 'auto' | 'strict' | 'loose',
-    { message, type }: { message: string; type: 'warning' | 'error' }
-) {
-    const error = new Error(message);
-    if (diagnosticsMode === 'auto') {
-        if (type === 'warning') {
-            ctx.emitWarning(error);
-        } else if (type === 'error') {
-            ctx.emitError(error);
-        }
-    } else if (diagnosticsMode === 'strict') {
-        ctx.emitError(error);
-    } else if (diagnosticsMode === 'loose') {
-        ctx.emitWarning(error);
-    }
-}
-
-function emitDiagnostics(
-    ctx: LoaderContext,
-    res: StylableResults,
-    diagnosticsMode: 'auto' | 'strict' | 'loose'
-) {
-    res.meta.diagnostics?.reports.forEach((diagnostic) => {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
-    });
-    res.meta.transformDiagnostics?.reports.forEach((diagnostic) => {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
-    });
-}

@@ -234,10 +234,12 @@ export class ProjectRunner {
     }
 
     public getBuildAsset(assetPath: string) {
-        return nodeFs.readFileSync(
-            join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
-            'utf-8'
-        );
+        return nodeFs
+            .readFileSync(
+                join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
+                'utf-8'
+            )
+            .toString();
     }
 
     public getBuildAssets(): Assets {
@@ -251,7 +253,7 @@ export class ProjectRunner {
                     return nodeFs.readFileSync(this.distPath, 'utf8');
                 },
                 get emitted() {
-                    return nodeFs.existsSync(join(this.distPath, normalize(assetPath)));
+                    return nodeFs.existsSync(this.distPath);
                 },
             };
             return acc;
@@ -276,6 +278,23 @@ export class ProjectRunner {
                 (_module.exports = typeof factory === 'function' ? factory() : factory)
         );
         return _module.exports;
+    }
+
+    getChunksModulesNames() {
+        const compilation = this.stats!.compilation;
+        const chunkByName: any = {};
+        compilation.chunks.forEach((chunk) => {
+            const names = [];
+            const modules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
+                chunk,
+                'javascript'
+            );
+            for (const module of modules) {
+                names.push(module.identifier().split(/[\\/]/).slice(-2).join('/'));
+            }
+            chunkByName[chunk.name] = names;
+        });
+        return chunkByName;
     }
 
     public async closeAllPages() {

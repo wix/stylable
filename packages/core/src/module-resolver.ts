@@ -9,9 +9,10 @@ const resolverContext = {};
 
 export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any): ModuleResolver {
     const eResolver = ResolverFactory.createResolver({
-        useSyncFileSystemCalls: true,
-        fileSystem,
         ...resolveOptions,
+        useSyncFileSystemCalls: true,
+        cache: false,
+        fileSystem,
     });
 
     return (directoryPath, request) =>

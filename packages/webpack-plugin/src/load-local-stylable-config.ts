@@ -9,7 +9,7 @@ export function loadLocalStylableConfig(
     | {
           webpackPlugin?: (options: Required<Options>, compiler: Compiler) => Required<Options>;
       } {
-    const path = findConfig('stylable.config', { cwd: context });
+    const path = findConfig('stylable.config.js', { cwd: context });
     let config;
     if (path) {
         try {

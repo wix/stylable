@@ -98,16 +98,19 @@ export function stylesheet(host: Host) {
 
 export function injectStyles(host: Host) {
     function stylableRuntime(namespace: string, css: string, depth: number): void {
+        if (typeof document === 'undefined') {
+            return;
+        }
         var d = document;
         var head = d.head;
         var style = d.createElement('style');
-        style.dataset.depth = (depth as unknown) as string;
-        style.dataset.stNs = namespace;
+        style.setAttribute('st-depth', (depth as unknown) as string);
+        style.setAttribute('st-id', namespace);
         style.textContent = css;
-        var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(`style[data-st-ns]`);
+        var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(`style[st-id]`);
         for (var i = 0; i < loadedStyleElements.length; i++) {
             var styleElement = loadedStyleElements[i];
-            if (depth < Number(styleElement.dataset.depth)) {
+            if (depth < Number(styleElement.getAttribute('st-depth'))) {
                 head.insertBefore(style, styleElement);
                 return;
             }

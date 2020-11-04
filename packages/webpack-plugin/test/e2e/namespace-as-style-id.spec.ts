@@ -30,11 +30,10 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const res = await page.evaluate(() => {
             return {
-                id: (window as any).$id,
-                namespace: (window as any).$namespace,
+                gotStyleByNamespace: (window as any).gotStyleByNamespace,
             };
         });
 
-        expect(res.id).to.eql(res.namespace);
+        expect(res.gotStyleByNamespace, 'gotStyleByNamespace').to.eql(true);
     });
 });

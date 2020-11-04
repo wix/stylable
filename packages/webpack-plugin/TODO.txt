@@ -1,0 +1,13 @@
+why error order changed
+global-runtime.spec.ts
+
+Pending Optimizations: 
+    optimizations.spec.ts
+    simple-production-project.spec
+
+bootstrap: {
+    autoInit: false,
+},
+
+unsafe-mute-diagnostics.spec
+watched-project.spec

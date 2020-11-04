@@ -22,7 +22,7 @@ export function calcDepth(
   if (results) {
     return results;
   } else {
-    results = { id, depth: 0, deps: new Set() };
+    results = { id, depth: 1, deps: new Set() };
     visited.set(id, results);
   }
   const selfDepth = isStylableModule(start) ? 1 : 0;
@@ -39,7 +39,8 @@ export function calcDepth(
     );
     for (const module of dependedModules) {
       if (isSameResourceModule(start, module)) {
-        break;
+        // TODO;
+        continue;
       }
       handleStylableConnection(results, module, selfDepth);
     }

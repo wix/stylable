@@ -189,3 +189,16 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     }
     return isInUse;
 }
+
+export function getFileName(filename: string, data: Record<string, string>) {
+    return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
+        const [type, len] = inner.split(':');
+        const value = data[type];
+        if (value) {
+            const length = Number(len);
+            return !isNaN(length) ? value.slice(0, length) : value;
+        } else {
+            return fullMatch;
+        }
+    });
+}

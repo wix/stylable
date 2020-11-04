@@ -18,6 +18,7 @@ import {
     injectLoader,
     findIfStylableModuleUsed,
     createStaticCSS,
+    getFileName,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCSSOptimizationRules, injectCssModules } from './mini-css-support';
@@ -28,14 +29,18 @@ export interface Options {
     filename?: string;
     cssInjection?: 'js' | 'css' | 'mini-css';
     assetsMode?: 'url' | 'loader';
+    runtimeStylesheetId?: 'module' | 'namespace';
+    diagnosticsMode?: 'auto' | 'strict' | 'loose';
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
 }
 
 const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
-    filename: 'stylable.css',
+    filename: userOptions.filename ?? 'stylable.css',
     cssInjection: userOptions.cssInjection ?? (isProd ? 'css' : 'js'),
     assetsMode: userOptions.assetsMode ?? 'url',
     stylableConfig: userOptions.stylableConfig ?? ((config: StylableConfig) => config),
+    runtimeStylesheetId: userOptions.runtimeStylesheetId ?? (isProd ? 'namespace' : 'module'),
+    diagnosticsMode: userOptions.diagnosticsMode ?? 'auto',
 });
 
 export class StylableWebpackPlugin {
@@ -90,11 +95,15 @@ export class StylableWebpackPlugin {
         if (this.stylable) {
             return;
         }
+        let fileSystem = compiler.inputFileSystem as any;
+        while (fileSystem.fileSystem) {
+            fileSystem = fileSystem.fileSystem;
+        }
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
                     projectRoot: compiler.context,
-                    fileSystem: compiler.inputFileSystem as any,
+                    fileSystem,
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: compiler.options.resolve as any,
                     timedCacheOptions: { useTimer: true, timeout: 1000 },
@@ -127,6 +136,7 @@ export class StylableWebpackPlugin {
                 if (isStylableModule(module)) {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
+                    loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         stylableModules.add(module);
                         const stylableBuildMeta: StylableBuildMeta = {
@@ -205,9 +215,9 @@ export class StylableWebpackPlugin {
                         cssSource
                     );
 
-                    const cssBundleFilename = compilation.getPath(this.options.filename, {
+                    const cssBundleFilename = getFileName(this.options.filename, {
                         hash: compilation.hash,
-                        contentHash,
+                        contenthash: contentHash,
                     });
 
                     compilation.entrypoints.forEach((entryPoint) => {
@@ -241,7 +251,11 @@ export class StylableWebpackPlugin {
         dependencyFactories.set(StylableRuntimeDependency, normalModuleFactory);
         dependencyTemplates.set(
             StylableRuntimeDependency,
-            new InjectDependencyTemplate(staticPublicPath, assetsModules)
+            new InjectDependencyTemplate(
+                staticPublicPath,
+                assetsModules,
+                this.options.runtimeStylesheetId
+            )
         );
         dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);
         dependencyTemplates.set(CSSURLDependency as any, new CSSURLDependencyTemplate());

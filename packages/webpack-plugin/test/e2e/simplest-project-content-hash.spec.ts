@@ -18,9 +18,8 @@ describe(`(${project})`, () => {
     );
 
     it('renders css', () => {
-        const assets =projectRunner.getBuildAssets();
-        const file = Object.keys(assets).find((path)=>path.match(/output\.\w+\.css/))!
+        const assets = projectRunner.getBuildAssets();
+        const file = Object.keys(assets).find((path) => path.match(/output\.\w+\.\w+\.css/))!;
         expect(assets[file].emitted, 'should emit file with content hash').to.equal(true);
     });
-
 });

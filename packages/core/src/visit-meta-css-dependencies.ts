@@ -1,6 +1,6 @@
 import { StylableMeta, StylableTransformer } from '@stylable/core';
 
-export function addMetaDependencies(
+export function visitMetaCSSDependencies(
     meta: StylableMeta,
     onMetaDependency: (meta: StylableMeta) => void,
     transformer: StylableTransformer,
@@ -14,7 +14,7 @@ export function addMetaDependencies(
         const res = transformer.resolver.resolveImported(imported, '');
         if (res?._kind === 'css') {
             onMetaDependency(res.meta);
-            addMetaDependencies(res.meta, onMetaDependency, transformer, visited);
+            visitMetaCSSDependencies(res.meta, onMetaDependency, transformer, visited);
         }
     }
 }
