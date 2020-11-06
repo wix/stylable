@@ -7403,13 +7403,13 @@ posix-character-classes@^0.1.0:
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
   integrity sha1-AerA/jta9xoqbAL+q7jB/vfgDqs=
 
-postcss-js@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/postcss-js/-/postcss-js-3.0.1.tgz#e467efdce80ca02e072c60b42e0b35ad2f950a94"
-  integrity sha512-m1DgECmEbOK9JhGkdctaP9ZRVheJuEnkk2eb/d3K+5uN10C3S004Ng6Hat4Aha7PsLt824x0xwrT7rVwGRVLHg==
+postcss-js@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/postcss-js/-/postcss-js-3.0.3.tgz#2f0bd370a2e8599d45439f6970403b5873abda33"
+  integrity sha512-gWnoWQXKFw65Hk/mi2+WTQTHdPD5UJdDXZmX073EY/B3BWnYjO4F4t0VneTCnCGQ5E5GsCdMkzPaTXwl3r5dJw==
   dependencies:
     camelcase-css "^2.0.1"
-    postcss "^8.1.0"
+    postcss "^8.1.6"
 
 postcss-modules-extract-imports@^3.0.0:
   version "3.0.0"
