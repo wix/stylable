@@ -26,10 +26,7 @@ module.exports = {
         test: /\.st\.css$/i,
         use: [
           stylableLoaders.runtime(),
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: { reloadAll: true },
-          },
+          MiniCssExtractPlugin.loader,
           stylableLoaders.transform(),
         ],
       },
