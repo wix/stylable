@@ -20,8 +20,8 @@
 import { StylableDOMUtil } from '@stylable/dom-test-kit';
 import style from './my-component.st.css';
 
-const domUtil = new StylableDOMUtil(style);
-const partElement = domUtil.select(style.part);
+const domUtil = new StylableDOMUtil(style, document.body);
+const partElement = domUtil.select('.part');
 
 domUtil.hasStyleState(partElement, 'loading');
 ```

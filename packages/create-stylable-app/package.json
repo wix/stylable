@@ -1,6 +1,6 @@
 {
   "name": "create-stylable-app",
-  "version": "3.11.1",
+  "version": "3.11.5",
   "description": "Quickly create a Stylable application",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -10,6 +10,7 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
+    "test": "tsc -p template/ts-react-webpack --noEmit",
     "prepack": "yarn build"
   },
   "dependencies": {

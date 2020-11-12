@@ -10,3 +10,6 @@ updates:
       - dependency-name: '@types/node'
         versions:
           - '>=11'
+      - dependency-name: 'enhanced-resolve'
+        versions:
+          - '>=5'

@@ -178,7 +178,7 @@ function createMixinRootFromCSSResolve(
     const namedArgs = mix.mixin.options as Record<string, string>;
 
     if (mix.mixin.partial) {
-        filterPartialMixinDecl(mixinRoot, Object.keys(namedArgs));
+        filterPartialMixinDecl(meta, mixinRoot, Object.keys(namedArgs));
     }
 
     const resolvedArgs = resolveArgumentsValue(
@@ -309,7 +309,7 @@ function handleLocalClassMixin(
     );
 
     if (isPartial) {
-        filterPartialMixinDecl(mixinRoot, overrideKeys);
+        filterPartialMixinDecl(meta, mixinRoot, overrideKeys);
     }
 
     transformer.transformAst(
@@ -343,16 +343,44 @@ function getMixinDeclaration(rule: postcss.Rule): postcss.Declaration | undefine
         }) as postcss.Declaration)
     );
 }
+const partialsOnly = ({ mixin: { partial } }: RefedMixin): boolean => {
+    return !!partial;
+};
+const nonPartials = ({ mixin: { partial } }: RefedMixin): boolean => {
+    return !partial;
+};
 
-function filterPartialMixinDecl(mixinRoot: postcss.Root, overrideKeys: string[]) {
-    const regexp = new RegExp(`value\\((\\s*${overrideKeys.join('\\s*)|(\\s*')}\\s*)\\)`);
+/** we assume that mixinRoot is freshly created nodes from the ast */
+function filterPartialMixinDecl(
+    meta: StylableMeta,
+    mixinRoot: postcss.Root,
+    overrideKeys: string[]
+) {
+    let regexp: RegExp;
+    const overrideSet = new Set(overrideKeys);
+    let size;
+    do {
+        size = overrideSet.size;
+        regexp = new RegExp(`value\\((\\s*${Array.from(overrideSet).join('\\s*)|(\\s*')}\\s*)\\)`);
+        for (const { text, name } of meta.vars) {
+            if (!overrideSet.has(name) && text.match(regexp)) {
+                overrideSet.add(name);
+            }
+        }
+    } while (overrideSet.size !== size);
 
     mixinRoot.walkDecls((decl) => {
         if (!decl.value.match(regexp)) {
-            const parent = decl.parent; // ref the parent before remove
+            const parent = decl.parent as SRule; // ref the parent before remove
             decl.remove();
             if (parent?.nodes?.length === 0) {
                 parent.remove();
+            } else if (parent) {
+                if (decl.prop === valueMapping.mixin) {
+                    parent.mixins = parent.mixins!.filter(partialsOnly);
+                } else if (decl.prop === valueMapping.partialMixin) {
+                    parent.mixins = parent.mixins!.filter(nonPartials);
+                }
             }
         }
     });
