@@ -59,14 +59,14 @@ export function stylesheet(host: Host) {
     function style(namespace: string) {
         const classNames = [];
 
-        for (let i = 0; i < arguments.length; i++) {
+        for (let i = 1; i < arguments.length; i++) {
             // eslint-disable-next-line prefer-rest-params
             var item = arguments[i];
 
             if (item) {
                 if (typeof item === 'string') {
                     classNames[classNames.length] = item;
-                } else if (i === 1) {
+                } else if (i === 2) {
                     for (var stateName in item) {
                         var stateValue = item[stateName];
                         var stateClass = createStateClass(namespace, stateName, stateValue);
@@ -108,14 +108,27 @@ export function injectStyles(host: Host) {
         style.setAttribute('st-id', namespace);
         style.textContent = css;
         var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(`style[st-id]`);
+        var inserted = false;
         for (var i = 0; i < loadedStyleElements.length; i++) {
             var styleElement = loadedStyleElements[i];
-            if (depth < Number(styleElement.getAttribute('st-depth'))) {
+            var stId = styleElement.getAttribute('st-id');
+            var stDepth = Number(styleElement.getAttribute('st-depth'));
+            if (stId === namespace) {
+                if (stDepth === depth) {
+                    head.replaceChild(style, styleElement);
+                    return;
+                } else {
+                    styleElement.parentElement!.removeChild(styleElement);
+                }
+            }
+            if (!inserted && depth < stDepth) {
                 head.insertBefore(style, styleElement);
-                return;
+                inserted = true;
             }
         }
-        head.append(style);
+        if (!inserted) {
+            head.append(style);
+        }
     }
     host.sti = stylableRuntime;
 }

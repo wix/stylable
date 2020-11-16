@@ -9,3 +9,4 @@ MiniCSS test
 
 shortNamespace webpack 4 fix.
  
+watch mode
