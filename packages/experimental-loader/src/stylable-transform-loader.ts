@@ -88,7 +88,7 @@ const stylableLoader: Loader = function (content) {
     visitMetaCSSDependencies(
         meta,
         ({ source }) => this.addDependency(source),
-        stylable.createTransformer()
+        stylable.resolver
     );
 
     if (exportsOnly) {

@@ -1057,6 +1057,38 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
 
+            it('should warn with multiple selector', () => {
+                expectWarnings(
+                    `
+                    |.x, $button$| {}
+                `,
+                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                );
+            });
+
+            it('should not warn if same chunk is scoped', () => {
+                expectWarnings(
+                    `
+                    |$button$.root| {}
+                `,
+                    []
+                );
+            });
+
+            it('should not warn when using imported elements (classes) with scoping in the same chunk', () => {
+                expectWarnings(
+                    `
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: Blah;
+                    }
+
+                    |.$Blah$.root| {}
+                `,
+                    []
+                );
+            });
+
             it('should warn when using imported element with no root scoping', () => {
                 expectWarnings(
                     `

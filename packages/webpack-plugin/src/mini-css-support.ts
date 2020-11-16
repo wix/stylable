@@ -62,7 +62,7 @@ export function injectCssModules(
             for (const chunk of compilation.chunkGraph.getModuleChunksIterable(module)) {
                 const [chunkGroup] = chunk.groupsIterable;
                 compilation.chunkGraph.connectChunkAndModule(chunk, cssModule);
-                chunkGroup.setModulePostOrderIndex(cssModule, module.buildMeta.stylable.cssDepth);
+                chunkGroup.setModulePostOrderIndex(cssModule, module.buildMeta.stylable.depth);
             }
         }
     });

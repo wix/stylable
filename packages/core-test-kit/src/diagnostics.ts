@@ -51,6 +51,9 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
 
     res.diagnostics.reports.forEach((report, i) => {
         const expectedWarning = warnings[i];
+        if (!expectedWarning) {
+            return;
+        }
         if (expectedWarning.skip) {
             return;
         }

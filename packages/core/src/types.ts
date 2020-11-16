@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import { Box } from './custom-values';
 import { StylableMeta } from './stylable-meta';
-import { StylableResults } from './stylable-transformer';
+import { StylableExports, StylableResults } from './stylable-transformer';
 
 export type PartialObject<T> = Partial<T> & object;
 export type CSSObject = any & object;
@@ -27,15 +27,31 @@ export interface StateParsedValue {
     arguments: StateArguments;
 }
 
+export interface OptimizeConfig {
+    removeComments?: boolean;
+    removeStylableDirectives?: boolean;
+    removeUnusedComponents?: boolean;
+    classNameOptimizations?: boolean;
+    removeEmptyNodes?: boolean;
+    shortNamespaces?: boolean;
+}
+
 export interface IStylableOptimizer {
-    classNameOptimizer: IStylableClassNameOptimizer;
-    namespaceOptimizer: IStylableNamespaceOptimizer;
     minifyCSS(css: string): string;
     optimize(
-        config: object,
+        config: OptimizeConfig,
         stylableResult: StylableResults,
         usageMapping: Record<string, boolean>,
         delimiter?: string
+    ): void;
+    getNamespace(namespace: string): string;
+    optimizeAst(
+        config: OptimizeConfig,
+        outputAst: postcss.Root,
+        usageMapping: Record<string, boolean>,
+        delimiter: string | undefined,
+        jsExports: StylableExports,
+        globals: Record<string, boolean>
     ): void;
     removeStylableDirectives(root: postcss.Root, shouldComment: boolean): void;
 }

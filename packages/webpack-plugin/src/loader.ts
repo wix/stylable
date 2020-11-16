@@ -1,20 +1,33 @@
-import { getImports } from './loader-utils';
+import { addBuildDependencies, getImports } from './loader-utils';
 import { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core';
 
 export default function (this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(source, this.resourcePath);
 
-    const { urls, imports } = getImports(meta, this.stylable.projectRoot, this.assetsMode);
+    const { urls, imports, cssDepth, buildDependencies, unUsedImports } = getImports(
+        this.stylable,
+        meta,
+        this.stylable.projectRoot,
+        this.assetsMode
+    );
 
-    this.flagStylableModule({ css: meta.outputAst!.toString(), urls });
-
+    this.flagStylableModule({
+        css: meta.outputAst!.toString(),
+        globals: meta.globals,
+        exports,
+        namespace: meta.namespace,
+        urls,
+        cssDepth,
+        unUsedImports
+    });
+    addBuildDependencies(this, buildDependencies);
     emitDiagnostics(this, meta, this.diagnosticsMode);
 
     return `
 ${imports.join('\n')}
-export const namespace = ${JSON.stringify(meta.namespace)};
-export const classes = ${JSON.stringify(exports.classes)}; 
+export const namespace = {__namespace__:true};
+export const classes = {__classes__:true};
 export const keyframes = ${JSON.stringify(exports.keyframes)}; 
 export const stVars = ${JSON.stringify(exports.stVars)}; 
 export const vars = ${JSON.stringify(exports.vars)}; 

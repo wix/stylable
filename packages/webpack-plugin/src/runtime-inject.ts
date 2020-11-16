@@ -14,6 +14,7 @@ import {
     extractFilenameFromAssetModule,
     replaceCSSAssetPlaceholders,
     isLoadedWithKnownAssetLoader,
+    getStylableBuildMeta,
 } from './plugin-utils';
 import { RuntimeTemplate, StylableBuildMeta } from './types';
 const makeSerializable = require('webpack/lib/util/makeSerializable');
@@ -53,12 +54,13 @@ export class InjectDependencyTemplate {
         source: sources.ReplaceSource,
         { module, runtimeRequirements, runtimeTemplate }: DependencyTemplateContext
     ) {
-        if (!module.buildMeta.stylable.isUsed) {
+        const stylableBuildMeta = getStylableBuildMeta(module);
+        if (!stylableBuildMeta.isUsed) {
             return;
         }
-        if (module.buildMeta.stylable.cssInjection === 'js') {
+        if (stylableBuildMeta.cssInjection === 'js') {
             const css = replaceCSSAssetPlaceholders(
-                module.buildMeta.stylable,
+                stylableBuildMeta,
                 this.staticPublicPath,
                 (resourcePath) => {
                     const assetModule = this.assetsModules.get(resourcePath);
@@ -85,12 +87,16 @@ export class InjectDependencyTemplate {
             source.insert(
                 source.size(),
                 `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
-                    module.buildMeta.stylable.cssDepth
+                    stylableBuildMeta.depth
                 });`,
                 StylableRuntimeDependency.name
             );
             runtimeRequirements.add(StylableRuntimeInject.name);
         }
+
+        replacePlaceholderExport(source, `{__classes__:true}`, stylableBuildMeta.exports.classes);
+        replacePlaceholderExport(source, `{__namespace__:true}`, stylableBuildMeta.namespace);
+
         runtimeRequirements.add(StylableRuntimeStylesheet.name);
     }
 }
@@ -120,6 +126,23 @@ export class LoadCSS extends RuntimeModule {
     generate() {
         return `${RuntimeGlobals.ensureChunkHandlers}.stcss = ()=>{/*load css for chunk*/}`;
     }
+}
+
+function replacePlaceholderExport(
+    source: sources.ReplaceSource,
+    replacementPoint: string,
+    value: string | Record<string, string>
+) {
+    const i = source.source().indexOf(replacementPoint);
+    if (!i) {
+        throw new Error(`missing ${replacementPoint} from stylable loader source`);
+    }
+    source.replace(
+        i,
+        i + replacementPoint.length - 1,
+        JSON.stringify(value),
+        `${replacementPoint} optimizations`
+    );
 }
 
 export function injectRuntimeModules(name: string, compilation: Compilation) {

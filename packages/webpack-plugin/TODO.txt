@@ -1,13 +1,11 @@
-why error order changed
-global-runtime.spec.ts
 
-Pending Optimizations: 
-    optimizations.spec.ts
-    simple-production-project.spec
+global-runtime.spec.ts // maybe sep
 
-bootstrap: {
-    autoInit: false,
-},
 
 unsafe-mute-diagnostics.spec
-watched-project.spec
+
+MiniCSS test
+
+
+shortNamespace webpack 4 fix.
+ 

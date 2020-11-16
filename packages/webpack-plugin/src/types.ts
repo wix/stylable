@@ -1,22 +1,32 @@
-import { Stylable } from '@stylable/core';
+import { Stylable, StylableExports } from '@stylable/core';
 import { LoaderContext } from 'typings/webpack5';
 import { Compilation, Compiler, Dependency } from 'webpack';
 
 export interface StylableBuildMeta {
     css: string;
+    exports: StylableExports;
     urls: string[];
+    // stylableImports: { request: string; hasOwnSideEffects: boolean }[];
+    depth: number;
     cssDepth: number;
     cssInjection: 'js' | 'css' | 'mini-css';
+    namespace: string;
     isUsed: undefined | boolean;
+    globals: Record<string, boolean>;
+    unUsedImports: string[];
 }
 
-export type LoaderData = Pick<StylableBuildMeta, 'css' | 'urls'>;
+export type LoaderData = Pick<
+    StylableBuildMeta,
+    'css' | 'urls' | 'cssDepth' | 'exports' | 'namespace' | 'globals' | 'unUsedImports'
+>;
 
 export interface StylableLoaderContext extends LoaderContext {
     resourcePath: string;
     stylable: Stylable;
     assetsMode: 'loader' | 'url';
     diagnosticsMode: 'auto' | 'strict' | 'loose';
+
     flagStylableModule: (loaderData: LoaderData) => void;
 }
 

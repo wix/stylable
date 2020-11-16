@@ -1,12 +1,12 @@
 import { join } from 'path';
 import { Compilation, Compiler, Module, NormalModule } from 'webpack';
+import { UnusedDependency } from './stcss-dependency';
 import { StylableBuildMeta, webpackCreateHash, webpackOutputOptions } from './types';
 const { makePathsRelative } = require('webpack/lib/util/identifier');
-
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
     map = (item: T): O => (item as unknown) as O,
-    filter = (item: O) => item !== undefined && item !== null
+    filter = (item: O): item is NonNullable<O> => item !== undefined && item !== null
 ) {
     const s = new Set();
     for (const item of iter) {
@@ -82,7 +82,7 @@ export function getAssetOutputPath(
     const fullHash = /** @type {string} */ hash.digest(runtimeTemplate.outputOptions.hashDigest);
     const contentHash = fullHash.slice(0, runtimeTemplate.outputOptions.hashDigestLength);
     module.buildInfo.fullContentHash = fullHash;
-    const { path: filename, info } = compilation.getAssetPathWithInfo(assetModuleFilename as any, {
+    const { path: filename } = compilation.getAssetPathWithInfo(assetModuleFilename as any, {
         module,
         runtime,
         filename: makePathsRelative(
@@ -142,7 +142,7 @@ export function createStaticCSS(
 ) {
     const cssChunks = Array.from(stylableModules)
         .filter((m) => m.buildMeta.stylable.isUsed !== false)
-        .sort((m1, m2) => m1.buildMeta.stylable.cssDepth - m2.buildMeta.stylable.cssDepth)
+        .sort((m1, m2) => m1.buildMeta.stylable.depth - m2.buildMeta.stylable.depth)
         .map((m) =>
             replaceCSSAssetPlaceholders(m.buildMeta.stylable, staticPublicPath, (resourcePath) => {
                 const assetModule = assetsModules.get(resourcePath);
@@ -160,12 +160,27 @@ export function createStaticCSS(
     return cssChunks;
 }
 
+export function getStylableBuildMeta(module: Module): StylableBuildMeta {
+    const meta = module.buildMeta.stylable;
+    if (!meta) {
+        throw new Error('Stylable module does not contains build meta');
+    }
+    return meta;
+}
+
 export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     const { chunkGraph, moduleGraph } = compilation;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
-        ({ resolvedOriginModule }) => resolvedOriginModule
+        ({ resolvedOriginModule, dependency }) =>
+            dependency instanceof UnusedDependency ? undefined : resolvedOriginModule
     );
+
+    // TODO: check if this optimization is good.
+    // const inChunks = chunkGraph.getNumberOfModuleChunks(m)
+    // if(inChunks === 0) {
+    //     debugger
+    // }
 
     let isInUse = false;
     for (const cm of inConnections) {

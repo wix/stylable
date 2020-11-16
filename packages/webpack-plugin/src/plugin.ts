@@ -1,4 +1,4 @@
-import { Stylable, StylableConfig, packageNamespaceFactory } from '@stylable/core';
+import { Stylable, StylableConfig, packageNamespaceFactory, OptimizeConfig } from '@stylable/core';
 import { dirname, relative } from 'path';
 import decache from 'decache';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
@@ -19,11 +19,19 @@ import {
     findIfStylableModuleUsed,
     createStaticCSS,
     getFileName,
+    getStylableBuildMeta,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCSSOptimizationRules, injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadLocalStylableConfig } from './load-local-stylable-config';
+import { UnusedDependency, UnusedDependencyTemplate } from './stcss-dependency';
+import { StylableOptimizer } from '@stylable/optimizer';
+import { parse } from 'postcss';
+
+type OptimizeOptions = OptimizeConfig & {
+    minify: boolean;
+};
 
 export interface Options {
     filename?: string;
@@ -31,8 +39,19 @@ export interface Options {
     assetsMode?: 'url' | 'loader';
     runtimeStylesheetId?: 'module' | 'namespace';
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    optimize?: OptimizeOptions;
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
 }
+
+const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
+    removeUnusedComponents: true,
+    removeComments: isProd ? true : false,
+    removeStylableDirectives: true,
+    classNameOptimizations: isProd ? true : false,
+    shortNamespaces: isProd ? true : false,
+    removeEmptyNodes: isProd ? true : false,
+    minify: isProd ? true : false,
+});
 
 const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
     filename: userOptions.filename ?? 'stylable.css',
@@ -41,6 +60,9 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
     stylableConfig: userOptions.stylableConfig ?? ((config: StylableConfig) => config),
     runtimeStylesheetId: userOptions.runtimeStylesheetId ?? (isProd ? 'namespace' : 'module'),
     diagnosticsMode: userOptions.diagnosticsMode ?? 'auto',
+    optimize: userOptions.optimize
+        ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
+        : defaultOptimizations(isProd),
 });
 
 export class StylableWebpackPlugin {
@@ -118,6 +140,7 @@ export class StylableWebpackPlugin {
                         decache(id);
                         return require(id);
                     },
+                    optimizer: new StylableOptimizer(),
                 },
                 compiler
             )
@@ -140,13 +163,18 @@ export class StylableWebpackPlugin {
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         stylableModules.add(module);
                         const stylableBuildMeta: StylableBuildMeta = {
-                            cssDepth: 0,
+                            depth: 0,
                             cssInjection: this.options.cssInjection,
                             isUsed: undefined,
                             ...loaderData,
                         };
                         module.buildMeta.stylable = stylableBuildMeta;
                         module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
+
+                        for (const request of stylableBuildMeta.unUsedImports) {
+                            module.addDependency(new UnusedDependency(request) as Dependency);
+                        }
+
                         if (this.options.assetsMode === 'url') {
                             for (const resourcePath of stylableBuildMeta.urls) {
                                 module.addDependency(
@@ -169,8 +197,11 @@ export class StylableWebpackPlugin {
             for (const module of stylableModules) {
                 const connections = moduleGraph.getOutgoingConnections(module);
                 for (const connection of connections) {
+                    // if (connection.dependency instanceof UnusedDependency) {
+                    //     connection.setActive(false);
+                    // }
                     if (stylableModules.has(connection.module as NormalModule)) {
-                        connection.setActive(false);
+                        // connection.setActive(false);
                     } else if (
                         !isAssetModule(connection.module) &&
                         isLoadedWithKnownAssetLoader(connection.module)
@@ -184,7 +215,7 @@ export class StylableWebpackPlugin {
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             for (const module of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
-                module.buildMeta.stylable.cssDepth = calcDepth(module, moduleGraph).depth;
+                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph).depth;
             }
         });
     }
@@ -195,6 +226,47 @@ export class StylableWebpackPlugin {
         assetsModules: Map<string, NormalModule>
     ) {
         const { runtimeTemplate } = compilation;
+
+        compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
+            const optimizer = this.stylable.optimizer!;
+            const optimizeOptions = this.options.optimize;
+            const { usageMapping, namespaceMapping } = Array.from(stylableModules).reduce<{
+                usageMapping: Record<string, boolean>;
+                namespaceMapping: Record<string, string>;
+            }>(
+                (acc, module) => {
+                    const { namespace, isUsed } = getStylableBuildMeta(module);
+                    acc.usageMapping[namespace] = isUsed ?? true;
+                    acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
+                    return acc;
+                },
+                { usageMapping: {}, namespaceMapping: {} }
+            );
+
+            for (const module of stylableModules) {
+                const buildMeta = getStylableBuildMeta(module);
+                const { css, exports, globals } = buildMeta;
+
+                const ast = parse(css);
+
+                optimizer.optimizeAst(
+                    optimizeOptions,
+                    ast,
+                    usageMapping,
+                    this.stylable.delimiter,
+                    exports,
+                    globals
+                );
+
+                buildMeta.css = optimizeOptions.minify
+                    ? optimizer.minifyCSS(ast.toString())
+                    : ast.toString();
+
+                if (optimizeOptions.shortNamespaces) {
+                    buildMeta.namespace = namespaceMapping[buildMeta.namespace];
+                }
+            }
+        });
 
         if (this.options.cssInjection === 'css') {
             compilation.hooks.processAssets.tap(
@@ -259,5 +331,8 @@ export class StylableWebpackPlugin {
         );
         dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);
         dependencyTemplates.set(CSSURLDependency as any, new CSSURLDependencyTemplate());
+
+        dependencyFactories.set(UnusedDependency as DependencyClass, normalModuleFactory);
+        dependencyTemplates.set(UnusedDependency as any, new UnusedDependencyTemplate());
     }
 }

@@ -1,0 +1,27 @@
+:import {
+    -st-from: "./not-included.st.css";
+    -st-named: x;
+}
+
+:import {
+    -st-from: "./included-via-compse.st.css";
+    -st-named: x as x1;
+}
+
+:import {
+    -st-from: "./not-included-explicit-global.st.css";
+    -st-default: WithGlobals;
+}
+
+:import {
+    -st-from: "./included-via-keyframes.st.css";
+    -st-named: keyframes(x);
+}
+
+WithGlobals {}
+
+.root {
+    -st-mixin: x;
+    -st-extends: x1;
+    animation-name: x;
+}
