@@ -39,6 +39,7 @@ export interface Options {
     assetsMode?: 'url' | 'loader';
     runtimeStylesheetId?: 'module' | 'namespace';
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    runtimeId?: string;
     optimize?: OptimizeOptions;
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
 }
@@ -60,6 +61,7 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
     stylableConfig: userOptions.stylableConfig ?? ((config: StylableConfig) => config),
     runtimeStylesheetId: userOptions.runtimeStylesheetId ?? (isProd ? 'namespace' : 'module'),
     diagnosticsMode: userOptions.diagnosticsMode ?? 'auto',
+    runtimeId: userOptions.runtimeId ?? '0',
     optimize: userOptions.optimize
         ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
         : defaultOptimizations(isProd),
@@ -215,7 +217,7 @@ export class StylableWebpackPlugin {
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             for (const module of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
-                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph).depth;
+                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph);
             }
         });
     }
@@ -326,7 +328,8 @@ export class StylableWebpackPlugin {
             new InjectDependencyTemplate(
                 staticPublicPath,
                 assetsModules,
-                this.options.runtimeStylesheetId
+                this.options.runtimeStylesheetId,
+                this.options.runtimeId
             )
         );
         dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);

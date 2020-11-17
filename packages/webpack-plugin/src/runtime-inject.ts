@@ -47,7 +47,8 @@ export class InjectDependencyTemplate {
     constructor(
         private staticPublicPath: string,
         private assetsModules: Map<string, NormalModule>,
-        private runtimeStylesheetId: 'namespace' | 'module'
+        private runtimeStylesheetId: 'namespace' | 'module',
+        private runtimeId: string
     ) {}
     apply(
         _dependency: StylableRuntimeDependency,
@@ -88,7 +89,7 @@ export class InjectDependencyTemplate {
                 source.size(),
                 `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
                     stylableBuildMeta.depth
-                });`,
+                }, ${JSON.stringify(this.runtimeId)});`,
                 StylableRuntimeDependency.name
             );
             runtimeRequirements.add(StylableRuntimeInject.name);

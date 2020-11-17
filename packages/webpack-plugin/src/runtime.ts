@@ -97,7 +97,12 @@ export function stylesheet(host: Host) {
 }
 
 export function injectStyles(host: Host) {
-    function stylableRuntime(namespace: string, css: string, depth: number): void {
+    function stylableRuntime(
+        namespace: string,
+        css: string,
+        depth: number,
+        runtimeId: string
+    ): void {
         if (typeof document === 'undefined') {
             return;
         }
@@ -106,8 +111,11 @@ export function injectStyles(host: Host) {
         var style = d.createElement('style');
         style.setAttribute('st-depth', (depth as unknown) as string);
         style.setAttribute('st-id', namespace);
+        style.setAttribute('st-runtime', runtimeId);
         style.textContent = css;
-        var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(`style[st-id]`);
+        var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(
+            `style[st-runtime="${runtimeId}"]`
+        );
         var inserted = false;
         for (var i = 0; i < loadedStyleElements.length; i++) {
             var styleElement = loadedStyleElements[i];

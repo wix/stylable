@@ -11,7 +11,7 @@ module.exports = {
     },
     plugins: [
         new StylableWebpackPlugin({
-            runtimeMode: 'shared',
+            runtimeId: 'test',
         }),
         new HtmlWebpackPlugin(),
     ],

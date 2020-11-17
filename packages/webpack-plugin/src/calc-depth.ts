@@ -1,10 +1,6 @@
+import { join, parse } from 'path';
 import { Module, ModuleGraph, NormalModule } from 'webpack';
-import {
-    isStylableModule,
-    isAssetModule,
-    uniqueFilterMap,
-    isSameResourceModule,
-} from './plugin-utils';
+import { isStylableModule, uniqueFilterMap } from './plugin-utils';
 
 export interface DepthResults {
     id: string;
@@ -13,74 +9,59 @@ export interface DepthResults {
 }
 
 export function calcDepth(
-    start: NormalModule,
+    start: Module,
     moduleGraph: ModuleGraph,
-    visited = new Map<string, DepthResults>(),
-    up = true
-) {
-    const id = start.resource;
-    let results = visited.get(id);
-    if (results) {
-        return results;
-    } else {
-        const depth = start.buildMeta?.stylable?.cssDepth ?? 0;
-        results = { id, depth: depth + 1, deps: new Set() };
-        visited.set(id, results);
-    }
-    const selfDepth = up && isStylableModule(start) ? 1 : 0;
+    path: Module[] = [],
+    cache = new Map<Module, number>()
+): number {
+    let cssDepth = 0;
 
-    const inConnections = uniqueFilterMap(
-        moduleGraph.getIncomingConnections(start),
-        ({ originModule }) => originModule
+    if (cache.has(start)) {
+        return cache.get(start)!;
+    }
+
+    if (path.includes(start)) {
+        return 0;
+    }
+
+    path = path.concat(start);
+
+    const dependencies = uniqueFilterMap(
+        moduleGraph.getOutgoingConnections(start),
+        ({ module }) => module
     );
 
+    for (const dependencyModule of dependencies) {
+        cssDepth = Math.max(cssDepth, calcDepth(dependencyModule, moduleGraph, path, cache));
+    }
+
     if (isStylableModule(start)) {
-        for (const connectionModule of inConnections) {
-            if(isStylableModule(connectionModule)){
-                continue;
-            }
-            const dependedModules = uniqueFilterMap(connectionModule.dependencies, (dep) =>
-                moduleGraph.getModule(dep)
-            );
-            for (const module of dependedModules) {
-                if (isSameResourceModule(start, module)) {
-                    // TODO;
-                    continue;
+        const viewPath = start.resource.replace(/\.st\.css$/, '');
+
+        const parentViews = uniqueFilterMap(
+            moduleGraph.getIncomingConnections(start),
+            ({ originModule }) => {
+                const { dir, name } = parse((originModule as NormalModule).resource || '');
+                if (!isStylableModule(originModule) && join(dir, name) === viewPath) {
+                    return originModule as NormalModule;
                 }
-                handleStylableConnection(results, module, selfDepth);
+                return null;
             }
-        }
-    } else {
-
-        const outConnections = uniqueFilterMap(
-            moduleGraph.getOutgoingConnections(start),
-            ({ module }) => module
         );
-    
-        for (const connectionModule of outConnections) {
-            handleStylableConnection(results, connectionModule, selfDepth);
+        const parentViewsList = [...parentViews];
+        if (parentViewsList.length > 1) {
+            throw new Error(
+                `Stylable Component Conflict:\n ${
+                    start.resource
+                } has multiple components entries [${parentViewsList.map((m) => m.resource)}] `
+            );
+        } else if (parentViewsList.length === 1) {
+            cssDepth = Math.max(cssDepth, calcDepth(parentViewsList[0], moduleGraph, path, cache));
         }
+        cssDepth++;
     }
 
-    return results;
+    cache.set(start, cssDepth);
 
-    function handleStylableConnection(
-        results: DepthResults,
-        connectionModule: Module,
-        selfDepth: number
-    ) {
-        if (isAssetModule(connectionModule)) {
-            return;
-        }
-        const depResult = calcDepth(connectionModule as NormalModule, moduleGraph, visited, false);
-        if (depResult.id !== results.id) {
-            results.depth = Math.max(results.depth, depResult.depth + selfDepth);
-        }
-        if (isStylableModule(connectionModule)) {
-            results.deps.add(connectionModule);
-            for (const dep of depResult.deps) {
-                results.deps.add(dep);
-            }
-        }
-    }
+    return cssDepth;
 }

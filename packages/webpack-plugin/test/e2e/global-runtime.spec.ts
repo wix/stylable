@@ -9,7 +9,7 @@ describe(`(${project})`, () => {
         {
             projectDir: join(__dirname, 'projects', project),
             puppeteerOptions: {
-                // headless: false
+                // headless: false,
             },
         },
         before,
@@ -19,11 +19,15 @@ describe(`(${project})`, () => {
 
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
+        const styleElements = await page.evaluate(
+            browserFunctions.getStyleElementsMetadata,
+            false,
+            true
+        );
 
         expect(styleElements).to.eql([
-            { id: './src/index.st.css', depth: '1' },
-            { id: './src/index2.st.css', depth: '1' },
+            { id: './src/index.st.css', depth: '1', runtime: 'test' },
+            { id: './src/index2.st.css', depth: '1', runtime: 'test' },
         ]);
     });
 
@@ -31,7 +35,6 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const res = await page.evaluate(() => {
             return {
-                runtimes: (window as any).__stylable_renderer_global_counter,
                 index: getComputedStyle(document.querySelector('[data-name="index"]')!)
                     .backgroundColor,
                 index2: getComputedStyle(document.querySelector('[data-name="index2"]')!)
@@ -40,7 +43,6 @@ describe(`(${project})`, () => {
         });
 
         expect(res).to.eql({
-            runtimes: 1,
             index: 'rgb(255, 0, 0)',
             index2: 'rgb(0, 128, 0)',
         });

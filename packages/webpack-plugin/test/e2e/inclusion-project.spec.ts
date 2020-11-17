@@ -24,8 +24,8 @@ describe(`(${project})`, () => {
         expect(styleElements).to.eql([
             { id: './src/included-via-compse.st.css', depth: '1' },
             { id: './src/included-via-keyframes.st.css', depth: '1' },
+            { id: './src/included-via-js.st.css', depth: '1' },
             { id: './src/index.st.css', depth: '2' },
-            { id: './src/included-via-js.st.css', depth: '2' },
         ]);
     });
 });
