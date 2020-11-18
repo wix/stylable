@@ -27,10 +27,7 @@ export default {
                 test: /\.st\.css$/i,
                 use: [
                     stylableLoaders.runtime(),
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: { esModule: true, reloadAll: true },
-                    },
+                    MiniCssExtractPlugin.loader,
                     stylableLoaders.transform({
                         resolveNamespace: noCollisionNamespace(),
                     }),

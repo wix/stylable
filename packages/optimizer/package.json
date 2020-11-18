@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@stylable/core": "^3.11.5",
-    "csso": "^4.1.0",
-    "postcss": "^8.1.4"
+    "csso": "^4.1.1",
+    "postcss": "^8.1.7"
   },
   "files": [
     "cjs",

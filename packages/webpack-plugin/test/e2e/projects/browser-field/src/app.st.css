@@ -1,0 +1,11 @@
+:import {
+    -st-from: "test-components/index.st.css";
+    -st-named: Button;
+}
+
+.root {
+    -st-extends: Button;
+
+    /* cjs = red, esm = green, here = gold */
+    background-color: gold; 
+}
