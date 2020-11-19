@@ -1,5 +1,5 @@
 import { Stylable, StylableConfig } from '@stylable/core';
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 
 const stylableInstancesCache = new WeakMap<Compiler, Map<Stylable, StylableConfig>>();
 

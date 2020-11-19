@@ -217,3 +217,9 @@ export function getFileName(filename: string, data: Record<string, string>) {
         }
     });
 }
+
+export function getSortedModules(stylableModules: Set<NormalModule>) {
+    return Array.from(stylableModules).sort((m1, m2) => {
+        return getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
+    });
+}

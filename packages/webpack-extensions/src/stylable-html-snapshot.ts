@@ -1,44 +1,47 @@
 import { basename, join } from 'path';
-import webpack from 'webpack';
-import { RawSource } from 'webpack-sources';
+import { sources } from 'webpack';
+import { Module, Compiler, Compilation } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 
-import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
+import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
+
+const { RawSource } = sources;
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
-    render: (componentModule: any, component: any) => string | false;
+    render: (componentModule: Module, component: any) => string | false;
     /**
      * By default, gets component logic related to the stylesheet being imported. E.g., you
      * have stylesheet `a.st.css`, which is imported by a few files. By default, this method
      * will attempt to find `a.tsx`.
      */
-    getLogicModule?: (stylableModule: any) => any;
+    getLogicModule?: typeof getCSSViewModules;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private getLogicModule: (stylableModule: any) => any;
+    private getLogicModule: typeof getCSSViewModules;
 
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.getLogicModule = options.getLogicModule || getCSSComponentLogicModule;
+        this.getLogicModule = options.getLogicModule || getCSSViewModules;
     }
-    public apply(compiler: webpack.Compiler) {
+    public apply(compiler: Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', (compilation) => {
             compilation.hooks.additionalAssets.tapPromise('HTMLSnapshotPlugin', async () => {
-                const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
+                const stylableModules = uniqueFilterMap(compilation.modules, (m) => {
+                    return isStylableModule(m) ? m : null;
+                });
                 for (const module of stylableModules) {
                     await this.snapShotStylableModule(compilation, module);
                 }
             });
         });
     }
-    public async snapShotStylableModule(compilation: webpack.compilation.Compilation, module: any) {
-        const component = this.getLogicModule(module);
-
+    public async snapShotStylableModule(compilation: Compilation, module: any) {
+        const component = this.getLogicModule(module, compilation.moduleGraph);
         if (!component) {
             return;
         }
@@ -58,12 +61,12 @@ export class HTMLSnapshotPlugin {
         );
 
         if (!compilation.assets[targetPath]) {
-            compilation.assets[targetPath] = new RawSource(html);
+            compilation.assets[targetPath] = new RawSource(html, false);
         } else {
             compilation.errors.push(
                 new Error(
                     `Duplicate component name ${component.resource} target path ${targetPath}`
-                )
+                ) as any // TODO: webpack types 
             );
         }
     }

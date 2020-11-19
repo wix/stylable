@@ -1,13 +1,15 @@
-import { basename } from 'path';
-import { EOL } from 'os';
-import webpack from 'webpack';
-import { RawSource } from 'webpack-sources';
 import { Stylable } from '@stylable/core';
 import { resolveNamespace } from '@stylable/node';
 import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
-import { ComponentsMetadata } from './component-metadata-builder';
-import { Metadata, Manifest } from './types';
+import { basename } from 'path';
+import { EOL } from 'os';
+import { sources } from 'webpack';
+import type { Compilation, Compiler, Module } from 'webpack';
+import type { ComponentsMetadata } from './component-metadata-builder';
+import type { Metadata, Manifest } from './types';
+
+const { RawSource } = sources;
 
 export interface Options {
     outputType: 'manifest' | 'fs-manifest';
@@ -46,14 +48,15 @@ export class StylableManifestPlugin {
     constructor(options: Partial<Options> = {}) {
         this.options = Object.assign({}, defaultOptions, options);
     }
-    public apply(compiler: webpack.Compiler) {
+    public apply(compiler: Compiler) {
         const stylable = Stylable.create({
             projectRoot: compiler.context,
             fileSystem: {
-                readlinkSync: (filePath) => compiler.inputFileSystem.readlinkSync(filePath),
-                statSync: (filePath) => compiler.inputFileSystem.statSync(filePath),
+                readlinkSync: (filePath) =>
+                    (compiler.inputFileSystem as any).readlinkSync(filePath),
+                statSync: (filePath) => (compiler.inputFileSystem as any).statSync(filePath),
                 readFileSync: (filePath) =>
-                    compiler.inputFileSystem.readFileSync(filePath).toString(),
+                    (compiler.inputFileSystem as any).readFileSync(filePath).toString(),
             },
             mode: compiler.options.mode === 'development' ? 'development' : 'production',
             resolveOptions: compiler.options.resolve as any /* make stylable types better */,
@@ -64,17 +67,17 @@ export class StylableManifestPlugin {
         let metadata: Array<{ compId: string; metadata: Metadata }>;
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) => {
             compilation.hooks.optimizeModules.tap(this.constructor.name, (modules) => {
-                metadata = this.createModulesMetadata(compiler, stylable, modules);
+                metadata = this.createModulesMetadata(compiler, stylable, [...modules]);
             });
-        });
 
-        compiler.hooks.emit.tap(this.constructor.name, (compilation) =>
-            this.emitManifest(metadata, compilation)
-        );
+            compilation.hooks.processAssets.tap(this.constructor.name, () =>
+                this.emitManifest(metadata, compilation)
+            );
+        });
     }
     private emitManifest(
         metadata: { compId: string; metadata: Metadata }[],
-        compilation: webpack.compilation.Compilation
+        compilation: Compilation
     ) {
         const manifest = metadata.reduce<Manifest>(
             (manifest, { compId, metadata }) => {
@@ -83,7 +86,7 @@ export class StylableManifestPlugin {
                 manifest.componentsEntries[compId] = metadata.entry;
                 manifest.componentsIndex += `:import{-st-from: ${JSON.stringify(
                     metadata.entry
-                )};-st-default: ${compId};} ${compId}{}${EOL}`;
+                )};-st-default: ${compId};} .root ${compId}{}${EOL}`;
                 return manifest;
             },
             {
@@ -106,24 +109,17 @@ export class StylableManifestPlugin {
         }
     }
 
-    private emitJSONAsset(
-        manifest: Manifest | ComponentsMetadata,
-        compilation: webpack.compilation.Compilation
-    ) {
+    private emitJSONAsset(manifest: Manifest | ComponentsMetadata, compilation: Compilation) {
         const manifestContent = JSON.stringify(manifest);
 
         const contentHash = hashContent(manifestContent, this.options.contentHashLength);
-
-        compilation.assets[this.options.getOutputFileName(contentHash)] = new RawSource(
-            manifestContent
+        compilation.emitAsset(
+            this.options.getOutputFileName(contentHash),
+            new RawSource(manifestContent, false)
         );
     }
 
-    private createModulesMetadata(
-        compiler: webpack.compiler.Compiler,
-        stylable: Stylable,
-        modules: webpack.compilation.Module[]
-    ) {
+    private createModulesMetadata(compiler: Compiler, stylable: Stylable, modules: Module[]) {
         const stylableComps = modules.filter((module) => {
             const resource = (module as any).resource;
             return resource && this.options.filterComponents(resource);
@@ -131,7 +127,7 @@ export class StylableManifestPlugin {
 
         return stylableComps.map((module) => {
             const resource = (module as any).resource;
-            const source = compiler.inputFileSystem.readFileSync(resource).toString();
+            const source = (compiler.inputFileSystem as any).readFileSync(resource).toString();
 
             return {
                 compId: this.options.getCompId(resource),

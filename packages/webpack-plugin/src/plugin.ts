@@ -20,6 +20,7 @@ import {
     createStaticCSS,
     getFileName,
     getStylableBuildMeta,
+    getSortedModules,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCSSOptimizationRules, injectCssModules } from './mini-css-support';
@@ -30,7 +31,7 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import { parse } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
-    minify: boolean;
+    minify?: boolean;
 };
 
 export interface Options {
@@ -46,12 +47,12 @@ export interface Options {
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     removeUnusedComponents: true,
-    removeComments: isProd ? true : false,
     removeStylableDirectives: true,
-    classNameOptimizations: isProd ? true : false,
-    shortNamespaces: isProd ? true : false,
-    removeEmptyNodes: isProd ? true : false,
-    minify: isProd ? true : false,
+    removeComments: isProd,
+    classNameOptimizations: isProd,
+    shortNamespaces: isProd,
+    removeEmptyNodes: isProd,
+    minify: isProd,
 });
 
 const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
@@ -70,12 +71,14 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
 export class StylableWebpackPlugin {
     stylable!: Stylable;
     options!: Required<Options>;
-    constructor(private userOptions: Options = {}) {}
+    constructor(private userOptions: Options = {}, private injectConfigHooks = true) {}
     apply(compiler: Compiler) {
-        injectLoader(compiler);
-        injectCSSOptimizationRules(compiler);
+        if (this.injectConfigHooks) {
+            injectLoader(compiler);
+            injectCSSOptimizationRules(compiler);
+        }
 
-        compiler.hooks.thisCompilation.tap(
+        compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
                 const staticPublicPath = getStaticPublicPath(compilation);
@@ -220,19 +223,12 @@ export class StylableWebpackPlugin {
                 module.buildMeta.stylable.depth = calcDepth(module, moduleGraph);
             }
         });
-    }
-    private chunksIntegration(
-        compilation: Compilation,
-        staticPublicPath: string,
-        stylableModules: Set<NormalModule>,
-        assetsModules: Map<string, NormalModule>
-    ) {
-        const { runtimeTemplate } = compilation;
 
         compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
             const optimizer = this.stylable.optimizer!;
             const optimizeOptions = this.options.optimize;
-            const { usageMapping, namespaceMapping } = Array.from(stylableModules).reduce<{
+            const sortedModules = getSortedModules(stylableModules);
+            const { usageMapping, namespaceMapping } = sortedModules.reduce<{
                 usageMapping: Record<string, boolean>;
                 namespaceMapping: Record<string, string>;
             }>(
@@ -245,7 +241,7 @@ export class StylableWebpackPlugin {
                 { usageMapping: {}, namespaceMapping: {} }
             );
 
-            for (const module of stylableModules) {
+            for (const module of sortedModules) {
                 const buildMeta = getStylableBuildMeta(module);
                 const { css, exports, globals } = buildMeta;
 
@@ -269,49 +265,59 @@ export class StylableWebpackPlugin {
                 }
             }
         });
+    }
+    private chunksIntegration(
+        compilation: Compilation,
+        staticPublicPath: string,
+        stylableModules: Set<NormalModule>,
+        assetsModules: Map<string, NormalModule>
+    ) {
+        const { runtimeTemplate } = compilation;
 
-        if (this.options.cssInjection === 'css') {
-            compilation.hooks.processAssets.tap(
-                {
-                    name: StylableWebpackPlugin.name,
-                    stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
-                },
-                () => {
-                    const cssSource = createStaticCSS(
-                        staticPublicPath,
-                        stylableModules,
-                        assetsModules
-                    ).join('\n');
+        if (!compilation.compiler.isChild()) {
+            if (this.options.cssInjection === 'css') {
+                compilation.hooks.processAssets.tap(
+                    {
+                        name: StylableWebpackPlugin.name,
+                        stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+                    },
+                    () => {
+                        const cssSource = createStaticCSS(
+                            staticPublicPath,
+                            stylableModules,
+                            assetsModules
+                        ).join('\n');
 
-                    const contentHash = outputOptionsAwareHashContent(
-                        util.createHash,
-                        runtimeTemplate.outputOptions,
-                        cssSource
-                    );
+                        const contentHash = outputOptionsAwareHashContent(
+                            util.createHash,
+                            runtimeTemplate.outputOptions,
+                            cssSource
+                        );
 
-                    const cssBundleFilename = getFileName(this.options.filename, {
-                        hash: compilation.hash,
-                        contenthash: contentHash,
-                    });
+                        const cssBundleFilename = getFileName(this.options.filename, {
+                            hash: compilation.hash,
+                            contenthash: contentHash,
+                        });
 
-                    compilation.entrypoints.forEach((entryPoint) => {
-                        entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
-                    });
+                        compilation.entrypoints.forEach((entryPoint) => {
+                            entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                        });
 
-                    compilation.emitAsset(
-                        cssBundleFilename,
-                        new sources.RawSource(cssSource, false)
-                    );
-                }
-            );
-        } else if (this.options.cssInjection === 'mini-css') {
-            injectCssModules(
-                compilation,
-                staticPublicPath,
-                util.createHash,
-                stylableModules,
-                assetsModules
-            );
+                        compilation.emitAsset(
+                            cssBundleFilename,
+                            new sources.RawSource(cssSource, false)
+                        );
+                    }
+                );
+            } else if (this.options.cssInjection === 'mini-css') {
+                injectCssModules(
+                    compilation,
+                    staticPublicPath,
+                    util.createHash,
+                    stylableModules,
+                    assetsModules
+                );
+            }
         }
     }
     private setupDependencies(

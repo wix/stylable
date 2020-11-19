@@ -1,8 +1,9 @@
 import { Stylable, StylableMeta, processNamespace } from '@stylable/core';
-import { loader as webpackLoader } from 'webpack';
 import findConfig from 'find-config';
-import { getOptions } from 'loader-utils';
+import type { LoaderContext } from 'typings/webpack5';
 import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';
+
+const { getOptions } = require('loader-utils');
 
 let stylable: Stylable;
 const getLocalConfig = loadLocalConfigLoader();
@@ -19,7 +20,7 @@ const defaultOptions: LoaderOptions = {
 
 export const metadataLoaderLocation = __filename;
 
-export default function metadataLoader(this: webpackLoader.LoaderContext, content: string) {
+export default function metadataLoader(this: LoaderContext, content: string) {
     const { resolveNamespace, exposeNamespaceMapping }: LoaderOptions = {
         ...defaultOptions,
         ...getOptions(this),
@@ -67,7 +68,7 @@ function loadLocalConfigLoader() {
 }
 
 function addWebpackWatchDependencies(
-    ctx: webpackLoader.LoaderContext,
+    ctx: LoaderContext,
     usedMeta: Map<StylableMeta, ResolvedImport[]>
 ) {
     for (const [meta] of usedMeta) {

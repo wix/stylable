@@ -1,12 +1,20 @@
 import { findFiles } from '@stylable/node';
 import { dirname, join } from 'path';
-import webpack from 'webpack';
-import { RawSource } from 'webpack-sources';
+import type { Compilation, Compiler } from 'webpack';
+import { sources } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
-import { getCSSComponentLogicModule } from '@stylable/webpack-plugin';
+import {
+    getCSSViewModules,
+    getStylableBuildMeta,
+    isStylableModule,
+    uniqueFilterMap,
+    StylableWebpackPlugin,
+} from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
+
+const RawSource = sources.RawSource;
 
 export interface MetadataOptions {
     name: string;
@@ -25,16 +33,16 @@ export interface MetadataOptions {
 
 export class StylableMetadataPlugin {
     constructor(private options: MetadataOptions) {}
-    public apply(compiler: webpack.Compiler) {
+    public apply(compiler: Compiler) {
         compiler.hooks.thisCompilation.tap('StylableMetadataPlugin', (compilation) => {
-            compilation.hooks.additionalAssets.tapPromise('StylableMetadataPlugin', async () => {
+            compilation.hooks.processAssets.tapPromise('StylableMetadataPlugin', async () => {
                 await this.createMetadataAssets(compilation);
             });
         });
     }
-    public loadComponentConfig(compilation: webpack.compilation.Compilation, component: any) {
+    public loadComponentConfig(compilation: Compilation, component: any) {
         return this.loadJSON<ComponentConfig>(
-            compilation.inputFileSystem,
+            compilation.inputFileSystem as any,
             component.resource.replace(
                 /\.[^.]+$/,
                 this.options.configExtension || '.component.json'
@@ -51,8 +59,10 @@ export class StylableMetadataPlugin {
             return null;
         }
     }
-    private async createMetadataAssets(compilation: webpack.compilation.Compilation) {
-        const stylableModules = compilation.modules.filter((m) => m.type === 'stylable');
+    private async createMetadataAssets(compilation: Compilation) {
+        const stylableModules = uniqueFilterMap(compilation.modules, (m) =>
+            isStylableModule(m) ? m : null
+        );
 
         const builder = new ComponentMetadataBuilder(
             this.options.context || compilation.compiler.options.context || process.cwd(),
@@ -61,16 +71,15 @@ export class StylableMetadataPlugin {
         );
 
         for (const module of stylableModules) {
-            const namespace = module.buildInfo.stylableMeta.namespace;
-            const depth = module.buildInfo.runtimeInfo.depth;
+            const { namespace, depth } = getStylableBuildMeta(module);
 
             builder.addSource(
                 module.resource,
-                compilation.inputFileSystem.readFileSync(module.resource).toString(),
+                (compilation.inputFileSystem as any).readFileSync(module.resource).toString(),
                 { namespace, depth }
             );
 
-            const component = getCSSComponentLogicModule(module);
+            const component = getCSSViewModules(module, compilation.moduleGraph);
             if (!component) {
                 continue;
             }
@@ -96,7 +105,8 @@ export class StylableMetadataPlugin {
                 const source = await compileAsEntry(
                     compilation,
                     component.context,
-                    component.resource
+                    component.resource,
+                    [new StylableWebpackPlugin({ cssInjection: 'js' }, false)]
                 );
 
                 const componentModule = exec(source, component.resource, component.context);
@@ -132,14 +142,14 @@ export class StylableMetadataPlugin {
                     ? `.${hashContent(fileContent, this.options.contentHashLength)}`
                     : ''
             }.metadata.json${!jsonMode ? '.js' : ''}`;
-            compilation.assets[fileName] = new RawSource(fileContent);
+            compilation.emitAsset(fileName, new RawSource(fileContent, false));
         }
     }
 
     private handleVariants(
         componentConfig: ComponentConfig,
         componentDir: string,
-        compilation: webpack.compilation.Compilation,
+        compilation: Compilation,
         builder: ComponentMetadataBuilder,
         namespace: any,
         depth: any
@@ -167,7 +177,9 @@ export class StylableMetadataPlugin {
                 const variantPath = join(variantsDir, name);
                 let content;
                 try {
-                    content = compilation.inputFileSystem.readFileSync(variantPath).toString();
+                    content = (compilation.inputFileSystem as any)
+                        .readFileSync(variantPath)
+                        .toString();
                 } catch (e) {
                     throw new Error(
                         `Error while reading variant: ${variantPath}\nOriginal Error:\n${e}`

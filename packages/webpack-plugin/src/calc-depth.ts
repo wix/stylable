@@ -9,25 +9,25 @@ export interface DepthResults {
 }
 
 export function calcDepth(
-    start: Module,
+    module: Module,
     moduleGraph: ModuleGraph,
     path: Module[] = [],
     cache = new Map<Module, number>()
 ): number {
     let cssDepth = 0;
 
-    if (cache.has(start)) {
-        return cache.get(start)!;
+    if (cache.has(module)) {
+        return cache.get(module)!;
     }
 
-    if (path.includes(start)) {
+    if (path.includes(module)) {
         return 0;
     }
 
-    path = path.concat(start);
+    path = path.concat(module);
 
     const dependencies = uniqueFilterMap(
-        moduleGraph.getOutgoingConnections(start),
+        moduleGraph.getOutgoingConnections(module),
         ({ module }) => module
     );
 
@@ -35,33 +35,46 @@ export function calcDepth(
         cssDepth = Math.max(cssDepth, calcDepth(dependencyModule, moduleGraph, path, cache));
     }
 
-    if (isStylableModule(start)) {
-        const viewPath = start.resource.replace(/\.st\.css$/, '');
+    if (isStylableModule(module)) {
+        const view = getCSSViewModules(module, moduleGraph);
+        if (view) {
+            cssDepth = Math.max(cssDepth, calcDepth(view, moduleGraph, path, cache));
+        }
+        cssDepth++;
+    }
+
+    cache.set(module, cssDepth);
+
+    return cssDepth;
+}
+
+export function getCSSViewModules(
+    module: Module,
+    moduleGraph: ModuleGraph
+): NormalModule | undefined {
+    if (isStylableModule(module)) {
+        const viewPath = module.resource.replace(/\.st\.css$/, '');
 
         const parentViews = uniqueFilterMap(
-            moduleGraph.getIncomingConnections(start),
+            moduleGraph.getIncomingConnections(module),
             ({ originModule }) => {
-                const { dir, name } = parse((originModule as NormalModule).resource || '');
+                const { dir, name } = parse((originModule as NormalModule)?.resource || '');
                 if (!isStylableModule(originModule) && join(dir, name) === viewPath) {
                     return originModule as NormalModule;
                 }
                 return null;
             }
         );
+
         const parentViewsList = [...parentViews];
         if (parentViewsList.length > 1) {
             throw new Error(
                 `Stylable Component Conflict:\n ${
-                    start.resource
+                    module.resource
                 } has multiple components entries [${parentViewsList.map((m) => m.resource)}] `
             );
-        } else if (parentViewsList.length === 1) {
-            cssDepth = Math.max(cssDepth, calcDepth(parentViewsList[0], moduleGraph, path, cache));
         }
-        cssDepth++;
+        return parentViewsList[0];
     }
-
-    cache.set(start, cssDepth);
-
-    return cssDepth;
+    return undefined;
 }

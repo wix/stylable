@@ -54,14 +54,14 @@ describe(`(${project})`, () => {
                 },
                 '/test/node_modules/test-components/button.st.css': {
                     metadata: {
-                        namespace: 'o2',
+                        namespace: 'o3',
                         depth: 1,
                     },
                     content: null,
                 },
                 '/test/node_modules/test-components/gallery.st.css': {
                     metadata: {
-                        namespace: 'o3',
+                        namespace: 'o2',
                         depth: 2,
                     },
                     content: null,
@@ -111,7 +111,7 @@ describe(`(${project})`, () => {
         );
 
         it('contains metadata file with content hash (length 4)', () => {
-            const file = Object.keys(projectRunnerJs.stats?.compilation.assets).find((fileName) =>
+            const file = Object.keys(projectRunnerJs.getBuildAssets()).find((fileName) =>
                 fileName.match(/test\.(\w{4})\.metadata\.json/)
             );
             const s = projectRunnerJs.getBuildAsset(file!);

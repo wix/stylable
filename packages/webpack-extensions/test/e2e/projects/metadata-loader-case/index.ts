@@ -1,3 +1,3 @@
-import content from 'stylable-metadata!./index.st.css';
+import content from '!!stylable-metadata!./index.st.css';
 
 export default content;

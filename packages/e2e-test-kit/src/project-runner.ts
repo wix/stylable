@@ -3,7 +3,7 @@ import { join, normalize } from 'path';
 import puppeteer from 'puppeteer';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
-import webpack from 'webpack';
+import webpack, { Stats } from 'webpack';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync } from 'fs';
@@ -115,9 +115,18 @@ export class ProjectRunner {
         const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        compiler.run = compiler.run.bind(compiler);
-        const promisedRun = promisify(compiler.run);
-        this.stats = (await promisedRun())!;
+        // compiler.run = compiler.run.bind(compiler);
+        const run = () => {
+            return new Promise<Stats>((res, rej) => {
+                compiler.run((err, stats) => {
+                    if (err) {
+                        rej(err);
+                    }
+                    res(stats);
+                });
+            });
+        };
+        this.stats = await run();
         if (this.throwOnBuildError && this.stats.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }

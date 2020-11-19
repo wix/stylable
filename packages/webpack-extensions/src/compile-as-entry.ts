@@ -1,65 +1,73 @@
-import webpack from 'webpack';
+import { Compilation, Compiler } from 'webpack';
 
 const NativeModule = require('module');
 const NodeTemplatePlugin = require('webpack/lib/node/NodeTemplatePlugin');
 const NodeTargetPlugin = require('webpack/lib/node/NodeTargetPlugin');
 const LibraryTemplatePlugin = require('webpack/lib/LibraryTemplatePlugin');
-const SingleEntryPlugin = require('webpack/lib/SingleEntryPlugin');
+const EntryPlugin = require('webpack/lib/EntryPlugin');
 const LimitChunkCountPlugin = require('webpack/lib/optimize/LimitChunkCountPlugin');
 
 export function compileAsEntry(
-    compilation: any,
+    compilation: Compilation,
     context: string,
-    request: string
+    request: string,
+    plugins: { apply(compiler: Compiler): void }[] = []
 ): Promise<string> {
     const pluginName = 'compileAsEntry';
     const outputOptions = {
         filename: '*',
     };
     const childCompiler = compilation.createChildCompiler(
-        `${'pluginName'} ${request}`,
-        outputOptions
+        `${pluginName} ${request}`,
+        outputOptions,
+        []
+        // [
+        //     new NodeTemplatePlugin(outputOptions),
+        //     new LibraryTemplatePlugin(null, 'commonjs2'),
+        //     new NodeTargetPlugin(),
+        //     new LimitChunkCountPlugin({ maxChunks: 1 }),
+        //     new EntryPlugin(context, request, {}),
+        //     ...plugins,
+        // ]
     );
+
     new NodeTemplatePlugin(outputOptions).apply(childCompiler);
     new LibraryTemplatePlugin(null, 'commonjs2').apply(childCompiler);
     new NodeTargetPlugin().apply(childCompiler);
-    new SingleEntryPlugin(context, request, pluginName).apply(childCompiler);
+    new EntryPlugin(context, `!!${request}`, pluginName).apply(childCompiler);
     new LimitChunkCountPlugin({ maxChunks: 1 }).apply(childCompiler);
+    plugins.forEach((p) => p.apply(childCompiler));
+
     let source: string;
-    childCompiler.hooks.afterCompile.tap(
-        pluginName,
-        (compilation: webpack.compilation.Compilation) => {
-            source = compilation.assets['*'] && compilation.assets['*'].source();
+
+    childCompiler.hooks.compilation.tap(pluginName, (compilation) => {
+        compilation.hooks.afterProcessAssets.tap(pluginName, () => {
+            source = compilation.assets['*'].source().toString();
+
             // Remove all chunk assets
             compilation.chunks.forEach((chunk) => {
-                chunk.files.forEach((file: string) => {
-                    delete compilation.assets[file];
+                chunk.files.forEach((file) => {
+                    compilation.deleteAsset(file);
                 });
             });
-        }
-    );
+        });
+    });
 
     return new Promise((res, rej) => {
-        childCompiler.runAsChild(
-            (
-                err: Error,
-                _entries: webpack.compilation.Chunk[],
-                compilation: webpack.compilation.Compilation
-            ) => {
-                if (err) {
-                    return rej(err);
-                }
-
-                if (compilation.errors.length > 0) {
-                    return rej(compilation.errors[0]);
-                }
-
-                if (!source) {
-                    throw new Error('');
-                }
-                res(source);
+        childCompiler.runAsChild((err, _entries, compilation) => {
+            if (err) {
+                return rej(err);
             }
-        );
+
+            if (compilation?.errors?.length) {
+                return rej(compilation.errors[0]);
+            }
+
+            if (!source) {
+                throw new Error('child compiler has no source output');
+            }
+            res(source);
+        });
     });
 }
 

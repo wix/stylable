@@ -33,6 +33,7 @@ export interface Loader extends Function {
 }
 
 export interface LoaderContext {
+    getOptions: () => any;
     /**
      * Loader API version. Currently 2.
      * This is useful for providing backwards compatibility.

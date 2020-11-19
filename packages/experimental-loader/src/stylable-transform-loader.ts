@@ -1,11 +1,6 @@
 import postcss from 'postcss';
 import decache from 'decache';
-import {
-    Stylable,
-    processNamespace,
-    emitDiagnostics,
-    visitMetaCSSDependencies,
-} from '@stylable/core';
+import { processNamespace, emitDiagnostics, visitMetaCSSDependencies } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
@@ -16,9 +11,7 @@ import type { LoaderContext, Loader } from 'typings/webpack5';
 const { urlParser } = require('css-loader/dist/plugins');
 const { getImportCode, getModuleCode, sort } = require('css-loader/dist/utils');
 const cssLoaderRuntimeApiPath = require.resolve('css-loader/dist/runtime/api');
-const { getOptions, isUrlRequest, stringifyRequest } = require('loader-utils');
-
-export let stylable: Stylable;
+const { isUrlRequest, stringifyRequest } = require('loader-utils');
 
 export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
@@ -67,11 +60,11 @@ const stylableLoader: Loader = function (content) {
 
     const { filterUrls, resolveNamespace, exportsOnly, diagnosticsMode }: LoaderOptions = {
         ...defaultOptions,
-        ...getOptions(this),
+        ...this.getOptions(),
     };
     const mode = this._compiler.options.mode === 'development' ? 'development' : 'production';
 
-    stylable = getStylable(this._compiler, {
+    const stylable = getStylable(this._compiler, {
         projectRoot: this.rootContext,
         fileSystem: this.fs,
         mode,
@@ -85,11 +78,7 @@ const stylableLoader: Loader = function (content) {
 
     emitDiagnostics(this, meta, diagnosticsMode);
 
-    visitMetaCSSDependencies(
-        meta,
-        ({ source }) => this.addDependency(source),
-        stylable.resolver
-    );
+    visitMetaCSSDependencies(meta, ({ source }) => this.addDependency(source), stylable.resolver);
 
     if (exportsOnly) {
         return callback(null, createRuntimeTargetCode(meta.namespace, exports));
