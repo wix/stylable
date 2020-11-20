@@ -122,7 +122,7 @@ export class ProjectRunner {
                     if (err) {
                         rej(err);
                     }
-                    res(stats);
+                    res(stats!);
                 });
             });
         };
@@ -327,7 +327,7 @@ export class ProjectRunner {
             this.log(`Server closed`);
         }
         if (this.watchingHandle) {
-            await new Promise<void>((res) => this.watchingHandle?.close(res));
+            await new Promise<void>((res) => this.watchingHandle?.close(() => res()));
             this.watchingHandle = null;
             this.log(`Watch closed`);
         }

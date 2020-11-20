@@ -8,3 +8,5 @@ MiniCSS test
 watch mode
 
 * remove RemoveUnusedCSSModules
+
+* move webpack types to ts file
