@@ -31,7 +31,7 @@ describe(`(${project})`, () => {
             /\.index\d+__root \{ color: red; font-size: 3em; z-index: 1; \}/
         );
 
-        const recompile = new Promise((res) => {
+        const recompile = new Promise<void>((res) => {
             projectRunner.compiler?.hooks.done.tap('Test', () => {
                 res();
             });
@@ -55,7 +55,7 @@ describe(`(${project})`, () => {
             join(projectRunner.projectDir, 'src', 'xxx.st.css')
         );
 
-        const recompile = new Promise((res) => {
+        const recompile = new Promise<void>((res) => {
             projectRunner.compiler?.hooks.done.tap('Test', () => {
                 res();
             });
