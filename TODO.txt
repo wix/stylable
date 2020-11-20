@@ -10,3 +10,5 @@ watch mode
 * remove RemoveUnusedCSSModules
 
 * move webpack types to ts file
+
+* fix child compiler

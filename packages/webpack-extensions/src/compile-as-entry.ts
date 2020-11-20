@@ -21,14 +21,6 @@ export function compileAsEntry(
         `${pluginName} ${request}`,
         outputOptions,
         []
-        // [
-        //     new NodeTemplatePlugin(outputOptions),
-        //     new LibraryTemplatePlugin(null, 'commonjs2'),
-        //     new NodeTargetPlugin(),
-        //     new LimitChunkCountPlugin({ maxChunks: 1 }),
-        //     new EntryPlugin(context, request, {}),
-        //     ...plugins,
-        // ]
     );
 
     new NodeTemplatePlugin(outputOptions).apply(childCompiler);
@@ -43,13 +35,11 @@ export function compileAsEntry(
     childCompiler.hooks.compilation.tap(pluginName, (compilation) => {
         compilation.hooks.afterProcessAssets.tap(pluginName, () => {
             source = compilation.assets['*'].source().toString();
-
-            // Remove all chunk assets
-            compilation.chunks.forEach((chunk) => {
-                chunk.files.forEach((file) => {
+            for (const chunk of compilation.chunks) {
+                for (const file of chunk.files) {
                     compilation.deleteAsset(file);
-                });
-            });
+                }
+            }
         });
     });
 

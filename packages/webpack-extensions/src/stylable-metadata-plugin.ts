@@ -10,7 +10,6 @@ import {
     getStylableBuildMeta,
     isStylableModule,
     uniqueFilterMap,
-    StylableWebpackPlugin,
 } from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
 
@@ -106,7 +105,7 @@ export class StylableMetadataPlugin {
                     compilation,
                     component.context,
                     component.resource,
-                    [new StylableWebpackPlugin({ cssInjection: 'js' }, false)]
+                    []
                 );
 
                 const componentModule = exec(source, component.resource, component.context);
