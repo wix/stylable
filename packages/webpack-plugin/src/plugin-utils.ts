@@ -223,3 +223,26 @@ export function getSortedModules(stylableModules: Set<NormalModule>) {
         return getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
     });
 }
+
+export function reportNamespaceCollision(
+    namespaceToFileMapping: Map<string, Set<string>>,
+    errors: Error[]
+) {
+    for (const [namespace, resources] of namespaceToFileMapping) {
+        if (resources.size > 1) {
+            errors.push(
+                new Error(
+                    `Duplicate namespace ${JSON.stringify(
+                        namespace
+                    )} found in multiple different resources:\n${Array.from(resources)
+                        .map((resource) => {
+                            return resource;
+                        })
+                        .join(
+                            '\n'
+                        )}\nThis issue indicates multiple versions of the same library in the compilation, or different paths importing the same stylesheet like: "esm" or "cjs".`
+                )
+            );
+        }
+    }
+}

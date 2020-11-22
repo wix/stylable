@@ -21,6 +21,7 @@ import {
     getFileName,
     getStylableBuildMeta,
     getSortedModules,
+    reportNamespaceCollision,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCSSOptimizationRules, injectCssModules } from './mini-css-support';
@@ -43,6 +44,9 @@ export interface Options {
     runtimeId?: string;
     optimize?: OptimizeOptions;
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
+    unsafeMuteDiagnostics?: {
+        DUPLICATE_MODULE_NAMESPACE?: boolean;
+    };
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -63,6 +67,7 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
     runtimeStylesheetId: userOptions.runtimeStylesheetId ?? (isProd ? 'namespace' : 'module'),
     diagnosticsMode: userOptions.diagnosticsMode ?? 'auto',
     runtimeId: userOptions.runtimeId ?? '0',
+    unsafeMuteDiagnostics: userOptions.unsafeMuteDiagnostics ?? {},
     optimize: userOptions.optimize
         ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
         : defaultOptimizations(isProd),
@@ -228,6 +233,7 @@ export class StylableWebpackPlugin {
             const optimizer = this.stylable.optimizer!;
             const optimizeOptions = this.options.optimize;
             const sortedModules = getSortedModules(stylableModules);
+            const namespaceToFileMapping = new Map<string, Set<string>>();
             const { usageMapping, namespaceMapping } = sortedModules.reduce<{
                 usageMapping: Record<string, boolean>;
                 namespaceMapping: Record<string, string>;
@@ -236,10 +242,19 @@ export class StylableWebpackPlugin {
                     const { namespace, isUsed } = getStylableBuildMeta(module);
                     acc.usageMapping[namespace] = isUsed ?? true;
                     acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
+                    if (namespaceToFileMapping.has(namespace)) {
+                        namespaceToFileMapping.get(namespace)!.add(module.resource);
+                    } else {
+                        namespaceToFileMapping.set(namespace, new Set([module.resource]));
+                    }
                     return acc;
                 },
                 { usageMapping: {}, namespaceMapping: {} }
             );
+
+            if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
+                reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
+            }
 
             for (const module of sortedModules) {
                 const buildMeta = getStylableBuildMeta(module);
