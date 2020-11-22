@@ -92,7 +92,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "repository": "git@github.com:wix/stylable.git",
   "author": "Wix.com",
