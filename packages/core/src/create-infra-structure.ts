@@ -20,7 +20,7 @@ export function createInfrastructure(
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
     resolveModule = createDefaultResolver(fileSystem, resolveOptions),
     createDiagnostics?: (from: string) => Diagnostics,
-    cssParser?: CssParser
+    cssParser: CssParser = safeParse
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
         if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
@@ -41,7 +41,7 @@ export function createInfrastructure(
         (from, content) => {
             const resolvedFrom = resolvePath(projectRoot, from);
             return process(
-                safeParse(content, { from: resolvedFrom }, cssParser),
+                cssParser(content, { from: resolvedFrom }),
                 createDiagnostics?.(resolvedFrom),
                 resolveNamespace
             );

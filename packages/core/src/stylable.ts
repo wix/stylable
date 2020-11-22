@@ -78,7 +78,7 @@ export class Stylable {
             useTimer: true,
         },
         protected resolveModule?: ModuleResolver,
-        protected cssParser?: CssParser
+        protected cssParser: CssParser = safeParse
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -117,7 +117,7 @@ export class Stylable {
         if (typeof meta === 'string') {
             // TODO: refactor to use fileProcessor
             // meta = this.fileProcessor.processContent(meta, resourcePath + '');
-            const root = safeParse(meta, { from: resourcePath }, this.cssParser);
+            const root = this.cssParser(meta, { from: resourcePath });
             meta = new StylableProcessor(undefined, this.resolveNamespace).process(root);
         }
         const transformer = this.createTransformer(options);
