@@ -88,7 +88,6 @@ export class Stylable {
             this.resolveNamespace,
             timedCacheOptions,
             resolveModule,
-            undefined,
             cssParser
         );
         this.resolvePath = resolvePath;
