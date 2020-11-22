@@ -1,6 +1,6 @@
 import { Stylable, StylableMeta, processNamespace } from '@stylable/core';
 import findConfig from 'find-config';
-import type { LoaderContext } from 'typings/webpack5';
+import type { LoaderContext } from '@stylable/core/webpack5';
 import { createMetadataForStylesheet, ResolvedImport } from './create-metadata-stylesheet';
 
 const { getOptions } = require('loader-utils');

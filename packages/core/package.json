@@ -32,7 +32,8 @@
     "cjs",
     "src",
     "test-utils.js",
-    "test-utils.d.ts"
+    "test-utils.d.ts",
+    "webpack5.d.ts"
   ],
   "engines": {
     "node": ">=12"

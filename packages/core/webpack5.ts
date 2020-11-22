@@ -1,3 +1,5 @@
+/* THIS FILE IS TEMPORARILY HERE UNTIL WEBPACK WILL EXPOSE IT'S TYPES PROPERLY */
+
 import type { RawSourceMap } from 'source-map';
 import type { Compiler, Module } from 'webpack';
 
@@ -283,8 +285,8 @@ export interface OptionObject {
     [key: string]: null | false | true | string;
 }
 
-export function stringifyRequest(loaderContext: LoaderContext, resource: string): string;
+export declare function stringifyRequest(loaderContext: LoaderContext, resource: string): string;
 
-export function isUrlRequest(url: string, root?: string): boolean;
+export declare function isUrlRequest(url: string, root?: string): boolean;
 
-export function getOptions(loaderContext: LoaderContext): Readonly<OptionObject>;
+export declare function getOptions(loaderContext: LoaderContext): Readonly<OptionObject>;

@@ -1,5 +1,5 @@
 import { Stylable, StylableExports } from '@stylable/core';
-import { LoaderContext } from 'typings/webpack5';
+import { LoaderContext } from '@stylable/core/webpack5';
 import { Compilation, Compiler, Dependency } from 'webpack';
 
 export interface StylableBuildMeta {
