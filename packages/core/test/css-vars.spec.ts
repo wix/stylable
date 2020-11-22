@@ -385,8 +385,7 @@ describe('css custom-properties (vars)', () => {
                 },
             });
 
-            const decl = (meta.outputAst!.nodes[0] as postcss.Rule)
-                .nodes[0] as postcss.Declaration;
+            const decl = (meta.outputAst!.nodes[0] as postcss.Rule).nodes[0] as postcss.Declaration;
 
             expect(meta.diagnostics.reports.length).to.equal(0);
             expect(meta.transformDiagnostics!.reports.length).to.equal(0);
@@ -630,6 +629,49 @@ describe('css custom-properties (vars)', () => {
                 expect(decl1.value).to.equal('green');
                 expect(decl2.prop).to.equal('--myVar2');
                 expect(decl2.value).to.equal('red');
+            });
+
+            it('should support any spacing between global variable definitions', () => {
+                const res = generateStylableResult({
+                    entry: `/entry.st.css`,
+                    files: {
+                        '/entry.st.css': {
+                            namespace: 'entry',
+                            content: `
+                            @st-global-custom-property --myVar1      ,--myVar2,
+                              --myVar3  ,  --myVar4  ;
+
+                            .root {
+                                --myVar1: 1;
+                                --myVar2: 2;
+                                --myVar3: 3;
+                                --myVar4: 4;
+                            }
+                            `,
+                        },
+                    },
+                });
+                expect(
+                    res.meta.diagnostics.reports,
+                    'no diagnostics reported for native states'
+                ).to.eql([]);
+
+                const decl1 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[0] as postcss.Declaration;
+                const decl2 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[1] as postcss.Declaration;
+                const decl3 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[2] as postcss.Declaration;
+                const decl4 = (res.meta.outputAst!.nodes[0] as postcss.Rule)
+                    .nodes[3] as postcss.Declaration;
+                expect(decl1.prop).to.equal('--myVar1');
+                expect(decl1.value).to.equal('1');
+                expect(decl2.prop).to.equal('--myVar2');
+                expect(decl2.value).to.equal('2');
+                expect(decl3.prop).to.equal('--myVar3');
+                expect(decl3.value).to.equal('3');
+                expect(decl4.prop).to.equal('--myVar4');
+                expect(decl4.value).to.equal('4');
             });
 
             it('mixed global and scoped var declarations', () => {

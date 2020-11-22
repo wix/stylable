@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core",
-  "version": "3.11.5",
+  "version": "3.11.7",
   "description": "CSS for Components",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -21,7 +21,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
     "murmurhash": "^2.0.0",
-    "postcss": "^8.1.8",
+    "postcss": "^8.1.9",
     "postcss-js": "^3.0.3",
     "postcss-nested": "^5.0.1",
     "postcss-safe-parser": "^5.0.2",
