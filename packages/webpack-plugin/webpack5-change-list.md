@@ -41,6 +41,7 @@ interface Options {
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
     runtimeId?: string;
     optimize?: OptimizeOptions;
+    optimizer?: StylableOptimizer;
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
@@ -55,7 +56,6 @@ interface OptimizeOptions {
     removeEmptyNodes?: boolean;
     shortNamespaces?: boolean;
     minify?: boolean;
-    optimizer?: StylableOptimizer;
 }
 
 ```

@@ -24,7 +24,7 @@ import {
     reportNamespaceCollision,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
-import { injectCSSOptimizationRules, injectCssModules } from './mini-css-support';
+import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadLocalStylableConfig } from './load-local-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './stcss-dependency';
@@ -33,7 +33,6 @@ import { parse } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
-    optimizer?: StylableOptimizer;
 };
 
 export interface Options {
@@ -44,6 +43,7 @@ export interface Options {
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
     runtimeId?: string;
     optimize?: OptimizeOptions;
+    optimizer?: StylableOptimizer;
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
@@ -58,7 +58,6 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     shortNamespaces: isProd,
     removeEmptyNodes: isProd,
     minify: isProd,
-    optimizer: new StylableOptimizer(),
 });
 
 const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
@@ -73,6 +72,7 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
     optimize: userOptions.optimize
         ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
         : defaultOptimizations(isProd),
+    optimizer: userOptions.optimizer ?? new StylableOptimizer(),
 });
 
 export class StylableWebpackPlugin {
@@ -82,8 +82,12 @@ export class StylableWebpackPlugin {
     apply(compiler: Compiler) {
         if (this.injectConfigHooks) {
             injectLoader(compiler);
-            injectCSSOptimizationRules(compiler);
         }
+
+        compiler.hooks.afterPlugins.tap(StylableWebpackPlugin.name, () => {
+            this.processOptions(compiler);
+            this.createStylable(compiler);
+        });
 
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
@@ -91,10 +95,6 @@ export class StylableWebpackPlugin {
                 const staticPublicPath = getStaticPublicPath(compilation);
                 const assetsModules = new Map<string, NormalModule>();
                 const stylableModules = new Set<NormalModule>();
-
-                this.processOptions(compiler);
-
-                this.createStylable(compiler);
 
                 this.modulesIntegration(compilation, stylableModules, assetsModules);
 
@@ -152,7 +152,7 @@ export class StylableWebpackPlugin {
                         decache(id);
                         return require(id);
                     },
-                    optimizer: this.options.optimize.optimizer,
+                    optimizer: this.options.optimizer,
                 },
                 compiler
             )
