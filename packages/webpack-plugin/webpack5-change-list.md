@@ -12,9 +12,9 @@ This did not allow webpack to optimize the usage of exports form the module.
 In webpack 5 Stylable modules uses `esm exports` and opt in to be fully optimized by webpack
 This means much smaller bundle size.
 
-2. smaller runtime size and memory usage.
+2. Smaller runtime size and memory usage.
 
-3. better of the shelf inclusion of necessary stylesheets in the build
+3. Better of the shelf inclusion of necessary stylesheets in the build
 
 Auto include imported @keyframes and compose (extending of classes) usage. 
 
@@ -22,7 +22,7 @@ Auto include imported @keyframes and compose (extending of classes) usage.
 
 Allow the plugin to emit css assets through `mini-css-extract-plugin` CSSModule mechanism. 
 
-5. better error reporting for duplicate namespaces
+5. Better error reporting for duplicate namespaces
 
 
 ## Braking changes.
@@ -46,6 +46,17 @@ interface Options {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
 }
+
+interface OptimizeOptions {
+    removeComments?: boolean;
+    removeStylableDirectives?: boolean;
+    removeUnusedComponents?: boolean;
+    classNameOptimizations?: boolean;
+    removeEmptyNodes?: boolean;
+    shortNamespaces?: boolean;
+    minify?: boolean;
+}
+
 ```
 
 * `filename` - Since the default Stylable extraction process does not aware of chunks and extract all the css to a single bundle 
