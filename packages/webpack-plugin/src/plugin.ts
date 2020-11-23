@@ -33,6 +33,7 @@ import { parse } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
+    optimizer?: StylableOptimizer;
 };
 
 export interface Options {
@@ -57,6 +58,7 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     shortNamespaces: isProd,
     removeEmptyNodes: isProd,
     minify: isProd,
+    optimizer: new StylableOptimizer(),
 });
 
 const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
@@ -150,7 +152,7 @@ export class StylableWebpackPlugin {
                         decache(id);
                         return require(id);
                     },
-                    optimizer: new StylableOptimizer(),
+                    optimizer: this.options.optimize.optimizer,
                 },
                 compiler
             )

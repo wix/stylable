@@ -55,6 +55,7 @@ interface OptimizeOptions {
     removeEmptyNodes?: boolean;
     shortNamespaces?: boolean;
     minify?: boolean;
+    optimizer?: StylableOptimizer;
 }
 
 ```
@@ -82,4 +83,10 @@ module.exports.webpackPlugin = function(currentConfig) {
 
 
 
+2. Optimizer
+
+Api has changed and now all optimization happens on target css. the main behavior change is that shortNamespaces is now operated on states classes inside the ast optimization and not during the process step. This means that the namespaces are now deterministic to the depth of the stylesheet.
+
+* Removed `ClassNameOptimizer` use optimizer.getClassName(className)
+* Removed `NamespaceNameOptimizer` use optimizer.getNamespace(namespace)
 

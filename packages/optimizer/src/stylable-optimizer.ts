@@ -40,6 +40,9 @@ export class StylableOptimizer implements IStylableOptimizer {
     public getNamespace(namespace: string) {
         return this.names.get(namespace, this.namespacePrefix);
     }
+    public getClassName(className: string) {
+        return this.names.get(className, this.classPrefix);
+    }
     public optimizeAst(
         config: OptimizeConfig,
         outputAst: Root,
@@ -103,7 +106,7 @@ export class StylableOptimizer implements IStylableOptimizer {
 
                 if (!isState) {
                     if (classNamespaceOptimizations) {
-                        node.name = this.names.get(node.name, this.classPrefix);
+                        node.name = this.getClassName(node.name);
                     } else if (shortNamespaces) {
                         const namespaceMatch = node.name.match(namespaceRegexp);
                         if (!namespaceMatch) {
@@ -159,7 +162,7 @@ export class StylableOptimizer implements IStylableOptimizer {
                     .split(' ')
                     .map((renderedNamed) => {
                         if (classNamespaceOptimizations) {
-                            return this.names.get(renderedNamed, this.classPrefix);
+                            return this.getClassName(renderedNamed);
                         } else if (shortNamespaces) {
                             const namespaceMatch = renderedNamed.match(namespaceRegexp);
                             if (!namespaceMatch) {
