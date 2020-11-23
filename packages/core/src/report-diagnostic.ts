@@ -1,6 +1,6 @@
 import { StylableMeta } from './stylable-processor';
 
-interface EmitDiagnosticsContext {
+export interface EmitDiagnosticsContext {
     emitError(e: Error): void;
     emitWarning(e: Error): void;
 }
