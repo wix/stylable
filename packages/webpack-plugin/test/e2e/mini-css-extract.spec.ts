@@ -36,7 +36,7 @@ describe(`(${project})`, () => {
         });
 
         expect(styles).to.eql({
-            backgroundColorAtLoadTime: 'rgba(0, 0, 0, 0)',
+            backgroundColorAtLoadTime: 'rgb(255, 0, 0)',
             colorOfDynamicComponent: 'rgb(0, 0, 255)',
         });
     });
