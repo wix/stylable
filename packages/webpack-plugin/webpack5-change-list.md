@@ -1,3 +1,5 @@
+(wip)
+
 With webpack 5 support for Stylable we bring many improvements for the webpack integration.
 
 
@@ -16,7 +18,7 @@ This means much smaller bundle size.
 
 3. Better of the shelf inclusion of necessary stylesheets in the build
 
-Auto include imported @keyframes and compose (extending of classes) usage. 
+Auto include imported `@keyframes` and compose (extending of classes) usage. 
 
 4. Support for `mini-css-extract-plugin`.
 
@@ -25,12 +27,12 @@ Allow the plugin to emit css assets through `mini-css-extract-plugin` CSSModule 
 5. Better error reporting for duplicate namespaces
 
 
-## Braking changes.
+## Breaking changes.
 
 Most of the breaking changes are in the API structure and should not affect the behavior of the application. 
 
 
-1. Plugin options have been simplified. 
+### Plugin options have been simplified. 
 
 ```ts
 interface Options {
@@ -83,7 +85,7 @@ module.exports.webpackPlugin = function(currentConfig) {
 
 
 
-2. Optimizer
+### Optimizer
 
 Api has changed and now all optimization happens on target css. the main behavior change is that shortNamespaces is now operated on states classes inside the ast optimization and not during the process step. This means that the namespaces are now deterministic to the depth of the stylesheet.
 
