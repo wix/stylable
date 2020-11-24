@@ -6496,10 +6496,10 @@ multimatch@^3.0.0:
     arrify "^1.0.1"
     minimatch "^3.0.4"
 
-murmurhash@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-1.0.0.tgz#d0e4556892317d984af632b6a88d5605beef26a7"
-  integrity sha512-u/NfpXS+viMWAupgU6IkwAVWkVnpvzS+D9bDxNuNRUoQ0BRMZ1DK/dPH6Qrknn7RxMHVQBpYBQQigUt7of6RiQ==
+murmurhash@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-2.0.0.tgz#556779daf7c39a0d2a3f5a9d080d84bf4833f9ee"
+  integrity sha512-Uo7ZHw+PLe2Q8/qbPIVYxAaoi+TYGZwu1a8ryeeASRXJLRSaLCblAGfjh02eu4+/9aUJBpkHXZv42AXmzOW2kw==
 
 mute-stream@0.0.7:
   version "0.0.7"
