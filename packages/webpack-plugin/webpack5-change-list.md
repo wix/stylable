@@ -1,38 +1,33 @@
-(wip)
+### Add webpack v5 support to Stylable - WIP
 
-With webpack 5 support for Stylable we bring many improvements for the webpack integration.
+Our new webpack integration features many improvements from previous versions.
 
+1. Better code tree shaking and inlining support
 
-1. Better tree shaking and inlining support
-
-previously in webpack 4 stylable modules looked like this
+previously in webpack v4 stylable modules looked like this:
 ```js
 module.export = stylableRuntime.create({...})
 ```
 
-This did not allow webpack to optimize the usage of exports form the module. 
-In webpack 5 Stylable modules uses `esm exports` and opt in to be fully optimized by webpack
-This means much smaller bundle size.
+This did not allow webpack to optimize the usage of exports from the module. 
+In webpack v5 Stylable modules use `esm exports` and opt in to be fully optimized by webpack, this means much smaller bundle size.
 
-2. Smaller runtime size and memory usage.
+2. Smaller runtime size and memory usage
 
-3. Better of the shelf inclusion of necessary stylesheets in the build
+3. Better off the shelf inclusion of necessary stylesheets in the build.  
+Auto include imported `@keyframes` and composition (extending of classes) usage. 
 
-Auto include imported `@keyframes` and compose (extending of classes) usage. 
-
-4. Support for `mini-css-extract-plugin`.
-
-Allow the plugin to emit css assets through `mini-css-extract-plugin` CSSModule mechanism. 
+4. Support `mini-css-extract-plugin` flow - allow the plugin to emit css assets through `mini-css-extract-plugin` CSSModule mechanism. 
 
 5. Better error reporting for duplicate namespaces
 
-
-## Breaking changes.
+## Breaking changes
 
 Most of the breaking changes are in the API structure and should not affect the behavior of the application. 
 
+1. Drop `node v10` support 
 
-### Plugin options have been simplified. 
+2. Plugin configuration options have been simplified
 
 ```ts
 interface Options {
@@ -62,15 +57,14 @@ interface OptimizeOptions {
 
 ```
 
-* `filename` - Since the default Stylable extraction process does not aware of chunks and extract all the css to a single bundle 
-the filename option cannot use the `[name]` replacer and only supports `[contenthash]` and `[fullHash]`
+* `filename` - the default Stylable extraction process is not aware of chunks and extracts all css to a single bundle. the filename option cannot use the `[name]` replacer and only supports `[contenthash]` and `[fullHash]`
 
-* `assetsMode` - Until official deprecation of the asset loaders `url-loader` and `file-loader` this option will allow to opt-in into old asset loader mechanism for stylable modules.
-It is not recommended to use it in webpack5 (see https://webpack.js.org/guides/asset-modules/)
- 
-* runtimeStylesheetId - will use the `namespace` option in production build
+* `assetsMode` - until official deprecation of the asset loaders (`url-loader` and `file-loader`) this option allows to opt-in into the old asset loader mechanism for stylable modules.  
+It is not recommended to use in webpack v5. (see https://webpack.js.org/guides/asset-modules/)
 
-* local `stylable.config.js` API changes and now the webpack configuration will use the `webpackPlugin` export to config the webpack plugin.
+* `runtimeStylesheetId` - defaults to `namespace` in production mode
+
+* `stylable.config.js` API change - the Stylable configuration now uses the `webpackPlugin` export to allow configuring the Stylable webpack plugin
 
 ```js
 module.exports.webpackPlugin = function(currentConfig) {
@@ -82,13 +76,10 @@ module.exports.webpackPlugin = function(currentConfig) {
 }
 ```
 
+3. Optimizer
 
+The API has changed and now all optimization happens on built css. The main behavior change is that `shortNamespaces` is now performed on state classes inside the AST optimization and not during the process step. This means that the namespaces are now deterministic to the depth of the stylesheet.
 
-
-### Optimizer
-
-Api has changed and now all optimization happens on target css. the main behavior change is that shortNamespaces is now operated on states classes inside the ast optimization and not during the process step. This means that the namespaces are now deterministic to the depth of the stylesheet.
-
-* Removed `ClassNameOptimizer` use optimizer.getClassName(className)
-* Removed `NamespaceNameOptimizer` use optimizer.getNamespace(namespace)
+* Removed `ClassNameOptimizer` - use optimizer.getClassName(className)
+* Removed `NamespaceNameOptimizer` - use optimizer.getNamespace(namespace)
 
