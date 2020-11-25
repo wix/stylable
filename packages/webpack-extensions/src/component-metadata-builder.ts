@@ -32,7 +32,7 @@ export interface ComponentsMetadata {
 
 export class ComponentMetadataBuilder {
     private output: ComponentsMetadata;
-    constructor(private context: string, name: string, version: string) {
+    constructor(public context: string, name: string, version: string) {
         this.output = {
             version,
             name,
@@ -96,7 +96,7 @@ export class ComponentMetadataBuilder {
         }
     }
     public createIndex() {
-        const indexPath = this.localResourcePath('/index.st.css');
+        const indexPath = join(this.context, 'index.st.css');
         const namespace = this.output.name + '-index';
         if (this.output.fs[indexPath]) {
             throw new Error('Duplicate index');
@@ -110,7 +110,7 @@ export class ComponentMetadataBuilder {
 
             return source + `:import {-st-from: "${from}"; -st-default: ${name}} .root ${name}{}\n`;
         }, '');
-        this.addSource('/index.st.css', source, { namespace, depth: maxDepth });
+        this.addSource(indexPath, source, { namespace, depth: maxDepth });
     }
     private validate() {
         const errors = [];
@@ -156,8 +156,12 @@ export class ComponentMetadataBuilder {
 }
 
 function normPath(resource: string, context = '') {
-    const v = resource.replace(context, '').replace(/\\/g, '/');
-    return v.startsWith('/') ? v : `/${v}`;
+    let norm = resource.replace(context, '');
+    if (norm === resource) {
+        throw new Error(`cannot use resource "${resource}" outside the context "${context}"`);
+    }
+    norm = norm.replace(/\\/g, '/');
+    return norm.startsWith('/') ? norm : `/${norm}`;
 }
 
 function cloneObject<T = object>(obj: T) {

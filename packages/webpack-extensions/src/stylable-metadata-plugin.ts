@@ -15,6 +15,7 @@ export interface MetadataOptions {
     version: string;
     configExtension?: string;
     context?: string;
+    normalizeModulePath?: (resource: string, builder: ComponentMetadataBuilder) => string;
     renderSnapshot?: (
         moduleExports: any,
         component: any,
@@ -63,10 +64,13 @@ export class StylableMetadataPlugin {
         for (const module of stylableModules) {
             const namespace = module.buildInfo.stylableMeta.namespace;
             const depth = module.buildInfo.runtimeInfo.depth;
-
+            let resource = module.resource;
+            if (this.options.normalizeModulePath) {
+                resource = this.options.normalizeModulePath(resource, builder);
+            }
             builder.addSource(
-                module.resource,
-                compilation.inputFileSystem.readFileSync(module.resource).toString(),
+                resource,
+                compilation.inputFileSystem.readFileSync(resource).toString(),
                 { namespace, depth }
             );
 
@@ -81,11 +85,11 @@ export class StylableMetadataPlugin {
                 continue;
             }
 
-            builder.addComponent(module.resource, componentConfig, namespace);
+            builder.addComponent(resource, componentConfig, namespace);
 
             this.handleVariants(
                 componentConfig,
-                dirname(module.resource),
+                dirname(resource),
                 compilation,
                 builder,
                 namespace,
