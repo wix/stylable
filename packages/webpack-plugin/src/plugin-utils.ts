@@ -219,9 +219,17 @@ export function getFileName(filename: string, data: Record<string, string>) {
 }
 
 export function getSortedModules(stylableModules: Set<NormalModule>) {
-    return Array.from(stylableModules).sort((m1, m2) => {
-        return getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
-    });
+    return Array.from(stylableModules)
+        .sort((m1, m2) => {
+            if (m1.resource > m2.resource) {
+                return 1;
+            } else if (m1.resource < m2.resource) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+        .sort((m1, m2) => getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth);
 }
 
 export function reportNamespaceCollision(
