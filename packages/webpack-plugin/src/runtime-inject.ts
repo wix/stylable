@@ -16,7 +16,7 @@ import {
     isLoadedWithKnownAssetLoader,
     getStylableBuildMeta,
 } from './plugin-utils';
-import { RuntimeTemplate, StylableBuildMeta } from './types';
+import { RuntimeTemplate, StringSortableSet, StylableBuildMeta } from './types';
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
 interface DependencyTemplateContext {
@@ -24,6 +24,7 @@ interface DependencyTemplateContext {
     moduleGraph: ModuleGraph;
     runtimeRequirements: Set<string>;
     runtimeTemplate: RuntimeTemplate;
+    runtime: string | StringSortableSet;
 }
 
 export class StylableRuntimeDependency extends Dependency {
@@ -53,7 +54,13 @@ export class InjectDependencyTemplate {
     apply(
         _dependency: StylableRuntimeDependency,
         source: sources.ReplaceSource,
-        { module, runtimeRequirements, runtimeTemplate }: DependencyTemplateContext
+        {
+            module,
+            runtimeRequirements,
+            runtimeTemplate,
+            moduleGraph,
+            runtime,
+        }: DependencyTemplateContext
     ) {
         const stylableBuildMeta = getStylableBuildMeta(module);
         if (!stylableBuildMeta.isUsed) {
@@ -98,7 +105,20 @@ export class InjectDependencyTemplate {
         replacePlaceholderExport(source, `{__classes__:true}`, stylableBuildMeta.exports.classes);
         replacePlaceholderExport(source, `{__namespace__:true}`, stylableBuildMeta.namespace);
 
-        runtimeRequirements.add(StylableRuntimeStylesheet.name);
+        const usedExports = moduleGraph.getUsedExports(module, runtime);
+        if (typeof usedExports === 'boolean') {
+            if (usedExports) {
+                runtimeRequirements.add(StylableRuntimeStylesheet.name);
+            }
+        } else if (!usedExports) {
+            runtimeRequirements.add(StylableRuntimeStylesheet.name);
+        } else if (
+            usedExports.has('st') ||
+            usedExports.has('style') ||
+            usedExports.has('cssStates')
+        ) {
+            runtimeRequirements.add(StylableRuntimeStylesheet.name);
+        }
     }
 }
 

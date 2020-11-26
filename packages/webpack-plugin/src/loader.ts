@@ -19,7 +19,7 @@ export default function (this: StylableLoaderContext, source: string) {
         namespace: meta.namespace,
         urls,
         cssDepth,
-        unUsedImports
+        unUsedImports,
     });
     addBuildDependencies(this, buildDependencies);
     emitDiagnostics(this, meta, this.diagnosticsMode);

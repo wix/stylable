@@ -1,5 +1,5 @@
 import { Stylable, StylableExports } from '@stylable/core';
-import { Compilation, Compiler, Dependency } from 'webpack';
+import { Chunk, Compilation, Compiler, Dependency } from 'webpack';
 import type { LoaderContext } from '@stylable/core/webpack5';
 
 export interface StylableBuildMeta {
@@ -37,3 +37,4 @@ export type webpackOutputOptions = RuntimeTemplate['outputOptions'];
 export type CompilationParams = Parameters<Compiler['newCompilation']>[0];
 export type NormalModuleFactory = CompilationParams['normalModuleFactory'];
 export type DependencyClass = new () => Dependency;
+export type StringSortableSet = Chunk['idNameHints'];
