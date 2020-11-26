@@ -64,10 +64,10 @@ export class StylableMetadataPlugin {
         for (const module of stylableModules) {
             const namespace = module.buildInfo.stylableMeta.namespace;
             const depth = module.buildInfo.runtimeInfo.depth;
-            let resource = module.resource;
-            if (this.options.normalizeModulePath) {
-                resource = this.options.normalizeModulePath(resource, builder);
-            }
+            const resource = this.options.normalizeModulePath
+                ? this.options.normalizeModulePath(module.resource, builder)
+                : module.resource;
+            
             builder.addSource(
                 resource,
                 compilation.inputFileSystem.readFileSync(resource).toString(),
