@@ -22,7 +22,7 @@ export interface StylableExports {
 }
 
 export type STFunction = (
-    context: string,
+    context: string | undefined,
     stateOrClass?: string | StateMap | undefined,
     ...classes: Array<string | undefined>
 ) => string;
