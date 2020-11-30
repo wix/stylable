@@ -49,7 +49,7 @@
     "@types/sinon": "^9.0.9",
     "@types/sinon-chai": "^3.2.5",
     "@types/tapable": "^1.0.6",
-    "@types/validate-npm-package-name": "^3.0.0",
+    "@types/validate-npm-package-name": "^3.0.1",
     "@types/webpack": "^4.41.25",
     "@types/webpack-sources": "^2.0.0",
     "@types/yargs": "^15.0.10",
