@@ -66,8 +66,8 @@ export class StylableMetadataPlugin {
         );
 
         for (const module of stylableModules) {
-            const namespace = module.buildInfo.stylableMeta.namespace;
-            const depth = module.buildInfo.runtimeInfo.depth;
+            const namespace = module.buildMeta.stylable.namespace;
+            const depth = module.buildMeta.stylable.depth;
             const resource = this.options.normalizeModulePath
                 ? this.options.normalizeModulePath(module.resource, builder)
                 : module.resource;
