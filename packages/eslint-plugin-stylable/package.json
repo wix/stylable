@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "description": "eslint plugin for Stylable usages",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0-alpha.1",
+    "@stylable/core": "^4.0.0-alpha.2",
     "@typescript-eslint/experimental-utils": "^4.8.1"
   },
   "devDependencies": {
