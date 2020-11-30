@@ -5547,10 +5547,10 @@ is-typedarray@~1.0.0:
   resolved "https://registry.yarnpkg.com/is-typedarray/-/is-typedarray-1.0.0.tgz#e479c80858df0c1b11ddda6940f96011fcda4a9a"
   integrity sha1-5HnICFjfDBsR3dppQPlgEfzaSpo=
 
-is-url-superb@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/is-url-superb/-/is-url-superb-4.0.0.tgz#b54d1d2499bb16792748ac967aa3ecb41a33a8c2"
-  integrity sha512-GI+WjezhPPcbM+tqE9LnmsY5qqjwHzTvjJ36wxYX5ujNXefSUJ/T17r5bqDV8yLhcgB59KTPNOc9O9cmHTPWsA==
+is-url-superb@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/is-url-superb/-/is-url-superb-5.0.0.tgz#8b3c0ce1ceacaa7561fefb9510018106091dccf5"
+  integrity sha512-jGkG59ra7/JlcV8ap3dsc0M79IgpuFU/obfsSf6X5D0z1NVvFTFuzt4ob7nfBTZEPbTwjGXVKNQDfWfPghapKQ==
 
 is-utf8@^0.2.0:
   version "0.2.1"
