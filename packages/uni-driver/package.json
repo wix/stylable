@@ -1,6 +1,6 @@
 {
   "name": "@stylable/uni-driver",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "Stylable UniDriver testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -23,5 +23,6 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/uni-driver",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
 }

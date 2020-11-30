@@ -1,6 +1,6 @@
 {
   "name": "@stylable/cli",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "A low-level utility used for working with Stylable projects",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -14,9 +14,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0-alpha.0",
-    "@stylable/node": "^4.0.0-alpha.0",
-    "@stylable/optimizer": "^4.0.0-alpha.0",
+    "@stylable/core": "^4.0.0-alpha.1",
+    "@stylable/node": "^4.0.0-alpha.1",
+    "@stylable/optimizer": "^4.0.0-alpha.1",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^16.1.1"
@@ -34,5 +34,6 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/cli",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
 }

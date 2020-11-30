@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "eslint plugin for Stylable usages",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0-alpha.0",
+    "@stylable/core": "^4.0.0-alpha.1",
     "@typescript-eslint/experimental-utils": "^4.8.1"
   },
   "devDependencies": {
@@ -32,5 +32,6 @@
     "LICENSE"
   ],
   "author": "Wix.com",
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
 }

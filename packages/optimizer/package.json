@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "Stylable core optimizer",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -12,7 +12,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0-alpha.0",
+    "@stylable/core": "^4.0.0-alpha.1",
     "csso": "^4.2.0",
     "postcss": "^8.1.10"
   },
@@ -29,5 +29,6 @@
   "repository": "https://github.com/wix/stylable/tree/master/packages/optimizer",
   "homepage": "https://stylable.io",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
 }

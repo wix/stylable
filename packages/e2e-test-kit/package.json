@@ -1,6 +1,6 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/runtime": "^4.0.0-alpha.0",
+    "@stylable/runtime": "^4.0.0-alpha.1",
     "express": "^4.17.1",
     "memory-fs": "^0.5.0",
     "node-eval": "^2.0.0",
@@ -30,5 +30,6 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/e2e-test-kit",
   "author": "Wix.com",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
 }
