@@ -23,6 +23,5 @@
   },
   "repository": "https://github.com/wix/stylable/tree/master/packages/uni-driver",
   "author": "Wix.com",
-  "license": "BSD-3-Clause",
-  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
+  "license": "BSD-3-Clause"
 }

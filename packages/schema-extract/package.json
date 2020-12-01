@@ -28,6 +28,5 @@
   "license": "BSD-3-Clause",
   "repository": "https://github.com/wix/stylable/tree/master/packages/schema-extract",
   "sideEffects": false,
-  "author": "Wix.com",
-  "gitHead": "f794574e154eb415e0dc41bd6c459543704d952f"
+  "author": "Wix.com"
 }
