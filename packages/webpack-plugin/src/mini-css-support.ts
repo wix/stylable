@@ -54,7 +54,7 @@ export function injectCssModules(
                 sourceMap: null,
             });
             cssModule.build(undefined, undefined, undefined, undefined, () => {
-                /** */
+                /** We use the void build method just to ensure that the module have buildMeta and buildInfo */
             });
 
             compilation.modules.add(cssModule);
