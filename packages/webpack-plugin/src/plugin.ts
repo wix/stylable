@@ -205,24 +205,21 @@ export class StylableWebpackPlugin {
             }
         );
 
-        compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, () => {
-            for (const module of stylableModules) {
-                const connections = moduleGraph.getOutgoingConnections(module);
-                for (const connection of connections) {
-                    // if (connection.dependency instanceof UnusedDependency) {
-                    //     connection.setActive(false);
-                    // }
-                    if (stylableModules.has(connection.module as NormalModule)) {
-                        // connection.setActive(false);
-                    } else if (
-                        !isAssetModule(connection.module) &&
-                        isLoadedWithKnownAssetLoader(connection.module)
-                    ) {
-                        connection.setActive(false);
+        if (this.options.assetsMode === 'loader') {
+            compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, () => {
+                for (const module of stylableModules) {
+                    const connections = moduleGraph.getOutgoingConnections(module);
+                    for (const connection of connections) {
+                        if (
+                            !isAssetModule(connection.module) &&
+                            isLoadedWithKnownAssetLoader(connection.module)
+                        ) {
+                            connection.setActive(false);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             for (const module of stylableModules) {
