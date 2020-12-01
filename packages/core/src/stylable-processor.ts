@@ -417,12 +417,6 @@ export class StylableProcessor {
                     }
                 }
             } else if (type === 'nested-pseudo-class' && name === 'global') {
-                if (
-                    locallyScoped === false &&
-                    !inStScope &&
-                    this.checkForScopedNodeAfter(rule, _nodes, _index) === false
-                ) {
-                }
                 return true;
             }
             return void 0;
