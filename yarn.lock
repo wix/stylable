@@ -122,10 +122,10 @@
     "@file-services/types" "^5.0.0"
     "@file-services/utils" "^5.0.0"
 
-"@file-services/node@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-5.0.0.tgz#91bcee5b9678b1af6a4925bec2faa64127e64279"
-  integrity sha512-uxQ3I+pT4S8pEJiPCMhneZWhnS+uaxN6bQHpAQMBglSIwNjqGZHEAtOk2B9XxrHV4zm8NjgZ7RMEYKn8OV/zZg==
+"@file-services/node@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-5.1.0.tgz#1fae099c5817ea81a2f6bb4e684d2ea8ab94a460"
+  integrity sha512-ksudNQhdOwwAaYU1nBGbSxxKsUmmY+f9IAehvh07beYaj6+tsMm92+ECMtw02hNfBQI6sdSf4fJ+EzpRDE+dGQ==
   dependencies:
     "@file-services/types" "^5.0.0"
     "@file-services/utils" "^5.0.0"
