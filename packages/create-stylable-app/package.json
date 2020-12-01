@@ -1,6 +1,6 @@
 {
   "name": "create-stylable-app",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-alpha.3",
   "description": "Quickly create a Stylable application",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
