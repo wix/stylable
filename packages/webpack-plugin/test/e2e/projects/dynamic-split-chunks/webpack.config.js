@@ -7,12 +7,7 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            // useEntryModuleInjection: true,
-            // includeDynamicModulesInCSS: true,
-            // skipDynamicCSSEmit: true,
-            // outputCSS: true,
-            // includeCSSInJS: false,
-            cssInjection: 'css'
+            cssInjection: 'css',
         }),
         new HtmlWebpackPlugin(),
     ],
