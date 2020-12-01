@@ -69,7 +69,7 @@ export function getCSSViewModules(
         const parentViewsList = [...parentViews];
         if (parentViewsList.length > 1) {
             throw new Error(
-                `Stylable Component Conflict:\n ${
+                `Stylable Component Conflict:\n${
                     module.resource
                 } has multiple components entries [${parentViewsList.map((m) => m.resource)}] `
             );
