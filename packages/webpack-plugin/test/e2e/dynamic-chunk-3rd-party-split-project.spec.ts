@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'dynamic-chunk-3dparty-split-project';
+const project = 'dynamic-chunk-3rd-party-split-project';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
