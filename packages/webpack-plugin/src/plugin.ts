@@ -183,7 +183,7 @@ export class StylableWebpackPlugin {
                         module.buildMeta.stylable = stylableBuildMeta;
                         module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
 
-                        for (const request of stylableBuildMeta.unUsedImports) {
+                        for (const request of stylableBuildMeta.unusedImports) {
                             module.addDependency(new UnusedDependency(request) as Dependency);
                         }
 

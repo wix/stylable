@@ -5,7 +5,7 @@ import { emitDiagnostics } from '@stylable/core';
 export default function (this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(source, this.resourcePath);
 
-    const { urls, imports, cssDepth, buildDependencies, unUsedImports } = getImports(
+    const { urls, imports, cssDepth, buildDependencies, unusedImports } = getImports(
         this.stylable,
         meta,
         this.stylable.projectRoot,
@@ -19,7 +19,7 @@ export default function (this: StylableLoaderContext, source: string) {
         namespace: meta.namespace,
         urls,
         cssDepth,
-        unUsedImports,
+        unusedImports,
     });
     addBuildDependencies(this, buildDependencies);
     emitDiagnostics(this, meta, this.diagnosticsMode);

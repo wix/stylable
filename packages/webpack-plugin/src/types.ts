@@ -13,12 +13,12 @@ export interface StylableBuildMeta {
     namespace: string;
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;
-    unUsedImports: string[];
+    unusedImports: string[];
 }
 
 export type LoaderData = Pick<
     StylableBuildMeta,
-    'css' | 'urls' | 'cssDepth' | 'exports' | 'namespace' | 'globals' | 'unUsedImports'
+    'css' | 'urls' | 'cssDepth' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
 >;
 
 export interface StylableLoaderContext extends LoaderContext {

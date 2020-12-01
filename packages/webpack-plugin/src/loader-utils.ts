@@ -17,13 +17,13 @@ export function getImports(
 ) {
     const urls = handleUrlDependencies(meta, projectRoot);
     const imports: string[] = [];
-    const unUsedImports: string[] = [];
+    const unusedImports: string[] = [];
     for (const imported of meta.imports) {
         if (imported.fromRelative.endsWith('.st.css')) {
             if (shouldBeIncludedAsImport(stylable, meta, imported)) {
                 imports.push(`import ${JSON.stringify(imported.fromRelative)};`);
             } else {
-                unUsedImports.push(imported.fromRelative);
+                unusedImports.push(imported.fromRelative);
             }
         }
     }
@@ -41,7 +41,7 @@ export function getImports(
     if (assetsMode === 'loader') {
         urls.forEach((assetPath) => imports.push(`import ${JSON.stringify(assetPath)};`));
     }
-    return { cssDepth, urls, imports, buildDependencies, unUsedImports };
+    return { cssDepth, urls, imports, buildDependencies, unusedImports };
 }
 
 export function addBuildDependencies(
@@ -70,7 +70,11 @@ function shouldBeIncludedAsImport(stylable: Stylable, meta: StylableMeta, import
                 localSymbol['-st-extends'],
                 meta
             );
-            if (cssResolved?.symbol && cssResolved.symbol._kind === 'class' && cssResolved.meta.root !== cssResolved.symbol.name) {
+            if (
+                cssResolved?.symbol &&
+                cssResolved.symbol._kind === 'class' &&
+                cssResolved.meta.root !== cssResolved.symbol.name
+            ) {
                 return true;
             }
         }
