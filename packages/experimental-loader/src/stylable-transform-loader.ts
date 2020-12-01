@@ -5,7 +5,7 @@ import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
-import type { LoaderContext, Loader } from '@stylable/core/webpack5';
+import type { LoaderContext, Loader } from '@stylable/webpack-plugin';
 
 // TODO: maybe adopt the code
 const { urlParser } = require('css-loader/dist/plugins');
