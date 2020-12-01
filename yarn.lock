@@ -113,10 +113,10 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-"@file-services/memory@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.0.0.tgz#47a014c256945130e5ba2c5056f9def432e98408"
-  integrity sha512-Fp5o9d4o2x5x0wkgY0c0T9o/8qsymQasQzjyL6e9JQHsjyGr9G0cmqXKyRNdYCeFCggqG3ApUo1yBWKkKAX0HA==
+"@file-services/memory@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.1.0.tgz#55891415de8f5e162236648f03b0019db2b0b358"
+  integrity sha512-/iCN0WTdQFWY5uI+x43a3vLT/Olc+Wfn4dT57m0vtlPbU+NSt5NdNTpFV3twQYuc4QBzHMtVGVDuIGWmgJ3ZOg==
   dependencies:
     "@file-services/path" "^5.0.0"
     "@file-services/types" "^5.0.0"
