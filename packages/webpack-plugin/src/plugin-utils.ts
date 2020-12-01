@@ -130,7 +130,7 @@ export function injectLoader(compiler: Compiler) {
     }
     compiler.options.module.rules.unshift({
         test: /\.st\.css$/,
-        loader: join(__dirname, 'loader.ts'),
+        loader: require.resolve(join(__dirname, 'loader')),
         sideEffects: true,
     });
 }
