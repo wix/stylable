@@ -23,6 +23,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         // disabling restructuring as it breaks production mode by disappearing classes
         return csso.minify(css, { restructure: false }).css;
     }
+
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
@@ -37,12 +38,15 @@ export class StylableOptimizer implements IStylableOptimizer {
 
         this.optimizeAst(config, outputAst, usageMapping, delimiter, jsExports, globals);
     }
+
     public getNamespace(namespace: string) {
         return this.names.get(namespace, this.namespacePrefix);
     }
+
     public getClassName(className: string) {
         return this.names.get(className, this.classPrefix);
     }
+
     public optimizeAst(
         config: OptimizeConfig,
         outputAst: Root,
@@ -203,9 +207,11 @@ export class StylableOptimizer implements IStylableOptimizer {
     private removeEmptyNodes(root: Root) {
         removeEmptyNodes(root);
     }
+
     private removeComments(root: Root) {
         removeCommentNodes(root);
     }
+
     private removeUnusedComponents(
         delimiter: string,
         outputAst: Root,
@@ -229,6 +235,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             }
         });
     }
+    
     private isContainsUnusedParts(
         selectorAst: SelectorAstNode,
         usageMapping: Record<string, boolean>,
