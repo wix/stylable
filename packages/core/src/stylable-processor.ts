@@ -396,7 +396,6 @@ export class StylableProcessor {
                         locallyScoped = true;
                     } else if (locallyScoped === false && !inStScope) {
                         if (this.checkForScopedNodeAfter(rule, _nodes, _index) === false) {
-                            this.meta.hasOwnGlobalSideEffects = true;
                             this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
                                 word: name,
                             });
@@ -410,7 +409,6 @@ export class StylableProcessor {
 
                 if (locallyScoped === false && !inStScope) {
                     if (this.checkForScopedNodeAfter(rule, _nodes, _index) === false) {
-                        this.meta.hasOwnGlobalSideEffects = true;
                         this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
                             word: name,
                         });
@@ -424,7 +422,6 @@ export class StylableProcessor {
                     !inStScope &&
                     this.checkForScopedNodeAfter(rule, _nodes, _index) === false
                 ) {
-                    this.meta.hasOwnGlobalSideEffects = true;
                 }
                 return true;
             }

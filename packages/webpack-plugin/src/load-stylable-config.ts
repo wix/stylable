@@ -2,7 +2,7 @@ import { Compiler } from 'webpack';
 import findConfig from 'find-config';
 import { Options } from './plugin';
 
-export function loadLocalStylableConfig(
+export function loadStylableConfig(
     context: string
 ):
     | undefined
@@ -15,7 +15,7 @@ export function loadLocalStylableConfig(
         try {
             config = require(path);
         } catch (e) {
-            throw new Error(`Failed to load stylable.config from ${path}\n${e.stack}`);
+            throw new Error(`Failed to load "stylable.config.js" from ${path}\n${e.stack}`);
         }
         if (!config) {
             throw new Error(`Missing Stylable configuration ${config}`);

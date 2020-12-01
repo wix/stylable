@@ -16,7 +16,7 @@ export class UnusedDependency extends ModuleDependency {
 
 export class UnusedDependencyTemplate extends ModuleDependency.Template {
     apply(_dependency: Dependency, _source: sources.ReplaceSource, _templateContext: any) {
-        /** */
+        /** noop */
     }
 }
 

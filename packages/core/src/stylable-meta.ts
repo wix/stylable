@@ -26,7 +26,6 @@ export class StylableMeta {
     public scopes: postcss.AtRule[];
     public simpleSelectors: Record<string, SimpleSelector>;
     public mixins: RefedMixin[];
-    public hasOwnGlobalSideEffects: boolean;
     // Generated during transform
     public outputAst?: postcss.Root;
     public globals: Record<string, boolean> = {};
@@ -60,7 +59,6 @@ export class StylableMeta {
         this.mixins = [];
         this.transformDiagnostics = null;
         this.transformedScopes = null;
-        this.hasOwnGlobalSideEffects = false;
     }
 }
 

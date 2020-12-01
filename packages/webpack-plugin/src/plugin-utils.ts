@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { Compilation, Compiler, Module, NormalModule } from 'webpack';
-import { UnusedDependency } from './stcss-dependency';
+import { UnusedDependency } from './unused-dependency';
 import { StylableBuildMeta, webpackCreateHash, webpackOutputOptions } from './types';
 const { makePathsRelative } = require('webpack/lib/util/identifier');
 export function* uniqueFilterMap<T, O = T>(

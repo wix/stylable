@@ -26,8 +26,8 @@ import {
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
-import { loadLocalStylableConfig } from './load-local-stylable-config';
-import { UnusedDependency, UnusedDependencyTemplate } from './stcss-dependency';
+import { loadStylableConfig } from './load-stylable-config';
+import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { parse } from 'postcss';
 
@@ -119,7 +119,7 @@ export class StylableWebpackPlugin {
     private processOptions(compiler: Compiler) {
         let options = defaultOptions(this.userOptions, compiler.options.mode === 'production');
 
-        const config = loadLocalStylableConfig(compiler.context);
+        const config = loadStylableConfig(compiler.context);
         if (config && config.webpackPlugin) {
             options = config.webpackPlugin(options, compiler);
         }
