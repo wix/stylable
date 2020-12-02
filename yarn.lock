@@ -1391,10 +1391,10 @@
   resolved "https://registry.yarnpkg.com/@types/validate-npm-package-name/-/validate-npm-package-name-3.0.1.tgz#7750db1f33b81bca6386ebd31f2077dfec3a9c10"
   integrity sha512-jXV7fVq4Ep+FOntJFDtqRKYs+MYndZkQOH2P0yHoqFsulresEjKza73j/01etLqN2oBIhqyN2UU0N4RqqLiccg==
 
-"@types/webpack-sources@*", "@types/webpack-sources@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-2.0.0.tgz#08216ab9be2be2e1499beaebc4d469cec81e82a7"
-  integrity sha512-a5kPx98CNFRKQ+wqawroFunvFqv7GHm/3KOI52NY9xWADgc8smu4R6prt4EU/M4QfVjvgBkMqU4fBhw3QfMVkg==
+"@types/webpack-sources@*", "@types/webpack-sources@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-2.1.0.tgz#8882b0bd62d1e0ce62f183d0d01b72e6e82e8c10"
+  integrity sha512-LXn/oYIpBeucgP1EIJbKQ2/4ZmpvRl+dlrFdX7+94SKRUV3Evy3FsfMZY318vGhkWUS5MPhtOM3w1/hCOAOXcg==
   dependencies:
     "@types/node" "*"
     "@types/source-list-map" "*"
