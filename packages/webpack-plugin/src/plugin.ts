@@ -1,14 +1,15 @@
 import { Stylable, StylableConfig, packageNamespaceFactory, OptimizeConfig } from '@stylable/core';
+import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
 import decache from 'decache';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
+
 import findConfig from 'find-config';
 import {
     injectRuntimeModules,
     StylableRuntimeDependency,
     InjectDependencyTemplate,
 } from './runtime-inject';
-import { DependencyClass, LoaderData, NormalModuleFactory, StylableBuildMeta } from './types';
 import {
     getStaticPublicPath,
     isStylableModule,
@@ -28,7 +29,7 @@ import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadStylableConfig } from './load-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
-import { StylableOptimizer } from '@stylable/optimizer';
+import type { DependencyClass, LoaderData, NormalModuleFactory, StylableBuildMeta } from './types';
 import { parse } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
@@ -37,7 +38,7 @@ type OptimizeOptions = OptimizeConfig & {
 
 export interface Options {
     filename?: string;
-    cssInjection?: 'js' | 'css' | 'mini-css';
+    cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     assetsMode?: 'url' | 'loader';
     runtimeStylesheetId?: 'module' | 'namespace';
     diagnosticsMode?: 'auto' | 'strict' | 'loose';

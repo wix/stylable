@@ -32,7 +32,7 @@ Most of the breaking changes are in the API structure and should not affect the 
 ```ts
 interface Options {
     filename?: string;
-    cssInjection?: 'js' | 'css' | 'mini-css';
+    cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
     assetsMode?: 'url' | 'loader';
     runtimeStylesheetId?: 'module' | 'namespace';
     diagnosticsMode?: 'auto' | 'strict' | 'loose';

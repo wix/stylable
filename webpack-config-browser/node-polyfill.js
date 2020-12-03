@@ -5,6 +5,7 @@ module.exports = {
     process: {
         title: 'browser',
         browser: true,
+        versions: {},
         env: {},
         cwd() {
             return '/';

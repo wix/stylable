@@ -15,6 +15,13 @@ export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any
         fileSystem,
     });
 
-    return (directoryPath, request) =>
-        eResolver.resolveSync(resolverContext, directoryPath, request);
+    return (directoryPath, request): string => {
+        const res = eResolver.resolveSync(resolverContext, directoryPath, request);
+        if (res === false) {
+            throw new Error(
+                `Stylable does not support browser field 'false' values. ${request} resolved to 'false'`
+            );
+        }
+        return res;
+    };
 }

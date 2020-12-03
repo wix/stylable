@@ -13,12 +13,13 @@ module.exports.baseConfig = () => {
         resolve: {
             alias: {
                 jsdom: join(__dirname, 'jsdom-browser.js'),
+                path: require.resolve('@file-services/path/browser-path.js'),
+                util: join(__dirname, 'node-polyfill.js'),
+                pnpapi: false,
             },
             fallback: {
                 fs: false,
                 os: false,
-                path: require.resolve('@file-services/path/browser-path.js'),
-                util: join(__dirname, 'node-polyfill.js'),
             },
             extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
             plugins: [new TsconfigPathsPlugin({ configFile: join(monorepoRoot, 'tsconfig.json') })],

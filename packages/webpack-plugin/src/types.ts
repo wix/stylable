@@ -9,7 +9,7 @@ export interface StylableBuildMeta {
     // stylableImports: { request: string; hasOwnSideEffects: boolean }[];
     depth: number;
     cssDepth: number;
-    cssInjection: 'js' | 'css' | 'mini-css';
+    cssInjection: 'js' | 'css' | 'mini-css' | 'none';
     namespace: string;
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;

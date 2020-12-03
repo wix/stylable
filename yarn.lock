@@ -1100,14 +1100,6 @@
   dependencies:
     "@types/css-tree" "*"
 
-"@types/enhanced-resolve@^3.0.6":
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/@types/enhanced-resolve/-/enhanced-resolve-3.0.6.tgz#a51eaa24f4458ed13fb42a7048c0b66f92e95a28"
-  integrity sha512-mAWc6JpDiA6GnPCF5023YSGMa/E7baMvLs+HtT9E6Z52lUds3pthf4APhVQpbmV6sZTrbASgBEDdh70eGWTJFw==
-  dependencies:
-    "@types/node" "*"
-    "@types/tapable" "^0"
-
 "@types/eslint-scope@^3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.0.tgz#4792816e31119ebd506902a482caec4951fabd86"
@@ -1366,11 +1358,6 @@
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@types/sinonjs__fake-timers/-/sinonjs__fake-timers-6.0.2.tgz#3a84cf5ec3249439015e14049bd3161419bf9eae"
   integrity sha512-dIPoZ3g5gcx9zZEszaxLSVTvMReD3xxyyDnQUjA6IYDG9Ba2AV0otMPs+77sG9ojB4Qr2N2Vk5RnKeuA0X/0bg==
-
-"@types/tapable@^0":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-0.2.5.tgz#2443fc12da514c81346b1a665675559cee21fa75"
-  integrity sha512-dEoVvo/I9QFomyhY+4Q6Qk+I+dhG59TYceZgC6Q0mCifVPErx6Y83PNTKGDS5e9h9Eti6q0S2mm16BU6iQK+3w==
 
 "@types/tapable@^1.0.5":
   version "1.0.6"
@@ -3410,7 +3397,7 @@ end-of-stream@^1.0.0, end-of-stream@^1.1.0, end-of-stream@^1.4.1:
   dependencies:
     once "^1.4.0"
 
-enhanced-resolve@^4.0.0, enhanced-resolve@^4.3.0:
+enhanced-resolve@^4.0.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-4.3.0.tgz#3b806f3bfafc1ec7de69551ef93cca46c1704126"
   integrity sha512-3e87LvavsdxyoCfGusJnrZ5G8SLPOFeHSNpZI/ATL9a5leXo2k0w6MKnbqhdBad9qTobSfB20Ld7UmgoNbAZkQ==
@@ -3423,6 +3410,14 @@ enhanced-resolve@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.3.1.tgz#3f988d0d7775bdc2d96ede321dc81f8249492f57"
   integrity sha512-G1XD3MRGrGfNcf6Hg0LVZG7GIKcYkbfHa5QMxt1HDUTdYoXH0JR1xXyg+MaKLF73E9A27uWNVxvFivNRYeUB6w==
+  dependencies:
+    graceful-fs "^4.2.4"
+    tapable "^2.0.0"
+
+enhanced-resolve@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.4.0.tgz#a8bcf23b00affac9455cf71efd80844f4054f4dc"
+  integrity sha512-ZmqfWURB2lConOBM1JdCVfPyMRv5RdKWktLXO6123p97ovVm2CLBgw9t5MBj3jJWA6eHyOeIws9iJQoGFR4euQ==
   dependencies:
     graceful-fs "^4.2.4"
     tapable "^2.0.0"
@@ -9265,7 +9260,7 @@ webidl-conversions@^6.1.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-6.1.0.tgz#9111b4d7ea80acd40f5270d666621afa78b69514"
   integrity sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
 
-webpack-cli@^4.1.0:
+webpack-cli@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-4.2.0.tgz#10a09030ad2bd4d8b0f78322fba6ea43ec56aaaa"
   integrity sha512-EIl3k88vaF4fSxWSgtAQR+VwicfLMTZ9amQtqS4o+TDPW9HGaEpbFBbAZ4A3ZOT5SOnMxNOzROsSTPiE8tBJPA==
@@ -9352,36 +9347,6 @@ webpack-sources@^2.1.1, webpack-sources@^2.2.0:
   dependencies:
     source-list-map "^2.0.1"
     source-map "^0.6.1"
-
-webpack@^5.3.2:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.6.0.tgz#282d10434c403b070ed91d459b385e873b51a07d"
-  integrity sha512-SIeFuBhuheKElRbd84O35UhKc0nxlgSwtzm2ksZ0BVhRJqxVJxEguT/pYhfiR0le/pxTa1VsCp7EOYyTsa6XOA==
-  dependencies:
-    "@types/eslint-scope" "^3.7.0"
-    "@types/estree" "^0.0.45"
-    "@webassemblyjs/ast" "1.9.0"
-    "@webassemblyjs/helper-module-context" "1.9.0"
-    "@webassemblyjs/wasm-edit" "1.9.0"
-    "@webassemblyjs/wasm-parser" "1.9.0"
-    acorn "^8.0.4"
-    browserslist "^4.14.5"
-    chrome-trace-event "^1.0.2"
-    enhanced-resolve "^5.3.1"
-    eslint-scope "^5.1.1"
-    events "^3.2.0"
-    glob-to-regexp "^0.4.1"
-    graceful-fs "^4.2.4"
-    json-parse-better-errors "^1.0.2"
-    loader-runner "^4.1.0"
-    mime-types "^2.1.27"
-    neo-async "^2.6.2"
-    pkg-dir "^4.2.0"
-    schema-utils "^3.0.0"
-    tapable "^2.0.0"
-    terser-webpack-plugin "^5.0.3"
-    watchpack "^2.0.0"
-    webpack-sources "^2.1.1"
 
 webpack@^5.9.0:
   version "5.9.0"
