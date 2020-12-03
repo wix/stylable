@@ -1386,10 +1386,10 @@
   dependencies:
     source-map "^0.6.1"
 
-"@types/validate-npm-package-name@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/validate-npm-package-name/-/validate-npm-package-name-3.0.1.tgz#7750db1f33b81bca6386ebd31f2077dfec3a9c10"
-  integrity sha512-jXV7fVq4Ep+FOntJFDtqRKYs+MYndZkQOH2P0yHoqFsulresEjKza73j/01etLqN2oBIhqyN2UU0N4RqqLiccg==
+"@types/validate-npm-package-name@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/validate-npm-package-name/-/validate-npm-package-name-3.0.2.tgz#91798f047eee96f14c4a64f873936f21715ff0b9"
+  integrity sha512-7ohzD2fh5iV74brBLY2SdEI/nt4vnUoY1++r0P8QEAL5utR0fTFGeGijJMLHTmeNriroZQphGyVp46CbIuILMA==
 
 "@types/webpack-sources@*", "@types/webpack-sources@^2.1.0":
   version "2.1.0"
