@@ -167,11 +167,6 @@ function replacePlaceholderExport(
 }
 
 export function injectRuntimeModules(name: string, compilation: Compilation) {
-    compilation.hooks.runtimeRequirementInTree
-        .for(RuntimeGlobals.ensureChunkHandlers)
-        .tap(name, (chunk) => {
-            compilation.addRuntimeModule(chunk, new LoadCSS());
-        });
 
     compilation.hooks.runtimeRequirementInModule
         .for(StylableRuntimeInject.name)
