@@ -1,5 +1,6 @@
 import { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
+import { HoverSettings } from 'vscode-css-languageservice';
 import { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import {
@@ -106,7 +107,7 @@ export class StylableLanguageService {
         return [];
     }
 
-    public onHover(filePath: string, offset: number): Hover | null {
+    public onHover(filePath: string, offset: number, settings?: HoverSettings): Hover | null {
         const stylableFile = this.readStylableFile(filePath);
 
         if (stylableFile && stylableFile.stat.isFile()) {
@@ -117,7 +118,7 @@ export class StylableLanguageService {
                 stylableFile.content
             );
 
-            return this.cssService.doHover(doc, doc.positionAt(offset));
+            return this.cssService.doHover(doc, doc.positionAt(offset), settings);
         }
 
         return null;

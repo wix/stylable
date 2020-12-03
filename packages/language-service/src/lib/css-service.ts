@@ -1,7 +1,7 @@
 import { IFileSystem } from '@file-services/types';
 import path from 'path';
 import * as postcss from 'postcss';
-import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice';
+import { getCSSLanguageService, HoverSettings, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
@@ -195,9 +195,13 @@ export class CssService {
             });
     }
 
-    public doHover(document: TextDocument, position: Position): Hover | null {
+    public doHover(
+        document: TextDocument,
+        position: Position,
+        settings?: HoverSettings
+    ): Hover | null {
         const stylesheet = this.inner.parseStylesheet(document);
-        return this.inner.doHover(document, position, stylesheet);
+        return this.inner.doHover(document, position, stylesheet, settings);
     }
 
     public findReferences(document: TextDocument, position: Position): Location[] {
