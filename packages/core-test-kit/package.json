@@ -13,7 +13,7 @@
     "@stylable/core": "^4.0.0-alpha.3",
     "chai": "^4.2.0",
     "flat": "^5.0.2",
-    "postcss": "^8.1.13"
+    "postcss": "^8.1.14"
   },
   "files": [
     "cjs",
