@@ -6,8 +6,7 @@
   "types": "cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs && yarn bundle",
-    "bundle": "node -r @ts-tools/node/r -r tsconfig-paths/register ./scripts/build-runtime.ts",
+    "build": "ts-build ./src --cjs",
     "test:unit": "mocha \"test/unit/**/*.spec.ts?(x)\"",
     "test:e2e": "mocha \"test/e2e/**/*.spec.[tj]s?(x)\" --timeout 20000",
     "test": "run-p test:unit test:e2e",
