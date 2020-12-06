@@ -14,8 +14,7 @@
   },
   "files": [
     "cjs",
-    "src",
-    "runtime.lib.js"
+    "src"
   ],
   "engines": {
     "node": ">=12"
