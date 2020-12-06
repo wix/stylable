@@ -2,26 +2,6 @@ import { StylableMeta } from './stylable-meta';
 import { Imported } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 
-export function visitMetaCSSDependencies(
-    meta: StylableMeta,
-    onMetaDependency: (meta: StylableMeta, imported: Imported, depth: number) => void,
-    resolver: StylableResolver,
-    visited = new Set<string>(),
-    depth = 0
-): void {
-    if (visited.has(meta.source)) {
-        return;
-    }
-    visited.add(meta.source);
-    for (const imported of meta.imports) {
-        const res = resolver.resolveImported(imported, '');
-        if (res?._kind === 'css') {
-            onMetaDependency(res.meta, imported, depth);
-            visitMetaCSSDependencies(res.meta, onMetaDependency, resolver, visited, depth + 1);
-        }
-    }
-}
-
 export function visitMetaCSSDependenciesBFS(
     meta: StylableMeta,
     onMetaDependency: (meta: StylableMeta, imported: Imported, depth: number) => void,

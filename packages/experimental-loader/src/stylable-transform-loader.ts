@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 import decache from 'decache';
-import { processNamespace, emitDiagnostics, visitMetaCSSDependencies } from '@stylable/core';
+import { processNamespace, emitDiagnostics, visitMetaCSSDependenciesBFS } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
@@ -78,7 +78,11 @@ const stylableLoader: Loader = function (content) {
 
     emitDiagnostics(this, meta, diagnosticsMode);
 
-    visitMetaCSSDependencies(meta, ({ source }) => this.addDependency(source), stylable.resolver);
+    visitMetaCSSDependenciesBFS(
+        meta,
+        ({ source }) => this.addDependency(source),
+        stylable.resolver
+    );
 
     if (exportsOnly) {
         return callback(null, createRuntimeTargetCode(meta.namespace, exports));
