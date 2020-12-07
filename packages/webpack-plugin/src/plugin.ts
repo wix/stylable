@@ -182,7 +182,6 @@ export class StylableWebpackPlugin {
                             ...loaderData,
                         };
                         module.buildMeta.stylable = stylableBuildMeta;
-                        module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
 
                         for (const request of stylableBuildMeta.unusedImports) {
                             module.addDependency(new UnusedDependency(request) as Dependency);
@@ -195,6 +194,8 @@ export class StylableWebpackPlugin {
                                 );
                             }
                         }
+
+                        module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
                     };
                 }
                 if (isAssetModule(module)) {
