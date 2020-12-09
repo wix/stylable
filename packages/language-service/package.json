@@ -15,12 +15,12 @@
     "typescript": ">=3.6"
   },
   "dependencies": {
-    "@file-services/types": "^5.0.0",
-    "@file-services/typescript": "^5.0.0",
+    "@file-services/types": "^5.2.0",
+    "@file-services/typescript": "^5.2.0",
     "@stylable/core": "^3.11.9",
     "css-selector-tokenizer": "^0.7.3",
     "js-beautify": "^1.13.0",
-    "postcss": "^8.2.0",
+    "postcss": "^8.2.1",
     "postcss-value-parser": "^4.1.0",
     "vscode-css-languageservice": "^4.4.0",
     "vscode-languageserver": "^6.1.1",
