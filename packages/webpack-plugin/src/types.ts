@@ -38,3 +38,4 @@ export type CompilationParams = Parameters<Compiler['newCompilation']>[0];
 export type NormalModuleFactory = CompilationParams['normalModuleFactory'];
 export type DependencyClass = new () => Dependency;
 export type StringSortableSet = Chunk['idNameHints'];
+export type DependencyTemplates = Compilation['dependencyTemplates'];

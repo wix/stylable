@@ -9,14 +9,21 @@ import {
     ModuleGraph,
     NormalModule,
     sources,
+    ChunkGraph,
 } from 'webpack';
 import {
     extractFilenameFromAssetModule,
     replaceCSSAssetPlaceholders,
     isLoadedWithKnownAssetLoader,
     getStylableBuildMeta,
+    extractDataUrlFromAssetModuleSource,
 } from './plugin-utils';
-import { RuntimeTemplate, StringSortableSet, StylableBuildMeta } from './types';
+import {
+    DependencyTemplates,
+    RuntimeTemplate,
+    StringSortableSet,
+    StylableBuildMeta,
+} from './types';
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
 interface DependencyTemplateContext {
@@ -25,6 +32,8 @@ interface DependencyTemplateContext {
     runtimeRequirements: Set<string>;
     runtimeTemplate: RuntimeTemplate;
     runtime: string | StringSortableSet;
+    chunkGraph: ChunkGraph;
+    dependencyTemplates: DependencyTemplates;
 }
 
 export class StylableRuntimeDependency extends Dependency {
@@ -60,6 +69,8 @@ export class InjectDependencyTemplate {
             runtimeTemplate,
             moduleGraph,
             runtime,
+            chunkGraph,
+            dependencyTemplates,
         }: DependencyTemplateContext
     ) {
         const stylableBuildMeta = getStylableBuildMeta(module);
@@ -70,15 +81,31 @@ export class InjectDependencyTemplate {
             const css = replaceCSSAssetPlaceholders(
                 stylableBuildMeta,
                 this.staticPublicPath,
-                (resourcePath) => {
+                (resourcePath, publicPath) => {
                     const assetModule = this.assetsModules.get(resourcePath);
                     if (!assetModule) {
                         throw new Error('Missing asset module for ' + resourcePath);
                     }
                     if (isLoadedWithKnownAssetLoader(assetModule)) {
-                        return extractFilenameFromAssetModule(assetModule);
+                        return extractFilenameFromAssetModule(assetModule, publicPath);
                     } else {
-                        return assetModule.buildInfo.filename;
+                        const assetModuleSource = assetModule.generator.generate(assetModule, {
+                            chunkGraph,
+                            moduleGraph,
+                            runtime,
+                            runtimeRequirements: new Set(),
+                            runtimeTemplate,
+                            dependencyTemplates,
+                            type: 'asset/resource',
+                        });
+
+                        if (assetModule.buildInfo.dataUrl) {
+                            return extractDataUrlFromAssetModuleSource(
+                                assetModuleSource.source().toString()
+                            );
+                        }
+
+                        return publicPath + assetModule.buildInfo.filename;
                     }
                 }
             );
@@ -167,7 +194,6 @@ function replacePlaceholderExport(
 }
 
 export function injectRuntimeModules(name: string, compilation: Compilation) {
-
     compilation.hooks.runtimeRequirementInModule
         .for(StylableRuntimeInject.name)
         .tap(name, (_module, set) => {

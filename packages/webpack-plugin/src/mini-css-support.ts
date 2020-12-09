@@ -32,20 +32,24 @@ export function injectCssModules(
                 content: replaceCSSAssetPlaceholders(
                     module.buildMeta.stylable,
                     staticPublicPath,
-                    (resourcePath) => {
+                    (resourcePath, publicPath) => {
+                        //TODO: fix base64 inline assets
                         const assetModule = assetsModules.get(resourcePath);
                         if (!assetModule) {
                             throw new Error('Missing asset module for ' + resourcePath);
                         }
                         if (isLoadedWithKnownAssetLoader(assetModule)) {
-                            return extractFilenameFromAssetModule(assetModule);
+                            return extractFilenameFromAssetModule(assetModule, publicPath);
                         } else {
-                            return getAssetOutputPath(
-                                createHash,
-                                assetModule,
-                                compilation,
-                                undefined,
-                                undefined
+                            return (
+                                publicPath +
+                                getAssetOutputPath(
+                                    createHash,
+                                    assetModule,
+                                    compilation,
+                                    undefined,
+                                    undefined
+                                )
                             );
                         }
                     }

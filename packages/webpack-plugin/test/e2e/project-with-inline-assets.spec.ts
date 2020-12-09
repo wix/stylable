@@ -6,7 +6,14 @@ import {
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'project-with-assets';
+const project = 'project-with-inline-assets';
+
+const expectedAssets = [
+    /* 1px-cyan.png */
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2BY9AIAAjABi8G3mj0AAAAASUVORK5CYII=',
+    /* 1px-red.png */
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=',
+];
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
@@ -29,7 +36,6 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset.png', 'asset-in-root.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 
@@ -60,7 +66,6 @@ describe(`(${project}) production mode`, () => {
     );
 
     it('load assets from url() declaration value', async () => {
-        const expectedAssets = ['asset.png', 'asset-in-root.png'];
         const { responses } = await projectRunner.openInBrowser();
         const assetResponses = filterAssetResponses(responses, expectedAssets);
 

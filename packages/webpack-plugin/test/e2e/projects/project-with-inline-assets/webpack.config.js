@@ -9,10 +9,7 @@ module.exports = {
         rules: [
             {
                 test: /\.(png|jpg|gif)$/,
-                type: 'asset/resource',
-                generator: {
-                    filename: 'static/[name][ext]',
-                },
+                type: 'asset/inline',
             },
         ],
     },

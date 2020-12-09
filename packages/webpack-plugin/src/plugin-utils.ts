@@ -1,7 +1,13 @@
 import { join } from 'path';
-import { Compilation, Compiler, Module, NormalModule } from 'webpack';
+import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
 import { UnusedDependency } from './unused-dependency';
-import { StylableBuildMeta, webpackCreateHash, webpackOutputOptions } from './types';
+import {
+    DependencyTemplates,
+    RuntimeTemplate,
+    StylableBuildMeta,
+    webpackCreateHash,
+    webpackOutputOptions,
+} from './types';
 const { makePathsRelative } = require('webpack/lib/util/identifier');
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -49,20 +55,40 @@ export function getStaticPublicPath(compilation: Compilation) {
 export function replaceCSSAssetPlaceholders(
     { css, urls }: Pick<StylableBuildMeta, 'css' | 'urls'>,
     publicPath: string,
-    getAssetOutputPath: (resourcePath: string) => string
+    getAssetOutputPath: (resourcePath: string, publicPath: string) => string
 ) {
-    return css.replace(/__stylable_url_asset_(\d+?)__/g, (_match, index) => {
-        return `${publicPath + getAssetOutputPath(urls[Number(index)])}`;
-    });
+    return css.replace(/__stylable_url_asset_(\d+?)__/g, (_match, index) =>
+        getAssetOutputPath(urls[Number(index)], publicPath)
+    );
 }
 
-export function extractFilenameFromAssetModule(m: Module): string {
+export function extractFilenameFromAssetModule(m: Module, publicPath: string): string {
     const source = m.originalSource().source();
-    const match = source.toString().match(/__webpack_public_path__\s*\+\s*"(.*?)"/);
+    let match = source.toString().match(/__webpack_public_path__\s*\+\s*"(.*?)"/);
+    if (match) {
+        return publicPath + match[1];
+    }
+    match = source.toString().match(/module.exports\s*=\s*"(.*?)"/);
+    if (match) {
+        return match[1];
+    }
+    match = source.toString().match(/export\s+default\s+"(.*?)"/);
     if (match) {
         return match[1];
     }
     throw new Error('unknown asset module format ' + source);
+}
+
+export function extractDataUrlFromAssetModuleSource(source: string): string {
+    let match = source.match(/.exports\s*=\s*"(.*?)"/);
+    if (match) {
+        return match[1];
+    }
+    match = source.toString().match(/export\s+default\s+"(.*?)"/);
+    if (match) {
+        return match[1];
+    }
+    throw new Error('unknown data url asset module format ' + source);
 }
 
 export function getAssetOutputPath(
@@ -138,24 +164,50 @@ export function injectLoader(compiler: Compiler) {
 export function createStaticCSS(
     staticPublicPath: string,
     stylableModules: Set<Module>,
-    assetsModules: Map<string, Module>
+    assetsModules: Map<string, NormalModule>,
+
+    chunkGraph: ChunkGraph,
+    moduleGraph: ModuleGraph,
+    runtime: string,
+    runtimeTemplate: RuntimeTemplate,
+    dependencyTemplates: DependencyTemplates
 ) {
     const cssChunks = Array.from(stylableModules)
         .filter((m) => m.buildMeta.stylable.isUsed !== false)
         .sort((m1, m2) => m1.buildMeta.stylable.depth - m2.buildMeta.stylable.depth)
-        .map((m) =>
-            replaceCSSAssetPlaceholders(m.buildMeta.stylable, staticPublicPath, (resourcePath) => {
-                const assetModule = assetsModules.get(resourcePath);
-                if (!assetModule) {
-                    throw new Error('Missing asset module for ' + resourcePath);
+        .map((m) => {
+            return replaceCSSAssetPlaceholders(
+                m.buildMeta.stylable,
+                staticPublicPath,
+                (resourcePath, publicPath) => {
+                    const assetModule = assetsModules.get(resourcePath);
+                    if (!assetModule) {
+                        throw new Error('Missing asset module for ' + resourcePath);
+                    }
+                    if (isLoadedWithKnownAssetLoader(assetModule)) {
+                        return extractFilenameFromAssetModule(assetModule, publicPath);
+                    } else {
+                        const assetModuleSource = assetModule.generator.generate(assetModule, {
+                            chunkGraph,
+                            moduleGraph,
+                            runtime,
+                            runtimeRequirements: new Set(),
+                            runtimeTemplate,
+                            dependencyTemplates,
+                            type: 'asset/resource',
+                        });
+
+                        if (assetModule.buildInfo.dataUrl) {
+                            return extractDataUrlFromAssetModuleSource(
+                                assetModuleSource.source().toString()
+                            );
+                        }
+
+                        return publicPath + assetModule.buildInfo.filename;
+                    }
                 }
-                if (isLoadedWithKnownAssetLoader(assetModule)) {
-                    return extractFilenameFromAssetModule(assetModule);
-                } else {
-                    return assetModule.buildInfo.filename;
-                }
-            })
-        );
+            );
+        });
 
     return cssChunks;
 }

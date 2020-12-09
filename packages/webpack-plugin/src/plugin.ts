@@ -301,7 +301,13 @@ export class StylableWebpackPlugin {
                         const cssSource = createStaticCSS(
                             staticPublicPath,
                             stylableModules,
-                            assetsModules
+                            assetsModules,
+
+                            compilation.chunkGraph,
+                            compilation.moduleGraph,
+                            'CSS' /*runtime*/,
+                            compilation.runtimeTemplate,
+                            compilation.dependencyTemplates
                         ).join('\n');
 
                         const contentHash = outputOptionsAwareHashContent(
