@@ -38,7 +38,7 @@
     "@types/lodash.findlast": "^4.6.6",
     "@types/lodash.upperfirst": "^4.3.6",
     "@types/memory-fs": "^0.3.2",
-    "@types/mini-css-extract-plugin": "^1.2.1",
+    "@types/mini-css-extract-plugin": "^1.2.2",
     "@types/mocha": "^8.2.0",
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",
