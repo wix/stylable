@@ -12,7 +12,7 @@
   },
   "peerDependencies": {
     "@stylable/core": ">=3",
-    "webpack": "~4"
+    "webpack": "^4.0.0"
   },
   "dependencies": {
     "@stylable/module-utils": "^3.11.9",
