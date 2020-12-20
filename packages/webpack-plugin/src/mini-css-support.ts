@@ -14,12 +14,12 @@ export function injectCssModules(
     stylableModules: Set<NormalModule>,
     assetsModules: Map<string, NormalModule>
 ) {
-    const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
-    const chunkGraph = compilation.chunkGraph!
-
     const CssModule = getCssModule();
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
+        const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
+        const chunkGraph = compilation.chunkGraph!;
+
         for (const module of stylableModules) {
             const cssModule = new CssModule({
                 context: module.context,
