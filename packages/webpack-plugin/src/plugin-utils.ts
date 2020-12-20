@@ -69,7 +69,7 @@ interface ReplaceMappedCSSAssetPlaceholdersOptions {
     assetsModules: Map<string, NormalModule>;
     chunkGraph: ChunkGraph;
     moduleGraph: ModuleGraph;
-    runtime: string | StringSortableSet;
+    runtime?: string | StringSortableSet;
     runtimeTemplate: RuntimeTemplate;
     dependencyTemplates: DependencyTemplates;
 }
@@ -117,8 +117,8 @@ export function replaceMappedCSSAssetPlaceholders({
     );
 }
 
-export function extractFilenameFromAssetModule(m: Module, publicPath: string): string {
-    const source = m.originalSource().source();
+export function extractFilenameFromAssetModule(m: NormalModule, publicPath: string): string {
+    const source = m.originalSource()!.source();
     let match = source.toString().match(/__webpack_public_path__\s*\+\s*"(.*?)"/);
     if (match) {
         return publicPath + match[1];
@@ -224,7 +224,8 @@ export function getStylableBuildMeta(module: Module): StylableBuildMeta {
 }
 
 export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
-    const { chunkGraph, moduleGraph } = compilation;
+    const moduleGraph = compilation.moduleGraph;
+    const chunkGraph = compilation.chunkGraph!;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
         ({ resolvedOriginModule, dependency }) =>

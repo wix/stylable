@@ -294,12 +294,14 @@ export class ProjectRunner {
         const chunkByName: any = {};
         compilation.chunks.forEach((chunk) => {
             const names = [];
-            const modules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
+            const modules = compilation.chunkGraph!.getChunkModulesIterableBySourceType(
                 chunk,
                 'javascript'
             );
-            for (const module of modules) {
-                names.push(module.identifier().split(/[\\/]/).slice(-2).join('/'));
+            if (modules) {
+                for (const module of modules) {
+                    names.push(module.identifier().split(/[\\/]/).slice(-2).join('/'));
+                }
             }
             chunkByName[chunk.name] = names;
         });

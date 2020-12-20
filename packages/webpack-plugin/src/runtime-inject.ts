@@ -25,7 +25,7 @@ interface DependencyTemplateContext {
     moduleGraph: ModuleGraph;
     runtimeRequirements: Set<string>;
     runtimeTemplate: RuntimeTemplate;
-    runtime: string | StringSortableSet;
+    runtime?: string | StringSortableSet;
     chunkGraph: ChunkGraph;
     dependencyTemplates: DependencyTemplates;
 }

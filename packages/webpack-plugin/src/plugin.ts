@@ -29,7 +29,13 @@ import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadStylableConfig } from './load-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
-import type { DependencyClass, LoaderData, NormalModuleFactory, StylableBuildMeta } from './types';
+import type {
+    DependencyClass,
+    LoaderData,
+    NormalModuleFactory,
+    StylableBuildMeta,
+    StylableLoaderContext,
+} from './types';
 import { parse } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
@@ -168,7 +174,8 @@ export class StylableWebpackPlugin {
 
         NormalModule.getCompilationHooks(compilation).loader.tap(
             StylableWebpackPlugin.name,
-            (loaderContext, module) => {
+            (webpackLoaderContext, module) => {
+                const loaderContext = webpackLoaderContext as StylableLoaderContext;
                 if (isStylableModule(module)) {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
@@ -303,7 +310,7 @@ export class StylableWebpackPlugin {
                             stylableModules,
                             assetsModules,
 
-                            compilation.chunkGraph,
+                            compilation.chunkGraph!,
                             compilation.moduleGraph,
                             'CSS' /*runtime*/,
                             compilation.runtimeTemplate,
@@ -317,7 +324,7 @@ export class StylableWebpackPlugin {
                         );
 
                         const cssBundleFilename = getFileName(this.options.filename, {
-                            hash: compilation.hash,
+                            hash: compilation.hash!,
                             contenthash: contentHash,
                         });
 
@@ -332,12 +339,7 @@ export class StylableWebpackPlugin {
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
-                injectCssModules(
-                    compilation,
-                    staticPublicPath,
-                    stylableModules,
-                    assetsModules
-                );
+                injectCssModules(compilation, staticPublicPath, stylableModules, assetsModules);
             }
         }
     }

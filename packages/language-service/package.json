@@ -5,7 +5,7 @@
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
   "scripts": {
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
     "test": "yarn test:unit",
     "test:unit": "mocha test/lib/**/*.spec.ts test/lib/*.spec.ts",

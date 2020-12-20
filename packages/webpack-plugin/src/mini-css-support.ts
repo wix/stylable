@@ -14,7 +14,8 @@ export function injectCssModules(
     stylableModules: Set<NormalModule>,
     assetsModules: Map<string, NormalModule>
 ) {
-    const { chunkGraph, moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
+    const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
+    const chunkGraph = compilation.chunkGraph!
 
     const CssModule = getCssModule();
 
@@ -42,10 +43,9 @@ export function injectCssModules(
             });
 
             compilation.modules.add(cssModule);
-
-            for (const chunk of compilation.chunkGraph.getModuleChunksIterable(module)) {
+            for (const chunk of chunkGraph.getModuleChunksIterable(module)) {
                 const [chunkGroup] = chunk.groupsIterable;
-                compilation.chunkGraph.connectChunkAndModule(chunk, cssModule);
+                chunkGraph.connectChunkAndModule(chunk, cssModule);
                 chunkGroup.setModulePostOrderIndex(cssModule, module.buildMeta.stylable.depth);
             }
         }
