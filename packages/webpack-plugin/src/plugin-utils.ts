@@ -9,7 +9,7 @@ import {
     webpackCreateHash,
     webpackOutputOptions,
 } from './types';
-const { makePathsRelative } = require('webpack/lib/util/identifier');
+
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
     map = (item: T): O => (item as unknown) as O,
@@ -144,37 +144,6 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
         return match[1];
     }
     throw new Error('unknown data url asset module format ' + source);
-}
-
-export function getAssetOutputPath(
-    createHash: Compiler['webpack']['util']['createHash'],
-    module: NormalModule,
-    compilation: Compilation,
-    runtime?: string,
-    staticFilename?: string /* data: */
-) {
-    const { runtimeTemplate, chunkGraph } = compilation;
-    const assetModuleFilename = staticFilename || runtimeTemplate.outputOptions.assetModuleFilename;
-    const hash = createHash(runtimeTemplate.outputOptions.hashFunction as string);
-    if (runtimeTemplate.outputOptions.hashSalt) {
-        hash.update(runtimeTemplate.outputOptions.hashSalt);
-    }
-    hash.update(module.originalSource().buffer());
-    const fullHash = /** @type {string} */ hash.digest(runtimeTemplate.outputOptions.hashDigest);
-    const contentHash = fullHash.slice(0, runtimeTemplate.outputOptions.hashDigestLength);
-    module.buildInfo.fullContentHash = fullHash;
-    const { path: filename } = compilation.getAssetPathWithInfo(assetModuleFilename as any, {
-        module,
-        runtime,
-        filename: makePathsRelative(
-            compilation.compiler.context,
-            module.matchResource || module.resource,
-            compilation.compiler.root
-        ).replace(/^\.\//, ''),
-        chunkGraph,
-        contentHash: contentHash as string,
-    });
-    return filename;
 }
 
 export function isLoadedWithKnownAssetLoader(module: Module) {
