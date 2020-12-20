@@ -22,10 +22,10 @@
     "js-beautify": "^1.13.0",
     "postcss": "^8.2.1",
     "postcss-value-parser": "^4.1.0",
-    "vscode-css-languageservice": "^5.0.1",
+    "vscode-css-languageservice": "^5.0.2",
     "vscode-languageserver": "^7.0.0",
     "vscode-languageserver-textdocument": "^1.0.1",
-    "vscode-uri": "^3.0.0"
+    "vscode-uri": "^3.0.1"
   },
   "author": "Wix.com",
   "files": [
