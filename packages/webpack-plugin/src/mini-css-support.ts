@@ -1,11 +1,5 @@
 import { Compilation, Compiler, NormalModule } from 'webpack';
-import { webpackCreateHash } from './types';
-import {
-    replaceCSSAssetPlaceholders,
-    extractFilenameFromAssetModule,
-    getAssetOutputPath,
-    isLoadedWithKnownAssetLoader,
-} from './plugin-utils';
+import { replaceMappedCSSAssetPlaceholders, getStylableBuildMeta } from './plugin-utils';
 
 const memorize = require('webpack/lib/util/memorize');
 
@@ -17,10 +11,11 @@ const getCssModule = memorize(() => {
 export function injectCssModules(
     compilation: Compilation,
     staticPublicPath: string,
-    createHash: webpackCreateHash,
     stylableModules: Set<NormalModule>,
     assetsModules: Map<string, NormalModule>
 ) {
+    const { chunkGraph, moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
+
     const CssModule = getCssModule();
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
@@ -29,31 +24,16 @@ export function injectCssModules(
                 context: module.context,
                 identifier: module.resource.replace('.st.css', '.css') + '?stylable-css-inject',
                 identifierIndex: 1,
-                content: replaceCSSAssetPlaceholders(
-                    module.buildMeta.stylable,
+                content: replaceMappedCSSAssetPlaceholders({
+                    assetsModules: assetsModules,
                     staticPublicPath,
-                    (resourcePath, publicPath) => {
-                        //TODO: fix base64 inline assets
-                        const assetModule = assetsModules.get(resourcePath);
-                        if (!assetModule) {
-                            throw new Error('Missing asset module for ' + resourcePath);
-                        }
-                        if (isLoadedWithKnownAssetLoader(assetModule)) {
-                            return extractFilenameFromAssetModule(assetModule, publicPath);
-                        } else {
-                            return (
-                                publicPath +
-                                getAssetOutputPath(
-                                    createHash,
-                                    assetModule,
-                                    compilation,
-                                    undefined,
-                                    undefined
-                                )
-                            );
-                        }
-                    }
-                ),
+                    chunkGraph,
+                    moduleGraph,
+                    dependencyTemplates,
+                    runtime: 'CSS' /*runtime*/,
+                    runtimeTemplate,
+                    stylableBuildMeta: getStylableBuildMeta(module),
+                }),
                 media: '',
                 sourceMap: null,
             });

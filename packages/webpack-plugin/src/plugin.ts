@@ -335,7 +335,6 @@ export class StylableWebpackPlugin {
                 injectCssModules(
                     compilation,
                     staticPublicPath,
-                    util.createHash,
                     stylableModules,
                     assetsModules
                 );

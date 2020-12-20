@@ -11,13 +11,7 @@ import {
     sources,
     ChunkGraph,
 } from 'webpack';
-import {
-    extractFilenameFromAssetModule,
-    replaceCSSAssetPlaceholders,
-    isLoadedWithKnownAssetLoader,
-    getStylableBuildMeta,
-    extractDataUrlFromAssetModuleSource,
-} from './plugin-utils';
+import { getStylableBuildMeta, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
 import {
     DependencyTemplates,
     RuntimeTemplate,
@@ -78,37 +72,16 @@ export class InjectDependencyTemplate {
             return;
         }
         if (stylableBuildMeta.cssInjection === 'js') {
-            const css = replaceCSSAssetPlaceholders(
+            const css = replaceMappedCSSAssetPlaceholders({
+                assetsModules: this.assetsModules,
+                staticPublicPath: this.staticPublicPath,
+                chunkGraph,
+                moduleGraph,
+                dependencyTemplates,
+                runtime,
+                runtimeTemplate,
                 stylableBuildMeta,
-                this.staticPublicPath,
-                (resourcePath, publicPath) => {
-                    const assetModule = this.assetsModules.get(resourcePath);
-                    if (!assetModule) {
-                        throw new Error('Missing asset module for ' + resourcePath);
-                    }
-                    if (isLoadedWithKnownAssetLoader(assetModule)) {
-                        return extractFilenameFromAssetModule(assetModule, publicPath);
-                    } else {
-                        const assetModuleSource = assetModule.generator.generate(assetModule, {
-                            chunkGraph,
-                            moduleGraph,
-                            runtime,
-                            runtimeRequirements: new Set(),
-                            runtimeTemplate,
-                            dependencyTemplates,
-                            type: 'asset/resource',
-                        });
-
-                        if (assetModule.buildInfo.dataUrl) {
-                            return extractDataUrlFromAssetModuleSource(
-                                assetModuleSource.source().toString()
-                            );
-                        }
-
-                        return publicPath + assetModule.buildInfo.filename;
-                    }
-                }
-            );
+            });
 
             if (!(module instanceof NormalModule)) {
                 throw new Error('InjectDependencyTemplate should only be used on stylable modules');

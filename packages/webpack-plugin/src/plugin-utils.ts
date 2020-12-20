@@ -4,6 +4,7 @@ import { UnusedDependency } from './unused-dependency';
 import {
     DependencyTemplates,
     RuntimeTemplate,
+    StringSortableSet,
     StylableBuildMeta,
     webpackCreateHash,
     webpackOutputOptions,
@@ -59,6 +60,60 @@ export function replaceCSSAssetPlaceholders(
 ) {
     return css.replace(/__stylable_url_asset_(\d+?)__/g, (_match, index) =>
         getAssetOutputPath(urls[Number(index)], publicPath)
+    );
+}
+
+interface ReplaceMappedCSSAssetPlaceholdersOptions {
+    stylableBuildMeta: StylableBuildMeta;
+    staticPublicPath: string;
+    assetsModules: Map<string, NormalModule>;
+    chunkGraph: ChunkGraph;
+    moduleGraph: ModuleGraph;
+    runtime: string | StringSortableSet;
+    runtimeTemplate: RuntimeTemplate;
+    dependencyTemplates: DependencyTemplates;
+}
+
+export function replaceMappedCSSAssetPlaceholders({
+    stylableBuildMeta,
+    staticPublicPath,
+    assetsModules,
+    chunkGraph,
+    moduleGraph,
+    runtime,
+    runtimeTemplate,
+    dependencyTemplates,
+}: ReplaceMappedCSSAssetPlaceholdersOptions) {
+    return replaceCSSAssetPlaceholders(
+        stylableBuildMeta,
+        staticPublicPath,
+        (resourcePath, publicPath) => {
+            const assetModule = assetsModules.get(resourcePath);
+            if (!assetModule) {
+                throw new Error('Missing asset module for ' + resourcePath);
+            }
+            if (isLoadedWithKnownAssetLoader(assetModule)) {
+                return extractFilenameFromAssetModule(assetModule, publicPath);
+            } else {
+                const assetModuleSource = assetModule.generator.generate(assetModule, {
+                    chunkGraph,
+                    moduleGraph,
+                    runtime,
+                    runtimeRequirements: new Set(),
+                    runtimeTemplate,
+                    dependencyTemplates,
+                    type: 'asset/resource',
+                });
+
+                if (assetModule.buildInfo.dataUrl) {
+                    return extractDataUrlFromAssetModuleSource(
+                        assetModuleSource.source().toString()
+                    );
+                }
+
+                return publicPath + assetModule.buildInfo.filename;
+            }
+        }
     );
 }
 
@@ -176,37 +231,16 @@ export function createStaticCSS(
         .filter((m) => m.buildMeta.stylable.isUsed !== false)
         .sort((m1, m2) => m1.buildMeta.stylable.depth - m2.buildMeta.stylable.depth)
         .map((m) => {
-            return replaceCSSAssetPlaceholders(
-                m.buildMeta.stylable,
+            return replaceMappedCSSAssetPlaceholders({
+                assetsModules: assetsModules,
                 staticPublicPath,
-                (resourcePath, publicPath) => {
-                    const assetModule = assetsModules.get(resourcePath);
-                    if (!assetModule) {
-                        throw new Error('Missing asset module for ' + resourcePath);
-                    }
-                    if (isLoadedWithKnownAssetLoader(assetModule)) {
-                        return extractFilenameFromAssetModule(assetModule, publicPath);
-                    } else {
-                        const assetModuleSource = assetModule.generator.generate(assetModule, {
-                            chunkGraph,
-                            moduleGraph,
-                            runtime,
-                            runtimeRequirements: new Set(),
-                            runtimeTemplate,
-                            dependencyTemplates,
-                            type: 'asset/resource',
-                        });
-
-                        if (assetModule.buildInfo.dataUrl) {
-                            return extractDataUrlFromAssetModuleSource(
-                                assetModuleSource.source().toString()
-                            );
-                        }
-
-                        return publicPath + assetModule.buildInfo.filename;
-                    }
-                }
-            );
+                chunkGraph,
+                moduleGraph,
+                dependencyTemplates,
+                runtime,
+                runtimeTemplate,
+                stylableBuildMeta: m.buildMeta.stylable,
+            });
         });
 
     return cssChunks;
