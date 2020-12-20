@@ -153,12 +153,9 @@ export class CssService {
                     return false;
                 }
                 if (diag.code === 'css-rparentexpected' || diag.code === 'css-identifierexpected') {
-                    const endOfLine = diag.range.end;
-                    endOfLine.character = -1;
-
                     const line = readDocRange(
                         document,
-                        Range.create(Position.create(diag.range.start.line, 0), endOfLine)
+                        Range.create(Position.create(diag.range.start.line, 0), diag.range.end)
                     );
                     const stateStart = findPseudoStateStart(line, diag.range.start.character);
 
