@@ -15,8 +15,8 @@
     "prettify": "npx prettier \"packages/**/*.{js,ts,tsx}\" --write"
   },
   "devDependencies": {
-    "@file-services/memory": "^5.2.0",
-    "@file-services/node": "^5.2.0",
+    "@file-services/memory": "^5.2.1",
+    "@file-services/node": "^5.2.1",
     "@ts-tools/build": "^2.1.1",
     "@ts-tools/node": "^2.1.1",
     "@ts-tools/webpack-loader": "^2.1.1",
@@ -53,8 +53,8 @@
     "@types/webpack": "^4.41.25",
     "@types/webpack-sources": "^2.1.0",
     "@types/yargs": "^15.0.12",
-    "@typescript-eslint/eslint-plugin": "^4.10.0",
-    "@typescript-eslint/parser": "^4.10.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
     "autoprefixer": "^10.1.0",
     "chai": "^4.2.0",
     "chai-subset": "^1.6.0",
