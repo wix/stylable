@@ -1,6 +1,6 @@
 {
   "name": "@stylable/language-service",
-  "version": "3.11.11",
+  "version": "3.11.12",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
