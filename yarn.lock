@@ -113,48 +113,48 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-"@file-services/memory@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.2.1.tgz#e76febd25701155394419ad58aaecb1b5cf7d041"
-  integrity sha512-Z5mLf+g5uX+gcRAXodcQHlXZgUo1wjscw9o3iihWnIyg8phxC6yAxBWsOtnmfPOQKruYfpOFj7mSXXm8SXGmiQ==
+"@file-services/memory@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/memory/-/memory-5.3.0.tgz#86006f2cf89aedf0ac917f726df184e626880698"
+  integrity sha512-JruAfESvBnh/UVd65jZrNoRkUanBhb9RpHHM8/qjDx7Qsr6Bv+nz/4Pp0BD0C2+Nqa1rG83NYCiBVl0b/QlEHw==
   dependencies:
-    "@file-services/path" "^5.2.1"
-    "@file-services/types" "^5.2.1"
-    "@file-services/utils" "^5.2.1"
+    "@file-services/path" "^5.3.0"
+    "@file-services/types" "^5.3.0"
+    "@file-services/utils" "^5.3.0"
 
-"@file-services/node@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-5.2.1.tgz#15aba82ae4027f9731e775d843f519b17b0e0d84"
-  integrity sha512-dMAvZVi7eDIh0BBSH6xG+Lwi73rxUOMn8/eWRsd6ZMsYrydylDTaz6kUhhPXUDyFlupBeheYNFhhO4oEkWRbqA==
+"@file-services/node@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/node/-/node-5.3.0.tgz#dfb8f435ceb53f30938f94ed232a8a9d93228568"
+  integrity sha512-obU7zvuHv7jNKGSNrS6gNbgVN+U6ehx33spgTBAUNJknOkcgA0QJqBLCJJb1Cosxnj8qEno4M7Ai1G5C2LbpSA==
   dependencies:
-    "@file-services/types" "^5.2.1"
-    "@file-services/utils" "^5.2.1"
+    "@file-services/types" "^5.3.0"
+    "@file-services/utils" "^5.3.0"
 
-"@file-services/path@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/path/-/path-5.2.1.tgz#7058a249074453832bb876268f107effc9f5c678"
-  integrity sha512-0qyuvPUedjHCYNVrLGyQZUuc79keggc/czPllIoDOaytPTOHBgLfrZ4qrzmcUehS1J5m9z5Cl/oyVDgVNWrecQ==
+"@file-services/path@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/path/-/path-5.3.0.tgz#2d8b0fca81602153a30c0a1009e76430de9c8c1d"
+  integrity sha512-3iXzrCTfF+MXywcYUBvAVbv7uONK/hZO4Xw3LILJdRNkEM1kA9NsZ4KtZqS1FqcJQ8yD2KyoY/I3wG2YEvpIng==
   dependencies:
-    "@file-services/types" "^5.2.1"
+    "@file-services/types" "^5.3.0"
 
-"@file-services/types@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-5.2.1.tgz#076eb7b1a4e43c7a31f126018718d4b17cb25911"
-  integrity sha512-LXvxY3+BLFEE+Gya0MvSlpGL0PIBYmemqnqSSdHe1OMDbD+AwtwjhE47aoc/lV5aLxleRtjod1PQNl2zx1xyBw==
+"@file-services/types@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/types/-/types-5.3.0.tgz#1ab6a36d8c3f49e7e371a33156d5f579fe5500a4"
+  integrity sha512-VnufBuTMRHFLALYPpje5QcV8bnQT4S/TCIK2LT5x3w0t9AHbq/Dpkkfxk2OS6/zGCiOXqRGqVmCEYPvSCHQMDw==
 
-"@file-services/typescript@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-5.2.1.tgz#0f78fd7c732d6630cc142e594a87a38e04be50b7"
-  integrity sha512-vjQWrUCVuLeGMm40z4v59jI1B7V6JudOnfi3Yjc9YfTviQVnzBZBh6D8vahG6FRS+BJApjDOepRyHPv3fuJlUg==
+"@file-services/typescript@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/typescript/-/typescript-5.3.0.tgz#cc26c1589947f4e84acf77e9403165e3111a998c"
+  integrity sha512-oLhEjHfdC0LIbbOcjSt4cU3Ql2aPlTkzYGSBfT0gTEpxNcS8p80LI/w7ozf8VXSdcaAdB7zr24jyL1Ch9+kYUA==
   dependencies:
-    "@file-services/types" "^5.2.1"
+    "@file-services/types" "^5.3.0"
 
-"@file-services/utils@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-5.2.1.tgz#39280b98b040b6f347a342c7f330b167c4cdba2f"
-  integrity sha512-ZjcU5Ja3JWZ4y48bGyUipPJHc2IdNcPL7OLjOSCuOiRuV9qmBzNmBxJp6ynb+JVT3eLwhrih7h2aYCUT4D4Urg==
+"@file-services/utils@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@file-services/utils/-/utils-5.3.0.tgz#4aa7792b2c0c04091e876bdf561868446ffd6ce8"
+  integrity sha512-MsSH7ol0ipIDdjAX03yevdwjVZSWhAG7Ko+kKOQqPBkWeTfLsV2XCvoQzoltB/JeVtxlMVLkrbqwjf175oHjNw==
   dependencies:
-    "@file-services/types" "^5.2.1"
+    "@file-services/types" "^5.3.0"
 
 "@lerna/add@3.21.0":
   version "3.21.0"
@@ -1359,10 +1359,10 @@
     "@types/chai" "*"
     "@types/sinon" "*"
 
-"@types/sinon@*", "@types/sinon@^9.0.9":
-  version "9.0.9"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-9.0.9.tgz#115843b491583f924080f684b6d0d7438344f73c"
-  integrity sha512-z/y8maYOQyYLyqaOB+dYQ6i0pxKLOsfwCmHmn4T7jS/SDHicIslr37oE3Dg8SCqKrKeBy6Lemu7do2yy+unLrw==
+"@types/sinon@*", "@types/sinon@^9.0.10":
+  version "9.0.10"
+  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-9.0.10.tgz#7fb9bcb6794262482859cab66d59132fca18fcf7"
+  integrity sha512-/faDC0erR06wMdybwI/uR8wEKV/E83T0k4sepIpB7gXuy2gzx2xiOjmztq6a2Y6rIGJ04D+6UU0VBmWy+4HEMA==
   dependencies:
     "@types/sinonjs__fake-timers" "*"
 
@@ -1425,9 +1425,9 @@
     source-map "^0.6.0"
 
 "@types/yargs-parser@*":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-15.0.0.tgz#cb3f9f741869e20cce330ffbeb9271590483882d"
-  integrity sha512-FA/BWv8t8ZWJ+gEOnLLd8ygxH/2UFbAvgEonyfN6yWGLKc7zVjbpl2Y4CTjid9h2RfgPP6SEt6uHwEOply00yw==
+  version "20.2.0"
+  resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-20.2.0.tgz#dd3e6699ba3237f0348cd085e4698780204842f9"
+  integrity sha512-37RSHht+gzzgYeobbG+KWryeAW8J33Nhr69cjTqSYymXVZEN9NbRYWoYlRtDhHKPVT1FyNKwaTPC1NynKZpzRA==
 
 "@types/yargs@^15.0.12":
   version "15.0.12"
@@ -3654,9 +3654,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.621:
-  version "1.3.630"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.630.tgz#102e930466e53ab7fde6009c2d50b8a4574b543e"
-  integrity sha512-HSTsvqOrR3kWsoekKu0EOQXR/YOncKs3HAys9lysvIS2ec/mlfV1ZoLHSx00semK+PscVJwqcvBN4ayGPs++fA==
+  version "1.3.633"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.633.tgz#16dd5aec9de03894e8d14a1db4cda8a369b9b7fe"
+  integrity sha512-bsVCsONiVX1abkWdH7KtpuDAhsQ3N3bjPYhROSAXE78roJKet0Y5wznA14JE9pzbwSZmSMAW6KiKYf1RvbTJkA==
 
 elliptic@^6.5.3:
   version "6.5.3"
@@ -4448,9 +4448,9 @@ forwarded@~0.1.2:
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
 
 fraction.js@^4.0.12:
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.0.12.tgz#0526d47c65a5fb4854df78bc77f7bec708d7b8c3"
-  integrity sha512-8Z1K0VTG4hzYY7kA/1sj4/r1/RWLBD3xwReT/RCrUCbzPszjNQCCsy3ktkU/eaEqX3MYa4pY37a52eiBlPMlhA==
+  version "4.0.13"
+  resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.0.13.tgz#3c1c315fa16b35c85fffa95725a36fa729c69dfe"
+  integrity sha512-E1fz2Xs9ltlUp+qbiyx9wmt2n9dRzPsS11Jtdb8D2o+cC7wr9xkkKsVKJuBX0ST+LVS+LhLO+SbLJNtfWcJvXA==
 
 fragment-cache@^0.2.1:
   version "0.2.1"
@@ -9537,9 +9537,9 @@ typical@^5.0.0, typical@^5.2.0:
   integrity sha512-dvdQgNDNJo+8B2uBQoqdb11eUCE1JQXhvjC/CZtgvZseVd5TYMXnq0+vuUemXbd/Se29cTaUuPX3YIc2xgbvIg==
 
 uglify-js@^3.1.4:
-  version "3.12.2"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.12.2.tgz#c7ae89da0ed1bb58999c7fce07190b347fdbdaba"
-  integrity sha512-rWYleAvfJPjduYCt+ELvzybNah/zIkRteGXIBO8X0lteRZPGladF61hFi8tU7qKTsF7u6DUQCtT9k00VlFOgkg==
+  version "3.12.3"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.12.3.tgz#bb26c4abe0e68c55e9776bca9bed99a4df73facf"
+  integrity sha512-feZzR+kIcSVuLi3s/0x0b2Tx4Iokwqt+8PJM7yRHKuldg4MLdam4TCFeICv+lgDtuYiCtdmrtIP+uN9LWvDasw==
 
 uid-number@0.0.6:
   version "0.0.6"
@@ -9777,15 +9777,15 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vscode-css-languageservice@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/vscode-css-languageservice/-/vscode-css-languageservice-5.0.2.tgz#92ec069c797dfcf5a67313a18f0211c27b0c6bf6"
-  integrity sha512-iGOukMyK4EVDIArBMuDmKpBDvg+zoXPyJZi2mGPICKkKTiK8mDAlTr4uxhldg/dwpABEaMlNb+5xeCFDaUyRlQ==
+vscode-css-languageservice@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/vscode-css-languageservice/-/vscode-css-languageservice-5.0.0.tgz#04fd899e25407a2fccd8f59a5896e2f020269bda"
+  integrity sha512-DTMa8QbVmujFPvD3NxoC5jjIXCyCG+cvn3hNzwQRhvhsk8LblNymBZBwzfcDdgEtqsi4O/2AB5HnMIRzxhzEzg==
   dependencies:
     vscode-languageserver-textdocument "^1.0.1"
     vscode-languageserver-types "^3.16.0"
     vscode-nls "^5.0.0"
-    vscode-uri "^3.0.1"
+    vscode-uri "^2.1.2"
 
 vscode-jsonrpc@6.0.0:
   version "6.0.0"
@@ -9822,10 +9822,10 @@ vscode-nls@^5.0.0:
   resolved "https://registry.yarnpkg.com/vscode-nls/-/vscode-nls-5.0.0.tgz#99f0da0bd9ea7cda44e565a74c54b1f2bc257840"
   integrity sha512-u0Lw+IYlgbEJFF6/qAqG2d1jQmJl0eyAGJHoAJqr2HT4M2BNuQYSEiSE75f52pXHSJm8AlTjnLLbBFPrdz2hpA==
 
-vscode-uri@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/vscode-uri/-/vscode-uri-3.0.1.tgz#c36502fcf6fa57e63441d3804b5826018e26062e"
-  integrity sha512-LnMgm97uZM2JDjX/vKbbCk+phm++Ih31e5Ao3lqokawhDRocp2ZAVMRiIhPZx6fS5Sqnquyhxh8ABn9TWCvHoA==
+vscode-uri@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/vscode-uri/-/vscode-uri-2.1.2.tgz#c8d40de93eb57af31f3c715dd650e2ca2c096f1c"
+  integrity sha512-8TEXQxlldWAuIODdukIb+TR5s+9Ds40eSJrw+1iDDA9IFORPjMELarNQE3myz5XIkWWpdprmJjm1/SxMlWOC8A==
 
 w3c-hr-time@^1.0.2:
   version "1.0.2"
