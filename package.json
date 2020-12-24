@@ -40,7 +40,7 @@
     "@types/memory-fs": "^0.3.2",
     "@types/mini-css-extract-plugin": "^1.2.2",
     "@types/mocha": "^8.2.0",
-    "@types/murmurhash": "^0.0.1",
+    "@types/murmurhash": "^2.0.0",
     "@types/node": "10",
     "@types/puppeteer": "^5.4.2",
     "@types/react": "^17.0.0",

@@ -1268,10 +1268,12 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.0.tgz#3eb56d13a1de1d347ecb1957c6860c911704bc44"
   integrity sha512-/Sge3BymXo4lKc31C8OINJgXLaw+7vL1/L1pGiBNpGrBiT8FQiaFpSYV0uhTaG4y78vcMBTMFsWaHDvuD+xGzQ==
 
-"@types/murmurhash@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@types/murmurhash/-/murmurhash-0.0.1.tgz#564a85100cb16eeec43218a09b08cd87da076afc"
-  integrity sha512-jiYuTCJ60WxEDOkJFs2192G/nH0PY8mtyHeZkv5fOQQ5DkSkmEgY7YLzCxyM8Y8jibd8Dprb9bGth4EO34mAjw==
+"@types/murmurhash@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/murmurhash/-/murmurhash-2.0.0.tgz#31de9549153d1a43bb32c3f0a02dbb2c657644a6"
+  integrity sha512-AYKjtkyGM6Stia77QpgOwmxJs4cPhFr2/pjufU7aiOkhd81tfBcPyW35gT2OpBLJiZePoJc4dsQ1pYFaUt26xQ==
+  dependencies:
+    murmurhash "*"
 
 "@types/node@*", "@types/node@>= 8":
   version "14.14.14"
@@ -6611,6 +6613,11 @@ multimatch@^3.0.0:
     array-union "^1.0.2"
     arrify "^1.0.1"
     minimatch "^3.0.4"
+
+murmurhash@*:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash/-/murmurhash-2.0.0.tgz#556779daf7c39a0d2a3f5a9d080d84bf4833f9ee"
+  integrity sha512-Uo7ZHw+PLe2Q8/qbPIVYxAaoi+TYGZwu1a8ryeeASRXJLRSaLCblAGfjh02eu4+/9aUJBpkHXZv42AXmzOW2kw==
 
 murmurhash@^1.0.0:
   version "1.0.0"
