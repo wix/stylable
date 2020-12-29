@@ -1,6 +1,6 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.5",
   "description": "Stylable core test-kit",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0-alpha.4",
+    "@stylable/core": "^4.0.0-alpha.5",
     "chai": "^4.2.0",
     "flat": "^5.0.2",
     "postcss": "^8.2.1"
