@@ -37,7 +37,7 @@ export function isStylableModule(module: any): module is NormalModule {
     return module.resource?.endsWith('.st.css');
 }
 
-export function isAssetModule(module: Module) {
+export function isAssetModule(module: Module): module is NormalModule {
     return module.type.startsWith('asset/');
 }
 
@@ -146,7 +146,9 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
     throw new Error('unknown data url asset module format ' + source);
 }
 
-export function isLoadedWithKnownAssetLoader(module: Module) {
+type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'url-loader' }] };
+
+export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
     if (module instanceof NormalModule) {
         return !!module.loaders.find(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)

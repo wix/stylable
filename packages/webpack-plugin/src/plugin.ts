@@ -96,13 +96,13 @@ export class StylableWebpackPlugin {
             this.createStylable(compiler);
         });
 
-        const assetsModules = new Map<string, NormalModule>();
-        const stylableModules = new Set<NormalModule>();
-
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
                 const staticPublicPath = getStaticPublicPath(compilation);
+
+                const assetsModules = new Map<string, NormalModule>();
+                const stylableModules = new Set<NormalModule>();
 
                 this.modulesIntegration(compilation, stylableModules, assetsModules);
 
@@ -182,7 +182,6 @@ export class StylableWebpackPlugin {
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
-                        stylableModules.add(module);
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,
                             cssInjection: this.options.cssInjection,
@@ -206,6 +205,14 @@ export class StylableWebpackPlugin {
                         module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
                     };
                 }
+            }
+        );
+
+        compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, (modules) => {
+            for (const module of modules) {
+                if (isStylableModule(module) && module.buildMeta.stylable) {
+                    stylableModules.add(module);
+                }
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
                 }
@@ -213,7 +220,7 @@ export class StylableWebpackPlugin {
                     assetsModules.set(module.resource, module);
                 }
             }
-        );
+        });
 
         if (this.options.assetsMode === 'loader') {
             compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, () => {
