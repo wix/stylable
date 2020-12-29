@@ -96,12 +96,13 @@ export class StylableWebpackPlugin {
             this.createStylable(compiler);
         });
 
+        const assetsModules = new Map<string, NormalModule>();
+        const stylableModules = new Set<NormalModule>();
+
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
                 const staticPublicPath = getStaticPublicPath(compilation);
-                const assetsModules = new Map<string, NormalModule>();
-                const stylableModules = new Set<NormalModule>();
 
                 this.modulesIntegration(compilation, stylableModules, assetsModules);
 
