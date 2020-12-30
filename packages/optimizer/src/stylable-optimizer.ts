@@ -133,7 +133,9 @@ export class StylableOptimizer implements IStylableOptimizer {
 }
 
 export function removeCommentNodes(root: Root) {
-    root.walkComments((comment) => comment.remove());
+    root.walkComments((comment) => {
+        comment.remove();
+    });
     root.walkDecls((decl) => {
         const r: any = decl.raws;
         if (r.value) {

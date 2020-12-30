@@ -41,7 +41,9 @@ export function appendMixins(
         appendMixin(mix, transformer, rule, meta, variableOverride, cssVarsMapping, path);
     });
     rule.mixins.length = 0;
-    rule.walkDecls(mixinDeclRegExp, (node) => node.remove());
+    rule.walkDecls(mixinDeclRegExp, (node) => {
+        node.remove();
+    });
 }
 
 export function appendMixin(
