@@ -20,7 +20,7 @@
     "@stylable/core": "^3.11.13",
     "css-selector-tokenizer": "^0.7.3",
     "js-beautify": "^1.13.0",
-    "postcss": "^8.2.2",
+    "postcss": "^8.2.3",
     "postcss-value-parser": "^4.1.0",
     "vscode-css-languageservice": "^5.0.2",
     "vscode-languageserver": "^7.0.0",
