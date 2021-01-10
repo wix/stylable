@@ -1,7 +1,7 @@
 import { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
-import { safeParse } from './parser';
+import { CssParser, safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import {
@@ -31,6 +31,7 @@ export interface StylableConfig {
     resolveNamespace?: typeof processNamespace;
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
+    cssParser?: CssParser;
 }
 
 export class Stylable {
@@ -53,7 +54,8 @@ export class Stylable {
             config.mode,
             config.resolveNamespace,
             config.timedCacheOptions,
-            config.resolveModule
+            config.resolveModule,
+            config.cssParser
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -75,7 +77,8 @@ export class Stylable {
             timeout: 1,
             useTimer: true,
         },
-        protected resolveModule?: ModuleResolver
+        protected resolveModule?: ModuleResolver,
+        protected cssParser: CssParser = safeParse
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -84,7 +87,8 @@ export class Stylable {
             resolveOptions,
             this.resolveNamespace,
             timedCacheOptions,
-            resolveModule
+            resolveModule,
+            cssParser
         );
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
@@ -112,7 +116,7 @@ export class Stylable {
         if (typeof meta === 'string') {
             // TODO: refactor to use fileProcessor
             // meta = this.fileProcessor.processContent(meta, resourcePath + '');
-            const root = safeParse(meta, { from: resourcePath });
+            const root = this.cssParser(meta, { from: resourcePath });
             meta = new StylableProcessor(undefined, this.resolveNamespace).process(root);
         }
         const transformer = this.createTransformer(options);

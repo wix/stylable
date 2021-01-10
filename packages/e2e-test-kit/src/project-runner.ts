@@ -150,7 +150,7 @@ export class ProjectRunner {
 
     public async serve() {
         this.log('Start Server');
-        return new Promise((res) => {
+        return new Promise<void>((res) => {
             const child = spawn(
                 'node',
                 [
@@ -284,7 +284,7 @@ export class ProjectRunner {
             this.compiler = null;
         }
         if (this.watchingHandle) {
-            await new Promise((res) => this.watchingHandle?.close(res));
+            await new Promise<void>((res) => this.watchingHandle?.close(res));
             this.watchingHandle = null;
             this.log(`Watch closed`);
         }

@@ -42,7 +42,7 @@ export async function createProjectFromTemplate({
 
     // package name validation
     const targetDirectoryName = path.basename(targetDirectoryPath);
-    const { validForNewPackages, errors = [], warnings = [] } = validatePackageName(
+    const { validForNewPackages, warnings = [], errors = [] } = validatePackageName(
         targetDirectoryName
     );
     if (!validForNewPackages) {

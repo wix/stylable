@@ -52,6 +52,11 @@
       title: Extend Stylesheet
     - id: references/pseudo-classes
       title: Pseudo-Classes
+      subitems:
+        - id: custom-pseudo-classes-with-parameters
+          title: Parameter Types
+        - id: mapped-states
+          title: Mapped States
     - id: references/pseudo-elements
       title: Pseudo-Elements
     - id: references/global-selectors

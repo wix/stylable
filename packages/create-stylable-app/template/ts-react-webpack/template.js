@@ -19,7 +19,7 @@ module.exports = {
         'ts-loader',
         'typescript',
         'webpack@4',
-        'webpack-cli@3',
+        'webpack-cli',
         'webpack-dev-server',
     ],
     packageJson: {
@@ -30,8 +30,8 @@ module.exports = {
         scripts: {
             clean: 'rimraf dist',
             prebuild: 'npm run clean',
-            build: 'webpack --mode production --devtool false',
-            start: 'webpack-dev-server --open',
+            build: 'webpack --mode production --no-devtool',
+            start: 'webpack serve --open',
             serve: 'serve ./dist',
             lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',

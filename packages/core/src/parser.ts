@@ -10,6 +10,8 @@ export function cssObjectToAst(cssObject: CSSObject, sourceFile = '') {
     return processor.process(cssObject, { from: sourceFile, parser: postcssJS });
 }
 
+export type CssParser = typeof safeParse;
+
 export function safeParse(css: string, options: ProcessOptions = { from: 'style.css' }): Root {
     return safeParser(css, options);
 }
