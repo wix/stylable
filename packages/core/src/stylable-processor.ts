@@ -263,7 +263,7 @@ export class StylableProcessor {
                     this.meta.scopes.push(atRule);
                     break;
                 case 'st-import':
-                    if (atRule.parent.type !== 'root') {
+                    if (atRule.parent?.type !== 'root') {
                         this.diagnostics.warn(
                             atRule,
                             processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
@@ -757,6 +757,7 @@ export class StylableProcessor {
             named: {},
             rule: atRule,
             context: this.dirContext,
+            keyframes: {}
         };
         // simple import parts extraction for now no parser is needed.
         const isStarImport = atRule.params.match(/^\s*\*/);
@@ -772,7 +773,7 @@ export class StylableProcessor {
 
             importObj.defaultExport = def || '';
             setImportObjectFrom(from, this.dirContext, importObj);
-            importObj.named = parseNamed(named);
+            importObj.named = parseNamed(named, atRule, this.diagnostics).namedMap;
             if (!from) {
                 this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
             }

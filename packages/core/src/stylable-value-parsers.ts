@@ -130,7 +130,7 @@ export const SBTypesParsers = {
             types,
         };
     },
-    '-st-named'(value: string, node: postcss.Declaration, diagnostics: Diagnostics) {
+    '-st-named'(value: string, node: postcss.Declaration | postcss.AtRule, diagnostics: Diagnostics) {
         const namedMap: Record<string, string> = {};
         const keyframesMap: Record<string, string> = {};
         if (value) {
@@ -195,7 +195,7 @@ function handleNamedTokens(
     tokens: PostCSSParsedValue | FunctionNode,
     buckets: { namedMap: Record<string, string>; keyframesMap: Record<string, string> },
     key: keyof typeof buckets = 'namedMap',
-    node: postcss.Declaration,
+    node: postcss.Declaration | postcss.AtRule,
     diagnostics: Diagnostics
 ) {
     const { nodes } = tokens;
