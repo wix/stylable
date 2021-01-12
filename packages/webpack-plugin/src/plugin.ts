@@ -48,6 +48,7 @@ export interface Options {
     assetsMode?: 'url' | 'loader';
     runtimeStylesheetId?: 'module' | 'namespace';
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    target?: 'oldie' | 'modern';
     runtimeId?: string;
     optimize?: OptimizeOptions;
     optimizer?: StylableOptimizer;
@@ -80,6 +81,7 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
         ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
+    target: userOptions.target ?? 'modern'
 });
 
 export class StylableWebpackPlugin {
@@ -181,6 +183,7 @@ export class StylableWebpackPlugin {
                     loaderContext.stylable = this.stylable;
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
+                    loaderContext.target = this.options.target;
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,

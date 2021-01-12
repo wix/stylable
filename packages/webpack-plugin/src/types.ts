@@ -26,6 +26,7 @@ export interface StylableLoaderContext extends LoaderContext {
     stylable: Stylable;
     assetsMode: 'loader' | 'url';
     diagnosticsMode: 'auto' | 'strict' | 'loose';
+    target: 'oldie' | 'modern';
 
     flagStylableModule: (loaderData: LoaderData) => void;
 }
