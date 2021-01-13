@@ -96,14 +96,14 @@ export function isRoot(node: postcss.Node): node is postcss.Root {
 }
 
 export function pathFromPosition(
-    ast: postcss.Node,
+    ast: postcss.AnyNode,
     position: ProviderPosition,
-    res: postcss.Node[] = [],
+    res: postcss.AnyNode[] = [],
     includeSelector = false
-): postcss.Node[] {
+): postcss.AnyNode[] {
     res.push(ast);
     if (isContainer(ast) && ast.nodes) {
-        const childNode = ast.nodes.find((node: postcss.Node) => {
+        const childNode = ast.nodes.find((node) => {
             return isInNode(position, node, includeSelector);
         });
         if (childNode) {

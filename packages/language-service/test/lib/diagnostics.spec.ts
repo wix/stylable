@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 import { StylableLanguageService } from '../../src/lib/service';
 
-function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
+export function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
     const fs = createMemoryFs(files);
 
     const stylableLSP = new StylableLanguageService({

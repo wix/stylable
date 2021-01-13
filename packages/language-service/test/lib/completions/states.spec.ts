@@ -7,6 +7,7 @@ describe('States', () => {
         const str1 = ':hello';
         const str2 = ':goodbye';
         const str3 = ':holla';
+        const str4 = ':shmover';
         const createCompletion = (str: string, rng: ProviderRange, path?: string) =>
             asserters.stateSelectorCompletion(str.slice(1), rng, path);
 
@@ -87,6 +88,36 @@ describe('States', () => {
                     }
                 );
             });
+        });
+
+        str4.split('').forEach((_c, i) => {
+            const prefix = str4.slice(0, i);
+
+            it('should complete local root state on top level with prefix ' + prefix + ' ', () => {
+                const rng = createRange(4, 0, 4, 0 + i);
+                const asserter = asserters.getCompletions('states/top-level.st.css', prefix);
+                const exp: Array<Partial<Completion>> = [];
+                const compl = createCompletion(str4, rng);
+                exp.push(compl);
+                asserter.suggested(exp);
+            });
+
+            it(
+                'should complete local root state on top level from extends with prefix ' +
+                    prefix +
+                    ' ',
+                () => {
+                    const rng = createRange(9, 0, 9, 0 + i);
+                    const asserter = asserters.getCompletions(
+                        'states/top-level-with-extend.st.css',
+                        prefix
+                    );
+                    const exp: Array<Partial<Completion>> = [];
+                    const compl = createCompletion(str4, rng, './comp-to-import.st.css');
+                    exp.push(compl);
+                    asserter.suggested(exp);
+                }
+            );
         });
 
         it('should not complete state value after :: ', () => {

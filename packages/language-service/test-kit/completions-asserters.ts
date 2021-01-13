@@ -128,7 +128,7 @@ export const stScopeDirectiveCompletion: (rng: ProviderRange) => Partial<Complet
         label: '@st-scope',
         detail: 'Define an @st-scope',
         sortText: 'a',
-        insertText: '@st-scope $1 {\n\t$2\n}$0',
+        insertText: '@st-scope $1 {\n\t$2\n}',
         range: rng,
     };
 };
@@ -142,6 +142,17 @@ export const extendsDirectiveCompletion: (rng: ProviderRange) => Partial<Complet
         range: rng,
     };
 };
+
+export const stImportDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
+    return {
+        label: '@st-import',
+        detail: 'Define an @st-import',
+        sortText: 'a',
+        insertText: '@st-import $2 from "$1";',
+        range: rng,
+    };
+};
+
 export const importDefaultDirectiveCompletion: (rng: ProviderRange) => Partial<Completion> = (
     rng
 ) => {
@@ -158,7 +169,7 @@ export const importDirectiveCompletion: (rng: ProviderRange) => Partial<Completi
         label: ':import',
         detail: 'Import an external library',
         sortText: 'a',
-        insertText: ':import {\n\t-st-from: "$1";\n}$0',
+        insertText: ':import {\n\t-st-from: "$1";\n}',
         range: rng,
     };
 };
@@ -196,7 +207,7 @@ export const namespaceDirectiveCompletion: (rng: ProviderRange) => Partial<Compl
         label: '@namespace',
         detail: 'Declare a namespace for the file',
         sortText: 'a',
-        insertText: '@namespace "$1";\n$0',
+        insertText: '@namespace "$1";\n',
         range: rng,
     };
 };
@@ -223,7 +234,7 @@ export const valueDirective: (rng: ProviderRange) => Partial<Completion> = (rng)
         label: 'value()',
         detail: 'Use the value of a variable',
         sortText: 'a',
-        insertText: ' value($1)$0',
+        insertText: ' value($1)',
         range: rng,
     };
 };
@@ -232,12 +243,12 @@ export const varsDirectiveCompletion: (rng: ProviderRange) => Partial<Completion
         label: ':vars',
         detail: 'Declare variables',
         sortText: 'a',
-        insertText: ':vars {\n\t$1\n}$0',
+        insertText: ':vars {\n\t$1\n}',
         range: rng,
     };
 };
 export const globalCompletion: (rng: ProviderRange) => Partial<Completion> = (rng) => {
-    return new Completion(':global()', 'Target a global selector', 'a', ':global($0)', rng);
+    return new Completion(':global()', 'Target a global selector', 'a', ':global($1)', rng);
 };
 
 // semantic
@@ -287,7 +298,7 @@ export const codeMixinCompletion: (
     rng: ProviderRange,
     from: string
 ) => Partial<Completion> = (symbolName, rng, from) => {
-    return new Completion(symbolName, 'from: ' + from, 'a', symbolName + '($0)', rng, false, true);
+    return new Completion(symbolName, 'from: ' + from, 'a', symbolName + '($1)', rng, false, true);
 };
 export const formatterCompletion: (
     symbolName: string,
@@ -298,7 +309,7 @@ export const formatterCompletion: (
         symbolName,
         'from: ' + from,
         'a',
-        new Snippet(symbolName + '($0)'),
+        new Snippet(symbolName + '($1)'),
         rng,
         false,
         true
@@ -313,7 +324,7 @@ export const stateTypeDefinitionCompletion: (
         label: `${type}()`,
         sortText: 'a',
         detail: `from: ${from}`,
-        insertText: `${type}($0)`,
+        insertText: `${type}($1)`,
         range: rng,
     };
 };
@@ -332,7 +343,7 @@ export const stateValidatorDefinitionCompletion: (
         label: `${validator}()`,
         sortText: 'a',
         detail: `from: ${from}`,
-        insertText: `${validator}($0)`,
+        insertText: `${validator}($1)`,
         range: rng,
     };
 };
@@ -346,7 +357,7 @@ export const stateSelectorCompletion: (
         label: ':' + stateName + (hasParam ? '()' : ''),
         sortText: 'a',
         detail: 'from: ' + from,
-        insertText: ':' + stateName + (hasParam ? '($1)$0' : ''),
+        insertText: ':' + stateName + (hasParam ? '($1)' : ''),
         range: rng,
         triggerSignature: hasParam,
     };

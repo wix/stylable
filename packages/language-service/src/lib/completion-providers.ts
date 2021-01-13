@@ -65,8 +65,9 @@ export interface ProviderOptions {
     src: string; // candidate for removal : meta.source
     tsLangService: ExtendedTsLanguageService; // candidate for removal
     resolvedElements: ResolvedElement[][]; // candidate for removal
+    resolvedRoot: ResolvedElement; // candidate for removal
     parentSelector: SRule | null;
-    astAtCursor: postcss.Node; // candidate for removal
+    astAtCursor: postcss.AnyNode; // candidate for removal
     lineChunkAtCursor: string;
     lastSelectoid: string; // candidate for removal
     fullLineText: string;
@@ -186,6 +187,7 @@ const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
     'import',
     'customSelector',
     'stScope',
+    'stImport',
 ];
 
 // Providers
@@ -290,7 +292,7 @@ export const RulesetInternalDirectivesProvider: CompletionProvider & {
 };
 
 // Only top level
-// :vars, @namespace may not repeat
+// @namespace may not repeat
 export const TopLevelDirectiveProvider: CompletionProvider = {
     provide({
         parentSelector,
@@ -299,9 +301,16 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
         position,
         lineChunkAtCursor,
         meta,
+        astAtCursor,
     }: ProviderOptions): Completion[] {
         if (!parentSelector) {
-            if (!isMediaQuery) {
+            if (
+                !isMediaQuery &&
+                !(
+                    astAtCursor.type === 'atrule' &&
+                    astAtCursor.name === topLevelDirectives.stScope.slice(1)
+                )
+            ) {
                 return topLevelDeclarations
                     .filter(
                         (d) =>
@@ -347,10 +356,11 @@ export const ValueDirectiveProvider: CompletionProvider & {
                 .nodes;
             const node = parsed[parsed.length - 1];
             if (
-                node.type === 'div' ||
-                node.type === 'space' ||
-                (node.type === 'function' && !node.unclosed) ||
-                (node.type === 'word' && 'value()'.startsWith(node.value))
+                node &&
+                (node.type === 'div' ||
+                    node.type === 'space' ||
+                    (node.type === 'function' && !node.unclosed) ||
+                    (node.type === 'word' && 'value()'.startsWith(node.value)))
             ) {
                 return [
                     valueDirective(
@@ -824,6 +834,7 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
         parentSelector,
         resolved,
         resolvedElements,
+        resolvedRoot,
         lastSelectoid,
         lineChunkAtCursor,
         meta,
@@ -836,12 +847,15 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
             resolved.length > 0 &&
             !isBetweenChars(fullLineText, position, '(', ')')
         ) {
-            let lastNode = resolvedElements[0][resolvedElements[0].length - 1];
+            const [firstResolvedElement] = resolvedElements;
+            const secondLastNode = firstResolvedElement[firstResolvedElement.length - 2];
+            let lastNode = firstResolvedElement[firstResolvedElement.length - 1] || resolvedRoot;
             if (
+                secondLastNode &&
                 lastNode.type === 'pseudo-element' &&
                 nativePseudoElements.includes(lastNode.name)
             ) {
-                lastNode = resolvedElements[0][resolvedElements[0].length - 2];
+                lastNode = secondLastNode;
             }
             const states = lastNode.resolved.reduce((acc, cur) => {
                 if (cur.symbol._kind === 'class') {
@@ -860,17 +874,15 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
                 : lastNode.name;
 
             const scope = filter
-                ? resolvedElements[0][resolvedElements[0].length - 2].type === 'pseudo-element' &&
-                  nativePseudoElements.includes(
-                      resolvedElements[0][resolvedElements[0].length - 2].name
-                  )
-                    ? resolvedElements[0][resolvedElements[0].length - 3]
-                    : resolvedElements[0][resolvedElements[0].length - 2]
+                ? secondLastNode?.type === 'pseudo-element' &&
+                  nativePseudoElements.includes(secondLastNode.name)
+                    ? firstResolvedElement[firstResolvedElement.length - 3]
+                    : secondLastNode
                 : lastNode;
 
             const colons = lineChunkAtCursor.match(/:*$/)![0].length;
 
-            scope.resolved.forEach((res) => {
+            scope?.resolved.forEach((res) => {
                 if (!(res.symbol as ClassSymbol)[valueMapping.root]) {
                     return;
                 }
@@ -1071,6 +1083,7 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
         parentSelector,
         lineChunkAtCursor,
         resolvedElements,
+        resolvedRoot,
         target,
         lastSelectoid,
         meta,
@@ -1082,9 +1095,9 @@ export const StateSelectorCompletionProvider: CompletionProvider = {
             !lineChunkAtCursor.endsWith('::') &&
             !isBetweenChars(fullLineText, position, '(', ')')
         ) {
-            let lastNode = resolvedElements[0][resolvedElements[0].length - 1];
+            let lastNode = resolvedElements[0][resolvedElements[0].length - 1] || resolvedRoot;
             if (
-                lastNode.type === 'pseudo-element' &&
+                lastNode?.type === 'pseudo-element' &&
                 nativePseudoElements.includes(lastNode.name)
             ) {
                 lastNode = resolvedElements[0][resolvedElements[0].length - 2];
@@ -1192,6 +1205,7 @@ export const StateEnumCompletionProvider: CompletionProvider = {
         position,
         lastSelectoid,
         resolvedElements,
+        resolvedRoot,
     }: ProviderOptions): Completion[] {
         let acc: Completion[] = [];
         const ast = astAtCursor;
@@ -1199,7 +1213,9 @@ export const StateEnumCompletionProvider: CompletionProvider = {
         if (!lineChunkAtCursor.endsWith('::') && (ast.type === 'root' || ast.type === 'atrule')) {
             if (lastSelectoid.startsWith(':')) {
                 const stateName = lastSelectoid.slice(1);
-                const lastNode = resolvedElements[0][resolvedElements[0].length - 1];
+                const lastNode =
+                    resolvedElements[0][resolvedElements[0].length - 1] || resolvedRoot;
+
                 const resolvedStates: MappedStates = collectStates(lastNode);
 
                 if (Object.keys(resolvedStates).length) {

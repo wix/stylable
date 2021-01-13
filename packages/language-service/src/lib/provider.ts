@@ -113,22 +113,24 @@ export class Provider {
     ): Completion[] {
         const res = fixAndProcess(src, pos, fileName);
         const completions: Completion[] = [];
-        try {
-            const options = this.createProviderOptions(
-                src,
-                pos,
-                res.processed.meta!,
-                res.processed.fakes,
-                res.currentLine,
-                res.cursorLineIndex,
-                fs
-            );
-            this.providers.forEach((p) => {
-                completions.push(...p.provide(options));
-            });
-        } catch {
-            /**/
+
+        if (!res.processed.meta) {
+            return [];
         }
+
+        const options = this.createProviderOptions(
+            src,
+            pos,
+            res.processed.meta,
+            res.processed.fakes,
+            res.currentLine,
+            res.cursorLineIndex,
+            fs
+        );
+        for (const provider of this.providers) {
+            completions.push(...provider.provide(options));
+        }
+
         return this.dedupeComps(completions);
     }
 
@@ -706,7 +708,7 @@ export class Provider {
             line: position.line + 1,
             character: position.character,
         });
-        const astAtCursor: postcss.Node = path[path.length - 1];
+        const astAtCursor = path[path.length - 1];
         const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
@@ -744,6 +746,7 @@ export class Provider {
             .split(' ')
             .pop()!; // TODO: replace with selector parser
         const resolvedElements = transformer.resolveSelectorElements(meta, expandedLine);
+        const resolvedRoot = transformer.resolveSelectorElements(meta, `.${meta.root}`)[0][0];
 
         let resolved: CSSResolve[] = [];
         if (currentSelector && resolvedElements[0].length) {
@@ -760,6 +763,7 @@ export class Provider {
             src,
             tsLangService: this.tsLangService,
             resolvedElements,
+            resolvedRoot,
             parentSelector,
             astAtCursor,
             lineChunkAtCursor,

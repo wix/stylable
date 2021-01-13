@@ -16,13 +16,13 @@ Top level directives are allowed only in the top level of the document.
 ```css
     :import{
         -st-from:"$1"
-    }$0
+    }
 ```
 - :vars - define vars for use
 ```css
     :vars{
         $1
-    }$0
+    }
 ```
 
 
@@ -38,14 +38,14 @@ Multiple use of the same directive in the same class is not allowed.
 ```css
     .gaga{
         -st-extends:$1
-    }$0
+    }
 ```
 
 - -st-states - defines list of states available for css class
 ```css
     .gaga{
         -st-states:$1;
-    }$0
+    }
 ```
 
 ### Import Rule Directives
@@ -55,20 +55,20 @@ Import rules are allowed only in import directive. '-st-from' is required, as is
 ```css
     :import{
         -st-from: "$1";
-    }$0
+    }
 ```
 - -st-default: - local name of default export
 ```css
     :import{
         -st-default: $1;
-    }$0
+    }
 ```
 - -st-named: - list of imported named imports
 
 ```css
     :import{
         -st-named: $1;
-    }$0
+    }
 ```
 
 
@@ -80,7 +80,7 @@ The mixin directive is allowed inside any selector except the top level directiv
 ```css
     .gaga:hover button{
         -st-mixin: $1;
-    }$0
+    }
 ```
 
 ### Selector Completions
@@ -98,12 +98,12 @@ predefined class
     .gaga:hover{
 
     }
-    .gaga$0
+    .gaga
 ```
 
 root class is always available
 ```css
-    .root$0
+    .root
 ```
 
 completing a class as an extra to a complex selector
@@ -111,7 +111,7 @@ completing a class as an extra to a complex selector
     .gaga{
 
     }
-    .root:hover .gaga$0
+    .root:hover .gaga
 ```
 
 #### Tag
@@ -127,7 +127,7 @@ completion in root level
         -st-default:Comp;
     }
 
-    Comp$0
+    Comp
 ```
 
 completion as part of complex selector
@@ -137,7 +137,7 @@ completion as part of complex selector
         -st-default:Comp;
     }
 
-    .root:hover Comp$0
+    .root:hover Comp
 ```
 
 #### Pseudo-States
@@ -152,7 +152,7 @@ simple
         -st-states:hello;
     }
 
-    .root:hello$0
+    .root:hello
 ```
 
 in complex selctor
@@ -161,7 +161,7 @@ in complex selctor
         -st-states:hello;
     }
 
-    .root:hover .gaga:hello$0
+    .root:hover .gaga:hello
 ```
 
 
@@ -176,7 +176,7 @@ class extended from import
         -st-extends:Comp;
     }
 
-    .gaga:hello$0
+    .gaga:hello
 ```
 
 
@@ -197,7 +197,7 @@ class extended from import
         -st-extends:Comp;
     }
 
-    .gaga::inner-part$0
+    .gaga::inner-part
 ```
 
 in complex selctor
@@ -211,7 +211,7 @@ in complex selctor
         -st-extends:Comp;
     }
 
-    .root:hover .gaga::inner-part$0
+    .root:hover .gaga::inner-part
 ```
 
 
