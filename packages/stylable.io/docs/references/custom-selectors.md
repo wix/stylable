@@ -20,11 +20,11 @@ The following code maps the alias name `controlBtn` that matches any `.btn` CSS 
 @namespace "Comp";
 @custom-selector :--controlBtn .controls .btn;
 /* 
-selector: .Comp__root .Comp__controls .Comp__btn 
+selector: .Comp__controls .Comp__btn 
 */
 :--controlBtn { border: 1px solid grey; }
 /* 
-selector: .Comp__root .Comp__controls .Comp__btn:hover 
+selector: .Comp__controls .Comp__btn:hover 
 */
 :--controlBtn:hover { border-color: red; }
 ```
@@ -41,7 +41,7 @@ Custom selectors generate a [pseudo-element](./pseudo-elements.md). So, for exam
     -st-default: Comp;
 }
 /*
-selector: .Page__root .Comp__root .Comp__controls .Comp__btn
+selector: .Comp__root .Comp__controls .Comp__btn
 */
 Comp::controlBtn { 
     background: gold; 
@@ -79,7 +79,7 @@ Here you can use the icon `custom selector` from the outside just like you would
     -st-default: Tree;
 }
 /*
-selector: .Panel__root .Tree__root > .Tree__icon
+selector: .Tree__root > .Tree__icon
 */
 Tree::icon {
     background: yellow;  /* paints the icons all the way down the tree */
@@ -121,7 +121,7 @@ For example, a `pseudo-element` named `navBtn` matches any `btn` CSS class neste
     -st-default: Comp;
 }
 /*
-selector: Page__root .Comp__root .Comp__nav .Comp__btn
+selector: .Comp__root .Comp__nav .Comp__btn
 */
 Comp::navBtn { 
     border: 1px solid grey; 
@@ -138,8 +138,7 @@ You could also use custom selectors to gather a collection of selectors into a s
 @custom-selector :--media .image, .video;
 /*
 selector: 
-.Comp__root .Comp__image, 
-.Comp__root .Comp__video 
+.Comp__image, .Comp__video 
 */
 :--media { 
     border: 1px solid grey; 
@@ -168,11 +167,6 @@ Comp::media {
 /* CSS Output */
 .Comp__root .Comp__image, 
 .Comp__root .Comp__video {
-    border: 1px solid grey; 
-}
-
-.Page__root .Comp__root .Comp__image, 
-.Page__root .Comp__root .Comp__video {
     border-color: red;
 }
 ```

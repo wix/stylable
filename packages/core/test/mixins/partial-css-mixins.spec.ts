@@ -230,4 +230,75 @@ describe('Partial CSS Mixins', () => {
             'border: 1px solid yellow'
         );
     });
+
+    it('nested partial mixins', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                
+                :vars {
+                    c1: red;
+                    c2: blue;
+                    c3: green;
+                    c4: purple;
+                }
+
+                .my-mixin {
+                    color: value(c1);
+                    background: value(c1), value(c2);
+                    background: value(c1), value(c3);
+                    background: value(c4);
+                }
+
+                .my-mixin2 {
+                    -st-partial-mixin: my-mixin(c3 value(c1));
+                    background: value(c4);
+                }
+
+                .container {
+                    -st-partial-mixin: my-mixin2(c4 gold, c1 yellow);
+                }
+
+            `,
+                },
+            },
+        });
+
+        expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
+        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'background: red, yellow;background: gold');
+    });
+
+    it('should follow variable binding and include derived variables', () => {
+        const result = generateStylableResult({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                
+                :vars {
+                    c1: red;
+                    c2: value(c1);
+                    c3: value(c2);
+                }
+
+                .my-mixin {
+                    color: value(c3);
+                }
+                
+                .container {
+                    -st-partial-mixin: my-mixin(c1 green);
+                }
+
+            `,
+                },
+            },
+        });
+
+        expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
+        matchRuleAndDeclaration(result.meta.outputAst!, 1, '.entry__container', 'color: green');
+    });
 });

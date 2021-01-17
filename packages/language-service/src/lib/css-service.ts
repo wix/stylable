@@ -1,7 +1,7 @@
 import { IFileSystem } from '@file-services/types';
 import path from 'path';
 import * as postcss from 'postcss';
-import { getCSSLanguageService, Stylesheet } from 'vscode-css-languageservice';
+import { getCSSLanguageService, HoverSettings, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
@@ -153,12 +153,9 @@ export class CssService {
                     return false;
                 }
                 if (diag.code === 'css-rparentexpected' || diag.code === 'css-identifierexpected') {
-                    const endOfLine = diag.range.end;
-                    endOfLine.character = -1;
-
                     const line = readDocRange(
                         document,
-                        Range.create(Position.create(diag.range.start.line, 0), endOfLine)
+                        Range.create(Position.create(diag.range.start.line, 0), diag.range.end)
                     );
                     const stateStart = findPseudoStateStart(line, diag.range.start.character);
 
@@ -195,9 +192,13 @@ export class CssService {
             });
     }
 
-    public doHover(document: TextDocument, position: Position): Hover | null {
+    public doHover(
+        document: TextDocument,
+        position: Position,
+        settings?: HoverSettings
+    ): Hover | null {
         const stylesheet = this.inner.parseStylesheet(document);
-        return this.inner.doHover(document, position, stylesheet);
+        return this.inner.doHover(document, position, stylesheet, settings);
     }
 
     public findReferences(document: TextDocument, position: Position): Location[] {

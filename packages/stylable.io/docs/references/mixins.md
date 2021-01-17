@@ -126,6 +126,73 @@ Here is an example of using a variable in a CSS mixin and how it can be overridd
 }
 ```
 
+## Partial CSS mixins
+
+Partial CSS Mixins (`-st-partial-mixin`) is a continuation of the idea of mixins with parameter overrides. (as described above)
+
+Where a regular `-st-mixin` includes all declarations inside the targeted mixed-in class, partial mixins enable you to pass through overriding variable values and mix in only declarations that would be affected by such an override. 
+
+For a partial mixin to work, at least one overriding variable must be provided, additional ones being optional.
+
+### Example
+```css
+:vars {
+    color1: red;
+    color2: green;
+}
+
+.my-mixin {
+    background: value(color1);
+    color: value(color2);
+}
+
+.container {
+    -st-partial-mixin: my-mixin(color1 gold);
+}
+```
+
+```css
+/* output */
+.container {
+    background: gold;
+}
+```
+
+A partial mixin will include any declaration in the mixed-in class (or rules containing the mixed-in class) that contains a variable usage that will be overridden. Any other variables not overridden inside the mixed in declaration will retain their original values.
+
+### Example
+```css
+:vars {
+    color1: red;
+    color2: green;
+    size1: 2px;
+}
+
+.my-mixin {
+    background: value(color1);
+    color: value(color2);
+}
+
+.my-mixin .part {
+    border: value(size1) solid value(color2);
+}
+
+.container {
+    -st-partial-mixin: my-mixin(color1 gold, size1 5px);
+}
+```
+
+```css
+/* output */
+.container {
+    background: gold;
+}
+
+.container .part {
+    border: 5px solid green;
+}
+``` 
+
 ## JavaScript mixins
 
 JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin. 

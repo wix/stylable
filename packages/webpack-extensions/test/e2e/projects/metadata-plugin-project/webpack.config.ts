@@ -19,6 +19,9 @@ export default {
             renderSnapshot(_exp, res) {
                 return `<snapshot>${basename(res.resource)}</snapshot>`;
             },
+            normalizeModulePath(resource) {
+                return resource;
+            },
         }),
         new HtmlWebpackPlugin(),
     ],

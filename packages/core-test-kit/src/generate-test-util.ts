@@ -59,6 +59,7 @@ export function generateInfra(
         undefined,
         undefined,
         undefined,
+        undefined,
         () => diagnostics
     );
     const resolver = new StylableResolver(fileProcessor, requireModule);

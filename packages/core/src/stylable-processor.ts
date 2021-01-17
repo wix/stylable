@@ -264,9 +264,13 @@ export class StylableProcessor {
                     this.meta.scopes.push(atRule);
                     break;
                 case 'st-global-custom-property': {
-                    const cssVars = atRule.params.split(',');
+                    const cssVarsByComma = atRule.params.split(',');
+                    const cssVarsBySpacing = atRule.params
+                        .trim()
+                        .split(/\s+/g)
+                        .filter((s) => s !== ',');
 
-                    if (atRule.params.trim().split(/\s+/g).length > cssVars.length) {
+                    if (cssVarsBySpacing.length > cssVarsByComma.length) {
                         this.diagnostics.warn(
                             atRule,
                             processorWarnings.GLOBAL_CSS_VAR_MISSING_COMMA(atRule.params),
@@ -275,7 +279,7 @@ export class StylableProcessor {
                         break;
                     }
 
-                    for (const entry of cssVars) {
+                    for (const entry of cssVarsByComma) {
                         const cssVar = entry.trim();
 
                         if (isCSSVarProp(cssVar)) {
