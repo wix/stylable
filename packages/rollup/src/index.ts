@@ -16,6 +16,7 @@ import { Plugin, PluginContext } from 'rollup';
 import { tokenizeImports } from 'toky';
 import MagicString from 'magic-string';
 import { getType } from 'mime';
+import { calcDepth } from './calc-depth';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -24,6 +25,7 @@ interface PluginOptions {
     minify?: boolean;
     inlineAssets?: boolean;
     cssInJS?: boolean;
+    fileName?: string;
 }
 
 const INIT_CODE = `import {$} from "@stylable/runtime"; if(typeof window !== 'undefined'){$.init(window);}`;
@@ -33,6 +35,7 @@ export function stylableRollupPlugin({
     minify = false,
     inlineAssets = true,
     cssInJS = true,
+    fileName = 'stylable.css'
 }: PluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
@@ -82,17 +85,28 @@ export function stylableRollupPlugin({
                 stylable.createTransformer()
             );
 
-            if (extract) {
-                extracted.set(id, css);
-            }
+            extracted.set(id, { css });
 
             return {
                 code,
-                map: null,
+                map: { mappings: '' },
             };
         },
-        // async generateBundle(_, bundle) {
-        // },
+        generateBundle(bundleOptions, bundle, isWrite) {
+            const modules = [];
+            for (const moduleId of this.getModuleIds()) {
+                if (moduleId.endsWith('.st.css')) {
+                    modules.push({ depth: calcDepth(moduleId, this), moduleId });
+                }
+            }
+            modules.sort((a, b) => a.depth - b.depth);
+            let outputCSS = '';
+            modules.forEach(({ moduleId }) => {
+                outputCSS += extracted.get(moduleId).css;
+            });
+
+            this.emitFile({ source: outputCSS, type: 'asset', fileName });
+        },
     };
 }
 
@@ -148,16 +162,6 @@ function generateStylableModuleCode(res: StylableResults, css: string, depth: st
         export { classes, keyframes, vars, stVars, cssStates, style, st, $depth, $id, $css };`,
         renderOnly
     );
-}
-
-function isUsed(named: Record<string, string>, res: StylableResults, defaultExport: string) {
-    Object.keys(named).some((name) => {
-        const symb = res.meta.mappedSymbols[name];
-        if (symb?._kind === 'class') {
-            return symb.alias;
-        }
-    });
-    const symb = res.meta.mappedSymbols[defaultExport];
 }
 
 function generateCssString(
