@@ -57,9 +57,9 @@ export function stylesheet(host: Host) {
     }
 
     function style(namespace: string) {
-        const classNames = [];
+        var classNames = [];
 
-        for (let i = 1; i < arguments.length; i++) {
+        for (var i = 1; i < arguments.length; i++) {
             // eslint-disable-next-line prefer-rest-params
             var item = arguments[i];
 
