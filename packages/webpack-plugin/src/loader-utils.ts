@@ -20,6 +20,10 @@ export function getImports(
     const unusedImports: string[] = [];
     for (const imported of meta.imports) {
         if (imported.fromRelative.endsWith('.st.css')) {
+            /**
+             * We want to include Stylable files that have effects on other files as regular imports
+             * and other ones as unused for depth calculation
+             */
             if (shouldBeIncludedAsImport(stylable, meta, imported)) {
                 imports.push(`import ${JSON.stringify(imported.fromRelative)};`);
             } else {
@@ -27,21 +31,27 @@ export function getImports(
             }
         }
     }
-    let cssDepth = 0;
     const buildDependencies: string[] = [];
+    /**
+     * Collect all deep dependencies since they can affect the output
+     */
     visitMetaCSSDependenciesBFS(
         meta,
-        ({ source }, _, depth) => {
+        ({ source }) => {
             buildDependencies.push(source);
-            cssDepth = Math.max(cssDepth, depth);
         },
         stylable.resolver
     );
 
+    /**
+     * @remove
+     * This part supports old loaders and should be removed
+     */
     if (assetsMode === 'loader') {
         urls.forEach((assetPath) => imports.push(`import ${JSON.stringify(assetPath)};`));
     }
-    return { cssDepth, urls, imports, buildDependencies, unusedImports };
+
+    return { urls, imports, buildDependencies, unusedImports };
 }
 
 export function addBuildDependencies(

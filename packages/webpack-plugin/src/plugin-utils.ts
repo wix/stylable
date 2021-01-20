@@ -9,6 +9,7 @@ import {
     webpackCreateHash,
     webpackOutputOptions,
 } from './types';
+import { IStylableOptimizer } from '@stylable/core';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -311,4 +312,41 @@ export function reportNamespaceCollision(
             );
         }
     }
+}
+
+type OptimizationMapping = {
+    usageMapping: Record<string, boolean>;
+    namespaceMapping: Record<string, string>;
+    namespaceToFileMapping: Map<string, Set<string>>;
+};
+export function createOptimizationMapping(
+    sortedModules: NormalModule[],
+    optimizer: IStylableOptimizer
+): OptimizationMapping {
+    return sortedModules.reduce<OptimizationMapping>(
+        (acc, module) => {
+            const { namespace, isUsed } = getStylableBuildMeta(module);
+            acc.usageMapping[namespace] = isUsed ?? true;
+            acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
+            if (acc.namespaceToFileMapping.has(namespace)) {
+                acc.namespaceToFileMapping.get(namespace)!.add(module.resource);
+            } else {
+                acc.namespaceToFileMapping.set(namespace, new Set([module.resource]));
+            }
+            return acc;
+        },
+        {
+            usageMapping: {},
+            namespaceMapping: {},
+            namespaceToFileMapping: new Map<string, Set<string>>(),
+        }
+    );
+}
+
+export function getTopLevelInputFilesystem(compiler: Compiler) {
+    let fileSystem = compiler.inputFileSystem as any;
+    while (fileSystem.fileSystem) {
+        fileSystem = fileSystem.fileSystem;
+    }
+    return fileSystem;
 }

@@ -23,6 +23,8 @@ import {
     getStylableBuildMeta,
     getSortedModules,
     reportNamespaceCollision,
+    createOptimizationMapping,
+    getTopLevelInputFilesystem,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -43,19 +45,59 @@ type OptimizeOptions = OptimizeConfig & {
 };
 
 export interface Options {
+    /**
+     * Filename of the output bundle when emitting css bundle
+     */
     filename?: string;
+    /**
+     * Determine the way css is injected to the document
+     * js - every js module contains the css and inject it independently
+     * css - emit bundled css asset to injected via link
+     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic)
+     * none - will not generate any output css (usually good for ssr bundles)
+     */
     cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
-    assetsMode?: 'url' | 'loader';
+    /**
+     * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     */
     runtimeStylesheetId?: 'module' | 'namespace';
+    /**
+     * Config how error and warning reported to webpack by stylable
+     * auto - Stylable warning will emit Webpack warning and Stylable error will emit Webpack error
+     * strict - Stylable error and warning will emit Webpack error
+     * loose - Stylable error and warning will emit Webpack warning
+     */
     diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    /**
+     * Target of the js module
+     * oldie - ES3 compatible
+     * modern - ES2105 compatible
+     */
     target?: 'oldie' | 'modern';
+    /**
+     * Set the <style> tag st-id attribute to allow multiple Stylable build to be separated in the head
+     * This only apply to cssInjection js mode
+     */
     runtimeId?: string;
+    /**
+     * Optimization options
+     */
     optimize?: OptimizeOptions;
+    /**
+     * Provide custom StylableOptimizer
+     */
     optimizer?: StylableOptimizer;
+    /**
+     * A function to override Stylable instance default configuration options
+     */
     stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
+    /**
+     * Allow to disable specific diagnostics reports
+     */
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
+    assetsMode?: 'url' | 'loader';
 }
 
 const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
@@ -81,7 +123,7 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
         ? { ...defaultOptimizations(isProd), ...userOptions.optimize }
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
-    target: userOptions.target ?? 'modern'
+    target: userOptions.target ?? 'modern',
 });
 
 export class StylableWebpackPlugin {
@@ -89,10 +131,17 @@ export class StylableWebpackPlugin {
     options!: Required<Options>;
     constructor(private userOptions: Options = {}, private injectConfigHooks = true) {}
     apply(compiler: Compiler) {
+        /**
+         * This plugin is based on a loader so we inject the loader here
+         */
         if (this.injectConfigHooks) {
             injectLoader(compiler);
         }
 
+        /**
+         * We want to catch any configuration changes made by other plugins
+         * only after they run we process our options and create the Stylable instance
+         */
         compiler.hooks.afterPlugins.tap(StylableWebpackPlugin.name, () => {
             this.processOptions(compiler);
             this.createStylable(compiler);
@@ -101,13 +150,22 @@ export class StylableWebpackPlugin {
         compiler.hooks.compilation.tap(
             StylableWebpackPlugin.name,
             (compilation, { normalModuleFactory }) => {
+                /**
+                 * Since we embed assets in the bundle css we must know the public path in advance
+                 */
                 const staticPublicPath = getStaticPublicPath(compilation);
 
                 const assetsModules = new Map<string, NormalModule>();
                 const stylableModules = new Set<NormalModule>();
 
+                /**
+                 * Handle things that related to each module
+                 */
                 this.modulesIntegration(compilation, stylableModules, assetsModules);
 
+                /**
+                 * Handle things that related to chunking and bundling
+                 */
                 this.chunksIntegration(
                     compilation,
                     staticPublicPath,
@@ -115,6 +173,9 @@ export class StylableWebpackPlugin {
                     assetsModules
                 );
 
+                /**
+                 * Setup all the boilerplate Webpack dependencies and factories
+                 */
                 this.setupDependencies(
                     compilation,
                     normalModuleFactory,
@@ -122,6 +183,9 @@ export class StylableWebpackPlugin {
                     assetsModules
                 );
 
+                /**
+                 * Here we inject our runtime code for the js modules and injection of css to head
+                 */
                 injectRuntimeModules(StylableWebpackPlugin.name, compilation);
             }
         );
@@ -139,15 +203,15 @@ export class StylableWebpackPlugin {
         if (this.stylable) {
             return;
         }
-        let fileSystem = compiler.inputFileSystem as any;
-        while (fileSystem.fileSystem) {
-            fileSystem = fileSystem.fileSystem;
-        }
         this.stylable = Stylable.create(
             this.options.stylableConfig(
                 {
                     projectRoot: compiler.context,
-                    fileSystem,
+                    /**
+                     * We need to get the top level file system
+                     * because issue with the sync resolver we create inside Stylable
+                     */
+                    fileSystem: getTopLevelInputFilesystem(compiler),
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: compiler.options.resolve as any,
                     timedCacheOptions: { useTimer: true, timeout: 1000 },
@@ -175,6 +239,9 @@ export class StylableWebpackPlugin {
     ) {
         const { moduleGraph } = compilation;
 
+        /**
+         * Here we are creating the context that our loader needs
+         */
         NormalModule.getCompilationHooks(compilation).loader.tap(
             StylableWebpackPlugin.name,
             (webpackLoaderContext, module) => {
@@ -184,6 +251,9 @@ export class StylableWebpackPlugin {
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
+                    /**
+                     * Every Stylable file that our loader handles will be call this function to add additional build data
+                     */
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,
@@ -193,10 +263,17 @@ export class StylableWebpackPlugin {
                         };
                         module.buildMeta.stylable = stylableBuildMeta;
 
+                        /**
+                         * We want to add the unused imports because we need them to calculate the depth correctly
+                         * They might be used by other stylesheets so they might end up in the final build
+                         */
                         for (const request of stylableBuildMeta.unusedImports) {
                             module.addDependency(new UnusedDependency(request) as Dependency);
                         }
 
+                        /**
+                         * Since we don't use the Webpack js api of url assets we have our own CSSURLDependency
+                         */
                         if (this.options.assetsMode === 'url') {
                             for (const resourcePath of stylableBuildMeta.urls) {
                                 module.addDependency(
@@ -204,13 +281,18 @@ export class StylableWebpackPlugin {
                                 );
                             }
                         }
-
+                        /**
+                         * This dependency is responsible for injecting the runtime to the main chunk and each module
+                         */
                         module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
                     };
                 }
             }
         );
 
+        /**
+         * We collect the modules that we are going to handle here once.
+         */
         compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, (modules) => {
             for (const module of modules) {
                 if (isStylableModule(module) && module.buildMeta.stylable) {
@@ -219,12 +301,20 @@ export class StylableWebpackPlugin {
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
                 }
+                /**
+                 * @remove
+                 * This part supports old loaders and should be removed
+                 */
                 if (isLoadedWithKnownAssetLoader(module) && !assetsModules.has(module.resource)) {
                     assetsModules.set(module.resource, module);
                 }
             }
         });
 
+        /**
+         * @remove
+         * This part supports old loaders and should be removed
+         */
         if (this.options.assetsMode === 'loader') {
             compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, () => {
                 for (const module of stylableModules) {
@@ -241,6 +331,9 @@ export class StylableWebpackPlugin {
             });
         }
 
+        /**
+         *  After we have the initial chunks we can calculate the depth and usage of each stylesheet
+         */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             for (const module of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
@@ -252,24 +345,12 @@ export class StylableWebpackPlugin {
             const optimizer = this.stylable.optimizer!;
             const optimizeOptions = this.options.optimize;
             const sortedModules = getSortedModules(stylableModules);
-            const namespaceToFileMapping = new Map<string, Set<string>>();
-            const { usageMapping, namespaceMapping } = sortedModules.reduce<{
-                usageMapping: Record<string, boolean>;
-                namespaceMapping: Record<string, string>;
-            }>(
-                (acc, module) => {
-                    const { namespace, isUsed } = getStylableBuildMeta(module);
-                    acc.usageMapping[namespace] = isUsed ?? true;
-                    acc.namespaceMapping[namespace] = optimizer.getNamespace(namespace);
-                    if (namespaceToFileMapping.has(namespace)) {
-                        namespaceToFileMapping.get(namespace)!.add(module.resource);
-                    } else {
-                        namespaceToFileMapping.set(namespace, new Set([module.resource]));
-                    }
-                    return acc;
-                },
-                { usageMapping: {}, namespaceMapping: {} }
-            );
+
+            const {
+                usageMapping,
+                namespaceMapping,
+                namespaceToFileMapping,
+            } = createOptimizationMapping(sortedModules, optimizer);
 
             if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
                 reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
@@ -308,6 +389,10 @@ export class StylableWebpackPlugin {
     ) {
         const { runtimeTemplate } = compilation;
 
+        /**
+         * As a work around unknown behavior
+         * if this plugin will run inside a child compilation we do not emit css assets
+         */
         if (!compilation.compiler.isChild()) {
             if (this.options.cssInjection === 'css') {
                 compilation.hooks.processAssets.tap(

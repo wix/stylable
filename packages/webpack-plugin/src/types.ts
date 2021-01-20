@@ -8,7 +8,6 @@ export interface StylableBuildMeta {
     urls: string[];
     // stylableImports: { request: string; hasOwnSideEffects: boolean }[];
     depth: number;
-    cssDepth: number;
     cssInjection: 'js' | 'css' | 'mini-css' | 'none';
     namespace: string;
     isUsed: undefined | boolean;
@@ -18,7 +17,7 @@ export interface StylableBuildMeta {
 
 export type LoaderData = Pick<
     StylableBuildMeta,
-    'css' | 'urls' | 'cssDepth' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
+    'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports'
 >;
 
 export interface StylableLoaderContext extends LoaderContext {
