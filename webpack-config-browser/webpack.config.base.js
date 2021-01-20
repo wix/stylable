@@ -37,5 +37,6 @@ module.exports.baseConfig = () => {
                 process: ['util', 'process'],
             }),
         ],
+        devServer: { host: 'localhost' },
     };
 };

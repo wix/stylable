@@ -1,6 +1,7 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
@@ -20,7 +21,7 @@ module.exports = {
         ],
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
+        extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin({ title: 'Stylable App' })],
 };
