@@ -15,12 +15,9 @@
     "rollup": "~2"
   },
   "dependencies": {
-    "@stylable/module-utils": "^3.10.1",
     "@stylable/node": "^3.10.1",
     "@stylable/optimizer": "^3.10.1",
-    "@stylable/runtime": "^3.10.0",
     "find-config": "^1.0.0",
-    "magic-string": "^0.25.7",
     "mime": "^2.4.6",
     "toky": "^0.0.4"
   },

@@ -1,6 +1,5 @@
 import { basename, join } from 'path';
 import { nodeFs } from '@file-services/node';
-import { symlinkSync } from 'fs';
 import { OutputChunk, RollupBuild, RollupWatcher, RollupWatcherEvent } from 'rollup';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { deferred } from 'promise-assist';
@@ -33,7 +32,7 @@ export function createTempProject(projectToCopy: string, nodeModulesToLink: stri
     const tempDir = createTempDirectorySync('local-rollup-test');
     const projectPath = join(tempDir.path, 'project');
     nodeFs.copyDirectorySync(projectToCopy, projectPath);
-    symlinkSync(nodeModulesToLink, join(tempDir.path, 'node_modules'), 'junction');
+    nodeFs.symlinkSync(nodeModulesToLink, join(tempDir.path, 'node_modules'), 'junction');
     return {
         context: tempDir.path,
         input: join(tempDir.path, 'project', entry),
