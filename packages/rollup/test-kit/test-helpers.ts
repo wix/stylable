@@ -34,12 +34,13 @@ export function createTempProject(projectToCopy: string, nodeModulesToLink: stri
     const projectPath = join(tempDir.path, 'project');
     nodeFs.copyDirectorySync(projectToCopy, projectPath);
     symlinkSync(nodeModulesToLink, join(tempDir.path, 'node_modules'), 'junction');
-    after(() => {
-        tempDir.remove();
-    });
     return {
         context: tempDir.path,
         input: join(tempDir.path, 'project', entry),
+        projectDir: join(tempDir.path, 'project'),
+        dispose() {
+            tempDir.remove();
+        },
     };
 }
 
