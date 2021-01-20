@@ -42,7 +42,7 @@ export class HTMLSnapshotPlugin {
     }
     public async snapShotStylableModule(compilation: Compilation, module: any) {
         const component = this.getLogicModule(module, compilation.moduleGraph);
-        if (!component) {
+        if (!component || !component.context) {
             return;
         }
         const source = await compileAsEntry(compilation, component.context, component.resource);

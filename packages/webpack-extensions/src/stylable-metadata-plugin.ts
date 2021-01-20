@@ -79,7 +79,7 @@ export class StylableMetadataPlugin {
             );
 
             const component = getCSSViewModules(module, compilation.moduleGraph);
-            if (!component) {
+            if (!component || !component.context) {
                 continue;
             }
 
