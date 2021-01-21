@@ -1,11 +1,11 @@
 import { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildMeta } from './plugin-utils';
 
-const memorize = require('webpack/lib/util/memorize');
+const memoize = require('webpack/lib/util/memoize');
 
 import { StylableWebpackPlugin } from './plugin';
 
-const getCssModule = memorize(() => {
+const getCssModule = memoize(() => {
     return require('mini-css-extract-plugin/dist/CssModule').default;
 });
 export function injectCssModules(

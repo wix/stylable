@@ -22,7 +22,7 @@ describe(`(${project})`, () => {
         const links = await page.evaluate(browserFunctions.getCSSLinks);
 
         expect(links[0]).to.equal('main.css');
-        expect(links[1]).to.match(/src_dynamic_js.css$/);
+        expect(links[1]).to.match(/src_dynamic_js/);
         expect(links).to.have.length(2);
     });
 
