@@ -88,7 +88,7 @@
   <div class="docs-nav-section">
     <div class="docs-nav-section-header">Guides</div>
     <ul>
-       <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>  <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>  <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>  <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>  <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>  <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>  <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>  <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>  <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li> 
+       <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>  <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>  <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>  <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>  <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>  <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>  <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>  <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>  <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>  <li class="active"><a href="../../docs/guides/migration-v3" class="active docs-nav-item">Migrating to Stylable v3</a></li> 
     </ul>
   </div>
   
@@ -104,7 +104,7 @@
 <section class="docs-content">
   <h1>Migrating to Stylable v3</h1>
   <p>This guide is intended to help migrate Stylable version 1 to Stylable version 2 or 3.
-It is mainly geared towards Stylable integration in React.</p>
+It is mainly geared towards Stylable integration in React projects.</p>
 
 <h1 id="suggested-steps-of-migration">Suggested steps of migration</h1>
 
@@ -136,13 +136,13 @@ v3 Stylable:</p>
 <blockquote>
   <p>Note: all Stylable packages in v3 are scoped under <code class="language-plaintext highlighter-rouge">@stylable</code> namespace. 
 if you have dependency like <code class="language-plaintext highlighter-rouge">stylable</code> (without namespace),
-it is a different one and should be changed to namespaced version.</p>
+it is a different one and should be changed to scoped version.</p>
 </blockquote>
 
 <h1 id="update-global-typings">Update global typings</h1>
 
-<p>If TypeScript is in the toolbelt, we recommend to update global typings
-(usually a file named <code class="language-plaintext highlighter-rouge">global.d.ts</code>) with <code class="language-plaintext highlighter-rouge">.st.css</code> module declaration:</p>
+<p>If TypeScript is used in the project, we recommend updating the global typings
+(usually <code class="language-plaintext highlighter-rouge">globals.d.ts</code>) with an <code class="language-plaintext highlighter-rouge">.st.css</code> module declaration:</p>
 
 <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">declare</span> <span class="kr">module</span> <span class="dl">'</span><span class="s1">*.st.css</span><span class="dl">'</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">stylesheet</span><span class="p">:</span> <span class="k">import</span><span class="p">(</span><span class="dl">'</span><span class="s1">@stylable/runtime</span><span class="dl">'</span><span class="p">).</span><span class="nx">RuntimeStylesheet</span><span class="p">;</span>
@@ -150,13 +150,13 @@ it is a different one and should be changed to namespaced version.</p>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>This way TypeScript compiler will help moving through most of the
+<p>This way the TypeScript compiler will help refactor most of the
 required changes and provide typings for other Stylable use cases.</p>
 
 <h2 id="update-stcss-file-imports">Update <code class="language-plaintext highlighter-rouge">.st.css</code> file imports</h2>
 
-<p>Prior to v2 all <code class="language-plaintext highlighter-rouge">.st.css</code> files would export <code class="language-plaintext highlighter-rouge">style</code> function. In v2
-this has changed: <code class="language-plaintext highlighter-rouge">.st.css</code> files now export an object.</p>
+<p>Prior to v2 all <code class="language-plaintext highlighter-rouge">.st.css</code> files would export a default <code class="language-plaintext highlighter-rouge">style</code> function. In v2
+this has changed: <code class="language-plaintext highlighter-rouge">.st.css</code> files now export a named object.</p>
 
 <p>List of all exported keys:</p>
 
@@ -183,9 +183,9 @@ this has changed: <code class="language-plaintext highlighter-rouge">.st.css</co
 <p><code class="language-plaintext highlighter-rouge">import { st, classes } from './Component.st.css';</code></p>
 
 <blockquote>
-  <p>Note: <code class="language-plaintext highlighter-rouge">.st.css</code> files export <code class="language-plaintext highlighter-rouge">style</code> function and an alias to it -
+  <p>Note: <code class="language-plaintext highlighter-rouge">.st.css</code> files export a <code class="language-plaintext highlighter-rouge">style</code> function and an alias to it -
 <code class="language-plaintext highlighter-rouge">st</code>. It is recommended to use <code class="language-plaintext highlighter-rouge">st</code> in order to avoid name clashing
-with other variables (for example, some other inline styles)</p>
+with other variables (for example, some other inline style).</p>
 </blockquote>
 
 <h2 id="update-usage-in-react-components">Update usage in React components</h2>
@@ -220,7 +220,7 @@ with other variables (for example, some other inline styles)</p>
     <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  className={st(classes.root, states, this.props.className)}
 </code></pre></div>    </div>
 
-    <p>There is no more props spread anymore and Stylable requires only
+    <p>There is no props spreading anymore and Stylable requires only
   <code class="language-plaintext highlighter-rouge">className</code> to be used.</p>
 
     <p>However, if you were relying on the props spread pattern, in v2 and v3 you
@@ -228,7 +228,9 @@ with other variables (for example, some other inline styles)</p>
 
     <p>Therefore, with Stylable v3 it is up to you to apply any additional props:</p>
 
-    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="nx">st</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="nx">states</span><span class="p">,</span> <span class="dl">'</span><span class="s1">additional-class</span><span class="dl">'</span><span class="p">)</span><span class="si">}</span> <span class="na">data</span><span class="err">-</span><span class="na">hook</span><span class="p">=</span><span class="s">"test"</span> <span class="na">hello</span><span class="p">=</span><span class="s">"world"</span> <span class="p">/&gt;</span>
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="nx">st</span><span class="p">(</span><span class="nx">classes</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="nx">states</span><span class="p">,</span> <span class="dl">'</span><span class="s1">additional-class</span><span class="dl">'</span><span class="p">)</span><span class="si">}</span> 
+       <span class="na">data</span><span class="err">-</span><span class="na">hook</span><span class="p">=</span><span class="s">"test"</span> 
+       <span class="na">hello</span><span class="p">=</span><span class="s">"world"</span> <span class="p">/&gt;</span>
 </code></pre></div>    </div>
   </li>
   <li>
@@ -246,7 +248,7 @@ with other variables (for example, some other inline styles)</p>
   </li>
 </ol>
 
-<p>Note: find more details and examples in React integration guide https://Stylable.io/docs/getting-started/react-integration</p>
+<p>Note: find more details and examples in our <a href="./runtime">Runtime</a> and <a href="../getting-started/react-integration">React integration</a> guides.</p>
 
 <h2 id="update-tests">Update tests</h2>
 
@@ -261,10 +263,9 @@ slightly different in v2 and v3:</p>
 <span class="gi">+const StylableDOMUtil = new StylableDOMUtil(styleSheet);
 </span></code></pre></div></div>
 
-<p>Stylable v2 and v3, <code class="language-plaintext highlighter-rouge">StylableDOMUtil</code> expects to receive argument which
-is the whole stylesheet exported from <code class="language-plaintext highlighter-rouge">.st.css</code></p>
+<p>Stylable v2 and v3 <code class="language-plaintext highlighter-rouge">StylableDOMUtil</code> expects to receive an argument which is the whole stylesheet exported from a <code class="language-plaintext highlighter-rouge">.st.css</code> file</p>
 
-<p>Prior to v2 it was only one thing - <code class="language-plaintext highlighter-rouge">style</code> function.</p>
+<p>Prior to v2 it was only one thing - the <code class="language-plaintext highlighter-rouge">style</code> function.</p>
 
 </section>
 
