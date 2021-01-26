@@ -25,6 +25,7 @@ import {
     reportNamespaceCollision,
     createOptimizationMapping,
     getTopLevelInputFilesystem,
+    createDecacheRequire,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -222,10 +223,7 @@ export class StylableWebpackPlugin {
                         compiler.options.output.hashSalt || '',
                         ''
                     ),
-                    requireModule: (id: string) => {
-                        decache(id);
-                        return require(id);
-                    },
+                    requireModule: createDecacheRequire(compiler),
                     optimizer: this.options.optimizer,
                 },
                 compiler

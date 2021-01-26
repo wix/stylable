@@ -10,6 +10,7 @@ import {
     webpackOutputOptions,
 } from './types';
 import { IStylableOptimizer } from '@stylable/core';
+import decache from 'decache';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -186,6 +187,24 @@ export function injectLoader(compiler: Compiler) {
         loader: require.resolve(join(__dirname, 'loader')),
         sideEffects: true,
     });
+}
+
+export function createDecacheRequire(compiler: Compiler) {
+    if (compiler.watchMode) {
+        const cacheIds = new Set<string>();
+        compiler.hooks.done.tap('decache require', () => {
+            for (const id of cacheIds) {
+                decache(id);
+            }
+            cacheIds.clear();
+        });
+        return (id: string) => {
+            cacheIds.add(id);
+            return require(id);
+        };
+    } else {
+        return require;
+    }
 }
 
 export function createStaticCSS(
