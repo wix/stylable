@@ -1,7 +1,6 @@
 import { Stylable, StylableConfig, packageNamespaceFactory, OptimizeConfig } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
-import decache from 'decache';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
 
 import findConfig from 'find-config';
