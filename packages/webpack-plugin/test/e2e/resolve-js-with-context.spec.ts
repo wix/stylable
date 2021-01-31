@@ -17,8 +17,6 @@ describe(`(${project})`, () => {
         after
     );
 
-    
-
     it('css is working', async () => {
         const { page } = await projectRunner.openInBrowser();
         const color = await page.evaluate(() => {
