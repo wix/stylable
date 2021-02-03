@@ -43,7 +43,7 @@
     "@types/murmurhash": "^0.0.1",
     "@types/node": "10",
     "@types/puppeteer": "^5.4.2",
-    "@types/react": "^17.0.0",
+    "@types/react": "^17.0.1",
     "@types/react-dom": "^17.0.0",
     "@types/rimraf": "^3.0.0",
     "@types/sinon": "^9.0.10",
