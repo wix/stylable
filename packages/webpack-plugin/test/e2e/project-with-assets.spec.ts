@@ -12,7 +12,7 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
         },
@@ -47,7 +47,7 @@ describe(`(${project}) production mode`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
             webpackOptions: {
