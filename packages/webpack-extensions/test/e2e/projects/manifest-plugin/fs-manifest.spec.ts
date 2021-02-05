@@ -10,10 +10,10 @@ describe(`(${__dirname})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: __dirname,
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
-            configName: 'webpack.fs-manifest.config'
+            configName: 'webpack.fs-manifest.config',
         },
         before,
         afterEach,
