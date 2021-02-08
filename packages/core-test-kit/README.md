@@ -21,6 +21,35 @@ A collection of tools aimed at testing Stylable diagnostics messages (warnings a
 
 Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
 
+Exposes `expectTransformOutput` utility for creating a transform tests. these are the most common core tests and the recommended way to test the core transform functionality.
+
+Currently only supports testing target selector but when needed the functionality can be expended here to support: 
+
+* JavaScript exports output
+* Declaration values
+* Mixins output  
+
+Example using the /* @expect selector */ magic comment to test the root selector target 
+
+```js
+expectTransformOutput(
+    {
+        entry: `/style.st.css`,
+        files: {
+            '/style.st.css': {
+                namespace: 'ns',
+                content: `
+                /* @expect .ns__root */
+                .root {}
+            `
+        },
+    },
+    1
+);
+```
+
+
+
 #### Match rules
 
 Exposes two utility functions (`matchRuleAndDeclaration` and `matchAllRulesAndDeclarations`) used for testing Stylable generated AST representing CSS rules and declarations.
