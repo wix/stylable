@@ -21,7 +21,7 @@ A collection of tools aimed at testing Stylable diagnostics messages (warnings a
 
 Used for easily setting up Stylable instances (processor/transformer) and its infrastructure.
 
-Exposes `expectTransformOutput` utility for creating a transform tests. these are the most common core tests and the recommended way to test the core transform functionality.
+Exposes `expectTransformOutput` utility for creating a transform tests. These are the most common core tests and the recommended way to test the core transform functionality.
 
 Currently only supports testing target selector but when needed the functionality can be expended here to support: 
 
