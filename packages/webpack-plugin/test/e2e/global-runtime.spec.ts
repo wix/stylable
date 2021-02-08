@@ -8,8 +8,8 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
-                // headless: false,
+            launchOptions: {
+                // headless: false
             },
         },
         before,

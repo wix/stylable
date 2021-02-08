@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 
-const project = 'library-project';
+const project = 'resolve-js-with-context';
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
@@ -17,12 +17,12 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('eval bundle exports', () => {
-        const global = { Library: {} };
+    it('css is working', async () => {
+        const { page } = await projectRunner.openInBrowser();
+        const color = await page.evaluate(() => {
+            return getComputedStyle(document.documentElement).color;
+        });
 
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval
-        new Function('self', projectRunner.getBuildAsset('main.js'))(global);
-
-        expect(Object.keys(global.Library)).to.eql(['Label', 'Button']);
+        expect(color).to.eql('rgb(255, 0, 0)');
     });
 });

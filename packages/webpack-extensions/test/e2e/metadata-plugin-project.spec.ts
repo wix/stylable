@@ -8,7 +8,7 @@ describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
         },
@@ -100,7 +100,7 @@ describe(`(${project})`, () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
+                launchOptions: {
                     // headless: false
                 },
                 configName: 'webpack-content-hash.config',
@@ -123,7 +123,7 @@ describe(`(${project})`, () => {
         const projectRunnerJs = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
+                launchOptions: {
                     // headless: false
                 },
                 configName: 'webpack-js-mode.config',
@@ -145,7 +145,7 @@ describe(`(${project})`, () => {
         const projectRunnerAmdStatic = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
+                launchOptions: {
                     // headless: false
                 },
                 configName: 'webpack-amd-static-mode.config',
@@ -167,7 +167,7 @@ describe(`(${project})`, () => {
         const projectRunnerAmdFactory = StylableProjectRunner.mochaSetup(
             {
                 projectDir: join(__dirname, 'projects', project),
-                puppeteerOptions: {
+                launchOptions: {
                     // headless: false
                 },
                 configName: 'webpack-amd-factory-mode.config',

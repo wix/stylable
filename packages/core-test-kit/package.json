@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@stylable/core": "^4.0.0-alpha.10",
-    "chai": "^4.2.0",
+    "chai": "^4.3.0",
     "flat": "^5.0.2",
-    "postcss": "^8.2.4"
+    "postcss": "^8.2.5"
   },
   "files": [
     "cjs",

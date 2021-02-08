@@ -1,4 +1,4 @@
-import type { Response } from 'puppeteer';
+import type { Response } from 'playwright-core';
 
 export function filterAssetResponses(responses: Response[], assetNames: string[]) {
     return assetNames
@@ -6,17 +6,20 @@ export function filterAssetResponses(responses: Response[], assetNames: string[]
         .filter(Boolean) as Response[];
 }
 
-function getStyleElementsMetadata(getCss: boolean, getRuntime: boolean) {
+function getStyleElementsMetadata(
+    includeCSSContent: boolean | void,
+    includeRuntimeId: boolean | void
+) {
     const styleElements = Array.from(document.head.getElementsByTagName('style'));
     return styleElements.map((styleEl) => {
         const data: { id?: string; depth?: string; css?: string; runtime?: string } = {
             id: styleEl.getAttribute('st-id')!,
             depth: styleEl.getAttribute('st-depth')!,
         };
-        if (getRuntime) {
+        if (includeRuntimeId) {
             data.runtime = styleEl.getAttribute('st-runtime')!;
         }
-        if (getCss) {
+        if (includeCSSContent) {
             data.css = styleEl.textContent!.replace(/\r?\n/g, '\n');
         }
         return data;

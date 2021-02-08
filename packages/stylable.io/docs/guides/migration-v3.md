@@ -5,7 +5,7 @@ layout: docs
 ---
 
 This guide is intended to help migrate Stylable version 1 to Stylable version 2 or 3.
-It is mainly geared towards Stylable integration in React.
+It is mainly geared towards Stylable integration in React projects.
 
 # Suggested steps of migration
 
@@ -32,12 +32,12 @@ v3 Stylable:
 
 > Note: all Stylable packages in v3 are scoped under `@stylable` namespace. 
 > if you have dependency like `stylable` (without namespace),
-> it is a different one and should be changed to namespaced version.
+> it is a different one and should be changed to scoped version.
 
 # Update global typings
 
-If TypeScript is in the toolbelt, we recommend to update global typings
-(usually a file named `global.d.ts`) with `.st.css` module declaration:
+If TypeScript is used in the project, we recommend updating the global typings
+(usually `globals.d.ts`) with an `.st.css` module declaration:
 
 ```ts
 declare module '*.st.css' {
@@ -46,13 +46,13 @@ declare module '*.st.css' {
 }
 ```
 
-This way TypeScript compiler will help moving through most of the
+This way the TypeScript compiler will help refactor most of the
 required changes and provide typings for other Stylable use cases.
 
 ## Update `.st.css` file imports
 
-Prior to v2 all `.st.css` files would export `style` function. In v2
-this has changed: `.st.css` files now export an object.
+Prior to v2 all `.st.css` files would export a default `style` function. In v2
+this has changed: `.st.css` files now export a named object.
 
 List of all exported keys:
 
@@ -80,9 +80,9 @@ However, most often `{ st, classes }` is enough:
 
 `import { st, classes } from './Component.st.css';`
 
-> Note: `.st.css` files export `style` function and an alias to it -
+> Note: `.st.css` files export a `style` function and an alias to it -
 > `st`. It is recommended to use `st` in order to avoid name clashing
-> with other variables (for example, some other inline styles)
+> with other variables (for example, some other inline style).
 
 ## Update usage in React components
 
@@ -118,7 +118,7 @@ There are subtle but very important nuances in this change.
      className={st(classes.root, states, this.props.className)}
      ```
 
-     There is no more props spread anymore and Stylable requires only
+     There is no props spreading anymore and Stylable requires only
      `className` to be used.
 
      However, if you were relying on the props spread pattern, in v2 and v3 you
@@ -127,7 +127,9 @@ There are subtle but very important nuances in this change.
      Therefore, with Stylable v3 it is up to you to apply any additional props:
 
      ```jsx
-     <div className={st(classes.root, states, 'additional-class')} data-hook="test" hello="world" />
+     <div className={st(classes.root, states, 'additional-class')} 
+          data-hook="test" 
+          hello="world" />
      ```
 
 2. Stylable v1 `style()` would accept unscoped css class name as a string  
@@ -143,7 +145,7 @@ There are subtle but very important nuances in this change.
 
     Similar scoping is applied to css variables too, imported from `vars`
 
-Note: find more details and examples in React integration guide https://Stylable.io/docs/getting-started/react-integration
+Note: find more details and examples in our [Runtime](./runtime) and [React integration](../getting-started/react-integration) guides.
 
 ## Update tests
 
@@ -159,7 +161,6 @@ import { StylableDOMUtil } from '@Stylable/dom-test-kit';
 +const StylableDOMUtil = new StylableDOMUtil(styleSheet);
 ```
 
-Stylable v2 and v3, `StylableDOMUtil` expects to receive argument which
-is the whole stylesheet exported from `.st.css`
+Stylable v2 and v3 `StylableDOMUtil` expects to receive an argument which is the whole stylesheet exported from a `.st.css` file
 
-Prior to v2 it was only one thing - `style` function.
+Prior to v2 it was only one thing - the `style` function.
