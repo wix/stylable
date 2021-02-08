@@ -117,14 +117,9 @@ export class ProjectRunner {
         this.compiler = compiler;
         // compiler.run = compiler.run.bind(compiler);
         const run = () => {
-            return new Promise<webpack.Stats | undefined>((res, rej) => {
-                compiler.run((err, stats) => {
-                    if (err) {
-                        rej(err);
-                    }
-                    res(stats);
-                });
-            });
+            return new Promise<webpack.Stats | undefined>((res, rej) =>
+                compiler.run((err, stats) => (err ? rej(err) : res(stats)))
+            );
         };
         this.stats = await run();
         if (this.throwOnBuildError && this.stats?.hasErrors()) {
