@@ -10,7 +10,7 @@
     "prepack": "yarn build"
   },
   "peerDependencies": {
-    "webpack": "^5.12.0"
+    "webpack": "^5.20.0"
   },
   "dependencies": {
     "@stylable/runtime": "^4.0.0-alpha.10",
