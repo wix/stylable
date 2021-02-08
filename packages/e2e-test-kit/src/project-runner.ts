@@ -3,7 +3,7 @@ import { join, normalize } from 'path';
 import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
-import webpack, { Stats } from 'webpack';
+import webpack from 'webpack';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { nodeFs } from '@file-services/node';
 import { symlinkSync } from 'fs';
@@ -117,7 +117,7 @@ export class ProjectRunner {
         this.compiler = compiler;
         // compiler.run = compiler.run.bind(compiler);
         const run = () => {
-            return new Promise<Stats | undefined>((res, rej) => {
+            return new Promise<webpack.Stats | undefined>((res, rej) => {
                 compiler.run((err, stats) => {
                     if (err) {
                         rej(err);
