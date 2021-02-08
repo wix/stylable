@@ -243,7 +243,6 @@ export class ProjectRunner {
                 join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
                 'utf-8'
             )
-            .toString();
     }
 
     public getBuildAssets(): Assets {
