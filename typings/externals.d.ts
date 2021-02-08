@@ -3,11 +3,10 @@ declare module 'deindent' {
     export = deindent;
 }
 
-// TODO: revisit
 declare module 'mini-css-extract-plugin' {
     class MiniCssExtractPlugin {
         static loader: string
-        apply(compiler: any): void;
+        apply(compiler: typeof import('webpack').Compiler): void;
     }
     export = MiniCssExtractPlugin;
 }
