@@ -9781,10 +9781,10 @@ vm-browserify@^1.0.1:
   resolved "https://registry.yarnpkg.com/vm-browserify/-/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha512-2ham8XPWTONajOR0ohOKOHXkm3+gaBmGut3SRuu75xLd/RRaY6vqgh8NBYYk7+RW3u5AtzPQZG8F10LHkl0lAQ==
 
-vscode-css-languageservice@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/vscode-css-languageservice/-/vscode-css-languageservice-5.0.3.tgz#2d400a47e73d0bfc5bc0d3fdf5be487cfdca341b"
-  integrity sha512-KJt4jhCxqrgGrC02UsQsKw90dPkFknMHsH5HTInT7gkDRRfGFwEd+e2O1/E75br3TdFhvRmzjljYz5thZ58L3A==
+vscode-css-languageservice@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/vscode-css-languageservice/-/vscode-css-languageservice-5.1.0.tgz#cd172d13e9e7ae23ba567c73778aee10475ff716"
+  integrity sha512-iLHd/WjRKgaZBXMNeUooHG+r0qlhJBkXa+3MpQQR6Rpm928cis/3OV2Mp1R80yAQevIMeDL32RIJfHoJCT/RRg==
   dependencies:
     vscode-languageserver-textdocument "^1.0.1"
     vscode-languageserver-types "^3.16.0"
