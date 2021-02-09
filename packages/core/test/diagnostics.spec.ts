@@ -1075,7 +1075,7 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
 
-            it('should not warn when using imported elements (classes) with scoping in the same chunk', () => {
+            it('should not warn when using imported elements with scoping in the same chunk', () => {
                 expectWarnings(
                     `
                     :import {
@@ -1083,7 +1083,7 @@ describe('diagnostics: warnings and errors', () => {
                         -st-named: Blah;
                     }
 
-                    |.$Blah$.root| {}
+                    |$Blah$.root| {}
                 `,
                     []
                 );
