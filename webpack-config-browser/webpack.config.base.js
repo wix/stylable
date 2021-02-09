@@ -12,9 +12,9 @@ module.exports.baseConfig = () => {
         },
         resolve: {
             alias: {
-                jsdom: join(__dirname, 'jsdom-browser.js'),
+                jsdom: require.resolve('./jsdom-browser.js'),
                 path: require.resolve('@file-services/path/browser-path.js'),
-                util: join(__dirname, 'node-polyfill.js'),
+                util: require.resolve('./node-polyfill.js'),
                 pnpapi: false,
             },
             fallback: {
