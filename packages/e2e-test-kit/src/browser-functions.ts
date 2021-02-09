@@ -6,10 +6,10 @@ export function filterAssetResponses(responses: Response[], assetNames: string[]
         .filter(Boolean) as Response[];
 }
 
-function getStyleElementsMetadata(
-    includeCSSContent: boolean | void,
-    includeRuntimeId: boolean | void
-) {
+function getStyleElementsMetadata({
+    includeRuntimeId,
+    includeCSSContent,
+}: void | { includeCSSContent?: boolean; includeRuntimeId?: boolean } = {}) {
     const styleElements = Array.from(document.head.getElementsByTagName('style'));
     return styleElements.map((styleEl) => {
         const data: { id?: string; depth?: string; css?: string; runtime?: string } = {

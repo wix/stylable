@@ -19,11 +19,10 @@ describe(`(${project})`, () => {
 
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(
-            browserFunctions.getStyleElementsMetadata,
-            false,
-            true
-        );
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeRuntimeId: true,
+            includeCSSContent: false,
+        });
 
         expect(styleElements).to.eql([
             { id: './src/index.st.css', depth: '1', runtime: 'test' },

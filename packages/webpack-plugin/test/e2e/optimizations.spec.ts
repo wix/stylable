@@ -19,7 +19,9 @@ describe(`(${project})`, () => {
 
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeCSSContent: true,
+        });
 
         expect(styleElements).to.eql([
             // {

@@ -176,9 +176,6 @@ export function outputOptionsAwareHashContent(
 }
 
 export function injectLoader(compiler: Compiler) {
-    if (!compiler.options.module) {
-        compiler.options.module = { rules: [] };
-    }
     if (!compiler.options.module.rules) {
         compiler.options.module.rules = [];
     }
