@@ -36,16 +36,17 @@ describe(`(${project})`, () => {
     });
 
     it('load assets from url() declaration value', async () => {
-        const { responses } = await projectRunner.openInBrowser();
-        const assetResponses = filterAssetResponses(responses, expectedAssets);
+        const { page } = await projectRunner.openInBrowser();
 
-        expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
-            expectedAssets.length
+        const { bg } = await page.evaluate(() => {
+            return {
+                bg: getComputedStyle(document.body).backgroundImage,
+            };
+        });
+
+        expect(bg).to.equal(
+            `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2BY9AIAAjABi8G3mj0AAAAASUVORK5CYII="), url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=")`
         );
-
-        for (const response of assetResponses) {
-            expect(response.ok(), `${response.url()} to be loaded`).to.equal(true);
-        }
     });
 });
 
@@ -66,15 +67,15 @@ describe(`(${project}) production mode`, () => {
     );
 
     it('load assets from url() declaration value', async () => {
-        const { responses } = await projectRunner.openInBrowser();
-        const assetResponses = filterAssetResponses(responses, expectedAssets);
+        const { page } = await projectRunner.openInBrowser();
+        const { bg } = await page.evaluate(() => {
+            return {
+                bg: getComputedStyle(document.body).backgroundImage,
+            };
+        });
 
-        expect(assetResponses.length, 'all expected assets has matching responses').to.equal(
-            expectedAssets.length
+        expect(bg).to.equal(
+            `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2BY9AIAAjABi8G3mj0AAAAASUVORK5CYII="), url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=")`
         );
-
-        for (const response of assetResponses) {
-            expect(response.ok(), `${response.url()} to be loaded`).to.equal(true);
-        }
     });
 });

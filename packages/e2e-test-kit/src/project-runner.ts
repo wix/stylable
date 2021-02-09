@@ -238,11 +238,10 @@ export class ProjectRunner {
     }
 
     public getBuildAsset(assetPath: string) {
-        return nodeFs
-            .readFileSync(
-                join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
-                'utf-8'
-            )
+        return nodeFs.readFileSync(
+            join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
+            'utf-8'
+        );
     }
 
     public getBuildAssets(): Assets {
