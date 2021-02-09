@@ -5,7 +5,7 @@ export default {
     entry: './index.js',
     context: __dirname,
     devtool: false,
-    output: { publicPath: '' },
+    output: { publicPath: '' }, // MiniCSSExtractPlugin does not support auto publicPath
     module: {
         rules: [
             {
