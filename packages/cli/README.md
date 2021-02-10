@@ -50,6 +50,32 @@ This generates an `index.st.css` file that acts as an export entry from every st
 $ stc --srcDir="./src" --outDir="./dist" --indexFile="index.st.css"
 ```
 
+#### Create custom generator
+
+Exporting a `Generator` named export class from a file will allow to use it as `customGenerator`.
+Usually this generator will inherit from our base generator class and override `generateImport` and `generateIndexSource` methods.
+
+```ts
+import { Generator as Base } from '@stylable/cli';
+
+export class Generator extends Base {
+    private count = 0;
+    public generateImport() {
+        return {
+            defaultName: 'Style' + this.count++,
+            named: {
+                name: '.Named' + this.count++,
+            },
+        };
+    }
+    protected generateIndexSource(indexFileTargetPath: string) {
+        const source = super.generateIndexSource(indexFileTargetPath);
+        return '@namespace "INDEX";\n' + source;
+    }
+}
+
+```
+
 ### Build source stylesheets to JavaScript modules
 
 To transform your project stylesheets to target JavaScript modules containing the transformed source files, you must provide the `indexFile` parameter with an empty string.
