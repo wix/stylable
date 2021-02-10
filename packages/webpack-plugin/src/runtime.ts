@@ -6,9 +6,9 @@ export interface StateMap {
 }
 
 export interface Host {
-    sts: any;
-    stc: any;
-    sti: any;
+    sts: (namespace: string) => string;
+    stc: (namespace: string, stateMapping?: StateMap | null | undefined) => string;
+    sti: (namespace: string, css: string, depth: number, runtimeId: string) => void;
 }
 
 export function stylesheet(host: Host) {
