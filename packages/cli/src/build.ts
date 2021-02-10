@@ -57,7 +57,7 @@ export function build({
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
         : require('./default-generator');
-    const generator = new generatorModule.Generator(log);
+    const generator = new generatorModule.Generator(stylable, log);
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);

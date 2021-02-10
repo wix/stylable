@@ -1,3 +1,4 @@
+import { Stylable } from '@stylable/core';
 import { FileSystem } from '@stylable/node';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
@@ -11,7 +12,7 @@ export class Generator {
         named: Record<string, string>;
     }> = [];
     private collisionDetector = new NameCollisionDetector<string>();
-    constructor(private log: (...args: string[]) => void) {}
+    constructor(protected stylable: Stylable, private log: (...args: string[]) => void) {}
     public generateImport(
         filePath: string
     ): { defaultName: string; named: Record<string, string> } {
