@@ -10,7 +10,7 @@ describe(`(${project})`, () => {
             projectDir: join(__dirname, 'projects', project),
             launchOptions: {
                 // headless: false,
-            }
+            },
         },
         before,
         afterEach,

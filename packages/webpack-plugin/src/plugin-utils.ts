@@ -5,8 +5,8 @@ import {
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
-    webpackCreateHash,
-    webpackOutputOptions,
+    WebpackCreateHash,
+    WebpackOutputOptions,
 } from './types';
 import { IStylableOptimizer } from '@stylable/core';
 import decache from 'decache';
@@ -47,7 +47,7 @@ export function getStaticPublicPath(compilation: Compilation) {
     if (typeof compilation.outputOptions.publicPath === 'string') {
         publicPath = compilation.outputOptions.publicPath;
         publicPath = publicPath === 'auto' ? '' : publicPath;
-        publicPath = publicPath.endsWith('/') ? publicPath : publicPath + '/';
+        publicPath = publicPath === '' || publicPath.endsWith('/') ? publicPath : publicPath + '/';
     } else {
         throw new Error('Public path as function is not supported yet.');
     }
@@ -151,7 +151,7 @@ type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'u
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
     if (module instanceof NormalModule) {
-        return !!module.loaders.find(({ loader }) =>
+        return module.loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
@@ -159,8 +159,8 @@ export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNor
 }
 
 export function outputOptionsAwareHashContent(
-    createHash: webpackCreateHash,
-    outputOptions: webpackOutputOptions,
+    createHash: WebpackCreateHash,
+    outputOptions: WebpackOutputOptions,
     content: string
 ) {
     const hash = createHash(outputOptions.hashFunction || 'md4');

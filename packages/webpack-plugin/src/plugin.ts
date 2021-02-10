@@ -1,4 +1,10 @@
-import { Stylable, StylableConfig, packageNamespaceFactory, OptimizeConfig } from '@stylable/core';
+import {
+    Stylable,
+    StylableConfig,
+    packageNamespaceFactory,
+    OptimizeConfig,
+    DiagnosticsMode,
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
@@ -67,7 +73,7 @@ export interface StylableWebpackPluginOptions {
      * strict - Stylable error and warning will emit Webpack error
      * loose - Stylable error and warning will emit Webpack warning
      */
-    diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    diagnosticsMode?: DiagnosticsMode;
     /**
      * Target of the js module
      * oldie - ES3 compatible

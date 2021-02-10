@@ -14,11 +14,12 @@ import postcss, { Declaration, Root, Rule, Node, Comment } from 'postcss';
 import { NameMapper } from './name-mapper';
 
 const { booleanStateDelimiter } = pseudoStates;
+const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
 
 export class StylableOptimizer implements IStylableOptimizer {
-    names = new NameMapper();
-    classPrefix = 's';
-    namespacePrefix = 'o';
+    public names = new NameMapper();
+    public classPrefix = 's';
+    public namespacePrefix = 'o';
     public minifyCSS(css: string): string {
         // disabling restructuring as it breaks production mode by disappearing classes
         return csso.minify(css, { restructure: false }).css;
@@ -71,7 +72,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             outputAst,
             jsExports.classes,
             undefined,
-            usageMapping || {},
+            usageMapping,
             globals,
             delimiter,
             config.shortNamespaces,
@@ -88,7 +89,7 @@ export class StylableOptimizer implements IStylableOptimizer {
         delimiter: string
     ) {
         const ast = parseSelector(selector);
-        const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
+
         const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
         traverseNode(ast, (node) => {
             if (node.type === 'class' && !globals[node.name]) {
@@ -235,7 +236,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             }
         });
     }
-    
+
     private isContainsUnusedParts(
         selectorAst: SelectorAstNode,
         usageMapping: Record<string, boolean>,

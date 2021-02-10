@@ -1,6 +1,11 @@
 import postcss from 'postcss';
 import decache from 'decache';
-import { processNamespace, emitDiagnostics, visitMetaCSSDependenciesBFS } from '@stylable/core';
+import {
+    processNamespace,
+    emitDiagnostics,
+    visitMetaCSSDependenciesBFS,
+    DiagnosticsMode,
+} from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { Warning, CssSyntaxError } from './warning';
 import { getStylable } from './cached-stylable-factory';
@@ -17,7 +22,7 @@ export interface LoaderOptions {
     resolveNamespace(namespace: string, filePath: string): string;
     filterUrls(url: string, ctx: LoaderContext): boolean;
     exportsOnly: boolean;
-    diagnosticsMode: 'auto' | 'strict' | 'loose';
+    diagnosticsMode: DiagnosticsMode;
 }
 
 const defaultOptions: LoaderOptions = {

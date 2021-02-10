@@ -4,12 +4,14 @@ export interface EmitDiagnosticsContext {
     emitError(e: Error): void;
     emitWarning(e: Error): void;
 }
+
+export type DiagnosticsMode = 'auto' | 'strict' | 'loose';
 /**
  * Helper function to report diagnostics for every diagnosticsMode
  */
 function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
-    diagnosticsMode: 'auto' | 'strict' | 'loose',
+    diagnosticsMode: DiagnosticsMode,
     { message, type }: { message: string; type: 'warning' | 'error' }
 ) {
     const error = new Error(message);
@@ -28,7 +30,7 @@ function reportDiagnostic(
 export function emitDiagnostics(
     ctx: EmitDiagnosticsContext,
     meta: StylableMeta,
-    diagnosticsMode: 'auto' | 'strict' | 'loose'
+    diagnosticsMode: DiagnosticsMode
 ) {
     meta.diagnostics?.reports.forEach((diagnostic) =>
         reportDiagnostic(ctx, diagnosticsMode, diagnostic)

@@ -137,7 +137,7 @@ export class ProjectRunner {
 
         this.watchingHandle = compiler.watch({}, (err, stats) => {
             if (!this.stats) {
-                if (this.throwOnBuildError && stats?.compilation.errors.length) {
+                if (this.throwOnBuildError && stats?.hasErrors()) {
                     err = new Error(stats?.compilation.errors.join('\n'));
                 }
                 if (err) {
@@ -284,7 +284,7 @@ export class ProjectRunner {
 
     getChunksModulesNames() {
         const compilation = this.stats!.compilation;
-        const chunkByName: any = {};
+        const chunkByName: Record<string, string[]> = {};
         compilation.chunks.forEach((chunk) => {
             const names = [];
             const modules = compilation.chunkGraph!.getChunkModulesIterableBySourceType(

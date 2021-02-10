@@ -1,4 +1,4 @@
-import { Compilation, Compiler } from 'webpack';
+import { Compilation, WebpackPluginInstance } from 'webpack';
 
 const NativeModule = require('module');
 const NodeTemplatePlugin = require('webpack/lib/node/NodeTemplatePlugin');
@@ -11,7 +11,7 @@ export function compileAsEntry(
     compilation: Compilation,
     context: string,
     request: string,
-    plugins: { apply(compiler: Compiler): void }[] = []
+    plugins: WebpackPluginInstance[] = []
 ): Promise<string> {
     const pluginName = 'compileAsEntry';
     const outputOptions = {

@@ -1,16 +1,11 @@
-type Prefix = string;
-type Name = string;
-type MappedName = string;
+export type Prefix = string;
+export type Name = string;
+export type MappedName = string;
 
 export class NameMapper {
-    public index: number;
-    public mapping: Record<Prefix, Record<Name, MappedName>>;
-    public indexMapping: Record<Prefix, number>;
-    constructor() {
-        this.index = 0;
-        this.mapping = {};
-        this.indexMapping = {};
-    }
+    public index = 0;
+    public mapping: Record<Prefix, Record<Name, MappedName>> = {};
+    public indexMapping: Record<Prefix, number> = {};
     public get(name: Name, prefix: Prefix) {
         this.indexMapping[prefix] || (this.indexMapping[prefix] = 0);
         const mapping = this.mapping[prefix] || (this.mapping[prefix] = {});

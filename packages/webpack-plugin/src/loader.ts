@@ -2,7 +2,7 @@ import { addBuildDependencies, getImports } from './loader-utils';
 import { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core';
 
-export default function (this: StylableLoaderContext, source: string) {
+export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {
     const { meta, exports } = this.stylable.transform(source, this.resourcePath);
 
     const { urls, imports, buildDependencies, unusedImports } = getImports(

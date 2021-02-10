@@ -16,7 +16,7 @@ export default {
         }),
         new HTMLSnapshotPlugin({
             outDir: 'snapshots',
-            render(module: any) {
+            render(module) {
                 return renderToStaticMarkup(el(module.Index));
             },
         }),

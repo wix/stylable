@@ -23,7 +23,7 @@ export function injectCssModules(
         for (const module of stylableModules) {
             const cssModule = new CssModule({
                 context: module.context,
-                identifier: module.resource.replace('.st.css', '.css') + '?stylable-css-inject',
+                identifier: module.resource.replace(/\.st\.css$/, '.css') + '?stylable-css-inject',
                 identifierIndex: 1,
                 content: replaceMappedCSSAssetPlaceholders({
                     assetsModules: assetsModules,

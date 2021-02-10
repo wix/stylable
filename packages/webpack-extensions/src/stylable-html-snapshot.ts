@@ -1,6 +1,5 @@
 import { basename, join } from 'path';
-import { sources } from 'webpack';
-import { Module, Compiler, Compilation } from 'webpack';
+import { Module, Compiler, Compilation, sources } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 
 import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
@@ -9,7 +8,7 @@ const { RawSource } = sources;
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
-    render: (componentModule: Module, component: any) => string | false;
+    render: (componentModule: any, component: any) => string | false;
     /**
      * By default, gets component logic related to the stylesheet being imported. E.g., you
      * have stylesheet `a.st.css`, which is imported by a few files. By default, this method
@@ -40,7 +39,7 @@ export class HTMLSnapshotPlugin {
             });
         });
     }
-    public async snapShotStylableModule(compilation: Compilation, module: any) {
+    public async snapShotStylableModule(compilation: Compilation, module: Module) {
         const component = this.getLogicModule(module, compilation.moduleGraph);
         if (!component || !component.context) {
             return;
@@ -66,7 +65,7 @@ export class HTMLSnapshotPlugin {
             compilation.errors.push(
                 new Error(
                     `Duplicate component name ${component.resource} target path ${targetPath}`
-                ) as any // TODO: webpack types 
+                ) as any // TODO: webpack types
             );
         }
     }
