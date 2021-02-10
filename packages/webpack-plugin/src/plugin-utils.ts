@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
 import { UnusedDependency } from './unused-dependency';
 import {
@@ -119,21 +118,21 @@ export function replaceMappedCSSAssetPlaceholders({
     );
 }
 
-export function extractFilenameFromAssetModule(m: NormalModule, publicPath: string): string {
-    const source = m.originalSource()!.source();
-    let match = source.toString().match(/__webpack_public_path__\s*\+\s*"(.*?)"/);
+export function extractFilenameFromAssetModule(module: NormalModule, publicPath: string): string {
+    const source = module.originalSource()!.source().toString();
+    let match = source.match(/__webpack_public_path__\s*\+\s*"(.*?)"/);
     if (match) {
         return publicPath + match[1];
     }
-    match = source.toString().match(/module.exports\s*=\s*"(.*?)"/);
+    match = source.match(/module.exports\s*=\s*"(.*?)"/);
     if (match) {
         return match[1];
     }
-    match = source.toString().match(/export\s+default\s+"(.*?)"/);
+    match = source.match(/export\s+default\s+"(.*?)"/);
     if (match) {
         return match[1];
     }
-    throw new Error('unknown asset module format ' + source);
+    throw new Error(`unknown asset module format ${source}\ntransformed from ${module.resource}`);
 }
 
 export function extractDataUrlFromAssetModuleSource(source: string): string {
@@ -181,27 +180,23 @@ export function injectLoader(compiler: Compiler) {
     }
     compiler.options.module.rules.unshift({
         test: /\.st\.css$/,
-        loader: require.resolve(join(__dirname, 'loader')),
+        loader: require.resolve('./loader'),
         sideEffects: true,
     });
 }
 
 export function createDecacheRequire(compiler: Compiler) {
-    if (compiler.watchMode) {
-        const cacheIds = new Set<string>();
-        compiler.hooks.done.tap('decache require', () => {
-            for (const id of cacheIds) {
-                decache(id);
-            }
-            cacheIds.clear();
-        });
-        return (id: string) => {
-            cacheIds.add(id);
-            return require(id);
-        };
-    } else {
-        return require;
-    }
+    const cacheIds = new Set<string>();
+    compiler.hooks.done.tap('decache require', () => {
+        for (const id of cacheIds) {
+            decache(id);
+        }
+        cacheIds.clear();
+    });
+    return (id: string) => {
+        cacheIds.add(id);
+        return require(id);
+    };
 }
 
 export function createStaticCSS(
@@ -216,8 +211,8 @@ export function createStaticCSS(
     dependencyTemplates: DependencyTemplates
 ) {
     const cssChunks = Array.from(stylableModules)
-        .filter((m) => m.buildMeta.stylable.isUsed !== false)
-        .sort((m1, m2) => m1.buildMeta.stylable.depth - m2.buildMeta.stylable.depth)
+        .filter((m) => getStylableBuildMeta(m).isUsed !== false)
+        .sort((m1, m2) => getStylableBuildMeta(m1).depth - getStylableBuildMeta(m2).depth)
         .map((m) => {
             return replaceMappedCSSAssetPlaceholders({
                 assetsModules: assetsModules,
@@ -227,7 +222,7 @@ export function createStaticCSS(
                 dependencyTemplates,
                 runtime,
                 runtimeTemplate,
-                stylableBuildMeta: m.buildMeta.stylable,
+                stylableBuildMeta: getStylableBuildMeta(m),
             });
         });
 
@@ -237,7 +232,7 @@ export function createStaticCSS(
 export function getStylableBuildMeta(module: Module): StylableBuildMeta {
     const meta = module.buildMeta.stylable;
     if (!meta) {
-        throw new Error('Stylable module does not contains build meta');
+        throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
     }
     return meta;
 }
@@ -251,16 +246,12 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
             dependency instanceof UnusedDependency ? undefined : resolvedOriginModule
     );
 
-    // TODO: check if this optimization is good.
-    // const inChunks = chunkGraph.getNumberOfModuleChunks(m)
-    // if(inChunks === 0) {
-    //     debugger
-    // }
+    // TODO: check if we can optimize by checking if a module contained in at least one chunk.
 
     let isInUse = false;
-    for (const cm of inConnections) {
-        if (cm.buildMeta.sideEffectFree) {
-            const info = moduleGraph.getExportsInfo(cm);
+    for (const connectionModule of inConnections) {
+        if (connectionModule.buildMeta.sideEffectFree) {
+            const info = moduleGraph.getExportsInfo(connectionModule);
             const usedExports = (info.getUsedExports as any)(/*if passed undefined it finds usages in all chunks*/);
             if (usedExports === false) {
                 continue;
@@ -270,7 +261,7 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
                 continue;
             }
         }
-        const chunksCount = chunkGraph.getNumberOfModuleChunks(cm);
+        const chunksCount = chunkGraph.getNumberOfModuleChunks(connectionModule);
 
         if (chunksCount > 0) {
             isInUse = true;
@@ -307,6 +298,23 @@ export function getSortedModules(stylableModules: Set<NormalModule>) {
         .sort((m1, m2) => getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth);
 }
 
+export function getSortedModules2(stylableModules: Set<NormalModule>) {
+    return Array.from(stylableModules).sort((m1, m2) => {
+        const depthDiff = m2.depth - m1.depth;
+        if (depthDiff === 0) {
+            if (m1.resource > m2.resource) {
+                return 1;
+            } else if (m1.resource < m2.resource) {
+                return -1;
+            } else {
+                return 0;
+            }
+        } else {
+            return depthDiff;
+        }
+    });
+}
+
 export function reportNamespaceCollision(
     namespaceToFileMapping: Map<string, Set<string>>,
     errors: Error[]
@@ -330,11 +338,12 @@ export function reportNamespaceCollision(
     }
 }
 
-type OptimizationMapping = {
+export interface OptimizationMapping {
     usageMapping: Record<string, boolean>;
     namespaceMapping: Record<string, string>;
     namespaceToFileMapping: Map<string, Set<string>>;
-};
+}
+
 export function createOptimizationMapping(
     sortedModules: NormalModule[],
     optimizer: IStylableOptimizer

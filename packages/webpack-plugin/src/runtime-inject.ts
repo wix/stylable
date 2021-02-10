@@ -20,7 +20,7 @@ import {
 } from './types';
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
-interface DependencyTemplateContext {
+export interface DependencyTemplateContext {
     module: Module;
     moduleGraph: ModuleGraph;
     runtimeRequirements: Set<string>;
@@ -84,7 +84,9 @@ export class InjectDependencyTemplate {
             });
 
             if (!(module instanceof NormalModule)) {
-                throw new Error('InjectDependencyTemplate should only be used on stylable modules');
+                throw new Error(
+                    `InjectDependencyTemplate should only be used on stylable modules was found on ${module.identifier()}`
+                );
             }
 
             const id =
@@ -140,7 +142,7 @@ export class StylableRuntimeInject extends RuntimeModule {
     }
 }
 
-export class LoadCSS extends RuntimeModule {
+export class StylableLoadCSS extends RuntimeModule {
     constructor() {
         super('stylable load css', 10);
     }

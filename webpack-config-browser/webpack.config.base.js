@@ -5,23 +5,20 @@ const { ProvidePlugin } = require('webpack');
 const monorepoRoot = join(__dirname, '..');
 
 module.exports.baseConfig = () => {
-    return {
+    /** @type import('webpack').Compiler */
+    const base = {
         mode: 'development',
-        output: {
-            filename: '[name].bundle.js',
-        },
         resolve: {
             alias: {
                 jsdom: require.resolve('./jsdom-browser.js'),
                 path: require.resolve('@file-services/path/browser-path.js'),
                 util: require.resolve('./node-polyfill.js'),
-                pnpapi: false,
             },
             fallback: {
                 fs: false,
                 os: false,
             },
-            extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
+            extensions: ['.ts', '.tsx', '.js', '.json'],
             plugins: [new TsconfigPathsPlugin({ configFile: join(monorepoRoot, 'tsconfig.json') })],
         },
         module: {
@@ -39,4 +36,5 @@ module.exports.baseConfig = () => {
         ],
         devServer: { host: 'localhost' },
     };
+    return base;
 };

@@ -1,11 +1,11 @@
 /* eslint-disable no-var */
-type StateValue = boolean | number | string;
+export type StateValue = boolean | number | string;
 
-interface StateMap {
+export interface StateMap {
     [stateName: string]: StateValue;
 }
 
-interface Host {
+export interface Host {
     sts: any;
     stc: any;
     sti: any;

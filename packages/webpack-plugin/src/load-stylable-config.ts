@@ -1,13 +1,13 @@
 import { Compiler } from 'webpack';
 import findConfig from 'find-config';
-import { Options } from './plugin';
+import { StylableWebpackPluginOptions } from './plugin';
 
 export function loadStylableConfig(
     context: string
 ):
     | undefined
     | {
-          webpackPlugin?: (options: Required<Options>, compiler: Compiler) => Required<Options>;
+          webpackPlugin?: (options: Required<StylableWebpackPluginOptions>, compiler: Compiler) => Required<StylableWebpackPluginOptions>;
       } {
     const path = findConfig('stylable.config.js', { cwd: context });
     let config;

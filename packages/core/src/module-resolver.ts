@@ -19,7 +19,7 @@ export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any
         const res = eResolver.resolveSync(resolverContext, directoryPath, request);
         if (res === false) {
             throw new Error(
-                `Stylable does not support browser field 'false' values. ${request} resolved to 'false'`
+                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`
             );
         }
         return res;

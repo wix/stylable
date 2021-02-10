@@ -4,7 +4,9 @@ export interface EmitDiagnosticsContext {
     emitError(e: Error): void;
     emitWarning(e: Error): void;
 }
-
+/**
+ * Helper function to report diagnostics for every diagnosticsMode
+ */
 function reportDiagnostic(
     ctx: EmitDiagnosticsContext,
     diagnosticsMode: 'auto' | 'strict' | 'loose',
@@ -28,10 +30,10 @@ export function emitDiagnostics(
     meta: StylableMeta,
     diagnosticsMode: 'auto' | 'strict' | 'loose'
 ) {
-    meta.diagnostics?.reports.forEach((diagnostic) => {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
-    });
-    meta.transformDiagnostics?.reports.forEach((diagnostic) => {
-        reportDiagnostic(ctx, diagnosticsMode, diagnostic);
-    });
+    meta.diagnostics?.reports.forEach((diagnostic) =>
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic)
+    );
+    meta.transformDiagnostics?.reports.forEach((diagnostic) =>
+        reportDiagnostic(ctx, diagnosticsMode, diagnostic)
+    );
 }

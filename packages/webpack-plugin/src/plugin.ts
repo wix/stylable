@@ -44,7 +44,7 @@ type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
 };
 
-export interface Options {
+export interface StylableWebpackPluginOptions {
     /**
      * Filename of the output bundle when emitting css bundle
      */
@@ -110,7 +110,10 @@ const defaultOptimizations = (isProd: boolean): Required<OptimizeOptions> => ({
     minify: isProd,
 });
 
-const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options> => ({
+const defaultOptions = (
+    userOptions: StylableWebpackPluginOptions,
+    isProd: boolean
+): Required<StylableWebpackPluginOptions> => ({
     filename: userOptions.filename ?? 'stylable.css',
     cssInjection: userOptions.cssInjection ?? (isProd ? 'css' : 'js'),
     assetsMode: userOptions.assetsMode ?? 'url',
@@ -128,8 +131,11 @@ const defaultOptions = (userOptions: Options, isProd: boolean): Required<Options
 
 export class StylableWebpackPlugin {
     stylable!: Stylable;
-    options!: Required<Options>;
-    constructor(private userOptions: Options = {}, private injectConfigHooks = true) {}
+    options!: Required<StylableWebpackPluginOptions>;
+    constructor(
+        private userOptions: StylableWebpackPluginOptions = {},
+        private injectConfigHooks = true
+    ) {}
     apply(compiler: Compiler) {
         /**
          * This plugin is based on a loader so we inject the loader here
@@ -194,7 +200,7 @@ export class StylableWebpackPlugin {
         let options = defaultOptions(this.userOptions, compiler.options.mode === 'production');
 
         const config = loadStylableConfig(compiler.context);
-        if (config && config.webpackPlugin) {
+        if (typeof config?.webpackPlugin === 'function') {
             options = config.webpackPlugin(options, compiler);
         }
         this.options = options;
@@ -222,7 +228,7 @@ export class StylableWebpackPlugin {
                         compiler.options.output.hashSalt || '',
                         ''
                     ),
-                    requireModule: createDecacheRequire(compiler),
+                    requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
                     optimizer: this.options.optimizer,
                 },
                 compiler
@@ -437,13 +443,11 @@ export class StylableWebpackPlugin {
         }
     }
     private setupDependencies(
-        compilation: Compilation,
+        { dependencyTemplates, dependencyFactories }: Compilation,
         normalModuleFactory: NormalModuleFactory,
         staticPublicPath: string,
         assetsModules: Map<string, NormalModule>
     ) {
-        const { dependencyTemplates, dependencyFactories } = compilation;
-
         dependencyFactories.set(StylableRuntimeDependency, normalModuleFactory);
         dependencyTemplates.set(
             StylableRuntimeDependency,
