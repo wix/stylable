@@ -284,23 +284,12 @@ export function getFileName(filename: string, data: Record<string, string>) {
     });
 }
 
+/**
+ * sorts by depth, falling back to alpha numeric
+ */
 export function getSortedModules(stylableModules: Set<NormalModule>) {
-    return Array.from(stylableModules)
-        .sort((m1, m2) => {
-            if (m1.resource > m2.resource) {
-                return 1;
-            } else if (m1.resource < m2.resource) {
-                return -1;
-            } else {
-                return 0;
-            }
-        })
-        .sort((m1, m2) => getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth);
-}
-
-export function getSortedModules2(stylableModules: Set<NormalModule>) {
     return Array.from(stylableModules).sort((m1, m2) => {
-        const depthDiff = m2.depth - m1.depth;
+        const depthDiff = getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
         if (depthDiff === 0) {
             if (m1.resource > m2.resource) {
                 return 1;
