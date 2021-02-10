@@ -337,7 +337,7 @@ export class StylableProcessor {
 
         let locallyScoped = false;
 
-        traverseNode(rule.selectorAst, (node, _index, _nodes) => {
+        traverseNode(rule.selectorAst, (node, index, nodes) => {
             if (node.type === 'selector') {
                 locallyScoped = false;
             }
@@ -354,9 +354,9 @@ export class StylableProcessor {
                             return false;
                         }
 
-                        const _import = this.handleImport(rule);
-                        this.meta.imports.push(_import);
-                        this.addImportSymbols(_import);
+                        const imported = this.handleImport(rule);
+                        this.meta.imports.push(imported);
+                        this.addImportSymbols(imported);
                         return false;
                     } else {
                         this.diagnostics.warn(
@@ -395,7 +395,7 @@ export class StylableProcessor {
                     if (!this.meta.classes[name].alias) {
                         locallyScoped = true;
                     } else if (locallyScoped === false && !inStScope) {
-                        if (this.checkForScopedNodeAfter(rule, _nodes, _index) === false) {
+                        if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
                             this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
                                 word: name,
                             });
@@ -408,7 +408,7 @@ export class StylableProcessor {
                 this.addElementSymbolOnce(name, rule);
 
                 if (locallyScoped === false && !inStScope) {
-                    if (this.checkForScopedNodeAfter(rule, _nodes, _index) === false) {
+                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
                         this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
                             word: name,
                         });
