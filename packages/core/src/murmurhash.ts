@@ -1,5 +1,5 @@
 /* eslint-disable no-fallthrough */
-
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * JS Implementation of MurmurHash3 (r136) (as of May 20, 2011)
  *
@@ -12,8 +12,7 @@
  * @param {number} seed Positive integer only
  * @return {number} 32-bit positive integer hash
  */
-
-function murmurhash3_32_gc(key: string, seed: number) {
+export function murmurhash3_32_gc(key: string, seed = 0) {
     const remainder = key.length & 3; // key.length % 4
     const bytes = key.length - remainder;
     const c1 = 0xcc9e2d51;
@@ -41,14 +40,13 @@ function murmurhash3_32_gc(key: string, seed: number) {
     }
 
     k1 = 0;
-
     switch (remainder) {
+        // @ts-expect-error
         case 3:
             k1 ^= (key.charCodeAt(i + 2) & 0xff) << 16;
-            break;
+        // @ts-expect-error
         case 2:
             k1 ^= (key.charCodeAt(i + 1) & 0xff) << 8;
-            break;
         case 1:
             k1 ^= key.charCodeAt(i) & 0xff;
 
@@ -56,7 +54,6 @@ function murmurhash3_32_gc(key: string, seed: number) {
             k1 = (k1 << 15) | (k1 >>> 17);
             k1 = ((k1 & 0xffff) * c2 + ((((k1 >>> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
             h1 ^= k1;
-            break;
     }
 
     h1 ^= key.length;
@@ -69,7 +66,3 @@ function murmurhash3_32_gc(key: string, seed: number) {
 
     return h1 >>> 0;
 }
-
-export default {
-    v3: murmurhash3_32_gc,
-};

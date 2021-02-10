@@ -1,6 +1,6 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import hash from 'murmurhash';
+import { murmurhash3_32_gc } from '@stylable/core';
 import { join } from 'path';
 
 const project = 'namespace-generation-project';
@@ -30,10 +30,14 @@ describe(`(${project})`, () => {
 
         const expectedLocalClassname =
             'index' +
-            hash.v3(localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css');
+            murmurhash3_32_gc(
+                localPackageName + '@' + localPackageVersion + '/' + 'src/index.st.css'
+            );
         const expectedImportedClassname =
             'index' +
-            hash.v3(externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css');
+            murmurhash3_32_gc(
+                externalPackageName + '@' + externalPackageVersion + '/' + 'index.st.css'
+            );
 
         const source: string = projectRunner.getBuildAsset('main.js');
         const testPackage = projectRunner.evalAssetModule(source).testPackage;
