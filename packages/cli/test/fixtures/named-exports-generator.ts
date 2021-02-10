@@ -1,13 +1,18 @@
 import { Generator as Base } from '@stylable/cli';
 
 export class Generator extends Base {
-    private count = 0;
-    public generateImport() {
+    public generateImport(filePath: string) {
+        const meta = this.stylable.process(filePath);
+        const rootExport = this.filename2varname(filePath);
+        const named = Object.keys(meta.classes)
+            .filter((name) => name !== meta.root)
+            .reduce<Record<string, string>>((acc, className) => {
+                acc[className] = `.${rootExport}__${className}`;
+                return acc;
+            }, {});
         return {
-            defaultName: 'Style' + this.count++,
-            named: {
-                name: '.Named' + this.count++,
-            },
+            defaultName: rootExport,
+            named: named,
         };
     }
     protected generateIndexSource(indexFileTargetPath: string) {

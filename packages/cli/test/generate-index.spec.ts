@@ -141,10 +141,10 @@ describe('build index', () => {
         expect(res.trim()).to.equal(
             [
                 '@namespace "INDEX";',
-                ':import {-st-from: "./comp-A.st.css";-st-default:Style0;-st-named: name as Named1;}',
-                '.root Style0{}.root .Named1{}',
-                ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:Style2;-st-named: name as Named3;}',
-                '.root Style2{}.root .Named3{}',
+                ':import {-st-from: "./comp-A.st.css";-st-default:CompA;-st-named: a as CompA__a;}',
+                '.root CompA{}.root .CompA__a{}',
+                ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;-st-named: b as SomeCompB__b;}',
+                '.root SomeCompB{}.root .SomeCompB__b{}',
             ].join('\n')
         );
     });
