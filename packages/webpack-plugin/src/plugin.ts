@@ -344,9 +344,10 @@ export class StylableWebpackPlugin {
          *  After we have the initial chunks we can calculate the depth and usage of each stylesheet
          */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
+            const cache = new Map();
             for (const module of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
-                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph);
+                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
             }
         });
 
