@@ -39,6 +39,7 @@ export function calcDepth(
         const view = getCSSViewModules(module, moduleGraph);
         if (view) {
             cssDepth = Math.max(cssDepth, calcDepth(view, moduleGraph, path, cache));
+            cache.delete(view);
         }
         cssDepth++;
     }
