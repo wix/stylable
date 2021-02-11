@@ -28,22 +28,6 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
     }
 }
 
-export function createImportForComponent(
-    from: string,
-    defaultName: string,
-    named: Record<string, string> = {}
-) {
-    const namedPart = Object.entries(named)
-        .map(([name, as]) => `${name} as ${as.startsWith('.') ? as.slice(1) : as}`)
-        .join(',');
-    const usagePart = Object.values(named)
-        .map((exportName) => `.root ${exportName}{}`)
-        .join(' ');
-    return `:import {-st-from: ${JSON.stringify(from)};-st-default:${defaultName};${
-        namedPart ? `-st-named: ${namedPart};` : ''
-    }}\n.root ${defaultName}{}${usagePart}`;
-}
-
 export function addDotSlash(p: string) {
     p = p.replace(/\\/g, '/');
     return p.startsWith('.') ? p : './' + p;

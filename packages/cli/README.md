@@ -53,21 +53,22 @@ $ stc --srcDir="./src" --outDir="./dist" --indexFile="index.st.css"
 #### Create custom generator
 
 Exporting a `Generator` named export class from a file will allow to use it as `customGenerator`.
-Usually this generator will inherit from our base generator class and override `generateImport` and `generateIndexSource` methods.
+Usually this generator will inherit from our base generator class and override `generateReExports` and `generateIndexSource` methods.
 
+This example mimics the default generator behavior (only exports stylesheet root): 
 ```ts
-import { Generator as Base } from '@stylable/cli';
+import { Generator as Base, ReExports } from '@stylable/cli';
 
 export class Generator extends Base {
-    private count = 0;
-    public generateImport() {
+    public generateReExports(filePath): ReExports {
         return {
-            defaultName: 'Style' + this.count++,
-            named: {
-                name: '.Named' + this.count++,
-            },
+            root: this.filename2varname(filePath),
+            parts: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
         };
-    }
+    }    
     protected generateIndexSource(indexFileTargetPath: string) {
         const source = super.generateIndexSource(indexFileTargetPath);
         return '@namespace "INDEX";\n' + source;
@@ -75,6 +76,9 @@ export class Generator extends Base {
 }
 
 ```
+
+* look for the `test/fixtures/named-exports-generator.ts` for more complete example that exports every symbol from a stylesheet
+
 
 ### Build source stylesheets to JavaScript modules
 

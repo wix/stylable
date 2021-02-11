@@ -4,7 +4,7 @@ import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
-import { Generator } from './default-generator';
+import { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
@@ -56,7 +56,7 @@ export function build({
 }: BuildOptions) {
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
-        : require('./default-generator');
+        : require('./base-generator');
     const generator = new generatorModule.Generator(stylable, log);
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);

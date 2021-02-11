@@ -115,7 +115,13 @@ describe('build index', () => {
     it('should create index file using a custom generator with named exports generation and @namespace', () => {
         const fs = createFS({
             '/comp-A.st.css': `
-               .a{}
+                :vars {
+                    color1: red;
+                }
+                .a{
+                    --color2: red;
+                }
+                @keyframes X {}
             `,
             '/b/1-some-comp-B-.st.css': `
                .b{}
@@ -141,10 +147,12 @@ describe('build index', () => {
         expect(res.trim()).to.equal(
             [
                 '@namespace "INDEX";',
-                ':import {-st-from: "./comp-A.st.css";-st-default:CompA;-st-named: a as CompA__a;}',
-                '.root CompA{}.root .CompA__a{}',
+                ':import {-st-from: "./comp-A.st.css";-st-default:CompA;-st-named: a as CompA__a, color1 as var_CompA__color1, --color2 as --CompA__color2, keyframes(X as CompA__X);}',
+                '.root CompA{}',
+                '.root .CompA__a{}',
                 ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;-st-named: b as SomeCompB__b;}',
-                '.root SomeCompB{}.root .SomeCompB__b{}',
+                '.root SomeCompB{}',
+                '.root .SomeCompB__b{}',
             ].join('\n')
         );
     });

@@ -1,2 +1,2 @@
 export * from './build';
-export * from './default-generator';
+export * from './base-generator';

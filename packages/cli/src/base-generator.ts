@@ -3,34 +3,45 @@ import { FileSystem } from '@stylable/node';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, join, relative } from 'path';
-import { addDotSlash, createImportForComponent, ensureDirectory, tryRun } from './build-tools';
+import { addDotSlash, ensureDirectory, tryRun } from './build-tools';
+
+export interface ReExports {
+    root: string;
+    parts: Record<string, string>;
+    keyframes: Record<string, string>;
+    vars: Record<string, string>;
+    stVars: Record<string, string>;
+}
 
 export class Generator {
     private indexFileOutput: Array<{
         from: string;
-        defaultName: string;
-        named: Record<string, string>;
+        reExports: ReExports;
     }> = [];
     private collisionDetector = new NameCollisionDetector<string>();
+
     constructor(protected stylable: Stylable, private log: (...args: string[]) => void) {}
-    public generateImport(
-        filePath: string
-    ): { defaultName: string; named: Record<string, string> } {
+
+    public generateReExports(filePath: string): ReExports {
         return {
-            defaultName: this.filename2varname(filePath),
-            named: {},
+            root: this.filename2varname(filePath),
+            parts: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
         };
     }
+
     public generateFileIndexEntry(filePath: string, fullOutDir: string) {
-        const { defaultName, named } = this.generateImport(filePath);
-        this.checkForCollisions(defaultName, named, filePath);
+        const reExports = this.generateReExports(filePath);
+        this.checkForCollisions(reExports, filePath);
         this.log('[Generator Index]', `Add file: ${filePath}`);
         this.indexFileOutput.push({
-            defaultName,
-            named,
+            reExports,
             from: addDotSlash(relative(fullOutDir, filePath)),
         });
     }
+
     public generateIndexFile(fs: FileSystem, fullOutDir: string, indexFile: string) {
         const indexFileTargetPath = join(fullOutDir, indexFile);
         const indexFileContent = this.generateIndexSource(indexFileTargetPath);
@@ -41,6 +52,7 @@ export class Generator {
         );
         this.log('[Generator Index]', 'creating index file: ' + indexFileTargetPath);
     }
+
     public filename2varname(filePath: string) {
         const varname = basename(basename(filePath, '.css'), '.st') // remove prefixes and .st.css ext
             .replace(/^\d+/, ''); // remove leading numbers
@@ -49,19 +61,29 @@ export class Generator {
 
     protected generateIndexSource(_indexFileTargetPath: string) {
         return this.indexFileOutput
-            .map((_) => createImportForComponent(_.from, _.defaultName, _.named))
+            .map((_) => createImportForComponent(_.from, _.reExports))
             .join('\n');
     }
 
-    private checkForCollisions(
-        defaultName: string,
-        named: Record<string, string>,
-        filePath: string
-    ) {
-        this.collisionDetector.detect(defaultName, filePath);
-        for (const asName of Object.values(named)) {
+    private checkForCollisions(reExports: ReExports, filePath: string) {
+        this.collisionDetector.detect(reExports.root, filePath);
+
+        for (const asName of Object.values(reExports.parts)) {
             this.collisionDetector.detect(asName, filePath);
         }
+
+        for (const asName of Object.values(reExports.vars)) {
+            this.collisionDetector.detect(asName, filePath);
+        }
+
+        for (const asName of Object.values(reExports.stVars)) {
+            this.collisionDetector.detect(asName, filePath);
+        }
+
+        for (const asName of Object.values(reExports.keyframes)) {
+            this.collisionDetector.detect(`keyframes(${asName})`, filePath);
+        }
+
         if (this.collisionDetector.collisions.size) {
             let errorMessage = 'Name Collision Error:';
             for (const [name, origin] of this.collisionDetector.collisions) {
@@ -82,4 +104,29 @@ class NameCollisionDetector<Origin> {
             this.nameMapping.set(name, origin);
         }
     }
+}
+
+function createImportForComponent(from: string, reExports: ReExports) {
+    const namedPart = [
+        ...Object.entries(reExports.parts).map(symbolMapper),
+        ...Object.entries(reExports.stVars).map(symbolMapper),
+        ...Object.entries(reExports.vars).map(symbolMapper),
+        ...Object.entries(reExports.keyframes).map(keyframesSymbolMapper),
+    ].join(', ');
+
+    const usagePart = Object.values(reExports.parts)
+        .map((exportName) => `.root .${exportName}{}`)
+        .join(' ');
+
+    return `:import {-st-from: ${JSON.stringify(from)};-st-default:${reExports.root};${
+        namedPart ? `-st-named: ${namedPart};` : ''
+    }}\n.root ${reExports.root}{}${usagePart ? `\n${usagePart}` : ''}`;
+}
+
+function symbolMapper([name, as]: [string, string]) {
+    return name === as ? as : `${name} as ${as}`;
+}
+
+function keyframesSymbolMapper([name, as]: [string, string]) {
+    return name === as ? `keyframes(${as})` : `keyframes(${name} as ${as})`;
 }

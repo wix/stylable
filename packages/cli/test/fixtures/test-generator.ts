@@ -1,11 +1,14 @@
-import { Generator as Base } from '@stylable/cli';
+import { Generator as Base, ReExports } from '@stylable/cli';
 
 export class Generator extends Base {
     private count = 0;
-    public generateImport() {
+    public generateReExports(): ReExports {
         return {
-            defaultName: 'Style' + this.count++,
-            named: {},
+            root: 'Style' + this.count++,
+            parts: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
         };
     }
 }
