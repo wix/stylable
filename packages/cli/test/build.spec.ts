@@ -1,9 +1,8 @@
-import { Stylable } from '@stylable/core';
-import { functionWarnings, processorWarnings, resolverWarnings } from '@stylable/core';
-import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { resolve } from 'path';
-import { build } from '../src';
+import { Stylable, functionWarnings, processorWarnings, resolverWarnings } from '@stylable/core';
+import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
+import { build } from '@stylable/cli';
 
 const log = () => {
     /**/

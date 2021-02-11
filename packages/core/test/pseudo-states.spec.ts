@@ -1,16 +1,22 @@
-import { expectWarnings, expectWarningsFromTransform } from '@stylable/core-test-kit';
-import { generateStylableResult, processSource } from '@stylable/core-test-kit';
-import { flatMatch, mediaQuery, styleRules } from '@stylable/core-test-kit';
-import { expect, use } from 'chai';
+import chai, { expect } from 'chai';
 import chaiSubset from 'chai-subset';
-import { processorWarnings, valueMapping } from '../src';
-import { nativePseudoClasses } from '../src/native-reserved-lists';
-import { stateErrors } from '../src/pseudo-states';
+import {
+    flatMatch,
+    mediaQuery,
+    styleRules,
+    expectWarnings,
+    expectWarningsFromTransform,
+    generateStylableResult,
+    processSource,
+} from '@stylable/core-test-kit';
+import { processorWarnings, valueMapping, nativePseudoClasses, pseudoStates } from '@stylable/core';
 
-use(chaiSubset); // move all of these to a central place
-use(styleRules);
-use(mediaQuery);
-use(flatMatch);
+chai.use(chaiSubset); // move all of these to a central place
+chai.use(styleRules);
+chai.use(mediaQuery);
+chai.use(flatMatch);
+
+const { stateErrors } = pseudoStates;
 
 // testing concerns for feature
 // - states belonging to an extended class (multi level)

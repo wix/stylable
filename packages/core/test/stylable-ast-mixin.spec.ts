@@ -1,6 +1,5 @@
 import { expect } from 'chai';
-import { safeParse } from '../src/parser';
-import { createSubsetAst, scopeSelector } from '../src/stylable-utils';
+import { safeParse, createSubsetAst, scopeSelector } from '@stylable/core';
 
 describe('scopeSelector', () => {
     const tests: Array<{ root: string; child: string; selector: string; only?: boolean }> = [

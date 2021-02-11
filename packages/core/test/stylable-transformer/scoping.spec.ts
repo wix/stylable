@@ -1,7 +1,7 @@
-import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { createWarningRule } from '../../src';
+import { generateStylableRoot } from '@stylable/core-test-kit';
+import { createWarningRule } from '@stylable/core';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-elements', () => {
@@ -181,8 +181,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             ).nodes as postcss.Declaration[]).forEach(
                 (decl: postcss.Declaration, index: number) => {
                     expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
-                            .prop
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
                     ).to.eql(decl.prop);
                     expect(
                         ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)

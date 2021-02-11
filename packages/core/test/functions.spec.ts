@@ -1,9 +1,7 @@
-import { expectWarningsFromTransform } from '@stylable/core-test-kit';
-import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { functionWarnings } from '../src';
-import { nativeFunctionsDic } from '../src/native-reserved-lists';
+import { generateStylableRoot, expectWarningsFromTransform } from '@stylable/core-test-kit';
+import { functionWarnings, nativeFunctionsDic } from '@stylable/core';
 
 // var receives special handling and standalone testing
 export const testedNativeFunctions = Object.keys(nativeFunctionsDic).filter(

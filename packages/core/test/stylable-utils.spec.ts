@@ -1,5 +1,5 @@
-import { generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import { generateInfra } from '@stylable/core-test-kit';
 import { scopeCSSVar, generateScopedCSSVar } from '@stylable/core';
 
 describe('stylable utils', () => {

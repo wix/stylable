@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import * as postcss from 'postcss';
-import { SBTypesParsers, valueMapping } from '../src/stylable-value-parsers';
-import { Diagnostics } from '../src';
+import { SBTypesParsers, valueMapping, Diagnostics } from '@stylable/core';
 
 const parseMixin = (mixinValue: string) => {
     return SBTypesParsers[valueMapping.mixin](

@@ -5,7 +5,7 @@ import {
     parseSelector,
     SelectorChunk,
     separateChunks,
-} from '../src/selector-utils';
+} from '@stylable/core';
 
 describe('Selector Utils', () => {
     const seperateChunksTestVectors: Array<{

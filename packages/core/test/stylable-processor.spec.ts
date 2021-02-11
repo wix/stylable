@@ -1,14 +1,8 @@
-import { flatMatch, processSource } from '@stylable/core-test-kit';
-import * as chai from 'chai';
 import { resolve } from 'path';
-import {
-    ImportSymbol,
-    processNamespace,
-    processorWarnings,
-    SRule,
-} from '../src/stylable-processor';
+import chai, { expect } from 'chai';
+import { flatMatch, processSource } from '@stylable/core-test-kit';
+import { ImportSymbol, processNamespace, processorWarnings, SRule } from '@stylable/core';
 
-const expect = chai.expect;
 chai.use(flatMatch);
 
 describe('Stylable postcss process', () => {
