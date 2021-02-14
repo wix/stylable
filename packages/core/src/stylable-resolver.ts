@@ -14,6 +14,8 @@ export const resolverWarnings = {
     },
 };
 
+export type ResolverCache = Map<string, CSSResolve | JSResolve | null>;
+
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     _kind: 'css';
     symbol: T;
@@ -38,10 +40,16 @@ export function isInPath(
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
-        protected requireModule: (modulePath: string) => any
+        protected requireModule: (modulePath: string) => any,
+        protected cache?: ResolverCache
     ) {}
     public resolveImported(imported: Imported, name: string) {
         const { context, from } = imported;
+        const key = context + '^^^' + from + '^^^' + name;
+        if (this.cache && this.cache.has(key)) {
+            return this.cache.get(key)!;
+        }
+
         let symbol: StylableSymbol;
         if (from.match(/\.css$/)) {
             let meta;
@@ -51,20 +59,24 @@ export class StylableResolver {
                     ? meta.mappedSymbols[meta.root]
                     : meta.mappedSymbols[name] || meta.mappedKeyframes[name];
             } catch (e) {
+                this.cache?.set(key, null);
                 return null;
             }
-
-            return { _kind: 'css', symbol, meta } as CSSResolve;
+            const res: CSSResolve = { _kind: 'css', symbol, meta };
+            this.cache?.set(key, res);
+            return res;
         } else {
             let _module;
             try {
                 _module = this.requireModule(this.fileProcessor.resolvePath(from, context));
             } catch {
+                this.cache?.set(key, null);
                 return null;
             }
             symbol = !name ? _module.default || _module : _module[name];
-
-            return { _kind: 'js', symbol, meta: null } as JSResolve;
+            const res: JSResolve = { _kind: 'js', symbol, meta: null };
+            this.cache?.set(key, res);
+            return res;
         }
     }
     public resolveImport(importSymbol: ImportSymbol) {

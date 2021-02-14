@@ -3,7 +3,7 @@ import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { CssParser, safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
-import { StylableResolver } from './stylable-resolver';
+import { ResolverCache, StylableResolver } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
@@ -61,6 +61,7 @@ export class Stylable {
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public resolvePath: (ctx: string | undefined, path: string) => string;
+    public resolverCache?: ResolverCache;
     constructor(
         public projectRoot: string,
         protected fileSystem: MinimalFS,
@@ -93,6 +94,15 @@ export class Stylable {
         this.resolvePath = resolvePath;
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
+    }
+    public initCache() {
+        this.resolverCache = new Map();
+    }
+    public createResolver() {
+        return new StylableResolver(this.fileProcessor, this.requireModule, this.resolverCache);
+    }
+    public createProcessor() {
+        return new StylableProcessor(undefined, this.resolveNamespace);
     }
     public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
