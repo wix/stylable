@@ -1,8 +1,8 @@
 import { expect } from 'chai';
+import { createDiagnostics } from '../../../test-kit/diagnostics-setup';
+import * as asserters from '../../../test-kit/completions-asserters';
 import { createRange, ProviderRange } from '../../../src/lib/completion-providers';
 import { Completion, topLevelDirectives } from '../../../src/lib/completion-types';
-import * as asserters from '../../../test-kit/completions-asserters';
-import { createDiagnostics } from '../diagnostics.spec';
 
 const named = ['c1', 'color2', 'part', 'otherPart'];
 
