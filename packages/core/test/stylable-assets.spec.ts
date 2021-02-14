@@ -1,6 +1,7 @@
-import { expect } from 'chai';
 import { normalize } from 'path';
-import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, safeParse } from '../src';
+import { expect } from 'chai';
+import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, safeParse } from '@stylable/core';
+
 const css = `
     .a{
         background: url("./a.png")

@@ -9,7 +9,7 @@ describe(`(${project})`, () => {
         {
             projectDir: join(__dirname, 'projects', project),
             throwOnBuildError: false,
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
         },

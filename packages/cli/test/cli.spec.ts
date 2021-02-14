@@ -1,13 +1,14 @@
-import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
-import { resolveNamespace } from '@stylable/node';
-import { expect } from 'chai';
-import { spawnSync } from 'child_process';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
+import { spawnSync } from 'child_process';
+import { expect } from 'chai';
+import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
+import { resolveNamespace } from '@stylable/node';
 
 function runCli(cliArgs: string[] = []) {
-    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs], { encoding: 'utf8' });
+    const cliPath = require.resolve('@stylable/cli/cli.js');
+    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 interface Files {

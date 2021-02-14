@@ -13,7 +13,7 @@ module.exports = {
         'eslint-plugin-stylable',
         'eslint',
         'file-loader',
-        'html-webpack-plugin',
+        'html-webpack-plugin@4',
         'rimraf',
         'serve',
         'ts-loader',

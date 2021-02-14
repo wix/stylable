@@ -1,10 +1,10 @@
+import { expect } from 'chai';
 import {
     generateStylableResult,
     generateStylableRoot,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
-import { expect } from 'chai';
 
 describe('Partial CSS Mixins', () => {
     it('should warn on partial mixins with no override arguments', () => {
@@ -268,7 +268,12 @@ describe('Partial CSS Mixins', () => {
         });
 
         expect(result.meta.diagnostics.reports).to.have.lengthOf(0);
-        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'background: red, yellow;background: gold');
+        matchRuleAndDeclaration(
+            result.meta.outputAst!,
+            2,
+            '.entry__container',
+            'background: red, yellow;background: gold'
+        );
     });
 
     it('should follow variable binding and include derived variables', () => {

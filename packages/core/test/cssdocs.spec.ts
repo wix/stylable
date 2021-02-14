@@ -1,6 +1,6 @@
-import { generateStylableResult } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import { getCssDocsForSymbol } from '../src';
+import { generateStylableResult } from '@stylable/core-test-kit';
+import { getCssDocsForSymbol } from '@stylable/core';
 
 describe('cssDocs comments metadata', () => {
     it('should return null when extracting cssDocs from a simple selector without a definition', () => {

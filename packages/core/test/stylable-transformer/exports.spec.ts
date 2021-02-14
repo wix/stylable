@@ -1,5 +1,5 @@
-import { generateStylableExports } from '@stylable/core-test-kit';
 import { expect } from 'chai';
+import { generateStylableExports } from '@stylable/core-test-kit';
 
 describe('Exports to js', () => {
     describe('classes', () => {

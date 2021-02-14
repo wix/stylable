@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { join, normalize } from 'path';
-import puppeteer from 'puppeteer';
+import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
@@ -12,7 +12,7 @@ import { deferred } from 'promise-assist';
 export interface Options {
     projectDir: string;
     port?: number;
-    puppeteerOptions: puppeteer.LaunchOptions;
+    launchOptions: playwright.LaunchOptions;
     webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
@@ -68,20 +68,20 @@ export class ProjectRunner {
     public outputDir: string;
     public webpackConfig: webpack.Configuration;
     public port: number;
-    public puppeteerOptions: puppeteer.LaunchOptions;
-    public pages: puppeteer.Page[];
+    public launchOptions: playwright.LaunchOptions;
+    public pages: playwright.Page[];
     public stats: webpack.Stats | null;
     public throwOnBuildError: boolean;
     public serverUrl: string;
     public server!: { close(): void } | null;
-    public browser!: puppeteer.Browser | null;
+    public browser!: playwright.Browser | null;
     public compiler!: webpack.Compiler | null;
     public watchingHandle!: webpack.Watching | null;
     public log: typeof console.log;
     constructor({
         projectDir,
         port = 3000,
-        puppeteerOptions = {},
+        launchOptions = {},
         throwOnBuildError = true,
         webpackOptions,
         configName = 'webpack.config',
@@ -92,7 +92,7 @@ export class ProjectRunner {
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
-        this.puppeteerOptions = { ...puppeteerOptions, pipe: true };
+        this.launchOptions = launchOptions;
         this.pages = [];
         this.stats = null;
         this.throwOnBuildError = throwOnBuildError;
@@ -187,17 +187,17 @@ export class ProjectRunner {
 
     public async openInBrowser() {
         if (!this.browser) {
-            this.browser = await puppeteer.launch(this.puppeteerOptions);
+            this.browser = await playwright.chromium.launch(this.launchOptions);
         }
-        const page = await this.browser.newPage();
+        const browserContext = await this.browser.newContext();
+        const page = await browserContext.newPage();
         this.pages.push(page);
 
-        await page.setCacheEnabled(false);
-        const responses: puppeteer.Response[] = [];
+        const responses: playwright.Response[] = [];
         page.on('response', (response) => {
             responses.push(response);
         });
-        await page.goto(this.serverUrl, { waitUntil: 'networkidle0' });
+        await page.goto(this.serverUrl, { waitUntil: 'networkidle' });
         return { page, responses };
     }
 

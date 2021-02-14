@@ -348,10 +348,13 @@ export class StylableProcessor {
         rule.selectorAst = parseSelector(rule.selector);
 
         const checker = createSimpleSelectorChecker();
-        const validRoot = isRootValid(rule.selectorAst, 'root');
+
         let locallyScoped = false;
 
-        traverseNode(rule.selectorAst, (node, _index, _nodes) => {
+        traverseNode(rule.selectorAst, (node, index, nodes) => {
+            if (node.type === 'selector') {
+                locallyScoped = false;
+            }
             if (!checker(node)) {
                 rule.isSimpleSelector = false;
             }
@@ -365,9 +368,9 @@ export class StylableProcessor {
                             return false;
                         }
 
-                        const _import = this.handleImport(rule);
-                        this.meta.imports.push(_import);
-                        this.addImportSymbols(_import);
+                        const imported = this.handleImport(rule);
+                        this.meta.imports.push(imported);
+                        this.addImportSymbols(imported);
                         return false;
                     } else {
                         this.diagnostics.warn(
@@ -406,18 +409,26 @@ export class StylableProcessor {
                     if (!this.meta.classes[name].alias) {
                         locallyScoped = true;
                     } else if (locallyScoped === false && !inStScope) {
-                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
-                            word: name,
-                        });
+                        if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
+                            this.diagnostics.warn(rule, processorWarnings.UNSCOPED_CLASS(name), {
+                                word: name,
+                            });
+                        } else {
+                            locallyScoped = true;
+                        }
                     }
                 }
             } else if (type === 'element') {
                 this.addElementSymbolOnce(name, rule);
 
                 if (locallyScoped === false && !inStScope) {
-                    this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
-                        word: name,
-                    });
+                    if (this.checkForScopedNodeAfter(rule, nodes, index) === false) {
+                        this.diagnostics.warn(rule, processorWarnings.UNSCOPED_ELEMENT(name), {
+                            word: name,
+                        });
+                    } else {
+                        locallyScoped = true;
+                    }
                 }
             } else if (type === 'nested-pseudo-class' && name === 'global') {
                 return true;
@@ -432,7 +443,7 @@ export class StylableProcessor {
             rule.selectorType = 'complex';
         }
 
-        if (!validRoot) {
+        if (!isRootValid(rule.selectorAst, 'root')) {
             this.diagnostics.warn(rule, processorWarnings.ROOT_AFTER_SPACING());
         }
     }
@@ -454,6 +465,28 @@ export class StylableProcessor {
             });
         }
         return symbol;
+    }
+
+    protected checkForScopedNodeAfter(rule: postcss.Rule, nodes: SelectorAstNode[], index: number) {
+        for (let i = index + 1; i < nodes.length; i++) {
+            const element = nodes[i];
+            if (!element) {
+                break;
+            }
+            if (element.type === 'spacing' || element.type === 'operator') {
+                break;
+            }
+            if (element.type === 'class') {
+                this.addClassSymbolOnce(element.name, rule);
+
+                if (this.meta.classes[element.name]) {
+                    if (!this.meta.classes[element.name].alias) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     protected addElementSymbolOnce(name: string, rule: postcss.Rule) {

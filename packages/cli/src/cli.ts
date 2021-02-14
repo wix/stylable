@@ -8,42 +8,45 @@ import { build } from './build';
 
 const { argv } = yargs
     .option('rootDir', {
+        type: 'string',
         description: 'root directory of project',
         default: process.cwd(),
         defaultDescription: 'current working directory',
     })
     .option('srcDir', {
+        type: 'string',
         description: 'source directory relative to root',
         default: '.',
     })
     .option('outDir', {
+        type: 'string',
         description: 'target directory relative to root',
         default: '.',
     })
     .option('esm', {
-        description: 'output esm module (.mjs)',
         type: 'boolean',
+        description: 'output esm module (.mjs)',
         default: false,
     })
     .option('cjs', {
-        description: 'output commonjs module (.js)',
         type: 'boolean',
+        description: 'output commonjs module (.js)',
         default: true,
     })
     .option('css', {
-        description: 'output transpiled css (.css)',
         type: 'boolean',
+        description: 'output transpiled css (.css)',
         default: false,
     })
     .option('stcss', {
-        description: 'output stylable sources (.st.css)',
         type: 'boolean',
+        description: 'output stylable sources (.st.css)',
         default: false,
     })
     .option('useNamespaceReference', {
+        type: 'boolean',
         description:
             'mark output .st.css files in outDir (cjs, esm) with the relative path to the matching output source file to use for its namespace',
-        type: 'boolean',
         default: false,
         alias: 'unsr',
     })
@@ -53,64 +56,69 @@ const { argv } = yargs
         default: '@stylable/node',
     })
     .option('injectCSSRequest', {
-        description: 'add a static import for the generated css in the js module output',
         type: 'boolean',
+        description: 'add a static import for the generated css in the js module output',
         default: false,
         alias: 'icr',
     })
     .option('cssFilename', {
+        type: 'string',
         description: 'pattern of the generated css file',
         default: '[filename].css',
     })
     .option('cssInJs', {
-        description: 'output transpiled css into the js module',
         type: 'boolean',
+        description: 'output transpiled css into the js module',
         default: false,
     })
     .option('optimize', {
+        type: 'boolean',
         description: 'removes: empty nodes, stylable directives, comments',
         alias: 'o',
-        type: 'boolean',
         default: false,
     })
     .option('minify', {
+        type: 'boolean',
         description: 'minify generated css',
         alias: 'm',
-        type: 'boolean',
         default: false,
     })
     .option('indexFile', {
-        description: 'filename of the generated index',
         type: 'string',
+        description: 'filename of the generated index',
     })
     .option('manifest', {
-        description: 'should output manifest file',
         type: 'boolean',
+        description: 'should output manifest file',
         default: false,
     })
     .option('manifestFilepath', {
+        type: 'string',
         description: 'manifest filepath relative to outDir',
         default: 'stylable.manifest.json',
     })
     .option('customGenerator', {
-        description: 'path to file containing indexFile output override methods',
         type: 'string',
+        description: 'path to file containing indexFile output override methods',
     })
     .option('ext', {
+        type: 'string',
         description: 'extension of stylable css files',
         default: '.st.css',
     })
     .option('require', {
+        type: 'array',
         description: 'require hooks',
         alias: 'r',
-        type: 'array',
         default: [] as string[],
     })
     .option('log', {
+        type: 'boolean',
         description: 'verbose log',
         default: false,
     })
     .option('diagnostics', {
+        type: 'boolean',
         description: 'verbose diagnostics',
         default: false,
     })
