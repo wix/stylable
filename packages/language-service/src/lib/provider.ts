@@ -52,8 +52,9 @@ import {
     TopLevelDirectiveProvider,
     ValueCompletionProvider,
     ValueDirectiveProvider,
+    StImportNamedCompletionProvider,
 } from './completion-providers';
-import { Completion } from './completion-types';
+import { Completion, topLevelDirectives } from './completion-types';
 import {
     createStateTypeSignature,
     createStateValidatorSignature,
@@ -102,6 +103,7 @@ export class Provider {
         StateEnumCompletionProvider,
         PseudoElementCompletionProvider,
         ValueCompletionProvider,
+        StImportNamedCompletionProvider,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
@@ -323,13 +325,12 @@ export class Provider {
         const line = split[pos.line];
         let value = '';
 
-        const path = pathFromPosition(meta.rawAst, {
+        const stPath = pathFromPosition(meta.rawAst, {
             line: pos.line + 1,
             character: pos.character + 1,
         });
-
-        if (isRoot(path[path.length - 1])) {
-            // TODO: check your actually on a selector
+        const lastStPath = stPath[stPath.length - 1];
+        if (isRoot(lastStPath)) {
             return this.getSignatureForStateWithParamSelector(meta, pos, line);
         } else if (line.slice(0, pos.character).trim().startsWith(valueMapping.states)) {
             return this.getSignatureForStateWithParamDefinition(pos, line);
@@ -869,11 +870,12 @@ function findRefs(
                 resScanned[0].some((rs) => {
                     const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
                     const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                    let lastStPath = pfp[pfp.length - 1];
+                    if (lastStPath.type === 'decl') {
+                        lastStPath = pfp[pfp.length - 2] as postcss.Rule;
+                    }
                     const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
-                    const callPs = parseSelector(
-                        (pfp[pfp.length - 1] as postcss.Rule).selector,
-                        char
-                    );
+                    const callPs = parseSelector((lastStPath as postcss.Rule).selector, char);
                     const callingElement = findLast(
                         callPs.selector[callPs.target.index].text.slice(
                             0,
@@ -884,7 +886,7 @@ function findRefs(
                     if (!callingElement) {
                         return false;
                     }
-                    const selector = (pfp[pfp.length - 1] as postcss.Rule)!.selector;
+                    const selector = (lastStPath as postcss.Rule).selector;
                     const selectorElement = trans.resolveSelectorElements(
                         callingMeta,
                         selector.slice(0, selector.indexOf(word) + word.length)
@@ -992,7 +994,7 @@ function findRefs(
             scannedMeta.source === defMeta.source &&
             !!blargh.length &&
             !!callingElement &&
-            !!blargh[0].some((inner) => {
+            blargh[0].some((inner) => {
                 return (
                     inner.name === callingElement.replace(/:/g, '').replace('.', '') &&
                     inner.resolved.some(
@@ -1282,8 +1284,12 @@ function newFindRefs(
                     if (k === word && !!pos) {
                         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
                         const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
-                        const selec = (pfp[pfp.length - 1] as postcss.Rule).selector;
+                        let lastStPath = pfp[pfp.length - 1];
+                        if (lastStPath.type === 'decl') {
+                            lastStPath = pfp[pfp.length - 2] as postcss.Rule;
+                        }
                         // If called from -st-state, i.e. inside node, pos is not in selector.
+                        const selec = (lastStPath as postcss.Rule).selector;
                         // Use 1 and not 0 for selector that starts with'.'
                         const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
                         const parsel = parseSelector(selec, char);
@@ -1580,6 +1586,10 @@ function isNamedDirective(line: string) {
     return line.includes(valueMapping.named);
 }
 
+function isStImportNamed(line: string) {
+    return line.trim().startsWith(topLevelDirectives.stImport) && line.includes('[');
+}
+
 export function isInValue(lineText: string, position: ProviderPosition) {
     let isInValue = false;
 
@@ -1628,13 +1638,24 @@ export function getNamedValues(
     let isNamedValueLine = false;
     const namedValues: string[] = [];
 
-    for (let i = lineIndex; i > 0; i--) {
+    for (let i = lineIndex; i >= 0; i--) {
         if (isDirective(lines[i]) && !isNamedDirective(lines[i])) {
             break;
         } else if (isNamedDirective(lines[i])) {
             isNamedValueLine = true;
             const valueStart = lines[i].indexOf(':') + 1;
             const value = lines[i].slice(valueStart);
+            value
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x !== '')
+                .forEach((x) => namedValues.push(x));
+            break;
+        } else if (isStImportNamed(lines[i])) {
+            isNamedValueLine = true;
+            const valueStart = lines[i].indexOf('[') + 1;
+            const valueEnd = lines[i].indexOf(']');
+            const value = lines[i].slice(valueStart, valueEnd);
             value
                 .split(',')
                 .map((x) => x.trim())
@@ -1656,7 +1677,10 @@ export function getNamedValues(
 }
 
 export function getExistingNames(lineText: string, position: ProviderPosition) {
-    const valueStart = lineText.indexOf(':') + 1;
+    const valueStart = lineText.includes(topLevelDirectives.stImport)
+        ? lineText.indexOf('[') + 1
+        : lineText.indexOf(':') + 1;
+
     const value = lineText.slice(valueStart, position.character);
     const parsed = postcssValueParser(value.trim());
     const names: string[] = parsed.nodes
@@ -1664,6 +1688,7 @@ export function getExistingNames(lineText: string, position: ProviderPosition) {
         .map((n: any) => n.value);
     const rev = parsed.nodes.reverse();
     const lastName: string = parsed.nodes.length && rev[0].type === 'word' ? rev[0].value : '';
+
     return { names, lastName };
 }
 

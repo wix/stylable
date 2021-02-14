@@ -6,29 +6,32 @@ export function isInNode(
     node: postcss.Node,
     includeSelector = false
 ): boolean {
+    const nodeStart = node.source?.start;
+    const nodeEnd = node.source?.end;
+
     if (!node.source) {
         return false;
     }
-    if (!node.source.start) {
+    if (!nodeStart) {
         return false;
     }
-    if (node.source.start.line > position.line) {
+    if (nodeStart.line > position.line) {
         return false;
     }
-    if (node.source.start.line === position.line && node.source.start.column > position.character) {
+    if (nodeStart.line === position.line && nodeStart.column > position.character) {
         return false;
     }
-    if (!node.source.end) {
+    if (!nodeEnd) {
         return (
             !isBeforeRuleset(position, node) ||
             (!!(node as postcss.Container).nodes &&
                 !!((node as postcss.Container).nodes.length > 0))
         );
     }
-    if (node.source.end.line < position.line) {
+    if (nodeEnd.line < position.line) {
         return false;
     }
-    if (node.source.end.line === position.line && node.source.end.column < position.character) {
+    if (nodeEnd.line === position.line && nodeEnd.column < position.character) {
         return false;
     }
     if (isBeforeRuleset(position, node) && !includeSelector) {
@@ -110,6 +113,37 @@ export function pathFromPosition(
             return pathFromPosition(childNode, position, res, includeSelector);
         }
     }
+    return res;
+}
+
+export function getAtRuleByPosition(
+    ast: postcss.Root,
+    position: ProviderPosition,
+    atRuleName: string
+): postcss.AtRule | undefined {
+    let res: postcss.AtRule | undefined;
+    ast.walkAtRules(atRuleName, (atRule) => {
+        const nodeStart = atRule.source?.start;
+        const sLine = nodeStart!.line - 1;
+        const sChar = nodeStart!.column - 1;
+        const nodeEnd = atRule.source?.end;
+        const eLine = nodeEnd!.line - 1;
+        const eChar = nodeEnd!.column - 1;
+
+        if (
+            (position.line === sLine &&
+                position.character >= sChar &&
+                position.line === eLine &&
+                position.character <= eChar) ||
+            (position.line > sLine && position.line < eLine)
+        ) {
+            res = atRule;
+            return false;
+        }
+
+        return undefined;
+    });
+
     return res;
 }
 

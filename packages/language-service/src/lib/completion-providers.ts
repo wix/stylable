@@ -53,7 +53,7 @@ import {
     isInValue,
 } from './provider';
 import { ExtendedTsLanguageService } from './types';
-import { isComment, isDeclaration } from './utils/postcss-ast-utils';
+import { getAtRuleByPosition, isComment, isDeclaration } from './utils/postcss-ast-utils';
 import { CursorPosition, SelectorChunk } from './utils/selector-analyzer';
 
 const { hasOwnProperty } = Object.prototype;
@@ -407,12 +407,19 @@ export const GlobalCompletionProvider: CompletionProvider = {
         fullLineText,
         position,
         lineChunkAtCursor,
+        astAtCursor,
     }: ProviderOptions): Completion[] {
         if (
             !parentSelector &&
             !lineChunkAtCursor.endsWith('::') &&
             !isBetweenChars(fullLineText, position, '(', ')')
         ) {
+            if (astAtCursor.type === 'root') {
+                if (getAtRuleByPosition(astAtCursor, position, 'st-import')) {
+                    return [];
+                }
+            }
+
             let offset = 0;
             if (fullLineText.lastIndexOf(':') !== -1) {
                 if (
@@ -725,6 +732,16 @@ export const NamedCompletionProvider: CompletionProvider & {
                 importName = ((astAtCursor as postcss.Rule).nodes.find(
                     (n) => (n as postcss.Declaration).prop === valueMapping.from
                 ) as postcss.Declaration).value.replace(/'|"/g, '');
+            } else if (
+                astAtCursor.type === 'atrule' &&
+                astAtCursor.name === topLevelDirectives.stImport.slice(1)
+            ) {
+                const parsed = postcssValueParser(astAtCursor.params);
+                parsed.walk((n) => {
+                    if (n.type === 'string') {
+                        importName = n.value;
+                    }
+                });
             } else {
                 return [];
             }
@@ -739,27 +756,8 @@ export const NamedCompletionProvider: CompletionProvider & {
                 );
                 if (resolvedImport) {
                     const { lastName } = getExistingNames(fullLineText, position);
-                    comps.push(
-                        ...Object.keys(resolvedImport.mappedSymbols)
-                            .filter(
-                                (ms) =>
-                                    (resolvedImport.mappedSymbols[ms]._kind === 'class' ||
-                                        resolvedImport.mappedSymbols[ms]._kind === 'var') &&
-                                    ms !== 'root'
-                            )
-                            .filter((ms) => ms.slice(0, -1).startsWith(lastName))
-                            .filter((ms) => !~namedValues.indexOf(ms))
-                            .map((ms) => [
-                                ms,
-                                path
-                                    .relative(meta.source, resolvedImport.source)
-                                    .slice(1)
-                                    .replace(/\\/g, '/'),
-                                resolvedImport.mappedSymbols[ms]._kind === 'var'
-                                    ? (resolvedImport.mappedSymbols[ms] as VarSymbol).text
-                                    : 'Stylable class',
-                            ])
-                    );
+                    getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+
                     return comps
                         .slice(1)
                         .map((c) =>
@@ -811,6 +809,119 @@ export const NamedCompletionProvider: CompletionProvider & {
                     );
             }
         }
+        return [];
+    },
+
+    resolveImport(importName: string, stylable: Stylable, meta: StylableMeta): StylableMeta | null {
+        let resolvedImport: StylableMeta | null = null;
+        if (importName && importName.endsWith('.st.css')) {
+            try {
+                resolvedImport = stylable.fileProcessor.process(
+                    meta.imports.find((i) => i.fromRelative === importName)!.from
+                );
+            } catch {
+                /**/
+            }
+        }
+        return resolvedImport;
+    },
+};
+
+export const StImportNamedCompletionProvider: CompletionProvider & {
+    resolveImport: (
+        importName: string,
+        stylable: Stylable,
+        meta: StylableMeta
+    ) => StylableMeta | null;
+} = {
+    provide({
+        astAtCursor,
+        stylable,
+        meta,
+        position,
+        fullLineText,
+        src,
+    }: ProviderOptions): Completion[] {
+        const { isNamedValueLine, namedValues } = getNamedValues(src, position.line);
+        let importName = '';
+
+        if (astAtCursor.type === 'root') {
+            const atRule = getAtRuleByPosition(astAtCursor, position, 'st-import');
+            const comps: string[][] = [[]];
+
+            if (isNamedValueLine && atRule) {
+                const parsed = postcssValueParser(atRule.params);
+                parsed.walk((n) => {
+                    if (n.type === 'string') {
+                        importName = n.value;
+                    }
+                });
+
+                if (importName.endsWith('.st.css')) {
+                    const resolvedImport: StylableMeta | null = this.resolveImport(
+                        importName,
+                        stylable,
+                        meta
+                    );
+
+                    if (resolvedImport) {
+                        const { lastName } = getExistingNames(fullLineText, position);
+
+                        getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+
+                        return comps
+                            .slice(1)
+                            .map((c) =>
+                                namedCompletion(
+                                    c[0],
+                                    new ProviderRange(
+                                        new ProviderPosition(
+                                            position.line,
+                                            position.character - lastName.length
+                                        ),
+                                        new ProviderPosition(position.line, position.character)
+                                    ),
+                                    c[1],
+                                    c[2]
+                                )
+                            );
+                    }
+                } else if (importName.endsWith('.js')) {
+                    let req: any;
+                    try {
+                        req = (stylable as any).requireModule(
+                            path.join(path.dirname(meta.source), importName)
+                        );
+                    } catch (e) {
+                        return [];
+                    }
+
+                    const { lastName } = getExistingNames(fullLineText, position);
+                    Object.keys(req).forEach((k) => {
+                        if (typeof req[k] === 'function' && k.startsWith(lastName)) {
+                            comps.push([k, importName, 'Mixin']);
+                        }
+                    });
+                    return comps
+                        .slice(1)
+                        .map((c) =>
+                            namedCompletion(
+                                c[0],
+                                new ProviderRange(
+                                    new ProviderPosition(
+                                        position.line,
+                                        position.character - lastName.length
+                                    ),
+                                    new ProviderPosition(position.line, position.character)
+                                ),
+                                c[1],
+                                c[2]
+                            )
+                        );
+                }
+            }
+        }
+
         return [];
     },
 
@@ -967,6 +1078,33 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
         return comps;
     },
 };
+
+function getNamedCSSImports(
+    comps: string[][],
+    resolvedImport: StylableMeta,
+    lastName: string,
+    namedValues: string[],
+    meta: StylableMeta
+) {
+    comps.push(
+        ...Object.keys(resolvedImport.mappedSymbols)
+            .filter(
+                (ms) =>
+                    (resolvedImport.mappedSymbols[ms]._kind === 'class' ||
+                        resolvedImport.mappedSymbols[ms]._kind === 'var') &&
+                    ms !== 'root'
+            )
+            .filter((ms) => ms.slice(0, -1).startsWith(lastName))
+            .filter((ms) => !~namedValues.indexOf(ms))
+            .map((ms) => [
+                ms,
+                path.relative(meta.source, resolvedImport.source).slice(1).replace(/\\/g, '/'),
+                resolvedImport.mappedSymbols[ms]._kind === 'var'
+                    ? (resolvedImport.mappedSymbols[ms] as VarSymbol).text
+                    : 'Stylable class',
+            ])
+    );
+}
 
 function isNodeRule(node: any): node is postcss.Rule {
     return node.type === 'rule';

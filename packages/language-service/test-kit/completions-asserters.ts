@@ -3,9 +3,10 @@ import fs from 'fs';
 import { expect } from 'chai';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
-import { ProviderPosition, ProviderRange } from '../src/lib/completion-providers';
+import { ProviderRange } from '../src/lib/completion-providers';
 import { Completion, Snippet } from '../src/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
+import { getCaretPosition } from './asserters';
 
 function assertPresent(
     actualCompletions: Completion[],
@@ -102,13 +103,6 @@ export function getStylableAndCssCompletions(fileName: string) {
     );
 
     return stylableLSP.getCompletions(document, fullPath, pos);
-}
-
-export function getCaretPosition(src: string) {
-    const caretPos = src.indexOf('|');
-    const linesTillCaret = src.substr(0, caretPos).split('\n');
-    const character = linesTillCaret[linesTillCaret.length - 1].length;
-    return new ProviderPosition(linesTillCaret.length - 1, character);
 }
 
 // syntactic
