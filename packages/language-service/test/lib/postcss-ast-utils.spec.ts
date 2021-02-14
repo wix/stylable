@@ -49,7 +49,9 @@ describe('getAtRuleByPosition', () => {
 
         const root = postcss.parse(css);
 
-        expect(getAtRuleByPosition(root, pos, stImportName)!.toString()).to.equal(`@st-import  from './stylesheet2.st.css'`);
+        expect(getAtRuleByPosition(root, pos, stImportName)!.toString()).to.equal(
+            `@st-import  from './stylesheet2.st.css'`
+        );
     });
 
     it('should return undefined for locations outside the requested at rule ', () => {

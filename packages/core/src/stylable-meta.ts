@@ -65,7 +65,7 @@ export class StylableMeta {
 export interface Imported {
     from: string;
     defaultExport: string;
-    named: Record<string, string>;    
+    named: Record<string, string>;
     keyframes: Record<string, string>;
     rule: postcss.Rule | postcss.AtRule;
     fromRelative: string;

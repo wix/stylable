@@ -85,54 +85,53 @@ describe('Stylable @st-import', () => {
 
         expect(result.mappedSymbols.a).to.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
 
         expect(result.mappedSymbols.c).to.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
 
         expect(result.mappedSymbols.name).to.include({
             _kind: 'import',
-            type: 'default'
+            type: 'default',
         });
 
         expect(result.mappedSymbols.t).to.include({
             _kind: 'import',
-            type: 'default'
+            type: 'default',
         });
 
         expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
             fromRelative: './some/other/path',
             defaultExport: '',
-            named: { a: 'a', c: 'b' }
+            named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             fromRelative: './some/global/path',
             defaultExport: 'name',
-            named: {}
+            named: {},
         });
 
         expect((result.mappedSymbols.t1 as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
             fromRelative: './some/external/path',
             defaultExport: 't',
-            named: { t1: 't1' }
+            named: { t1: 't1' },
         });
     });
 
-    
     it('collect @st-import with classNames', () => {
         const result = processSource(
             `
@@ -143,13 +142,12 @@ describe('Stylable @st-import', () => {
 
         expect(result.mappedSymbols['t-x']).to.include({
             _kind: 'import',
-            type: 'default'
+            type: 'default',
         });
 
         expect(result.mappedSymbols['-t1-x']).to.include({
             _kind: 'import',
-            type: 'named'
+            type: 'named',
         });
-
     });
 });
