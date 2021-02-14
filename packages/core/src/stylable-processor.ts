@@ -2,6 +2,7 @@ import hash from 'murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
 import {
     createSimpleSelectorChecker,
@@ -757,24 +758,18 @@ export class StylableProcessor {
             named: {},
             rule: atRule,
             context: this.dirContext,
-            keyframes: {}
+            keyframes: {},
         };
-        // simple import parts extraction for now no parser is needed.
-        const isStarImport = atRule.params.match(/^\s*\*/);
-        const matchImport = atRule.params.match(
-            /^((-?[_a-zA-Z]+[_a-zA-Z0-9-]*?)\s*,?\s*)?(\[(.*?)\])?(\s+from\s+)?(['"](.*?)['"])$/
-        );
-        if (isStarImport) {
-            this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
-        } else if (matchImport) {
-            const def = matchImport[2];
-            const named = matchImport[4];
-            const from = (matchImport[7] || '').trim();
 
-            importObj.defaultExport = def || '';
-            setImportObjectFrom(from, this.dirContext, importObj);
-            importObj.named = parseNamed(named, atRule, this.diagnostics).namedMap;
-            if (!from) {
+        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']')[0];
+
+        if (imports && imports.star) {
+            this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
+        } else if (imports) {
+            importObj.defaultExport = imports.defaultName || '';
+            setImportObjectFrom(imports.from || '', this.dirContext, importObj);
+            importObj.named = imports.named || {};
+            if (!imports.from) {
                 this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
             }
         } else {
