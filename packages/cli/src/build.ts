@@ -20,7 +20,6 @@ export interface BuildOptions {
     manifest?: string;
     log: (...args: string[]) => void;
     indexFile?: string;
-    diagnostics?: (...args: string[]) => void;
     generatorPath?: string;
     moduleFormats?: Array<'cjs' | 'esm'>;
     outputCSSNameTemplate?: string;
@@ -41,7 +40,6 @@ export function build({
     srcDir,
     outDir,
     log,
-    diagnostics,
     indexFile,
     generatorPath,
     moduleFormats,
@@ -64,7 +62,7 @@ export function build({
     const fullOutDir = join(rootDir, outDir);
     const { result: filesToBuild } = findFiles(fs, fullSrcDir, extension, blacklist);
     const assets: string[] = [];
-    const diagnosticsMsg: string[] = [];
+    const diagnosticsMessages: string[] = [];
     const indexFileOutput: Array<{ from: string; name: string }> = [];
     const nameMapping: { [key: string]: string } = {};
 
@@ -90,8 +88,7 @@ export function build({
                   log,
                   fs,
                   stylable,
-                  diagnostics,
-                  diagnosticsMsg,
+                  diagnosticsMessages,
                   assets,
                   moduleFormats || [],
                   includeCSSInJS,
@@ -109,14 +106,11 @@ export function build({
         generateIndexFile(indexFileOutput, fullOutDir, indexFile, log, fs);
     }
 
-    if (diagnostics && diagnosticsMsg.length) {
-        diagnostics(diagnosticsMsg.join('\n\n'));
-    }
-
     if (!indexFile) {
         handleAssets(assets, rootDir, srcDir, outDir, fs);
         generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
     }
+    return { diagnosticsMessages };
 }
 
 function buildSingleFile(
@@ -126,7 +120,6 @@ function buildSingleFile(
     log: (...args: string[]) => void,
     fs: any,
     stylable: Stylable,
-    diagnostics: ((...args: string[]) => void) | undefined,
     diagnosticsMsg: string[],
     projectAssets: string[],
     moduleFormats: string[],
@@ -169,7 +162,7 @@ function buildSingleFile(
             {}
         );
     }
-    handleDiagnostics(diagnostics, res, diagnosticsMsg, filePath);
+    handleDiagnostics(res, diagnosticsMsg, filePath);
     // st.css
     if (outputSources) {
         if (useSourceNamespace && !content.includes('st-namespace-reference')) {

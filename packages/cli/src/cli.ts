@@ -120,6 +120,11 @@ const { argv } = yargs
     .option('diagnostics', {
         type: 'boolean',
         description: 'verbose diagnostics',
+        default: true,
+    })
+    .option('ignoreDiagnostics', {
+        type: 'boolean',
+        description: 'ignore diagnostics and allow the process to exit regularly',
         default: false,
     })
     .alias('h', 'help')
@@ -127,8 +132,6 @@ const { argv } = yargs
     .strict();
 
 const log = createLogger('[Stylable]', argv.log);
-
-const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
 
 const {
     outDir,
@@ -151,6 +154,8 @@ const {
     manifest,
     require: requires,
     useNamespaceReference,
+    ignoreDiagnostics,
+    diagnostics,
 } = argv;
 
 log('[Arguments]', argv);
@@ -169,7 +174,7 @@ const stylable = Stylable.create({
     resolveNamespace: require(namespaceResolver).resolveNamespace,
 });
 
-build({
+const { diagnosticsMessages } = build({
     extension: ext,
     fs,
     stylable,
@@ -177,7 +182,6 @@ build({
     srcDir,
     rootDir,
     log,
-    diagnostics,
     indexFile,
     generatorPath,
     moduleFormats: getModuleFormats({ esm, cjs }),
@@ -191,6 +195,15 @@ build({
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
 });
+
+if (diagnosticsMessages.length) {
+    if (diagnostics) {
+        console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
+    }
+    if (!ignoreDiagnostics) {
+        process.exit(1);
+    }
+}
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     const formats: Array<'esm' | 'cjs'> = [];

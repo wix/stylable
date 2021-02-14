@@ -3,7 +3,6 @@ import { FileSystem } from '@stylable/node';
 import { dirname } from 'path';
 
 export function handleDiagnostics(
-    diagnostics: ((...args: string[]) => void) | undefined,
     res: StylableResults,
     diagnosticsMsg: string[],
     filePath: string
@@ -11,11 +10,11 @@ export function handleDiagnostics(
     const reports = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
-    if (diagnostics && reports.length) {
+    if (reports.length) {
         diagnosticsMsg.push(`Errors in file: ${filePath}`);
         reports.forEach((report) => {
             const err = report.node.error(report.message, report.options);
-            diagnosticsMsg.push([report.message, err.showSourceCode()].join('\n'));
+            diagnosticsMsg.push(`${report.message}\n${err.showSourceCode()}`);
         });
     }
 }

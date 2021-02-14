@@ -256,4 +256,35 @@ describe('Stylable Cli', () => {
         expect(stderr).equal('');
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
+
+    describe('Cli diagnostics', () => {
+        it('should report diagnostics by default and exit the process with error exit code 1', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(1);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
+        it('(ignoreDiagnostics) should report diagnostics and ignore process process exit', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path, '--ignoreDiagnostics']);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
+    });
 });
