@@ -70,7 +70,7 @@ export class StylableResolver {
                 res = null;
             }
         }
-        this.cache?.set(key, null);
+        this.cache?.set(key, res);
         return res;
     }
 
