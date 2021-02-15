@@ -201,7 +201,7 @@ if (diagnosticsMessages.length) {
         console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
     }
     if (!ignoreDiagnostics) {
-        process.exit(1);
+        process.exitCode = 1;
     }
 }
 
