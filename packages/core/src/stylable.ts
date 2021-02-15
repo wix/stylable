@@ -121,6 +121,7 @@ export class Stylable {
             requireModule: this.requireModule,
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
+            resolverCache: this.resolverCache,
             mode: this.mode,
             ...options,
         });

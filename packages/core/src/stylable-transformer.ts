@@ -106,7 +106,7 @@ export interface TransformerOptions {
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     mode?: EnvMode;
-    resolveCache?: StylableResolverCache;
+    resolverCache?: StylableResolverCache;
 }
 
 export interface AdditionalSelector {
@@ -157,7 +157,7 @@ export class StylableTransformer {
         this.resolver = new StylableResolver(
             options.fileProcessor,
             options.requireModule,
-            options.resolveCache
+            options.resolverCache
         );
         this.mode = options.mode || 'production';
     }
