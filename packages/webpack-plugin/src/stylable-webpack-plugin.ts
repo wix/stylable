@@ -130,7 +130,7 @@ export class StylableWebpackPlugin {
             new Map()
         );
         this.stylable = stylable;
-        compiler.hooks.done.tap('decache require', () => {
+        compiler.hooks.done.tap(StylableWebpackPlugin.name + ' stylable.initCache', () => {
             this.stylable.initCache();
         });
     }
