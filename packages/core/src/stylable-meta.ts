@@ -68,7 +68,7 @@ export interface Imported {
     named: Record<string, string>;
     keyframes: Record<string, string>;
     rule: postcss.Rule;
-    fromRelative: string;
+    request: string;
     context: string;
 }
 

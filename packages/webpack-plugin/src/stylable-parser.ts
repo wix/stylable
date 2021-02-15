@@ -86,8 +86,8 @@ function addStylableImportsDependencies(
         names: Object.keys(stylableImport.named || {}),
     };
     const dep = useWeakDeps
-        ? StylableImportDependency.createWeak(stylableImport.fromRelative, currentModule, importRef)
-        : new StylableImportDependency(stylableImport.fromRelative, importRef);
+        ? StylableImportDependency.createWeak(stylableImport.request, currentModule, importRef)
+        : new StylableImportDependency(stylableImport.request, importRef);
     currentModule.addDependency(dep);
     addStylableFileDependencyChain(stylable, stylableImport, fileDeps);
 }
@@ -129,5 +129,5 @@ function addUrlDependencies(urls: string[], stylableModule: StylableModule, root
 }
 
 function isStylableImport(stylableImport: Imported) {
-    return stylableImport.fromRelative.match(stylableExtension);
+    return stylableImport.request.match(stylableExtension);
 }
