@@ -40,7 +40,7 @@ import {
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-import { CSSResolve, JSResolve, ResolverCache, StylableResolver } from './stylable-resolver';
+import { CSSResolve, JSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
@@ -106,7 +106,7 @@ export interface TransformerOptions {
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     mode?: EnvMode;
-    resolveCache?: ResolverCache;
+    resolveCache?: StylableResolverCache;
 }
 
 export interface AdditionalSelector {

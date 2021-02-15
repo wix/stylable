@@ -3,7 +3,7 @@ import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { CssParser, safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
-import { ResolverCache, StylableResolver } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
@@ -32,6 +32,7 @@ export interface StylableConfig {
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
     cssParser?: CssParser;
+    resolverCache?: StylableResolverCache;
 }
 
 export class Stylable {
@@ -55,13 +56,13 @@ export class Stylable {
             config.resolveNamespace,
             config.timedCacheOptions,
             config.resolveModule,
-            config.cssParser
+            config.cssParser,
+            config.resolverCache
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
     public resolver: StylableResolver;
     public resolvePath: (ctx: string | undefined, path: string) => string;
-    public resolverCache?: ResolverCache;
     constructor(
         public projectRoot: string,
         protected fileSystem: MinimalFS,
@@ -79,7 +80,8 @@ export class Stylable {
             useTimer: true,
         },
         protected resolveModule?: ModuleResolver,
-        protected cssParser: CssParser = safeParse
+        protected cssParser: CssParser = safeParse,
+        protected resolverCache?: StylableResolverCache
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -98,11 +100,18 @@ export class Stylable {
     public initCache() {
         this.resolverCache = new Map();
     }
-    public createResolver() {
-        return new StylableResolver(this.fileProcessor, this.requireModule, this.resolverCache);
+    public createResolver({
+        requireModule,
+        resolverCache,
+    }: Pick<StylableConfig, 'requireModule' | 'resolverCache'>) {
+        return new StylableResolver(
+            this.fileProcessor,
+            requireModule || this.requireModule,
+            resolverCache || this.resolverCache
+        );
     }
-    public createProcessor() {
-        return new StylableProcessor(undefined, this.resolveNamespace);
+    public createProcessor({ resolveNamespace }: Pick<StylableConfig, 'resolveNamespace'> = {}) {
+        return new StylableProcessor(new Diagnostics(), resolveNamespace || this.resolveNamespace);
     }
     public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
@@ -127,7 +136,7 @@ export class Stylable {
             // TODO: refactor to use fileProcessor
             // meta = this.fileProcessor.processContent(meta, resourcePath + '');
             const root = this.cssParser(meta, { from: resourcePath });
-            meta = new StylableProcessor(undefined, this.resolveNamespace).process(root);
+            meta = this.createProcessor().process(root);
         }
         const transformer = this.createTransformer(options);
 
