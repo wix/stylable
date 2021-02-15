@@ -1,8 +1,7 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
 import { expect } from 'chai';
-
-import { StylableLanguageService } from '../../src/lib/service';
+import { StylableLanguageService } from '@stylable/language-service';
 
 function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
     const fs = createMemoryFs(files);
@@ -42,19 +41,19 @@ describe('diagnostics', () => {
         const filePath = '/style.st.css';
         const files = {
             [filePath]: '.gaga .root{}',
-        }
+        };
         const fs = createMemoryFs(files);
 
         const stylableLSP = new StylableLanguageService({
             fs,
             stylable: new Stylable('/', fs, require),
         });
-    
-        const diagnostics1 =  stylableLSP.diagnose(filePath);
-        const diagnostics2 =  stylableLSP.diagnose(filePath);
 
-        expect(diagnostics1).to.have.lengthOf(1)
-        expect(diagnostics2).to.have.lengthOf(1)
+        const diagnostics1 = stylableLSP.diagnose(filePath);
+        const diagnostics2 = stylableLSP.diagnose(filePath);
+
+        expect(diagnostics1).to.have.lengthOf(1);
+        expect(diagnostics2).to.have.lengthOf(1);
     });
 
     it('should create cross file errors', () => {

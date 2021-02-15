@@ -1,7 +1,7 @@
 import fs from '@file-services/node';
 import path from 'path';
 import { Stylable } from '@stylable/core';
-import { StylableLanguageService } from '../src/lib/service';
+import { StylableLanguageService } from '@stylable/language-service';
 
 export const CASES_PATH = path.join(
     path.dirname(require.resolve('@stylable/language-service/package.json')),

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { join } from 'path';
-import { resolveNamespace, resolveNamespaceFactory } from '../src';
+import { resolveNamespace, resolveNamespaceFactory } from '@stylable/node';
 
 describe('resolve-namespace-factory deterministic behavior', () => {
     it('default behavior', () => {
