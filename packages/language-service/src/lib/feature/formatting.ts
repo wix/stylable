@@ -1,5 +1,4 @@
 import { css } from 'js-beautify';
-import { TextDocument, Range } from 'vscode-languageserver-textdocument';
 import { FormattingOptions } from 'vscode-languageserver';
 
 export interface JSBeautifyFormatCSSOptions {
@@ -34,16 +33,12 @@ export function lspFormattingOptionsToJsBeautifyOptions(
     };
 }
 
-export function format(
-    doc: TextDocument,
-    range?: Range,
-    options?: JSBeautifyFormatCSSOptions
-): string {
+export function format(text: string, options?: JSBeautifyFormatCSSOptions): string {
     const normalizedOptions: JSBeautifyFormatCSSOptions = {
         ...options,
         // hard-coded to prevent custom selector values starting with combinators from breaking
         space_around_combinator: true,
     };
 
-    return css(doc.getText(range), normalizedOptions);
+    return css(text, normalizedOptions);
 }

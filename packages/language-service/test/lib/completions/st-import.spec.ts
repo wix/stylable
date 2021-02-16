@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { createDiagnostics } from '../../../test-kit/diagnostics-setup';
 import * as asserters from '../../../test-kit/completions-asserters';
+import { getFormattingEdits } from '../../../test-kit/asserters';
 import { createRange, ProviderRange } from '../../../src/lib/completion-providers';
 import { Completion, topLevelDirectives } from '../../../src/lib/completion-types';
 
@@ -172,21 +172,24 @@ describe('@st-import Directive', () => {
         asserter.notSuggested([asserters.globalCompletion(createRange(0, 11, 0, 11))]);
     });
 
-    xit('should create cross file errors', () => {
-        const filePathA = '/style.css';
-        const filePathB = '/import-style.st.css';
+    it('should not format @st-import statements', () => {
+        const res = getFormattingEdits('@st-import Comp, [v1, v2, v3] from "./stylesheet.st.css";');
 
-        const diagnostics = createDiagnostics(
+        expect(res).to.eql([]);
+    });
+
+    it('should format statements even when @st-import exists in the document', () => {
+        const res = getFormattingEdits(`
+        @st-import Comp, [v1, v2, v3] from "./stylesheet.st.css";
+        
+        .root {color:     red;}`);
+
+        expect(res).to.eql([
             {
-                [filePathA]: `
-                .root {}
-                .part {}
-                `,
-                [filePathB]: `@st-import Comp, [part] from "${filePathA}";`,
+                newText:
+                    '@st-import Comp, [v1, v2, v3] from "./stylesheet.st.css";\n\n.root {\n    color: red;\n}',
+                range: { start: { line: 0, character: 0 }, end: { line: 3, character: 31 } },
             },
-            filePathB
-        );
-
-        expect(diagnostics).to.eql([]);
+        ]);
     });
 });
