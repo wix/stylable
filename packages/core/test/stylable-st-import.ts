@@ -1,6 +1,6 @@
+import { ImportSymbol, processorWarnings } from '@stylable/core/src/stylable-processor';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
-import { ImportSymbol, processorWarnings } from '../src/stylable-processor';
 
 const expect = chai.expect;
 chai.use(flatMatch);

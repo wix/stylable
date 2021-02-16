@@ -1,8 +1,8 @@
+import { getAtRuleByPosition } from '@stylable/language-service/src/lib/utils/postcss-ast-utils';
+import { topLevelDirectives } from '@stylable/language-service/src/lib/completion-types';
 import { expect } from 'chai';
-import { getCaretPosition } from '../../test-kit/asserters';
 import postcss from 'postcss';
-import { getAtRuleByPosition } from '../../src/lib/utils/postcss-ast-utils';
-import { topLevelDirectives } from 'packages/language-service/src/lib/completion-types';
+import { getCaretPosition } from '../../test-kit/asserters';
 
 function getCSSAndPosition(css: string) {
     const pos = getCaretPosition(css);

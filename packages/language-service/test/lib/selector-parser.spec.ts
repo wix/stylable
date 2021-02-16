@@ -1,5 +1,8 @@
 import { expect } from 'chai';
-import { parseSelector, SelectorInternalChunk } from '../../src/lib/utils/selector-analyzer';
+import {
+    parseSelector,
+    SelectorInternalChunk,
+} from '@stylable/language-service/src/lib/utils/selector-analyzer';
 
 describe('Selector Parser', () => {
     let sel: string;

@@ -1,8 +1,8 @@
 import { expect } from 'chai';
+import { createRange, ProviderRange } from '@stylable/language-service/src/lib/completion-providers';
+import { Completion, topLevelDirectives } from '@stylable/language-service/src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 import { getFormattingEdits } from '../../../test-kit/asserters';
-import { createRange, ProviderRange } from '../../../src/lib/completion-providers';
-import { Completion, topLevelDirectives } from '../../../src/lib/completion-types';
 
 const named = ['c1', 'color2', 'part', 'otherPart'];
 

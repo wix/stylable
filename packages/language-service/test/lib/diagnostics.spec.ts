@@ -1,9 +1,8 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
+import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
-
 import { createDiagnostics } from '../../test-kit/diagnostics-setup';
-import { StylableLanguageService } from '../../src/lib/service';
 
 describe('diagnostics', () => {
     it('should create basic diagnostics', () => {
