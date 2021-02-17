@@ -88,7 +88,7 @@ However, most often `{ st, classes }` is enough:
 
 Stylable now localizes CSS Custom Properties. This means that any usage of Custom Proprties (e.g. `--prop`) should now be incorparated in the component code.
 
-See the docs about [CSS custom properties](https://stylable.io/docs/references/css-vars) for usage.
+See the docs about [CSS custom properties](https://stylable.io/docs/references/css-vars) for usage examples.
 
 
 ## Update usage in React components
