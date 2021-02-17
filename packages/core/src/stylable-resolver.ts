@@ -74,7 +74,11 @@ export class StylableResolver {
         return res;
     }
 
-    public resolveImported(imported: Imported, name: string): CSSResolve | JSResolve | null {
+    public resolveImported(
+        imported: Imported,
+        name: string,
+        subtype: 'mappedSymbols' | 'mappedKeyframes' = 'mappedSymbols'
+    ): CSSResolve | JSResolve | null {
         const res = this.getModule(imported);
         if (res === null) {
             return null;
@@ -84,9 +88,7 @@ export class StylableResolver {
             const meta = res as StylableMeta;
             return {
                 _kind: 'css',
-                symbol: !name
-                    ? meta.mappedSymbols[meta.root]
-                    : meta.mappedSymbols[name] || meta.mappedKeyframes[name],
+                symbol: !name ? meta.mappedSymbols[meta.root] : meta[subtype][name],
                 meta,
             };
         } else {
@@ -134,7 +136,11 @@ export class StylableResolver {
         };
 
         while (current.symbol?.import) {
-            const res = this.resolveImported(current.symbol.import, current.symbol.name);
+            const res = this.resolveImported(
+                current.symbol.import,
+                current.symbol.name,
+                'mappedKeyframes'
+            );
             if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
                 const { meta, symbol } = res;
                 current = {
