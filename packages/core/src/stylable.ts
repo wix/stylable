@@ -3,7 +3,7 @@ import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { CssParser, safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
-import { StylableResolver } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
@@ -29,10 +29,14 @@ export interface StylableConfig {
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
+    /** @deprecated use resolverCache instead */
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
     cssParser?: CssParser;
+    resolverCache?: StylableResolverCache;
 }
+
+export type CreateProcessorOptions = Pick<StylableConfig, 'resolveNamespace'>;
 
 export class Stylable {
     public static create(config: StylableConfig) {
@@ -55,7 +59,8 @@ export class Stylable {
             config.resolveNamespace,
             config.timedCacheOptions,
             config.resolveModule,
-            config.cssParser
+            config.cssParser,
+            config.resolverCache
         );
     }
     public fileProcessor: FileProcessor<StylableMeta>;
@@ -78,7 +83,8 @@ export class Stylable {
             useTimer: true,
         },
         protected resolveModule?: ModuleResolver,
-        protected cssParser: CssParser = safeParse
+        protected cssParser: CssParser = safeParse,
+        protected resolverCache?: StylableResolverCache
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(
             projectRoot,
@@ -94,6 +100,22 @@ export class Stylable {
         this.fileProcessor = fileProcessor;
         this.resolver = new StylableResolver(this.fileProcessor, this.requireModule);
     }
+    public initCache() {
+        this.resolverCache = new Map();
+    }
+    public createResolver({
+        requireModule,
+        resolverCache,
+    }: Pick<StylableConfig, 'requireModule' | 'resolverCache'>) {
+        return new StylableResolver(
+            this.fileProcessor,
+            requireModule || this.requireModule,
+            resolverCache || this.resolverCache
+        );
+    }
+    public createProcessor({ resolveNamespace }: CreateProcessorOptions = {}) {
+        return new StylableProcessor(new Diagnostics(), resolveNamespace || this.resolveNamespace);
+    }
     public createTransformer(options: Partial<TransformerOptions> = {}) {
         return new StylableTransformer({
             delimiter: this.delimiter,
@@ -102,6 +124,7 @@ export class Stylable {
             requireModule: this.requireModule,
             postProcessor: this.hooks.postProcessor,
             replaceValueHook: this.hooks.replaceValueHook,
+            resolverCache: this.resolverCache,
             mode: this.mode,
             ...options,
         });
@@ -111,18 +134,16 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<TransformerOptions> = {}
+        options: Partial<TransformerOptions> = {},
+        processorOptions: CreateProcessorOptions = {}
     ): StylableResults {
         if (typeof meta === 'string') {
-            // TODO: refactor to use fileProcessor
-            // meta = this.fileProcessor.processContent(meta, resourcePath + '');
-            const root = this.cssParser(meta, { from: resourcePath });
-            meta = new StylableProcessor(undefined, this.resolveNamespace).process(root);
+            meta = this.createProcessor(processorOptions).process(
+                this.cssParser(meta, { from: resourcePath })
+            );
         }
         const transformer = this.createTransformer(options);
-
         this.fileProcessor.add(meta.source, meta);
-
         return transformer.transform(meta);
     }
     public process(fullpath: string, context?: string, ignoreCache?: boolean): StylableMeta {
