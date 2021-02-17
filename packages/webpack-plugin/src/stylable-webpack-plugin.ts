@@ -125,9 +125,14 @@ export class StylableWebpackPlugin {
             compiler.options.mode as any,
             this.options.resolveNamespace || resolveNamespace,
             undefined,
-            resolveModule
+            resolveModule,
+            undefined,
+            new Map()
         );
         this.stylable = stylable;
+        compiler.hooks.done.tap(StylableWebpackPlugin.name + ' stylable.initCache', () => {
+            this.stylable.initCache();
+        });
     }
     public injectPlugins(compiler: webpack.Compiler) {
         if (this.options.plugins) {
