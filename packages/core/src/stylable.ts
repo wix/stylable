@@ -35,6 +35,8 @@ export interface StylableConfig {
     resolverCache?: StylableResolverCache;
 }
 
+export type CreateProcessorOptions = Pick<StylableConfig, 'resolveNamespace'>;
+
 export class Stylable {
     public static create(config: StylableConfig) {
         return new this(
@@ -110,7 +112,7 @@ export class Stylable {
             resolverCache || this.resolverCache
         );
     }
-    public createProcessor({ resolveNamespace }: Pick<StylableConfig, 'resolveNamespace'> = {}) {
+    public createProcessor({ resolveNamespace }: CreateProcessorOptions = {}) {
         return new StylableProcessor(new Diagnostics(), resolveNamespace || this.resolveNamespace);
     }
     public createTransformer(options: Partial<TransformerOptions> = {}) {
@@ -131,18 +133,16 @@ export class Stylable {
     public transform(
         meta: string | StylableMeta,
         resourcePath?: string,
-        options: Partial<TransformerOptions> = {}
+        options: Partial<TransformerOptions> = {},
+        processorOptions: CreateProcessorOptions = {}
     ): StylableResults {
         if (typeof meta === 'string') {
-            // TODO: refactor to use fileProcessor
-            // meta = this.fileProcessor.processContent(meta, resourcePath + '');
-            const root = this.cssParser(meta, { from: resourcePath });
-            meta = this.createProcessor().process(root);
+            meta = this.createProcessor(processorOptions).process(
+                this.cssParser(meta, { from: resourcePath })
+            );
         }
         const transformer = this.createTransformer(options);
-
         this.fileProcessor.add(meta.source, meta);
-
         return transformer.transform(meta);
     }
     public process(fullpath: string, context?: string, ignoreCache?: boolean): StylableMeta {
