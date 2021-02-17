@@ -86,7 +86,7 @@ However, most often `{ st, classes }` is enough:
 
 ### CSS custom properties 
 
-Stylable now also localize css custom properties, it means that any usage of custom proprties (--prop) should be now incoparated in the component code.
+Stylable now localizes CSS Custom Properties. This means that any usage of Custom Proprties (e.g. `--prop`) should now be incorparated in the component code.
 
 See the docs about [CSS custom properties](https://stylable.io/docs/references/css-vars) for usage.
 
