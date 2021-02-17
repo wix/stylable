@@ -20,8 +20,7 @@ export function getStylable(compiler: Compiler, initialConfig: StylableConfig): 
             return require(id);
         };
 
-        stylable = Stylable.create({ ...initialConfig, requireModule });
-        stylable.initCache();
+        stylable = Stylable.create({ ...initialConfig, requireModule, resolverCache: new Map() });
         compiler.hooks.done.tap('StylableLoader stylable.initCache', () => {
             stylable!.initCache();
             for (const id of requireModuleCache) {

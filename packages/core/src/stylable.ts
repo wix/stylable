@@ -29,6 +29,7 @@ export interface StylableConfig {
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;
+    /** @deprecated use resolverCache instead */
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>;
     resolveModule?: ModuleResolver;
     cssParser?: CssParser;
