@@ -26,6 +26,7 @@ export function getStylable(compiler: Compiler, initialConfig: StylableConfig): 
             for (const id of requireModuleCache) {
                 decache(id);
             }
+            requireModuleCache.clear();
         });
         cache.set(stylable, initialConfig);
     }
