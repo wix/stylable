@@ -135,8 +135,7 @@
 Generally when importing a <strong>default</strong> value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet.</p>
 </blockquote>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./toggle-button.css'</span><span class="p">;</span>
     <span class="py">-st-default</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span>
 <span class="p">}</span>
@@ -155,8 +154,7 @@ Generally when importing a <strong>default</strong> value from a css file, you c
 When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.</p>
 </blockquote>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span><span class="p">;</span>
 <span class="p">}</span>
@@ -170,8 +168,7 @@ When importing named values, they are generally used as class or tag selectors a
 
 <p>The values <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="language-plaintext highlighter-rouge">my-mixins.js</code>. The value <code class="language-plaintext highlighter-rouge">gridMixin</code> is used as is and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="language-plaintext highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltip</code> in this stylesheet.</p>
 
-<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS */</span>
-<span class="nd">:import</span> <span class="p">{</span>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
     <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
     <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span> <span class="n">as</span> <span class="n">tooltip</span><span class="p">;</span>
 <span class="p">}</span>
