@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createRange } from '../../src/lib/completion-providers';
+import { createRange } from '@stylable/language-service/src/lib/completion-providers';
 import { getFormattingEdits } from '../../test-kit/asserters';
 
 describe('Formatting', () => {

@@ -35,7 +35,8 @@ export function createDataAttr(dataAttrPrefix: string, stateName: string, param?
 export function applyStylableForceStateSelectors(
     outputAst: postcss.Root,
     namespaceMapping: Record<string, boolean> | ((namespace: string) => boolean) = {},
-    dataPrefix = OVERRIDE_STATE_PREFIX
+    dataPrefix = OVERRIDE_STATE_PREFIX,
+    plugin: (ctx: AddForceStateSelectorsContext) => AddForceStateSelectorsContext = (id) => id
 ) {
     const isKnownNamespace =
         typeof namespaceMapping === 'function'
@@ -43,34 +44,37 @@ export function applyStylableForceStateSelectors(
             : (name: string) => hasOwnProperty.call(namespaceMapping, name);
 
     const mapping: Record<string, string> = {};
-    addForceStateSelectors(outputAst, {
-        getForceStateAttrContentFromNative(name) {
-            return this.getForceStateAttrContent(name);
-        },
-        getForceStateAttrContent(name) {
-            return dataPrefix + name;
-        },
-        getStateClassName(name) {
-            const parts = name.match(MATCH_STATE_CLASS);
-            return parts![2];
-        },
-        getStateAttr(content) {
-            const parts = content.match(MATCH_STATE_ATTR);
-            return parts![2];
-        },
-        isStateClassName(name) {
-            const parts = name.match(MATCH_STATE_CLASS);
-            return parts ? isKnownNamespace(parts[1]) : false;
-        },
-        isStateAttr(content) {
-            const parts = content.match(MATCH_STATE_ATTR);
-            return parts ? isKnownNamespace(parts[1]) : false;
-        },
-        onMapping(key, value) {
-            mapping[key] = value;
-            mapping[value] = key;
-        },
-    });
+    addForceStateSelectors(
+        outputAst,
+        plugin({
+            getForceStateAttrContentFromNative(name) {
+                return this.getForceStateAttrContent(name);
+            },
+            getForceStateAttrContent(name) {
+                return dataPrefix + name;
+            },
+            getStateClassName(name) {
+                const parts = name.match(MATCH_STATE_CLASS);
+                return parts![2];
+            },
+            getStateAttr(content) {
+                const parts = content.match(MATCH_STATE_ATTR);
+                return parts![2];
+            },
+            isStateClassName(name) {
+                const parts = name.match(MATCH_STATE_CLASS);
+                return parts ? isKnownNamespace(parts[1]) : false;
+            },
+            isStateAttr(content) {
+                const parts = content.match(MATCH_STATE_ATTR);
+                return parts ? isKnownNamespace(parts[1]) : false;
+            },
+            onMapping(key, value) {
+                mapping[key] = value;
+                mapping[value] = key;
+            },
+        })
+    );
     return mapping;
 }
 

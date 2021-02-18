@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { readdirSync } from 'fs';
 import hash from 'murmurhash';
 import { join } from 'path';
-import { attachHook } from '../src';
+import { attachHook } from '@stylable/node';
 
 describe('require hook', () => {
     afterEach(() => {

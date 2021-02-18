@@ -9,7 +9,6 @@ In **Stylable**, selectors are scoped to the stylesheet. But what if you want to
 In this example `.classB` and `.classC` are not scoped to `Comp` but are part of the selector query.
 
 ```css
-/* CSS */
 @namespace "Comp";
 .classA :global(.classB > .classC) .classD:hover {
     color: red;
@@ -17,7 +16,7 @@ In this example `.classB` and `.classC` are not scoped to `Comp` but are part of
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Comp__classA .classB > .classC .Comp__classD:hover {
     color: red;
 }

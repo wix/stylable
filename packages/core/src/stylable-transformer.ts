@@ -35,7 +35,7 @@ import {
     StylableMeta,
     StylableSymbol,
 } from './stylable-processor';
-import { CSSResolve, StylableResolver } from './stylable-resolver';
+import { CSSResolve, StylableResolverCache, StylableResolver } from './stylable-resolver';
 import { findRule, generateScopedCSSVar, getDeclStylable, isCSSVarProp } from './stylable-utils';
 import { valueMapping } from './stylable-value-parsers';
 
@@ -100,6 +100,7 @@ export interface TransformerOptions {
     replaceValueHook?: replaceValueHook;
     postProcessor?: postProcessor;
     mode?: EnvMode;
+    resolverCache?: StylableResolverCache;
 }
 
 export interface AdditionalSelector {
@@ -147,7 +148,11 @@ export class StylableTransformer {
         this.fileProcessor = options.fileProcessor;
         this.replaceValueHook = options.replaceValueHook;
         this.postProcessor = options.postProcessor;
-        this.resolver = new StylableResolver(options.fileProcessor, options.requireModule);
+        this.resolver = new StylableResolver(
+            options.fileProcessor,
+            options.requireModule,
+            options.resolverCache
+        );
         this.mode = options.mode || 'production';
     }
     public transform(meta: StylableMeta): StylableResults {

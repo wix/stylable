@@ -27,7 +27,7 @@ In this example, the stylesheet is extending the `toggle-button.st.css` styleshe
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Page__checkBtn { background: white; }
 .Page__checkBtn .ToggleButton__label { color: green; }
 .Page__checkBtn.ToggleButton--toggled .ToggleButton__label { color: red; }
@@ -94,7 +94,7 @@ Any class other than `root` defined in a Stylesheet is considered an inner part.
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Page__defaultCheckBtn {}
 .Page__variantCheckBtn {}
 ```

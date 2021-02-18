@@ -29,7 +29,6 @@ Import the `toggle-button.css` stylesheet from a local location. Assign the name
 > Generally when importing a **default** value from a css file, you can use a capital letter to signify that the value is used as a component in this stylesheet. 
 
 ```css
-/* CSS */
 :import {
     -st-from: './toggle-button.css';
     -st-default: ToggleButton;
@@ -49,7 +48,6 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 > When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.
 
 ```css
-/* CSS */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin;
@@ -66,7 +64,6 @@ import { gridMixin, tooltipMixin } from "./my-mixins";
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. The value `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as `tooltip`. These mixins are referred to as `gridMixin` and `tooltip` in this stylesheet.
 
 ```css
-/* CSS */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin as tooltip;
