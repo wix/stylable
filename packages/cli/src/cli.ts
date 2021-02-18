@@ -119,13 +119,16 @@ const { argv } = yargs
     })
     .option('diagnostics', {
         type: 'boolean',
-        description: 'verbose diagnostics',
+        description: 'print verbose diagnostics',
         default: true,
     })
-    .option('ignoreDiagnostics', {
-        type: 'boolean',
-        description: 'ignore diagnostics and allow the process to exit regularly',
-        default: false,
+    .option('diagnosticsMode', {
+        alias: 'dm',
+        type: 'string',
+        description:
+            'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
+        default: 'strict',
+        choices: ['strict', 'loose'],
     })
     .alias('h', 'help')
     .help()
@@ -154,7 +157,7 @@ const {
     manifest,
     require: requires,
     useNamespaceReference,
-    ignoreDiagnostics,
+    diagnosticsMode,
     diagnostics,
 } = argv;
 
@@ -172,7 +175,7 @@ const stylable = Stylable.create({
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
-    resolverCache: new Map()
+    resolverCache: new Map(),
 });
 
 const { diagnosticsMessages } = build({
@@ -201,7 +204,7 @@ if (diagnosticsMessages.length) {
     if (diagnostics) {
         console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
     }
-    if (!ignoreDiagnostics) {
+    if (diagnosticsMode === 'strict') {
         process.exitCode = 1;
     }
 }

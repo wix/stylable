@@ -272,13 +272,17 @@ describe('Stylable Cli', () => {
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
             expect(stderr, 'stderr').equal('');
         });
-        it('(ignoreDiagnostics) should report diagnostics and ignore process process exit', () => {
+        it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
                 'style.st.css': `.root{color:value(xxx)}`,
             });
 
-            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path, '--ignoreDiagnostics']);
+            const { stderr, stdout, status } = runCli([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=loose',
+            ]);
 
             expect(status).to.equal(0);
             expect(stdout, 'stdout').to.match(/Errors in file/);

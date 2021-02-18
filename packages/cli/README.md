@@ -37,8 +37,8 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 | optimize              | `o`    | removes: empty nodes, stylable directives, comments                                | `false`          |
 | minify                | `m`    | minify generated css                                                               | `false`          |
 | log                   |        | verbose log                                                                        | `false`          |
-| diagnostics           |        | verbose diagnostics                                                                | `true`           |
-| ignoreDiagnostics     |        | ignore diagnostics and allow the process to exit regularly                         | `false`          |
+| diagnostics           |        | print verbose diagnostics                                                          | `true`           |
+| diagnosticsMode       |        | determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions                         | `false`          |
 | help                  | `h`    | Show help                                                                          | `boolean`        |
 
 `*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
