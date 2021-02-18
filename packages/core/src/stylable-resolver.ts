@@ -353,8 +353,8 @@ export class StylableResolver {
                 if (fromDecl) {
                     diagnostics.warn(
                         fromDecl,
-                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.fromRelative),
-                        { word: importObj.fromRelative }
+                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
+                        { word: importObj.request }
                     );
                 }
             } else if (resolvedImport._kind === 'css') {
@@ -373,7 +373,7 @@ export class StylableResolver {
                             namedDecl,
                             resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
                                 origName,
-                                importObj.fromRelative
+                                importObj.request
                             ),
                             { word: origName }
                         );

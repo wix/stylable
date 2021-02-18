@@ -465,7 +465,7 @@ export const SelectorCompletionProvider: CompletionProvider = {
                 )
             );
             const moreComps = meta.imports
-                .filter((imp) => imp.fromRelative.endsWith('st.css'))
+                .filter((imp) => imp.request.endsWith('st.css'))
                 .reduce((acc: Completion[], imp) => {
                     if (acc.every((comp) => comp.label !== imp.defaultExport)) {
                         acc.push(
@@ -522,7 +522,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                     i.defaultExport.startsWith(str) &&
                     i.from.endsWith('st.css')
                 ) {
-                    comps.push([i.defaultExport, i.fromRelative]);
+                    comps.push([i.defaultExport, i.request]);
                 }
             });
             meta.imports.forEach((i) =>
@@ -537,7 +537,7 @@ export const ExtendCompletionProvider: CompletionProvider = {
                             );
                         })
                         .filter((s) => s.startsWith(str))
-                        .map((s) => [s, i.fromRelative])
+                        .map((s) => [s, i.request])
                 )
             );
             return comps
@@ -568,7 +568,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
                 .filter(
                     (ms) =>
                         (meta.mappedSymbols[ms]._kind === 'import' &&
-                            (meta.mappedSymbols[ms] as ImportSymbol).import.fromRelative.endsWith(
+                            (meta.mappedSymbols[ms] as ImportSymbol).import.request.endsWith(
                                 'st.css'
                             )) ||
                         meta.mappedSymbols[ms]._kind === 'class'
@@ -586,7 +586,7 @@ export const CssMixinCompletionProvider: CompletionProvider = {
                             position
                         ),
                         meta.mappedSymbols[ms]._kind === 'import'
-                            ? (meta.mappedSymbols[ms] as ImportSymbol).import.fromRelative
+                            ? (meta.mappedSymbols[ms] as ImportSymbol).import.request
                             : 'Local file'
                     );
                 });
@@ -614,7 +614,7 @@ export const CodeMixinCompletionProvider: CompletionProvider = {
     }: ProviderOptions): Completion[] {
         if (
             meta.imports.some(
-                (imp) => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
+                (imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')
             ) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             parentSelector &&
@@ -655,7 +655,7 @@ export const FormatterCompletionProvider: CompletionProvider = {
     }: ProviderOptions): Completion[] {
         if (
             meta.imports.some(
-                (imp) => imp.fromRelative.endsWith('.ts') || imp.fromRelative.endsWith('.js')
+                (imp) => imp.request.endsWith('.ts') || imp.request.endsWith('.js')
             ) &&
             !fullLineText.trim().startsWith(valueMapping.from) &&
             !fullLineText.trim().startsWith(valueMapping.extends) &&
@@ -809,7 +809,7 @@ export const NamedCompletionProvider: CompletionProvider & {
         if (importName && importName.endsWith('.st.css')) {
             try {
                 resolvedImport = stylable.fileProcessor.process(
-                    meta.imports.find((i) => i.fromRelative === importName)!.from
+                    meta.imports.find((i) => i.request === importName)!.from
                 );
             } catch {
                 /**/
@@ -1297,7 +1297,7 @@ export const ValueCompletionProvider: CompletionProvider = {
                         importVars.push({
                             name: v.name,
                             value: v.text,
-                            from: imp.fromRelative,
+                            from: imp.request,
                             node: v.node,
                         })
                     );
@@ -1383,7 +1383,7 @@ function createCodeMixinCompletion(
             new ProviderPosition(position.line, position.character - lastName.length),
             position
         ),
-        (meta.mappedSymbols[name] as ImportSymbol).import.fromRelative
+        (meta.mappedSymbols[name] as ImportSymbol).import.request
     );
 }
 
@@ -1394,7 +1394,7 @@ function isMixin(
     tsLangService: ExtendedTsLanguageService
 ) {
     const importSymbol = meta.mappedSymbols[name] as ImportSymbol;
-    if (importSymbol.import.fromRelative.endsWith('.ts')) {
+    if (importSymbol.import.request.endsWith('.ts')) {
         const sig = extractTsSignature(
             importSymbol.import.from,
             name,
@@ -1409,7 +1409,7 @@ function isMixin(
             : '';
         return /(\w+.)?object/.test(rtype.trim());
     }
-    if (importSymbol.import.fromRelative.endsWith('.js')) {
+    if (importSymbol.import.request.endsWith('.js')) {
         return (
             extractJsModifierReturnType(name, fs.readFileSync(importSymbol.import.from, 'utf8')) ===
             'object'
