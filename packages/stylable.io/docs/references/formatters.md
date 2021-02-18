@@ -55,7 +55,7 @@ module.exports = function(baseSize, modifier) {
     }
 ```
 ```css
-/* CSS output*/
+/* CSS output */
 .header {
     font-size: 32px;
 }
@@ -95,7 +95,7 @@ In this example the CSS imports the same formatter as the previous example, `cal
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .header {
     font-size: 24px;
 }
@@ -137,7 +137,7 @@ module.export = {
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .header {
     font-size: 9px;
 }
