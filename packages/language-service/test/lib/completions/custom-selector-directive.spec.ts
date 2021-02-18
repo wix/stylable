@@ -1,5 +1,5 @@
-import { createRange } from '../../../src/lib/completion-providers';
-import { topLevelDirectives } from '../../../src/lib/completion-types';
+import { createRange } from '@stylable/language-service/src/lib/completion-providers';
+import { topLevelDirectives } from '@stylable/language-service/src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
 describe('Custom selector Directive', () => {

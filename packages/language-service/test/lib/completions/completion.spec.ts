@@ -1,4 +1,4 @@
-import { createRange } from '../../../src/lib/completion-providers';
+import { createRange } from '@stylable/language-service/src/lib/completion-providers';
 import * as asserters from '../../../test-kit/completions-asserters';
 
 describe('Completions', () => {

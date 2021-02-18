@@ -30,7 +30,7 @@ To define custom pseudo-classes, or states, without parameters, you tell **Styla
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Example1__root.Example1--toggled { color: red; }
 .Example1__root.Example1--loading { color: green; }
 .Example1__root.Example1--loading.Example1--toggled { color: blue; }
@@ -73,7 +73,7 @@ In this example, `toggled` and `loading` are defined on the root class with thei
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .ExampleCustom__root.on { color: red; }
 .ExampleCustom__root[dataSpinner] { color: green; }
 ```
@@ -103,7 +103,7 @@ You can extend another imported stylesheet and inherit its custom pseudo-classes
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Example1__root.Example1--toggled { color: red; }
 .Example1__root.Example1--loading { color: green; }
 .Example2__mediaButton:hover { border: 0.2em solid black; } /* native hover - not declared */

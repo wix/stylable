@@ -24,7 +24,6 @@ Any CSS stylesheet, class or element that is defined in a **Stylable** CSS file 
 In the following example, a locally defined class is used as a mixin in the same stylesheet.
 
 ```css
-/* CSS */
 .style-mixin {
     color: green;
     background: yellow;
@@ -33,6 +32,7 @@ In the following example, a locally defined class is used as a mixin in the same
     -st-mixin: style-mixin;     
 }  
 ```
+
 ```css
 /* CSS output */
 .someClass {
@@ -44,7 +44,7 @@ In the following example, a locally defined class is used as a mixin in the same
 Here is an example of a **Stylable** CSS file that is imported and mixed into the classes of a different stylesheet. The `.rootMixedIn` class as a stylesheet and `classMixedIn` as a class.
 
 ```css
-/* CSS mixin file - mixins.st.css */
+/* mixins.st.css */
 .root {
     color: purple;
 }
@@ -55,7 +55,7 @@ Here is an example of a **Stylable** CSS file that is imported and mixed into th
 ```
 
 ``` css
-/* CSS file - example.st.css - imports the above mixin */
+/* example.st.css - imports the above mixin */
 :import {
     -st-from: './mixins.st.css';
     -st-default: MixRoot;
@@ -101,7 +101,6 @@ Multiple variables can be comma separated or written on multiple lines:
 Here is an example of using a variable in a CSS mixin and how it can be overridden by the mixin's parameter value.
 
 ```css
-/* CSS */
 :vars {
     color1: green;
 }

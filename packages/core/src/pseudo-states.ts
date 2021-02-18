@@ -1,26 +1,16 @@
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import isVendorPrefixed from 'is-vendor-prefixed';
 import { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
-import { nativePseudoClasses } from './native-reserved-lists';
 import { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
-import {
-    ClassSymbol,
-    ElementSymbol,
-    SRule,
-    StylableMeta,
-    StylableSymbol,
-} from './stylable-processor';
+import { SRule, StylableMeta } from './stylable-processor';
 import { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
 import { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
-
-const { hasOwnProperty } = Object.prototype;
 
 export const stateMiddleDelimiter = '-';
 export const booleanStateDelimiter = '--';
@@ -263,87 +253,6 @@ export function validateStateArgument(
     }
 
     return resolvedValidations;
-}
-
-export function transformPseudoStateSelector(
-    meta: StylableMeta,
-    node: SelectorAstNode,
-    name: string,
-    symbol: StylableSymbol | null,
-    origin: StylableMeta,
-    originSymbol: ClassSymbol | ElementSymbol,
-    resolver: StylableResolver,
-    diagnostics: Diagnostics,
-    rule?: postcss.Rule
-) {
-    let current = meta;
-    let currentSymbol = symbol;
-
-    if (originSymbol && symbol !== originSymbol) {
-        current = origin;
-        currentSymbol = originSymbol;
-    }
-    let found = false;
-    while (current && currentSymbol) {
-        if (currentSymbol._kind === 'class' || currentSymbol._kind === 'element') {
-            const states = currentSymbol[valueMapping.states];
-            const extend = currentSymbol[valueMapping.extends];
-            const alias = currentSymbol.alias;
-            if (states && hasOwnProperty.call(states, name)) {
-                found = true;
-                setStateToNode(
-                    states,
-                    meta,
-                    name,
-                    node,
-                    current.namespace,
-                    resolver,
-                    diagnostics,
-                    rule
-                );
-                break;
-            } else if (extend) {
-                if (
-                    current.mappedSymbols[extend.name] &&
-                    current.mappedSymbols[extend.name]._kind !== 'import'
-                ) {
-                    const nextCurrentSymbol = current.mappedSymbols[extend.name];
-                    if (currentSymbol === nextCurrentSymbol) {
-                        break;
-                    }
-                    currentSymbol = nextCurrentSymbol;
-                } else {
-                    const next = resolver.resolve(extend);
-                    if (next && next.meta) {
-                        currentSymbol = next.symbol;
-                        current = next.meta;
-                    } else {
-                        break;
-                    }
-                }
-            } else if (alias) {
-                const next = resolver.resolve(alias);
-                if (next && next.meta) {
-                    currentSymbol = next.symbol;
-                    current = next.meta;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        } else {
-            break;
-        }
-    }
-
-    if (!found && rule) {
-        if (!nativePseudoClasses.includes(name) && !isVendorPrefixed(name)) {
-            diagnostics.warn(rule, stateErrors.UNKNOWN_STATE_USAGE(name), { word: name });
-        }
-    }
-
-    return meta;
 }
 
 export function setStateToNode(
