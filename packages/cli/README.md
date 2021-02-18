@@ -43,13 +43,44 @@ After installing `@stylable/cli`, a new `stc` command will be available, running
 
 `*` - For the `useNamespaceReference` flag to function properly, the `source` folder must be published in addition to the output `target` code
 
-### Generate an index file
+### Generating an index file
 
 This generates an `index.st.css` file that acts as an export entry from every stylesheet in the provided `srcDir`.
 
 ```sh
 $ stc --srcDir="./src" --outDir="./dist" --indexFile="index.st.css"
 ```
+
+The generated index file will include re-exports of all stylesheet roots found in the given `srcDir` path.
+
+#### Generating a custom index file
+
+Exporting a `Generator` named export class from a file will allow it to be used as a `customGenerator`.
+
+Usually this generator will inherit from our base generator class and override the `generateReExports` and `generateIndexSource` methods.
+
+This example demonstrates the default generator behavior (only exports stylesheet roots): 
+```ts
+import { Generator as Base, ReExports } from '@stylable/cli';
+
+export class Generator extends Base {
+    public generateReExports(filePath): ReExports {
+        return {
+            root: this.filename2varname(filePath),
+            parts: {},
+            keyframes: {},
+            stVars: {},
+            vars: {},
+        };
+    }    
+    protected generateIndexSource(indexFileTargetPath: string) {
+        const source = super.generateIndexSource(indexFileTargetPath);
+        return '@namespace "INDEX";\n' + source;
+    }
+}
+```
+
+* See our [named exports generator](./test/fixtures/named-exports-generator.ts) for a more complete example that re-exports every symbol from every stylesheet found in the generated index file.
 
 ### Build source stylesheets to JavaScript modules
 

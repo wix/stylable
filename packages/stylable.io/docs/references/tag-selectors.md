@@ -15,7 +15,6 @@ Targeting a native element matches any element with the same tag name that is fo
 To target **all** elements of a certain type in your project, use a [`global selector`](./global-selectors.md).
 
 ```css
-/* CSS */
 @namespace "Page";
 .root form { background: green; }
 .sideBar:hover form { background: red; }
@@ -23,9 +22,9 @@ To target **all** elements of a certain type in your project, use a [`global sel
 ```
 
 ```css
-/* CSS output - form is not namespaced - affects any nested form */
+/* CSS output - form is scoped to the page - affects any nested instance */
 .Page__root form { background: green; } 
-.sideBar:hover form { background: red; }
+.Page__sideBar:hover form { background: red; }
 span { background: blue; } /* this will affect *ALL* spans in your application */
 ```
 
@@ -57,7 +56,6 @@ class Comp extends React.Component {
 When the value of a stylesheet is [imported](./imports.md) with a **capital first letter**, it can be used as a component tag selector.
 
 ```css
-/* CSS */
 @namespace "Page";
 :import{
     -st-from: "./toggle-button.st.css";
@@ -68,11 +66,10 @@ When the value of a stylesheet is [imported](./imports.md) with a **capital firs
 ```
 
 ```css
-/* CSS output - ToggleButton is not namespaced - affects any nested toggle button */
+/* CSS output - ToggleButton is scoped to the page, affects any nested toggle button */
 .Page__root .ToggleButton__root { background: green; }
-.sideBar:hover .ToggleButton__root { background: red; }
+.Page__sideBar:hover .ToggleButton__root { background: red; }
 ```
-
 
 ```js
 /* comp.jsx */

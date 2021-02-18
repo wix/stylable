@@ -4,8 +4,7 @@ import { FileSystem, findFiles } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { basename, dirname, join, relative, resolve } from 'path';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
-import { Generator } from './default-generator';
-import { generateFileIndexEntry, generateIndexFile } from './generate-index';
+import { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
@@ -53,18 +52,16 @@ export function build({
     minify,
     manifest,
 }: BuildOptions) {
-    const generatorModule = generatorPath
+    const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
-        : require('./default-generator');
-    const generator: Generator = new generatorModule.Generator();
+        : require('./base-generator');
+    const generator = new generatorModule.Generator(stylable, log);
     const blacklist = new Set<string>(['node_modules']);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
     const { result: filesToBuild } = findFiles(fs, fullSrcDir, extension, blacklist);
     const assets: string[] = [];
     const diagnosticsMessages: string[] = [];
-    const indexFileOutput: Array<{ from: string; name: string }> = [];
-    const nameMapping: { [key: string]: string } = {};
 
     if (filesToBuild.length === 0) {
         log('[Build]', 'No stylable files found. build skipped.');
@@ -73,14 +70,7 @@ export function build({
     }
     filesToBuild.forEach((filePath) => {
         indexFile
-            ? generateFileIndexEntry(
-                  filePath,
-                  nameMapping,
-                  log,
-                  indexFileOutput,
-                  fullOutDir,
-                  generator
-              )
+            ? generator.generateFileIndexEntry(filePath, fullOutDir)
             : buildSingleFile(
                   fullOutDir,
                   filePath,
@@ -102,8 +92,8 @@ export function build({
               );
     });
 
-    if (indexFile && indexFileOutput.length) {
-        generateIndexFile(indexFileOutput, fullOutDir, indexFile, log, fs);
+    if (indexFile) {
+        generator.generateIndexFile(fs, fullOutDir, indexFile);
     }
 
     if (!indexFile) {

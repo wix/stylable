@@ -2,7 +2,7 @@ import path from 'path';
 import { expect } from 'chai';
 import { URI } from 'vscode-uri';
 
-import { createRange } from '../../src/lib/completion-providers';
+import { createRange } from '@stylable/language-service/src/lib/completion-providers';
 import { getReferences } from '../../test-kit/asserters';
 import { CASES_PATH } from '../../test-kit/stylable-fixtures-lsp';
 

@@ -15,13 +15,12 @@ If the root class exists and is being used, all other classes defined in the sty
 ## Examples
 
 ```css
-/* CSS */
 @namespace "Comp";
 .root { background: red; } /* set component background to red */
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Comp__root { background: red; }
 ```
 

@@ -172,6 +172,7 @@ const stylable = Stylable.create({
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
+    resolverCache: new Map()
 });
 
 const { diagnosticsMessages } = build({
