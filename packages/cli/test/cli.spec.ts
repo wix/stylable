@@ -257,7 +257,7 @@ describe('Stylable Cli', () => {
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
 
-    describe('Cli diagnostics', () => {
+    describe('CLI diagnostics', () => {
         it('should report diagnostics by default and exit the process with error exit code 1', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
