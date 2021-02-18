@@ -7,7 +7,7 @@ import { addDotSlash, ensureDirectory, tryRun } from './build-tools';
 
 export interface ReExports {
     root: string;
-    parts: Record<string, string>;
+    classes: Record<string, string>;
     keyframes: Record<string, string>;
     vars: Record<string, string>;
     stVars: Record<string, string>;
@@ -20,12 +20,12 @@ export class Generator {
     }> = [];
     private collisionDetector = new NameCollisionDetector<string>();
 
-    constructor(protected stylable: Stylable, private log: (...args: string[]) => void) {}
+    constructor(public stylable: Stylable, private log: (...args: string[]) => void) {}
 
     public generateReExports(filePath: string): ReExports {
         return {
             root: this.filename2varname(filePath),
-            parts: {},
+            classes: {},
             keyframes: {},
             stVars: {},
             vars: {},
@@ -68,7 +68,7 @@ export class Generator {
     private checkForCollisions(reExports: ReExports, filePath: string) {
         this.collisionDetector.detect(reExports.root, filePath);
 
-        for (const asName of Object.values(reExports.parts)) {
+        for (const asName of Object.values(reExports.classes)) {
             this.collisionDetector.detect(asName, filePath);
         }
 
@@ -94,6 +94,39 @@ export class Generator {
     }
 }
 
+export function reExportsAllSymbols(filePath: string, generator: Generator): ReExports {
+    const meta = generator.stylable.process(filePath);
+    const rootExport = generator.filename2varname(filePath);
+    const classes = Object.keys(meta.classes)
+        .filter((name) => name !== meta.root)
+        .reduce<Record<string, string>>((acc, className) => {
+            acc[className] = `${rootExport}__${className}`;
+            return acc;
+        }, {});
+    const stVars = meta.vars.reduce<Record<string, string>>((acc, { name }) => {
+        acc[name] = `${rootExport}__${name}`;
+        return acc;
+    }, {});
+    const vars = Object.keys(meta.cssVars).reduce<Record<string, string>>((acc, varName) => {
+        acc[varName] = `--${rootExport}__${varName.slice(2)}`;
+        return acc;
+    }, {});
+    const keyframes = Object.keys(meta.mappedKeyframes).reduce<Record<string, string>>(
+        (acc, keyframe) => {
+            acc[keyframe] = `${rootExport}__${keyframe}`;
+            return acc;
+        },
+        {}
+    );
+    return {
+        root: rootExport,
+        classes,
+        keyframes,
+        stVars,
+        vars,
+    };
+}
+
 class NameCollisionDetector<Origin> {
     nameMapping = new Map<string, Origin>();
     collisions = new Map<string, Origin>();
@@ -108,13 +141,13 @@ class NameCollisionDetector<Origin> {
 
 function createImportForComponent(from: string, reExports: ReExports) {
     const namedPart = [
-        ...Object.entries(reExports.parts).map(symbolMapper),
+        ...Object.entries(reExports.classes).map(symbolMapper),
         ...Object.entries(reExports.stVars).map(symbolMapper),
         ...Object.entries(reExports.vars).map(symbolMapper),
         ...Object.entries(reExports.keyframes).map(keyframesSymbolMapper),
     ].join(', ');
 
-    const usagePart = Object.values(reExports.parts)
+    const usagePart = Object.values(reExports.classes)
         .map((exportName) => `.root .${exportName}{}`)
         .join(' ');
 

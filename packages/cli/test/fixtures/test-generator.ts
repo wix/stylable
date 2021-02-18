@@ -5,7 +5,7 @@ export class Generator extends Base {
     public generateReExports(): ReExports {
         return {
             root: 'Style' + this.count++,
-            parts: {},
+            classes: {},
             keyframes: {},
             stVars: {},
             vars: {},
