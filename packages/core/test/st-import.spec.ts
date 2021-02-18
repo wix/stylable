@@ -63,10 +63,10 @@ describe('Stylable @st-import', () => {
 
         expect(result.diagnostics.reports.length).to.eql(2);
         expect(result.diagnostics.reports[0].message).to.eql(
-            processorWarnings.INVALID_ST_IMPORT_FORMAT()
+            processorWarnings.INVALID_ST_IMPORT_FORMAT(['invalid missing source'])
         );
         expect(result.diagnostics.reports[1].message).to.eql(
-            processorWarnings.INVALID_ST_IMPORT_FORMAT()
+            processorWarnings.INVALID_ST_IMPORT_FORMAT(['invalid missing from', 'invalid missing source'])
         );
     });
 
@@ -146,6 +146,25 @@ describe('Stylable @st-import', () => {
         });
 
         expect(result.mappedSymbols['-t1-x']).to.include({
+            _kind: 'import',
+            type: 'named',
+        });
+    });
+
+    it('collect @st-import with keyframes', () => {
+        const result = processSource(
+            `
+            @st-import [blah, keyframes(blah)] from "./some/external/path";
+        `,
+            { from: 'path/to/style.css' }
+        );
+
+        expect(result.mappedSymbols['blah']).to.include({
+            _kind: 'import',
+            type: 'named',
+        });
+
+        expect(result.mappedKeyframes['blah']).to.include({
             _kind: 'import',
             type: 'named',
         });

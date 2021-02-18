@@ -124,10 +124,10 @@ export const processorWarnings = {
         return '@st-import * is not supported';
     },
     ST_IMPORT_EMPTY_FROM() {
-        return '@st-import must specify from with value';
+        return '@st-import must specify a valid "from" string value';
     },
-    INVALID_ST_IMPORT_FORMAT() {
-        return 'Invalid @st-import format';
+    INVALID_ST_IMPORT_FORMAT(errors: string[]) {
+        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
     },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
@@ -793,20 +793,33 @@ export class StylableProcessor {
             context: this.dirContext,
             keyframes: {},
         };
-
+        const namedMap: Record<string, string> = {};
+        const keyframesMap: Record<string, string> = {};
+        
         const imports = tokenizeImports(`import ${atRule.params}`, '[', ']')[0];
 
         if (imports && imports.star) {
             this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
-        } else if (imports) {
+        } else {
             importObj.defaultExport = imports.defaultName || '';
             setImportObjectFrom(imports.from || '', this.dirContext, importObj);
-            importObj.named = imports.named || {};
-            if (!imports.from) {
+
+            if (imports.named) {
+                for (const [impName, impAsName] of Object.entries(imports.named)) {
+                    if (impAsName) {
+                        
+                    } else {
+
+                    }
+                }
+                importObj.named = imports.named || {};
+            }
+
+            if (imports.errors.length) {
+                this.diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors));
+            } else if (!imports.from?.trim()) {
                 this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
             }
-        } else {
-            this.diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT());
         }
 
         atRule.remove();

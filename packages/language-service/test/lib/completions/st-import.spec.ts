@@ -172,13 +172,7 @@ describe('@st-import Directive', () => {
         asserter.notSuggested([asserters.globalCompletion(createRange(0, 11, 0, 11))]);
     });
 
-    it('should not format @st-import statements', () => {
-        const res = getFormattingEdits('@st-import Comp, [v1, v2, v3] from "./stylesheet.st.css";');
-
-        expect(res).to.eql([]);
-    });
-
-    it('should format statements even when @st-import exists in the document', () => {
+    it('should format statements even when @st-import exists in the document (and ignore st-import)', () => {
         const res = getFormattingEdits(`
         @st-import Comp, [v1, v2, v3] from "./stylesheet.st.css";
         
