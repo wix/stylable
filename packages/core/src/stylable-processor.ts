@@ -775,7 +775,7 @@ export class StylableProcessor {
         const importObj: Imported = {
             defaultExport: '',
             from: '',
-            fromRelative: '',
+            request: '',
             named: {},
             keyframes: {},
             rule,
@@ -796,10 +796,10 @@ export class StylableProcessor {
 
                     if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
                         // 3rd party request
-                        importObj.fromRelative = importPath;
+                        importObj.request = importPath;
                         importObj.from = importPath;
                     } else {
-                        importObj.fromRelative = importPath;
+                        importObj.request = importPath;
                         const dirPath = path.dirname(this.meta.source);
                         importObj.from =
                             path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods

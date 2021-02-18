@@ -9,7 +9,7 @@ import {
     stylableModule,
     StylableModuleSchema,
     stylableVar,
-} from '../src';
+} from '@stylable/schema-extract';
 import { mockNamespace } from './mock-namespace';
 
 use(flatMatch);

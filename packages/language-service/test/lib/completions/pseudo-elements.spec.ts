@@ -1,5 +1,5 @@
-import { createRange, ProviderRange } from '../../../src/lib/completion-providers';
-import { Completion } from '../../../src/lib/completion-types';
+import { createRange, ProviderRange } from '@stylable/language-service/src/lib/completion-providers';
+import { Completion } from '@stylable/language-service/src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
 describe('Pseudo-elements', () => {

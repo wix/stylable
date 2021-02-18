@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { noCollisionNamespace } from '../src/resolve-namespace-factories';
+import { noCollisionNamespace } from '@stylable/core';
 
 describe('No collision namespace resolver', () => {
     const nsResolver = noCollisionNamespace({ prefix: 'MyApp_' });

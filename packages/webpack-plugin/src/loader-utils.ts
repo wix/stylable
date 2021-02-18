@@ -19,15 +19,15 @@ export function getImports(
     const imports: string[] = [];
     const unusedImports: string[] = [];
     for (const imported of meta.imports) {
-        if (imported.fromRelative.endsWith('.st.css')) {
+        if (imported.request.endsWith('.st.css')) {
             /**
              * We want to include Stylable files that have effects on other files as regular imports
              * and other ones as unused for depth calculation
              */
             if (shouldBeIncludedAsImport(stylable, meta, imported)) {
-                imports.push(`import ${JSON.stringify(imported.fromRelative)};`);
+                imports.push(`import ${JSON.stringify(imported.request)};`);
             } else {
-                unusedImports.push(imported.fromRelative);
+                unusedImports.push(imported.request);
             }
         }
     }
@@ -74,7 +74,7 @@ function shouldBeIncludedAsImport(stylable: Stylable, meta: StylableMeta, import
         if (
             localSymbol['-st-extends'] &&
             localSymbol['-st-extends']._kind === 'import' &&
-            localSymbol['-st-extends'].import.fromRelative === imported.fromRelative
+            localSymbol['-st-extends'].import.request === imported.request
         ) {
             const cssResolved = stylable.resolver.resolveSymbolOrigin(
                 localSymbol['-st-extends'],

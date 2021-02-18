@@ -1,5 +1,4 @@
 import postcss from 'postcss';
-import decache from 'decache';
 import {
     processNamespace,
     emitDiagnostics,
@@ -45,11 +44,6 @@ interface LoaderImport {
     index: number;
 }
 
-const timedCacheOptions = { useTimer: true, timeout: 1000 };
-const requireModule = (id: string) => {
-    decache(id);
-    return require(id);
-};
 const optimizer = new StylableOptimizer();
 
 const stylableLoader: Loader = function (content) {
@@ -74,9 +68,7 @@ const stylableLoader: Loader = function (content) {
         fileSystem: this.fs,
         mode,
         resolveOptions: this._compiler.options.resolve as any /* make stylable types better */,
-        timedCacheOptions,
         resolveNamespace,
-        requireModule,
     });
 
     const { meta, exports } = stylable.transform(content, this.resourcePath);

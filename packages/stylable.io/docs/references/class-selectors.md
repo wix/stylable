@@ -11,7 +11,6 @@ In **Stylable**, class selectors are scoped to the [namespace](./namespace.md) o
 You should use camelCase to name class selectors. Avoid using hyphens (-) and capital first letters.
 
 ```css
-/* CSS */
 @namespace "Page";
 .root:hover .thumbnail { background:red; }
 .thumbnail { background:green; }
@@ -19,7 +18,7 @@ You should use camelCase to name class selectors. Avoid using hyphens (-) and ca
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Page__root:hover .Page__thumbnail { background:red; }
 .Page__thumbnail { background:green;}
 .Page__thumbnail:hover { background:blue; }

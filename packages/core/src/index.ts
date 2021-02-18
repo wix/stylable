@@ -23,6 +23,7 @@ export * from './module-resolver';
 export * from './report-diagnostic';
 export * from './visit-meta-css-dependencies';
 export * from './murmurhash';
+export * from './timed-cache';
 
 import * as pseudoStates from './pseudo-states';
 export { pseudoStates };

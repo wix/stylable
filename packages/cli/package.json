@@ -5,7 +5,7 @@
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "bin": {
-    "stc": "./cli.js"
+    "stc": "bin/stc.js"
   },
   "scripts": {
     "clean": "rimraf ./cjs",
@@ -22,9 +22,9 @@
     "yargs": "^16.2.0"
   },
   "files": [
+    "bin",
     "cjs",
-    "src",
-    "cli.js"
+    "src"
   ],
   "engines": {
     "node": ">=12"

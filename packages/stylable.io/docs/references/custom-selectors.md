@@ -16,7 +16,6 @@ The following code maps the alias name `controlBtn` that matches any `.btn` CSS 
 
 ****
 ```css
-/* CSS */
 @namespace "Comp";
 @custom-selector :--controlBtn .controls .btn;
 /* 
@@ -34,7 +33,6 @@ selector: .Comp__controls .Comp__btn:hover
 Custom selectors generate a [pseudo-element](./pseudo-elements.md). So, for example, [importing](./imports.md) a stylesheet into another stylesheet enables access to the `controlBtn` pseudo-element. In this example, the stylesheet `comp.st.css` from the previous example is imported into this stylesheet.
 
 ```css
-/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";
@@ -64,7 +62,6 @@ If the component exposes any `pseudo-elements`, it is a good practice to define 
 The following example shows how a tree component exposes an icon.
 
 ```css
-/* CSS */
 @namespace "Tree";
 @custom-selector :--icon .root > .icon;
 ```
@@ -72,7 +69,6 @@ The following example shows how a tree component exposes an icon.
 Here you can use the icon `custom selector` from the outside just like you would use any other `pseudo-element`.
 
 ```css
-/* CSS */
 @namespace "Panel";
 :import {
     -st-from: "./tree.st.css";
@@ -93,7 +89,6 @@ When you want to make internal parts of your component API more accessible, you 
 For example, you can expose a `pseudo-element` named `navigationBtn` that enables you to style an internal gallery component's `navBtn` element.
 
 ```css
-/* CSS */
 :import {
     -st-from: "./gallery.st.css";
     -st-default: Gallery;
@@ -108,13 +103,11 @@ You may have a component with several basic CSS classes and with corresponding `
 For example, a `pseudo-element` named `navBtn` matches any `btn` CSS class nested in a `nav` CSS class.
 
 ```css
-/* CSS */
 @namespace "Comp";
 @custom-selector :--navBtn .nav .btn;
 ```
 
 ```css
-/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";
@@ -133,7 +126,6 @@ Comp::navBtn {
 You could also use custom selectors to gather a collection of selectors into a single selector. For example, you may want to access media that includes both images and videos.
 
 ```css
-/* CSS */
 @namespace "Comp";
 @custom-selector :--media .image, .video;
 /*
@@ -152,7 +144,6 @@ Aliasing multiple selectors in a `custom selector` may generate lots of CSS that
 For example, when you import the `Comp` stylesheet (the selector described in the previous example) into another stylesheet, in the output the selector is split for each override.
 
 ```css
-/* CSS */
 @namespace "Page";
 :import {
     -st-from: "./comp.st.css";

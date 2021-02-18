@@ -1,6 +1,6 @@
-import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import * as postcss from 'postcss';
+import { generateStylableRoot, processSource } from '@stylable/core-test-kit';
 
 describe('@custom-selector', () => {
     it('collect custom-selectors', () => {

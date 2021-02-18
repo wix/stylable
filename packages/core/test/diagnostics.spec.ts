@@ -1,15 +1,21 @@
+import { expect } from 'chai';
 import {
     expectWarnings,
     expectWarningsFromTransform,
     findTestLocations,
 } from '@stylable/core-test-kit';
-import { expect } from 'chai';
-import { functionWarnings, mixinWarnings, valueMapping } from '../src';
-import { nativePseudoElements, reservedKeyFrames } from '../src/native-reserved-lists';
-import { processorWarnings } from '../src/stylable-processor';
-import { resolverWarnings } from '../src/stylable-resolver';
-import { transformerWarnings } from '../src/stylable-transformer';
-import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
+import {
+    functionWarnings,
+    mixinWarnings,
+    valueMapping,
+    processorWarnings,
+    resolverWarnings,
+    transformerWarnings,
+    nativePseudoElements,
+    reservedKeyFrames,
+    rootValueMapping,
+    valueParserWarnings,
+} from '@stylable/core';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {

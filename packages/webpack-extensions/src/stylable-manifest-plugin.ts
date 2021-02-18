@@ -60,9 +60,11 @@ export class StylableManifestPlugin {
             },
             mode: compiler.options.mode === 'development' ? 'development' : 'production',
             resolveOptions: compiler.options.resolve as any /* make stylable types better */,
-            timedCacheOptions: { useTimer: true, timeout: 1000 },
+            resolverCache: new Map(),
             resolveNamespace: this.options.resolveNamespace,
         });
+
+        compiler.hooks.done.tap(this.constructor.name + ' stylable.initCache', () => stylable.initCache());
 
         let metadata: Array<{ compId: string; metadata: Metadata }>;
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) => {

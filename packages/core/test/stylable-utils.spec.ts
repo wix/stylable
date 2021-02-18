@@ -1,6 +1,6 @@
-import { generateInfra } from '@stylable/core-test-kit';
 import { expect } from 'chai';
 import { scopeCSSVar, generateScopedCSSVar, visitMetaCSSDependenciesBFS } from '@stylable/core';
+import { generateInfra } from '@stylable/core-test-kit';
 
 describe('stylable utils', () => {
     it('scopeCSSVar', () => {

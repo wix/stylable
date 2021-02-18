@@ -1,13 +1,14 @@
-import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
-import { resolveNamespace } from '@stylable/node';
-import { expect } from 'chai';
-import { spawnSync } from 'child_process';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, relative } from 'path';
+import { spawnSync } from 'child_process';
+import { expect } from 'chai';
+import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
+import { resolveNamespace } from '@stylable/node';
 
 function runCli(cliArgs: string[] = []) {
-    return spawnSync('node', [join(__dirname, '../cli.js'), ...cliArgs], { encoding: 'utf8' });
+    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
+    return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
 interface Files {
@@ -254,5 +255,40 @@ describe('Stylable Cli', () => {
 
         expect(stderr).equal('');
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
+    });
+
+    describe('CLI diagnostics', () => {
+        it('should report diagnostics by default and exit the process with error exit code 1', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(1);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
+        it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=loose',
+            ]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
     });
 });

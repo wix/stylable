@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { SBTypesParsers, valueMapping } from '../src/stylable-value-parsers';
+import { SBTypesParsers, valueMapping } from '@stylable/core';
 
 const parseExtends = SBTypesParsers[valueMapping.extends];
 
