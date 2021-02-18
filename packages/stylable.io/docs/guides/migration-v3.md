@@ -84,6 +84,13 @@ However, most often `{ st, classes }` is enough:
 > `st`. It is recommended to use `st` in order to avoid name clashing
 > with other variables (for example, some other inline style).
 
+### CSS custom properties 
+
+Stylable now localizes CSS Custom Properties. This means that any usage of Custom Proprties (e.g. `--prop`) should now be incorparated in the component code.
+
+See the docs about [CSS custom properties](https://stylable.io/docs/references/css-vars) for usage examples.
+
+
 ## Update usage in React components
 
 Once `.st.css` imports are updated, React components should be updated too:
