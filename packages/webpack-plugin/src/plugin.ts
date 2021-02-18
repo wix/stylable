@@ -53,6 +53,7 @@ type OptimizeOptions = OptimizeConfig & {
 export interface StylableWebpackPluginOptions {
     /**
      * Filename of the output bundle when emitting css bundle
+     * Only supports [contenthash] replacer - "stylable.[contenthash].css"
      */
     filename?: string;
     /**
