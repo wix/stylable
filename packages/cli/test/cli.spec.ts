@@ -7,7 +7,7 @@ import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 
 function runCli(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/cli.js');
+    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
     return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
