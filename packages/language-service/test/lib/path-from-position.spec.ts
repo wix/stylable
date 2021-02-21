@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getPath } from '../../test-kit/asserters';
+import { getPath } from '../test-kit/asserters';
 
 describe('Path parser', () => {
     it('Should add selector with no end if broken', () => {

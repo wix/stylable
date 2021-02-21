@@ -1,9 +1,9 @@
 import {
     createRange,
     ProviderRange,
-} from '@stylable/language-service/src/lib/completion-providers';
-import type { Completion } from '@stylable/language-service/src/lib/completion-types';
-import * as asserters from '../../../test-kit/completions-asserters';
+} from '@stylable/language-service/dist/lib/completion-providers';
+import type { Completion } from '@stylable/language-service/dist/lib/completion-types';
+import * as asserters from '../../test-kit/completions-asserters';
 
 describe('Mixins', () => {
     describe('CSS Class Mixins', () => {

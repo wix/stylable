@@ -2,13 +2,7 @@
   "name": "@stylable/e2e-test-kit",
   "version": "4.0.0-alpha.10",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "prepack": "yarn build"
-  },
+  "main": "dist/index.js",
   "peerDependencies": {
     "webpack": "^5.20.0"
   },
@@ -21,8 +15,10 @@
     "rimraf": "^3.0.2"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

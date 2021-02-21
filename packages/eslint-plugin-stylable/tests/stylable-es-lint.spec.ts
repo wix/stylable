@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import StylableLint from 'eslint-plugin-stylable/src/stylable-es-lint';
+import StylableLint from 'eslint-plugin-stylable/dist/stylable-es-lint';
 import { createTempDirectorySync } from 'create-temp-directory';
 
 // mock afterAll for RuleTester (should be fixed in next version)

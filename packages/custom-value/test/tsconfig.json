@@ -1,0 +1,7 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/test"
+  },
+  "references": [{ "path": "../../webpack-plugin/src" }, { "path": "../../e2e-test-kit/src" }]
+}

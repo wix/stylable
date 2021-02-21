@@ -1,9 +1,9 @@
-import { createRange } from '@stylable/language-service/src/lib/completion-providers';
+import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
 import {
     importDirectives,
     rulesetDirectives,
-} from '@stylable/language-service/src/lib/completion-types';
-import * as asserters from '../../../test-kit/completions-asserters';
+} from '@stylable/language-service/dist/lib/completion-types';
+import * as asserters from '../../test-kit/completions-asserters';
 
 describe('Inner Directives', () => {
     describe('should complete -st-from inside import selector ', () => {
