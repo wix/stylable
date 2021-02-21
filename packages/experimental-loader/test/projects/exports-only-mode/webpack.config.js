@@ -1,8 +1,9 @@
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { stylableLoaders } from '../../../src';
-import { noCollisionNamespace } from '@stylable/core';
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { noCollisionNamespace } = require('@stylable/core');
+const { stylableLoaders } = require('@stylable/experimental-loader');
 
-export default {
+/** @type import('webpack').Configuration */
+module.exports = {
     mode: 'development',
     entry: './index.js',
     context: __dirname,
