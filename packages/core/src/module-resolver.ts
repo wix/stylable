@@ -9,10 +9,10 @@ const resolverContext = {};
 
 export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any): ModuleResolver {
     const eResolver = ResolverFactory.createResolver({
-        extensions: ['.js', '.ts'],
         ...resolveOptions,
         useSyncFileSystemCalls: true,
         cache: false,
+        extensions: ['.js', '.ts'],
         fileSystem,
     });
 
