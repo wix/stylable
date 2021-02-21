@@ -140,7 +140,7 @@ describe('build index', () => {
             indexFile: 'index.st.css',
             rootDir: resolve('/'),
             log,
-            generatorPath: require.resolve('./fixtures/named-exports-generator.ts'),
+            generatorPath: require.resolve('./fixtures/named-exports-generator'),
         });
 
         const res = fs.readFileSync(resolve('/index.st.css')).toString();

@@ -6,7 +6,7 @@ module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
-    entry: './index.ts',
+    entry: require.resolve('./index'),
     output: {
         library: 'metadata',
     },
@@ -16,15 +16,8 @@ module.exports = {
             package: require('./package.json'),
         }),
     ],
-    resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.json'],
-    },
     module: {
         rules: [
-            {
-                test: /\.tsx?$/,
-                loader: '@ts-tools/webpack-loader',
-            },
             {
                 test: /\.st\.css?$/,
                 use: [stylableLoaders.transform({ exportsOnly: true })],

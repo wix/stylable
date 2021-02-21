@@ -1,15 +1,18 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
 import { hashContent } from '@stylable/webpack-extensions';
 
 const project = 'metadata-loader-case';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             launchOptions: {
                 // headless: false
             },

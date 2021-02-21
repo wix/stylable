@@ -986,36 +986,6 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@ts-tools/build@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-2.1.1.tgz#6580c0ed5aea8ee8de93d43f40929fcba211f3a5"
-  integrity sha512-uuyXyYMa5BBbZoOddoBQPd+keLUjBR+V7unYAv/cjkCKwahbCAHTlvm2EIXIVafFyMJ9Egit4D9kohE3Q8j8fw==
-  dependencies:
-    "@ts-tools/transpile" "^2.1.1"
-    chalk "^4.1.0"
-    commander "^6.1.0"
-
-"@ts-tools/node@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-2.1.1.tgz#2923b4386e543bd20d534824429440b46ac87e95"
-  integrity sha512-+pcRdNZIz32c8lxZrKJAoXxD/X9UgdioV7ccqfXL0h1Yyt+VeGdSUknxJ3WyKWiDKiS4RacL4LqHztaSUmBiLA==
-  dependencies:
-    "@ts-tools/transpile" "^2.1.1"
-    source-map-support "^0.5.19"
-
-"@ts-tools/transpile@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.1.1.tgz#f2448013cdfc2944055d0446a568da97b93c6a3e"
-  integrity sha512-kuhuOlvexcF2UBkmnr+Ir8yhInzJtItiuUxLEgYKQ6odVsD1w7N1n9B0Eqxj9ZT53rhYWUzZEzMWalh9l34EPQ==
-
-"@ts-tools/webpack-loader@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-2.1.1.tgz#29971073f4650935f075e747883b8f9342cec340"
-  integrity sha512-lHYxSZCajnPcaODE0VKYizsq6qmrd8UAESJfNWfQHKZVvIScH64HRdLfBRKQXYSfmELa/6Lg6s0fqg6KJlfieA==
-  dependencies:
-    "@ts-tools/transpile" "^2.1.1"
-    loader-utils "^2.0.0"
-
 "@types/body-parser@*":
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.0.tgz#0685b3c47eb3006ffed117cdd55164b61f80538f"
@@ -7302,7 +7272,7 @@ source-map-loader@^2.0.1:
     iconv-lite "^0.6.2"
     source-map-js "^0.6.2"
 
-source-map-support@^0.5.19, source-map-support@~0.5.12, source-map-support@~0.5.19:
+source-map-support@~0.5.12, source-map-support@~0.5.19:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.19.tgz#a98b62f86dcaf4f67399648c085291ab9e8fed61"
   integrity sha512-Wonm7zOCIJzBGQdB+thsPar0kYuCIzYvxZwlBa87yi/Mdjv7Tip2cyVbLj5o0cFPN4EVkuTwb3GDDyUx2DGnGw==

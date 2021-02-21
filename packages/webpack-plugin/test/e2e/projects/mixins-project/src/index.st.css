@@ -4,7 +4,7 @@
 }
 
 :import {
-    -st-from: "./mixin2.ts";
+    -st-from: "./mixin2";
     -st-named: Mixin as Mixin2;
 }
 

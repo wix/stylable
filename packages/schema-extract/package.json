@@ -4,7 +4,7 @@
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"test/**/*.spec.ts?(x)\""
+    "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
     "@stylable/core": "^4.0.0-alpha.10"
