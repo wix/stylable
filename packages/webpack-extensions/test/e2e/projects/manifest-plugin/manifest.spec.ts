@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { hashContent } from '../../../../src/hash-content-util';
+import { hashContent } from '@stylable/webpack-extensions';
 import { EOL } from 'os';
 
 describe(`(${__dirname})`, () => {

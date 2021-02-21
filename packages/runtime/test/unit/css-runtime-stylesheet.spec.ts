@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { create } from '../../src/css-runtime-stylesheet';
+import { create } from '@stylable/runtime';
 
 describe('Stylable runtime stylesheet', () => {
     it('creates stylesheet with mapping ', () => {

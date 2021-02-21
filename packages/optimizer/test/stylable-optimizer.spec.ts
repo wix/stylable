@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as postcss from 'postcss';
 import deindent from 'deindent';
 import { createStylableInstance } from '@stylable/core-test-kit';
-import { removeCommentNodes, StylableOptimizer } from '../src';
+import { removeCommentNodes, StylableOptimizer } from '@stylable/optimizer';
 
 describe('StylableOptimizer', () => {
     it('removeComments', () => {
