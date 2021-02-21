@@ -8,7 +8,7 @@ import type {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
-import type { IStylableOptimizer } from '@stylable/core';
+import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core';
 import decache from 'decache';
 
 export function* uniqueFilterMap<T, O = T>(
@@ -197,6 +197,14 @@ export function createDecacheRequire(compiler: Compiler) {
         cacheIds.add(id);
         return require(id);
     };
+}
+
+export function createStylableResolverCacheMap(compiler: Compiler): StylableResolverCache {
+    const cache: StylableResolverCache = new Map();
+    compiler.hooks.done.tap('decache require', () => {
+        cache.clear();
+    });
+    return cache;
 }
 
 export function createStaticCSS(

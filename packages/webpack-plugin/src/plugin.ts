@@ -31,6 +31,7 @@ import {
     createOptimizationMapping,
     getTopLevelInputFilesystem,
     createDecacheRequire,
+    createStylableResolverCacheMap,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -237,6 +238,7 @@ export class StylableWebpackPlugin {
                     ),
                     requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
                     optimizer: this.options.optimizer,
+                    resolverCache: createStylableResolverCacheMap(compiler),
                 },
                 compiler
             )
@@ -446,7 +448,9 @@ export class StylableWebpackPlugin {
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
-                throw new Error('Support for mini-css is temporarily disabled. see https://github.com/webpack-contrib/mini-css-extract-plugin/pull/703')
+                throw new Error(
+                    'Support for mini-css is temporarily disabled. see https://github.com/webpack-contrib/mini-css-extract-plugin/pull/703'
+                );
                 injectCssModules(compilation, staticPublicPath, stylableModules, assetsModules);
             }
         }
