@@ -3,8 +3,7 @@ import { EOL } from 'os';
 import { join } from 'path';
 import { expect } from 'chai';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
-import { ComponentsMetadata } from '@stylable/webpack-extensions/src';
-import { hashContent } from '../../../../src/hash-content-util';
+import { ComponentsMetadata, hashContent } from '@stylable/webpack-extensions';
 
 describe(`(${__dirname})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(

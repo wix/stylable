@@ -2,7 +2,7 @@ import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { hashContent } from '../../src/hash-content-util';
+import { hashContent } from '@stylable/webpack-extensions';
 
 const project = 'metadata-loader-case';
 
