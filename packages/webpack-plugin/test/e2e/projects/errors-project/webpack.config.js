@@ -1,5 +1,6 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',
     context: __dirname,

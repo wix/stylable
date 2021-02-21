@@ -5,6 +5,7 @@ const autoprefixer = require('autoprefixer');
 const postcss = require('postcss');
 const autoprefixProcessor = postcss([autoprefixer]);
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',
     context: __dirname,
