@@ -12,7 +12,7 @@ module.exports = {
     },
     plugins: [new StylableManifestPlugin({ package: require('./package.json') })],
     resolve: {
-        extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
+        extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     module: {
         rules: [

@@ -12,9 +12,9 @@ import {
 import { TextDocument, TextEdit } from 'vscode-languageserver-textdocument';
 import { Range, TextDocumentIdentifier } from 'vscode-languageserver-types';
 import { URI } from 'vscode-uri';
-import { ProviderPosition } from '@stylable/language-service/src/lib/completion-providers';
-import { createMeta, ProviderLocation } from '@stylable/language-service/src/lib/provider';
-import { pathFromPosition } from '@stylable/language-service/src/lib/utils/postcss-ast-utils';
+import { ProviderPosition } from '@stylable/language-service/dist/lib/completion-providers';
+import { createMeta, ProviderLocation } from '@stylable/language-service/dist/lib/provider';
+import { pathFromPosition } from '@stylable/language-service/dist/lib/utils/postcss-ast-utils';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 
 export function getCaretPosition(src: string) {

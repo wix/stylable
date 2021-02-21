@@ -5,12 +5,11 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "yarn workspace @stylable/runtime build",
-    "clean": "lerna run clean --stream --parallel",
-    "build": "lerna run build --stream",
-    "typecheck": "tsc --noEmit",
+    "clean": "rimraf ./packages/*/{dist,cjs,esm}",
+    "build": "tsc --build",
+    "watch": "yarn build -w",
     "lint": "eslint . -f codeframe",
-    "pretest": "yarn typecheck && yarn lint",
+    "pretest": "yarn build && yarn lint",
     "test": "lerna run test --stream",
     "prettify": "npx prettier \"packages/**/*.{js,ts,tsx}\" --write"
   },
@@ -78,9 +77,8 @@
     "rimraf": "^3.0.2",
     "sinon": "^9.2.4",
     "sinon-chai": "^3.5.0",
+    "source-map-loader": "^2.0.1",
     "style-loader": "^2.0.0",
-    "tsconfig-paths": "^3.9.0",
-    "tsconfig-paths-webpack-plugin": "^3.3.0",
     "typescript": "~4.1.5",
     "url-loader": "^4.1.1",
     "webpack": "^5.23.0",

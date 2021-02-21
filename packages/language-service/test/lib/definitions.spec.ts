@@ -5,9 +5,9 @@ import { URI } from 'vscode-uri';
 import {
     createRange,
     ProviderPosition,
-} from '@stylable/language-service/src/lib/completion-providers';
-import * as asserters from '../../test-kit/asserters';
-import { CASES_PATH } from '../../test-kit/stylable-fixtures-lsp';
+} from '@stylable/language-service/dist/lib/completion-providers';
+import * as asserters from '../test-kit/asserters';
+import { CASES_PATH } from '../test-kit/stylable-fixtures-lsp';
 
 describe('Definitions', () => {
     const getCasePath = (innerPath: string) => URI.file(path.join(CASES_PATH, innerPath)).fsPath;

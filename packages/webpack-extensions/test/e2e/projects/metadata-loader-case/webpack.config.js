@@ -12,7 +12,7 @@ module.exports = {
     },
     plugins: [new StylableWebpackPlugin()],
     resolve: {
-        extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
+        extensions: ['.ts', '.tsx', '.js', '.json'],
     },
     resolveLoader: {
         alias: {

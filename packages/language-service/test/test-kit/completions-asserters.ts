@@ -6,8 +6,8 @@ import { URI } from 'vscode-uri';
 import {
     ProviderPosition,
     ProviderRange,
-} from '@stylable/language-service/src/lib/completion-providers';
-import { Completion, Snippet } from '@stylable/language-service/src/lib/completion-types';
+} from '@stylable/language-service/dist/lib/completion-providers';
+import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 
 function assertPresent(

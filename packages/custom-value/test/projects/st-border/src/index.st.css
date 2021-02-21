@@ -1,5 +1,5 @@
 :import {
-    -st-from: "../../../../src";
+    -st-from: "@stylable/custom-value";
     -st-named: stBorder;
 }
 

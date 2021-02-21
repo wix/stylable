@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import {
     parseSelector,
     SelectorInternalChunk,
-} from '@stylable/language-service/src/lib/utils/selector-analyzer';
+} from '@stylable/language-service/dist/lib/utils/selector-analyzer';
 
 describe('Selector Parser', () => {
     let sel: string;

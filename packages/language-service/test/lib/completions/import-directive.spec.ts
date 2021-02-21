@@ -1,6 +1,6 @@
-import { createRange } from '@stylable/language-service/src/lib/completion-providers';
-import { topLevelDirectives } from '@stylable/language-service/src/lib/completion-types';
-import * as asserters from '../../../test-kit/completions-asserters';
+import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
+import { topLevelDirectives } from '@stylable/language-service/dist/lib/completion-types';
+import * as asserters from '../../test-kit/completions-asserters';
 
 describe('Import Directive', () => {
     describe('should complete :import at top level ', () => {
