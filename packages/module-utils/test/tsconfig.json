@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/test"
+  },
+  "references": [
+    { "path": "../../e2e-test-kit/src" },
+    { "path": "../../runtime/src" },
+    { "path": "../src" }
+  ]
+}

@@ -1,5 +1,5 @@
-import { StylableResults } from '@stylable/core';
-import * as postcss from 'postcss';
+import type { StylableResults } from '@stylable/core';
+import type * as postcss from 'postcss';
 
 export function matchRuleAndDeclaration(
     parent: postcss.Container,

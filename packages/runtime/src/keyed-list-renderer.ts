@@ -1,4 +1,4 @@
-import { NodeRenderer } from './types';
+import type { NodeRenderer } from './types';
 
 export interface DOMListRenderer<I, O extends Element, C extends Element = Element> {
     nodes: { [key: string]: O };

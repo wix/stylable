@@ -1,5 +1,5 @@
 import { addBuildDependencies, getImports } from './loader-utils';
-import { StylableLoaderContext } from './types';
+import type { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core';
 
 export default function StylableWebpackLoader(this: StylableLoaderContext, source: string) {

@@ -2,14 +2,10 @@
   "name": "@stylable/language-service",
   "version": "4.0.0-alpha.10",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
     "test": "yarn test:unit",
-    "test:unit": "mocha test/lib/**/*.spec.ts test/lib/*.spec.ts",
-    "prepack": "yarn build"
+    "test:unit": "mocha test/lib/**/*.spec.ts test/lib/*.spec.ts"
   },
   "peerDependencies": {
     "typescript": ">=3.6"
@@ -29,8 +25,10 @@
   },
   "author": "Wix.com",
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

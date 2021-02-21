@@ -1,6 +1,6 @@
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
 import findConfig from 'find-config';
-import { StylableWebpackPluginOptions } from './plugin';
+import type { StylableWebpackPluginOptions } from './plugin';
 
 export function loadStylableConfig(
     context: string

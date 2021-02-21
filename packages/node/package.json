@@ -2,13 +2,9 @@
   "name": "@stylable/node",
   "version": "4.0.0-alpha.10",
   "description": "Integrate Stylable into your node application",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 10000",
-    "prepack": "yarn build"
+    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 10000"
   },
   "dependencies": {
     "@stylable/core": "^4.0.0-alpha.10",
@@ -16,8 +12,11 @@
     "find-config": "^1.0.0"
   },
   "files": [
-    "cjs",
-    "register.js"
+    "dist",
+    "!dist/test",
+    "src",
+    "register.js",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

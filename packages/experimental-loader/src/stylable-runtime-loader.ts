@@ -1,4 +1,4 @@
-import { StylableExports } from '@stylable/core';
+import type { StylableExports } from '@stylable/core';
 import { createRuntimeTargetCode } from './create-runtime-target-code';
 
 import type { Loader } from '@stylable/webpack-plugin';

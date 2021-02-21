@@ -5,7 +5,7 @@ declare module 'deindent' {
 
 declare module 'mini-css-extract-plugin' {
     class MiniCssExtractPlugin {
-        static loader: string
+        static loader: string;
         apply(compiler: typeof import('webpack').Compiler): void;
     }
     export = MiniCssExtractPlugin;
@@ -45,4 +45,22 @@ declare module 'postcss-selector-matches/dist/replaceRuleSelector' {
 declare module 'node-eval' {
     function nodeEval(content: string, filename: string, context?: object): any;
     export = nodeEval;
+}
+
+declare module '!!stylable-metadata?exposeNamespaceMapping=true!*.st.css' {
+    const stylesheetMetadata: {
+        entry: string;
+        stylesheetMapping: Record<string, string>;
+        namespaceMapping: Record<string, string>;
+    };
+    export = stylesheetMetadata;
+}
+
+declare module '!!stylable-metadata!*.st.css' {
+    const stylesheetMetadata: {
+        entry: string;
+        stylesheetMapping: Record<string, string>;
+        namespaceMapping?: Record<string, string>;
+    };
+    export = stylesheetMetadata;
 }

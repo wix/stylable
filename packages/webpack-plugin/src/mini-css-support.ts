@@ -1,4 +1,4 @@
-import { Compilation, Compiler, NormalModule } from 'webpack';
+import type { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildMeta } from './plugin-utils';
 
 const memoize = require('webpack/lib/util/memoize');

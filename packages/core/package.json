@@ -2,14 +2,10 @@
   "name": "@stylable/core",
   "version": "4.0.0-alpha.10",
   "description": "CSS for Components",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
     "test": "mocha \"./test/**/*.spec.ts\"",
-    "start": "webpack serve",
-    "prepack": "yarn build"
+    "start": "webpack serve"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.3",
@@ -28,10 +24,10 @@
     "postcss-value-parser": "^4.1.0"
   },
   "files": [
-    "cjs",
+    "dist",
+    "!dist/test",
     "src",
-    "test-utils.js",
-    "test-utils.d.ts"
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

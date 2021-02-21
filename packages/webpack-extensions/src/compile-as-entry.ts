@@ -1,4 +1,4 @@
-import { Compilation, WebpackPluginInstance } from 'webpack';
+import type { Compilation, WebpackPluginInstance } from 'webpack';
 
 const NativeModule = require('module');
 const NodeTemplatePlugin = require('webpack/lib/node/NodeTemplatePlugin');

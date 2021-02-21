@@ -2,16 +2,12 @@
   "name": "@stylable/cli",
   "version": "4.0.0-alpha.10",
   "description": "A low-level utility used for working with Stylable projects",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
+  "main": "dist/index.js",
   "bin": {
     "stc": "bin/stc.js"
   },
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 25000",
-    "prepack": "yarn build"
+    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 25000"
   },
   "dependencies": {
     "@stylable/core": "^4.0.0-alpha.10",
@@ -23,8 +19,10 @@
   },
   "files": [
     "bin",
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

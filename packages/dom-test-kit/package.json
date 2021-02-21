@@ -2,22 +2,20 @@
   "name": "@stylable/dom-test-kit",
   "version": "4.0.0-alpha.10",
   "description": "Stylable DOM testing utilities",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
     "test": "mocha \"./test/**/*.spec.ts\"",
-    "start": "webpack serve",
-    "prepack": "yarn build"
+    "start": "webpack serve"
   },
   "dependencies": {
     "@stylable/core": "^4.0.0-alpha.10",
     "@stylable/runtime": "^4.0.0-alpha.10"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=12"

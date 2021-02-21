@@ -2,8 +2,8 @@ import cloneDeep from 'lodash.clonedeep';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
 import replaceRuleSelector from 'postcss-selector-matches/dist/replaceRuleSelector';
-import { Diagnostics } from './diagnostics';
-import {
+import type { Diagnostics } from './diagnostics';
+import type {
     DeclStylableProps,
     Imported,
     SDecl,
@@ -20,9 +20,9 @@ import {
     stringifySelector,
     traverseNode,
 } from './selector-utils';
-import { ImportSymbol } from './stylable-meta';
+import type { ImportSymbol } from './stylable-meta';
 import { valueMapping, mixinDeclRegExp } from './stylable-value-parsers';
-import { StylableResolver } from './stylable-resolver';
+import type { StylableResolver } from './stylable-resolver';
 
 export const CUSTOM_SELECTOR_RE = /:--[\w-]+/g;
 

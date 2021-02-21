@@ -27,18 +27,14 @@ export function createMemoryFileSystemWithFiles(
 }
 
 function addStylableRuntimeToMemFs(memfs: CustomMemoryFs) {
-    const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
-    const content = readdirSync(runtimeDir).map((f) => {
-        const fullpath = join(runtimeDir, f);
-        return {
-            content: readFileSync(fullpath, 'utf-8'),
-            fullpath,
-        };
-    });
-
-    for (const entry of content) {
-        memfs.mkdirpSync(dirname(entry.fullpath));
-        memfs.writeFileSync(entry.fullpath, entry.content || '\n');
+    const runtimeDir = dirname(require.resolve('@stylable/runtime'));
+    for (const item of readdirSync(runtimeDir, {withFileTypes: true})) {
+        if (item.isDirectory()) {
+            continue;
+        }
+        const filePath = join(runtimeDir, item.name);
+        memfs.mkdirpSync(dirname(filePath));
+        memfs.writeFileSync(filePath, readFileSync(filePath, 'utf8'));
     }
 }
 
