@@ -371,10 +371,7 @@ export class StylableResolver {
                     if (!resolvedSymbol!.symbol && namedDecl) {
                         diagnostics.warn(
                             namedDecl,
-                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                origName,
-                                importObj.request
-                            ),
+                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
                             { word: origName }
                         );
                     }

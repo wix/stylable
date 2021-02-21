@@ -1,4 +1,3 @@
-
 const Lib = {
     async loadButton() {
         return import(/* webpackChunkName: Button */ './button');

@@ -28,7 +28,7 @@ export function createMemoryFileSystemWithFiles(
 
 function addStylableRuntimeToMemFs(memfs: CustomMemoryFs) {
     const runtimeDir = dirname(require.resolve('@stylable/runtime'));
-    for (const item of readdirSync(runtimeDir, {withFileTypes: true})) {
+    for (const item of readdirSync(runtimeDir, { withFileTypes: true })) {
         if (item.isDirectory()) {
             continue;
         }

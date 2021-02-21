@@ -446,7 +446,9 @@ export class StylableWebpackPlugin {
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
-                throw new Error('Support for mini-css is temporarily disabled. see https://github.com/webpack-contrib/mini-css-extract-plugin/pull/703')
+                throw new Error(
+                    'Support for mini-css is temporarily disabled. see https://github.com/webpack-contrib/mini-css-extract-plugin/pull/703'
+                );
                 injectCssModules(compilation, staticPublicPath, stylableModules, assetsModules);
             }
         }

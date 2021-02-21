@@ -70,7 +70,6 @@ export const valueMapping = {
     global: '-st-global' as const,
 };
 
-
 export const mixinDeclRegExp = new RegExp(`(${valueMapping.mixin})|(${valueMapping.partialMixin})`);
 
 export type stKeys = keyof typeof valueMapping;

@@ -64,7 +64,9 @@ export class StylableManifestPlugin {
             resolveNamespace: this.options.resolveNamespace,
         });
 
-        compiler.hooks.done.tap(this.constructor.name + ' stylable.initCache', () => stylable.initCache());
+        compiler.hooks.done.tap(this.constructor.name + ' stylable.initCache', () =>
+            stylable.initCache()
+        );
 
         let metadata: Array<{ compId: string; metadata: Metadata }>;
         compiler.hooks.compilation.tap(this.constructor.name, (compilation) => {

@@ -1,3 +1,5 @@
+dist
 *.st.css
 /tsconfig.base.json
+/packages/create-stylable-app/template/ts-react-webpack/tsconfig.json
 *.md

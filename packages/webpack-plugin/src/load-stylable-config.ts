@@ -7,7 +7,10 @@ export function loadStylableConfig(
 ):
     | undefined
     | {
-          webpackPlugin?: (options: Required<StylableWebpackPluginOptions>, compiler: Compiler) => Required<StylableWebpackPluginOptions>;
+          webpackPlugin?: (
+              options: Required<StylableWebpackPluginOptions>,
+              compiler: Compiler
+          ) => Required<StylableWebpackPluginOptions>;
       } {
     const path = findConfig('stylable.config.js', { cwd: context });
     let config;

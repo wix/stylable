@@ -1,6 +1,9 @@
 import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
 import * as asserters from '../../test-kit/completions-asserters';
-import { Completion, rulesetDirectives } from '@stylable/language-service/dist/lib/completion-types';
+import {
+    Completion,
+    rulesetDirectives,
+} from '@stylable/language-service/dist/lib/completion-types';
 import { expect } from 'chai';
 
 describe('completion inside @st-scope', () => {

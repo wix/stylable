@@ -1240,9 +1240,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes[0] as postcss.Rule).nodes[1].toString()).to.equal(
                 'animation-name: imported__anim1'
             );
-            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
-                '.imported__anim1'
-            );
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.imported__anim1');
         });
 
         it('not scope rules that are child of keyframe atRule', () => {

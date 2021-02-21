@@ -5,7 +5,7 @@ module.exports.webpackPlugin = function (config) {
         filename: 'test.css',
         optimize: {
             shortNamespaces: true,
-            minify: true
-        }
+            minify: true,
+        },
     };
 };

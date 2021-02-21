@@ -1,4 +1,7 @@
-import { createRange, ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
+import {
+    createRange,
+    ProviderRange,
+} from '@stylable/language-service/dist/lib/completion-providers';
 import type { Completion } from '@stylable/language-service/dist/lib/completion-types';
 import * as asserters from '../../test-kit/completions-asserters';
 
