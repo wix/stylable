@@ -1,4 +1,4 @@
-import { contractTest } from '@stylable/dom-test-kit/test/contract-test';
+import { contractTest } from '@stylable/dom-test-kit/dist/test/contract-test';
 import { ElementRemoteApi, StylableUnidriverUtil } from '@stylable/uni-driver';
 
 function wrapWithMiniUni(el: HTMLElement): ElementRemoteApi {

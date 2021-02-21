@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOMServer = require('react-dom/server');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { HTMLSnapshotPlugin } = require('@stylable/webpack-extensions');
 
 /** @type {import('webpack').Configuration} */

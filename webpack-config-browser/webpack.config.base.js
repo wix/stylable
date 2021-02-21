@@ -14,19 +14,14 @@ module.exports.baseConfig = () => {
                 fs: false,
                 os: false,
             },
-            extensions: ['.ts', '.tsx', '.js', '.json'],
         },
         module: {
             rules: [
                 {
-                    test: /\.tsx?$/,
-                    loader: '@ts-tools/webpack-loader',
-                },
-                {
                     test: /\.js$/,
                     enforce: 'pre',
                     loader: 'source-map-loader',
-                  },
+                },
             ],
         },
         plugins: [

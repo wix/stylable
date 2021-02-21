@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Program",
       "program": "",
-      "args": ["-r", "@ts-tools/node/r", "${file}"]
+      "args": ["${file}"]
     },
     {
       "type": "node",

@@ -8,6 +8,7 @@
     { "path": "../../e2e-test-kit/src" },
     { "path": "../src" },
     { "path": "../../module-utils/src" },
+    { "path": "../../module-utils/test" },
     { "path": "../../node/src" }
   ]
 }

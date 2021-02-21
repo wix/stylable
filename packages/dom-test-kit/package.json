@@ -4,7 +4,7 @@
   "description": "Stylable DOM testing utilities",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"./test/**/*.spec.ts\"",
+    "test": "mocha \"./dist/test/**/*.spec.js\"",
     "start": "webpack serve"
   },
   "dependencies": {

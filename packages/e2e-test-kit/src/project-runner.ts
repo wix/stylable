@@ -158,13 +158,7 @@ export class ProjectRunner {
         return new Promise<void>((res) => {
             const child = spawn(
                 'node',
-                [
-                    '-r',
-                    '@ts-tools/node/r',
-                    './isolated-server',
-                    this.outputDir,
-                    this.port.toString(),
-                ],
+                [require.resolve('./isolated-server'), this.outputDir, this.port.toString()],
                 {
                     cwd: __dirname,
                     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],

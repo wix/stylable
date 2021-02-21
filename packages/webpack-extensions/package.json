@@ -4,7 +4,7 @@
   "description": "Experimental Stylable webpack plugins",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000"
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
     "webpack": "^5.20.0"

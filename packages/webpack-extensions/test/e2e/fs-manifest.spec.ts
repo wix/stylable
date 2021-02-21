@@ -1,14 +1,19 @@
 import { readFileSync } from 'fs';
 import { EOL } from 'os';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import { expect } from 'chai';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { ComponentsMetadata, hashContent } from '@stylable/webpack-extensions';
 
-describe(`(${__dirname})`, () => {
+const project = 'manifest-plugin';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-extensions/test/e2e/projects/${project}/webpack.config`)
+);
+
+describe(`${project} - fs-manifest`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: __dirname,
+            projectDir,
             launchOptions: {
                 // headless: false
             },

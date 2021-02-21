@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:unit",
-    "test:unit": "mocha test/lib/**/*.spec.ts test/lib/*.spec.ts"
+    "test:unit": "mocha \"dist/test/lib/**/*.spec.js\""
   },
   "peerDependencies": {
     "typescript": ">=3.6"
