@@ -1,6 +1,6 @@
 import { DiagnosticsMode, Stylable, StylableExports } from '@stylable/core';
 import { Chunk, Compilation, Compiler, Dependency } from 'webpack';
-import type { LoaderContext } from '@stylable/webpack-plugin';
+import { LoaderContext } from './webpack-loader-types';
 
 export interface StylableBuildMeta {
     css: string;
