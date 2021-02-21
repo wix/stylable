@@ -793,10 +793,7 @@ export class StylableProcessor {
             context: this.dirContext,
             keyframes: {},
         };
-        const namedMap: Record<string, string> = {};
-        const keyframesMap: Record<string, string> = {};
-        
-        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']')[0];
+        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']', true)[0];
 
         if (imports && imports.star) {
             this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
@@ -804,19 +801,23 @@ export class StylableProcessor {
             importObj.defaultExport = imports.defaultName || '';
             setImportObjectFrom(imports.from || '', this.dirContext, importObj);
 
+            if (imports.tagged?.keyframes) {
+                // importObj.keyframes = imports.tagged?.keyframes;
+                for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
+                    importObj.keyframes[impAsName] = impName;
+                }
+            }
             if (imports.named) {
                 for (const [impName, impAsName] of Object.entries(imports.named)) {
-                    if (impAsName) {
-                        
-                    } else {
-
-                    }
+                    importObj.named[impAsName] = impName;
                 }
-                importObj.named = imports.named || {};
             }
 
             if (imports.errors.length) {
-                this.diagnostics.error(atRule, processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors));
+                this.diagnostics.error(
+                    atRule,
+                    processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors)
+                );
             } else if (!imports.from?.trim()) {
                 this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
             }

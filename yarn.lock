@@ -9229,10 +9229,10 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-toky@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/toky/-/toky-0.0.6.tgz#9dcef8745ac5b0709318cb0b56be8db1391f5cbe"
-  integrity sha512-42N7AuOdy1qnVx8inD73NofMehUP8gRK1m9dWv1QqKSYvCssEqadDT4HfQzDRFOFJ0/JXhNBtUq/qt93T7+q6g==
+toky@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/toky/-/toky-0.1.0.tgz#28d6473fd3145bb4afacfd1da07b93ab51cb94f4"
+  integrity sha512-+EudMPGOVW/U7w76T3UQ66cBvWnsMmL0+ci1qRe6epVxN070t2YnKwP/vs7YQP9rEVkah83IzyFRw05fcz3JaQ==
 
 tough-cookie@^2.3.3, tough-cookie@~2.5.0:
   version "2.5.0"

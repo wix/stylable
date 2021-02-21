@@ -66,7 +66,10 @@ describe('Stylable @st-import', () => {
             processorWarnings.INVALID_ST_IMPORT_FORMAT(['invalid missing source'])
         );
         expect(result.diagnostics.reports[1].message).to.eql(
-            processorWarnings.INVALID_ST_IMPORT_FORMAT(['invalid missing from', 'invalid missing source'])
+            processorWarnings.INVALID_ST_IMPORT_FORMAT([
+                'invalid missing from',
+                'invalid missing source',
+            ])
         );
     });
 
@@ -154,19 +157,20 @@ describe('Stylable @st-import', () => {
     it('collect @st-import with keyframes', () => {
         const result = processSource(
             `
-            @st-import [blah, keyframes(blah)] from "./some/external/path";
+            @st-import [slide, keyframes(slide as slide1)] from "./some/external/path";
         `,
             { from: 'path/to/style.css' }
         );
 
-        expect(result.mappedSymbols['blah']).to.include({
+        expect(result.mappedSymbols.slide).to.include({
             _kind: 'import',
             type: 'named',
+            name: 'slide',
         });
 
-        expect(result.mappedKeyframes['blah']).to.include({
-            _kind: 'import',
-            type: 'named',
+        expect(result.mappedKeyframes.slide1).to.include({
+            _kind: 'keyframes',
+            name: 'slide',
         });
     });
 });
