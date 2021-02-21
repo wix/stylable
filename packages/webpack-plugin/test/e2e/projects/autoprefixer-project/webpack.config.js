@@ -11,11 +11,16 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            transformHooks: {
-                postProcessor: (stylableResult) => {
-                    autoprefixProcessor.process(stylableResult.meta.outputAst).sync();
-                    return stylableResult;
-                },
+            stylableConfig(config) {
+                return {
+                    ...config,
+                    hooks: {
+                        postProcessor: (stylableResult) => {
+                            autoprefixProcessor.process(stylableResult.meta.outputAst).sync();
+                            return stylableResult;
+                        },
+                    },
+                };
             },
         }),
         new HtmlWebpackPlugin(),

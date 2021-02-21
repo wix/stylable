@@ -5,7 +5,7 @@ import { Configuration } from 'webpack';
 const config: Configuration = {
     mode: 'development',
     context: __dirname,
-    devtool: 'source-map',
+    devtool: false,
     entry: './index.ts',
     output: {
         library: 'metadata',

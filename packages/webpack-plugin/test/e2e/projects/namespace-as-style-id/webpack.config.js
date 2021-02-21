@@ -7,9 +7,7 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            generate: {
-                runtimeStylesheetId: 'namespace',
-            },
+            runtimeStylesheetId: 'namespace',
         }),
         new HtmlWebpackPlugin(),
     ],

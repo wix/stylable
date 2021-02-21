@@ -20,7 +20,9 @@ describe(`(${project})`, () => {
     );
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeCSSContent: true,
+        });
 
         expect(styleElements[0]).to.include({
             id: './src/index.st.css',
@@ -43,7 +45,9 @@ describe(`(${project})`, () => {
         );
         await recompile;
         await page.reload();
-        const styleElements2 = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
+        const styleElements2 = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeCSSContent: true,
+        });
         expect(styleElements2[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
             /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/
         );

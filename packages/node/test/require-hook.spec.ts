@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { readdirSync } from 'fs';
-import hash from 'murmurhash';
+import { murmurhash3_32_gc } from '@stylable/core';
 import { join } from 'path';
 import { attachHook } from '@stylable/node';
 
@@ -46,7 +46,7 @@ describe('require hook', () => {
         const relativePathFromRoot = 'test.st.css';
         const { name, version } = require('./fixtures/package.json');
         const expectedNamespace =
-            fileName + hash.v3(name + '@' + version + '/' + relativePathFromRoot);
+            fileName + murmurhash3_32_gc(name + '@' + version + '/' + relativePathFromRoot);
         const m = require('./fixtures/test.st.css');
         expect(m.namespace).to.equal(expectedNamespace);
     });

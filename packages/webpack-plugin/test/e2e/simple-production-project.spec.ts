@@ -17,8 +17,8 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('renders css', async () => {
-        const source = await projectRunner.getBuildAsset('main.bundle.css');
+    it('renders css', () => {
+        const source = projectRunner.getBuildAsset('stylable.css');
         expect(source).to.equal('.s0{background-color:red}');
     });
 

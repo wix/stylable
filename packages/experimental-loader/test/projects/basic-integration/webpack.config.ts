@@ -8,19 +8,13 @@ export default {
     entry: './index.js',
     context: __dirname,
     devtool: false,
+    output: { publicPath: '' }, // MiniCssExtractPlugin does not support "auto" public path
     plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin()],
     module: {
         rules: [
             {
-                test: /\.(png|jpg|gif)$/i,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            limit: 8192,
-                        },
-                    },
-                ],
+                test: /\.(svg|png|jpg|jpeg|gif|ttf)/,
+                type: 'asset/resource',
             },
             {
                 test: /\.st\.css$/i,

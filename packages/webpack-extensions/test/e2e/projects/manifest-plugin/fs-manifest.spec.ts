@@ -48,7 +48,7 @@ describe(`(${__dirname})`, () => {
             },
             fs: {
                 [`/manifest-plugin-test/index.st.css`]: {
-                    content: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;} Button{}${EOL}`,
+                    content: `:import{-st-from: "/${compHash}.st.css";-st-default: Button;} .root Button{}${EOL}`,
                     metadata: {
                         namespace: 'manifest-plugin-test',
                     },

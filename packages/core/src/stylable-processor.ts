@@ -1,4 +1,4 @@
-import hash from 'murmurhash';
+import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
@@ -869,7 +869,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
 }
 
 export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source); // .toString(36);
+    return namespace + murmurhash3_32_gc(source); // .toString(36);
 }
 
 export function process(

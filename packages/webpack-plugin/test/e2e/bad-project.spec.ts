@@ -23,12 +23,12 @@ describe(`(${project})`, () => {
         // const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
 
         const expected = [
-            /cannot resolve imported symbol "unknown" from stylesheet "\.\/comp\.st\.css"/,
             /cannot extend unknown symbol "unknown"/,
+            /cannot resolve imported symbol "unknown" from stylesheet "\.\/comp\.st\.css"/,
             /unknown var "xxx"/,
         ];
         expect(warnings.length).to.equal(3);
-        warnings.forEach((warning: string, i: number) => {
+        warnings.forEach((warning, i: number) => {
             expect(warning).to.match(expected[i]);
         });
     });

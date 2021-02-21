@@ -9,11 +9,19 @@ const resolverContext = {};
 
 export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any): ModuleResolver {
     const eResolver = ResolverFactory.createResolver({
-        useSyncFileSystemCalls: true,
-        fileSystem,
         ...resolveOptions,
+        useSyncFileSystemCalls: true,
+        cache: false,
+        fileSystem,
     });
 
-    return (directoryPath, request) =>
-        eResolver.resolveSync(resolverContext, directoryPath, request);
+    return (directoryPath, request): string => {
+        const res = eResolver.resolveSync(resolverContext, directoryPath, request);
+        if (res === false) {
+            throw new Error(
+                `Stylable does not support browser field 'false' values. ${request} resolved to 'false' from ${directoryPath}`
+            );
+        }
+        return res;
+    };
 }

@@ -19,7 +19,7 @@ describe(`(${project})`, () => {
     );
 
     it('should not emit dynamic chunks css', () => {
-        const source = projectRunner.getBuildAsset('main.bundle.css');
+        const source = projectRunner.getBuildAsset('stylable.css');
         const cssAssets = Object.keys(projectRunner.getBuildAssets()).filter((assetsName) =>
             assetsName.endsWith('css')
         );

@@ -27,8 +27,5 @@ describe(`(${project})`, () => {
         });
         expect(text.index).to.match(/\/\* CONTENT \*\//);
         expect(text.css).to.equal('data:text/css;charset=utf-8;base64,LyogQ09OVEVOVCAqLw==');
-        expect(projectRunner.getBuildWarningMessages()[0]).to.match(
-            /Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors\.\n".*?" in ".*?"/
-        );
     });
 });

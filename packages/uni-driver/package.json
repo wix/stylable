@@ -1,6 +1,6 @@
 {
   "name": "@stylable/uni-driver",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "Stylable UniDriver testing utilities",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
@@ -8,6 +8,7 @@
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
     "test": "mocha \"./test/**/*.spec.ts\"",
+    "start": "webpack serve",
     "prepack": "yarn build"
   },
   "files": [
@@ -15,7 +16,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

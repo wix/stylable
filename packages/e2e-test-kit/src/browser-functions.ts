@@ -6,13 +6,19 @@ export function filterAssetResponses(responses: Response[], assetNames: string[]
         .filter(Boolean) as Response[];
 }
 
-function getStyleElementsMetadata(includeCSSContent: boolean | void) {
+function getStyleElementsMetadata({
+    includeRuntimeId,
+    includeCSSContent,
+}: void | { includeCSSContent?: boolean; includeRuntimeId?: boolean } = {}) {
     const styleElements = Array.from(document.head.getElementsByTagName('style'));
     return styleElements.map((styleEl) => {
-        const data: { id?: string; depth?: string; css?: string } = {
+        const data: { id?: string; depth?: string; css?: string; runtime?: string } = {
             id: styleEl.getAttribute('st-id')!,
             depth: styleEl.getAttribute('st-depth')!,
         };
+        if (includeRuntimeId) {
+            data.runtime = styleEl.getAttribute('st-runtime')!;
+        }
         if (includeCSSContent) {
             data.css = styleEl.textContent!.replace(/\r?\n/g, '\n');
         }

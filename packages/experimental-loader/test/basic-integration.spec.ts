@@ -46,7 +46,7 @@ describe(`(${project})`, () => {
             hello: {
                 color: 'rgb(255, 0, 0)',
                 height: '500px',
-                imageAsset: 'c1581c599fef18f7460cd972e77273fd.png',
+                imageAsset: 'c1581c599fef18f7460c.png',
             },
             world: {
                 color: 'rgb(0, 0, 255)',

@@ -1,7 +1,7 @@
 {
   "name": "@stylable/webpack-plugin",
-  "version": "3.11.14",
-  "description": "Webpack (4.x) plugin for Stylable modules",
+  "description": "Webpack (5.x) plugin for Stylable modules",
+  "version": "4.0.0-alpha.10",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
@@ -12,13 +12,13 @@
   },
   "peerDependencies": {
     "@stylable/core": ">=3",
-    "webpack": "^4.0.0"
+    "webpack": "^5.20.0"
   },
   "dependencies": {
-    "@stylable/module-utils": "^3.11.14",
-    "@stylable/node": "^3.11.14",
-    "@stylable/optimizer": "^3.11.14",
-    "@stylable/runtime": "^3.11.14",
+    "@stylable/module-utils": "^4.0.0-alpha.10",
+    "@stylable/node": "^4.0.0-alpha.10",
+    "@stylable/optimizer": "^4.0.0-alpha.10",
+    "decache": "^4.6.0",
     "find-config": "^1.0.0",
     "webpack-sources": "^2.2.0"
   },
@@ -27,7 +27,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"
