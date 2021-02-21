@@ -4,7 +4,7 @@ import { join } from 'path';
 
 const project = 'mini-css-extract';
 
-describe(`(${project})`, () => {
+describe.skip(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir: join(__dirname, 'projects', project),
