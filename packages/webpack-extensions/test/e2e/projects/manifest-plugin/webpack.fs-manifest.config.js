@@ -1,8 +1,8 @@
-import { Configuration } from 'webpack';
-import { stylableLoaders } from '@stylable/experimental-loader';
-import { StylableManifestPlugin } from '../../../../src/stylable-manifest-plugin';
+const { stylableLoaders } = require('@stylable/experimental-loader');
+const { StylableManifestPlugin } = require('@stylable/webpack-extensions');
 
-const config: Configuration = {
+/** @type import('webpack').Configuration */
+module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
@@ -32,5 +32,3 @@ const config: Configuration = {
         ],
     },
 };
-
-export default config;

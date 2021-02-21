@@ -1,9 +1,10 @@
-import { basename } from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { StylableMetadataPlugin } from '@stylable/webpack-extensions';
-import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
+const { basename } = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { StylableMetadataPlugin } = require('@stylable/webpack-extensions');
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 
-export default {
+/** @type import('webpack').Configuration */
+module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
@@ -19,9 +20,7 @@ export default {
             renderSnapshot(_exp, res) {
                 return `<snapshot>${basename(res.resource)}</snapshot>`;
             },
-            normalizeModulePath(resource) {
-                return resource;
-            },
+            mode: 'amd:static',
         }),
         new HtmlWebpackPlugin(),
     ],

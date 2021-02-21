@@ -1,6 +1,7 @@
-import { stylableLoaders } from '../../../src';
+const { stylableLoaders } = require('@stylable/experimental-loader');
 
-export default {
+/** @type import('webpack').Configuration */
+module.exports = {
     mode: 'development',
     entry: './index.js',
     context: __dirname,

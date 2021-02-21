@@ -1,8 +1,8 @@
-import { StylableWebpackPlugin } from '@stylable/webpack-plugin';
-import { metadataLoaderLocation } from '@stylable/webpack-extensions';
-import { Configuration } from 'webpack';
+const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
+const { metadataLoaderLocation } = require('@stylable/webpack-extensions');
 
-const config: Configuration = {
+/** @type import('webpack').Configuration */
+module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: false,
@@ -28,5 +28,3 @@ const config: Configuration = {
         ],
     },
 };
-
-export default config;
