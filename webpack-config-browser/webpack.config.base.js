@@ -1,7 +1,7 @@
 const { ProvidePlugin } = require('webpack');
 
 module.exports.baseConfig = () => {
-    /** @type import('webpack').Compiler */
+    /** @type {import('webpack').Configuration} */
     const base = {
         mode: 'development',
         resolve: {

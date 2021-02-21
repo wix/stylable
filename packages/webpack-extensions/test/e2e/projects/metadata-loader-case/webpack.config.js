@@ -1,7 +1,7 @@
 const { StylableWebpackPlugin } = require('@stylable/webpack-plugin');
 const { metadataLoaderLocation } = require('@stylable/webpack-extensions');
 
-/** @type import('webpack').Configuration */
+/** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',
     context: __dirname,

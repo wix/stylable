@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { noCollisionNamespace } = require('@stylable/core');
 const { stylableLoaders } = require('@stylable/experimental-loader');
 
-/** @type import('webpack').Configuration */
+/** @type {import('webpack').Configuration} */
 module.exports = {
     mode: 'development',
     entry: './app.js',
