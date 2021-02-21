@@ -3,7 +3,7 @@ import ts from 'typescript';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
-import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
+import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
     CSSResolve,
@@ -21,7 +21,7 @@ import {
     valueMapping,
     JSResolve,
 } from '@stylable/core';
-import {
+import type {
     Location,
     ParameterInformation,
     Position,
@@ -53,14 +53,14 @@ import {
     ValueCompletionProvider,
     ValueDirectiveProvider,
 } from './completion-providers';
-import { Completion } from './completion-types';
+import type { Completion } from './completion-types';
 import {
     createStateTypeSignature,
     createStateValidatorSignature,
     resolveStateParams,
     resolveStateTypeOrValidator,
 } from './feature/pseudo-class';
-import { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types';
 import { isInNode, isRoot, isSelector, pathFromPosition } from './utils/postcss-ast-utils';
 import {
     parseSelector,

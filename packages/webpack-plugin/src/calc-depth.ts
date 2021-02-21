@@ -1,5 +1,5 @@
 import { join, parse } from 'path';
-import { Module, ModuleGraph, NormalModule } from 'webpack';
+import type { Module, ModuleGraph, NormalModule } from 'webpack';
 import { isStylableModule, uniqueFilterMap } from './plugin-utils';
 
 export interface DepthResults {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
 
 describe('Stylable postcss transform (Global)', () => {

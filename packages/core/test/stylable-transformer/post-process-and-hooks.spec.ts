@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { createTransformer } from '@stylable/core-test-kit';
 
 describe('post-process-and-hooks', () => {

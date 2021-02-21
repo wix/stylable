@@ -1,13 +1,13 @@
 import { dirname, relative } from 'path';
 import postcssValueParser from 'postcss-value-parser';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { resolveCustomValues } from './custom-values';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 import { isCssNativeFunction } from './native-reserved-lists';
 import { assureRelativeUrlPrefix } from './stylable-assets';
-import { StylableMeta } from './stylable-processor';
-import { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
-import { replaceValueHook, StylableTransformer } from './stylable-transformer';
+import type { StylableMeta } from './stylable-processor';
+import type { CSSResolve, JSResolve, StylableResolver } from './stylable-resolver';
+import type { replaceValueHook, StylableTransformer } from './stylable-transformer';
 import { isCSSVarProp } from './stylable-utils';
 import {
     getFormatterArgs,
@@ -15,7 +15,7 @@ import {
     strategies,
     valueMapping,
 } from './stylable-value-parsers';
-import { ParsedValue } from './types';
+import type { ParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 export type ValueFormatter = (name: string) => string;

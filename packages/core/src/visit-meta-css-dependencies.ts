@@ -1,6 +1,6 @@
-import { StylableMeta } from './stylable-meta';
-import { Imported } from './stylable-processor';
-import { StylableResolver } from './stylable-resolver';
+import type { StylableMeta } from './stylable-meta';
+import type { Imported } from './stylable-processor';
+import type { StylableResolver } from './stylable-resolver';
 
 export function visitMetaCSSDependenciesBFS(
     meta: StylableMeta,

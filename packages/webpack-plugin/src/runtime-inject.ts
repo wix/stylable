@@ -12,7 +12,7 @@ import {
     ChunkGraph,
 } from 'webpack';
 import { getStylableBuildMeta, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
-import {
+import type {
     DependencyTemplates,
     RuntimeTemplate,
     StringSortableSet,

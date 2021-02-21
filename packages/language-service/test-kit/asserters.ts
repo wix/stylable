@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import * as postcss from 'postcss';
-import { ColorInformation } from 'vscode-css-languageservice';
+import type * as postcss from 'postcss';
+import type { ColorInformation } from 'vscode-css-languageservice';
 import {
     Color,
     ColorPresentation,

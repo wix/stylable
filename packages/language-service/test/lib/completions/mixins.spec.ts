@@ -2,7 +2,7 @@ import {
     createRange,
     ProviderRange,
 } from '@stylable/language-service/src/lib/completion-providers';
-import { Completion } from '@stylable/language-service/src/lib/completion-types';
+import type { Completion } from '@stylable/language-service/src/lib/completion-types';
 import * as asserters from '../../../test-kit/completions-asserters';
 
 describe('Mixins', () => {

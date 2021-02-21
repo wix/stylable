@@ -1,5 +1,5 @@
-import { Stylable } from '@stylable/core';
-import { FileSystem } from '@stylable/node';
+import type { Stylable } from '@stylable/core';
+import type { FileSystem } from '@stylable/node';
 import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, join, relative } from 'path';

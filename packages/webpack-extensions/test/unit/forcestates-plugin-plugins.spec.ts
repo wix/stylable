@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { applyStylableForceStateSelectors } from '@stylable/webpack-extensions';
 import { safeParse } from '@stylable/core';
 

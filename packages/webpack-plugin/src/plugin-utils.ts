@@ -1,6 +1,6 @@
 import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
 import { UnusedDependency } from './unused-dependency';
-import {
+import type {
     DependencyTemplates,
     RuntimeTemplate,
     StringSortableSet,
@@ -8,7 +8,7 @@ import {
     WebpackCreateHash,
     WebpackOutputOptions,
 } from './types';
-import { IStylableOptimizer } from '@stylable/core';
+import type { IStylableOptimizer } from '@stylable/core';
 import decache from 'decache';
 
 export function* uniqueFilterMap<T, O = T>(

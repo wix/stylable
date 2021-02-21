@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import nodeEval from 'node-eval';
-import { RuntimeStylesheet } from '@stylable/runtime';
+import type { RuntimeStylesheet } from '@stylable/runtime';
 import { process } from '@stylable/jest';
 
 describe('jest process', () => {

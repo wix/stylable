@@ -1,6 +1,6 @@
 import path from 'path';
 import { promises } from 'fs';
-import { SpawnOptions } from 'child_process';
+import type { SpawnOptions } from 'child_process';
 import validatePackageName from 'validate-npm-package-name';
 import { statSafe, spawnSafe, directoryDeepChildren, executeWithProgress } from './helpers';
 

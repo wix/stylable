@@ -1,4 +1,4 @@
-import { StylableResults } from '@stylable/core';
+import type { StylableResults } from '@stylable/core';
 
 export function generateModuleSource(
     stylableResult: StylableResults,

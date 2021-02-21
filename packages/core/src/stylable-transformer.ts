@@ -4,9 +4,9 @@ import postcssValueParser from 'postcss-value-parser';
 import isVendorPrefixed from 'is-vendor-prefixed';
 import cloneDeep from 'lodash.clonedeep';
 
-import { FileProcessor } from './cached-process-file';
+import type { FileProcessor } from './cached-process-file';
 import { unbox } from './custom-values';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue, processDeclarationValue } from './functions';
 import {
     nativePseudoClasses,
@@ -27,7 +27,7 @@ import {
     traverseNode,
 } from './selector-utils';
 import { appendMixins } from './stylable-mixins';
-import {
+import type {
     ClassSymbol,
     ElementSymbol,
     SDecl,

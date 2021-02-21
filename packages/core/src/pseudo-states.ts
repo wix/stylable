@@ -1,15 +1,15 @@
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 import { evalDeclarationValue } from './functions';
-import { SelectorAstNode } from './selector-utils';
+import type { SelectorAstNode } from './selector-utils';
 import { StateResult, systemValidators } from './state-validators';
-import { SRule, StylableMeta } from './stylable-processor';
-import { StylableResolver } from './stylable-resolver';
+import type { SRule, StylableMeta } from './stylable-processor';
+import type { StylableResolver } from './stylable-resolver';
 import { isValidClassName } from './stylable-utils';
 import { groupValues, listOptions, MappedStates } from './stylable-value-parsers';
 import { valueMapping } from './stylable-value-parsers';
-import { ParsedValue, StateParsedValue } from './types';
+import type { ParsedValue, StateParsedValue } from './types';
 import { stripQuotation } from './utils';
 
 export const stateMiddleDelimiter = '-';

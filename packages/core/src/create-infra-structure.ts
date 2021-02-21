@@ -4,7 +4,7 @@ import { CssParser, safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
 import { createDefaultResolver } from './module-resolver';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;

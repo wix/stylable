@@ -1,4 +1,4 @@
-import { Dependency, sources } from 'webpack';
+import type { Dependency, sources } from 'webpack';
 
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 const ModuleDependency = require('webpack/lib/dependencies/ModuleDependency');
