@@ -201,7 +201,7 @@ export function createDecacheRequire(compiler: Compiler) {
 
 export function createStylableResolverCacheMap(compiler: Compiler): StylableResolverCache {
     const cache: StylableResolverCache = new Map();
-    compiler.hooks.done.tap('decache require', () => {
+    compiler.hooks.done.tap('StylableResolverCache cleanup', () => {
         cache.clear();
     });
     return cache;
