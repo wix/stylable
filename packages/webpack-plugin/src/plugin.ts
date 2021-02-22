@@ -228,7 +228,6 @@ export class StylableWebpackPlugin {
                     fileSystem: getTopLevelInputFilesystem(compiler),
                     mode: compiler.options.mode === 'production' ? 'production' : 'development',
                     resolveOptions: compiler.options.resolve as any,
-                    timedCacheOptions: { useTimer: true, timeout: 1000 },
                     resolveNamespace: packageNamespaceFactory(
                         findConfig,
                         require,
