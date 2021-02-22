@@ -57,7 +57,7 @@ When importing another stylesheet, the default import represents the root of the
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: './button.st.css';
     -st-default: ToggleButton;
@@ -85,7 +85,7 @@ In this
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: './button.st.css';
     -st-named: label, icon, --bgColor;
@@ -110,7 +110,7 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin;
@@ -132,7 +132,7 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin as tooltip;
@@ -156,7 +156,7 @@ Due to this, when importing keyframes from another stylesheet, a special `keyfra
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: keyframes(slideX, slideY);
