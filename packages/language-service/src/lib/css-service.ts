@@ -131,15 +131,12 @@ export class CssService {
                 if (diag.code === 'emptyRules') {
                     return false;
                 }
+                const atRuleName = readDocRange(document, diag.range);
                 if (
                     diag.code === 'unknownAtRules' &&
-                    readDocRange(document, diag.range) === '@custom-selector'
-                ) {
-                    return false;
-                }
-                if (
-                    diag.code === 'unknownAtRules' &&
-                    readDocRange(document, diag.range) === '@st-scope'
+                    (atRuleName === '@custom-selector' ||
+                        atRuleName === '@st-scope' ||
+                        atRuleName === '@st-import')
                 ) {
                     return false;
                 }

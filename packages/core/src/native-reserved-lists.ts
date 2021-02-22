@@ -159,7 +159,7 @@ export const nativeFunctionsDic = {
     skewX: true,
     skewY: true,
     steps: true,
-    styleset: true, 
+    styleset: true,
     stylistic: true,
     swash: true,
     symbols: true,

@@ -1,18 +1,8 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
-import { expect } from 'chai';
 import { StylableLanguageService } from '@stylable/language-service';
-
-function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
-    const fs = createMemoryFs(files);
-
-    const stylableLSP = new StylableLanguageService({
-        fs,
-        stylable: new Stylable('/', fs, require),
-    });
-
-    return stylableLSP.diagnose(filePath);
-}
+import { expect } from 'chai';
+import { createDiagnostics } from '../../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
     it('should create basic diagnostics', () => {

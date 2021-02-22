@@ -26,7 +26,8 @@
     "postcss-nested": "^5.0.3",
     "postcss-safe-parser": "^5.0.2",
     "postcss-selector-matches": "^4.0.0",
-    "postcss-value-parser": "^4.1.0"
+    "postcss-value-parser": "^4.1.0",
+    "toky": "^0.1.0"
   },
   "files": [
     "cjs",

@@ -36,6 +36,7 @@ export const topLevelDirectives = {
     vars: ':vars' as const,
     import: ':import' as const,
     stScope: '@st-scope' as const,
+    stImport: '@st-import' as const,
 };
 
 // syntactic
@@ -67,9 +68,6 @@ export function importInternalDirective(type: keyof typeof importDirectives, rng
                 rng
             );
     }
-
-    // Remove this and other throws in this file after upgrading to a TS version with a fix
-    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, rng: ProviderRange) {
@@ -101,8 +99,6 @@ export function rulesetInternalDirective(type: keyof typeof rulesetDirectives, r
                 rng
             );
     }
-
-    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: ProviderRange) {
@@ -112,7 +108,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.import,
                 'Import an external library',
                 'a',
-                new Snippet(':import {\n\t-st-from: "$1";\n}$0'),
+                new Snippet(':import {\n\t-st-from: "$1";\n}'),
                 rng
             );
         case topLevelDirectives.namespace:
@@ -120,7 +116,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.namespace,
                 'Declare a namespace for the file',
                 'a',
-                new Snippet('@namespace "$1";\n$0'),
+                new Snippet('@namespace "$1";\n'),
                 rng
             );
         case topLevelDirectives.customSelector:
@@ -138,7 +134,7 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.vars,
                 'Declare variables',
                 'a',
-                new Snippet(':vars {\n\t$1\n}$0'),
+                new Snippet(':vars {\n\t$1\n}'),
                 rng
             );
         case topLevelDirectives.stScope:
@@ -146,12 +142,18 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 topLevelDirectives.stScope,
                 'Define an @st-scope',
                 'a',
-                new Snippet('@st-scope $1 {\n\t$2\n}$0'),
+                new Snippet('@st-scope $1 {\n\t$2\n}'),
+                rng
+            );
+        case topLevelDirectives.stImport:
+            return new Completion(
+                topLevelDirectives.stImport,
+                'Define an @st-import',
+                'a',
+                new Snippet('@st-import $2 from "$1";'),
                 rng
             );
     }
-
-    throw new Error("Shouldn't reach here, typescript bug");
 }
 
 export function valueDirective(rng: ProviderRange) {
@@ -159,7 +161,7 @@ export function valueDirective(rng: ProviderRange) {
         'value()',
         'Use the value of a variable',
         'a',
-        new Snippet(' value($1)$0'),
+        new Snippet(' value($1)'),
         rng
     );
 }
@@ -169,7 +171,7 @@ export function globalCompletion(rng: ProviderRange) {
         ':global()',
         'Target a global selector',
         'a',
-        new Snippet(':global($0)'),
+        new Snippet(':global($1)'),
         rng
     );
 }
@@ -213,7 +215,7 @@ export function codeMixinCompletion(symbolName: string, rng: ProviderRange, from
         symbolName,
         'from: ' + from,
         'a',
-        new Snippet(symbolName + '($0)'),
+        new Snippet(symbolName + '($1)'),
         rng,
         false,
         true
@@ -225,7 +227,7 @@ export function formatterCompletion(symbolName: string, rng: ProviderRange, from
         symbolName,
         'from: ' + from,
         'a',
-        new Snippet(symbolName + '($0)'),
+        new Snippet(symbolName + '($1)'),
         rng,
         false,
         true
@@ -241,7 +243,7 @@ export function stateTypeCompletion(type: string, from: string, rng: ProviderRan
         `${type}()`,
         `from: ${from}`,
         'a',
-        new Snippet(`${type}($0)`),
+        new Snippet(`${type}($1)`),
         rng,
         false
     );
@@ -258,7 +260,7 @@ export function stateCompletion(
         ':' + stateName + (hasParam ? '()' : ''),
         'from: ' + from,
         'a',
-        new Snippet(':' + stateName + (hasParam ? '($1)$0' : '')),
+        new Snippet(':' + stateName + (hasParam ? '($1)' : '')),
         rng,
         type === 'enum',
         hasParam

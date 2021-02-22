@@ -3,7 +3,7 @@ import { Color } from 'vscode-languageserver-protocol';
 import { createRange } from '@stylable/language-service/src/lib/completion-providers';
 import { getDocColorPresentation, getDocumentColors } from '../../test-kit/asserters';
 
-export function createColor(red: number, green: number, blue: number, alpha: number): Color {
+function createColor(red: number, green: number, blue: number, alpha: number): Color {
     return { red, green, blue, alpha } as Color;
 }
 

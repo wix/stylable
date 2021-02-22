@@ -35,7 +35,7 @@ module.exports = {
             serve: 'serve ./dist',
             lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',
-            test: 'npm run typecheck && npm run lint'
+            test: 'npm run typecheck && npm run lint',
         },
     },
 };

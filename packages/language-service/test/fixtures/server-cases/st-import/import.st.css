@@ -1,0 +1,12 @@
+.part {
+    color: red;
+}
+
+.otherPart {
+    color: blue;
+}
+
+:vars {
+    c1: brown;
+    color2: pink;
+}

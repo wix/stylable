@@ -67,7 +67,7 @@ export class StylableMetadataPlugin {
             const resource = this.options.normalizeModulePath
                 ? this.options.normalizeModulePath(module.resource, builder)
                 : module.resource;
-            
+
             builder.addSource(
                 resource,
                 compilation.inputFileSystem.readFileSync(resource).toString(),

@@ -6,7 +6,7 @@ import {
     CSSResolve,
     JSResolve,
 } from '@stylable/core';
-import { Rule, ChildNode } from 'postcss';
+import { Rule, ChildNode, AtRule } from 'postcss';
 import { hashContent } from './hash-content-util';
 
 export function createMetadataForStylesheet(
@@ -83,7 +83,7 @@ export function rewriteImports(
     return sourcesByHash;
 }
 
-function ruleByLocation(ruleA: Rule) {
+function ruleByLocation(ruleA: Rule | AtRule) {
     return (ruleB: ChildNode) => {
         return (
             ruleB.source?.start?.column === ruleA.source?.start?.column &&
