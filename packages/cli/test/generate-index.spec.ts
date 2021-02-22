@@ -112,6 +112,52 @@ describe('build index', () => {
             ].join('\n')
         );
     });
+
+    it('should create index file using a custom generator with named exports generation and @namespace', () => {
+        const fs = createFS({
+            '/comp-A.st.css': `
+                :vars {
+                    color1: red;
+                }
+                .a{
+                    --color2: red;
+                }
+                @keyframes X {}
+            `,
+            '/b/1-some-comp-B-.st.css': `
+               .b{}
+            `,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            indexFile: 'index.st.css',
+            rootDir: resolve('/'),
+            log,
+            generatorPath: require.resolve('./fixtures/named-exports-generator'),
+        });
+
+        const res = fs.readFileSync(resolve('/index.st.css')).toString();
+
+        expect(res.trim()).to.equal(
+            [
+                '@namespace "INDEX";',
+                ':import {-st-from: "./comp-A.st.css";-st-default:CompA;-st-named: a as CompA__a, color1 as CompA__color1, --color2 as --CompA__color2, keyframes(X as CompA__X);}',
+                '.root CompA{}',
+                '.root .CompA__a{}',
+                ':import {-st-from: "./b/1-some-comp-B-.st.css";-st-default:SomeCompB;-st-named: b as SomeCompB__b;}',
+                '.root SomeCompB{}',
+                '.root .SomeCompB__b{}',
+            ].join('\n')
+        );
+    });
+
     it('should create non-existing folders in path to the generated indexFile', () => {
         const fs = createFS({
             '/comp.st.css': `
@@ -161,9 +207,9 @@ describe('build index', () => {
             });
         } catch (error) {
             expect(error.message).to.equal(
-                `Name Collision Error: ${resolve('/comp.st.css')} and ${resolve(
+                `Name Collision Error:\nexport symbol Comp from ${resolve(
                     '/a/comp.st.css'
-                )} has the same filename`
+                )} is already used by ${resolve('/comp.st.css')}`
             );
         }
     });

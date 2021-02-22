@@ -1,13 +1,16 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'raw-project';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             launchOptions: {
                 // headless: false
             },
@@ -27,8 +30,5 @@ describe(`(${project})`, () => {
         });
         expect(text.index).to.match(/\/\* CONTENT \*\//);
         expect(text.css).to.equal('data:text/css;charset=utf-8;base64,LyogQ09OVEVOVCAqLw==');
-        expect(projectRunner.getBuildWarningMessages()[0]).to.match(
-            /Loading a Stylable stylesheet via webpack loaders is not supported and may cause runtime errors\.\n".*?" in ".*?"/
-        );
     });
 });

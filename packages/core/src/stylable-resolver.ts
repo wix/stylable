@@ -1,8 +1,8 @@
-import { FileProcessor } from './cached-process-file';
-import { Diagnostics } from './diagnostics';
-import { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
-import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
-import { StylableTransformer } from './stylable-transformer';
+import type { FileProcessor } from './cached-process-file';
+import type { Diagnostics } from './diagnostics';
+import type { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
+import type { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 
 export const resolverWarnings = {
@@ -353,8 +353,8 @@ export class StylableResolver {
                 if (fromDecl) {
                     diagnostics.warn(
                         fromDecl,
-                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.fromRelative),
-                        { word: importObj.fromRelative }
+                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
+                        { word: importObj.request }
                     );
                 }
             } else if (resolvedImport._kind === 'css') {
@@ -371,10 +371,7 @@ export class StylableResolver {
                     if (!resolvedSymbol!.symbol && namedDecl) {
                         diagnostics.warn(
                             namedDecl,
-                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                origName,
-                                importObj.fromRelative
-                            ),
+                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
                             { word: origName }
                         );
                     }

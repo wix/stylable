@@ -30,7 +30,6 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 
 
 ```css
-/* CSS */
 @namespace "Page";
 :import {
     -st-from: './video-player.st.css';
@@ -46,7 +45,7 @@ In this example, you [import](./imports.md) a `VideoPlayer` component into your 
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Page__mainVideo.VideoPlayer__root {}
 .Page__mainVideo.VideoPlayer__root .VideoPlayer__playButton {
     background: green;
@@ -82,7 +81,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .SuperVideoPlayer__root.VideoPlayer__root {}
 .SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__playButton {
     color: gold; 
@@ -105,7 +104,7 @@ The `page.css` stylesheet can then extend `super-video-player.css` and on the `.
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Page__mainPlayer.SuperVideoPlayer__root {}
 .Page__mainPlayer.SuperVideoPlayer__root .VideoPlayer__playButton {
     color: silver;
@@ -123,7 +122,6 @@ You can use CSS classes to override extended pseudo-elements.
 In this example, `root` extends `VideoPlayer` and so any class placed on the `root` overrides the pseudo-element.
 
 ```css
-/* CSS */
 @namespace "SuperVideoPlayer";
 :import {
     -st-from: './video-player.st.css';
@@ -141,7 +139,7 @@ In this example, `root` extends `VideoPlayer` and so any class placed on the `ro
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .SuperVideoPlayer__root.VideoPlayer__root {}
 .SuperVideoPlayer__playButton { color: gold; }
 .SuperVideoPlayer__root.VideoPlayer__root .VideoPlayer__playButton { color: grey; }

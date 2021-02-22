@@ -1,13 +1,16 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'global-runtime';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             launchOptions: {
                 // headless: false
             },
@@ -19,11 +22,14 @@ describe(`(${project})`, () => {
 
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata);
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeRuntimeId: true,
+            includeCSSContent: false,
+        });
 
         expect(styleElements).to.eql([
-            { id: './src/index.st.css', depth: '1' },
-            { id: './src/index2.st.css', depth: '1' },
+            { id: './src/index.st.css', depth: '1', runtime: 'test' },
+            { id: './src/index2.st.css', depth: '1', runtime: 'test' },
         ]);
     });
 
@@ -31,7 +37,6 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const res = await page.evaluate(() => {
             return {
-                runtimes: (window as any).__stylable_renderer_global_counter,
                 index: getComputedStyle(document.querySelector('[data-name="index"]')!)
                     .backgroundColor,
                 index2: getComputedStyle(document.querySelector('[data-name="index2"]')!)
@@ -40,7 +45,6 @@ describe(`(${project})`, () => {
         });
 
         expect(res).to.eql({
-            runtimes: 1,
             index: 'rgb(255, 0, 0)',
             index2: 'rgb(0, 128, 0)',
         });

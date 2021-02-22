@@ -1,34 +1,29 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "Experimental Stylable webpack plugins",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "ts-build ./src --cjs --esm",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
-    "webpack": "^4.0.0"
+    "webpack": "^5.20.0"
   },
   "dependencies": {
-    "@stylable/core": "^3.11.14",
-    "@stylable/node": "^3.11.14",
-    "@stylable/webpack-plugin": "^3.11.14",
+    "@stylable/core": "^4.0.0-alpha.10",
+    "@stylable/node": "^4.0.0-alpha.10",
+    "@stylable/webpack-plugin": "^4.0.0-alpha.10",
     "loader-utils": "^2.0.0",
-    "lodash.clonedeep": "^4.5.0",
-    "webpack-sources": "^2.2.0"
+    "lodash.clonedeep": "^4.5.0"
   },
   "files": [
-    "cjs",
-    "esm",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

@@ -1,33 +1,31 @@
 {
   "name": "@stylable/cli",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "A low-level utility used for working with Stylable projects",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
+  "main": "dist/index.js",
   "bin": {
-    "stc": "./cli.js"
+    "stc": "bin/stc.js"
   },
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 25000",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 25000"
   },
   "dependencies": {
-    "@stylable/core": "^3.11.14",
-    "@stylable/node": "^3.11.14",
-    "@stylable/optimizer": "^3.11.14",
+    "@stylable/core": "^4.0.0-alpha.10",
+    "@stylable/node": "^4.0.0-alpha.10",
+    "@stylable/optimizer": "^4.0.0-alpha.10",
     "lodash.camelcase": "^4.3.0",
     "lodash.upperfirst": "^4.3.1",
     "yargs": "^16.2.0"
   },
   "files": [
-    "cjs",
+    "bin",
+    "dist",
+    "!dist/test",
     "src",
-    "cli.js"
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

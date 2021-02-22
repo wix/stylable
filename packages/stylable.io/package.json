@@ -1,9 +1,9 @@
 {
   "name": "stylable.io",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "The Stylable website https://stylable.io/",
   "private": true,
-  "main": "N/A",
+  "main": "dist/index.js",
   "scripts": {
     "start": "bundle exec jekyll serve",
     "deploy": "bundle install && bundle exec jekyll build && gh-pages -d ./_site"

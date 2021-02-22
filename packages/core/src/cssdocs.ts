@@ -1,5 +1,5 @@
 import { extract, parseWithComments } from 'jest-docblock';
-import { StylableMeta, StylableSymbol } from './stylable-meta';
+import type { StylableMeta, StylableSymbol } from './stylable-meta';
 
 export interface CssDoc {
     description: string;

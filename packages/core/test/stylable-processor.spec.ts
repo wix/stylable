@@ -125,21 +125,21 @@ describe('Stylable postcss process', () => {
 
         expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
-            fromRelative: './some/other/path',
+            request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
-            fromRelative: './some/other/path',
+            request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
-            fromRelative: '../some/global/path',
+            request: '../some/global/path',
             defaultExport: 'name',
             named: {},
         });
@@ -243,7 +243,7 @@ describe('Stylable postcss process', () => {
                     type: 'default',
                     import: {
                         // from: '/path/to/file.css',
-                        fromRelative: './file.css',
+                        request: './file.css',
                         defaultExport: 'Style',
                     },
                 },

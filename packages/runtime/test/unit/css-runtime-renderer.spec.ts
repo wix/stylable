@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { RuntimeRenderer } from '../../src/css-runtime-renderer';
+import { RuntimeRenderer } from '@stylable/runtime';
 
 function assertStyle(node: Element, { $css, key }: { $css: string; key: string }) {
     expect(node.getAttribute('st-id')).to.equal(key);

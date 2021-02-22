@@ -1,13 +1,16 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'simple-production-project';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             launchOptions: {
                 // headless: false
             },
@@ -17,8 +20,8 @@ describe(`(${project})`, () => {
         after
     );
 
-    it('renders css', async () => {
-        const source = await projectRunner.getBuildAsset('main.bundle.css');
+    it('renders css', () => {
+        const source = projectRunner.getBuildAsset('stylable.css');
         expect(source).to.equal('.s0{background-color:red}');
     });
 

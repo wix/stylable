@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/test",
+    "types": ["node", "externals", "mocha"]
+  },
+  "references": [
+    { "path": "../../e2e-test-kit/src" },
+    { "path": "../src" },
+    { "path": "../../webpack-plugin/src" },
+    { "path": "../../experimental-loader/src" },
+    { "path": "../../core/src" },
+    { "path": "../../core-test-kit/src" }
+  ]
+}

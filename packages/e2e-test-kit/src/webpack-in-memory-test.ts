@@ -2,18 +2,12 @@ import { readdirSync, readFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import webpack from 'webpack';
 import nodeEval from 'node-eval';
-import { memoryFS } from './mem-fs';
+import { CustomMemoryFs, memoryFS } from './mem-fs';
 
-const runtimeDir = dirname(require.resolve('@stylable/runtime/cjs'));
-const content = readdirSync(runtimeDir).map((f) => {
-    const fullpath = join(runtimeDir, f);
-    return {
-        content: readFileSync(fullpath, 'utf-8'),
-        fullpath,
-    };
-});
-
-export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: string }) {
+export function createMemoryFileSystemWithFiles(
+    files: { [fullpath: string]: string },
+    includeStylableRuntime = true
+) {
     const memfs = memoryFS();
 
     for (const k in files) {
@@ -22,12 +16,26 @@ export function createMemoryFileSystemWithFiles(files: { [fullpath: string]: str
         memfs.writeFileSync(r, files[k] || '\n');
     }
 
-    for (const entry of content) {
-        memfs.mkdirpSync(dirname(entry.fullpath));
-        memfs.writeFileSync(entry.fullpath, entry.content || '\n');
+    if (includeStylableRuntime) {
+        /* 
+            TODO: load the runtime code explicitly in all test locations and remove this.
+        */
+        addStylableRuntimeToMemFs(memfs);
     }
 
     return memfs;
+}
+
+function addStylableRuntimeToMemFs(memfs: CustomMemoryFs) {
+    const runtimeDir = dirname(require.resolve('@stylable/runtime'));
+    for (const item of readdirSync(runtimeDir, { withFileTypes: true })) {
+        if (item.isDirectory()) {
+            continue;
+        }
+        const filePath = join(runtimeDir, item.name);
+        memfs.mkdirpSync(dirname(filePath));
+        memfs.writeFileSync(filePath, readFileSync(filePath, 'utf8'));
+    }
 }
 
 export function webpackTest({ files, config }: any) {
@@ -36,8 +44,9 @@ export function webpackTest({ files, config }: any) {
 
     config.plugins.unshift({
         apply(compiler: webpack.Compiler) {
-            compiler.inputFileSystem = memfs;
-            compiler.outputFileSystem = memfs;
+            // TODO: resolve type issue
+            compiler.inputFileSystem = memfs as any;
+            compiler.outputFileSystem = memfs as any;
         },
     });
 

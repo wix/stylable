@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { createRange } from '@stylable/language-service/src/lib/completion-providers';
-import { getFormattingEdits } from '../../test-kit/asserters';
+import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
+import { getFormattingEdits } from '../test-kit/asserters';
 
 describe('Formatting', () => {
     it('should format an entire stylesheet with extra spaces', () => {

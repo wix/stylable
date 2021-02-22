@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import nodeEval from 'node-eval';
-import { RuntimeStylesheet } from '@stylable/runtime';
+import type { RuntimeStylesheet } from '@stylable/runtime';
 import { process } from '@stylable/jest';
 
 describe('jest process', () => {
     it('should process stylable sources', () => {
-        const filename = require.resolve('./fixtures/test.st.css');
+        const filename = require.resolve('@stylable/jest/test/fixtures/test.st.css');
         const content = readFileSync(filename, 'utf8');
         const module = nodeEval(process(content, filename), filename) as RuntimeStylesheet;
 

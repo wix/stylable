@@ -3,11 +3,11 @@ import { join, relative } from 'path';
 import { spawnSync } from 'child_process';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { evalStylableModule } from '@stylable/module-utils/test/test-kit';
+import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
 
 function runCli(cliArgs: string[] = []) {
-    const cliPath = require.resolve('@stylable/cli/cli.js');
+    const cliPath = require.resolve('@stylable/cli/bin/stc.js');
     return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
 }
 
@@ -42,6 +42,7 @@ function populateDirectorySync(rootDir: string, files: Files) {
 
 describe('Stylable Cli', () => {
     let tempDir: ITempDirectory;
+    const testNsrPath = require.resolve('./fixtures/test-ns-resolver');
 
     beforeEach(async () => {
         tempDir = await createTempDirectory();
@@ -56,8 +57,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
-        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
+        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
 
         expect(stderr).equal('');
         expect(stdout).equal('');
@@ -77,8 +77,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
-        runCli(['--rootDir', tempDir.path, '--nsr', nsr, '--outDir', './dist']);
+        runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath, '--outDir', './dist']);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(Object.keys(dirContent)).to.eql([
@@ -111,12 +110,11 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
         const { stderr, stdout } = runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
-            nsr,
+            testNsrPath,
             '--outDir',
             './dist',
             '--stcss',
@@ -191,12 +189,12 @@ describe('Stylable Cli', () => {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`,
         });
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+
         const { stderr, stdout } = runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
-            nsr,
+            testNsrPath,
             '--outDir',
             './dist',
             '--manifest',
@@ -217,12 +215,12 @@ describe('Stylable Cli', () => {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `.root{color:red}`,
         });
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
+
         const { stderr, stdout } = runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
-            nsr,
+            testNsrPath,
             '--outDir',
             './dist',
             '--manifest',
@@ -242,18 +240,52 @@ describe('Stylable Cli', () => {
 
     it('test require hook', () => {
         populateDirectorySync(tempDir.path, {});
-        const nsr = join(__dirname, 'fixtures/test-ns-resolver.js');
-        const requireHook = join(__dirname, 'fixtures/test-require-hook.js');
+        const requireHook = require.resolve('./fixtures/test-require-hook');
         const { stderr, stdout } = runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
-            nsr,
+            testNsrPath,
             '-r',
             requireHook,
         ]);
 
         expect(stderr).equal('');
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
+    });
+
+    describe('CLI diagnostics', () => {
+        it('should report diagnostics by default and exit the process with error exit code 1', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path]);
+
+            expect(status).to.equal(1);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
+        it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `.root{color:value(xxx)}`,
+            });
+
+            const { stderr, stdout, status } = runCli([
+                '--rootDir',
+                tempDir.path,
+                '--diagnosticsMode=loose',
+            ]);
+
+            expect(status).to.equal(0);
+            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/style\.st\.css/);
+            expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
+            expect(stderr, 'stderr').equal('');
+        });
     });
 });

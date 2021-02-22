@@ -1,5 +1,5 @@
 import { expect, use } from 'chai';
-import { AtRule, Declaration, Rule } from 'postcss';
+import type { AtRule, Declaration, Rule } from 'postcss';
 import {
     expectWarningsFromTransform,
     flatMatch,

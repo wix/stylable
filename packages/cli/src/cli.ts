@@ -119,16 +119,22 @@ const { argv } = yargs
     })
     .option('diagnostics', {
         type: 'boolean',
-        description: 'verbose diagnostics',
-        default: false,
+        description: 'print verbose diagnostics',
+        default: true,
+    })
+    .option('diagnosticsMode', {
+        alias: 'dm',
+        type: 'string',
+        description:
+            'determine the diagnostics mode. if strict process will exit on any exception, loose will attempt to finish the process regardless of exceptions',
+        default: 'strict',
+        choices: ['strict', 'loose'],
     })
     .alias('h', 'help')
     .help()
     .strict();
 
 const log = createLogger('[Stylable]', argv.log);
-
-const diagnostics = createLogger('[Stylable Diagnostics]\n', argv.diagnostics);
 
 const {
     outDir,
@@ -151,6 +157,8 @@ const {
     manifest,
     require: requires,
     useNamespaceReference,
+    diagnosticsMode,
+    diagnostics,
 } = argv;
 
 log('[Arguments]', argv);
@@ -167,10 +175,10 @@ const stylable = Stylable.create({
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
-    resolverCache: new Map()
+    resolverCache: new Map(),
 });
 
-build({
+const { diagnosticsMessages } = build({
     extension: ext,
     fs,
     stylable,
@@ -178,7 +186,6 @@ build({
     srcDir,
     rootDir,
     log,
-    diagnostics,
     indexFile,
     generatorPath,
     moduleFormats: getModuleFormats({ esm, cjs }),
@@ -192,6 +199,15 @@ build({
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
 });
+
+if (diagnosticsMessages.length) {
+    if (diagnostics) {
+        console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
+    }
+    if (diagnosticsMode === 'strict') {
+        process.exitCode = 1;
+    }
+}
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     const formats: Array<'esm' | 'cjs'> = [];

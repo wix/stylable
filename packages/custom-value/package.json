@@ -1,24 +1,22 @@
 {
   "name": "@stylable/custom-value",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "Custom values (variables) for Stylable",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"test/**/*.spec.ts?(x)\" --timeout 20000",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "dependencies": {
-    "@stylable/core": "^3.11.14"
+    "@stylable/core": "^4.0.0-alpha.10"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

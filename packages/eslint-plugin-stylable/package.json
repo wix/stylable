@@ -1,16 +1,13 @@
 {
   "name": "eslint-plugin-stylable",
-  "version": "3.11.14",
+  "version": "4.0.0-alpha.10",
   "description": "eslint plugin for Stylable usages",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"tests/**/*.spec.ts?(x)\" --timeout 5000",
-    "prepack": "yarn build"
+    "test": "mocha \"dist/test/**/*.spec.js\" --timeout 5000"
   },
   "dependencies": {
-    "@stylable/core": "^3.11.14",
+    "@stylable/core": "^4.0.0-alpha.10",
     "@typescript-eslint/experimental-utils": "^4.15.1"
   },
   "devDependencies": {
@@ -25,11 +22,10 @@
     "lint"
   ],
   "files": [
-    "cjs",
-    "index.js",
-    "package.json",
-    "README.md",
-    "LICENSE"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "author": "Wix.com",
   "license": "MIT"

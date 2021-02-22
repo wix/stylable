@@ -1,4 +1,4 @@
-import { Stylable } from '@stylable/core';
+import type { Stylable } from '@stylable/core';
 import { dirname, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
 export function generateManifest(

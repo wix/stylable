@@ -17,7 +17,6 @@ If you wish to use dynamic variables, and to change their values during runtime,
 Use the syntax `:vars` to define variables, and apply them with a `value()`:
 
 ```css
-/* CSS */
 @namespace "Example1";
 :vars {
     color1: red;
@@ -42,7 +41,6 @@ Use the syntax `:vars` to define variables, and apply them with a `value()`:
 Any var defined in a stylesheet is exported as a named export and can be [imported](./imports.md) by other stylesheets.
 
 ```css
-/* CSS */
 @namespace "Example2";
 :import {
     -st-from: "./example1.css"; /* Example1 stylesheet */
@@ -57,7 +55,7 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Example2__root {
     border: 10px solid red; /* color1 */
 }
@@ -75,7 +73,6 @@ Any var defined in a stylesheet is exported as a named export and can be [import
 You can set the value of a variable using another variable.
 
 ```css
-/* CSS */
 @namespace "Example3";
 :import {
     -st-from: "./example1.css"; /* Example1 stylesheet */
@@ -90,7 +87,7 @@ You can set the value of a variable using another variable.
 ```
 
 ```css
-/* CSS output*/
+/* CSS output */
 .Example3__root {
     border: 10px solid red; /* 10px solid {color1} */
 }

@@ -1,5 +1,6 @@
 import unknownLocals from './stylable-es-lint';
-export const stylableEslintPlugin = {
+
+export = {
     rules: {
         'unknown-locals': unknownLocals,
     },

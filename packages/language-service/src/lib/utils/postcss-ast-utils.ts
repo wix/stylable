@@ -1,5 +1,5 @@
-import * as postcss from 'postcss';
-import { ProviderPosition } from '../completion-providers';
+import type * as postcss from 'postcss';
+import type { ProviderPosition } from '../completion-providers';
 
 export function isInNode(
     position: ProviderPosition,

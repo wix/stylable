@@ -1,4 +1,4 @@
-import hash from 'murmurhash';
+import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
@@ -787,7 +787,7 @@ export class StylableProcessor {
         const importObj: Imported = {
             defaultExport: '',
             from: '',
-            fromRelative: '',
+            request: '',
             named: {},
             rule: atRule,
             context: this.dirContext,
@@ -833,7 +833,7 @@ export class StylableProcessor {
         const importObj: Imported = {
             defaultExport: '',
             from: '',
-            fromRelative: '',
+            request: '',
             named: {},
             keyframes: {},
             rule,
@@ -917,10 +917,10 @@ export class StylableProcessor {
 
 function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imported) {
     if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-        importObj.fromRelative = importPath;
+        importObj.request = importPath;
         importObj.from = importPath;
     } else {
-        importObj.fromRelative = importPath;
+        importObj.request = importPath;
         importObj.from =
             path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
                 ? path.posix.resolve(dirPath, importPath)
@@ -946,7 +946,7 @@ export function createEmptyMeta(root: postcss.Root, diagnostics: Diagnostics): S
 }
 
 export function processNamespace(namespace: string, source: string) {
-    return namespace + hash.v3(source); // .toString(36);
+    return namespace + murmurhash3_32_gc(source); // .toString(36);
 }
 
 export function process(

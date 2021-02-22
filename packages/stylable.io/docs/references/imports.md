@@ -52,12 +52,12 @@ When importing another stylesheet, the default import represents the root of the
 
 
 ```css
-/* comp.st.css - new syntax */
+/* comp.st.css - atRule syntax */
 @st-import ToggleButton from './button.st.css';
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: './button.st.css';
     -st-default: ToggleButton;
@@ -80,12 +80,12 @@ Named imports from a stylesheet can be used to bring symbols of different types,
 
 In this 
 ```css
-/* comp.st.css - new syntax */
+/* comp.st.css - atRule syntax */
 @st-import [label, icon, --bgColor] from './button.st.css';
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: './button.st.css';
     -st-named: label, icon, --bgColor;
@@ -105,12 +105,12 @@ The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript
 > When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.
 
 ```css
-/* comp.st.css - new syntax */
+/* comp.st.css - atRule syntax */
 @st-import [gridMixin, tooltipMixin] from './my-mixins';
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin;
@@ -127,12 +127,12 @@ import { gridMixin, tooltipMixin } from "./my-mixins";
 The values `gridMixin` and `tooltipMixin` are imported from the local JavaScript module `my-mixins.js`. The value `gridMixin` is used as is and `tooltipMixin` has been renamed for use in this scoped stylesheet as `tooltip`. These mixins are referred to as `gridMixin` and `tooltip` in this stylesheet.
 
 ```css
-/* comp.st.css - new syntax */
+/* comp.st.css - atRule syntax */
 @st-import [gridMixin, tooltipMixin as tooltip] from './my-mixins';
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: gridMixin, tooltipMixin as tooltip;
@@ -151,12 +151,12 @@ In Stylable, both class names and keyframes undergo namespacing to avoid collisi
 Due to this, when importing keyframes from another stylesheet, a special `keyframes()` directive needs to be used.
 
 ```css
-/* comp.st.css - new syntax */
+/* comp.st.css - atRule syntax */
 @st-import [keyframes(slideX, slideY)] from './keyframes.st.css';
 ```
 
 ```css
-/* comp.st.css - old syntax */
+/* comp.st.css - legacy syntax */
 :import {
     -st-from: "./my-mixins";
     -st-named: keyframes(slideX, slideY);

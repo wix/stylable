@@ -139,9 +139,8 @@ describe('build stand alone', () => {
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
-        let reportedError = '';
 
-        build({
+        const { diagnosticsMessages } = build({
             extension: '.st.css',
             fs,
             stylable,
@@ -149,9 +148,9 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: resolve('/'),
             log,
-            diagnostics: (...args: string[]) => ([reportedError] = args),
             moduleFormats: ['cjs'],
         });
+        const reportedError = diagnosticsMessages.join('\n\n');
 
         expect(reportedError).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
         expect(reportedError).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));

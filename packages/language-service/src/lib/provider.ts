@@ -3,7 +3,7 @@ import ts from 'typescript';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
-import { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
+import type { IFileSystem, IFileSystemDescriptor } from '@file-services/types';
 import {
     ClassSymbol,
     CSSResolve,
@@ -21,7 +21,7 @@ import {
     valueMapping,
     JSResolve,
 } from '@stylable/core';
-import {
+import type {
     Location,
     ParameterInformation,
     Position,
@@ -54,14 +54,15 @@ import {
     ValueDirectiveProvider,
     StImportNamedCompletionProvider,
 } from './completion-providers';
-import { Completion, topLevelDirectives } from './completion-types';
+import { topLevelDirectives } from './completion-types';
+import type { Completion } from './completion-types';
 import {
     createStateTypeSignature,
     createStateValidatorSignature,
     resolveStateParams,
     resolveStateTypeOrValidator,
 } from './feature/pseudo-class';
-import { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types';
 import { isInNode, isRoot, isSelector, pathFromPosition } from './utils/postcss-ast-utils';
 import {
     parseSelector,
@@ -234,6 +235,7 @@ export class Provider {
                             (str: string) => !str.startsWith(':') || str.startsWith('::')
                         );
                         name = name!.replace('.', '').replace(/:/g, '');
+                        const localSymbol = callingMeta.mappedSymbols[name];
                         if (
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
@@ -242,8 +244,9 @@ export class Provider {
                             stateMeta = meta;
                             return true;
                         } else if (
-                            !!callingMeta.mappedSymbols[name] &&
-                            !!(callingMeta.mappedSymbols[name] as ClassSymbol)[valueMapping.extends]
+                            localSymbol &&
+                            (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
+                            localSymbol[valueMapping.extends]
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
                             if (res) {
@@ -257,12 +260,13 @@ export class Provider {
                 return false;
             })
         ) {
-            defs.push(
-                new ProviderLocation(
-                    meta.source,
-                    this.findWord(temp!.name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
-                )
-            );
+            // Todo: this doesn't seem to do anything, investigate intent
+            // defs.push(
+            //     new ProviderLocation(
+            //         meta.source,
+            //         this.findWord(temp.name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
+            //     )
+            // );
         } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
@@ -287,16 +291,18 @@ export class Provider {
             res = this.stylable.resolver.resolveImport(importedSymbol);
         }
 
+        const localSymbol = origMeta.mappedSymbols[elementName];
         if (
-            !!res &&
+            res &&
             res._kind === 'css' &&
             Object.keys((res.symbol as ClassSymbol)[valueMapping.states]!).includes(state)
         ) {
             return res;
         } else if (
-            !!res &&
+            res &&
             res._kind === 'css' &&
-            !!(origMeta.mappedSymbols[elementName] as ClassSymbol)[valueMapping.extends]
+            (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
+            localSymbol[valueMapping.extends]
         ) {
             return this.findMyState(res.meta, res.symbol.name, state);
         } else {
@@ -1169,14 +1175,13 @@ function newFindRefs(
             if (
                 Object.keys(scannedMeta.mappedSymbols).some((k) => {
                     tmp = k;
+                    const localSymbol = scannedMeta.mappedSymbols[k];
                     return (
-                        (scannedMeta.mappedSymbols[k]._kind === 'element' &&
-                            (scannedMeta.mappedSymbols[k] as ElementSymbol).alias &&
-                            (scannedMeta.mappedSymbols[k] as ElementSymbol).alias!.import.from ===
-                                defMeta.source) ||
-                        (scannedMeta.mappedSymbols[k]._kind === 'import' &&
-                            (scannedMeta.mappedSymbols[k] as ImportSymbol).import.from ===
-                                defMeta.source)
+                        (localSymbol._kind === 'element' &&
+                            localSymbol.alias &&
+                            localSymbol.alias!.import.from === defMeta.source) ||
+                        (localSymbol._kind === 'import' &&
+                            localSymbol.import.from === defMeta.source)
                     );
                 })
             ) {
@@ -1746,23 +1751,18 @@ export function getDefSymbol(
     }
 
     const match = lineChunkAtCursor.match(directiveRegex);
-    if (match && !!meta.mappedSymbols[word]) {
+    const localSymbol = meta.mappedSymbols[word];
+    if (match && localSymbol) {
         // We're in an -st directive
         let imp;
-        if (meta.mappedSymbols[word]._kind === 'import') {
-            imp = stylable.resolver.resolveImport(meta.mappedSymbols[word] as ImportSymbol);
-        } else if (
-            meta.mappedSymbols[word]._kind === 'element' &&
-            (meta.mappedSymbols[word] as ElementSymbol).alias
-        ) {
-            imp = stylable.resolver.resolveImport(
-                (meta.mappedSymbols[word] as ElementSymbol).alias as ImportSymbol
-            );
-        } else if (meta.mappedSymbols[word]._kind === 'class') {
-            if ((meta.mappedSymbols[word] as ClassSymbol).alias) {
-                meta = (stylable.resolver.resolveImport(
-                    (meta.mappedSymbols[word] as ClassSymbol).alias!
-                ) as CSSResolve).meta;
+        if (localSymbol._kind === 'import') {
+            imp = stylable.resolver.resolveImport(localSymbol);
+        } else if (localSymbol._kind === 'element' && localSymbol.alias) {
+            imp = stylable.resolver.resolveImport(localSymbol.alias);
+        } else if (localSymbol._kind === 'class') {
+            if (localSymbol.alias) {
+                const res = stylable.resolver.resolveImport(localSymbol.alias!);
+                return { word, meta: res ? res.meta : null };
             }
             return { word, meta };
         }

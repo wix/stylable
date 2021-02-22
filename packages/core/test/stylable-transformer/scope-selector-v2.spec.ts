@@ -1,4 +1,4 @@
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { generateStylableRoot } from '@stylable/core-test-kit';
 
 function selfTest(

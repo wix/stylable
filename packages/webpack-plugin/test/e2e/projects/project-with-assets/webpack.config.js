@@ -9,15 +9,10 @@ module.exports = {
         rules: [
             {
                 test: /\.(png|jpg|gif)$/,
-                use: [
-                    {
-                        loader: require.resolve('url-loader'),
-                        options: {
-                            limit: 300,
-                            name: '[name].[ext]',
-                        },
-                    },
-                ],
+                type: 'asset/resource',
+                generator: {
+                    filename: 'static/[name][ext]',
+                },
             },
         ],
     },

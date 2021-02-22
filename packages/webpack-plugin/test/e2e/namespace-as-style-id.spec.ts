@@ -1,13 +1,16 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'namespace-as-style-id';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             launchOptions: {
                 // headless: false
             },
@@ -30,11 +33,10 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const res = await page.evaluate(() => {
             return {
-                id: (window as any).$id,
-                namespace: (window as any).$namespace,
+                gotStyleByNamespace: (window as any).gotStyleByNamespace,
             };
         });
 
-        expect(res.id).to.eql(res.namespace);
+        expect(res.gotStyleByNamespace, 'gotStyleByNamespace').to.eql(true);
     });
 });

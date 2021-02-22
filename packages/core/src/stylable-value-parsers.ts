@@ -1,12 +1,12 @@
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import postcssValueParser, {
     ParsedValue as PostCSSParsedValue,
     FunctionNode,
 } from 'postcss-value-parser';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 import { processPseudoStates } from './pseudo-states';
 import { parseSelector } from './selector-utils';
-import { ParsedValue, StateParsedValue } from './types';
+import type { ParsedValue, StateParsedValue } from './types';
 
 export const valueParserWarnings = {
     VALUE_CANNOT_BE_STRING() {

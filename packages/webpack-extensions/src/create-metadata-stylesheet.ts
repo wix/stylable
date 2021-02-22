@@ -6,7 +6,7 @@ import {
     CSSResolve,
     JSResolve,
 } from '@stylable/core';
-import { Rule, ChildNode, AtRule } from 'postcss';
+import type { Rule, ChildNode, AtRule } from 'postcss';
 import { hashContent } from './hash-content-util';
 
 export function createMetadataForStylesheet(
