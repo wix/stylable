@@ -78,10 +78,7 @@ export class Stylable {
         public optimizer?: IStylableOptimizer,
         protected mode: 'production' | 'development' = 'production',
         public resolveNamespace?: typeof processNamespace,
-        protected timedCacheOptions: Omit<TimedCacheOptions, 'createKey'> = {
-            timeout: 1,
-            useTimer: true,
-        },
+        protected timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
         protected resolveModule?: ModuleResolver,
         protected cssParser: CssParser = safeParse,
         protected resolverCache?: StylableResolverCache
