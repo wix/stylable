@@ -1,0 +1,10 @@
+:import {
+    -st-from: "./comp-to-import.st.css";
+    -st-default: Comp;
+}
+
+.root {
+    -st-extends: Comp;
+}
+
+|

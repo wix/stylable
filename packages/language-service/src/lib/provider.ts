@@ -8,7 +8,6 @@ import {
     ClassSymbol,
     CSSResolve,
     Diagnostics,
-    ElementSymbol,
     expandCustomSelectors,
     ImportSymbol,
     process as stylableProcess,
@@ -52,7 +51,9 @@ import {
     TopLevelDirectiveProvider,
     ValueCompletionProvider,
     ValueDirectiveProvider,
+    StImportNamedCompletionProvider,
 } from './completion-providers';
+import { topLevelDirectives } from './completion-types';
 import type { Completion } from './completion-types';
 import {
     createStateTypeSignature,
@@ -102,6 +103,7 @@ export class Provider {
         StateEnumCompletionProvider,
         PseudoElementCompletionProvider,
         ValueCompletionProvider,
+        StImportNamedCompletionProvider,
     ];
     constructor(private stylable: Stylable, private tsLangService: ExtendedTsLanguageService) {}
 
@@ -113,22 +115,24 @@ export class Provider {
     ): Completion[] {
         const res = fixAndProcess(src, pos, fileName);
         const completions: Completion[] = [];
-        try {
-            const options = this.createProviderOptions(
-                src,
-                pos,
-                res.processed.meta!,
-                res.processed.fakes,
-                res.currentLine,
-                res.cursorLineIndex,
-                fs
-            );
-            this.providers.forEach((p) => {
-                completions.push(...p.provide(options));
-            });
-        } catch {
-            /**/
+
+        if (!res.processed.meta) {
+            return [];
         }
+
+        const options = this.createProviderOptions(
+            src,
+            pos,
+            res.processed.meta,
+            res.processed.fakes,
+            res.currentLine,
+            res.cursorLineIndex,
+            fs
+        );
+        for (const provider of this.providers) {
+            completions.push(...provider.provide(options));
+        }
+
         return this.dedupeComps(completions);
     }
 
@@ -230,6 +234,7 @@ export class Provider {
                             (str: string) => !str.startsWith(':') || str.startsWith('::')
                         );
                         name = name!.replace('.', '').replace(/:/g, '');
+                        const localSymbol = callingMeta.mappedSymbols[name];
                         if (
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
@@ -238,8 +243,9 @@ export class Provider {
                             stateMeta = meta;
                             return true;
                         } else if (
-                            !!callingMeta.mappedSymbols[name] &&
-                            !!(callingMeta.mappedSymbols[name] as ClassSymbol)[valueMapping.extends]
+                            localSymbol &&
+                            (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
+                            localSymbol[valueMapping.extends]
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
                             if (res) {
@@ -256,7 +262,12 @@ export class Provider {
             defs.push(
                 new ProviderLocation(
                     meta.source,
-                    this.findWord(temp!.name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
+                    this.findWord(
+                        (temp as any) /* This is here because typescript does not recognize size effects during the if statement */
+                            .name,
+                        fs.readFileSync(stateMeta!.source, 'utf8'),
+                        position
+                    )
                 )
             );
         } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
@@ -283,16 +294,18 @@ export class Provider {
             res = this.stylable.resolver.resolveImport(importedSymbol);
         }
 
+        const localSymbol = origMeta.mappedSymbols[elementName];
         if (
-            !!res &&
+            res &&
             res._kind === 'css' &&
             Object.keys((res.symbol as ClassSymbol)[valueMapping.states]!).includes(state)
         ) {
             return res;
         } else if (
-            !!res &&
+            res &&
             res._kind === 'css' &&
-            !!(origMeta.mappedSymbols[elementName] as ClassSymbol)[valueMapping.extends]
+            (localSymbol._kind === 'class' || localSymbol._kind === 'element') &&
+            localSymbol[valueMapping.extends]
         ) {
             return this.findMyState(res.meta, res.symbol.name, state);
         } else {
@@ -321,13 +334,12 @@ export class Provider {
         const line = split[pos.line];
         let value = '';
 
-        const path = pathFromPosition(meta.rawAst, {
+        const stPath = pathFromPosition(meta.rawAst, {
             line: pos.line + 1,
             character: pos.character + 1,
         });
-
-        if (isRoot(path[path.length - 1])) {
-            // TODO: check your actually on a selector
+        const lastStPath = stPath[stPath.length - 1];
+        if (isRoot(lastStPath)) {
             return this.getSignatureForStateWithParamSelector(meta, pos, line);
         } else if (line.slice(0, pos.character).trim().startsWith(valueMapping.states)) {
             return this.getSignatureForStateWithParamDefinition(pos, line);
@@ -706,7 +718,7 @@ export class Provider {
             line: position.line + 1,
             character: position.character,
         });
-        const astAtCursor: postcss.Node = path[path.length - 1];
+        const astAtCursor = path[path.length - 1];
         const parentAst: postcss.Node | undefined = (astAtCursor as postcss.Declaration).parent
             ? (astAtCursor as postcss.Declaration).parent
             : undefined;
@@ -744,6 +756,7 @@ export class Provider {
             .split(' ')
             .pop()!; // TODO: replace with selector parser
         const resolvedElements = transformer.resolveSelectorElements(meta, expandedLine);
+        const resolvedRoot = transformer.resolveSelectorElements(meta, `.${meta.root}`)[0][0];
 
         let resolved: CSSResolve[] = [];
         if (currentSelector && resolvedElements[0].length) {
@@ -760,6 +773,7 @@ export class Provider {
             src,
             tsLangService: this.tsLangService,
             resolvedElements,
+            resolvedRoot,
             parentSelector,
             astAtCursor,
             lineChunkAtCursor,
@@ -865,11 +879,12 @@ function findRefs(
                 resScanned[0].some((rs) => {
                     const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
                     const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
+                    let lastStPath = pfp[pfp.length - 1];
+                    if (lastStPath.type === 'decl') {
+                        lastStPath = pfp[pfp.length - 2] as postcss.Rule;
+                    }
                     const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
-                    const callPs = parseSelector(
-                        (pfp[pfp.length - 1] as postcss.Rule).selector,
-                        char
-                    );
+                    const callPs = parseSelector((lastStPath as postcss.Rule).selector, char);
                     const callingElement = findLast(
                         callPs.selector[callPs.target.index].text.slice(
                             0,
@@ -880,7 +895,7 @@ function findRefs(
                     if (!callingElement) {
                         return false;
                     }
-                    const selector = (pfp[pfp.length - 1] as postcss.Rule)!.selector;
+                    const selector = (lastStPath as postcss.Rule).selector;
                     const selectorElement = trans.resolveSelectorElements(
                         callingMeta,
                         selector.slice(0, selector.indexOf(word) + word.length)
@@ -988,7 +1003,7 @@ function findRefs(
             scannedMeta.source === defMeta.source &&
             !!blargh.length &&
             !!callingElement &&
-            !!blargh[0].some((inner) => {
+            blargh[0].some((inner) => {
                 return (
                     inner.name === callingElement.replace(/:/g, '').replace('.', '') &&
                     inner.resolved.some(
@@ -1163,14 +1178,13 @@ function newFindRefs(
             if (
                 Object.keys(scannedMeta.mappedSymbols).some((k) => {
                     tmp = k;
+                    const localSymbol = scannedMeta.mappedSymbols[k];
                     return (
-                        (scannedMeta.mappedSymbols[k]._kind === 'element' &&
-                            (scannedMeta.mappedSymbols[k] as ElementSymbol).alias &&
-                            (scannedMeta.mappedSymbols[k] as ElementSymbol).alias!.import.from ===
-                                defMeta.source) ||
-                        (scannedMeta.mappedSymbols[k]._kind === 'import' &&
-                            (scannedMeta.mappedSymbols[k] as ImportSymbol).import.from ===
-                                defMeta.source)
+                        (localSymbol._kind === 'element' &&
+                            localSymbol.alias &&
+                            localSymbol.alias.import.from === defMeta.source) ||
+                        (localSymbol._kind === 'import' &&
+                            localSymbol.import.from === defMeta.source)
                     );
                 })
             ) {
@@ -1278,8 +1292,12 @@ function newFindRefs(
                     if (k === word && !!pos) {
                         const postcsspos = new ProviderPosition(pos.line + 1, pos.character);
                         const pfp = pathFromPosition(callingMeta.rawAst, postcsspos, [], true);
-                        const selec = (pfp[pfp.length - 1] as postcss.Rule).selector;
+                        let lastStPath = pfp[pfp.length - 1];
+                        if (lastStPath.type === 'decl') {
+                            lastStPath = pfp[pfp.length - 2] as postcss.Rule;
+                        }
                         // If called from -st-state, i.e. inside node, pos is not in selector.
+                        const selec = (lastStPath as postcss.Rule).selector;
                         // Use 1 and not 0 for selector that starts with'.'
                         const char = isInNode(postcsspos, pfp[pfp.length - 1]) ? 1 : pos.character;
                         const parsel = parseSelector(selec, char);
@@ -1576,6 +1594,10 @@ function isNamedDirective(line: string) {
     return line.includes(valueMapping.named);
 }
 
+function isStImportNamed(line: string) {
+    return line.trim().startsWith(topLevelDirectives.stImport) && line.includes('[');
+}
+
 export function isInValue(lineText: string, position: ProviderPosition) {
     let isInValue = false;
 
@@ -1624,13 +1646,24 @@ export function getNamedValues(
     let isNamedValueLine = false;
     const namedValues: string[] = [];
 
-    for (let i = lineIndex; i > 0; i--) {
+    for (let i = lineIndex; i >= 0; i--) {
         if (isDirective(lines[i]) && !isNamedDirective(lines[i])) {
             break;
         } else if (isNamedDirective(lines[i])) {
             isNamedValueLine = true;
             const valueStart = lines[i].indexOf(':') + 1;
             const value = lines[i].slice(valueStart);
+            value
+                .split(',')
+                .map((x) => x.trim())
+                .filter((x) => x !== '')
+                .forEach((x) => namedValues.push(x));
+            break;
+        } else if (isStImportNamed(lines[i])) {
+            isNamedValueLine = true;
+            const valueStart = lines[i].indexOf('[') + 1;
+            const valueEnd = lines[i].indexOf(']');
+            const value = lines[i].slice(valueStart, valueEnd);
             value
                 .split(',')
                 .map((x) => x.trim())
@@ -1652,7 +1685,10 @@ export function getNamedValues(
 }
 
 export function getExistingNames(lineText: string, position: ProviderPosition) {
-    const valueStart = lineText.indexOf(':') + 1;
+    const valueStart = lineText.includes(topLevelDirectives.stImport)
+        ? lineText.indexOf('[') + 1
+        : lineText.indexOf(':') + 1;
+
     const value = lineText.slice(valueStart, position.character);
     const parsed = postcssValueParser(value.trim());
     const names: string[] = parsed.nodes
@@ -1660,6 +1696,7 @@ export function getExistingNames(lineText: string, position: ProviderPosition) {
         .map((n: any) => n.value);
     const rev = parsed.nodes.reverse();
     const lastName: string = parsed.nodes.length && rev[0].type === 'word' ? rev[0].value : '';
+
     return { names, lastName };
 }
 
@@ -1717,23 +1754,18 @@ export function getDefSymbol(
     }
 
     const match = lineChunkAtCursor.match(directiveRegex);
-    if (match && !!meta.mappedSymbols[word]) {
+    const localSymbol = meta.mappedSymbols[word];
+    if (match && localSymbol) {
         // We're in an -st directive
         let imp;
-        if (meta.mappedSymbols[word]._kind === 'import') {
-            imp = stylable.resolver.resolveImport(meta.mappedSymbols[word] as ImportSymbol);
-        } else if (
-            meta.mappedSymbols[word]._kind === 'element' &&
-            (meta.mappedSymbols[word] as ElementSymbol).alias
-        ) {
-            imp = stylable.resolver.resolveImport(
-                (meta.mappedSymbols[word] as ElementSymbol).alias as ImportSymbol
-            );
-        } else if (meta.mappedSymbols[word]._kind === 'class') {
-            if ((meta.mappedSymbols[word] as ClassSymbol).alias) {
-                meta = (stylable.resolver.resolveImport(
-                    (meta.mappedSymbols[word] as ClassSymbol).alias!
-                ) as CSSResolve).meta;
+        if (localSymbol._kind === 'import') {
+            imp = stylable.resolver.resolveImport(localSymbol);
+        } else if (localSymbol._kind === 'element' && localSymbol.alias) {
+            imp = stylable.resolver.resolveImport(localSymbol.alias);
+        } else if (localSymbol._kind === 'class') {
+            if (localSymbol.alias) {
+                const res = stylable.resolver.resolveImport(localSymbol.alias);
+                return { word, meta: res ? res.meta : null };
             }
             return { word, meta };
         }
