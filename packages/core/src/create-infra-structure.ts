@@ -23,10 +23,7 @@ export function createInfrastructure(
     createDiagnostics?: (from: string) => Diagnostics
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
-            moduleId = resolveModule(context, moduleId);
-        }
-        return moduleId;
+        return path.isAbsolute(moduleId) ? moduleId : resolveModule(context, moduleId);
     };
 
     if (timedCacheOptions) {
