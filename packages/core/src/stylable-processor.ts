@@ -771,84 +771,80 @@ export class StylableProcessor {
     }
 
     protected handleImport(rule: postcss.Rule) {
-        let fromExists = false;
-        const importObj: Imported = {
-            defaultExport: '',
-            from: '',
-            request: '',
-            named: {},
-            keyframes: {},
-            rule,
-            context: path.dirname(this.meta.source),
-        };
-
-        rule.walkDecls((decl) => {
-            switch (decl.prop) {
-                case valueMapping.from: {
-                    const importPath = stripQuotation(decl.value);
-                    if (!importPath.trim()) {
-                        this.diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
-                    }
-
-                    if (fromExists) {
-                        this.diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
-                    }
-
-                    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-                        // 3rd party request
-                        importObj.request = importPath;
-                        importObj.from = importPath;
-                    } else {
-                        importObj.request = importPath;
-                        const dirPath = path.dirname(this.meta.source);
-                        importObj.from =
-                            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
-                                ? path.posix.resolve(dirPath, importPath)
-                                : path.resolve(dirPath, importPath);
-                    }
-                    fromExists = true;
-                    break;
-                }
-                case valueMapping.default:
-                    importObj.defaultExport = decl.value;
-
-                    if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
-                        this.diagnostics.warn(
-                            decl,
-                            processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(),
-                            { word: importObj.defaultExport }
-                        );
-                    }
-                    break;
-                case valueMapping.named:
-                    {
-                        const { keyframesMap, namedMap } = parseNamed(
-                            decl.value,
-                            decl,
-                            this.diagnostics
-                        );
-                        importObj.named = namedMap;
-                        importObj.keyframes = keyframesMap;
-                    }
-                    break;
-                default:
-                    this.diagnostics.warn(
-                        decl,
-                        processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop),
-                        { word: decl.prop }
-                    );
-                    break;
-            }
-        });
-
-        if (!importObj.from) {
-            this.diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
-        }
-
+        const importObj = parseStImport(rule, path.dirname(this.meta.source), this.diagnostics);
         rule.remove();
-
         return importObj;
     }
+}
+
+export function parseStImport(rule: postcss.Rule, context: string, diagnostics: Diagnostics): Imported {
+    let fromExists = false;
+    const importObj: Imported = {
+        defaultExport: '',
+        from: '',
+        request: '',
+        named: {},
+        keyframes: {},
+        rule,
+        context,
+    };
+
+    rule.walkDecls((decl) => {
+        switch (decl.prop) {
+            case valueMapping.from: {
+                const importPath = stripQuotation(decl.value);
+                if (!importPath.trim()) {
+                    diagnostics.error(decl, processorWarnings.EMPTY_IMPORT_FROM());
+                }
+
+                if (fromExists) {
+                    diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
+                }
+
+                if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+                    // 3rd party request
+                    importObj.request = importPath;
+                    importObj.from = importPath;
+                } else {
+                    importObj.request = importPath;
+                    const dirPath = context;
+                    importObj.from =
+                        path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
+                            ? path.posix.resolve(dirPath, importPath)
+                            : path.resolve(dirPath, importPath);
+                }
+                fromExists = true;
+                break;
+            }
+            case valueMapping.default:
+                importObj.defaultExport = decl.value;
+
+                if (!isCompRoot(importObj.defaultExport) && importObj.from.match(/\.css$/)) {
+                    diagnostics.warn(decl, processorWarnings.DEFAULT_IMPORT_IS_LOWER_CASE(), {
+                        word: importObj.defaultExport,
+                    });
+                }
+                break;
+            case valueMapping.named:
+                {
+                    const { keyframesMap, namedMap } = parseNamed(decl.value, decl, diagnostics);
+                    importObj.named = namedMap;
+                    importObj.keyframes = keyframesMap;
+                }
+                break;
+            default:
+                diagnostics.warn(decl, processorWarnings.ILLEGAL_PROP_IN_IMPORT(decl.prop), {
+                    word: decl.prop,
+                });
+                break;
+        }
+    });
+
+    if (!importObj.from) {
+        diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
+    }
+
+    return importObj;
 }
 
 export function validateScopingSelector(
