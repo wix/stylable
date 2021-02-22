@@ -8,7 +8,6 @@ import {
     ClassSymbol,
     CSSResolve,
     Diagnostics,
-    ElementSymbol,
     expandCustomSelectors,
     ImportSymbol,
     process as stylableProcess,
@@ -154,8 +153,8 @@ export class Provider {
         }
 
         const defs: ProviderLocation[] = [];
-        let temp: ClassSymbol | null = null;
-        let stateMeta: StylableMeta;
+        // let temp: ClassSymbol | null = null;
+        // let stateMeta: StylableMeta;
 
         if (Object.keys(meta.mappedSymbols).find((sym) => sym === word.replace('.', ''))) {
             const symb = meta.mappedSymbols[word.replace('.', '')];
@@ -240,8 +239,8 @@ export class Provider {
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
                         ) {
-                            temp = k;
-                            stateMeta = meta;
+                            // temp = k;
+                            // stateMeta = meta;
                             return true;
                         } else if (
                             localSymbol &&
@@ -250,8 +249,8 @@ export class Provider {
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
                             if (res) {
-                                temp = k;
-                                stateMeta = res.meta;
+                                // temp = k;
+                                // stateMeta = res.meta;
                                 return true;
                             }
                         }
@@ -1179,7 +1178,7 @@ function newFindRefs(
                     return (
                         (localSymbol._kind === 'element' &&
                             localSymbol.alias &&
-                            localSymbol.alias!.import.from === defMeta.source) ||
+                            localSymbol.alias.import.from === defMeta.source) ||
                         (localSymbol._kind === 'import' &&
                             localSymbol.import.from === defMeta.source)
                     );
@@ -1761,7 +1760,7 @@ export function getDefSymbol(
             imp = stylable.resolver.resolveImport(localSymbol.alias);
         } else if (localSymbol._kind === 'class') {
             if (localSymbol.alias) {
-                const res = stylable.resolver.resolveImport(localSymbol.alias!);
+                const res = stylable.resolver.resolveImport(localSymbol.alias);
                 return { word, meta: res ? res.meta : null };
             }
             return { word, meta };

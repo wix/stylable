@@ -7,18 +7,15 @@ import {
     ClassSymbol,
     CSSResolve,
     evalDeclarationValue,
-    ImportSymbol,
     MappedStates,
     nativePseudoClasses,
     nativePseudoElements,
     ResolvedElement,
     SRule,
-    StateParsedValue,
     Stylable,
     StylableMeta,
     systemValidators,
     valueMapping,
-    VarSymbol,
 } from '@stylable/core';
 
 import type { IFileSystem } from '@file-services/types';

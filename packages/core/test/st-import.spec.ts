@@ -1,4 +1,4 @@
-import { ImportSymbol, processorWarnings } from '@stylable/core/src/stylable-processor';
+import { ImportSymbol, processorWarnings } from '@stylable/core';
 import { flatMatch, processSource } from '@stylable/core-test-kit';
 import * as chai from 'chai';
 
@@ -108,28 +108,28 @@ describe('Stylable @st-import', () => {
 
         expect((result.mappedSymbols.a as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
-            fromRelative: './some/other/path',
+            request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.c as ImportSymbol).import).to.deep.include({
             // from: '/path/to/some/other/path',
-            fromRelative: './some/other/path',
+            request: './some/other/path',
             defaultExport: '',
             named: { a: 'a', c: 'b' },
         });
 
         expect((result.mappedSymbols.name as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
-            fromRelative: './some/global/path',
+            request: './some/global/path',
             defaultExport: 'name',
             named: {},
         });
 
         expect((result.mappedSymbols.t1 as ImportSymbol).import).to.deep.include({
             // from: '/path/some/global/path',
-            fromRelative: './some/external/path',
+            request: './some/external/path',
             defaultExport: 't',
             named: { t1: 't1' },
         });
