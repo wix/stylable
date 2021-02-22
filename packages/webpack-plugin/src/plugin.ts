@@ -31,6 +31,7 @@ import {
     createOptimizationMapping,
     getTopLevelInputFilesystem,
     createDecacheRequire,
+    createStylableResolverCacheMap,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -237,6 +238,7 @@ export class StylableWebpackPlugin {
                     ),
                     requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
                     optimizer: this.options.optimizer,
+                    resolverCache: createStylableResolverCacheMap(compiler),
                 },
                 compiler
             )
