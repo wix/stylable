@@ -153,8 +153,8 @@ export class Provider {
         }
 
         const defs: ProviderLocation[] = [];
-        // let temp: ClassSymbol | null = null;
-        // let stateMeta: StylableMeta;
+        let temp: ClassSymbol | null = null;
+        let stateMeta: StylableMeta;
 
         if (Object.keys(meta.mappedSymbols).find((sym) => sym === word.replace('.', ''))) {
             const symb = meta.mappedSymbols[word.replace('.', '')];
@@ -239,8 +239,8 @@ export class Provider {
                             name === k.name ||
                             (!name.startsWith(name.charAt(0).toLowerCase()) && k.name === 'root')
                         ) {
-                            // temp = k;
-                            // stateMeta = meta;
+                            temp = k;
+                            stateMeta = meta;
                             return true;
                         } else if (
                             localSymbol &&
@@ -249,8 +249,8 @@ export class Provider {
                         ) {
                             const res = this.findMyState(callingMeta, name, word);
                             if (res) {
-                                // temp = k;
-                                // stateMeta = res.meta;
+                                temp = k;
+                                stateMeta = res.meta;
                                 return true;
                             }
                         }
@@ -259,13 +259,17 @@ export class Provider {
                 return false;
             })
         ) {
-            // Todo: this doesn't seem to do anything, investigate intent
-            // defs.push(
-            //     new ProviderLocation(
-            //         meta.source,
-            //         this.findWord(temp.name, fs.readFileSync(stateMeta!.source, 'utf8'), position)
-            //     )
-            // );
+            defs.push(
+                new ProviderLocation(
+                    meta.source,
+                    this.findWord(
+                        (temp as any) /* This is here because typescript does not recognize size effects during the if statement */
+                            .name,
+                        fs.readFileSync(stateMeta!.source, 'utf8'),
+                        position
+                    )
+                )
+            );
         } else if (Object.keys(meta.customSelectors).find((sym) => sym === ':--' + word)) {
             defs.push(
                 new ProviderLocation(meta.source, this.findWord(':--' + word, src, position))
