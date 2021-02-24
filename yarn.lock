@@ -3133,6 +3133,11 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
+escape-string-regexp@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz#a30304e99daa32e23b2fd20f51babd07cffca344"
+  integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
+
 escodegen@^1.14.1:
   version "1.14.3"
   resolved "https://registry.yarnpkg.com/escodegen/-/escodegen-1.14.3.tgz#4e7b81fba61581dc97582ed78cab7f0e8d63f503"
@@ -6247,10 +6252,10 @@ playwright-chromium@^1.8.1:
     rimraf "^3.0.2"
     ws "^7.3.1"
 
-playwright-core@^1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.8.1.tgz#53a5c8eba41f3bde83a98bf9b2723478f57092a7"
-  integrity sha512-OysNL+mNSpjqvs1dlymBTxv0GZhGwTbuv+KBnPfhzXQZCpzhzin01y/JNtfopT4P8T8awrglEP9hynOZ/H7OeQ==
+playwright-core@^1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.9.0.tgz#6e79ef09eb0583ec9939a853856ce68c808f9bfc"
+  integrity sha512-PckBIeQnTf4otsE8L6ahy2/SnkKDELosoWFAaottcTM6+En7vSVLFiNkyEqKwQ5z9KGZJZiUPhqvp44tbf1gcQ==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -6263,6 +6268,7 @@ playwright-core@^1.8.1:
     proper-lockfile "^4.1.1"
     proxy-from-env "^1.1.0"
     rimraf "^3.0.2"
+    stack-utils "^2.0.3"
     ws "^7.3.1"
 
 pngjs@^5.0.0:
@@ -7384,6 +7390,13 @@ ssri@^8.0.0, ssri@^8.0.1:
   integrity sha512-97qShzy1AiyxvPNIkLWoGua7xoQzzPjQ0HAH4B0rWKo7SZ6USuPcrUiAFrws0UH8RrbWmgq3LMTObhPIHbbBeQ==
   dependencies:
     minipass "^3.1.1"
+
+stack-utils@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/stack-utils/-/stack-utils-2.0.3.tgz#cd5f030126ff116b78ccb3c027fe302713b61277"
+  integrity sha512-gL//fkxfWUsIlFL2Tl42Cl6+HFALEaB1FU76I/Fy+oZjRreP7OPMXFlGbxM7NQsI0ZpUfw76sHnv0WNYuTb7Iw==
+  dependencies:
+    escape-string-regexp "^2.0.0"
 
 "statuses@>= 1.4.0 < 2", "statuses@>= 1.5.0 < 2", statuses@~1.5.0:
   version "1.5.0"
