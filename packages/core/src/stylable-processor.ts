@@ -8,6 +8,7 @@ import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
+    isNested,
     isRootValid,
     parseSelector,
     SelectorAstNode,
@@ -351,8 +352,8 @@ export class StylableProcessor {
 
         let locallyScoped = false;
 
-        traverseNode(rule.selectorAst, (node, index, nodes) => {
-            if (node.type === 'selector') {
+        traverseNode(rule.selectorAst, (node, index, nodes, parents) => {
+            if (node.type === 'selector' && !isNested(parents)) {
                 locallyScoped = false;
             }
             if (!checker(node)) {
