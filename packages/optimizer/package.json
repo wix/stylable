@@ -1,6 +1,6 @@
 {
   "name": "@stylable/optimizer",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Stylable core optimizer",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "webpack serve"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.0",
+    "@stylable/core": "^4.0.1",
     "csso": "^4.2.0",
     "postcss": "^8.2.6"
   },
