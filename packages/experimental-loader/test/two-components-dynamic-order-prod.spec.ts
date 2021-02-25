@@ -26,8 +26,9 @@ describe(`(${project}) (production)`, () => {
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
         const cssLinks = await page.evaluate(browserFunctions.getCSSLinks);
+        const linkPaths = cssLinks.map((l) => (l ? new URL(l).pathname : l));
 
-        expect(cssLinks).to.eql(['compA.css', 'compB.css']);
+        expect(linkPaths).to.eql(['/compA.css', '/compB.css']);
     });
 
     it('not output dev st directives', () => {
