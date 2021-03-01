@@ -15,7 +15,7 @@ describe('StylableRollupPlugin', () => {
 
         await bundle();
         const url = await serve();
-        const page = await open(url, { headless: false });
+        const page = await open(url);
 
         const getBodyStyles = () => {
             const { backgroundImage, fontSize, fontFamily } = getComputedStyle(document.body);
