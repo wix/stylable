@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist"
+  },
+  "references": [
+    { "path": "../../core/src" },
+    { "path": "../../webpack-plugin/src" },
+    { "path": "../../node/src" }
+  ]
+}

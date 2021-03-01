@@ -1,6 +1,6 @@
-import { IFileSystem } from '@file-services/types';
+import type { IFileSystem } from '@file-services/types';
 import path from 'path';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import { getCSSLanguageService, HoverSettings, Stylesheet } from 'vscode-css-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
@@ -131,15 +131,13 @@ export class CssService {
                 if (diag.code === 'emptyRules') {
                     return false;
                 }
+                const atRuleName = readDocRange(document, diag.range);
                 if (
                     diag.code === 'unknownAtRules' &&
-                    readDocRange(document, diag.range) === '@custom-selector'
-                ) {
-                    return false;
-                }
-                if (
-                    diag.code === 'unknownAtRules' &&
-                    readDocRange(document, diag.range) === '@st-scope'
+                    (atRuleName === '@custom-selector' ||
+                        atRuleName === '@st-scope' ||
+                        atRuleName === '@st-import' ||
+                        atRuleName === '@st-global-custom-property')
                 ) {
                     return false;
                 }

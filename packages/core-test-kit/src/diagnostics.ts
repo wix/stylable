@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import deindent from 'deindent';
-import { Position } from 'postcss';
+import type { Position } from 'postcss';
 import { Diagnostics, process, safeParse, StylableMeta, StylableResults } from '@stylable/core';
 import { Config, generateFromMock } from './generate-test-util';
 
@@ -51,7 +51,7 @@ export function expectWarnings(css: string, warnings: Diagnostic[]) {
 
     res.diagnostics.reports.forEach((report, i) => {
         const expectedWarning = warnings[i];
-        if (expectedWarning.skip) {
+        if (!expectedWarning || expectedWarning.skip) {
             return;
         }
 

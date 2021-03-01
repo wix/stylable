@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+import type * as postcss from 'postcss';
 import {
     generateStylableResult,
     generateStylableRoot,
@@ -5,8 +7,6 @@ import {
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
-import { expect } from 'chai';
-import * as postcss from 'postcss';
 
 describe('CSS Mixins', () => {
     it('apply simple class mixins declarations', () => {

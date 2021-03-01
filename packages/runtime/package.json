@@ -1,26 +1,21 @@
 {
   "name": "@stylable/runtime",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "Stylable runtime DOM integration",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs && ts-build ./src --esm && yarn bundle",
-    "bundle": "node -r @ts-tools/node/r -r tsconfig-paths/register ./scripts/build-runtime.ts",
-    "test:unit": "mocha \"test/unit/**/*.spec.ts?(x)\"",
-    "test:e2e": "mocha \"test/e2e/**/*.spec.[tj]s?(x)\" --timeout 20000",
     "test": "run-p test:unit test:e2e",
-    "prepack": "yarn build"
+    "test:unit": "mocha \"dist/test/unit/**/*.spec.js\"",
+    "test:e2e": "mocha \"dist/test/e2e/**/*.spec.js\" --timeout 20000"
   },
   "files": [
-    "cjs",
+    "dist",
+    "!dist/test",
     "src",
-    "runtime.lib.js"
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

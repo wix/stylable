@@ -1,9 +1,9 @@
 import cloneDeepWith from 'lodash.clonedeepwith';
 import postcssValueParser from 'postcss-value-parser';
-import { StylableMeta } from './stylable-meta';
-import { StylableResolver } from './stylable-resolver';
+import type { StylableMeta } from './stylable-meta';
+import type { StylableResolver } from './stylable-resolver';
 import { getFormatterArgs, getNamedArgs, getStringValue } from './stylable-value-parsers';
-import { ParsedValue } from './types';
+import type { ParsedValue } from './types';
 
 export interface Box<Type extends string, Value extends any> {
     type: Type;

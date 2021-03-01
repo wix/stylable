@@ -1,5 +1,6 @@
 import { Stylable, StylableConfig } from '@stylable/core';
-import { Compiler } from 'webpack';
+import type { Compiler } from 'webpack';
+import decache from 'decache';
 
 const stylableInstancesCache = new WeakMap<Compiler, Map<Stylable, StylableConfig>>();
 
@@ -13,7 +14,20 @@ export function getStylable(compiler: Compiler, initialConfig: StylableConfig): 
 
     let stylable = findMatchingStylableInstance(initialConfig, cache);
     if (!stylable) {
-        stylable = Stylable.create(initialConfig);
+        const requireModuleCache = new Set<string>();
+        const requireModule = (id: string) => {
+            requireModuleCache.add(id);
+            return require(id);
+        };
+
+        stylable = Stylable.create({ ...initialConfig, requireModule, resolverCache: new Map() });
+        compiler.hooks.done.tap('StylableLoader stylable.initCache', () => {
+            stylable!.initCache();
+            for (const id of requireModuleCache) {
+                decache(id);
+            }
+            requireModuleCache.clear();
+        });
         cache.set(stylable, initialConfig);
     }
     return stylable;

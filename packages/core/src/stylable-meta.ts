@@ -1,6 +1,6 @@
-import * as postcss from 'postcss';
-import { Diagnostics } from './diagnostics';
-import { SelectorAstNode, SelectorChunk2 } from './selector-utils';
+import type * as postcss from 'postcss';
+import type { Diagnostics } from './diagnostics';
+import type { SelectorAstNode, SelectorChunk2 } from './selector-utils';
 import { getSourcePath } from './stylable-utils';
 import { MappedStates, MixinValue, valueMapping } from './stylable-value-parsers';
 export const RESERVED_ROOT_NAME = 'root';
@@ -67,8 +67,8 @@ export interface Imported {
     defaultExport: string;
     named: Record<string, string>;
     keyframes: Record<string, string>;
-    rule: postcss.Rule;
-    fromRelative: string;
+    rule: postcss.Rule | postcss.AtRule;
+    request: string;
     context: string;
 }
 

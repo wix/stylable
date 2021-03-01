@@ -9,16 +9,23 @@
       "request": "launch",
       "name": "Launch Program",
       "program": "",
-      "args": ["-r", "@ts-tools/node/r", "${file}"]
+      "args": ["${file}"]
     },
     {
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "name": "Mocha Current",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": ["${file}", "--timeout", "999999"],
+      "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
+      "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
     },
     {
       "type": "node",

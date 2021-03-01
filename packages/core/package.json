@@ -1,41 +1,37 @@
 {
   "name": "@stylable/core",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "CSS for Components",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"./test/**/*.spec.ts\"",
-    "start": "webpack serve",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\"",
+    "start": "webpack serve"
   },
   "dependencies": {
     "css-selector-tokenizer": "^0.7.3",
     "deindent": "^0.1.0",
-    "enhanced-resolve": "^4.5.0",
+    "enhanced-resolve": "^5.7.0",
     "is-url-superb": "^5.0.0",
     "is-vendor-prefixed": "^4.0.0",
     "jest-docblock": "^26.0.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.clonedeepwith": "^4.5.0",
-    "murmurhash": "^1.0.0",
-    "postcss": "^8.2.4",
+    "postcss": "^8.2.6",
     "postcss-js": "^3.0.3",
-    "postcss-nested": "^5.0.3",
+    "postcss-nested": "^5.0.4",
     "postcss-safe-parser": "^5.0.2",
     "postcss-selector-matches": "^4.0.0",
-    "postcss-value-parser": "^4.1.0"
+    "postcss-value-parser": "^4.1.0",
+    "toky": "^0.1.0"
   },
   "files": [
-    "cjs",
+    "dist",
+    "!dist/test",
     "src",
-    "test-utils.js",
-    "test-utils.d.ts"
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

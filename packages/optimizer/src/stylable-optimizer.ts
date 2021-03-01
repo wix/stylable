@@ -1,42 +1,61 @@
 import {
     IStylableOptimizer,
+    OptimizeConfig,
     parseSelector,
     SelectorAstNode,
+    stringifySelector,
+    StylableExports,
     StylableResults,
     traverseNode,
+    pseudoStates,
 } from '@stylable/core';
 import csso from 'csso';
 import postcss, { Declaration, Root, Rule, Node, Comment } from 'postcss';
-import { StylableClassNameOptimizer } from './classname-optimizer';
-import { StylableNamespaceOptimizer } from './namespace-optimizer';
+import { NameMapper } from './name-mapper';
 
-export interface OptimizeConfig {
-    removeComments?: boolean;
-    removeStylableDirectives?: boolean;
-    removeUnusedComponents?: boolean;
-    classNameOptimizations?: boolean;
-    removeEmptyNodes?: boolean;
-}
+const { booleanStateDelimiter } = pseudoStates;
+const stateRegexp = new RegExp(`^(.*?)${booleanStateDelimiter}`);
 
 export class StylableOptimizer implements IStylableOptimizer {
-    constructor(
-        public classNameOptimizer = new StylableClassNameOptimizer(),
-        public namespaceOptimizer = new StylableNamespaceOptimizer()
-    ) {}
-
+    public names = new NameMapper();
+    public classPrefix = 's';
+    public namespacePrefix = 'o';
     public minifyCSS(css: string): string {
         // disabling restructuring as it breaks production mode by disappearing classes
         return csso.minify(css, { restructure: false }).css;
     }
+
     public optimize(
         config: OptimizeConfig,
         stylableResults: StylableResults,
         usageMapping: Record<string, boolean>,
         delimiter?: string
     ) {
-        const { meta, exports: jsExports } = stylableResults;
-        const outputAst = meta.outputAst!;
+        const {
+            meta: { globals, outputAst: _outputAst },
+            exports: jsExports,
+        } = stylableResults;
+        const outputAst = _outputAst!;
 
+        this.optimizeAst(config, outputAst, usageMapping, delimiter, jsExports, globals);
+    }
+
+    public getNamespace(namespace: string) {
+        return this.names.get(namespace, this.namespacePrefix);
+    }
+
+    public getClassName(className: string) {
+        return this.names.get(className, this.classPrefix);
+    }
+
+    public optimizeAst(
+        config: OptimizeConfig,
+        outputAst: Root,
+        usageMapping: Record<string, boolean>,
+        delimiter: string | undefined,
+        jsExports: StylableExports,
+        globals: Record<string, boolean>
+    ) {
         if (config.removeComments) {
             this.removeComments(outputAst);
         }
@@ -49,16 +68,126 @@ export class StylableOptimizer implements IStylableOptimizer {
         if (config.removeEmptyNodes) {
             this.removeEmptyNodes(outputAst);
         }
-        if (config.classNameOptimizations) {
-            this.classNameOptimizer.optimizeAstAndExports(
-                outputAst,
-                jsExports.classes,
-                Object.keys(meta.classes),
-                usageMapping || {}, // used to determine namespaces and computed states
-                meta.globals
+        this.optimizeAstAndExports(
+            outputAst,
+            jsExports.classes,
+            undefined,
+            usageMapping,
+            globals,
+            delimiter,
+            config.shortNamespaces,
+            config.classNameOptimizations
+        );
+    }
+
+    public rewriteSelector(
+        selector: string,
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean> = {},
+        shortNamespaces: boolean,
+        classNamespaceOptimizations: boolean,
+        delimiter: string
+    ) {
+        const ast = parseSelector(selector);
+
+        const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
+        traverseNode(ast, (node) => {
+            if (node.type === 'class' && !globals[node.name]) {
+                const possibleStateNamespace = node.name.match(stateRegexp);
+                let isState;
+                if (possibleStateNamespace) {
+                    if (possibleStateNamespace[1] in usageMapping) {
+                        isState = true;
+                        if (shortNamespaces) {
+                            node.name = node.name.replace(
+                                stateRegexp,
+                                `${this.getNamespace(
+                                    possibleStateNamespace[1]
+                                )}${booleanStateDelimiter}`
+                            );
+                        }
+                    }
+                }
+
+                if (!isState) {
+                    if (classNamespaceOptimizations) {
+                        node.name = this.getClassName(node.name);
+                    } else if (shortNamespaces) {
+                        const namespaceMatch = node.name.match(namespaceRegexp);
+                        if (!namespaceMatch) {
+                            throw new Error(
+                                `Stylable class dose not have proper namespace ${node.name}`
+                            );
+                        }
+                        node.name = node.name.replace(
+                            namespaceRegexp,
+                            `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+                        );
+                    }
+                }
+            }
+        });
+        return stringifySelector(ast);
+    }
+
+    public optimizeAstAndExports(
+        ast: Root,
+        exported: Record<string, string>,
+        classes = Object.keys(exported),
+        usageMapping: Record<string, boolean>,
+        globals: Record<string, boolean> = {},
+        delimiter?: string,
+        shortNamespaces?: boolean,
+        classNamespaceOptimizations?: boolean
+    ) {
+        if (!shortNamespaces && !classNamespaceOptimizations) {
+            return;
+        }
+        if (!delimiter) {
+            throw new Error(
+                'Missing delimiter when shortNamespaces or classNamespaceOptimizations is enabled'
             );
         }
+
+        ast.walkRules((rule) => {
+            rule.selector = this.rewriteSelector(
+                rule.selector,
+                usageMapping,
+                globals,
+                shortNamespaces || false,
+                classNamespaceOptimizations || false,
+                delimiter
+            );
+        });
+        const namespaceRegexp = new RegExp(`^(.*?)${delimiter}`);
+
+        classes.forEach((originName) => {
+            if (exported[originName]) {
+                exported[originName] = exported[originName]
+                    .split(' ')
+                    .map((renderedNamed) => {
+                        if (classNamespaceOptimizations) {
+                            return this.getClassName(renderedNamed);
+                        } else if (shortNamespaces) {
+                            const namespaceMatch = renderedNamed.match(namespaceRegexp);
+                            if (!namespaceMatch) {
+                                throw new Error(
+                                    `Stylable class dose not have proper export namespace ${renderedNamed}`
+                                );
+                            }
+                            return renderedNamed.replace(
+                                namespaceRegexp,
+                                `${this.getNamespace(namespaceMatch[1])}${delimiter}`
+                            );
+                        } else {
+                            throw new Error('Invalid optimization config');
+                        }
+                    })
+                    .join(' ');
+            }
+        });
     }
+
     public removeStylableDirectives(root: Root, shouldComment = false) {
         const toRemove: Node[] = [];
         root.walkDecls((decl: Declaration) => {
@@ -79,9 +208,11 @@ export class StylableOptimizer implements IStylableOptimizer {
     private removeEmptyNodes(root: Root) {
         removeEmptyNodes(root);
     }
+
     private removeComments(root: Root) {
         removeCommentNodes(root);
     }
+
     private removeUnusedComponents(
         delimiter: string,
         outputAst: Root,
@@ -105,6 +236,7 @@ export class StylableOptimizer implements IStylableOptimizer {
             }
         });
     }
+
     private isContainsUnusedParts(
         selectorAst: SelectorAstNode,
         usageMapping: Record<string, boolean>,

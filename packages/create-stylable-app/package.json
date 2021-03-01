@@ -1,26 +1,24 @@
 {
   "name": "create-stylable-app",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "Quickly create a Stylable application",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "bin": {
     "create-stylable-app": "./bin/create-stylable-app.js"
   },
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "tsc -p template/ts-react-webpack --noEmit",
-    "prepack": "yarn build"
+    "test": "tsc -p template/ts-react-webpack --noEmit"
   },
   "dependencies": {
     "validate-npm-package-name": "^3.0.0"
   },
   "files": [
     "bin",
-    "cjs",
+    "dist",
+    "!dist/test",
     "src",
-    "template"
+    "template",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "keywords": [
     "stylable",
@@ -28,7 +26,7 @@
     "application"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

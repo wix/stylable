@@ -36,6 +36,8 @@
       title: Component Variants
     - id: guides/server-side-rendering
       title: Server Side Rendering
+    - id: guides/migration-v3
+      title: Migrating to Stylable v3
 - title: Specification Reference
   items:
     - id: getting-started/cheatsheet

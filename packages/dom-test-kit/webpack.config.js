@@ -1,27 +1,4 @@
-const testFiles = require('glob').sync('./test/**/*.spec.ts');
-const first = testFiles.shift();
-const withMochaLoader = [`mocha-loader!${first}`].concat(testFiles);
+const { baseConfig } = require('../../webpack-config-browser/webpack.config.base');
+const [first, ...tests] = require('glob').sync('./dist/test/**/*.spec.js');
 
-module.exports = {
-    mode: 'development',
-    entry: {
-        tests: withMochaLoader,
-    },
-    output: {
-        filename: '[name].bundle.js',
-    },
-    resolve: {
-        extensions: ['.ts', '.tsx', '.js'],
-    },
-    node: {
-        fs: 'empty',
-    },
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                loader: '@ts-tools/webpack-loader',
-            },
-        ],
-    },
-};
+module.exports = { ...baseConfig(), entry: { tests: [`mocha-loader!${first}`, ...tests] } };

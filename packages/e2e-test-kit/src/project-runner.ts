@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { join, normalize } from 'path';
-import puppeteer from 'puppeteer';
+import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
@@ -12,7 +12,7 @@ import { deferred } from 'promise-assist';
 export interface Options {
     projectDir: string;
     port?: number;
-    puppeteerOptions: puppeteer.LaunchOptions;
+    launchOptions: playwright.LaunchOptions;
     webpackOptions?: webpack.Configuration;
     throwOnBuildError?: boolean;
     configName?: string;
@@ -20,6 +20,7 @@ export interface Options {
 }
 
 type MochaHook = import('mocha').HookFunction;
+type Assets = Record<string, { source(): string; emitted: boolean; distPath: string }>;
 const rimraf = promisify(rimrafCallback);
 
 export class ProjectRunner {
@@ -68,20 +69,20 @@ export class ProjectRunner {
     public outputDir: string;
     public webpackConfig: webpack.Configuration;
     public port: number;
-    public puppeteerOptions: puppeteer.LaunchOptions;
-    public pages: puppeteer.Page[];
-    public stats: webpack.Stats | null;
+    public launchOptions: playwright.LaunchOptions;
+    public pages: playwright.Page[];
+    public stats: webpack.Stats | null | undefined;
     public throwOnBuildError: boolean;
     public serverUrl: string;
     public server!: { close(): void } | null;
-    public browser!: puppeteer.Browser | null;
+    public browser!: playwright.Browser | null;
     public compiler!: webpack.Compiler | null;
-    public watchingHandle!: webpack.Watching | null;
+    public watchingHandle!: ReturnType<webpack.Compiler['watch']> | null;
     public log: typeof console.log;
     constructor({
         projectDir,
         port = 3000,
-        puppeteerOptions = {},
+        launchOptions = {},
         throwOnBuildError = true,
         webpackOptions,
         configName = 'webpack.config',
@@ -92,9 +93,9 @@ export class ProjectRunner {
         this.webpackConfig = this.loadTestConfig(configName, webpackOptions);
         this.port = port;
         this.serverUrl = `http://localhost:${this.port}`;
-        this.puppeteerOptions = { ...puppeteerOptions, pipe: true };
+        this.launchOptions = launchOptions;
         this.pages = [];
-        this.stats = null;
+        this.stats = undefined;
         this.throwOnBuildError = throwOnBuildError;
         this.log = log
             ? console.log.bind(console, '[ProjectRunner]')
@@ -114,10 +115,14 @@ export class ProjectRunner {
         const webpackConfig = this.getWebpackConfig();
         const compiler = webpack(webpackConfig);
         this.compiler = compiler;
-        compiler.run = compiler.run.bind(compiler);
-        const promisedRun = promisify(compiler.run);
-        this.stats = await promisedRun();
-        if (this.throwOnBuildError && this.stats.hasErrors()) {
+        // compiler.run = compiler.run.bind(compiler);
+        const run = () => {
+            return new Promise<webpack.Stats | undefined>((res, rej) =>
+                compiler.run((err, stats) => (err ? rej(err) : res(stats)))
+            );
+        };
+        this.stats = await run();
+        if (this.throwOnBuildError && this.stats?.hasErrors()) {
             throw new Error(this.stats.toString({ colors: true }));
         }
         this.log('Bundle Finished');
@@ -132,8 +137,8 @@ export class ProjectRunner {
 
         this.watchingHandle = compiler.watch({}, (err, stats) => {
             if (!this.stats) {
-                if (this.throwOnBuildError && stats.compilation.errors.length) {
-                    err = new Error(stats.compilation.errors.join('\n'));
+                if (this.throwOnBuildError && stats?.hasErrors()) {
+                    err = new Error(stats?.compilation.errors.join('\n'));
                 }
                 if (err) {
                     firstCompile.reject(err);
@@ -153,13 +158,7 @@ export class ProjectRunner {
         return new Promise<void>((res) => {
             const child = spawn(
                 'node',
-                [
-                    '-r',
-                    '@ts-tools/node/r',
-                    './isolated-server',
-                    this.outputDir,
-                    this.port.toString(),
-                ],
+                [require.resolve('./isolated-server'), this.outputDir, this.port.toString()],
                 {
                     cwd: __dirname,
                     stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
@@ -187,30 +186,30 @@ export class ProjectRunner {
 
     public async openInBrowser() {
         if (!this.browser) {
-            this.browser = await puppeteer.launch(this.puppeteerOptions);
+            this.browser = await playwright.chromium.launch(this.launchOptions);
         }
-        const page = await this.browser.newPage();
+        const browserContext = await this.browser.newContext();
+        const page = await browserContext.newPage();
         this.pages.push(page);
 
-        await page.setCacheEnabled(false);
-        const responses: puppeteer.Response[] = [];
+        const responses: playwright.Response[] = [];
         page.on('response', (response) => {
             responses.push(response);
         });
-        await page.goto(this.serverUrl, { waitUntil: 'networkidle0' });
+        await page.goto(this.serverUrl, { waitUntil: 'networkidle' });
         return { page, responses };
     }
 
-    public getBuildWarningMessages() {
+    public getBuildWarningMessages(): webpack.Compilation['warnings'] {
         return this.stats!.compilation.warnings.slice();
     }
 
-    public getBuildErrorMessages() {
+    public getBuildErrorMessages(): webpack.Compilation['errors'] {
         return this.stats!.compilation.errors.slice();
     }
 
     public getBuildErrorMessagesDeep() {
-        function getErrors(compilations: webpack.compilation.Compilation[]) {
+        function getErrors(compilations: webpack.Compilation[]) {
             return compilations.reduce((errors, compilation) => {
                 errors.push(...compilation.errors);
                 errors.push(...getErrors(compilation.children));
@@ -221,7 +220,7 @@ export class ProjectRunner {
         return getErrors([this.stats!.compilation]);
     }
     public getBuildWarningsMessagesDeep() {
-        function getWarnings(compilations: webpack.compilation.Compilation[]) {
+        function getWarnings(compilations: webpack.Compilation[]) {
             return compilations.reduce((warnings, compilation) => {
                 warnings.push(...compilation.warnings);
                 warnings.push(...getWarnings(compilation.children));
@@ -233,11 +232,28 @@ export class ProjectRunner {
     }
 
     public getBuildAsset(assetPath: string) {
-        return this.getBuildAssets()[normalize(assetPath)].source();
+        return nodeFs.readFileSync(
+            join(this.stats?.compilation.options.output.path || '', normalize(assetPath)),
+            'utf-8'
+        );
     }
 
-    public getBuildAssets() {
-        return this.stats!.compilation.assets;
+    public getBuildAssets(): Assets {
+        return Object.keys(this.stats!.compilation.assets).reduce<Assets>((acc, assetPath) => {
+            acc[assetPath] = {
+                distPath: join(
+                    this.stats?.compilation.options.output.path || '',
+                    normalize(assetPath)
+                ),
+                source() {
+                    return nodeFs.readFileSync(this.distPath, 'utf8');
+                },
+                get emitted() {
+                    return nodeFs.existsSync(this.distPath);
+                },
+            };
+            return acc;
+        }, {});
     }
 
     public evalAssetModule(source: string, publicPath = ''): any {
@@ -260,6 +276,25 @@ export class ProjectRunner {
         return _module.exports;
     }
 
+    getChunksModulesNames() {
+        const compilation = this.stats!.compilation;
+        const chunkByName: Record<string, string[]> = {};
+        compilation.chunks.forEach((chunk) => {
+            const names = [];
+            const modules = compilation.chunkGraph!.getChunkModulesIterableBySourceType(
+                chunk,
+                'javascript'
+            );
+            if (modules) {
+                for (const module of modules) {
+                    names.push(module.identifier().split(/[\\/]/).slice(-2).join('/'));
+                }
+            }
+            chunkByName[chunk.name] = names;
+        });
+        return chunkByName;
+    }
+
     public async closeAllPages() {
         for (const page of this.pages) {
             await page.close();
@@ -280,13 +315,17 @@ export class ProjectRunner {
             this.server = null;
             this.log(`Server closed`);
         }
-        if (this.compiler) {
-            this.compiler = null;
-        }
         if (this.watchingHandle) {
-            await new Promise<void>((res) => this.watchingHandle?.close(res));
+            await new Promise<void>((res) => this.watchingHandle?.close(() => res()));
             this.watchingHandle = null;
             this.log(`Watch closed`);
+        }
+        if (this.compiler) {
+            await new Promise((res) => {
+                this.compiler!.close(res);
+                this.compiler = null;
+            });
+            this.log(`Compiler closed`);
         }
         await rimraf(this.outputDir);
         this.log(`Finished Destroy`);

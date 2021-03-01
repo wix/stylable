@@ -1,7 +1,8 @@
-import { IFileSystem, IFileSystemStats } from '@file-services/types';
+import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
-import { HoverSettings } from 'vscode-css-languageservice';
-import { ColorPresentationParams } from 'vscode-languageserver-protocol';
+import { Root } from 'postcss';
+import type { HoverSettings } from 'vscode-css-languageservice';
+import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';
 import {
     Color,
@@ -21,7 +22,8 @@ import {
 import { URI } from 'vscode-uri';
 
 import { ProviderPosition, ProviderRange } from './completion-providers';
-import { Completion } from './completion-types';
+import { topLevelDirectives } from './completion-types';
+import type { Completion } from './completion-types';
 import { CssService } from './css-service';
 import { dedupeRefs } from './dedupe-refs';
 import { createDiagnosis } from './diagnosis';
@@ -33,7 +35,7 @@ import {
 } from './feature/formatting';
 import { Provider } from './provider';
 import { getRefs, getRenameRefs } from './provider';
-import { ExtendedTsLanguageService } from './types';
+import type { ExtendedTsLanguageService } from './types';
 import { typescriptSupport } from './typescript-support';
 
 export interface StylableLanguageServiceOptions {
@@ -276,13 +278,47 @@ export class StylableLanguageService {
         options?: JSBeautifyFormatCSSOptions
     ): TextEdit[] {
         const range = { start: doc.positionAt(offset.start), end: doc.positionAt(offset.end) };
+        const srcText = doc.getText(range);
+        const fsPath = URI.parse(doc.uri).fsPath;
 
-        return [
-            {
-                newText: format(doc, range, options),
-                range,
-            },
-        ];
+        const ast = safeParse(srcText, { from: fsPath });
+        const changes = this.removeFormattingExceptions(ast);
+
+        const formattedText = format(ast.toString(), options);
+
+        const newText = this.restoreFormattingExceptions(
+            safeParse(formattedText, { from: fsPath }),
+            changes
+        ).toString();
+
+        return srcText === newText
+            ? []
+            : [
+                  {
+                      newText,
+                      range,
+                  },
+              ];
+    }
+
+    private removeFormattingExceptions(ast: Root) {
+        const changes: string[] = [];
+
+        // sanitizing @st-imports due to resulting broken formatting
+        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule) => {
+            changes.push(atRule.params);
+            atRule.params = 'temp';
+        });
+
+        return changes;
+    }
+
+    private restoreFormattingExceptions(ast: Root, changes: string[]) {
+        ast.walkAtRules(topLevelDirectives.stImport.slice(1), (atRule, index) => {
+            atRule.params = changes[index];
+        });
+
+        return ast;
     }
 
     public provideCompletionItemsFromSrc(src: string, pos: Position, fileName: string) {

@@ -5,10 +5,5 @@ module.exports = {
     mode: 'production',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [
-        new StylableWebpackPlugin({
-            useEntryModuleInjection: true,
-        }),
-        new HtmlWebpackPlugin(),
-    ],
+    plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()],
 };

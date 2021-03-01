@@ -1,8 +1,8 @@
-import { FileProcessor } from './cached-process-file';
-import { Diagnostics } from './diagnostics';
-import { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
-import { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
-import { StylableTransformer } from './stylable-transformer';
+import type { FileProcessor } from './cached-process-file';
+import type { Diagnostics } from './diagnostics';
+import type { ClassSymbol, ElementSymbol, Imported } from './stylable-meta';
+import type { ImportSymbol, StylableMeta, StylableSymbol } from './stylable-processor';
+import type { StylableTransformer } from './stylable-transformer';
 import { valueMapping } from './stylable-value-parsers';
 
 export const resolverWarnings = {
@@ -13,6 +13,13 @@ export const resolverWarnings = {
         return `cannot resolve imported symbol "${name}" from stylesheet "${path}"`;
     },
 };
+
+export type JsModule = {
+    default?: unknown;
+    [key: string]: unknown;
+};
+export type CachedModule = StylableMeta | JsModule | null;
+export type StylableResolverCache = Map<string, StylableMeta | JsModule | null>;
 
 export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     _kind: 'css';
@@ -35,36 +42,62 @@ export function isInPath(
     });
 }
 
+// this is a safe cache key delimiter for all OS;
+const safePathDelimiter = ';:';
+
 export class StylableResolver {
     constructor(
         protected fileProcessor: FileProcessor<StylableMeta>,
-        protected requireModule: (modulePath: string) => any
+        protected requireModule: (modulePath: string) => any,
+        protected cache?: StylableResolverCache
     ) {}
-    public resolveImported(imported: Imported, name: string) {
-        const { context, from } = imported;
-        let symbol: StylableSymbol;
+    private getModule({ context, from }: Imported): CachedModule {
+        const key = `${context}${safePathDelimiter}${from}`;
+        if (this.cache?.has(key)) {
+            return this.cache.get(key)!;
+        }
+        let res;
         if (from.match(/\.css$/)) {
-            let meta;
             try {
-                meta = this.fileProcessor.process(from, false, context);
-                symbol = !name
-                    ? meta.mappedSymbols[meta.root]
-                    : meta.mappedSymbols[name] || meta.mappedKeyframes[name];
+                res = this.fileProcessor.process(from, false, context);
             } catch (e) {
-                return null;
+                res = null;
             }
-
-            return { _kind: 'css', symbol, meta } as CSSResolve;
         } else {
-            let _module;
             try {
-                _module = this.requireModule(this.fileProcessor.resolvePath(from));
+                res = this.requireModule(this.fileProcessor.resolvePath(from, context));
             } catch {
-                return null;
+                res = null;
             }
-            symbol = !name ? _module.default || _module : _module[name];
+        }
+        this.cache?.set(key, res);
+        return res;
+    }
 
-            return { _kind: 'js', symbol, meta: null } as JSResolve;
+    public resolveImported(
+        imported: Imported,
+        name: string,
+        subtype: 'mappedSymbols' | 'mappedKeyframes' = 'mappedSymbols'
+    ): CSSResolve | JSResolve | null {
+        const res = this.getModule(imported);
+        if (res === null) {
+            return null;
+        }
+
+        if (imported.from.match(/\.css$/)) {
+            const meta = res as StylableMeta;
+            return {
+                _kind: 'css',
+                symbol: !name ? meta.mappedSymbols[meta.root] : meta[subtype][name],
+                meta,
+            };
+        } else {
+            const jsModule = res as JsModule;
+            return {
+                _kind: 'js',
+                symbol: !name ? jsModule.default || jsModule : jsModule[name],
+                meta: null,
+            };
         }
     }
     public resolveImport(importSymbol: ImportSymbol) {
@@ -103,7 +136,11 @@ export class StylableResolver {
         };
 
         while (current.symbol?.import) {
-            const res = this.resolveImported(current.symbol.import, current.symbol.name);
+            const res = this.resolveImported(
+                current.symbol.import,
+                current.symbol.name,
+                'mappedKeyframes'
+            );
             if (res?._kind === 'css' && res.symbol?._kind === 'keyframes') {
                 const { meta, symbol } = res;
                 current = {
@@ -316,8 +353,8 @@ export class StylableResolver {
                 if (fromDecl) {
                     diagnostics.warn(
                         fromDecl,
-                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.fromRelative),
-                        { word: importObj.fromRelative }
+                        resolverWarnings.UNKNOWN_IMPORTED_FILE(importObj.request),
+                        { word: importObj.request }
                     );
                 }
             } else if (resolvedImport._kind === 'css') {
@@ -334,10 +371,7 @@ export class StylableResolver {
                     if (!resolvedSymbol!.symbol && namedDecl) {
                         diagnostics.warn(
                             namedDecl,
-                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(
-                                origName,
-                                importObj.fromRelative
-                            ),
+                            resolverWarnings.UNKNOWN_IMPORTED_SYMBOL(origName, importObj.request),
                             { word: origName }
                         );
                     }

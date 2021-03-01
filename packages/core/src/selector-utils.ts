@@ -1,7 +1,7 @@
 import * as postcss from 'postcss';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
-import { ClassSymbol, ElementSymbol } from './stylable-meta';
-import { CSSResolve } from './stylable-resolver';
+import type { ClassSymbol, ElementSymbol } from './stylable-meta';
+import type { CSSResolve } from './stylable-resolver';
 import { valueMapping } from './stylable-value-parsers';
 
 export interface SelectorAstNode {
@@ -22,7 +22,8 @@ export interface PseudoSelectorAstNode extends SelectorAstNode {
 export type Visitor = (
     node: SelectorAstNode,
     index: number,
-    nodes: SelectorAstNode[]
+    nodes: SelectorAstNode[],
+    parents: SelectorAstNode[]
 ) => boolean | void;
 type nodeWithPseudo = Partial<SelectorAstNode> & { pseudo: Array<Partial<SelectorAstNode>> };
 
@@ -38,13 +39,14 @@ export function traverseNode(
     node: SelectorAstNode,
     visitor: Visitor,
     index = 0,
-    nodes: SelectorAstNode[] = [node]
+    nodes: SelectorAstNode[] = [node],
+    parents: SelectorAstNode[] = []
 ): boolean | void {
     if (!node) {
         return;
     }
     const cNodes = node.nodes;
-    let doNext = visitor(node, index, nodes);
+    let doNext = visitor(node, index, nodes, parents);
     if (doNext === false) {
         return false;
     }
@@ -52,13 +54,24 @@ export function traverseNode(
         return true;
     }
     if (cNodes) {
+        parents = [...parents, node];
         for (let i = 0; i < node.nodes.length; i++) {
-            doNext = traverseNode(node.nodes[i], visitor, i, node.nodes);
+            doNext = traverseNode(node.nodes[i], visitor, i, node.nodes, parents);
             if (doNext === false) {
                 return false;
             }
         }
     }
+}
+
+export function isNested(parentChain: SelectorAstNode[]) {
+    let i = parentChain.length;
+    while (i--) {
+        if (parentChain[i].type === 'nested-pseudo-class') {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function createChecker(types: Array<string | string[]>) {

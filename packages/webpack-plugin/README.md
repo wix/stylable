@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)
 
-`@stylable/webpack-plugin` (for webpack `v4.x`) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
+`@stylable/webpack-plugin` (for webpack `^5.20.0`) is the main build utility for [Stylable](https://stylable.io/). It supports both development and production modes, providing various configurations that can be tweaked according to your specific needs. It enables loading Stylable files (`.st.css`) from local projects or imported from a 3rd party source (for example, NPM node modules).
 
 ## Getting started
 Install `@stylable/webpack-plugin` as a dev dependency in your local project.
@@ -28,75 +28,126 @@ module.exports = {
 ```
 ## Plugin Configuration Options
 Some of the default values given to configuration parameters depend on what environment mode is currently active in webpack (`development` or `production`).
-Below you can see the various possible configuration parameters and their default values.
+Below you can see the various possible configuration parameters.
 
-| Option	| Type	| Development Mode Default | Production Mode Default | Description |
-|---------|:-----:|:-----------------:|:----------------:|------------|
-|outputCSS | `boolean` |	`false`	| `true` | Generate CSS asset files per bundle |
-|filename	| `string` | -	| `[name].bundle.css` | The name of the CSS bundle file when outputCSS is enabled |
-|includeCSSInJS |	`boolean`	| `true` | `false` | Include target CSS in the JavaScript modules (used by runtime renderer) |
-| createRuntimeChunk | `boolean` | `false` | `false` | Move **all** Stylable modules into a separate chunk with a runtime renderer |
-| experimentalHMR | `boolean` | `false` | `false` | Enables experimental HMR for rendered css in dev mode |
-| diagnosticsMode | `auto` \| `strict` \| `loose` | `auto` | `auto` | `auto` - errors and warnings emitted as is; `strict` - warnings emitted as errors; `loose` - errors emitted as warnings  |
-| onProcessMeta | `(meta: StylableMeta, path: string) => StylableMeta` \| `undefined` | `undefined` | `undefined` | accepts a function that executes after Stylable's processing step and allows manipulation of its resulting AST and `meta` |
-| bootstrap.autoInit | `boolean` | `true` | `true` | Initialize the rendering of the CSS in the browser |
-| optimize.removeUnusedComponents | `boolean` | `true` | `true` | Remove selectors that contain namespaces (classes) that are not imported by JavaScript |
-| optimize.removeComments | `boolean` | `false` | `true` | Remove CSS comments from the target |
-| optimize.removeStylableDirectives | `boolean` | `true` | `true` | Remove all `-st-*` from target (currently also removes empty rules which will be a separate option coming soon) |
-| optimize.classNameOptimizations | `boolean` | `false` | `true` | Shorten all class names and replace them in the JavaScript modules |
-| optimize.shortNamespaces | `boolean` | `false` | `true` | Shorten all namespaces which affects the resulting `data-*` selectors and DOM attributes |
-| optimize.minify | `boolean` | `false` | `true` | Minify each css asset. |
-| generate.runtimeStylesheetId | `module` \| `namespace` | `module` | `module` | set the id of the runtime stylesheet |
+```ts
+interface StylableWebpackPluginOptions {
+    /**
+     * Filename of the output bundle when emitting css bundle
+     * Only supports [contenthash] replacer - "stylable.[contenthash].css"
+     */
+    filename?: string;
+    /**
+     * Determine the way css is injected to the document
+     * js - every js module contains the css and inject it independently
+     * css - emit bundled css asset to injected via link
+     * mini-css - inject css modules via webpack mini-css-extract-plugin (can support dynamic splitting but order is not deterministic)
+     * none - will not generate any output css (usually good for ssr bundles)
+     */
+    cssInjection?: 'js' | 'css' | 'mini-css' | 'none';
+    /**
+     * Determine the runtime stylesheet id kind used by the cssInjection js mode
+     */
+    runtimeStylesheetId?: 'module' | 'namespace';
+    /**
+     * Config how error and warning reported to webpack by stylable
+     * auto - Stylable warning will emit Webpack warning and Stylable error will emit Webpack error
+     * strict - Stylable error and warning will emit Webpack error
+     * loose - Stylable error and warning will emit Webpack warning
+     */
+    diagnosticsMode?: 'auto' | 'strict' | 'loose';
+    /**
+     * Target of the js module
+     * oldie - ES3 compatible
+     * modern - ES2105 compatible
+     */
+    target?: 'oldie' | 'modern';
+    /**
+     * Set the <style> tag st-id attribute to allow multiple Stylable build to be separated in the head
+     * This only apply to cssInjection js mode
+     */
+    runtimeId?: string;
+    /**
+     * Optimization options
+     */
+    optimize?: {
+        /* Removes comments from output css */
+        removeComments?: boolean;
+        /* Removes all Stylable directives like -st-extends */
+        removeStylableDirectives?: boolean;
+        /* Removes unused rules that target unused components */
+        removeUnusedComponents?: boolean;
+        /* Remove empty css rules */
+        removeEmptyNodes?: boolean;
+        /* Generate short classnames */
+        classNameOptimizations?: boolean;
+        /* Generate short namespaces */
+        shortNamespaces?: boolean;
+        /* Should minify css */
+        minify?: boolean
+    };
+    /**
+     * Provide custom StylableOptimizer instance
+     */
+    optimizer?: StylableOptimizer;
+    /**
+     * A function to override Stylable instance default configuration options
+     */
+    stylableConfig?: (config: StylableConfig, compiler: Compiler) => StylableConfig;
+    /**
+     * Allow to disable specific diagnostics reports
+     */
+    unsafeMuteDiagnostics?: {
+        DUPLICATE_MODULE_NAMESPACE?: boolean;
+    };
+}
 
-### Sample production configuration
+```
+
+### Default development configuration
 ```js
 new StylableWebpackPlugin({ 
-    outputCSS: true, 
-    includeCSSInJS: false,
+    filename: 'stylable.css',
+    cssInjection: 'js',
+    runtimeStylesheetId: 'module',
+    diagnosticsMode: 'auto',
     optimize: {
       removeUnusedComponents: true,
-      removeComments: true,
       removeStylableDirectives: true,
-      classNameOptimizations: true,
-      shortNamespaces: true,
-      minify: true
+      removeComments: false,
+      classNameOptimizations: false,
+      shortNamespaces: false,
+      removeEmptyNodes: false,
+      minify: false,
     }
 })
 ```
-## Asset handling
-CSS assets are handled by a url-loader + file-loader combination.
+
+### Default production configuration
 ```js
- module: {
-    rules: [
-      {
-        test: /\.(png|jpg|gif)$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 8192
-            }
-          }
-        ]
-      }
-    ]
-  }
+new StylableWebpackPlugin({ 
+    filename: 'stylable.css',
+    cssInjection: 'css',
+    runtimeStylesheetId: 'namespace',
+    diagnosticsMode: 'auto',
+    optimize: {
+      removeUnusedComponents: true,
+      removeStylableDirectives: true,
+      removeComments: true,
+      classNameOptimizations: true,
+      shortNamespaces: true,
+      removeEmptyNodes: true,
+      minify: true,
+    }
+})
 ```
+> Note: the values above reflect the defaults given to each parameter, they only need to be specified if the default value needs to be changed
+
+## Asset handling
+CSS assets are handled by webpack native AssetsModules support.
+
 ## Compatibilities with existing loading mechanisms
 If you're using css_loader/extract make sure to exclude `.st.css` files from the process. You cannot use loaders with Stylable `.st.css` files
-
-## How it works
-The plugin transforms all Stylable files into JavaScript modules with CSS rendering capabilities. 
-
-Every bundle that contains Stylable modules is injected with a `stylable-bootstrap-module` as its entrypoint. This module is responsible for: 
-* Ensuring that all of the transformed modules are imported in the proper order. 
-* Initializing the runtime DOM renderer. 
-
-The resulting renderer orders the CSS by the depth of each module, calculated from its dependencies and component dependencies. 
-
-**Stylable bootstrap module** The `stylable-bootstrap-module` is a generated module injected into the bundle as its entrypoint and ensures all Stylable modules are injected into the runtime renderer.
-
-**Runtime DOM renderer** The core Stylable runtime renderer in the browser is responsible for rendering stylesheets in the correct order in the DOM.
 
 ## License
 Copyright (c) 2017 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).

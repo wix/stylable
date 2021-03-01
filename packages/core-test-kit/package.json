@@ -1,26 +1,22 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "Stylable core test-kit",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "prepack": "yarn build"
-  },
+  "main": "dist/index.js",
   "dependencies": {
-    "@stylable/core": "^3.11.13",
-    "chai": "^4.2.0",
+    "@stylable/core": "^4.0.1",
+    "chai": "^4.3.0",
     "flat": "^5.0.2",
-    "postcss": "^8.2.4"
+    "postcss": "^8.2.6"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

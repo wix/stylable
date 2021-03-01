@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
-import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 import { generateStylableResult, generateStylableRoot } from '@stylable/core-test-kit';
+import { box, CustomValueExtension, functionWarnings, stTypes } from '@stylable/core';
 
 describe('Generator variables interpolation', () => {
     it('should inline value() usage with and without quotes', () => {

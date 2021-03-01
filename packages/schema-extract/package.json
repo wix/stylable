@@ -1,26 +1,22 @@
 {
   "name": "@stylable/schema-extract",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "A utility for extracting JSON schema objects from a Stylable stylesheet",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "ts-build ./src --cjs --esm",
-    "test": "mocha \"test/**/*.spec.ts?(x)\"",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@stylable/core": "^3.11.13"
+    "@stylable/core": "^4.0.1"
   },
   "files": [
-    "cjs",
-    "esm",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

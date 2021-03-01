@@ -1,11 +1,11 @@
+import { expect } from 'chai';
+import type * as postcss from 'postcss';
 import {
     expectWarningsFromTransform,
     generateStylableResult,
     processSource,
 } from '@stylable/core-test-kit';
-import { expect } from 'chai';
-import * as postcss from 'postcss';
-import { processorWarnings, resolverWarnings } from '../src';
+import { processorWarnings, resolverWarnings } from '@stylable/core';
 
 describe('css custom-properties (vars)', () => {
     describe('process', () => {

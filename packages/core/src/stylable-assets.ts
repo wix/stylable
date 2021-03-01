@@ -1,8 +1,8 @@
 import path from 'path';
-import * as postcss from 'postcss';
+import type * as postcss from 'postcss';
 import isUrl from 'is-url-superb';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
-import { ParsedValue } from './types';
+import type { ParsedValue } from './types';
 
 const { parseValues, stringifyValues } = cssSelectorTokenizer;
 

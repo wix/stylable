@@ -15,6 +15,7 @@ import {
 } from '@stylable/core';
 import { isAbsolute } from 'path';
 import * as postcss from 'postcss';
+import { matchFromSource } from './match-rules';
 
 export interface File {
     content: string;
@@ -129,6 +130,12 @@ export function createTransform(
             keepValues: false,
         }).transform(meta).meta;
     };
+}
+
+export function expectTransformOutput(config: Config, numOfAssertions: number) {
+    const res = generateFromMock(config);
+    matchFromSource(res, numOfAssertions);
+    return res;
 }
 
 export function generateStylableResult(config: Config) {

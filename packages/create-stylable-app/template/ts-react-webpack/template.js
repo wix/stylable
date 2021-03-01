@@ -13,12 +13,12 @@ module.exports = {
         'eslint-plugin-stylable',
         'eslint',
         'file-loader',
-        'html-webpack-plugin@4',
+        'html-webpack-plugin',
         'rimraf',
         'serve',
         'ts-loader',
         'typescript',
-        'webpack@4',
+        'webpack',
         'webpack-cli',
         'webpack-dev-server',
     ],
@@ -35,7 +35,7 @@ module.exports = {
             serve: 'serve ./dist',
             lint: 'eslint . -f codeframe',
             typecheck: 'tsc --noEmit',
-            test: 'npm run typecheck && npm run lint'
+            test: 'npm run typecheck && npm run lint',
         },
     },
 };

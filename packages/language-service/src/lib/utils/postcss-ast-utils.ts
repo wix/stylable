@@ -1,34 +1,37 @@
-import * as postcss from 'postcss';
-import { ProviderPosition } from '../completion-providers';
+import type * as postcss from 'postcss';
+import type { ProviderPosition } from '../completion-providers';
 
 export function isInNode(
     position: ProviderPosition,
     node: postcss.Node,
     includeSelector = false
 ): boolean {
+    const nodeStart = node.source?.start;
+    const nodeEnd = node.source?.end;
+
     if (!node.source) {
         return false;
     }
-    if (!node.source.start) {
+    if (!nodeStart) {
         return false;
     }
-    if (node.source.start.line > position.line) {
+    if (nodeStart.line > position.line) {
         return false;
     }
-    if (node.source.start.line === position.line && node.source.start.column > position.character) {
+    if (nodeStart.line === position.line && nodeStart.column > position.character) {
         return false;
     }
-    if (!node.source.end) {
+    if (!nodeEnd) {
         return (
             !isBeforeRuleset(position, node) ||
             (!!(node as postcss.Container).nodes &&
                 !!((node as postcss.Container).nodes.length > 0))
         );
     }
-    if (node.source.end.line < position.line) {
+    if (nodeEnd.line < position.line) {
         return false;
     }
-    if (node.source.end.line === position.line && node.source.end.column < position.character) {
+    if (nodeEnd.line === position.line && nodeEnd.column < position.character) {
         return false;
     }
     if (isBeforeRuleset(position, node) && !includeSelector) {
@@ -96,20 +99,51 @@ export function isRoot(node: postcss.Node): node is postcss.Root {
 }
 
 export function pathFromPosition(
-    ast: postcss.Node,
+    ast: postcss.AnyNode,
     position: ProviderPosition,
-    res: postcss.Node[] = [],
+    res: postcss.AnyNode[] = [],
     includeSelector = false
-): postcss.Node[] {
+): postcss.AnyNode[] {
     res.push(ast);
     if (isContainer(ast) && ast.nodes) {
-        const childNode = ast.nodes.find((node: postcss.Node) => {
+        const childNode = ast.nodes.find((node) => {
             return isInNode(position, node, includeSelector);
         });
         if (childNode) {
             return pathFromPosition(childNode, position, res, includeSelector);
         }
     }
+    return res;
+}
+
+export function getAtRuleByPosition(
+    ast: postcss.Root,
+    position: ProviderPosition,
+    atRuleName: string
+): postcss.AtRule | undefined {
+    let res: postcss.AtRule | undefined;
+    ast.walkAtRules(atRuleName, (atRule) => {
+        const nodeStart = atRule.source?.start;
+        const sLine = nodeStart!.line - 1;
+        const sChar = nodeStart!.column - 1;
+        const nodeEnd = atRule.source?.end;
+        const eLine = nodeEnd!.line - 1;
+        const eChar = nodeEnd!.column - 1;
+
+        if (
+            (position.line === sLine &&
+                position.character >= sChar &&
+                position.line === eLine &&
+                position.character <= eChar) ||
+            (position.line > sLine && position.line < eLine)
+        ) {
+            res = atRule;
+            return false;
+        }
+
+        return undefined;
+    });
+
     return res;
 }
 

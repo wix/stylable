@@ -1,0 +1,8 @@
+:import {
+    -st-from: "test1/comp.st.css";
+    -st-named: x;
+}
+
+.root {
+    -st-mixin: x;
+}

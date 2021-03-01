@@ -1,5 +1,5 @@
-import hash from 'murmurhash';
-import { processNamespace } from './stylable-processor';
+import { murmurhash3_32_gc } from './murmurhash';
+import type { processNamespace } from './stylable-processor';
 
 export function packageNamespaceFactory(
     findConfig: (fileName: string, options: { cwd: string }) => string | null,
@@ -22,7 +22,7 @@ export function packageNamespaceFactory(
         return (
             prefix +
             namespace +
-            hash.v3(
+            murmurhash3_32_gc(
                 hashSalt + config.name + '@' + normalizeVersion(config.version) + '/' + fromRoot
             )
         );

@@ -4,7 +4,7 @@ import { CssParser, safeParse } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
 import { createDefaultResolver } from './module-resolver';
-import { Diagnostics } from './diagnostics';
+import type { Diagnostics } from './diagnostics';
 
 export interface StylableInfrastructure {
     fileProcessor: FileProcessor<StylableMeta>;
@@ -23,10 +23,7 @@ export function createInfrastructure(
     createDiagnostics?: (from: string) => Diagnostics
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {
-        if (!path.isAbsolute(moduleId) && !moduleId.startsWith('.')) {
-            moduleId = resolveModule(context, moduleId);
-        }
-        return moduleId;
+        return path.isAbsolute(moduleId) ? moduleId : resolveModule(context, moduleId);
     };
 
     if (timedCacheOptions) {

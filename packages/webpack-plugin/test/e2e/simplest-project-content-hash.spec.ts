@@ -1,14 +1,17 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'simplest-project-content-hash';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            projectDir,
+            launchOptions: {
                 // headless: false
             },
         },
@@ -18,9 +21,8 @@ describe(`(${project})`, () => {
     );
 
     it('renders css', () => {
-        const assets =projectRunner.getBuildAssets();
-        const file = Object.keys(assets).find((path)=>path.match(/output\.\w+\.css/))!
+        const assets = projectRunner.getBuildAssets();
+        const file = Object.keys(assets).find((path) => path.match(/output\.\w+\.\w+\.css/))!;
         expect(assets[file].emitted, 'should emit file with content hash').to.equal(true);
     });
-
 });

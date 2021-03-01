@@ -179,7 +179,7 @@ function getImportedRef(
     const suffix = importSymbol.type === 'default' ? 'root' : `${importSymbol.name}`;
     return `${normalizeImportPath(
         fileName,
-        importSymbol.import.fromRelative,
+        importSymbol.import.request,
         basePath,
         path
     )}#${suffix}`;

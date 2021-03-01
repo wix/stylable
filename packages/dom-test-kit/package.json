@@ -1,25 +1,24 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "Stylable DOM testing utilities",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"./test/**/*.spec.ts\"",
-    "prepack": "yarn build"
+    "test": "mocha \"./dist/test/**/*.spec.js\"",
+    "start": "webpack serve"
   },
   "dependencies": {
-    "@stylable/core": "^3.11.13",
-    "@stylable/runtime": "^3.11.13"
+    "@stylable/core": "^4.0.1",
+    "@stylable/runtime": "^4.0.1"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

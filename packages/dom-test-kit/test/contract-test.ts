@@ -60,7 +60,7 @@ export const contractTest = (
     }
 
     describe('Style state', () => {
-        const { window } = new JSDOM(`<div id="container"></div>`);
+        const { window } = new JSDOM();
         it('hasStyleState returns true if the requested style state exists', async () => {
             const document = window.document;
             const elem = document.createElement('a');

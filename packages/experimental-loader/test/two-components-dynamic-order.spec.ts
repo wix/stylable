@@ -1,14 +1,17 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'two-components-dynamic-order';
+const projectDir = dirname(
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            projectDir,
+            launchOptions: {
                 // headless: false,
             },
         },
@@ -20,8 +23,9 @@ describe(`(${project})`, () => {
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
         const cssLinks = await page.evaluate(browserFunctions.getCSSLinks);
+        const linkPaths = cssLinks.map((l) => (l ? new URL(l).pathname : l));
 
-        expect(cssLinks).to.eql(['compA.css', 'compB.css']);
+        expect(linkPaths).to.eql(['/compA.css', '/compB.css']);
     });
 
     it('css applied correctly', async () => {

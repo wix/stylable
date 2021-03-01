@@ -1,15 +1,18 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'bad-project';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
+            projectDir,
             throwOnBuildError: false,
-            puppeteerOptions: {
+            launchOptions: {
                 // headless: false
             },
         },
@@ -23,12 +26,12 @@ describe(`(${project})`, () => {
         // const expected = [/could not resolve "unknown"/, /unknown var "xxx"/];
 
         const expected = [
-            /cannot resolve imported symbol "unknown" from stylesheet "\.\/comp\.st\.css"/,
             /cannot extend unknown symbol "unknown"/,
+            /cannot resolve imported symbol "unknown" from stylesheet "\.\/comp\.st\.css"/,
             /unknown var "xxx"/,
         ];
         expect(warnings.length).to.equal(3);
-        warnings.forEach((warning: string, i: number) => {
+        warnings.forEach((warning, i: number) => {
             expect(warning).to.match(expected[i]);
         });
     });

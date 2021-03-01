@@ -15,13 +15,12 @@
     {
       "files": ["*.ts", "*.tsx"],
       "parserOptions": {
-        "project": "./tsconfig.json",
+        "project": "./tsconfig.base.json",
         "warnOnUnsupportedTypeScriptVersion": false
       },
       "extends": [
         "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "prettier/@typescript-eslint"
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
       ],
       "rules": {
         "@typescript-eslint/ban-types": "off",

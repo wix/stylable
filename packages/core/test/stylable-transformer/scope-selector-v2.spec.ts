@@ -1,5 +1,5 @@
+import type * as postcss from 'postcss';
 import { generateStylableRoot } from '@stylable/core-test-kit';
-import * as postcss from 'postcss';
 
 function selfTest(
     result: postcss.Root,

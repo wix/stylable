@@ -1,10 +1,10 @@
+import { expect } from 'chai';
+import type * as postcss from 'postcss';
 import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
 } from '@stylable/core-test-kit';
-import { expect } from 'chai';
-import * as postcss from 'postcss';
 
 describe('Javascript Mixins', () => {
     it('javascript value', () => {

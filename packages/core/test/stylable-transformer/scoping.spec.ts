@@ -1,7 +1,7 @@
-import { generateStylableRoot } from '@stylable/core-test-kit';
 import { expect } from 'chai';
-import * as postcss from 'postcss';
-import { createWarningRule } from '../../src';
+import type * as postcss from 'postcss';
+import { generateStylableRoot } from '@stylable/core-test-kit';
+import { createWarningRule } from '@stylable/core';
 
 describe('Stylable postcss transform (Scoping)', () => {
     describe('scoped pseudo-elements', () => {
@@ -181,8 +181,7 @@ describe('Stylable postcss transform (Scoping)', () => {
             ).nodes as postcss.Declaration[]).forEach(
                 (decl: postcss.Declaration, index: number) => {
                     expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
-                            .prop
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
                     ).to.eql(decl.prop);
                     expect(
                         ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
@@ -1198,6 +1197,50 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect((result.nodes[0] as postcss.Rule).nodes[1].toString()).to.equal(
                 'animation-name: imported__anim1'
             );
+        });
+
+        it('scope imported animation and animation name with part name collision', () => {
+            const result = generateStylableRoot({
+                entry: `/entry.st.css`,
+                files: {
+                    '/entry.st.css': {
+                        namespace: 'entry',
+                        content: `
+                            :import {
+                                -st-from: './imported.st.css';
+                                -st-named: anim1, keyframes(anim1);
+                            }
+
+                            .selector {
+                                animation: 2s anim1 infinite;
+                                animation-name: anim1;
+                            }
+
+                            .anim1{}
+
+                        `,
+                    },
+                    '/imported.st.css': {
+                        namespace: 'imported',
+                        content: `
+                            @keyframes anim1 {
+                                from {}
+                                to {}
+                            }
+                            .anim1 {}
+
+                        `,
+                    },
+                },
+            });
+
+            expect((result.nodes[0] as postcss.Rule).nodes[0].toString()).to.equal(
+                'animation: 2s imported__anim1 infinite'
+            );
+            expect((result.nodes[0] as postcss.Rule).nodes[1].toString()).to.equal(
+                'animation-name: imported__anim1'
+            );
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal('.imported__anim1');
         });
 
         it('not scope rules that are child of keyframe atRule', () => {

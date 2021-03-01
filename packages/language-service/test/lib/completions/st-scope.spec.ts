@@ -1,6 +1,9 @@
-import { createRange } from '../../../src/lib/completion-providers';
-import * as asserters from '../../../test-kit/completions-asserters';
-import { Completion, rulesetDirectives } from 'packages/language-service/src/lib/completion-types';
+import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
+import * as asserters from '../../test-kit/completions-asserters';
+import {
+    Completion,
+    rulesetDirectives,
+} from '@stylable/language-service/dist/lib/completion-types';
 import { expect } from 'chai';
 
 describe('completion inside @st-scope', () => {
@@ -127,7 +130,7 @@ describe('completion inside @st-scope', () => {
                     title: 'Suggest',
                     command: 'editor.action.triggerSuggest',
                 },
-                sortText: 'd_a1',
+                sortText: 'd_a0',
             });
         });
 

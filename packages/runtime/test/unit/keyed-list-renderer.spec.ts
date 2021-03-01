@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { createDOMListRenderer, DOMListRenderer } from '../../src/keyed-list-renderer';
-import { NodeRenderer } from '../../src/types';
+import { createDOMListRenderer, DOMListRenderer, NodeRenderer } from '@stylable/runtime';
 
 interface TestNode {
     key: string;

@@ -1,14 +1,17 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'exports-only-mode';
+const projectDir = dirname(
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            projectDir,
+            launchOptions: {
                 // headless: false,
             },
         },

@@ -1,19 +1,8 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
+import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
-
-import { StylableLanguageService } from '../../src/lib/service';
-
-function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
-    const fs = createMemoryFs(files);
-
-    const stylableLSP = new StylableLanguageService({
-        fs,
-        stylable: new Stylable('/', fs, require),
-    });
-
-    return stylableLSP.diagnose(filePath);
-}
+import { createDiagnostics } from '../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
     it('should create basic diagnostics', () => {
@@ -42,19 +31,19 @@ describe('diagnostics', () => {
         const filePath = '/style.st.css';
         const files = {
             [filePath]: '.gaga .root{}',
-        }
+        };
         const fs = createMemoryFs(files);
 
         const stylableLSP = new StylableLanguageService({
             fs,
             stylable: new Stylable('/', fs, require),
         });
-    
-        const diagnostics1 =  stylableLSP.diagnose(filePath);
-        const diagnostics2 =  stylableLSP.diagnose(filePath);
 
-        expect(diagnostics1).to.have.lengthOf(1)
-        expect(diagnostics2).to.have.lengthOf(1)
+        const diagnostics1 = stylableLSP.diagnose(filePath);
+        const diagnostics2 = stylableLSP.diagnose(filePath);
+
+        expect(diagnostics1).to.have.lengthOf(1);
+        expect(diagnostics2).to.have.lengthOf(1);
     });
 
     it('should create cross file errors', () => {
@@ -147,6 +136,19 @@ describe('diagnostics', () => {
                     .root:someState(T1)   {}    /* css-identifierexpected */ 
                     .root:someState(T1.1) {}    /* css-rparentexpected    */
                     `,
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should not warn about pseudo-states with params', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `@st-global-custom-property --x;   /* unknownAtRules */`,
                 },
                 filePath
             );

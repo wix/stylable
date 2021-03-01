@@ -1,5 +1,5 @@
-import { createRange } from '../../../src/lib/completion-providers';
-import * as asserters from '../../../test-kit/completions-asserters';
+import { createRange } from '@stylable/language-service/dist/lib/completion-providers';
+import * as asserters from '../../test-kit/completions-asserters';
 
 describe('Variables', () => {
     describe('from path', () => {

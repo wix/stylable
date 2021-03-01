@@ -1,5 +1,5 @@
-import { RuntimeRenderer } from './css-runtime-renderer';
-import { RuntimeStylesheet, StateMap, StateValue, StylableExports } from './types';
+import type { RuntimeRenderer } from './css-runtime-renderer';
+import type { RuntimeStylesheet, StateMap, StateValue, StylableExports } from './types';
 
 const stateMiddleDelimiter = '-';
 const booleanStateDelimiter = '--';

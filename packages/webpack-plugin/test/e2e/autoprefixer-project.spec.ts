@@ -1,14 +1,17 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'autoprefixer-project';
+const projectDir = dirname(
+    require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            projectDir,
+            launchOptions: {
                 // headless: false
             },
         },
@@ -19,7 +22,9 @@ describe(`(${project})`, () => {
 
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
-        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, true);
+        const styleElements = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
+            includeCSSContent: true,
+        });
 
         expect(styleElements).to.eql([
             {

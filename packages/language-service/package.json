@@ -1,39 +1,37 @@
 {
   "name": "@stylable/language-service",
-  "version": "3.11.13",
+  "version": "4.0.1",
   "description": "Stylable Language Services - syntax highlighting, completions, hinting and more for the Stylable CSS preprocessor.",
-  "main": "./cjs/index.js",
-  "types": "./cjs/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf ./dist",
-    "build": "ts-build ./src --cjs",
     "test": "yarn test:unit",
-    "test:unit": "mocha test/lib/**/*.spec.ts test/lib/*.spec.ts",
-    "prepack": "yarn build"
+    "test:unit": "mocha \"dist/test/lib/**/*.spec.js\""
   },
   "peerDependencies": {
-    "typescript": ">=3.6"
+    "typescript": ">=3.8"
   },
   "dependencies": {
-    "@file-services/types": "^5.3.0",
-    "@file-services/typescript": "^5.3.0",
-    "@stylable/core": "^3.11.13",
+    "@file-services/types": "^5.3.1",
+    "@file-services/typescript": "^5.3.1",
+    "@stylable/core": "^4.0.1",
     "css-selector-tokenizer": "^0.7.3",
-    "js-beautify": "^1.13.4",
-    "postcss": "^8.2.4",
+    "js-beautify": "^1.13.5",
+    "postcss": "^8.2.6",
     "postcss-value-parser": "^4.1.0",
-    "vscode-css-languageservice": "^5.0.2",
+    "vscode-css-languageservice": "^5.1.0",
     "vscode-languageserver": "^7.0.0",
     "vscode-languageserver-textdocument": "^1.0.1",
     "vscode-uri": "^3.0.2"
   },
   "author": "Wix.com",
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "publishConfig": {
     "access": "public"

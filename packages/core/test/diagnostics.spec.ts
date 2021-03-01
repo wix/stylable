@@ -1,15 +1,21 @@
+import { expect } from 'chai';
 import {
     expectWarnings,
     expectWarningsFromTransform,
     findTestLocations,
 } from '@stylable/core-test-kit';
-import { expect } from 'chai';
-import { functionWarnings, mixinWarnings, valueMapping } from '../src';
-import { nativePseudoElements, reservedKeyFrames } from '../src/native-reserved-lists';
-import { processorWarnings } from '../src/stylable-processor';
-import { resolverWarnings } from '../src/stylable-resolver';
-import { transformerWarnings } from '../src/stylable-transformer';
-import { rootValueMapping, valueParserWarnings } from '../src/stylable-value-parsers';
+import {
+    functionWarnings,
+    mixinWarnings,
+    valueMapping,
+    processorWarnings,
+    resolverWarnings,
+    transformerWarnings,
+    nativePseudoElements,
+    reservedKeyFrames,
+    rootValueMapping,
+    valueParserWarnings,
+} from '@stylable/core';
 
 describe('findTestLocations', () => {
     it('find single location 1', () => {
@@ -1028,6 +1034,23 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
 
+            it('should not issue scoping diagnostics for a class scoped by a selector with ":not()" (regression)', () => {
+                expectWarnings(
+                    `
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: classNeedsScoping;
+                    }
+                    .cls {
+                        -st-states: someState;
+                    }
+
+                    .cls:not(:someState) .classNeedsScoping {}  
+                `,
+                    []
+                );
+            });
+
             it('should not warn when using imported elements (classes) without scoping', () => {
                 expectWarnings(
                     `
@@ -1054,6 +1077,38 @@ describe('diagnostics: warnings and errors', () => {
                     |:global(div) $button$| {}
                 `,
                     [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                );
+            });
+
+            it('should warn with multiple selector', () => {
+                expectWarnings(
+                    `
+                    |.x, $button$| {}
+                `,
+                    [{ message: processorWarnings.UNSCOPED_ELEMENT('button'), file: 'main.css' }]
+                );
+            });
+
+            it('should not warn if same chunk is scoped', () => {
+                expectWarnings(
+                    `
+                    |$button$.root| {}
+                `,
+                    []
+                );
+            });
+
+            it('should not warn when using imported elements with scoping in the same chunk', () => {
+                expectWarnings(
+                    `
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: Blah;
+                    }
+
+                    |$Blah$.root| {}
+                `,
+                    []
                 );
             });
 

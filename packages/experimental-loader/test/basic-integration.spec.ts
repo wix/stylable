@@ -1,14 +1,17 @@
 import { browserFunctions, StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
-import { join } from 'path';
+import { dirname } from 'path';
 
 const project = 'basic-integration';
+const projectDir = dirname(
+    require.resolve(`@stylable/experimental-loader/test/projects/${project}/webpack.config`)
+);
 
 describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
-            projectDir: join(__dirname, 'projects', project),
-            puppeteerOptions: {
+            projectDir,
+            launchOptions: {
                 // headless: false,
             },
         },
@@ -46,7 +49,7 @@ describe(`(${project})`, () => {
             hello: {
                 color: 'rgb(255, 0, 0)',
                 height: '500px',
-                imageAsset: 'c1581c599fef18f7460cd972e77273fd.png',
+                imageAsset: 'c1581c599fef18f7460c.png',
             },
             world: {
                 color: 'rgb(0, 0, 255)',

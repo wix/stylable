@@ -1,9 +1,8 @@
-import { Stylable } from '@stylable/core';
-import { functionWarnings, processorWarnings, resolverWarnings } from '@stylable/core';
-import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { resolve } from 'path';
-import { build } from '../src';
+import { Stylable, functionWarnings, processorWarnings, resolverWarnings } from '@stylable/core';
+import { createMemoryFileSystemWithFiles as createFS } from '@stylable/e2e-test-kit';
+import { build } from '@stylable/cli';
 
 const log = () => {
     /**/
@@ -140,9 +139,8 @@ describe('build stand alone', () => {
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
-        let reportedError = '';
 
-        build({
+        const { diagnosticsMessages } = build({
             extension: '.st.css',
             fs,
             stylable,
@@ -150,9 +148,9 @@ describe('build stand alone', () => {
             srcDir: '.',
             rootDir: resolve('/'),
             log,
-            diagnostics: (...args: string[]) => ([reportedError] = args),
             moduleFormats: ['cjs'],
         });
+        const reportedError = diagnosticsMessages.join('\n\n');
 
         expect(reportedError).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
         expect(reportedError).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
