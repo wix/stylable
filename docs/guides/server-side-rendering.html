@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Supporting Server Side Rendering</title>
+
+    <!-— facebook open graph tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://stylable.io/" />
+    <meta property="og:title" content="Stylable - scoped CSS for components" />
+    <meta
+      property="og:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+
+    <!-— twitter card tags additive with the og: tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:domain" content="stylable.io" />
+    <meta name="twitter:title" content="Stylable - scoped CSS for components" />
+    <meta
+      name="twitter:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+    <meta name="twitter:url" content="https://stylable.io/" />
+
+    <link rel="stylesheet" href="../../css/normalize.css" />
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4" />
+    <link rel="stylesheet" href="../../css/highlight.css" />
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header>
+  <div class="header-content">
+    <label class="menu-icon" for="menu"> </label>
+    <a href="../.."><span class="logo"></span></a>
+
+    <ul class="main-nav">
+      <li>
+        <a href="https://github.com/wix/stylable" target="_blank"
+          ><img src="/images/logo-git.svg" alt="Stylable on GitHub"
+        /></a>
+      </li>
+      <li>
+        <a href="https://twitter.com/stylableio" target="_blank"
+          ><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"
+        /></a>
+      </li>
+    </ul>
+  </div>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'UA-109043375-1');
+  </script>
+</header>
+
+
+    <input id="menu" type="checkbox" class="hidden-control hidden-control_menu" />
+    <div class="main-content"><nav class="docs-nav">
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header"></div>
+    <ul>
+      
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Discover</div>
+    <ul>
+       <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>  <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>  <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>  <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Guides</div>
+    <ul>
+       <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>  <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>  <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>  <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>  <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>  <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>  <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>  <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>  <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>  <li class=""><a href="../../docs/guides/migration-v3" class=" docs-nav-item">Migrating to Stylable v3</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Specification Reference</div>
+    <ul>
+       <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>  <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>  <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>  <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>  <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>  <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>  <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>  <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>  <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>  <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>  <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>  <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>  <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>  <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>  <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>  <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>  <li class=""><a href="../../docs/references/using-external-assets" class=" docs-nav-item">Using External Assets</a></li>  <li class=""><a href="../../docs/references/keyframes" class=" docs-nav-item">Keyframes</a></li> 
+    </ul>
+  </div>
+  
+</nav>
+
+<section class="docs-content">
+  <h1>Supporting Server Side Rendering</h1>
+  <p>Server side rendering (SSR) is an approach to serving JavaScript rendered web applications (such as React, Vue, Angular, etc…) that tries to improve time-to-paint, SEO support and more.</p>
+
+<p>To learn more about SSR - see this <a href="https://dev.to/sunnysingh/the-benefits-and-origins-of-server-side-rendering-4doh">introduction post</a>.</p>
+
+<p>When creating your library / application you will see that you might need to make some changes to your project publish / consumption process in order to integrate Stylable to your SSR flow.</p>
+
+<h2 id="rendering-stylable-in-the-client">Rendering Stylable in the Client</h2>
+<p>To integrate Stylable into your application, use <code class="language-plaintext highlighter-rouge">@stylable/webpack-plugin</code> and <a href="https://github.com/wix/stylable/tree/master/packages/webpack-plugin">configure</a> it according to your project needs.</p>
+
+<h2 id="transforming-stylable-in-the-server">Transforming Stylable in the Server</h2>
+<p>In order to use Stylable imports from your source files in <code class="language-plaintext highlighter-rouge">nodeJS</code>, you will need to add <code class="language-plaintext highlighter-rouge">@stylable/node</code> as a dependency.</p>
+
+<p>Import and use its <code class="language-plaintext highlighter-rouge">requireHook</code> method before rendering to enable requiring Stylable stylesheets in their <code class="language-plaintext highlighter-rouge">CommonJS</code> module format.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// server.js </span>
+<span class="kd">const</span> <span class="p">{</span> <span class="nx">attachHook</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">@stylable/node</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="nx">attachHook</span><span class="p">();</span> <span class="c1">// enables requiring .st.css files as CommonJS</span>
+
+<span class="c1">// &lt; render application ... &gt;</span>
+</code></pre></div></div>
+
+<h2 id="matching-namespaces">Matching namespaces</h2>
+<p>In order to ensure full SSR compatibility, <strong>generated namespaces for all stylesheets must match exactly</strong> across all different build targets.</p>
+
+<p>The default Stylable <code class="language-plaintext highlighter-rouge">namespaceResolver</code> uses a combination of file-system path, name and version from the <code class="language-plaintext highlighter-rouge">package.json</code> file to create its namespace. This means that namespaces can be influenced by the published file path structure.</p>
+
+<p>If you choose to provide an alternative namespace resolver that does not depend on file paths as part of its namespace creation, then you can avoid the problem described below.</p>
+
+<h3 id="supporting-multiple-transpilation-targets">Supporting multiple transpilation targets</h3>
+
+<p>When building a library or application for consumption in both client and server environments it is common to output multiple transpilation targets for various module systems.</p>
+
+<p>This means that a published project will usually have both <code class="language-plaintext highlighter-rouge">CommonJS</code> and <code class="language-plaintext highlighter-rouge">ES modules</code>, each with their own transpiled copy of the project, including the Stylable assets.</p>
+
+<p>This can pose a problem when trying to synchronize namespace creation for SSR.</p>
+
+<h3 id="publishing-ssr-ready-source-files-stcss">Publishing SSR-ready source files (<code class="language-plaintext highlighter-rouge">*.st.css</code>)</h3>
+
+<p>The Stylable CLI offers a feature that allows you to sync your namespace across dist targets by inserting a custom header comment to the start of your <code class="language-plaintext highlighter-rouge">.st.css</code> file. This header comment is used to normalize namespacing paths across different build targets.</p>
+
+<p>When using <code class="language-plaintext highlighter-rouge">@stylable/cli</code> to publish your source stylesheets, use the <code class="language-plaintext highlighter-rouge">useNamespaceReference</code> flag to mark all targets as originating from the same original source.</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stc <span class="nt">--srcDir</span> ./src <span class="nt">--outDir</span> ./dist/cjs <span class="nt">--cjs</span> <span class="nt">--stcss</span> <span class="nt">--useNamespaceReference</span>
+</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stc <span class="nt">--srcDir</span> ./src <span class="nt">--outDir</span> ./dist/esm <span class="nt">--esm</span> <span class="nt">--stcss</span> <span class="nt">--useNamespaceReference</span>
+</code></pre></div></div>
+
+<p>For this to work properly, your source folder must be published along with your distribution build targets.</p>
+
+</section>
+</div>
+
+    
+    <script src="../../js/vendor/prism/prism.js"></script>
+    <script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+    <script>
+      tippy('.code [title]', {
+        duration: 0,
+      });
+    </script>
+
+    <script src="https://static.parastorage.com/unpkg/react@16.13.1/umd/react.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/react-dom@16.13.1/umd/react-dom.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+  </body>
+</html>

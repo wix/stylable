@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mixins</title>
+
+    <!-— facebook open graph tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://stylable.io/" />
+    <meta property="og:title" content="Stylable - scoped CSS for components" />
+    <meta
+      property="og:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+
+    <!-— twitter card tags additive with the og: tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:domain" content="stylable.io" />
+    <meta name="twitter:title" content="Stylable - scoped CSS for components" />
+    <meta
+      name="twitter:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+    <meta name="twitter:url" content="https://stylable.io/" />
+
+    <link rel="stylesheet" href="../../css/normalize.css" />
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4" />
+    <link rel="stylesheet" href="../../css/highlight.css" />
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header>
+  <div class="header-content">
+    <label class="menu-icon" for="menu"> </label>
+    <a href="../.."><span class="logo"></span></a>
+
+    <ul class="main-nav">
+      <li>
+        <a href="https://github.com/wix/stylable" target="_blank"
+          ><img src="/images/logo-git.svg" alt="Stylable on GitHub"
+        /></a>
+      </li>
+      <li>
+        <a href="https://twitter.com/stylableio" target="_blank"
+          ><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"
+        /></a>
+      </li>
+    </ul>
+  </div>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'UA-109043375-1');
+  </script>
+</header>
+
+
+    <input id="menu" type="checkbox" class="hidden-control hidden-control_menu" />
+    <div class="main-content"><nav class="docs-nav">
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header"></div>
+    <ul>
+      
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Discover</div>
+    <ul>
+       <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>  <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>  <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>  <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Guides</div>
+    <ul>
+       <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>  <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>  <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>  <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>  <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>  <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>  <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>  <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>  <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>  <li class=""><a href="../../docs/guides/migration-v3" class=" docs-nav-item">Migrating to Stylable v3</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Specification Reference</div>
+    <ul>
+       <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>  <li class=""><a href="../../docs/references/imports" class=" docs-nav-item">Imports</a></li>  <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>  <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>  <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>  <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>  <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>  <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>  <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>  <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>  <li class="active"><a href="../../docs/references/mixins" class="active docs-nav-item">Mixins</a><ul><li><a href="#css-mixins" class="docs-nav-subitem">CSS Mixins</a></li><li><a href="#partial-css-mixins" class="docs-nav-subitem">Partial CSS Mixins</a></li><li><a href="#javascript-mixins" class="docs-nav-subitem">JavaScript Mixins</a></li></ul></li>  <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>  <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>  <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>  <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>  <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>  <li class=""><a href="../../docs/references/using-external-assets" class=" docs-nav-item">Using External Assets</a></li>  <li class=""><a href="../../docs/references/keyframes" class=" docs-nav-item">Keyframes</a></li> 
+    </ul>
+  </div>
+  
+</nav>
+
+<section class="docs-content">
+  <h1>Mixins</h1>
+  <p><strong>Stylable</strong> mixins enable you to reuse complex styles and CSS behaviors, defined in CSS or Javascript, and apply them to any style-rule during build time.</p>
+
+<p>Here are some examples of when you can use mixins:</p>
+
+<ul>
+  <li>Presets/Variants - create reusable pieces of styling CSS</li>
+  <li>Layouts - easily describe complex layouts</li>
+  <li>Effects - easily describe complex effects</li>
+  <li>Macros - use code to define the CSS macros you need</li>
+</ul>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+If you need to return only a single declaration value using code, we recommend instead using <a href="./formatters">formatters</a>.</p>
+</blockquote>
+
+<h2 id="css-mixins">CSS mixins</h2>
+
+<p>Any CSS stylesheet, class or element that is defined in a <strong>Stylable</strong> CSS file can be used as a mixin source. You can use either a local class or element, or import the mixin from a different stylesheet.</p>
+
+<p>In the following example, a locally defined class is used as a mixin in the same stylesheet.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.style-mixin</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">yellow</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.someClass</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">style-mixin</span><span class="p">;</span>     
+<span class="p">}</span>  
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.someClass</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* from local mixin */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">yellow</span><span class="p">;</span> <span class="c">/* from local mixin */</span>
+<span class="p">}</span>  
+</code></pre></div></div>
+
+<p>Here is an example of a <strong>Stylable</strong> CSS file that is imported and mixed into the classes of a different stylesheet. The <code class="language-plaintext highlighter-rouge">.rootMixedIn</code> class as a stylesheet and <code class="language-plaintext highlighter-rouge">classMixedIn</code> as a class.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* mixins.st.css */</span>
+<span class="nc">.root</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.someClass</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* example.st.css - imports the above mixin */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./mixins.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">MixRoot</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">someClass</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.rootMixedIn</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">MixRoot</span><span class="p">;</span> <span class="c">/* stylesheet mixin */</span>
+<span class="p">}</span>
+
+<span class="nc">.classMixedIn</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">someClass</span><span class="p">;</span> <span class="c">/* class mixin */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.rootMixedIn</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span> <span class="c">/* from stylesheet mixin */</span>
+<span class="p">}</span>
+
+<span class="nc">.rootMixedIn</span> <span class="nc">.someClass</span> <span class="p">{</span> <span class="c">/* ruleset added as a result of the stylesheet mixin */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.classMixedIn</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* from class mixin */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="css-mixin-with-parameters-and-variables">CSS mixin with parameters and variables</h3>
+
+<p>CSS mixins can accept named parameters in the following format:
+ <code class="language-plaintext highlighter-rouge">mixin(variableName valueOverride, variableName2 valueOverride2)</code>. 
+Multiple variables can be comma separated or written on multiple lines:
+ <code class="language-plaintext highlighter-rouge">mixin (
+     variableName valueOverride,
+     variableName2 valueOverride2
+ )</code></p>
+
+<p>Using parameters in a mixin enables you to override specific <a href="./variables">variables</a> inside of a mixin before they are applied.</p>
+
+<p>Here is an example of using a variable in a CSS mixin and how it can be overridden by the mixin’s parameter value.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.classToMixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.targetClass</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">classToMixin</span><span class="p">(</span><span class="n">color1</span> <span class="no">orange</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.classToMixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* from local class */</span>
+<span class="p">}</span>
+
+<span class="nc">.targetClass</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">orange</span><span class="p">;</span> <span class="c">/* from mixin with override */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="partial-css-mixins">Partial CSS mixins</h2>
+
+<p>Partial CSS Mixins (<code class="language-plaintext highlighter-rouge">-st-partial-mixin</code>) is a continuation of the idea of mixins with parameter overrides. (as described above)</p>
+
+<p>Where a regular <code class="language-plaintext highlighter-rouge">-st-mixin</code> includes all declarations inside the targeted mixed-in class, partial mixins enable you to pass through overriding variable values and mix in only declarations that would be affected by such an override.</p>
+
+<p>For a partial mixin to work, at least one overriding variable must be provided, additional ones being optional.</p>
+
+<h3 id="example">Example</h3>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="py">-st-partial-mixin</span><span class="p">:</span> <span class="n">my-mixin</span><span class="p">(</span><span class="n">color1</span> <span class="no">gold</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>A partial mixin will include any declaration in the mixed-in class (or rules containing the mixed-in class) that contains a variable usage that will be overridden. Any other variables not overridden inside the mixed in declaration will retain their original values.</p>
+
+<h3 id="example-1">Example</h3>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:vars</span> <span class="p">{</span>
+    <span class="py">color1</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+    <span class="py">color2</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span>
+    <span class="py">size1</span><span class="p">:</span> <span class="m">2px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color1</span><span class="p">);</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.my-mixin</span> <span class="nc">.part</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">size1</span><span class="p">)</span> <span class="nb">solid</span> <span class="n">value</span><span class="p">(</span><span class="n">color2</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="py">-st-partial-mixin</span><span class="p">:</span> <span class="n">my-mixin</span><span class="p">(</span><span class="n">color1</span> <span class="no">gold</span><span class="p">,</span> <span class="n">size1</span> <span class="m">5px</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* output */</span>
+<span class="nc">.container</span> <span class="p">{</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.container</span> <span class="nc">.part</span> <span class="p">{</span>
+    <span class="nl">border</span><span class="p">:</span> <span class="m">5px</span> <span class="nb">solid</span> <span class="no">green</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="javascript-mixins">JavaScript mixins</h2>
+
+<p>JavaScript mixins allow you to create complex structures in CSS based on the arguments passed to the mixin.</p>
+
+<p>A JS mixin returns a CSS fragment which can contain multiple declarations with optional sub style-rules.</p>
+
+<p>Arguments are passed to the mixin as a string argument and it’s the mixin’s responsibility to parse them.</p>
+
+<p>Here is an example of a mixin receiving multiple arguments and returning multiple declarations into the target ruleset.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* file my-mixin.js */</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">colorAndBg</span><span class="p">([</span><span class="nx">color</span><span class="p">,</span> <span class="nx">bgColor</span><span class="p">]){</span> 
+    <span class="cm">/* arguments: array of string types */</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="na">color</span><span class="p">:</span> <span class="nx">color</span><span class="p">,</span>
+        <span class="na">background</span><span class="p">:</span> <span class="nx">bgColor</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* file example.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./my-mixin'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">colorAndBg</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.codeMixedIn</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">colorAndBg</span><span class="p">(</span><span class="no">green</span><span class="p">,</span> <span class="no">orange</span><span class="p">);</span> 
+    <span class="nl">font-family</span><span class="p">:</span> <span class="nb">monospace</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.codeMixedIn</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* from JS mixin */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">orange</span><span class="p">;</span> <span class="c">/* from JS mixin */</span>
+    <span class="nl">font-family</span><span class="p">:</span> <span class="nb">monospace</span><span class="p">;</span> <span class="c">/* from local class */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="javascript-mixins-returning-multiple-style-rules">JavaScript mixins returning multiple style-rules</h3>
+
+<p>Mixins can return multiple style-rules that are mixed into the target stylesheet. These style-rules can be written with the following syntax options:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">selector</code> - resulting ruleset is appended as a descendent selector to its mixed in target (in below example <code class="language-plaintext highlighter-rouge">.otherClass</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">&amp;selector</code> - resulting ruleset references the parent selector into which it was mixed in (in below example <code class="language-plaintext highlighter-rouge">&amp;:hover</code>, the parent selector is <code class="language-plaintext highlighter-rouge">.codeMixedIn</code>)</li>
+</ul>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* file my-mixin.js */</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">complexMixin</span><span class="p">([</span><span class="nx">color</span><span class="p">,</span> <span class="nx">bgColor</span><span class="p">]){</span> 
+    <span class="cm">/* arguments: array of string types */</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="na">color</span><span class="p">:</span> <span class="nx">color</span><span class="p">,</span>
+        <span class="na">background</span><span class="p">:</span> <span class="nx">bgColor</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">&amp;:hover</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">color</span><span class="p">:</span> <span class="dl">"</span><span class="s2">gold</span><span class="dl">"</span>
+        <span class="p">},</span>
+        <span class="dl">"</span><span class="s2">.otherClass</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">color</span><span class="p">:</span> <span class="dl">"</span><span class="s2">purple</span><span class="dl">"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* file example.st.css */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./my-mixin'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">complexMixin</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.codeMixedIn</span> <span class="p">{</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="n">complexMixin</span><span class="p">(</span><span class="no">green</span><span class="p">,</span> <span class="no">orange</span><span class="p">);</span> 
+    <span class="nl">font-family</span><span class="p">:</span> <span class="nb">monospace</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* CSS output */</span>
+<span class="nc">.codeMixedIn</span> <span class="p">{</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">green</span><span class="p">;</span> <span class="c">/* from JS mixin */</span>
+    <span class="nl">background</span><span class="p">:</span> <span class="no">orange</span><span class="p">;</span> <span class="c">/* from JS mixin */</span>
+    <span class="nl">font-family</span><span class="p">:</span> <span class="nb">monospace</span><span class="p">;</span> <span class="c">/* from local class */</span>
+<span class="p">}</span>
+
+<span class="nc">.codeMixedIn</span><span class="nd">:hover</span> <span class="p">{</span> <span class="c">/* from JS mixin with &amp; */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">gold</span><span class="p">;</span> 
+<span class="p">}</span>
+
+<span class="nc">.codeMixedIn</span> <span class="nc">.otherClass</span> <span class="p">{</span> <span class="c">/* from JS mixin with appended selector */</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">purple</span><span class="p">;</span> 
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="how-mixins-are-applied">How mixins are applied</h2>
+
+<p>Mixins can add CSS declarations to the CSS ruleset to which they are applied.</p>
+
+<p>Rules are added at the position in the CSS where the <code class="language-plaintext highlighter-rouge">-st-mixin</code> is declared.
+Any selectors that are appended as a result of the mixin are added directly after the ruleset that the mixin was applied to.</p>
+
+<p>You can apply multiple mixins from either CSS or JavaScript, or both separated by comma <code class="language-plaintext highlighter-rouge">-st-mixin: mixinA, mixinB</code>.
+Multiple mixins are applied according to the order that they are declared left to right.</p>
+
+<h2 id="considerations-when-using-mixins">Considerations when using mixins</h2>
+
+<p>Take a look at these considerations before working with <strong>Stylable</strong> mixins.</p>
+
+<h3 id="mixin-usage-with-special-characters">Mixin usage with special characters</h3>
+<p>You can escape special characters by wrapping them with quotes or using a backslash (<code class="language-plaintext highlighter-rouge">\</code>).</p>
+
+<p>Example:</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.x</span> <span class="p">{</span> <span class="c">/* use quotations to include comma */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"xx,x"</span><span class="p">);</span> <span class="c">/* ["300", "xx,x"] */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>They can also be used to include quotes or backslashes as part of the parameter.</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.y</span> <span class="p">{</span> <span class="c">/* escape slashes */</span>
+    <span class="py">-st-mixin</span><span class="p">:</span> <span class="nb">mix</span><span class="p">(</span><span class="m">300</span><span class="p">,</span> <span class="s1">"\"xxx\""</span><span class="p">);</span> <span class="c">/* ["300", "\"xxx\""] */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h3 id="circular-references">Circular references</h3>
+<p>It is possible to reach a state where you have circular references between mixins. These cannot be resolved, and a diagnostics warning is issued in your <strong>Stylable</strong> code intelligence and build process.</p>
+
+
+</section>
+</div>
+
+    
+    <script src="../../js/vendor/prism/prism.js"></script>
+    <script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+    <script>
+      tippy('.code [title]', {
+        duration: 0,
+      });
+    </script>
+
+    <script src="https://static.parastorage.com/unpkg/react@16.13.1/umd/react.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/react-dom@16.13.1/umd/react-dom.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+  </body>
+</html>

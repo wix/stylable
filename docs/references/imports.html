@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Imports</title>
+
+    <!-— facebook open graph tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://stylable.io/" />
+    <meta property="og:title" content="Stylable - scoped CSS for components" />
+    <meta
+      property="og:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta property="og:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+
+    <!-— twitter card tags additive with the og: tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:domain" content="stylable.io" />
+    <meta name="twitter:title" content="Stylable - scoped CSS for components" />
+    <meta
+      name="twitter:description"
+      content="Stylable is an open-source CSS preprocessor that extends and scopes CSS for components, resolving to flat, vanilla, cross-browser CSS at build time."
+    />
+    <meta name="twitter:image" content="https://stylable.io/images/96-logo-horizontal.png" />
+    <meta name="twitter:url" content="https://stylable.io/" />
+
+    <link rel="stylesheet" href="../../css/normalize.css" />
+    <link rel="stylesheet" href="../../css/main.css?cacheKill=4" />
+    <link rel="stylesheet" href="../../css/highlight.css" />
+    <link rel="icon" type="image/x-icon" href="../../images/favicon-1.png" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header>
+  <div class="header-content">
+    <label class="menu-icon" for="menu"> </label>
+    <a href="../.."><span class="logo"></span></a>
+
+    <ul class="main-nav">
+      <li>
+        <a href="https://github.com/wix/stylable" target="_blank"
+          ><img src="/images/logo-git.svg" alt="Stylable on GitHub"
+        /></a>
+      </li>
+      <li>
+        <a href="https://twitter.com/stylableio" target="_blank"
+          ><img src="/images/logo-twitter.svg" alt="Stylable on Twitter"
+        /></a>
+      </li>
+    </ul>
+  </div>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109043375-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'UA-109043375-1');
+  </script>
+</header>
+
+
+    <input id="menu" type="checkbox" class="hidden-control hidden-control_menu" />
+    <div class="main-content"><nav class="docs-nav">
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header"></div>
+    <ul>
+      
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Discover</div>
+    <ul>
+       <li class=""><a href="../../docs/get-started" class=" docs-nav-item">Getting Started</a></li>  <li class=""><a href="../../docs/getting-started/install-configure" class=" docs-nav-item">Installation</a></li>  <li class=""><a href="../../docs/getting-started/react-integration" class=" docs-nav-item">React Integration</a></li>  <li class=""><a href="../../docs/getting-started/stylable-intelligence" class=" docs-nav-item">Stylable Intelligence</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Guides</div>
+    <ul>
+       <li class=""><a href="../../docs/guides/components-basics" class=" docs-nav-item">Component Basics</a></li>  <li class=""><a href="../../docs/guides/stylable-component-best-practices" class=" docs-nav-item">Component Best Practices</a></li>  <li class=""><a href="../../docs/guides/runtime" class=" docs-nav-item">Runtime</a></li>  <li class=""><a href="../../docs/guides/stylable-application" class=" docs-nav-item">Stylable Application</a></li>  <li class=""><a href="../../docs/guides/stylable-component-library" class=" docs-nav-item">Stylable Component Library</a></li>  <li class=""><a href="../../docs/guides/project-commons" class=" docs-nav-item">Project Commons</a></li>  <li class=""><a href="../../docs/guides/shared-classes" class=" docs-nav-item">Shared Classes</a></li>  <li class=""><a href="../../docs/guides/component-variants" class=" docs-nav-item">Component Variants</a></li>  <li class=""><a href="../../docs/guides/server-side-rendering" class=" docs-nav-item">Server Side Rendering</a></li>  <li class=""><a href="../../docs/guides/migration-v3" class=" docs-nav-item">Migrating to Stylable v3</a></li> 
+    </ul>
+  </div>
+  
+  <div class="docs-nav-section">
+    <div class="docs-nav-section-header">Specification Reference</div>
+    <ul>
+       <li class=""><a href="../../docs/getting-started/cheatsheet" class=" docs-nav-item">Specification Overview</a></li>  <li class="active"><a href="../../docs/references/imports" class="active docs-nav-item">Imports</a></li>  <li class=""><a href="../../docs/references/root" class=" docs-nav-item">Root</a></li>  <li class=""><a href="../../docs/references/class-selectors" class=" docs-nav-item">Class Selectors</a></li>  <li class=""><a href="../../docs/references/tag-selectors" class=" docs-nav-item">Tag/Component Selectors</a></li>  <li class=""><a href="../../docs/references/extend-stylesheet" class=" docs-nav-item">Extend Stylesheet</a></li>  <li class=""><a href="../../docs/references/pseudo-classes" class=" docs-nav-item">Pseudo-Classes</a></li>  <li class=""><a href="../../docs/references/pseudo-elements" class=" docs-nav-item">Pseudo-Elements</a></li>  <li class=""><a href="../../docs/references/global-selectors" class=" docs-nav-item">Global Selectors</a></li>  <li class=""><a href="../../docs/references/custom-selectors" class=" docs-nav-item">Custom Selectors</a></li>  <li class=""><a href="../../docs/references/mixins" class=" docs-nav-item">Mixins</a></li>  <li class=""><a href="../../docs/references/formatters" class=" docs-nav-item">Formatters</a></li>  <li class=""><a href="../../docs/references/variables" class=" docs-nav-item">Variables</a></li>  <li class=""><a href="../../docs/references/css-vars" class=" docs-nav-item">CSS Custom Properties</a></li>  <li class=""><a href="../../docs/references/st-scope" class=" docs-nav-item">Scoping</a></li>  <li class=""><a href="../../docs/references/namespace" class=" docs-nav-item">Namespace</a></li>  <li class=""><a href="../../docs/references/using-external-assets" class=" docs-nav-item">Using External Assets</a></li>  <li class=""><a href="../../docs/references/keyframes" class=" docs-nav-item">Keyframes</a></li> 
+    </ul>
+  </div>
+  
+</nav>
+
+<section class="docs-content">
+  <h1>Imports</h1>
+  <p><strong>Stylable</strong> enables you to import other stylesheets and modules in a way that is similar to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import">JS Imports</a>. You can then use the stylesheet or module as it’s been defined, or just one or more of its named values, in your own <strong>Stylable</strong> stylesheet.</p>
+
+<h2 id="import-syntax">Import syntax</h2>
+<p><strong>Stylable</strong> supports two types of import syntax that can be used, the two are identical in their capabilities.</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@st-import</code> at-rule directive - A newer more concise syntax, similar to ES imports:
+    <ul>
+      <li>replace <code class="language-plaintext highlighter-rouge">&lt;DEFAULT_NAME&gt;</code> with your desired local name to import an entire stylesheet, representing its root class</li>
+      <li>Inside the square brackets, import any inner parts belonging to said stylesheet</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@st-import</span> <span class="err">&lt;</span><span class="n">DEFAULT_NAME</span><span class="err">&gt;</span><span class="p">,</span> <span class="p">[</span><span class="err">&lt;</span><span class="n">NAMED_PART1</span><span class="p">,</span> <span class="n">NAMED_PART2</span><span class="p">,</span> <span class="p">...</span><span class="err">&gt;</span><span class="p">]</span> <span class="n">from</span> <span class="s2">'./stylesheet.st.css'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">:import</code> ruleset directive - The original more verbose way of importing symbols, uses the <strong>Stylable</strong> syntax beginning with <code class="language-plaintext highlighter-rouge">-st-</code> inside the <code class="language-plaintext highlighter-rouge">:import</code> ruleset:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">-st-from:</code> Identifies the path to the stylesheet or JavaScript module. Can be a relative path or a 3rd party path.</li>
+      <li><code class="language-plaintext highlighter-rouge">-st-default:</code> Imports the default export of the module named in <code class="language-plaintext highlighter-rouge">-st-from:</code>. Use with the name by which to identify the imported value in the scoped stylesheet.</li>
+      <li><code class="language-plaintext highlighter-rouge">-st-named:</code> List of the named exports to import into the local scoped stylesheet from the file named in <code class="language-plaintext highlighter-rouge">-st-from:</code>.</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./stylesheet.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="err">&lt;</span><span class="n">DEFAULT_NAME</span><span class="err">&gt;</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="err">&lt;</span><span class="n">NAMED_PART1</span><span class="p">,</span> <span class="n">NAMED_PART2</span><span class="p">,</span> <span class="p">...</span><span class="err">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Every example below will feature both types of import syntaxes, their end result is identical.</p>
+
+<blockquote>
+  <p><strong>Note</strong></p>
+  <ul>
+    <li><code class="language-plaintext highlighter-rouge">:import</code> is a Stylable directive and not a selector.</li>
+    <li>likewise, <code class="language-plaintext highlighter-rouge">@st-import</code> is a Stylable directive and not an actual at-rule.</li>
+    <li>Import statements cannot be used as a part of a complex selector or inside a CSS ruleset.</li>
+    <li>Multiple imports may conflict in their used symbol names; the last one in the file wins.</li>
+  </ul>
+</blockquote>
+
+<h2 id="imports---basic-usage">Imports - basic usage</h2>
+
+<p>Here are some examples of how you can use imports in your <strong>Stylable</strong> stylesheet.</p>
+
+<h3 id="import-the-default-export-of-a-local-reference-stylesheet-for-use-in-the-scoped-stylesheet">Import the default export of a local reference stylesheet for use in the scoped stylesheet</h3>
+
+<p>Import the <code class="language-plaintext highlighter-rouge">button.st.css</code> stylesheet from a local location. Assign the name <code class="language-plaintext highlighter-rouge">Button</code> to the default export of that stylesheet for use in this scoped stylesheet.</p>
+
+<p>When importing another stylesheet, the default import represents the root of the stylesheet and is generally treated as a component, and named imports represent other internal stylesheet parts.</p>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+Generally when importing a <strong>default</strong> value from a stylable file, you should use a capital letter to signify that the value represents a component root node in this stylesheet.</p>
+</blockquote>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - atRule syntax */</span>
+<span class="k">@st-import</span> <span class="n">ToggleButton</span> <span class="n">from</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - legacy syntax */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-default</span><span class="p">:</span> <span class="n">ToggleButton</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 "equivalent" */</span>
+<span class="k">import</span> <span class="nx">ToggleButton</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./button.st.css</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="import-named-parts-from-a-local-stylesheet">Import named parts from a local stylesheet</h3>
+<p>Named imports from a stylesheet can be used to bring symbols of different types, which you can then use inside your stylesheet.</p>
+
+<ul>
+  <li>Elements</li>
+  <li>Classes</li>
+  <li>Stylable Variables</li>
+  <li>CSS Variables</li>
+  <li>Keyframes - special case, see <a href="#importing_keyframes">importing keyframes</a> entry below</li>
+</ul>
+
+<p>In this</p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - atRule syntax */</span>
+<span class="k">@st-import</span> <span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="nb">icon</span><span class="p">,</span> <span class="n">--bgColor</span><span class="p">]</span> <span class="n">from</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - legacy syntax */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s2">'./button.st.css'</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span> <span class="nb">icon</span><span class="p">,</span> <span class="n">--bgColor</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 "equivalent" */</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">label</span><span class="p">,</span> <span class="nx">icon</span><span class="p">,</span> <span class="o">--</span><span class="nx">bgColor</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./button.st.css</span><span class="dl">'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="import-named-exports-from-a-local-js-module">Import named exports from a local JS module</h3>
+
+<p>The values <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="language-plaintext highlighter-rouge">my-mixins.js</code>. These named exports are now imported into this scoped stylesheet.</p>
+
+<blockquote>
+  <p><strong>Note</strong><br />
+When importing named values, they are generally used as class or tag selectors and, therefore, you should camelCase to name them.</p>
+</blockquote>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - atRule syntax */</span>
+<span class="k">@st-import</span> <span class="p">[</span><span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span><span class="p">]</span> <span class="n">from</span> <span class="s2">'./my-mixins'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - legacy syntax */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./my-mixins</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="import-named-exports-from-a-local-js-module-and-locally-refer-to-one-of-the-export-values-as-a-different-name">Import named exports from a local JS module and locally refer to one of the export values as a different name</h3>
+
+<p>The values <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> are imported from the local JavaScript module <code class="language-plaintext highlighter-rouge">my-mixins.js</code>. The value <code class="language-plaintext highlighter-rouge">gridMixin</code> is used as is and <code class="language-plaintext highlighter-rouge">tooltipMixin</code> has been renamed for use in this scoped stylesheet as <code class="language-plaintext highlighter-rouge">tooltip</code>. These mixins are referred to as <code class="language-plaintext highlighter-rouge">gridMixin</code> and <code class="language-plaintext highlighter-rouge">tooltip</code> in this stylesheet.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - atRule syntax */</span>
+<span class="k">@st-import</span> <span class="p">[</span><span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span> <span class="n">as</span> <span class="n">tooltip</span><span class="p">]</span> <span class="n">from</span> <span class="s2">'./my-mixins'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - legacy syntax */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">gridMixin</span><span class="p">,</span> <span class="n">tooltipMixin</span> <span class="n">as</span> <span class="n">tooltip</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* ES6 equivalent */</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">gridMixin</span><span class="p">,</span> <span class="nx">tooltipMixin</span> <span class="k">as</span> <span class="nx">tooltip</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">./my-mixins</span><span class="dl">"</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="import-keyframes">Import keyframes</h2>
+
+<p>In Stylable, both class names and keyframes undergo namespacing to avoid collision. However, despite the two being global, they do not share a namespace in CSS - this means that you can have both a class name and a keyframe with the same name.</p>
+
+<p>Due to this, when importing keyframes from another stylesheet, a special <code class="language-plaintext highlighter-rouge">keyframes()</code> directive needs to be used.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - atRule syntax */</span>
+<span class="k">@st-import</span> <span class="p">[</span><span class="n">keyframes</span><span class="p">(</span><span class="n">slideX</span><span class="p">,</span> <span class="n">slideY</span><span class="p">)]</span> <span class="n">from</span> <span class="s2">'./keyframes.st.css'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* comp.st.css - legacy syntax */</span>
+<span class="nd">:import</span> <span class="p">{</span>
+    <span class="py">-st-from</span><span class="p">:</span> <span class="s1">"./my-mixins"</span><span class="p">;</span>
+    <span class="py">-st-named</span><span class="p">:</span> <span class="n">keyframes</span><span class="p">(</span><span class="n">slideX</span><span class="p">,</span> <span class="n">slideY</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>You can read more about keyframes behavior <a href="./keyframes">here</a>.</p>
+
+<h2 id="importing-specific-symbols">Importing specific symbols</h2>
+
+<ul>
+  <li><a href="./tag-selectors">Tag selectors</a></li>
+  <li><a href="./extend-stylesheet">Extend a stylesheet</a></li>
+  <li><a href="./variables#import-variables">Import Stylable variables</a></li>
+  <li><a href="./css-vars#importing-css-variables">Import CSS variables</a></li>
+  <li><a href="./class-selectors#import-classes">Import classes</a></li>
+  <li><a href="./mixins">Mixins</a></li>
+  <li><a href="../guides/component-variants">Component variants</a> and <a href="../guides/shared-classes">Shared classes</a></li>
+</ul>
+
+</section>
+</div>
+
+    
+    <script src="../../js/vendor/prism/prism.js"></script>
+    <script src="../../js/vendor/tippy/tippy.all.min.js"></script>
+    <script>
+      tippy('.code [title]', {
+        duration: 0,
+      });
+    </script>
+
+    <script src="https://static.parastorage.com/unpkg/react@16.13.1/umd/react.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/react-dom@16.13.1/umd/react-dom.production.min.js"></script>
+    <script src="https://static.parastorage.com/unpkg/jquery@3.3.1"></script>
+  </body>
+</html>
