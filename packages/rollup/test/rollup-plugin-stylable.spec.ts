@@ -1,19 +1,21 @@
 import { nodeFs } from '@file-services/node';
-import { join } from 'path';
 import { expect } from 'chai';
-import { rollupRunner } from '../test-kit/rollup-runner';
+import { rollupRunner } from './test-kit/rollup-runner';
+import { getProjectPath } from './test-kit/test-helpers';
 
 describe('StylableRollupPlugin', () => {
+    const project = 'simple-stylable';
+
     const runner = rollupRunner({
-        projectPath: join(__dirname, `projects/simple-stylable`),
+        projectPath: getProjectPath(project),
     });
 
-    it('should', async () => {
+    it('should work', async () => {
         const { projectDir, serve, bundle, open } = runner;
 
         await bundle();
         const url = await serve();
-        const page = await open(url);
+        const page = await open(url, { headless: false });
 
         const getBodyStyles = () => {
             const { backgroundImage, fontSize, fontFamily } = getComputedStyle(document.body);
@@ -31,7 +33,7 @@ describe('StylableRollupPlugin', () => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');
         });
 
-        await page.reload({ waitUntil: 'networkidle0' });
+        await page.reload({ waitUntil: 'networkidle' });
 
         const { body: body2 } = await page.evaluate(getBodyStyles);
 

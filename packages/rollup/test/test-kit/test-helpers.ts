@@ -1,4 +1,4 @@
-import { basename, join } from 'path';
+import { basename, dirname, join } from 'path';
 import { nodeFs } from '@file-services/node';
 import { OutputChunk, RollupBuild, RollupWatcher, RollupWatcherEvent } from 'rollup';
 import { createTempDirectorySync } from 'create-temp-directory';
@@ -65,6 +65,6 @@ export function findModuleByName(fileName: string, build: RollupBuild, chunk?: O
     return modules[0];
 }
 
-export function getProjectPath(name: string, index = 'index.ts'): string {
-    return join(__dirname, `projects/${name}/${index}`);
+export function getProjectPath(name: string) {
+    return dirname(require.resolve(`@stylable/rollup/test/projects/${name}/package.json`));
 }

@@ -1,16 +1,16 @@
 import nodeResolve from 'rollup-plugin-node-resolve';
 import { watch } from 'rollup';
 import { serve } from '@stylable/e2e-test-kit';
-import puppeteer from 'puppeteer';
-import { stylableRollupPlugin } from '../src';
+import playwright from 'playwright-core';
+import { stylableRollupPlugin } from '@stylable/rollup';
 import { createTempProject, actAndWaitForBuild } from './test-helpers';
 import { join } from 'path';
 const html = require('@rollup/plugin-html');
 
 export function rollupRunner({
     projectPath,
-    nodeModulesPath = join(__dirname, '../../../node_modules'),
-    entry = 'index.ts',
+    nodeModulesPath = join(__dirname, '../../../../node_modules'),
+    entry = 'index.js',
 }: {
     projectPath: string;
     nodeModulesPath?: string;
@@ -73,12 +73,12 @@ export function rollupRunner({
             disposables.push(() => server.close());
             return serverUrl;
         },
-        async open(url: string) {
-            const browser = await puppeteer.launch({ headless: true });
-            const page = await browser.newPage();
+        async open(url: string, launchOptions?: playwright.LaunchOptions) {
+            const browser = await playwright.chromium.launch(launchOptions);
+            const browserContext = await browser.newContext();
+            const page = await browserContext.newPage();
 
-            await page.setCacheEnabled(false);
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle' });
 
             disposables.push(() => {
                 return browser.close();

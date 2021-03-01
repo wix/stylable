@@ -5,7 +5,7 @@ import {
     Stylable,
     StylableMeta,
     StylableResults,
-    findMetaDependencies,
+    visitMetaCSSDependenciesBFS,
 } from '@stylable/core';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -24,9 +24,8 @@ interface PluginOptions {
     resolveNamespace?: typeof resolveNamespaceNode;
 }
 const runtimeImport = `import {style as stc, cssStates as sts} from ${JSON.stringify(
-    nodeFs.join(__dirname, 'runtime.js')
+    require.resolve('@stylable/rollup/runtime')
 )};`;
-
 
 export function stylableRollupPlugin({
     minify = false,
@@ -69,12 +68,12 @@ export function stylableRollupPlugin({
             const assetsIds = emitAssets(id, this, stylable, res.meta, emittedAssets, inlineAssets);
             const css = generateCssString(res.meta, minify, stylable, assetsIds);
 
-            findMetaDependencies(
+            visitMetaCSSDependenciesBFS(
                 res.meta,
                 (dep) => {
                     this.addWatchFile(dep.source);
                 },
-                stylable.createTransformer()
+                stylable.createResolver()
             );
 
             extracted.set(id, { css });
@@ -122,7 +121,6 @@ function sortByDepth(modules: { depth: number; moduleId: string }[]) {
         })
         .sort((a, b) => b.depth - a.depth);
 }
-
 
 function generateStylableModuleCode2(res: StylableResults) {
     return `

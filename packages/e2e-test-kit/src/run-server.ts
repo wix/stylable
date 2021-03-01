@@ -4,7 +4,7 @@ export async function serve(dir: string, port = 3000, log = console.log) {
     return new Promise<{ server: { close(): void }; serverUrl: string }>((res) => {
         const child = spawn(
             'node',
-            ['-r', '@ts-tools/node/r', './isolated-server', dir, port.toString()],
+            ['./isolated-server', dir, port.toString()],
             {
                 cwd: __dirname,
                 stdio: ['inherit', 'inherit', 'inherit', 'ipc'],

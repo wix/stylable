@@ -22,7 +22,7 @@ export function calcDepth(
 
     path = path.concat(module);
 
-    const dependencies = context.getModuleInfo(module).importedIds;
+    const dependencies = context.getModuleInfo(module)!.importedIds;
 
     for (const dependencyModule of dependencies) {
         cssDepth = Math.max(cssDepth, calcDepth(dependencyModule, context, path, cache));
@@ -45,7 +45,7 @@ export function getCSSViewModules(module: string, context: PluginContext) {
     if (isStylableModule(module)) {
         const viewPath = module.replace(/\.st\.css$/, '');
 
-        const parentViewsList = context.getModuleInfo(module).importers.filter((importer) => {
+        const parentViewsList = context.getModuleInfo(module)!.importers.filter((importer) => {
             const { dir, name } = parse(importer);
             if (!isStylableModule(importer) && join(dir, name) === viewPath) {
                 return true;
