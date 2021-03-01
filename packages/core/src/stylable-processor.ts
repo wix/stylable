@@ -184,13 +184,7 @@ export class StylableProcessor {
                 this.handleCSSVarUse(decl);
             }
 
-            processDeclarationUrls(
-                decl,
-                (node) => {
-                    this.meta.urls.push(node.url!);
-                },
-                false
-            );
+            this.collectUrls(decl);
         });
 
         stubs.forEach((s) => s && s.remove());
@@ -323,7 +317,15 @@ export class StylableProcessor {
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
-
+    private collectUrls(decl: postcss.Declaration) {
+        processDeclarationUrls(
+            decl,
+            (node) => {
+                this.meta.urls.push(node.url!);
+            },
+            false
+        );
+    }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
         this.meta.ast.walkComments((comment) => {
@@ -573,6 +575,7 @@ export class StylableProcessor {
 
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls((decl) => {
+            this.collectUrls(decl);
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 

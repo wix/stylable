@@ -425,4 +425,19 @@ describe('Stylable postcss process', () => {
         expect(mixinRule.mixins![0].mixin.type).to.eql('my-mixin3');
         expect(mixinRule.mixins![1].mixin.type).to.eql('my-mixin4');
     });
+
+    describe('process assets', () => {
+        it('should collect url assets from :vars', () => {
+            const result = processSource(
+                `
+                :vars {
+                    img: url('./x.svg');
+                }
+            `,
+                { from: 'path/to/style.css' }
+            );
+
+            expect(result.urls.length).to.eql(1);
+        });
+    });
 });
