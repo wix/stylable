@@ -4,7 +4,7 @@
   "description": "Rollup plugin for Stylable modules",
   "main": "dist/index.js",
   "scripts": {
-    "test": "mocha \"dist/test/**/*.spec.js\""
+    "test": "mocha \"dist/test/**/*.spec.js\" --timeout 10000"
   },
   "peerDependencies": {
     "@stylable/core": ">=3",
