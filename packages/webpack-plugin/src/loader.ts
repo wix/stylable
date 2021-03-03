@@ -1,4 +1,4 @@
-import { addBuildDependencies, getImports } from './loader-utils';
+import { getImports } from './loader-utils';
 import type { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core';
 
@@ -20,7 +20,9 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
         urls,
         unusedImports,
     });
-    addBuildDependencies(this, buildDependencies);
+    for (const dep of buildDependencies) {
+        this.addDependency(dep);
+    }
     emitDiagnostics(this, meta, this.diagnosticsMode);
 
     const varType = this.target === 'oldie' ? 'var' : 'const';

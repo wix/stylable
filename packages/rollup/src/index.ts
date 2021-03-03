@@ -1,12 +1,10 @@
 import {
-    isAsset,
-    makeAbsolute,
-    processDeclarationUrls,
     Stylable,
     StylableMeta,
     StylableResults,
     visitMetaCSSDependenciesBFS,
 } from '@stylable/core';
+import { getUrlDependencies, sortModulesByDepth } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { nodeFs } from '@file-services/node';
@@ -64,7 +62,7 @@ export function stylableRollupPlugin({
                 return null;
             }
             const res = stylable.transform(source, id);
-            const assetsIds = emitAssets(id, this, stylable, res.meta, emittedAssets, inlineAssets);
+            const assetsIds = emitAssets(this, stylable, res.meta, emittedAssets, inlineAssets);
             const css = generateCssString(res.meta, minify, stylable, assetsIds);
 
             visitMetaCSSDependenciesBFS(
@@ -90,7 +88,11 @@ export function stylableRollupPlugin({
                 }
             }
 
-            sortByDepth(modules);
+            sortModulesByDepth(
+                modules,
+                (m) => m.depth,
+                (m) => m.moduleId
+            );
 
             outputCSS = '';
 
@@ -105,20 +107,6 @@ export function stylableRollupPlugin({
             this.emitFile({ source: outputCSS, type: 'asset', fileName });
         },
     };
-}
-
-function sortByDepth(modules: { depth: number; moduleId: string }[]) {
-    modules
-        .sort((a, b) => {
-            if (a.moduleId > b.moduleId) {
-                return 1;
-            } else if (a.moduleId < b.moduleId) {
-                return -1;
-            } else {
-                return 0;
-            }
-        })
-        .sort((a, b) => b.depth - a.depth);
 }
 
 const runtimeImport = `import {style as stc, cssStates as sts} from ${JSON.stringify(
@@ -147,9 +135,7 @@ function generateCssString(
 ) {
     const css = meta
         .outputAst!.toString()
-        .replace(/__css_asset_placeholder__(.*?)__/g, (_$0, $1) =>
-            JSON.stringify(assetsIds[Number($1)])
-        );
+        .replace(/__stylable_url_asset_(.*?)__/g, (_$0, $1) => assetsIds[Number($1)]);
 
     if (minify && stylable.optimizer) {
         return stylable.optimizer.minifyCSS(css);
@@ -158,14 +144,13 @@ function generateCssString(
 }
 
 function emitAssets(
-    id: string,
     ctx: PluginContext,
     stylable: Stylable,
     meta: StylableMeta,
     emittedAssets: Map<string, string>,
     inlineAssets: boolean
 ): string[] {
-    const assets = getUrlDependencies(meta, nodeFs.dirname(id), stylable.projectRoot);
+    const assets = getUrlDependencies(meta, stylable.projectRoot);
     const assetsIds: string[] = [];
     for (const asset of assets) {
         if (inlineAssets) {
@@ -197,29 +182,4 @@ function emitAssets(
         }
     }
     return assetsIds;
-}
-
-function rewriteUrl(node: any, replacementIndex: number) {
-    node.stringType = '';
-    delete node.innerSpacingBefore;
-    delete node.innerSpacingAfter;
-    node.url = `__css_asset_placeholder__${replacementIndex}__`;
-}
-
-function getUrlDependencies(meta: StylableMeta, importerDir: string, rootContext: string) {
-    const urls: string[] = [];
-    meta.outputAst!.walkDecls((node) =>
-        processDeclarationUrls(
-            node,
-            (node) => {
-                const { url } = node;
-                if (url && isAsset(url)) {
-                    rewriteUrl(node, urls.length);
-                    urls.push(makeAbsolute(url, rootContext, importerDir));
-                }
-            },
-            true
-        )
-    );
-    return urls;
 }

@@ -5,6 +5,7 @@ import {
     OptimizeConfig,
     DiagnosticsMode,
 } from '@stylable/core';
+import { sortModulesByDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
@@ -26,7 +27,6 @@ import {
     createStaticCSS,
     getFileName,
     getStylableBuildMeta,
-    getSortedModules,
     reportNamespaceCollision,
     createOptimizationMapping,
     getTopLevelInputFilesystem,
@@ -356,7 +356,11 @@ export class StylableWebpackPlugin {
         compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
             const optimizer = this.stylable.optimizer!;
             const optimizeOptions = this.options.optimize;
-            const sortedModules = getSortedModules(stylableModules);
+            const sortedModules = sortModulesByDepth(
+                Array.from(stylableModules),
+                (m) => getStylableBuildMeta(m).depth,
+                (m) => m.resource
+            );
 
             const {
                 usageMapping,
