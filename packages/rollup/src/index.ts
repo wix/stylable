@@ -23,9 +23,6 @@ interface PluginOptions {
     fileName?: string;
     resolveNamespace?: typeof resolveNamespaceNode;
 }
-const runtimeImport = `import {style as stc, cssStates as sts} from ${JSON.stringify(
-    require.resolve('@stylable/rollup/runtime')
-)};`;
 
 export function stylableRollupPlugin({
     minify = false,
@@ -42,16 +39,18 @@ export function stylableRollupPlugin({
         buildStart(rollupOptions) {
             extracted = extracted || new Map();
             emittedAssets = emittedAssets || new Map();
-
-            stylable =
-                stylable ||
-                Stylable.create({
+            if (stylable) {
+                stylable.initCache();
+            } else {
+                stylable = Stylable.create({
                     fileSystem: nodeFs,
                     projectRoot: rollupOptions.context,
                     mode: production ? 'production' : 'development',
                     resolveNamespace,
                     optimizer: new StylableOptimizer(),
+                    resolverCache: new Map(),
                 });
+            }
         },
         load(id) {
             if (id.endsWith('.st.css')) {
@@ -79,7 +78,7 @@ export function stylableRollupPlugin({
             extracted.set(id, { css });
 
             return {
-                code: generateStylableModuleCode2(res),
+                code: generateStylableModuleCode(res),
                 map: { mappings: '' },
             };
         },
@@ -122,7 +121,11 @@ function sortByDepth(modules: { depth: number; moduleId: string }[]) {
         .sort((a, b) => b.depth - a.depth);
 }
 
-function generateStylableModuleCode2(res: StylableResults) {
+const runtimeImport = `import {style as stc, cssStates as sts} from ${JSON.stringify(
+    require.resolve('@stylable/rollup/runtime')
+)};`;
+
+function generateStylableModuleCode(res: StylableResults) {
     return `
         ${runtimeImport}
         export var namespace = ${JSON.stringify(res.meta.namespace)};
