@@ -44,7 +44,7 @@
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "autoprefixer": "^10.2.4",
-    "chai": "^4.3.1",
+    "chai": "^4.3.3",
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
     "create-temp-directory": "^1.1.1",
