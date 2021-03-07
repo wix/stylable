@@ -3,7 +3,7 @@ import type * as postcss from 'postcss';
 import { generateStylableResult } from '@stylable/core-test-kit';
 
 describe('@property support', () => {
-    it('should transform @property var definition', () => {
+    it('should transform @property definition', () => {
         const { meta } = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -40,7 +40,7 @@ describe('@property support', () => {
         expect(prop1.params).to.equal('--global');
         expect(prop2.params).to.equal('--entry-radius');
     });
-    it('should detect and export @property usages', () => {
+    it('should detect and export @property definition', () => {
         const { exports, meta } = generateStylableResult({
             entry: `/entry.st.css`,
             files: {
@@ -48,7 +48,7 @@ describe('@property support', () => {
                     namespace: 'entry',
                     content: `
                
-                        @property --no-usage {
+                        @property --my-var {
                             syntax: "<length>";
                             inherits: false;
                             initial-value: 0px;
@@ -61,10 +61,10 @@ describe('@property support', () => {
 
         const prop1 = meta.outputAst!.nodes[0] as postcss.AtRule;
 
-        expect(prop1.params).to.equal('--entry-no-usage');
+        expect(prop1.params).to.equal('--entry-my-var');
 
         expect(exports.vars).to.eql({
-            'no-usage': '--entry-no-usage',
+            'my-var': '--entry-my-var',
         });
     });
 });
