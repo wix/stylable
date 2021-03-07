@@ -36,41 +36,43 @@ describe(`(${project})`, () => {
             /\.index\d+__root \{ color: red; font-size: 3em; z-index: 1; \}/
         );
 
-        const recompile = new Promise<void>((res) => {
-            projectRunner.compiler?.hooks.done.tap('Test', () => {
-                res();
-            });
-        });
-
-        writeFileSync(
-            join(projectRunner.projectDir, 'src', 'mixin-b.st.css'),
-            '.b{ color: green; }'
-        );
-        await recompile;
-        await page.reload();
-        const styleElements2 = await page.evaluate(browserFunctions.getStyleElementsMetadata, {
-            includeCSSContent: true,
-        });
-        expect(styleElements2[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
-            /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/
+        await projectRunner.actAndWaitForRecompile(
+            'invalidate dependency',
+            () => {
+                writeFileSync(
+                    join(projectRunner.projectDir, 'src', 'mixin-b.st.css'),
+                    '.b{ color: green; }'
+                );
+            },
+            async () => {
+                await page.reload();
+                const styleElements = await page.evaluate(
+                    browserFunctions.getStyleElementsMetadata,
+                    {
+                        includeCSSContent: true,
+                    }
+                );
+                expect(styleElements[0].css!.replace(/\s\s*/gm, ' ').trim()).to.match(
+                    /\.index\d+__root \{ color: green; font-size: 3em; z-index: 1; \}/
+                );
+            }
         );
     });
 
     it('allow stylable imports with missing files', async () => {
-        renameSync(
-            join(projectRunner.projectDir, 'src', 'index.st.css'),
-            join(projectRunner.projectDir, 'src', 'xxx.st.css')
+        await projectRunner.actAndWaitForRecompile(
+            'rename files with invalid dependencies',
+            () => {
+                renameSync(
+                    join(projectRunner.projectDir, 'src', 'index.st.css'),
+                    join(projectRunner.projectDir, 'src', 'xxx.st.css')
+                );
+            },
+            () => {
+                // if we got here we finished to recompile with the missing file.
+                // when this test is broken the compiler had en error and exit the process.
+                expect('finish recompile');
+            }
         );
-
-        const recompile = new Promise<void>((res) => {
-            projectRunner.compiler?.hooks.done.tap('Test', () => {
-                res();
-            });
-        });
-
-        await recompile;
-        // if we got here we finished to recompile with the missing file.
-        // when this test is broken the compiler had en error and exit the process.
-        expect('finish recompile');
     });
 });
