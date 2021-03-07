@@ -36,7 +36,7 @@ describe(`(${project})`, () => {
                 );
             },
             async () => {
-                await page.reload({ waitUntil: 'networkidle' });
+                const { page } = await projectRunner.openInBrowser();
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 expect(color).to.equal('rgb(0, 128, 0)');
             }
@@ -51,7 +51,8 @@ describe(`(${project})`, () => {
                 );
             },
             async () => {
-                await page.reload({ waitUntil: 'networkidle' });
+                const { page } = await projectRunner.openInBrowser();
+
                 const e = projectRunner.getBuildErrorMessages();
 
                 expect(e.length, 'one error').to.equal(1);
@@ -72,7 +73,7 @@ describe(`(${project})`, () => {
                 );
             },
             async () => {
-                await page.reload({ waitUntil: 'networkidle' });
+                const { page } = await projectRunner.openInBrowser();
 
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);
                 // Broken css never loaded to the browser
