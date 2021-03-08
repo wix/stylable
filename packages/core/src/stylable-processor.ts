@@ -149,7 +149,7 @@ export const processorWarnings = {
         return `css variable "${name}" usage (var()) must receive comma separated values`;
     },
     INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
-        return `invalid custom property rename ${name} as ${as} the "as" name must contain "--"`;
+        return `invalid custom property rename ${name} as ${as} the "as" name must begin with "--" (double-dash)`;
     },
 };
 
