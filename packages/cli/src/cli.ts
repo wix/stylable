@@ -5,6 +5,7 @@ import path from 'path';
 import yargs from 'yargs';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
+import { registeredMods } from './code-mods/apply-code-mods';
 
 const { argv } = yargs
     .option('rootDir', {
@@ -130,6 +131,11 @@ const { argv } = yargs
         default: 'strict',
         choices: ['strict', 'loose'],
     })
+    .option('codemod', {
+        type: 'array',
+        default: undefined as string[] | undefined,
+        choices: Object.keys(registeredMods),
+    })
     .alias('h', 'help')
     .help()
     .strict();
@@ -159,6 +165,7 @@ const {
     useNamespaceReference,
     diagnosticsMode,
     diagnostics,
+    codemod,
 } = argv;
 
 log('[Arguments]', argv);
@@ -198,6 +205,7 @@ const { diagnosticsMessages } = build({
     minify,
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
+    codemod,
 });
 
 if (diagnosticsMessages.length) {

@@ -8,6 +8,7 @@ import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
+import { applyCodeMods, registeredMods } from './code-mods/apply-code-mods';
 
 export interface BuildOptions {
     extension: string;
@@ -29,6 +30,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
+    codemod?: string[];
 }
 
 export function build({
@@ -51,54 +53,78 @@ export function build({
     optimize,
     minify,
     manifest,
+    codemod,
 }: BuildOptions) {
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
         : require('./base-generator');
     const generator = new generatorModule.Generator(stylable, log);
-    const blacklist = new Set<string>(['node_modules']);
+    const blacklist = new Set<string>(['node_modules', '.git']);
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
     const { result: filesToBuild } = findFiles(fs, fullSrcDir, extension, blacklist);
     const assets: string[] = [];
     const diagnosticsMessages: string[] = [];
-
+    const codeModsActive = codemod !== undefined;
     if (filesToBuild.length === 0) {
         log('[Build]', 'No stylable files found. build skipped.');
     } else {
-        log('[Build]', `Building ${filesToBuild.length} stylable files.`);
-    }
-    filesToBuild.forEach((filePath) => {
-        indexFile
-            ? generator.generateFileIndexEntry(filePath, fullOutDir)
-            : buildSingleFile(
-                  fullOutDir,
-                  filePath,
-                  fullSrcDir,
-                  log,
-                  fs,
-                  stylable,
-                  diagnosticsMessages,
-                  assets,
-                  moduleFormats || [],
-                  includeCSSInJS,
-                  outputCSS,
-                  outputCSSNameTemplate,
-                  outputSources,
-                  useSourceNamespace,
-                  injectCSSRequest,
-                  optimize,
-                  minify
-              );
-    });
-
-    if (indexFile) {
-        generator.generateIndexFile(fs, fullOutDir, indexFile);
+        log(
+            '[Build]',
+            `${codeModsActive ? 'Transforming' : 'Building'} ${filesToBuild.length} stylable files.`
+        );
     }
 
-    if (!indexFile) {
-        handleAssets(assets, rootDir, srcDir, outDir, fs);
-        generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
+    if (codeModsActive) {
+        const loadedMods =
+            codemod?.length === 0
+                ? Object.values(registeredMods)
+                : codemod!.map((mod) => registeredMods[mod]);
+        filesToBuild.forEach((filePath) => {
+            const css = fs.readFileSync(filePath).toString();
+            const res = applyCodeMods(css, filePath, loadedMods);
+            if (res.messages.length) {
+                for (const message of res.messages) {
+                    diagnosticsMessages.push(`[Mod] ${filePath}: ${message}`);
+                }
+            } else {
+                fs.writeFileSync(filePath, res.css);
+            }
+        });
+        return { diagnosticsMessages: [] };
+    } else {
+        filesToBuild.forEach((filePath) => {
+            indexFile
+                ? generator.generateFileIndexEntry(filePath, fullOutDir)
+                : buildSingleFile(
+                      fullOutDir,
+                      filePath,
+                      fullSrcDir,
+                      log,
+                      fs,
+                      stylable,
+                      diagnosticsMessages,
+                      assets,
+                      moduleFormats || [],
+                      includeCSSInJS,
+                      outputCSS,
+                      outputCSSNameTemplate,
+                      outputSources,
+                      useSourceNamespace,
+                      injectCSSRequest,
+                      optimize,
+                      minify
+                  );
+        });
+
+        if (indexFile) {
+            generator.generateIndexFile(fs, fullOutDir, indexFile);
+        }
+
+        if (!indexFile) {
+            handleAssets(assets, rootDir, srcDir, outDir, fs);
+            generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
+        }
     }
     return { diagnosticsMessages };
 }

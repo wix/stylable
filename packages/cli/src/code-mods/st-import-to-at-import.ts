@@ -56,5 +56,5 @@ function createAtImport(importObj: Imported): AtRule {
 
     params += ` from ${JSON.stringify(importObj.request)};`;
 
-    return postcss.atRule({ name: 'stImport', params });
+    return postcss.atRule({ name: 'st-import', params });
 }

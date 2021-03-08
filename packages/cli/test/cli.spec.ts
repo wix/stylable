@@ -288,4 +288,21 @@ describe('Stylable Cli', () => {
             expect(stderr, 'stderr').equal('');
         });
     });
+
+    describe.only('Code Mods', () => {
+        it('apply all code mods when no specific filter applied', () => {
+            populateDirectorySync(tempDir.path, {
+                'package.json': `{"name": "test", "version": "0.0.0"}`,
+                'style.st.css': `:import {-st-from: './x'; -st-default: Name}`,
+            });
+
+            const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--codemod']);
+
+            expect(stderr).equal('');
+            expect(stdout).equal('');
+
+            const dirContent = loadDirSync(tempDir.path);
+            expect(dirContent['style.st.css']).equal('@st-import Name from "./x";');
+        });
+    });
 });
