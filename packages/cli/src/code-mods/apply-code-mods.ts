@@ -1,27 +1,25 @@
 import { Root, parse } from 'postcss';
 import { stImportToAtImport } from './st-import-to-at-import';
 
-export const registeredMods: Record<
-    string,
-    (ast: Root, messages: string[]) => void
-> = Object.assign(Object.create(null), {
+export type CodeMod = (ast: Root, messages: string[]) => void;
+
+export const registeredMods: Record<string, CodeMod> = Object.assign(Object.create(null), {
     'st-import-to-at-import': stImportToAtImport,
 });
 
-export function applyCodeMods(
-    css: string,
-    filePath: string,
-    mods: Array<(ast: Root, messages: string[]) => void>
-) {
+export function applyCodeMods(css: string, mods: Set<{ id: string; apply: CodeMod }>) {
+    const reports = new Map<string, string[]>();
     const ast = parse(css);
-    const messages: string[] = [];
-    for (const mod of mods) {
-        mod(ast, messages);
+    for (const { id, apply } of mods) {
+        const messages: string[] = [];
+        apply(ast, messages);
+        if (messages.length) {
+            reports.set(id, messages);
+        }
     }
 
     return {
         css: ast.toString(),
-        filePath,
-        messages,
+        reports,
     };
 }

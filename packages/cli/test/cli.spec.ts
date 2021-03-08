@@ -1,43 +1,14 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import { join, relative } from 'path';
+import { join } from 'path';
 import { spawnSync } from 'child_process';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { evalStylableModule } from '@stylable/module-utils/dist/test/test-kit';
 import { resolveNamespace } from '@stylable/node';
+import { populateDirectorySync, loadDirSync } from './test-kit';
 
 function runCli(cliArgs: string[] = []) {
     const cliPath = require.resolve('@stylable/cli/bin/stc.js');
     return spawnSync('node', [cliPath, ...cliArgs], { encoding: 'utf8' });
-}
-
-interface Files {
-    [filepath: string]: string;
-}
-
-function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
-    return readdirSync(dirPath).reduce<Files>((acc, entry) => {
-        const fullPath = join(dirPath, entry);
-        const key = relative(rootPath, fullPath);
-        const stat = statSync(fullPath);
-        if (stat.isFile()) {
-            acc[key] = readFileSync(fullPath, 'utf8');
-        } else if (stat.isDirectory()) {
-            return {
-                ...acc,
-                ...loadDirSync(rootPath, fullPath),
-            };
-        } else {
-            throw new Error('Not Implemented');
-        }
-        return acc;
-    }, {});
-}
-
-function populateDirectorySync(rootDir: string, files: Files) {
-    for (const filePath in files) {
-        writeFileSync(join(rootDir, filePath), files[filePath]);
-    }
 }
 
 describe('Stylable Cli', () => {
@@ -286,23 +257,6 @@ describe('Stylable Cli', () => {
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
             expect(stderr, 'stderr').equal('');
-        });
-    });
-
-    describe.only('Code Mods', () => {
-        it('apply all code mods when no specific filter applied', () => {
-            populateDirectorySync(tempDir.path, {
-                'package.json': `{"name": "test", "version": "0.0.0"}`,
-                'style.st.css': `:import {-st-from: './x'; -st-default: Name}`,
-            });
-
-            const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--codemod']);
-
-            expect(stderr).equal('');
-            expect(stdout).equal('');
-
-            const dirContent = loadDirSync(tempDir.path);
-            expect(dirContent['style.st.css']).equal('@st-import Name from "./x";');
         });
     });
 });

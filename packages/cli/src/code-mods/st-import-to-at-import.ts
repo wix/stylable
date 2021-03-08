@@ -5,9 +5,9 @@ export function stImportToAtImport(ast: Root, messages: string[]) {
     ast.walkRules((rule) => {
         if (rule.selector === ':import') {
             const diagnostics = new Diagnostics();
-            const importObj = parseStImport(rule, 'CODE_MODS', diagnostics);
+            const importObj = parseStImport(rule, '*', diagnostics);
             if (diagnostics.reports.length) {
-                messages.push(`failed to replace :import`);
+                messages.push(`failed to parse/replace :import`);
             } else {
                 rule.replaceWith(createAtImport(importObj));
             }
