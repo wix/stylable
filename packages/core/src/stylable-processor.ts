@@ -2,11 +2,13 @@ import { murmurhash3_32_gc } from './murmurhash';
 import path from 'path';
 import * as postcss from 'postcss';
 import postcssValueParser from 'postcss-value-parser';
+import { tokenizeImports } from 'toky';
 import { Diagnostics } from './diagnostics';
 import {
     createSimpleSelectorChecker,
     isChildOfAtRule,
     isCompRoot,
+    isNested,
     isRootValid,
     parseSelector,
     SelectorAstNode,
@@ -116,6 +118,18 @@ export const processorWarnings = {
     NO_IMPORT_IN_ST_SCOPE() {
         return `cannot use "${rootValueMapping.import}" inside of "@st-scope"`;
     },
+    NO_ST_IMPORT_IN_NESTED_SCOPE() {
+        return `cannot use "@st-import" inside of nested scope`;
+    },
+    ST_IMPORT_STAR() {
+        return '@st-import * is not supported';
+    },
+    ST_IMPORT_EMPTY_FROM() {
+        return '@st-import must specify a valid "from" string value';
+    },
+    INVALID_ST_IMPORT_FORMAT(errors: string[]) {
+        return `Invalid @st-import format:\n - ${errors.join('\n - ')}`;
+    },
     NO_KEYFRAMES_IN_ST_SCOPE() {
         return `cannot use "@keyframes" inside of "@st-scope"`;
     },
@@ -138,12 +152,15 @@ export const processorWarnings = {
 
 export class StylableProcessor {
     protected meta!: StylableMeta;
+    protected dirContext!: string;
     constructor(
         protected diagnostics = new Diagnostics(),
         private resolveNamespace = processNamespace
     ) {}
     public process(root: postcss.Root): StylableMeta {
         this.meta = new StylableMeta(root, this.diagnostics);
+
+        this.dirContext = path.dirname(this.meta.source);
 
         this.handleAtRules(root);
 
@@ -167,34 +184,12 @@ export class StylableProcessor {
                 this.handleCSSVarUse(decl);
             }
 
-            processDeclarationUrls(
-                decl,
-                (node) => {
-                    this.meta.urls.push(node.url!);
-                },
-                false
-            );
+            this.collectUrls(decl);
         });
 
-        this.meta.scopes.forEach((atRule) => {
-            const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
-            this.handleRule(scopingRule, true);
-            validateScopingSelector(atRule, scopingRule, this.diagnostics);
-
-            if (scopingRule.selector) {
-                atRule.walkRules((rule) => {
-                    const scopedRule = rule.clone({
-                        selector: scopeSelector(scopingRule.selector, rule.selector, false)
-                            .selector,
-                    });
-                    (scopedRule as SRule).stScopeSelector = atRule.params;
-                    rule.replaceWith(scopedRule);
-                });
-            }
-
-            atRule.replaceWith(atRule.nodes || []);
-        });
         stubs.forEach((s) => s && s.remove());
+
+        this.meta.scopes.forEach((scope) => this.handleScope(scope));
 
         return this.meta;
     }
@@ -263,6 +258,20 @@ export class StylableProcessor {
                 case 'st-scope':
                     this.meta.scopes.push(atRule);
                     break;
+                case 'st-import':
+                    if (atRule.parent?.type !== 'root') {
+                        this.diagnostics.warn(
+                            atRule,
+                            processorWarnings.NO_ST_IMPORT_IN_NESTED_SCOPE()
+                        );
+                        atRule.remove();
+                    } else {
+                        const _import = this.handleStImport(atRule);
+                        this.meta.imports.push(_import);
+                        this.addImportSymbols(_import);
+                    }
+
+                    break;
                 case 'st-global-custom-property': {
                     const cssVarsByComma = atRule.params.split(',');
                     const cssVarsBySpacing = atRule.params
@@ -308,7 +317,15 @@ export class StylableProcessor {
         namespace = namespace || filename2varname(path.basename(this.meta.source)) || 's';
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
-
+    private collectUrls(decl: postcss.Declaration) {
+        processDeclarationUrls(
+            decl,
+            (node) => {
+                this.meta.urls.push(node.url!);
+            },
+            false
+        );
+    }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
         this.meta.ast.walkComments((comment) => {
@@ -337,8 +354,8 @@ export class StylableProcessor {
 
         let locallyScoped = false;
 
-        traverseNode(rule.selectorAst, (node, index, nodes) => {
-            if (node.type === 'selector') {
+        traverseNode(rule.selectorAst, (node, index, nodes, parents) => {
+            if (node.type === 'selector' && !isNested(parents)) {
                 locallyScoped = false;
             }
             if (!checker(node)) {
@@ -531,7 +548,7 @@ export class StylableProcessor {
                 type: 'default',
                 name: 'default',
                 import: importDef,
-                context: path.dirname(this.meta.source),
+                context: this.dirContext,
             };
         }
         Object.keys(importDef.named).forEach((name) => {
@@ -541,7 +558,7 @@ export class StylableProcessor {
                 type: 'named',
                 name: importDef.named[name],
                 import: importDef,
-                context: path.dirname(this.meta.source),
+                context: this.dirContext,
             };
         });
         Object.keys(importDef.keyframes).forEach((name) => {
@@ -558,6 +575,7 @@ export class StylableProcessor {
 
     protected addVarSymbols(rule: postcss.Rule) {
         rule.walkDecls((decl) => {
+            this.collectUrls(decl);
             this.checkRedeclareSymbol(decl.prop, decl);
             let type = null;
 
@@ -769,15 +787,89 @@ export class StylableProcessor {
             typedRule[key] = value;
         }
     }
+    protected handleStImport(atRule: postcss.AtRule) {
+        const importObj: Imported = {
+            defaultExport: '',
+            from: '',
+            request: '',
+            named: {},
+            rule: atRule,
+            context: this.dirContext,
+            keyframes: {},
+        };
+        const imports = tokenizeImports(`import ${atRule.params}`, '[', ']', true)[0];
+
+        if (imports && imports.star) {
+            this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_STAR());
+        } else {
+            importObj.defaultExport = imports.defaultName || '';
+            setImportObjectFrom(imports.from || '', this.dirContext, importObj);
+
+            if (imports.tagged?.keyframes) {
+                // importObj.keyframes = imports.tagged?.keyframes;
+                for (const [impName, impAsName] of Object.entries(imports.tagged.keyframes)) {
+                    importObj.keyframes[impAsName] = impName;
+                }
+            }
+            if (imports.named) {
+                for (const [impName, impAsName] of Object.entries(imports.named)) {
+                    importObj.named[impAsName] = impName;
+                }
+            }
+
+            if (imports.errors.length) {
+                this.diagnostics.error(
+                    atRule,
+                    processorWarnings.INVALID_ST_IMPORT_FORMAT(imports.errors)
+                );
+            } else if (!imports.from?.trim()) {
+                this.diagnostics.error(atRule, processorWarnings.ST_IMPORT_EMPTY_FROM());
+            }
+        }
+
+        atRule.remove();
+
+        return importObj;
+    }
 
     protected handleImport(rule: postcss.Rule) {
-        const importObj = parseStImport(rule, path.dirname(this.meta.source), this.diagnostics);
+        const importObj = parsePseudoImport(rule, this.dirContext, this.diagnostics);
         rule.remove();
         return importObj;
     }
+    private handleScope(atRule: postcss.AtRule) {
+        const scopingRule = postcss.rule({ selector: atRule.params }) as SRule;
+        this.handleRule(scopingRule, true);
+        validateScopingSelector(atRule, scopingRule, this.diagnostics);
+
+        if (scopingRule.selector) {
+            atRule.walkRules((rule) => {
+                const scopedRule = rule.clone({
+                    selector: scopeSelector(scopingRule.selector, rule.selector, false).selector,
+                });
+                (scopedRule as SRule).stScopeSelector = atRule.params;
+                rule.replaceWith(scopedRule);
+            });
+        }
+
+        atRule.replaceWith(atRule.nodes || []);
+    }
 }
 
-export function parseStImport(rule: postcss.Rule, context: string, diagnostics: Diagnostics): Imported {
+function setImportObjectFrom(importPath: string, dirPath: string, importObj: Imported) {
+    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+        importObj.request = importPath;
+        importObj.from = importPath;
+    } else {
+        importObj.request = importPath;
+        importObj.from =
+            path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
+                ? path.posix.resolve(dirPath, importPath)
+                : path.resolve(dirPath, importPath);
+    }
+}
+
+export function parsePseudoImport(rule: postcss.Rule, context: string, diagnostics: Diagnostics) {
     let fromExists = false;
     const importObj: Imported = {
         defaultExport: '',
@@ -801,18 +893,7 @@ export function parseStImport(rule: postcss.Rule, context: string, diagnostics: 
                     diagnostics.warn(rule, processorWarnings.MULTIPLE_FROM_IN_IMPORT());
                 }
 
-                if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-                    // 3rd party request
-                    importObj.request = importPath;
-                    importObj.from = importPath;
-                } else {
-                    importObj.request = importPath;
-                    const dirPath = context;
-                    importObj.from =
-                        path.posix && path.posix.isAbsolute(dirPath) // browser has no posix methods
-                            ? path.posix.resolve(dirPath, importPath)
-                            : path.resolve(dirPath, importPath);
-                }
+                setImportObjectFrom(importPath, context, importObj);
                 fromExists = true;
                 break;
             }
@@ -843,7 +924,6 @@ export function parseStImport(rule: postcss.Rule, context: string, diagnostics: 
     if (!importObj.from) {
         diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
     }
-
     return importObj;
 }
 

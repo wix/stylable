@@ -1,18 +1,8 @@
 import { createMemoryFs } from '@file-services/memory';
 import { Stylable } from '@stylable/core';
-import { expect } from 'chai';
 import { StylableLanguageService } from '@stylable/language-service';
-
-function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
-    const fs = createMemoryFs(files);
-
-    const stylableLSP = new StylableLanguageService({
-        fs,
-        stylable: new Stylable('/', fs, require),
-    });
-
-    return stylableLSP.diagnose(filePath);
-}
+import { expect } from 'chai';
+import { createDiagnostics } from '../test-kit/diagnostics-setup';
 
 describe('diagnostics', () => {
     it('should create basic diagnostics', () => {
@@ -146,6 +136,19 @@ describe('diagnostics', () => {
                     .root:someState(T1)   {}    /* css-identifierexpected */ 
                     .root:someState(T1.1) {}    /* css-rparentexpected    */
                     `,
+                },
+                filePath
+            );
+
+            expect(diagnostics).to.eql([]);
+        });
+
+        it('should not warn about pseudo-states with params', () => {
+            const filePath = '/style.st.css';
+
+            const diagnostics = createDiagnostics(
+                {
+                    [filePath]: `@st-global-custom-property --x;   /* unknownAtRules */`,
                 },
                 filePath
             );

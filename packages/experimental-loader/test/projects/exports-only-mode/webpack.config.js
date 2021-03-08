@@ -8,7 +8,6 @@ module.exports = {
     entry: './index.js',
     context: __dirname,
     devtool: false,
-    output: { publicPath: '' },
     plugins: [new HtmlWebpackPlugin()],
     module: {
         rules: [

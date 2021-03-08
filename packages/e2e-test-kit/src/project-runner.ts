@@ -183,7 +183,33 @@ export class ProjectRunner {
             });
         });
     }
-
+    public waitForRecompile() {
+        let done = false;
+        return new Promise<void>((res) => {
+            this.compiler?.hooks.afterDone.tap('waitForRecompile', () => {
+                if (done) {
+                    return;
+                }
+                done = true;
+                res();
+            });
+        });
+    }
+    public async actAndWaitForRecompile(
+        actionDesc: string,
+        action: () => Promise<void> | void,
+        validate: () => Promise<void> | void = () => Promise.resolve()
+    ) {
+        try {
+            const recompile = this.waitForRecompile();
+            await action();
+            await recompile;
+            await validate();
+        } catch (e) {
+            e.message = actionDesc + '\n' + e.message;
+            throw e;
+        }
+    }
     public async openInBrowser() {
         if (!this.browser) {
             this.browser = await playwright.chromium.launch(this.launchOptions);

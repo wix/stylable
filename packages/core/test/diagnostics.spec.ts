@@ -1034,6 +1034,23 @@ describe('diagnostics: warnings and errors', () => {
                 );
             });
 
+            it('should not issue scoping diagnostics for a class scoped by a selector with ":not()" (regression)', () => {
+                expectWarnings(
+                    `
+                    :import {
+                        -st-from: "./blah.st.css";
+                        -st-named: classNeedsScoping;
+                    }
+                    .cls {
+                        -st-states: someState;
+                    }
+
+                    .cls:not(:someState) .classNeedsScoping {}  
+                `,
+                    []
+                );
+            });
+
             it('should not warn when using imported elements (classes) without scoping', () => {
                 expectWarnings(
                     `

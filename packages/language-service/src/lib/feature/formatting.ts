@@ -1,6 +1,5 @@
 import { css } from 'js-beautify';
-import type { TextDocument, Range } from 'vscode-languageserver-textdocument';
-import type { FormattingOptions } from 'vscode-languageserver';
+import { FormattingOptions } from 'vscode-languageserver';
 
 export interface JSBeautifyFormatCSSOptions {
     indent_size?: number;
@@ -34,16 +33,12 @@ export function lspFormattingOptionsToJsBeautifyOptions(
     };
 }
 
-export function format(
-    doc: TextDocument,
-    range?: Range,
-    options?: JSBeautifyFormatCSSOptions
-): string {
+export function format(text: string, options?: JSBeautifyFormatCSSOptions): string {
     const normalizedOptions: JSBeautifyFormatCSSOptions = {
         ...options,
         // hard-coded to prevent custom selector values starting with combinators from breaking
         space_around_combinator: true,
     };
 
-    return css(doc.getText(range), normalizedOptions);
+    return css(text, normalizedOptions);
 }

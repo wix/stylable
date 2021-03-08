@@ -9,7 +9,6 @@ module.exports = {
     entry: './app.js',
     context: __dirname,
     devtool: false,
-    output: { publicPath: '' }, // MiniCssExtractPlugin does not support "auto" public path
     plugins: [new MiniCssExtractPlugin(), new HtmlWebpackPlugin()],
     module: {
         rules: [

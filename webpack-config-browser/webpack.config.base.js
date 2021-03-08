@@ -7,11 +7,9 @@ module.exports.baseConfig = () => {
         resolve: {
             alias: {
                 jsdom: require.resolve('./jsdom-browser.js'),
-                path: require.resolve('@file-services/path/browser-path.js'),
-                util: require.resolve('./node-polyfill.js'),
+                path: require.resolve('@file-services/path'),
             },
             fallback: {
-                fs: false,
                 os: false,
             },
         },
