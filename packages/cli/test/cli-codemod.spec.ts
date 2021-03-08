@@ -18,7 +18,7 @@ describe('Stylable Cli', () => {
         await tempDir.remove();
     });
 
-    describe.only('Code Mods', () => {
+    describe('Code Mods', () => {
         it('apply all code mods when no specific filter applied', () => {
             populateDirectorySync(tempDir.path, {
                 'package.json': `{"name": "test", "version": "0.0.0"}`,
