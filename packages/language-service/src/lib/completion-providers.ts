@@ -1106,15 +1106,15 @@ function getNamedCSSImports(
                     importedVar.symbol &&
                     importedVar.symbol._kind === 'cssVar'
                 ) {
-                    addCompilation(symbolName, importedVar.meta, importedVar.symbol);
+                    addCompletion(symbolName, importedVar.meta, importedVar.symbol);
                 }
             }
         } else {
-            addCompilation(symbolName, meta, symbol);
+            addCompletion(symbolName, meta, symbol);
         }
     }
 
-    function addCompilation(
+    function addCompletion(
         symbolName: string,
         meta: StylableMeta,
         symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol
