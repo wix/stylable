@@ -89,12 +89,16 @@ Here is an example of a **Stylable** CSS file that is imported and mixed into th
 ### CSS mixin with parameters and variables
 
 CSS mixins can accept named parameters in the following format:
- `mixin(variableName valueOverride, variableName2 valueOverride2)`. 
-Multiple variables can be comma separated or written on multiple lines:
- `mixin (
-     variableName valueOverride,
-     variableName2 valueOverride2
- )`
+```
+mixinName(variableName1 valueOverride1, variableName2 valueOverride2)
+```
+Multiple variables can be comma separated or written on multiple lines:  
+```
+mixinName(  
+  variableName1 valueOverride1,  
+  variableName2 valueOverride2  
+)
+```
  
  Using parameters in a mixin enables you to override specific [variables](./variables.md) inside of a mixin before they are applied.
 
