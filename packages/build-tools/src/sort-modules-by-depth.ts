@@ -4,7 +4,8 @@
 export function sortModulesByDepth<T>(
     modules: Array<T>,
     getDepth: (m: T) => number,
-    getID: (m: T) => string
+    getID: (m: T) => string,
+    factor = 1
 ) {
     return modules.sort((m1, m2) => {
         const depthDiff = getDepth(m2) - getDepth(m1);
@@ -19,7 +20,7 @@ export function sortModulesByDepth<T>(
                 return 0;
             }
         } else {
-            return depthDiff;
+            return depthDiff * factor;
         }
     });
 }
