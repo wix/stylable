@@ -39,7 +39,7 @@ export function isStylableModule(module: any): module is NormalModule {
 }
 
 export function isAssetModule(module: Module): module is NormalModule {
-    return module.type.startsWith('asset/');
+    return module.type.startsWith('asset/') || module.type === 'asset';
 }
 
 export function getStaticPublicPath(compilation: Compilation) {

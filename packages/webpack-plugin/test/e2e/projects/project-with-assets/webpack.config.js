@@ -14,6 +14,18 @@ module.exports = {
                     filename: 'static/[name][ext]',
                 },
             },
+            {
+                test: /\.(svg)$/,
+                type: 'asset',
+                generator: {
+                    filename: 'static/[name][ext]',
+                },
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 4 * 1024, // 4kb
+                    },
+                },
+            },
         ],
     },
 };
