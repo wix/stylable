@@ -672,7 +672,7 @@ describe('diagnostics: warnings and errors', () => {
                 expectWarnings(
                     `
                     |:import{
-                        -st-from: "a";
+                        -st-from: "./a.st.css";
                         -st-named: --x as z;
                     }|
                 `,

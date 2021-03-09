@@ -146,10 +146,10 @@ export const processorWarnings = {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
     },
     ILLEGAL_CSS_VAR_ARGS(name: string) {
-        return `css variable "${name}" usage (var()) must receive comma separated values`;
+        return `custom property "${name}" usage (var()) must receive comma separated values`;
     },
     INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
-        return `invalid CSS property alias "${as}" for "${name}". CSS properties must be prefixed with "--" (double-dash)`;
+        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
 };
 
