@@ -146,7 +146,10 @@ export const processorWarnings = {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
     },
     ILLEGAL_CSS_VAR_ARGS(name: string) {
-        return `css variable "${name}" usage (var()) must receive comma separated values`;
+        return `custom property "${name}" usage (var()) must receive comma separated values`;
+    },
+    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
+        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
 };
 
@@ -544,6 +547,7 @@ export class StylableProcessor {
     }
 
     protected addImportSymbols(importDef: Imported) {
+        this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
             this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
             this.meta.mappedSymbols[importDef.defaultExport] = {
@@ -919,6 +923,16 @@ export class StylableProcessor {
         }
 
         atRule.replaceWith(atRule.nodes || []);
+    }
+    private checkForInvalidAsUsage(importDef: Imported) {
+        for (const [local, imported] of Object.entries(importDef.named)) {
+            if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
+                this.diagnostics.warn(
+                    importDef.rule,
+                    processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
+                );
+            }
+        }
     }
 }
 
