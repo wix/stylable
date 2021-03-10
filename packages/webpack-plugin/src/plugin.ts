@@ -5,7 +5,7 @@ import {
     OptimizeConfig,
     DiagnosticsMode,
 } from '@stylable/core';
-import { sortModulesByDepth } from '@stylable/build-tools';
+import { sortModulesByDepth, loadStylableConfig } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
@@ -36,7 +36,7 @@ import {
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
-import { loadStylableConfig } from './load-stylable-config';
+// import { loadStylableConfig } from './load-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
 import type {
     DependencyClass,
@@ -205,12 +205,15 @@ export class StylableWebpackPlugin {
         );
     }
     private processOptions(compiler: Compiler) {
-        let options = defaultOptions(this.userOptions, compiler.options.mode === 'production');
+        const defaults = defaultOptions(this.userOptions, compiler.options.mode === 'production');
 
-        const config = loadStylableConfig(compiler.context);
-        if (typeof config?.webpackPlugin === 'function') {
-            options = config.webpackPlugin(options, compiler);
-        }
+        const options =
+            loadStylableConfig(compiler.context, (config) => {
+                return isWebpackConfigProcessor(config)
+                    ? config.webpackPlugin(defaults, compiler)
+                    : undefined;
+            }) || defaults;
+
         this.options = options;
     }
     private createStylable(compiler: Compiler) {
@@ -480,4 +483,15 @@ export class StylableWebpackPlugin {
         dependencyFactories.set(UnusedDependency as DependencyClass, normalModuleFactory);
         dependencyTemplates.set(UnusedDependency as any, new UnusedDependencyTemplate());
     }
+}
+
+function isWebpackConfigProcessor(
+    config: any
+): config is {
+    webpackPlugin: (
+        options: Required<StylableWebpackPluginOptions>,
+        compiler: Compiler
+    ) => Required<StylableWebpackPluginOptions>;
+} {
+    return typeof config === 'object' && typeof config.webpackPlugin === 'function';
 }
