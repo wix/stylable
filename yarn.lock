@@ -6282,10 +6282,10 @@ playwright-chromium@^1.9.1:
     stack-utils "^2.0.3"
     ws "^7.3.1"
 
-playwright-core@^1.9.1:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.9.1.tgz#c3b9160f54318f1657e29309df5a5419c5574479"
-  integrity sha512-V/i2kMWRaJ+76XTCiR0+dS711V0+JVPNw+YcOiCa0GjGiq3bEhZCFPeHMv++BH4hfC3jFXuD9/XUaw2to6EVcw==
+playwright-core@^1.9.2:
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.9.2.tgz#cef51ac7e9b862528a860b6531628598b485ac17"
+  integrity sha512-XXurYB1mEFWdjlXja1J7fJUwzSJaS+1qXV64B8vQOSZvV6NgaBxlkvexbyzM3i7RNyE9pwMKKeJzJ9kj2ThB/Q==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
