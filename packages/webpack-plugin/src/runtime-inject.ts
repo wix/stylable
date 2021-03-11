@@ -18,6 +18,7 @@ import type {
     StringSortableSet,
     StylableBuildMeta,
 } from './types';
+import { getReplacementToken } from './loader-utils';
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
 export interface DependencyTemplateContext {
@@ -94,18 +95,15 @@ export class InjectDependencyTemplate {
                     ? JSON.stringify(runtimeTemplate.requestShortener.contextify(module.resource))
                     : 'namespace';
 
-            source.insert(
-                source.size(),
+            replacePlaceholder(
+                source,
+                '/* JS_INJECT */',
                 `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
                     stylableBuildMeta.depth
-                }, ${JSON.stringify(this.runtimeId)});`,
-                StylableRuntimeDependency.name
+                }, ${JSON.stringify(this.runtimeId)});`
             );
             runtimeRequirements.add(StylableRuntimeInject.name);
         }
-
-        replacePlaceholderExport(source, `{__classes__:true}`, stylableBuildMeta.exports.classes);
-        replacePlaceholderExport(source, `{__namespace__:true}`, stylableBuildMeta.namespace);
 
         const usedExports = moduleGraph.getUsedExports(module, runtime);
         if (typeof usedExports === 'boolean') {
@@ -121,6 +119,49 @@ export class InjectDependencyTemplate {
         ) {
             runtimeRequirements.add(StylableRuntimeStylesheet.name);
         }
+
+        if (runtimeRequirements.has(StylableRuntimeStylesheet.name)) {
+            /* st */
+            replacePlaceholder(source, getReplacementToken('st'), `/*#__PURE__*/ style`);
+            /* style */
+            replacePlaceholder(
+                source,
+                getReplacementToken('sts'),
+                `/*#__PURE__*/ __webpack_require__.sts.bind(null, namespace)`
+            );
+            /* cssStates */
+            replacePlaceholder(
+                source,
+                getReplacementToken('stc'),
+                `/*#__PURE__*/ __webpack_require__.stc.bind(null, namespace)`
+            );
+        }
+
+        replacePlaceholder(
+            source,
+            getReplacementToken('vars'),
+            JSON.stringify(stylableBuildMeta.exports.vars)
+        );
+        replacePlaceholder(
+            source,
+            getReplacementToken('stVars'),
+            JSON.stringify(stylableBuildMeta.exports.stVars)
+        );
+        replacePlaceholder(
+            source,
+            getReplacementToken('keyframes'),
+            JSON.stringify(stylableBuildMeta.exports.keyframes)
+        );
+        replacePlaceholder(
+            source,
+            getReplacementToken('classes'),
+            JSON.stringify(stylableBuildMeta.exports.classes)
+        );
+        replacePlaceholder(
+            source,
+            getReplacementToken('namespace'),
+            JSON.stringify(stylableBuildMeta.namespace)
+        );
     }
 }
 
@@ -151,21 +192,16 @@ export class StylableLoadCSS extends RuntimeModule {
     }
 }
 
-function replacePlaceholderExport(
+function replacePlaceholder(
     source: sources.ReplaceSource,
     replacementPoint: string,
-    value: string | Record<string, string>
+    value: string
 ) {
     const i = source.source().indexOf(replacementPoint);
     if (!i) {
         throw new Error(`missing ${replacementPoint} from stylable loader source`);
     }
-    source.replace(
-        i,
-        i + replacementPoint.length - 1,
-        JSON.stringify(value),
-        `${replacementPoint} optimizations`
-    );
+    source.replace(i, i + replacementPoint.length - 1, value, `${replacementPoint}`);
 }
 
 export function injectRuntimeModules(name: string, compilation: Compilation) {
