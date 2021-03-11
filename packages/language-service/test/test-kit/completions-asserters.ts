@@ -82,6 +82,7 @@ export function getCompletions(fileName: string, prefix = '') {
     );
 
     return {
+        completions,
         suggested: (expectedCompletions: Array<Partial<Completion>>) => {
             assertPresent(completions, expectedCompletions, prefix);
         },

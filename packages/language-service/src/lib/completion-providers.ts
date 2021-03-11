@@ -6,6 +6,8 @@ import type ts from 'typescript';
 import {
     ClassSymbol,
     CSSResolve,
+    CSSVarSymbol,
+    ElementSymbol,
     evalDeclarationValue,
     MappedStates,
     nativePseudoClasses,
@@ -16,6 +18,7 @@ import {
     StylableMeta,
     systemValidators,
     valueMapping,
+    VarSymbol,
 } from '@stylable/core';
 
 import type { IFileSystem } from '@file-services/types';
@@ -751,7 +754,14 @@ export const NamedCompletionProvider: CompletionProvider & {
                 );
                 if (resolvedImport) {
                     const { lastName } = getExistingNames(fullLineText, position);
-                    getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+                    getNamedCSSImports(
+                        stylable,
+                        comps,
+                        resolvedImport,
+                        lastName,
+                        namedValues,
+                        meta
+                    );
 
                     return comps
                         .slice(1)
@@ -862,7 +872,7 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
                     if (resolvedImport) {
                         const { lastName } = getExistingNames(fullLineText, position);
 
-                        getNamedCSSImports(comps, resolvedImport, lastName, namedValues, meta);
+                        getNamedCSSImports(stylable, comps, resolvedImport, lastName, namedValues, meta);
 
                         return comps
                             .slice(1)
@@ -1075,31 +1085,61 @@ export const PseudoElementCompletionProvider: CompletionProvider = {
 };
 
 function getNamedCSSImports(
+    stylable: Stylable,
     comps: string[][],
     resolvedImport: StylableMeta,
     lastName: string,
     namedValues: string[],
     meta: StylableMeta
 ) {
-    comps.push(
-        ...Object.keys(resolvedImport.mappedSymbols)
-            .filter(
-                (ms) =>
-                    (resolvedImport.mappedSymbols[ms]._kind === 'class' ||
-                        resolvedImport.mappedSymbols[ms]._kind === 'var') &&
-                    ms !== 'root'
-            )
-            .filter((ms) => ms.slice(0, -1).startsWith(lastName))
-            .filter((ms) => !~namedValues.indexOf(ms))
-            .map((ms) => {
-                const varSymbol = resolvedImport.mappedSymbols[ms];
-                return [
-                    ms,
-                    path.relative(meta.source, resolvedImport.source).slice(1).replace(/\\/g, '/'),
-                    varSymbol._kind === 'var' ? varSymbol.text : 'Stylable class',
-                ];
-            })
-    );
+    const namedSet = new Set(namedValues);
+    for (const [symbolName, symbol] of Object.entries(resolvedImport.mappedSymbols)) {
+        if (symbol._kind === 'keyframes') {
+            continue;
+        }
+        if (symbol._kind === 'import') {
+            if (symbol.name.startsWith('--')) {
+                const importedVar = stylable.createResolver({}).deepResolve(symbol);
+                if (
+                    importedVar &&
+                    importedVar._kind === 'css' &&
+                    importedVar.symbol &&
+                    importedVar.symbol._kind === 'cssVar'
+                ) {
+                    addCompletion(symbolName, importedVar.meta, importedVar.symbol);
+                }
+            }
+        } else {
+            addCompletion(symbolName, meta, symbol);
+        }
+    }
+
+    function addCompletion(
+        symbolName: string,
+        meta: StylableMeta,
+        symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol
+    ) {
+        if (symbolName.slice(0, -1).startsWith(lastName) && !namedSet.has(symbolName)) {
+            comps.push([
+                symbolName,
+                path.relative(meta.source, resolvedImport.source).slice(1).replace(/\\/g, '/'),
+                createCompletionDetail(symbol),
+            ]);
+        }
+    }
+}
+
+function createCompletionDetail(symbol: VarSymbol | ClassSymbol | ElementSymbol | CSSVarSymbol) {
+    switch (symbol._kind) {
+        case 'class':
+            return 'Stylable class';
+        case 'cssVar':
+            return `${symbol.global ? 'Global ' : ''}${symbol.name}`;
+        case 'var':
+            return symbol.text;
+        case 'element':
+            return 'Stylable element';
+    }
 }
 
 function isNodeRule(node: any): node is postcss.Rule {
