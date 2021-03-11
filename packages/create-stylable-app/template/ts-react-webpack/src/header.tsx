@@ -1,4 +1,3 @@
-import React from 'react';
 import { st, classes } from './header.st.css';
 import stylableLogo from './stylable.svg';
 
