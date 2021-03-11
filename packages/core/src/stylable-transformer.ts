@@ -190,19 +190,24 @@ export class StylableTransformer {
             rule.selector = this.scopeRule(meta, rule);
         });
 
-        ast.walkAtRules(/media$/, (atRule) => {
-            atRule.params = evalDeclarationValue(
-                this.resolver,
-                atRule.params,
-                meta,
-                atRule,
-                variableOverride,
-                this.replaceValueHook,
-                this.diagnostics,
-                path.slice(),
-                undefined,
-                undefined
-            );
+        ast.walkAtRules((atRule) => {
+            const { name } = atRule;
+            if (name === 'media') {
+                atRule.params = evalDeclarationValue(
+                    this.resolver,
+                    atRule.params,
+                    meta,
+                    atRule,
+                    variableOverride,
+                    this.replaceValueHook,
+                    this.diagnostics,
+                    path.slice(),
+                    undefined,
+                    undefined
+                );
+            } else if (name === 'property') {
+                atRule.params = cssVarsMapping[atRule.params] ?? atRule.params;
+            }
         });
 
         ast.walkDecls((decl) => {
