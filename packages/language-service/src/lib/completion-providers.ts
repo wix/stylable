@@ -188,6 +188,7 @@ const topLevelDeclarations: Array<keyof typeof topLevelDirectives> = [
     'customSelector',
     'stScope',
     'stImport',
+    'stGlobalCustomProperty',
 ];
 
 // Providers
@@ -314,7 +315,8 @@ export const TopLevelDirectiveProvider: CompletionProvider = {
                 return topLevelDeclarations
                     .filter(
                         (d) =>
-                            !meta.ast.source!.input.css.includes('@namespace') || d !== 'namespace'
+                            !meta.ast.source!.input.css.includes(topLevelDirectives.namespace) ||
+                            d !== 'namespace'
                     )
                     .filter((d) => topLevelDirectives[d].startsWith(fullLineText.trim()))
                     .map((d) =>
@@ -872,7 +874,14 @@ export const StImportNamedCompletionProvider: CompletionProvider & {
                     if (resolvedImport) {
                         const { lastName } = getExistingNames(fullLineText, position);
 
-                        getNamedCSSImports(stylable, comps, resolvedImport, lastName, namedValues, meta);
+                        getNamedCSSImports(
+                            stylable,
+                            comps,
+                            resolvedImport,
+                            lastName,
+                            namedValues,
+                            meta
+                        );
 
                         return comps
                             .slice(1)
