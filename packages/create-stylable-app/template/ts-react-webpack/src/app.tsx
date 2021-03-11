@@ -1,4 +1,3 @@
-import React from 'react';
 import { st, classes } from './app.st.css';
 import { Header } from './header';
 
