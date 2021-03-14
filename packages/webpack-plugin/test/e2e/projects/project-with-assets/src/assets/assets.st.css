@@ -1,6 +1,6 @@
 
 .bg {
-    background: url('./asset.png'), url('/asset-in-root.png');
+    background: url('./asset.png'), url('/asset-in-root.png'), url('./icon.svg'), url('./mandela.svg');
 }
 
 .bg-data-url {

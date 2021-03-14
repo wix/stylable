@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "dependencies": {
     "@stylable/core": "^4.0.1",
-    "chai": "^4.3.0",
+    "chai": "^4.3.4",
     "flat": "^5.0.2",
-    "postcss": "^8.2.6"
+    "postcss": "^8.2.8"
   },
   "files": [
     "dist",

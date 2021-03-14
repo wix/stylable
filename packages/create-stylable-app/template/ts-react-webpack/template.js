@@ -1,3 +1,4 @@
+/** @type {import('create-stylable-app').TemplateDefinition} */
 module.exports = {
     dependencies: ['@stylable/runtime', 'react', 'react-dom'],
     devDependencies: [
@@ -12,7 +13,6 @@ module.exports = {
         'eslint-plugin-react-hooks',
         'eslint-plugin-stylable',
         'eslint',
-        'file-loader',
         'html-webpack-plugin',
         'rimraf',
         'serve',

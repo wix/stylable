@@ -376,26 +376,30 @@ export class StylableWebpackPlugin {
             }
 
             for (const module of sortedModules) {
-                const buildMeta = getStylableBuildMeta(module);
-                const { css, exports, globals } = buildMeta;
+                try {
+                    const buildMeta = getStylableBuildMeta(module);
+                    const { css, exports, globals } = buildMeta;
 
-                const ast = parse(css);
+                    const ast = parse(css);
 
-                optimizer.optimizeAst(
-                    optimizeOptions,
-                    ast,
-                    usageMapping,
-                    this.stylable.delimiter,
-                    exports,
-                    globals
-                );
+                    optimizer.optimizeAst(
+                        optimizeOptions,
+                        ast,
+                        usageMapping,
+                        this.stylable.delimiter,
+                        exports,
+                        globals
+                    );
 
-                buildMeta.css = optimizeOptions.minify
-                    ? optimizer.minifyCSS(ast.toString())
-                    : ast.toString();
+                    buildMeta.css = optimizeOptions.minify
+                        ? optimizer.minifyCSS(ast.toString())
+                        : ast.toString();
 
-                if (optimizeOptions.shortNamespaces) {
-                    buildMeta.namespace = namespaceMapping[buildMeta.namespace];
+                    if (optimizeOptions.shortNamespaces) {
+                        buildMeta.namespace = namespaceMapping[buildMeta.namespace];
+                    }
+                } catch (e) {
+                    compilation.errors.push(e);
                 }
             }
         });

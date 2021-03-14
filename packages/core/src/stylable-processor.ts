@@ -146,7 +146,10 @@ export const processorWarnings = {
         return `a custom css property must begin with "--" (double-dash), but received "${name}"`;
     },
     ILLEGAL_CSS_VAR_ARGS(name: string) {
-        return `css variable "${name}" usage (var()) must receive comma separated values`;
+        return `custom property "${name}" usage (var()) must receive comma separated values`;
+    },
+    INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
+        return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
 };
 
@@ -177,7 +180,7 @@ export class StylableProcessor {
             if (stValuesMap[decl.prop]) {
                 this.handleDirectives(decl.parent as SRule, decl);
             } else if (isCSSVarProp(decl.prop)) {
-                this.addCSSVarFromProp(decl);
+                this.addCSSVarDefinition(decl);
             }
 
             if (decl.value.includes('var(')) {
@@ -271,6 +274,9 @@ export class StylableProcessor {
                         this.addImportSymbols(_import);
                     }
 
+                    break;
+                case 'property':
+                    this.addCSSVarDefinition(atRule);
                     break;
                 case 'st-global-custom-property': {
                     const cssVarsByComma = atRule.params.split(',');
@@ -541,6 +547,7 @@ export class StylableProcessor {
     }
 
     protected addImportSymbols(importDef: Imported) {
+        this.checkForInvalidAsUsage(importDef);
         if (importDef.defaultExport) {
             this.checkRedeclareSymbol(importDef.defaultExport, importDef.rule);
             this.meta.mappedSymbols[importDef.defaultExport] = {
@@ -618,12 +625,12 @@ export class StylableProcessor {
         });
     }
 
-    protected addCSSVarFromProp(decl: postcss.Declaration) {
-        const varName = decl.prop.trim();
-        this.addCSSVar(varName, decl);
+    protected addCSSVarDefinition(node: postcss.Declaration | postcss.AtRule) {
+        const varName = node.type === 'atrule' ? node.params : node.prop;
+        this.addCSSVar(varName.trim(), node);
     }
 
-    protected addCSSVar(varName: string, decl: postcss.Declaration) {
+    protected addCSSVar(varName: string, node: postcss.Declaration | postcss.AtRule) {
         if (isCSSVarProp(varName)) {
             if (!this.meta.cssVars[varName]) {
                 const cssVarSymbol: CSSVarSymbol = {
@@ -636,7 +643,7 @@ export class StylableProcessor {
                 }
             }
         } else {
-            this.diagnostics.warn(decl, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
+            this.diagnostics.warn(node, processorWarnings.ILLEGAL_CSS_VAR_USE(varName), {
                 word: varName,
             });
         }
@@ -916,6 +923,16 @@ export class StylableProcessor {
         }
 
         atRule.replaceWith(atRule.nodes || []);
+    }
+    private checkForInvalidAsUsage(importDef: Imported) {
+        for (const [local, imported] of Object.entries(importDef.named)) {
+            if (isCSSVarProp(imported) && !isCSSVarProp(local)) {
+                this.diagnostics.warn(
+                    importDef.rule,
+                    processorWarnings.INVALID_CUSTOM_PROPERTY_AS_VALUE(imported, local)
+                );
+            }
+        }
     }
 }
 
