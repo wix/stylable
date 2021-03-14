@@ -37,6 +37,7 @@ export const topLevelDirectives = {
     import: ':import' as const,
     stScope: '@st-scope' as const,
     stImport: '@st-import' as const,
+    stGlobalCustomProperty: '@st-global-custom-property' as const,
 };
 
 // syntactic
@@ -151,6 +152,14 @@ export function topLevelDirective(type: keyof typeof topLevelDirectives, rng: Pr
                 'Define an @st-import',
                 'a',
                 new Snippet('@st-import $2 from "$1";'),
+                rng
+            );
+        case topLevelDirectives.stGlobalCustomProperty:
+            return new Completion(
+                topLevelDirectives.stGlobalCustomProperty,
+                'Define global custom properties using @st-global-custom-property',
+                'a',
+                new Snippet('@st-global-custom-property --$1;'),
                 rng
             );
     }
