@@ -1,4 +1,4 @@
-import { addBuildDependencies, getImports } from './loader-utils';
+import { addBuildDependencies, getImports, getReplacementToken } from './loader-utils';
 import type { StylableLoaderContext } from './types';
 import { emitDiagnostics } from '@stylable/core';
 
@@ -27,16 +27,15 @@ export default function StylableWebpackLoader(this: StylableLoaderContext, sourc
 
     return `
 ${imports.join('\n')}
-export ${varType} namespace = {__namespace__:true};
-export ${varType} classes = {__classes__:true};
-export ${varType} keyframes = ${JSON.stringify(exports.keyframes)}; 
-export ${varType} stVars = ${JSON.stringify(exports.stVars)}; 
-export ${varType} vars = ${JSON.stringify(exports.vars)}; 
-export ${varType} cssStates = /*#__PURE__*/ __webpack_require__.stc.bind(null, namespace);
-export ${varType} style = /*#__PURE__*/ __webpack_require__.sts.bind(null, namespace);
-export ${varType} st = style;
-if(import.meta.webpackHot /* HMR */) {
-  import.meta.webpackHot.accept();
-}
+export ${varType} namespace = ${getReplacementToken('namespace')};
+export ${varType} classes = ${getReplacementToken('classes')};
+export ${varType} keyframes = ${getReplacementToken('keyframes')}; 
+export ${varType} stVars = ${getReplacementToken('stVars')}; 
+export ${varType} vars = ${getReplacementToken('vars')}; 
+export ${varType} cssStates = ${getReplacementToken('stc')};
+export ${varType} style = ${getReplacementToken('sts')};
+export ${varType} st = ${getReplacementToken('st')};
+/* JS_INJECT */
+if(import.meta.webpackHot /* HMR */) { import.meta.webpackHot.accept();}
 `;
 }

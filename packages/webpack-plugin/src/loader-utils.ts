@@ -9,6 +9,10 @@ import {
 } from '@stylable/core';
 import { dirname } from 'path';
 
+export function getReplacementToken(token: string) {
+    return `/* INJECT */ {__${token}__:true}`;
+}
+
 export function getImports(
     stylable: Stylable,
     meta: StylableMeta,
