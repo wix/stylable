@@ -19,7 +19,7 @@ describe(`(${project})`, () => {
         afterEach,
         after
     );
-    
+
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
         const links = await page.evaluate(browserFunctions.getCSSLinks);
