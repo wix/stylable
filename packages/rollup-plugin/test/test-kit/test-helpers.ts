@@ -31,20 +31,9 @@ export async function actAndWaitForBuild(
     watcher: RollupWatcher,
     action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
 ) {
-    const done = new Promise<RollupWatcherEvent>((res) => {
-        watcher.once('restart', () => {
-            res(waitForWatcherFinish(watcher));
-        });
-    });
-
-    return new Promise<void>((res, rej) => {
-        const wait = action(done);
-        if (wait) {
-            wait.then(res).catch(rej);
-        } else {
-            res();
-        }
-    });
+    const done = waitForWatcherFinish(watcher);
+    await action(done);
+    return await done;
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
     const tempDir = createTempDirectorySync('local-rollup-test');
