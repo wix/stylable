@@ -31,11 +31,12 @@ describe('StylableRollupPlugin', () => {
     });
 
     it('should work', async () => {
-        const { projectDir, serve, bundle, open } = runner;
+        const { projectDir, serve, ready, act, open } = runner;
 
-        await bundle();
+        await ready;
+
         const url = await serve();
-        const page = await open(url);
+        let page = await open(url);
 
         const { body, part } = await page.evaluate(getElementsStyles);
 
@@ -45,10 +46,10 @@ describe('StylableRollupPlugin', () => {
 
         expect(part.backgroundImage).to.match(/2e13bcd92bf005d9bf9046f9206e5652ed34fc7b_dog.png/);
 
-        await bundle(async (done) => {
+        await act(async (done) => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');
             await done;
-            await page.reload({ waitUntil: 'load' });
+            page = await open(url);
         });
 
         const { body: body2 } = await page.evaluate(getElementsStyles);
@@ -56,13 +57,13 @@ describe('StylableRollupPlugin', () => {
         expect(body2.backgroundImage).to.equal('none');
         expect(body2.fontSize).to.equal('16px');
 
-        await bundle(async (done) => {
+        await act(async (done) => {
             nodeFs.writeFileSync(
                 nodeFs.join(projectDir, 'index.st.css'),
                 '.root {background: red}'
             );
             await done;
-            await page.reload({ waitUntil: 'load' });
+            page = await open(url);
         });
 
         const { body: body3 } = await page.evaluate(getElementsStyles);

@@ -4,10 +4,7 @@ import { OutputChunk, RollupBuild, RollupWatcher, RollupWatcherEvent } from 'rol
 import { createTempDirectorySync } from 'create-temp-directory';
 import { deferred } from 'promise-assist';
 
-export async function actAndWaitForBuild(
-    watcher: RollupWatcher,
-    action?: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
-) {
+export function waitForWatcherFinish(watcher: RollupWatcher) {
     const current = deferred<RollupWatcherEvent & { code: 'BUNDLE_END' }>();
 
     let bundleEnd: RollupWatcherEvent & { code: 'BUNDLE_END' };
@@ -25,19 +22,29 @@ export async function actAndWaitForBuild(
             current.reject(e);
         }
     };
-    
     watcher.on('event', handler);
 
-    await new Promise<void>((res, rej) => {
-        const wait = action?.(current.promise);
+    return current.promise;
+}
+
+export async function actAndWaitForBuild(
+    watcher: RollupWatcher,
+    action: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
+) {
+    const done = new Promise<RollupWatcherEvent>((res) => {
+        watcher.once('restart', () => {
+            res(waitForWatcherFinish(watcher));
+        });
+    });
+
+    return new Promise<void>((res, rej) => {
+        const wait = action(done);
         if (wait) {
             wait.then(res).catch(rej);
         } else {
             res();
         }
     });
-
-    return current.promise;
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
     const tempDir = createTempDirectorySync('local-rollup-test');

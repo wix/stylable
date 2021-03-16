@@ -3,7 +3,7 @@ import { RollupWatcherEvent, watch } from 'rollup';
 import { serve } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
-import { createTempProject, actAndWaitForBuild } from './test-helpers';
+import { createTempProject, actAndWaitForBuild, waitForWatcherFinish } from './test-helpers';
 import { join } from 'path';
 import html from '@rollup/plugin-html';
 
@@ -33,7 +33,7 @@ export function rollupRunner({
         input,
         output: { dir: dist },
         watch: {
-            buildDelay: 500,
+            buildDelay: 100,
             clearScreen: false,
             chokidar: { persistent: true },
         },
@@ -49,6 +49,7 @@ export function rollupRunner({
             html({}),
         ],
     });
+    const ready = waitForWatcherFinish(watcher);
 
     const disposables: Array<() => Promise<void> | void> = [
         removeProject,
@@ -90,8 +91,9 @@ export function rollupRunner({
             return page;
         },
         dispose,
-        async bundle(action?: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
-            await actAndWaitForBuild(watcher, action);
+        ready,
+        async act(action: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
+            return await actAndWaitForBuild(watcher, action);
         },
     };
 }
