@@ -14,7 +14,6 @@ export async function actAndWaitForBuild(
     const handler = (e: RollupWatcherEvent) => {
         if (e.code === 'BUNDLE_END') {
             bundleEnd = e;
-            console.log('next');
         }
         if (e.code === 'END') {
             current.resolve(bundleEnd);

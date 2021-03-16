@@ -45,11 +45,11 @@ describe('StylableRollupPlugin', () => {
 
         expect(part.backgroundImage).to.match(/2e13bcd92bf005d9bf9046f9206e5652ed34fc7b_dog.png/);
 
-        await bundle(() => {
+        await bundle(async (done) => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');
+            await done;
+            await page.reload({ waitUntil: 'networkidle' });
         });
-
-        await page.reload({ waitUntil: 'networkidle' });
 
         const { body: body2 } = await page.evaluate(getElementsStyles);
 
