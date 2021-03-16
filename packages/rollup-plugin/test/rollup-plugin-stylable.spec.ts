@@ -24,7 +24,7 @@ describe('StylableRollupPlugin', () => {
 
         await bundle();
         const url = await serve();
-        const page = await open(url, { headless: false });
+        const page = await open(url);
 
         const { body } = await page.evaluate(getBodyStyles);
 
