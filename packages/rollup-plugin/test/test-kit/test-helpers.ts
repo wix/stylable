@@ -16,26 +16,27 @@ export async function actAndWaitForBuild(
             bundleEnd = e;
         }
         if (e.code === 'END') {
-            current.resolve(bundleEnd);
             watcher.off('event', handler);
+            current.resolve(bundleEnd);
         }
         if (e.code === 'ERROR') {
             console.log('stop');
-            current.reject(e);
             watcher.off('event', handler);
+            current.reject(e);
         }
     };
+    
     watcher.on('event', handler);
+
     await new Promise<void>((res, rej) => {
-        setTimeout(() => {
-            const wait = action?.(current.promise);
-            if (wait) {
-                wait.then(res).catch(rej);
-            } else {
-                res();
-            }
-        }, 10);
+        const wait = action?.(current.promise);
+        if (wait) {
+            wait.then(res).catch(rej);
+        } else {
+            res();
+        }
     });
+
     return current.promise;
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {

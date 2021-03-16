@@ -33,8 +33,7 @@ export function rollupRunner({
         input,
         output: { dir: dist },
         watch: {
-            // skipWrite: true,
-            buildDelay: 100,
+            buildDelay: 500,
             clearScreen: false,
             chokidar: { persistent: true },
         },
@@ -92,10 +91,7 @@ export function rollupRunner({
         },
         dispose,
         async bundle(action?: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
-            const val = await actAndWaitForBuild(watcher, action);
-            await val.result.write({
-                dir: dist,
-            });
+            await actAndWaitForBuild(watcher, action);
         },
     };
 }
