@@ -1,6 +1,10 @@
 import { Stylable, StylableMeta, visitMetaCSSDependenciesBFS } from '@stylable/core';
 import { getUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 
+export function getReplacementToken(token: string) {
+    return `/* INJECT */ {__${token}__:true}`;
+}
+
 export function getImports(
     stylable: Stylable,
     meta: StylableMeta,
