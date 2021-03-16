@@ -14,7 +14,7 @@ or
 ### Usage
 
 ```js
-
+// rollup.config.js
 import stylable from "@stylable/rollup-plugin";
 
 export default {
