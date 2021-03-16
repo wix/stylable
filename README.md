@@ -49,7 +49,6 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | [create-stylable-app](./packages/create-stylable-app) | `create-stylable-app`        |        [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)        | Boilerplate generator CLI                                                                  |
 | [schema-extract](./packages/schema-extract)           | `@stylable/schema-extract`   |   [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)   | JSON Schema convertor for Stylable stylesheets                                             |
 | [language-service](./packages/language-service)       | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
-| [stylable.io](./packages/stylable.io)                 | -                            |                                                                    -                                                                    | source package for the [stylable.io](http://stylable.io) official website                  |
 
 ### Integrations
 
