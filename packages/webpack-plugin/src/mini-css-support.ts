@@ -5,16 +5,18 @@ const memoize = require('webpack/lib/util/memoize');
 
 import { StylableWebpackPlugin } from './plugin';
 
-const getCssModule = memoize(() => {
-    return require('mini-css-extract-plugin/dist/CssModule').default;
+const getMiniCssExtractPlugin = memoize(() => {
+    return require('mini-css-extract-plugin');
 });
 export function injectCssModules(
+    webpack: Compiler['webpack'],
     compilation: Compilation,
     staticPublicPath: string,
     stylableModules: Set<NormalModule>,
     assetsModules: Map<string, NormalModule>
 ) {
-    const CssModule = getCssModule();
+    const MiniCssExtractPlugin = getMiniCssExtractPlugin();
+    const CssModule = MiniCssExtractPlugin.getCssModule(webpack);
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
         const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
@@ -53,7 +55,7 @@ export function injectCssModules(
 }
 
 export function injectCSSOptimizationRules(compiler: Compiler) {
-    const CssModule = getCssModule();
+    const CssModule = getMiniCssExtractPlugin().getCssModule(compiler.webpack);
     if (!compiler.options.optimization) {
         compiler.options.optimization = {};
     }

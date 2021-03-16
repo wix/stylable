@@ -7,7 +7,7 @@ const projectDir = dirname(
     require.resolve(`@stylable/webpack-plugin/test/e2e/projects/${project}/webpack.config`)
 );
 
-describe.skip(`(${project})`, () => {
+describe(`(${project})`, () => {
     const projectRunner = StylableProjectRunner.mochaSetup(
         {
             projectDir,
@@ -19,7 +19,7 @@ describe.skip(`(${project})`, () => {
         afterEach,
         after
     );
-
+    
     it('renders css', async () => {
         const { page } = await projectRunner.openInBrowser();
         const links = await page.evaluate(browserFunctions.getCSSLinks);
