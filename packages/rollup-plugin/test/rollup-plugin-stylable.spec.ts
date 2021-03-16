@@ -48,7 +48,7 @@ describe('StylableRollupPlugin', () => {
         await bundle(async (done) => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');
             await done;
-            await page.reload({ waitUntil: 'networkidle' });
+            await page.reload({ waitUntil: 'load' });
         });
 
         const { body: body2 } = await page.evaluate(getElementsStyles);
@@ -62,7 +62,7 @@ describe('StylableRollupPlugin', () => {
                 '.root {background: red}'
             );
             await done;
-            await page.reload({ waitUntil: 'networkidle' });
+            await page.reload({ waitUntil: 'load' });
         });
 
         const { body: body3 } = await page.evaluate(getElementsStyles);
