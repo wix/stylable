@@ -34,6 +34,7 @@ interface StylableRollupPluginOptions {
     minify?: boolean;
     inlineAssets?: boolean;
     fileName?: string;
+    diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: (namespace: string, source: string) => string;
 }
 ```
