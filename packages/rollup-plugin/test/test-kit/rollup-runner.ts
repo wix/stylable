@@ -2,20 +2,24 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 import { RollupWatcherEvent, watch } from 'rollup';
 import { serve } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
-import { stylableRollupPlugin } from '@stylable/rollup-plugin';
+import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
 import { createTempProject, actAndWaitForBuild } from './test-helpers';
 import { join } from 'path';
 import html from '@rollup/plugin-html';
+
+interface RollupRunnerOptions {
+    projectPath: string;
+    nodeModulesPath?: string;
+    entry?: string;
+    pluginOptions?: StylableRollupPluginOptions;
+}
 
 export function rollupRunner({
     projectPath,
     nodeModulesPath = join(__dirname, '../../../../node_modules'),
     entry = 'index.js',
-}: {
-    projectPath: string;
-    nodeModulesPath?: string;
-    entry?: string;
-}) {
+    pluginOptions,
+}: RollupRunnerOptions) {
     const { context, projectDir, input, dispose: removeProject } = createTempProject(
         projectPath,
         nodeModulesPath,
@@ -41,6 +45,7 @@ export function rollupRunner({
                 resolveNamespace(ns) {
                     return ns;
                 },
+                ...pluginOptions,
             }),
             html({}),
         ],

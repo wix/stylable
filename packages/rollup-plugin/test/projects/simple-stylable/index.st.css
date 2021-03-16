@@ -1,19 +1,9 @@
-:import {
-    -st-from: "./imported.st.css";
-    -st-named: imported as part;
-}
-:import {
-    -st-from: "./imported-too.st.css";
-    -st-named: imported-too;
-}
-
-.imported-too{}
-
 .root {
-    font-size: 10em;
+    font-size: 120px;
+    font-family: monospace;
     background: url("./asset.png");
 }
 
 .part {
-    font-family: monospace;
+    background: url("./dog.png");
 }

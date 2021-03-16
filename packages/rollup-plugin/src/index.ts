@@ -11,6 +11,7 @@ import {
     sortModulesByDepth,
     calcDepth,
     CalcDepthContext,
+    hasImportedSideEffects,
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
@@ -22,7 +23,7 @@ import { join, parse } from 'path';
 
 const production = !process.env.ROLLUP_WATCH;
 
-interface StylableRollupPluginOptions {
+export interface StylableRollupPluginOptions {
     optimization?: {
         minify?: boolean;
     };
@@ -79,16 +80,14 @@ export function stylableRollupPlugin({
             const { meta, exports } = stylable.transform(source, id);
             const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
             const css = generateCssString(meta, minify, stylable, assetsIds);
-            
-            emitDiagnostics(
-                {
-                    emitError: (e) => this.error(e),
-                    emitWarning: (e) => this.warn(e),
-                },
-                meta,
-                diagnosticsMode
-            );
-            
+            const moduleImports = [];
+            for (const imported of meta.imports) {
+                if (hasImportedSideEffects(stylable, meta, imported)) {
+                    moduleImports.push(`import ${JSON.stringify(imported.request)};`);
+                }
+            }
+            extracted.set(id, { css });
+
             visitMetaCSSDependenciesBFS(
                 meta,
                 (dep) => {
@@ -97,10 +96,17 @@ export function stylableRollupPlugin({
                 stylable.createResolver()
             );
 
-            extracted.set(id, { css });
+            emitDiagnostics(
+                {
+                    emitError: (e) => this.error(e),
+                    emitWarning: (e) => this.warn(e),
+                },
+                meta,
+                diagnosticsMode
+            );
 
             return {
-                code: generateStylableModuleCode(meta, exports),
+                code: generateStylableModuleCode(meta, exports, moduleImports),
                 map: { mappings: '' },
             };
         },
@@ -153,9 +159,14 @@ const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runt
 const runtimeImport = `import { stc, sts } from ${runtimePath};`;
 // const runtimeImport = `const { stc, sts } = require(${runtimePath});`;// from ${JSON.stringify(require.resolve('./runtime'))};`;
 
-function generateStylableModuleCode(meta: StylableMeta, exports: StylableExports) {
+function generateStylableModuleCode(
+    meta: StylableMeta,
+    exports: StylableExports,
+    moduleImports: string[]
+) {
     return `
         ${runtimeImport}
+        ${moduleImports.join('\n')}
         export var namespace = ${JSON.stringify(meta.namespace)};
         export var st = stc.bind(null, namespace);
         export var style = st;
