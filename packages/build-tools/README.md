@@ -1,3 +1,16 @@
 # @stylable/build-tools
 
-Collection of helper functions for stylable based tooling.
+[![npm version](https://img.shields.io/npm/v/@stylable/build-tools.svg)](https://www.npmjs.com/package/@stylable/build-tools)
+
+A collection of helper functions for Stylable based tooling.
+
+## What's inside
+
+* getUrlDependencies - Collect all dependencies of Stylable meta
+* hasImportedSideEffects - Detect if a meta has imports with Stylable side effects
+* loadStylableConfig - Loads `stylable.config` file from package
+* sortModulesByDepth - Sort algorithm for Stylable modules 
+
+
+## License
+Copyright (c) 2021 Wix.com Ltd. All Rights Reserved. Use of this source code is governed by an [BSD license](./LICENSE).

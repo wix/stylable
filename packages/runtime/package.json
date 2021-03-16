@@ -10,6 +10,7 @@
   },
   "files": [
     "dist",
+    "lib",
     "!dist/test",
     "src",
     "!*/tsconfig.{json,tsbuildinfo}"

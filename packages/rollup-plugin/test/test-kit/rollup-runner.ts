@@ -1,11 +1,11 @@
 import nodeResolve from 'rollup-plugin-node-resolve';
-import { watch } from 'rollup';
+import { RollupWatcherEvent, watch } from 'rollup';
 import { serve } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
-import { stylableRollupPlugin } from '@stylable/rollup';
+import { stylableRollupPlugin } from '@stylable/rollup-plugin';
 import { createTempProject, actAndWaitForBuild } from './test-helpers';
 import { join } from 'path';
-const html = require('@rollup/plugin-html');
+import html from '@rollup/plugin-html';
 
 export function rollupRunner({
     projectPath,
@@ -42,7 +42,7 @@ export function rollupRunner({
                     return ns;
                 },
             }),
-            html(),
+            html({}),
         ],
     });
 
@@ -86,9 +86,8 @@ export function rollupRunner({
             return page;
         },
         dispose,
-        async bundle(action?: () => void) {
+        async bundle(action?: (done: Promise<RollupWatcherEvent>) => Promise<void> | void) {
             const val = await actAndWaitForBuild(watcher, action);
-
             await val.result.write({
                 dir: dist,
             });

@@ -27,6 +27,7 @@
     { "path": "./packages/optimizer/src" },
     { "path": "./packages/optimizer/test" },
     { "path": "./packages/runtime/src" },
+    { "path": "./packages/runtime/src/tsconfig.esm.json" },
     { "path": "./packages/runtime/test" },
     { "path": "./packages/schema-extract/src" },
     { "path": "./packages/schema-extract/test" },
@@ -36,8 +37,8 @@
     { "path": "./packages/webpack-extensions/test" },
     { "path": "./packages/webpack-plugin/src" },
     { "path": "./packages/webpack-plugin/test" },
-    { "path": "./packages/rollup/src" },
-    { "path": "./packages/rollup/test" },
+    { "path": "./packages/rollup-plugin/src" },
+    { "path": "./packages/rollup-plugin/test" },
     { "path": "./packages/build-tools/test" },
     { "path": "./packages/build-tools/src" }
   ]

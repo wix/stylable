@@ -1,4 +1,5 @@
-import { stylesheet, injectStyles } from './runtime';
+import { stylesheet } from '@stylable/runtime/dist/runtime';
+import { injectStyles } from '@stylable/runtime/dist/inject-styles';
 
 import {
     RuntimeModule,
@@ -18,6 +19,7 @@ import type {
     StringSortableSet,
     StylableBuildMeta,
 } from './types';
+
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
 export interface DependencyTemplateContext {

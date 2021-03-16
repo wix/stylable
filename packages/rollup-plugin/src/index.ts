@@ -1,37 +1,52 @@
 import {
     Stylable,
+    StylableExports,
     StylableMeta,
-    StylableResults,
     visitMetaCSSDependenciesBFS,
+    emitDiagnostics,
+    DiagnosticsMode,
 } from '@stylable/core';
-import { getUrlDependencies, sortModulesByDepth } from '@stylable/build-tools';
+import {
+    getUrlDependencies,
+    sortModulesByDepth,
+    calcDepth,
+    CalcDepthContext,
+} from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { nodeFs } from '@file-services/node';
 import { createHash } from 'crypto';
 import { Plugin, PluginContext } from 'rollup';
 import { getType } from 'mime';
-import { calcDepth } from './calc-depth';
+import { join, parse } from 'path';
 
 const production = !process.env.ROLLUP_WATCH;
 
-interface PluginOptions {
-    minify?: boolean;
-    inlineAssets?: boolean;
+interface StylableRollupPluginOptions {
+    optimization?: {
+        minify?: boolean;
+    };
+    inlineAssets?: boolean | ((filepath: string, buffer: Buffer) => boolean);
     fileName?: string;
+    diagnosticsMode?: DiagnosticsMode;
     resolveNamespace?: typeof resolveNamespaceNode;
 }
 
+const ST_CSS = '.st.css';
+
+const PRINT_ORDER = -1;
 export function stylableRollupPlugin({
-    minify = false,
+    optimization: { minify = false } = {},
     inlineAssets = true,
     fileName = 'stylable.css',
+    diagnosticsMode = 'strict',
     resolveNamespace = resolveNamespaceNode,
-}: PluginOptions = {}): Plugin {
+}: StylableRollupPluginOptions = {}): Plugin {
     let stylable!: Stylable;
     let extracted!: Map<any, any>;
     let emittedAssets!: Map<string, string>;
     let outputCSS = '';
+
     return {
         name: 'Stylable',
         buildStart(rollupOptions) {
@@ -51,22 +66,31 @@ export function stylableRollupPlugin({
             }
         },
         load(id) {
-            if (id.endsWith('.st.css')) {
+            if (id.endsWith(ST_CSS)) {
                 const code = nodeFs.readFileSync(id, 'utf8');
                 return { code, moduleSideEffects: false };
             }
             return null;
         },
         transform(source, id) {
-            if (!id.endsWith('.st.css')) {
+            if (!id.endsWith(ST_CSS)) {
                 return null;
             }
-            const res = stylable.transform(source, id);
-            const assetsIds = emitAssets(this, stylable, res.meta, emittedAssets, inlineAssets);
-            const css = generateCssString(res.meta, minify, stylable, assetsIds);
-
+            const { meta, exports } = stylable.transform(source, id);
+            const assetsIds = emitAssets(this, stylable, meta, emittedAssets, inlineAssets);
+            const css = generateCssString(meta, minify, stylable, assetsIds);
+            
+            emitDiagnostics(
+                {
+                    emitError: (e) => this.error(e),
+                    emitWarning: (e) => this.warn(e),
+                },
+                meta,
+                diagnosticsMode
+            );
+            
             visitMetaCSSDependenciesBFS(
-                res.meta,
+                meta,
                 (dep) => {
                     this.addWatchFile(dep.source);
                 },
@@ -76,22 +100,38 @@ export function stylableRollupPlugin({
             extracted.set(id, { css });
 
             return {
-                code: generateStylableModuleCode(res),
+                code: generateStylableModuleCode(meta, exports),
                 map: { mappings: '' },
             };
         },
         buildEnd() {
             const modules = [];
+            const cache = new Map();
+
+            const context: CalcDepthContext<string> = {
+                getDependencies: (module) => this.getModuleInfo(module)!.importedIds,
+                getImporters: (module) => this.getModuleInfo(module)!.importers,
+                isStylableModule: (module) => module.endsWith(ST_CSS),
+                getModulePathNoExt: (module) => {
+                    if (module.endsWith(ST_CSS)) {
+                        return module.replace(/\.st\.css$/, '');
+                    }
+                    const { dir, name } = parse(module);
+                    return join(dir, name);
+                },
+            };
+
             for (const moduleId of this.getModuleIds()) {
-                if (moduleId.endsWith('.st.css')) {
-                    modules.push({ depth: calcDepth(moduleId, this), moduleId });
+                if (moduleId.endsWith(ST_CSS)) {
+                    modules.push({ depth: calcDepth(moduleId, context, [], cache), moduleId });
                 }
             }
 
             sortModulesByDepth(
                 modules,
                 (m) => m.depth,
-                (m) => m.moduleId
+                (m) => m.moduleId,
+                PRINT_ORDER
             );
 
             outputCSS = '';
@@ -109,21 +149,21 @@ export function stylableRollupPlugin({
     };
 }
 
-const runtimeImport = `import {style as stc, cssStates as sts} from ${JSON.stringify(
-    require.resolve('@stylable/rollup/runtime')
-)};`;
+const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
+const runtimeImport = `import { stc, sts } from ${runtimePath};`;
+// const runtimeImport = `const { stc, sts } = require(${runtimePath});`;// from ${JSON.stringify(require.resolve('./runtime'))};`;
 
-function generateStylableModuleCode(res: StylableResults) {
+function generateStylableModuleCode(meta: StylableMeta, exports: StylableExports) {
     return `
         ${runtimeImport}
-        export var namespace = ${JSON.stringify(res.meta.namespace)};
+        export var namespace = ${JSON.stringify(meta.namespace)};
         export var st = stc.bind(null, namespace);
         export var style = st;
         export var cssStates = sts.bind(null, namespace);
-        export var classes = ${JSON.stringify(res.exports.classes)}; 
-        export var keyframes = ${JSON.stringify(res.exports.keyframes)}; 
-        export var stVars = ${JSON.stringify(res.exports.stVars)}; 
-        export var vars = ${JSON.stringify(res.exports.vars)}; 
+        export var classes = ${JSON.stringify(exports.classes)}; 
+        export var keyframes = ${JSON.stringify(exports.keyframes)}; 
+        export var stVars = ${JSON.stringify(exports.stVars)}; 
+        export var vars = ${JSON.stringify(exports.vars)}; 
     `;
 }
 
@@ -148,15 +188,18 @@ function emitAssets(
     stylable: Stylable,
     meta: StylableMeta,
     emittedAssets: Map<string, string>,
-    inlineAssets: boolean
+    inlineAssets: StylableRollupPluginOptions['inlineAssets']
 ): string[] {
     const assets = getUrlDependencies(meta, stylable.projectRoot);
     const assetsIds: string[] = [];
     for (const asset of assets) {
-        if (inlineAssets) {
-            const fileBuffer = nodeFs.readFileSync(asset, 'base64');
+        const fileBuffer = nodeFs.readFileSync(asset);
+        const shouldInline =
+            typeof inlineAssets === 'function' ? inlineAssets(asset, fileBuffer) : inlineAssets;
+
+        if (shouldInline) {
             const mimeType = getType(nodeFs.extname(asset));
-            assetsIds.push(`data:${mimeType};base64,${fileBuffer}`);
+            assetsIds.push(`data:${mimeType};base64,${fileBuffer.toString('base64')}`);
         } else {
             const name = nodeFs.basename(asset);
             let hash = emittedAssets.get(asset);
@@ -183,3 +226,5 @@ function emitAssets(
     }
     return assetsIds;
 }
+
+export default stylableRollupPlugin;

@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 
 export async function serve(dir: string, port = 3000, log = console.log) {
+    log('Start Server');
     return new Promise<{ server: { close(): void }; serverUrl: string }>((res) => {
         const child = spawn(
             'node',

@@ -5,7 +5,7 @@ import {
     OptimizeConfig,
     DiagnosticsMode,
 } from '@stylable/core';
-import { sortModulesByDepth, loadStylableConfig } from '@stylable/build-tools';
+import { sortModulesByDepth, loadStylableConfig, calcDepth } from '@stylable/build-tools';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { dirname, relative } from 'path';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
@@ -32,11 +32,10 @@ import {
     getTopLevelInputFilesystem,
     createDecacheRequire,
     createStylableResolverCacheMap,
+    createCalcDepthContext,
 } from './plugin-utils';
-import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
 import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
-// import { loadStylableConfig } from './load-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
 import type {
     DependencyClass,
@@ -45,7 +44,7 @@ import type {
     StylableBuildMeta,
     StylableLoaderContext,
 } from './types';
-import { parse } from 'postcss';
+import { parse as parseCSS } from 'postcss';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -350,9 +349,10 @@ export class StylableWebpackPlugin {
          */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             const cache = new Map();
+            const context = createCalcDepthContext(moduleGraph);
             for (const module of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
-                module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
+                module.buildMeta.stylable.depth = calcDepth(module, context, [], cache);
             }
         });
 
@@ -380,7 +380,7 @@ export class StylableWebpackPlugin {
                     const buildMeta = getStylableBuildMeta(module);
                     const { css, exports, globals } = buildMeta;
 
-                    const ast = parse(css);
+                    const ast = parseCSS(css);
 
                     optimizer.optimizeAst(
                         optimizeOptions,

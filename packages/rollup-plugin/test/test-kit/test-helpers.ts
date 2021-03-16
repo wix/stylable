@@ -4,11 +4,12 @@ import { OutputChunk, RollupBuild, RollupWatcher, RollupWatcherEvent } from 'rol
 import { createTempDirectorySync } from 'create-temp-directory';
 import { deferred } from 'promise-assist';
 
-export function actAndWaitForBuild(watcher: RollupWatcher, action?: () => void) {
-    if (action) {
-        setTimeout(action, 0);
-    }
+export async function actAndWaitForBuild(
+    watcher: RollupWatcher,
+    action?: (bundled: Promise<RollupWatcherEvent>) => Promise<void> | void
+) {
     const current = deferred<RollupWatcherEvent & { code: 'BUNDLE_END' }>();
+
     let bundleEnd: RollupWatcherEvent & { code: 'BUNDLE_END' };
     const handler = (e: RollupWatcherEvent) => {
         if (e.code === 'BUNDLE_END') {
@@ -26,6 +27,16 @@ export function actAndWaitForBuild(watcher: RollupWatcher, action?: () => void) 
         }
     };
     watcher.on('event', handler);
+    await new Promise<void>((res, rej) => {
+        setTimeout(() => {
+            const wait = action?.(current.promise);
+            if (wait) {
+                wait.then(res).catch(rej);
+            } else {
+                res();
+            }
+        }, 10);
+    });
     return current.promise;
 }
 export function createTempProject(projectToCopy: string, nodeModulesToLink: string, entry: string) {
@@ -66,5 +77,5 @@ export function findModuleByName(fileName: string, build: RollupBuild, chunk?: O
 }
 
 export function getProjectPath(name: string) {
-    return dirname(require.resolve(`@stylable/rollup/test/projects/${name}/package.json`));
+    return dirname(require.resolve(`@stylable/rollup-plugin/test/projects/${name}/package.json`));
 }

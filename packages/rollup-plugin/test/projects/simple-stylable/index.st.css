@@ -1,6 +1,6 @@
 :import {
     -st-from: "./imported.st.css";
-    -st-named: imported as xxx;
+    -st-named: imported as part;
 }
 :import {
     -st-from: "./imported-too.st.css";
@@ -9,11 +9,11 @@
 
 .imported-too{}
 
-.xxx {
-    font-family: monospace;
-}
-
 .root {
     font-size: 10em;
     background: url("./asset.png");
+}
+
+.part {
+    font-family: monospace;
 }
