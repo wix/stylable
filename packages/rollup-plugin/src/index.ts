@@ -157,7 +157,6 @@ export function stylableRollupPlugin({
 
 const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
 const runtimeImport = `import { stc, sts } from ${runtimePath};`;
-// const runtimeImport = `const { stc, sts } = require(${runtimePath});`;// from ${JSON.stringify(require.resolve('./runtime'))};`;
 
 function generateStylableModuleCode(
     meta: StylableMeta,

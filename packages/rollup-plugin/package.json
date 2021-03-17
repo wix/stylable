@@ -8,7 +8,7 @@
   },
   "peerDependencies": {
     "@stylable/core": ">=4",
-    "rollup": "~2"
+    "rollup": "^2.40.0"
   },
   "dependencies": {
     "@stylable/node": "^4.0.2",

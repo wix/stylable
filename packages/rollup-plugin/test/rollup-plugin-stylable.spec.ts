@@ -30,7 +30,7 @@ describe('StylableRollupPlugin', () => {
         },
     });
 
-    it('should work', async () => {
+    it('should transform Stylable files with assets and create output css', async () => {
         const { projectDir, serve, ready, act, open } = runner;
 
         await ready;
