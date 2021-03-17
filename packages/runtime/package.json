@@ -10,7 +10,7 @@
   },
   "files": [
     "dist",
-    "lib",
+    "esm",
     "!dist/test",
     "src",
     "!*/tsconfig.{json,tsbuildinfo}"
