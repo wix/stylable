@@ -19,7 +19,7 @@ export function injectStyles(host: Host) {
         style.setAttribute('st-runtime', runtimeId);
         style.textContent = css;
         var loadedStyleElements = head.querySelectorAll<HTMLStyleElement>(
-            `style[st-runtime="${runtimeId}"]`
+            'style[st-runtime="' + runtimeId + '"]'
         );
         var inserted = false;
         for (var i = 0; i < loadedStyleElements.length; i++) {
