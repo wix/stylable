@@ -50,28 +50,6 @@ export function createTempProject(projectToCopy: string, nodeModulesToLink: stri
     };
 }
 
-export function findModuleByName(fileName: string, build: RollupBuild, chunk?: OutputChunk) {
-    const modules = [];
-    const buildModules = build.cache?.modules.values();
-    if (!buildModules) {
-        throw new Error('Missing build.cache');
-    }
-    for (const module of buildModules) {
-        if (basename(module.id) === fileName) {
-            modules.push(module);
-        }
-    }
-    if (modules.length !== 1) {
-        throw new Error(`Found 0 or more then 1 module with the name ${fileName}`);
-    }
-    if (chunk) {
-        if (!chunk.modules[modules[0].id]) {
-            throw new Error(`module is not included in chunk ${chunk.name}`);
-        }
-    }
-    return modules[0];
-}
-
 export function getProjectPath(name: string) {
     return dirname(require.resolve(`@stylable/rollup-plugin/test/projects/${name}/package.json`));
 }
