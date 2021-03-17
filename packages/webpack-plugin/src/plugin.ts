@@ -180,6 +180,7 @@ export class StylableWebpackPlugin {
                  * Handle things that related to chunking and bundling
                  */
                 this.chunksIntegration(
+                    compiler.webpack,
                     compilation,
                     staticPublicPath,
                     stylableModules,
@@ -405,6 +406,7 @@ export class StylableWebpackPlugin {
         });
     }
     private chunksIntegration(
+        webpack: Compiler['webpack'],
         compilation: Compilation,
         staticPublicPath: string,
         stylableModules: Set<NormalModule>,
@@ -458,10 +460,7 @@ export class StylableWebpackPlugin {
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
-                throw new Error(
-                    'Support for mini-css is temporarily disabled. see https://github.com/webpack-contrib/mini-css-extract-plugin/pull/703'
-                );
-                injectCssModules(compilation, staticPublicPath, stylableModules, assetsModules);
+                injectCssModules(webpack, compilation, staticPublicPath, stylableModules, assetsModules);
             }
         }
     }
