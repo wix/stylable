@@ -14,6 +14,7 @@
     "@stylable/module-utils": "^4.0.2",
     "@stylable/node": "^4.0.2",
     "@stylable/optimizer": "^4.0.2",
+    "@stylable/runtime": "^4.0.2",
     "decache": "^4.6.0",
     "find-config": "^1.0.0",
     "webpack-sources": "^2.2.0"

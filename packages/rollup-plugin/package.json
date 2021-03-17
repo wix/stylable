@@ -11,9 +11,9 @@
     "rollup": "~2"
   },
   "dependencies": {
-    "@stylable/node": "^4.0.1",
-    "@stylable/optimizer": "^4.0.1",
-    "@stylable/runtime": "^4.0.1",
+    "@stylable/node": "^4.0.2",
+    "@stylable/optimizer": "^4.0.2",
+    "@stylable/runtime": "^4.0.2",
     "mime": "^2.5.2",
     "toky": "^0.1.0"
   },
