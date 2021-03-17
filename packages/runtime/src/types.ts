@@ -48,7 +48,12 @@ export interface RenderableStylesheet {
 }
 
 export interface Host {
-    sts?: (namespace: string) => string;
+    sts?: (
+        namespace: string,
+        context: string | undefined,
+        stateOrClass?: string | StateMap | undefined,
+        ...classes: Array<string | undefined>
+    ) => string;
     stc?: (namespace: string, stateMapping?: StateMap | null | undefined) => string;
     sti?: (namespace: string, css: string, depth: number, runtimeId: string) => void;
 }
