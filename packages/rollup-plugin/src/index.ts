@@ -168,9 +168,9 @@ function generateStylableModuleCode(
         ${runtimeImport}
         ${moduleImports.join('\n')}
         export var namespace = ${JSON.stringify(meta.namespace)};
-        export var st = stc.bind(null, namespace);
+        export var st = sts.bind(null, namespace);
         export var style = st;
-        export var cssStates = sts.bind(null, namespace);
+        export var cssStates = stc.bind(null, namespace);
         export var classes = ${JSON.stringify(exports.classes)}; 
         export var keyframes = ${JSON.stringify(exports.keyframes)}; 
         export var stVars = ${JSON.stringify(exports.stVars)}; 

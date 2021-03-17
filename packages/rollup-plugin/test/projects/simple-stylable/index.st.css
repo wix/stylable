@@ -5,5 +5,10 @@
 }
 
 .part {
+    -st-states: myState;
     background: url("./dog.png");
+}
+
+.part:myState {
+    color: green;
 }

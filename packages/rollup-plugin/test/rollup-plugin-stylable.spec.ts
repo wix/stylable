@@ -9,12 +9,12 @@ const getElementsStyles = () => {
     const { backgroundImage, backgroundColor, fontSize, fontFamily } = getComputedStyle(
         document.body
     );
-    const { backgroundImage: partBackgroundImage } = getComputedStyle(
+    const { backgroundImage: partBackgroundImage, color: partColor } = getComputedStyle(
         document.body.firstElementChild!
     );
     return {
         body: { backgroundImage, backgroundColor, fontSize, fontFamily },
-        part: { backgroundImage: partBackgroundImage },
+        part: { backgroundImage: partBackgroundImage, color: partColor },
     };
 };
 
@@ -45,6 +45,7 @@ describe('StylableRollupPlugin', () => {
         expect(body.fontFamily).to.equal('monospace');
 
         expect(part.backgroundImage).to.match(/2e13bcd92bf005d9bf9046f9206e5652ed34fc7b_dog.png/);
+        expect(part.color).to.equal('rgb(0, 128, 0)');
 
         await act(async (done) => {
             nodeFs.writeFileSync(nodeFs.join(projectDir, 'index.st.css'), '');
