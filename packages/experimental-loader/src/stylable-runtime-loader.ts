@@ -36,7 +36,9 @@ function addBuildInfo(ctx: loader.LoaderContext, namespace: string) {
     try {
         ctx._module.buildInfo.stylableNamespace = namespace;
     } catch (e) {
-        ctx.emitWarning(`Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath}`);
+        ctx.emitWarning(
+            `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${e.message}`
+        );
     }
 }
 
