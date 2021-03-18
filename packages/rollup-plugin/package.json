@@ -11,6 +11,7 @@
     "rollup": "^2.40.0"
   },
   "dependencies": {
+    "@stylable/build-tools": "^4.1.0-alpha.0",
     "@stylable/node": "^4.1.0-alpha.0",
     "@stylable/optimizer": "^4.1.0-alpha.0",
     "@stylable/runtime": "^4.1.0-alpha.0",
