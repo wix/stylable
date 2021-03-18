@@ -1,13 +1,13 @@
 {
   "name": "@stylable/e2e-test-kit",
-  "version": "4.1.0-alpha.1",
+  "version": "4.1.0-alpha.2",
   "description": "A collection of tools to help test Stylable components and applications from end-to-end",
   "main": "dist/index.js",
   "peerDependencies": {
     "webpack": "^5.20.0"
   },
   "dependencies": {
-    "@stylable/runtime": "^4.1.0-alpha.1",
+    "@stylable/runtime": "^4.1.0-alpha.2",
     "express": "^4.17.1",
     "memory-fs": "^0.5.0",
     "node-eval": "^2.0.0",
