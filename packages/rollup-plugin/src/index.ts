@@ -15,11 +15,11 @@ import {
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { nodeFs } from '@file-services/node';
+import fs from 'fs';
+import { basename, extname, join, parse } from 'path';
 import { createHash } from 'crypto';
 import { Plugin, PluginContext } from 'rollup';
 import { getType } from 'mime';
-import { join, parse } from 'path';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -57,7 +57,7 @@ export function stylableRollupPlugin({
                 stylable.initCache();
             } else {
                 stylable = Stylable.create({
-                    fileSystem: nodeFs,
+                    fileSystem: fs,
                     projectRoot: rollupOptions.context,
                     mode: production ? 'production' : 'development',
                     resolveNamespace,
@@ -68,7 +68,7 @@ export function stylableRollupPlugin({
         },
         load(id) {
             if (id.endsWith(ST_CSS)) {
-                const code = nodeFs.readFileSync(id, 'utf8');
+                const code = fs.readFileSync(id, 'utf8');
                 return { code, moduleSideEffects: false };
             }
             return null;
@@ -203,20 +203,20 @@ function emitAssets(
     const assets = getUrlDependencies(meta, stylable.projectRoot);
     const assetsIds: string[] = [];
     for (const asset of assets) {
-        const fileBuffer = nodeFs.readFileSync(asset);
+        const fileBuffer = fs.readFileSync(asset);
         const shouldInline =
             typeof inlineAssets === 'function' ? inlineAssets(asset, fileBuffer) : inlineAssets;
 
         if (shouldInline) {
-            const mimeType = getType(nodeFs.extname(asset));
+            const mimeType = getType(extname(asset));
             assetsIds.push(`data:${mimeType};base64,${fileBuffer.toString('base64')}`);
         } else {
-            const name = nodeFs.basename(asset);
+            const name = basename(asset);
             let hash = emittedAssets.get(asset);
             if (hash) {
                 assetsIds.push(`${hash}_${name}`);
             } else {
-                const fileBuffer = nodeFs.readFileSync(asset);
+                const fileBuffer = fs.readFileSync(asset);
                 hash = createHash('sha1').update(fileBuffer).digest('hex');
                 const fileName = `${hash}_${name}`;
                 if (emittedAssets.has(fileName)) {

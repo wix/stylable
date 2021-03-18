@@ -7,7 +7,7 @@
     "test": "mocha \"dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
-    "@stylable/core": ">=4",
+    "@stylable/core": "4.1.0-alpha.1",
     "rollup": "^2.40.0"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "dist",
     "!dist/test",
     "src",
+    "runtime.js",
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
