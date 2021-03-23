@@ -73,7 +73,7 @@
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
     "sinon": "^10.0.0",
-    "sinon-chai": "^3.5.0",
+    "sinon-chai": "^3.6.0",
     "source-map-loader": "^2.0.1",
     "style-loader": "^2.0.0",
     "typescript": "~4.2.3",
@@ -81,7 +81,7 @@
     "util": "^0.12.3",
     "webpack": "^5.27.2",
     "webpack-cli": "^4.5.0",
-    "webpack-dev-server": "^4.0.0-beta.0"
+    "webpack-dev-server": "^4.0.0-beta.1"
   },
   "engines": {
     "node": ">=12"
