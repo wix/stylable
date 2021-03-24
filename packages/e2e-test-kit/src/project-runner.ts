@@ -35,11 +35,10 @@ export class ProjectRunner {
         const disposeAfterEach: Set<() => void> = new Set();
         if (watch) {
             const projectToCopy = runnerOptions.projectDir;
-            if(watchedDir){
-                rmdirSync(watchedDir, { recursive: true })
+            if (watchedDir) {
+                rmdirSync(watchedDir, { recursive: true });
             }
-            const tempPath =
-                watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
+            const tempPath = watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
             const removeTemp = () => rmdirSync(tempPath, { recursive: true });
             const projectPath = join(tempPath, 'project');
             disposeAfterEach.add(removeTemp);
