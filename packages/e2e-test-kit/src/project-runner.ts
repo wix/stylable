@@ -8,6 +8,7 @@ import { nodeFs } from '@file-services/node';
 import { mkdtempSync, rmdirSync, symlinkSync } from 'fs';
 import { deferred } from 'promise-assist';
 import { tmpdir } from 'os';
+import { existsSync } from 'node:fs';
 
 export interface Options {
     projectDir: string;
@@ -35,7 +36,7 @@ export class ProjectRunner {
         const disposeAfterEach: Set<() => void> = new Set();
         if (watch) {
             const projectToCopy = runnerOptions.projectDir;
-            if (watchedDir) {
+            if (watchedDir && existsSync(watchedDir)) {
                 rmdirSync(watchedDir, { recursive: true });
             }
             const tempPath = watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
