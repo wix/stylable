@@ -1,6 +1,6 @@
 {
   "name": "@stylable/dom-test-kit",
-  "version": "4.0.2",
+  "version": "4.0.4",
   "description": "Stylable DOM testing utilities",
   "main": "dist/index.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "start": "webpack serve"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.2",
-    "@stylable/runtime": "^4.0.2"
+    "@stylable/core": "^4.0.4",
+    "@stylable/runtime": "^4.0.4"
   },
   "files": [
     "dist",
