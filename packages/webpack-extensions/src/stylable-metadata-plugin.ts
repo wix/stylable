@@ -5,7 +5,12 @@ import { sources } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
-import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
+import {
+    getCSSViewModules,
+    getStylableModules,
+    isStylableModule,
+    uniqueFilterMap,
+} from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
 
 const RawSource = sources.RawSource;
@@ -64,9 +69,10 @@ export class StylableMetadataPlugin {
             this.options.name,
             this.options.version
         );
-
+        const stylableModulesWithData = getStylableModules(compilation);
         for (const module of stylableModules) {
-            const namespace = module.buildMeta.stylable.namespace;
+            const namespace =
+                stylableModulesWithData?.get(module)?.namespace ?? module.buildMeta.namespace;
             const depth = module.buildMeta.stylable.depth;
             const resource = this.options.normalizeModulePath
                 ? this.options.normalizeModulePath(module.resource, builder)

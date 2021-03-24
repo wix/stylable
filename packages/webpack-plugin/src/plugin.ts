@@ -6,6 +6,7 @@ import {
     DiagnosticsMode,
 } from '@stylable/core';
 import { StylableOptimizer } from '@stylable/optimizer';
+import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
 import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
 
@@ -32,6 +33,7 @@ import {
     getTopLevelInputFilesystem,
     createDecacheRequire,
     createStylableResolverCacheMap,
+    provideStylableModules,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -39,6 +41,7 @@ import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadStylableConfig } from './load-stylable-config';
 import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
 import type {
+    BuildData,
     DependencyClass,
     LoaderData,
     NormalModuleFactory,
@@ -170,7 +173,8 @@ export class StylableWebpackPlugin {
                 const staticPublicPath = getStaticPublicPath(compilation);
 
                 const assetsModules = new Map<string, NormalModule>();
-                const stylableModules = new Set<NormalModule>();
+                const stylableModules = new Map<NormalModule, BuildData | null>();
+                provideStylableModules(compilation, stylableModules);
 
                 /**
                  * Handle things that related to each module
@@ -195,6 +199,7 @@ export class StylableWebpackPlugin {
                     compilation,
                     normalModuleFactory,
                     staticPublicPath,
+                    stylableModules,
                     assetsModules
                 );
 
@@ -246,7 +251,7 @@ export class StylableWebpackPlugin {
     }
     private modulesIntegration(
         compilation: Compilation,
-        stylableModules: Set<NormalModule>,
+        stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
         const { moduleGraph } = compilation;
@@ -269,7 +274,6 @@ export class StylableWebpackPlugin {
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,
-                            cssInjection: this.options.cssInjection,
                             isUsed: undefined,
                             ...loaderData,
                         };
@@ -308,7 +312,7 @@ export class StylableWebpackPlugin {
         compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, (modules) => {
             for (const module of modules) {
                 if (isStylableModule(module) && module.buildMeta.stylable) {
-                    stylableModules.add(module);
+                    stylableModules.set(module, null);
                 }
                 if (isAssetModule(module)) {
                     assetsModules.set(module.resource, module);
@@ -329,7 +333,7 @@ export class StylableWebpackPlugin {
          */
         if (this.options.assetsMode === 'loader') {
             compilation.hooks.optimizeDependencies.tap(StylableWebpackPlugin.name, () => {
-                for (const module of stylableModules) {
+                for (const [module] of stylableModules) {
                     const connections = moduleGraph.getOutgoingConnections(module);
                     for (const connection of connections) {
                         if (
@@ -344,13 +348,23 @@ export class StylableWebpackPlugin {
         }
 
         /**
-         *  After we have the initial chunks we can calculate the depth and usage of each stylesheet
+         *  After we have the initial chunks we can calculate the depth and usage of each stylesheet and create buildData
          */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             const cache = new Map();
-            for (const module of stylableModules) {
+            for (const [module] of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
                 module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
+
+                const { css, urls, exports, namespace } = getStylableBuildMeta(module);
+                stylableModules.set(module, {
+                    exports: cloneDeep(exports),
+                    urls: cloneDeep(urls),
+                    namespace,
+                    css,
+                    isUsed: module.buildMeta.stylable.isUsed,
+                    depth: module.buildMeta.stylable.depth,
+                });
             }
         });
 
@@ -370,10 +384,10 @@ export class StylableWebpackPlugin {
             }
 
             for (const module of sortedModules) {
-                try {
-                    const buildMeta = getStylableBuildMeta(module);
-                    const { css, exports, globals } = buildMeta;
+                const { css, globals, namespace } = getStylableBuildMeta(module);
 
+                try {
+                    const buildData = stylableModules.get(module)!;
                     const ast = parse(css);
 
                     optimizer.optimizeAst(
@@ -381,16 +395,16 @@ export class StylableWebpackPlugin {
                         ast,
                         usageMapping,
                         this.stylable.delimiter,
-                        exports,
+                        buildData.exports,
                         globals
                     );
 
-                    buildMeta.css = optimizeOptions.minify
+                    buildData.css = optimizeOptions.minify
                         ? optimizer.minifyCSS(ast.toString())
                         : ast.toString();
 
                     if (optimizeOptions.shortNamespaces) {
-                        buildMeta.namespace = namespaceMapping[buildMeta.namespace];
+                        buildData.namespace = namespaceMapping[namespace];
                     }
                 } catch (e) {
                     compilation.errors.push(e);
@@ -402,7 +416,7 @@ export class StylableWebpackPlugin {
         webpack: Compiler['webpack'],
         compilation: Compilation,
         staticPublicPath: string,
-        stylableModules: Set<NormalModule>,
+        stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
         const { runtimeTemplate } = compilation;
@@ -453,7 +467,13 @@ export class StylableWebpackPlugin {
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
-                injectCssModules(webpack, compilation, staticPublicPath, stylableModules, assetsModules);
+                injectCssModules(
+                    webpack,
+                    compilation,
+                    staticPublicPath,
+                    stylableModules,
+                    assetsModules
+                );
             }
         }
     }
@@ -461,6 +481,7 @@ export class StylableWebpackPlugin {
         { dependencyTemplates, dependencyFactories }: Compilation,
         normalModuleFactory: NormalModuleFactory,
         staticPublicPath: string,
+        stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
         dependencyFactories.set(StylableRuntimeDependency, normalModuleFactory);
@@ -468,9 +489,11 @@ export class StylableWebpackPlugin {
             StylableRuntimeDependency,
             new InjectDependencyTemplate(
                 staticPublicPath,
+                stylableModules,
                 assetsModules,
                 this.options.runtimeStylesheetId,
-                this.options.runtimeId
+                this.options.runtimeId,
+                this.options.cssInjection
             )
         );
         dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);
