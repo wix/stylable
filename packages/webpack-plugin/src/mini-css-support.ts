@@ -1,9 +1,10 @@
 import type { Compilation, Compiler, NormalModule } from 'webpack';
-import { replaceMappedCSSAssetPlaceholders, getStylableBuildMeta } from './plugin-utils';
+import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
 
 const memoize = require('webpack/lib/util/memoize');
 
 import { StylableWebpackPlugin } from './plugin';
+import { BuildData } from './types';
 
 const getMiniCssExtractPlugin = memoize(() => {
     return require('mini-css-extract-plugin');
@@ -12,7 +13,7 @@ export function injectCssModules(
     webpack: Compiler['webpack'],
     compilation: Compilation,
     staticPublicPath: string,
-    stylableModules: Set<NormalModule>,
+    stylableModules: Map<NormalModule, BuildData | null>,
     assetsModules: Map<string, NormalModule>
 ) {
     const MiniCssExtractPlugin = getMiniCssExtractPlugin();
@@ -22,20 +23,20 @@ export function injectCssModules(
         const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
         const chunkGraph = compilation.chunkGraph!;
 
-        for (const module of stylableModules) {
+        for (const [module] of stylableModules) {
             const cssModule = new CssModule({
                 context: module.context,
                 identifier: module.resource.replace(/\.st\.css$/, '.css') + '?stylable-css-inject',
                 identifierIndex: 1,
                 content: replaceMappedCSSAssetPlaceholders({
-                    assetsModules: assetsModules,
+                    assetsModules,
                     staticPublicPath,
                     chunkGraph,
                     moduleGraph,
                     dependencyTemplates,
                     runtime: 'CSS' /*runtime*/,
                     runtimeTemplate,
-                    stylableBuildMeta: getStylableBuildMeta(module),
+                    stylableBuildData: getStylableBuildData(stylableModules, module),
                 }),
                 media: '',
                 sourceMap: null,

@@ -15,6 +15,13 @@ export interface StylableBuildMeta {
     unusedImports: string[];
 }
 
+export type BuildData = {
+    css: string;
+    namespace: string;
+    exports: StylableExports;
+    urls: string[];
+};
+
 export type LoaderData = Pick<
     StylableBuildMeta,
     'css' | 'urls' | 'exports' | 'namespace' | 'globals' | 'unusedImports'

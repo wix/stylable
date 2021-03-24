@@ -1,6 +1,7 @@
 import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
 import { UnusedDependency } from './unused-dependency';
 import type {
+    BuildData,
     DependencyTemplates,
     RuntimeTemplate,
     StringSortableSet,
@@ -55,7 +56,7 @@ export function getStaticPublicPath(compilation: Compilation) {
 }
 
 export function replaceCSSAssetPlaceholders(
-    { css, urls }: Pick<StylableBuildMeta, 'css' | 'urls'>,
+    { css, urls }: BuildData,
     publicPath: string,
     getAssetOutputPath: (resourcePath: string, publicPath: string) => string
 ) {
@@ -65,7 +66,7 @@ export function replaceCSSAssetPlaceholders(
 }
 
 interface ReplaceMappedCSSAssetPlaceholdersOptions {
-    stylableBuildMeta: StylableBuildMeta;
+    stylableBuildData: BuildData;
     staticPublicPath: string;
     assetsModules: Map<string, NormalModule>;
     chunkGraph: ChunkGraph;
@@ -76,7 +77,7 @@ interface ReplaceMappedCSSAssetPlaceholdersOptions {
 }
 
 export function replaceMappedCSSAssetPlaceholders({
-    stylableBuildMeta,
+    stylableBuildData,
     staticPublicPath,
     assetsModules,
     chunkGraph,
@@ -86,7 +87,7 @@ export function replaceMappedCSSAssetPlaceholders({
     dependencyTemplates,
 }: ReplaceMappedCSSAssetPlaceholdersOptions) {
     return replaceCSSAssetPlaceholders(
-        stylableBuildMeta,
+        stylableBuildData,
         staticPublicPath,
         (resourcePath, publicPath) => {
             const assetModule = assetsModules.get(resourcePath);
@@ -209,7 +210,7 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
 
 export function createStaticCSS(
     staticPublicPath: string,
-    stylableModules: Set<Module>,
+    stylableModules: Map<Module, BuildData | null>,
     assetsModules: Map<string, NormalModule>,
 
     chunkGraph: ChunkGraph,
@@ -218,19 +219,19 @@ export function createStaticCSS(
     runtimeTemplate: RuntimeTemplate,
     dependencyTemplates: DependencyTemplates
 ) {
-    const cssChunks = Array.from(stylableModules)
+    const cssChunks = Array.from(stylableModules.keys())
         .filter((m) => getStylableBuildMeta(m).isUsed !== false)
         .sort((m1, m2) => getStylableBuildMeta(m1).depth - getStylableBuildMeta(m2).depth)
         .map((m) => {
             return replaceMappedCSSAssetPlaceholders({
-                assetsModules: assetsModules,
+                assetsModules,
                 staticPublicPath,
                 chunkGraph,
                 moduleGraph,
                 dependencyTemplates,
                 runtime,
                 runtimeTemplate,
-                stylableBuildMeta: getStylableBuildMeta(m),
+                stylableBuildData: getStylableBuildData(stylableModules, m),
             });
         });
 
@@ -243,6 +244,17 @@ export function getStylableBuildMeta(module: Module): StylableBuildMeta {
         throw new Error(`Stylable module ${module.identifier()} does not contains build meta`);
     }
     return meta;
+}
+
+export function getStylableBuildData(
+    stylableModules: Map<Module, BuildData | null>,
+    module: Module
+): BuildData {
+    const data = stylableModules.get(module);
+    if (!data) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build data`);
+    }
+    return data;
 }
 
 export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
@@ -295,8 +307,8 @@ export function getFileName(filename: string, data: Record<string, string>) {
 /**
  * sorts by depth, falling back to alpha numeric
  */
-export function getSortedModules(stylableModules: Set<NormalModule>) {
-    return Array.from(stylableModules).sort((m1, m2) => {
+export function getSortedModules(stylableModules: Map<NormalModule, BuildData | null>) {
+    return Array.from(stylableModules.keys()).sort((m1, m2) => {
         const depthDiff = getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
         if (depthDiff === 0) {
             if (m1.resource > m2.resource) {
@@ -371,4 +383,20 @@ export function getTopLevelInputFilesystem(compiler: Compiler) {
         fileSystem = fileSystem.fileSystem;
     }
     return fileSystem;
+}
+
+/**
+ * Provide a simple way to share build meta with other plugins without using module state like WeakMap<Compilation, DATA>
+ */
+export function provideStylableModules(
+    compilation: any,
+    stylableModules: Map<NormalModule, BuildData | null>
+) {
+    compilation[Symbol.for('stylableModules')] = stylableModules;
+}
+
+export function getStylableModules(
+    compilation: any
+): Map<NormalModule, BuildData | null> | undefined {
+    return compilation[Symbol.for('stylableModules')];
 }

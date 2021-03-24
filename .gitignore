@@ -6,6 +6,7 @@ cjs
 .history
 .DS_Store
 .vcode/settings.json
+**/test/**/temp-dist
 
 # Dependency directories
 node_modules/
