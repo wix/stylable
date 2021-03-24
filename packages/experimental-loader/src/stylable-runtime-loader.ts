@@ -27,8 +27,20 @@ const stylableRuntimeLoader: loader.Loader = function loader(content) {
 
     const [namespace, mapping] = evalStylableExtractModule(content);
 
+    addBuildInfo(this, namespace);
+
     return createRuntimeTargetCode(namespace, mapping);
 };
+
+function addBuildInfo(ctx: loader.LoaderContext, namespace: string) {
+    try {
+        ctx._module.buildInfo.stylableNamespace = namespace;
+    } catch (e) {
+        ctx.emitWarning(
+            `Failed to add stylableNamespace buildInfo for: ${ctx.resourcePath} because ${e.message}`
+        );
+    }
+}
 
 export const loaderPath = __filename;
 export default stylableRuntimeLoader;
