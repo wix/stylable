@@ -5,10 +5,9 @@ import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
-import { mkdtempSync, rmdirSync, symlinkSync } from 'fs';
+import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
 import { deferred } from 'promise-assist';
 import { tmpdir } from 'os';
-import { existsSync } from 'node:fs';
 
 export interface Options {
     projectDir: string;
