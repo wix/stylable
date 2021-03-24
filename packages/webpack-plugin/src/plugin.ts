@@ -274,7 +274,6 @@ export class StylableWebpackPlugin {
                     loaderContext.flagStylableModule = (loaderData: LoaderData) => {
                         const stylableBuildMeta: StylableBuildMeta = {
                             depth: 0,
-                            cssInjection: this.options.cssInjection,
                             isUsed: undefined,
                             ...loaderData,
                         };
@@ -349,13 +348,23 @@ export class StylableWebpackPlugin {
         }
 
         /**
-         *  After we have the initial chunks we can calculate the depth and usage of each stylesheet
+         *  After we have the initial chunks we can calculate the depth and usage of each stylesheet and create buildData
          */
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             const cache = new Map();
             for (const [module] of stylableModules) {
                 module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
                 module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
+
+                const { css, urls, exports, namespace } = getStylableBuildMeta(module);
+                stylableModules.set(module, {
+                    exports: cloneDeep(exports),
+                    urls: cloneDeep(urls),
+                    namespace,
+                    css,
+                    isUsed: module.buildMeta.stylable.isUsed,
+                    depth: module.buildMeta.stylable.depth,
+                });
             }
         });
 
@@ -375,18 +384,10 @@ export class StylableWebpackPlugin {
             }
 
             for (const module of sortedModules) {
-                const { css, urls, exports, globals, namespace } = getStylableBuildMeta(module);
-
-                const buildData: BuildData = {
-                    exports: cloneDeep(exports),
-                    urls: cloneDeep(urls),
-                    namespace,
-                    css,
-                };
-
-                stylableModules.set(module, buildData);
+                const { css, globals, namespace } = getStylableBuildMeta(module);
 
                 try {
+                    const buildData = stylableModules.get(module)!;
                     const ast = parse(css);
 
                     optimizer.optimizeAst(
@@ -491,7 +492,8 @@ export class StylableWebpackPlugin {
                 stylableModules,
                 assetsModules,
                 this.options.runtimeStylesheetId,
-                this.options.runtimeId
+                this.options.runtimeId,
+                this.options.cssInjection
             )
         );
         dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);

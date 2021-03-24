@@ -6,21 +6,17 @@ export interface StylableBuildMeta {
     css: string;
     exports: StylableExports;
     urls: string[];
-    // stylableImports: { request: string; hasOwnSideEffects: boolean }[];
     depth: number;
-    cssInjection: 'js' | 'css' | 'mini-css' | 'none';
     namespace: string;
     isUsed: undefined | boolean;
     globals: Record<string, boolean>;
     unusedImports: string[];
 }
 
-export type BuildData = {
-    css: string;
-    namespace: string;
-    exports: StylableExports;
-    urls: string[];
-};
+export type BuildData = Pick<
+    StylableBuildMeta,
+    'css' | 'namespace' | 'depth' | 'exports' | 'isUsed' | 'urls'
+>;
 
 export type LoaderData = Pick<
     StylableBuildMeta,

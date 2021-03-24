@@ -11,11 +11,7 @@ import {
     sources,
     ChunkGraph,
 } from 'webpack';
-import {
-    getStylableBuildData,
-    getStylableBuildMeta,
-    replaceMappedCSSAssetPlaceholders,
-} from './plugin-utils';
+import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
 import type {
     BuildData,
     DependencyTemplates,
@@ -59,7 +55,8 @@ export class InjectDependencyTemplate {
         private stylableModules: Map<Module, BuildData | null>,
         private assetsModules: Map<string, NormalModule>,
         private runtimeStylesheetId: 'namespace' | 'module',
-        private runtimeId: string
+        private runtimeId: string,
+        private cssInjection: 'js' | 'css' | 'mini-css' | 'none'
     ) {}
     apply(
         _dependency: StylableRuntimeDependency,
@@ -74,12 +71,11 @@ export class InjectDependencyTemplate {
             dependencyTemplates,
         }: DependencyTemplateContext
     ) {
-        const stylableBuildMeta = getStylableBuildMeta(module);
         const stylableBuildData = getStylableBuildData(this.stylableModules, module);
-        if (!stylableBuildMeta.isUsed) {
+        if (!stylableBuildData.isUsed) {
             return;
         }
-        if (stylableBuildMeta.cssInjection === 'js') {
+        if (this.cssInjection === 'js') {
             const css = replaceMappedCSSAssetPlaceholders({
                 assetsModules: this.assetsModules,
                 staticPublicPath: this.staticPublicPath,
@@ -106,7 +102,7 @@ export class InjectDependencyTemplate {
                 source,
                 '/* JS_INJECT */',
                 `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
-                    stylableBuildMeta.depth
+                    stylableBuildData.depth
                 }, ${JSON.stringify(this.runtimeId)});`
             );
             runtimeRequirements.add(StylableRuntimeInject.name);

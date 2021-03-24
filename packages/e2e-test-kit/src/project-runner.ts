@@ -39,7 +39,7 @@ export class ProjectRunner {
                 rmdirSync(watchedDir, { recursive: true })
             }
             const tempPath =
-                watchedDir || nodeFs.realpathSync(mkdtempSync(join(tmpdir(), 'local-test')));
+                watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
             const removeTemp = () => rmdirSync(tempPath, { recursive: true });
             const projectPath = join(tempPath, 'project');
             disposeAfterEach.add(removeTemp);

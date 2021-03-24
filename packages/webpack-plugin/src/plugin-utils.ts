@@ -389,14 +389,14 @@ export function getTopLevelInputFilesystem(compiler: Compiler) {
  * Provide a simple way to share build meta with other plugins without using module state like WeakMap<Compilation, DATA>
  */
 export function provideStylableModules(
-    compilation: any,
+    compilation: Compilation,
     stylableModules: Map<NormalModule, BuildData | null>
 ) {
-    compilation[Symbol.for('stylableModules')] = stylableModules;
+    (compilation as any)[Symbol.for('stylableModules')] = stylableModules;
 }
 
 export function getStylableModules(
-    compilation: any
+    compilation: Compilation
 ): Map<NormalModule, BuildData | null> | undefined {
-    return compilation[Symbol.for('stylableModules')];
+    return (compilation as any)[Symbol.for('stylableModules')];
 }
