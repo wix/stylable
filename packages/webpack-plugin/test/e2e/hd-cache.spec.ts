@@ -19,11 +19,10 @@ describe(`(${project})`, () => {
         before,
         afterEach,
         after,
-        true,
-        join(projectDir, '../temp-dist')
+        true
+        // ,join(projectDir, '../temp-dist')
     );
     it('renders css', async () => {
-
         await projectRunner.actAndWaitForRecompile('include box component', () => {
             const indexPath = join(projectRunner.projectDir, 'src', 'index.js');
             const indexSource = readFileSync(indexPath, 'utf8');
