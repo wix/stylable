@@ -10,7 +10,8 @@
     "test": "tsc -p template/ts-react-webpack --noEmit"
   },
   "dependencies": {
-    "validate-npm-package-name": "^3.0.0"
+    "validate-npm-package-name": "^3.0.0",
+    "yargs": "^16.2.0"
   },
   "files": [
     "bin",
