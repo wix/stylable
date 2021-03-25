@@ -26,7 +26,7 @@ export function compileAsEntry(
     new NodeTemplatePlugin(outputOptions).apply(childCompiler);
     new LibraryTemplatePlugin(null, 'commonjs2').apply(childCompiler);
     new NodeTargetPlugin().apply(childCompiler);
-    new EntryPlugin(context, `!!${request}`, pluginName).apply(childCompiler);
+    new EntryPlugin(context, request, pluginName).apply(childCompiler);
     new LimitChunkCountPlugin({ maxChunks: 1 }).apply(childCompiler);
     plugins.forEach((p) => p.apply(childCompiler));
 
