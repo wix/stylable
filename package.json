@@ -40,7 +40,7 @@
     "@types/sinon": "^9.0.11",
     "@types/sinon-chai": "^3.2.5",
     "@types/validate-npm-package-name": "^3.0.2",
-    "@types/yargs": "^16.0.0",
+    "@types/yargs": "^16.0.1",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
     "autoprefixer": "^10.2.5",
