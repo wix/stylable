@@ -16,7 +16,7 @@
   "devDependencies": {
     "@file-services/memory": "^5.3.1",
     "@file-services/node": "^5.3.1",
-    "@types/chai": "^4.2.15",
+    "@types/chai": "^4.2.16",
     "@types/chai-subset": "^1.3.3",
     "@types/css-selector-tokenizer": "^0.7.0",
     "@types/csso": "^3.5.1",
@@ -24,7 +24,7 @@
     "@types/find-config": "^1.0.0",
     "@types/flat": "^5.0.1",
     "@types/js-beautify": "^1.13.1",
-    "@types/jsdom": "^16.2.9",
+    "@types/jsdom": "^16.2.10",
     "@types/json-schema": "^7.0.7",
     "@types/lodash.camelcase": "^4.3.6",
     "@types/lodash.clonedeep": "^4.5.6",
