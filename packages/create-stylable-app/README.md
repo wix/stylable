@@ -7,7 +7,7 @@ This CLI creates a simple setup that showcases _basic_ Stylable integration.
 ## Usage
 
 ```sh
-npx create-stylable-app <project-name> 
+npx create-stylable-app <project-name>
 ```
 
 _OR_
