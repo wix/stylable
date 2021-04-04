@@ -8,14 +8,10 @@ import {
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
-import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
+import type { Compilation, Compiler, NormalModule } from 'webpack';
 
 import findConfig from 'find-config';
-import {
-    injectRuntimeModules,
-    StylableRuntimeDependency,
-    InjectDependencyTemplate,
-} from './runtime-inject';
+
 import {
     getStaticPublicPath,
     isStylableModule,
@@ -37,18 +33,16 @@ import {
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
-import { CSSURLDependency, CSSURLDependencyTemplate } from './css-url';
 import { loadStylableConfig } from './load-stylable-config';
-import { UnusedDependency, UnusedDependencyTemplate } from './unused-dependency';
 import type {
     BuildData,
-    DependencyClass,
     LoaderData,
     NormalModuleFactory,
     StylableBuildMeta,
     StylableLoaderContext,
 } from './types';
 import { parse } from 'postcss';
+import { getWebpackEntities } from './webpack-entities';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -143,11 +137,16 @@ const defaultOptions = (
 export class StylableWebpackPlugin {
     stylable!: Stylable;
     options!: Required<StylableWebpackPluginOptions>;
+    entities!: ReturnType<typeof getWebpackEntities>;
     constructor(
         private userOptions: StylableWebpackPluginOptions = {},
         private injectConfigHooks = true
     ) {}
     apply(compiler: Compiler) {
+        /**
+         * Create all webpack entities
+         */
+        this.entities = getWebpackEntities(compiler.webpack);
         /**
          * This plugin is based on a loader so we inject the loader here
          */
@@ -179,7 +178,12 @@ export class StylableWebpackPlugin {
                 /**
                  * Handle things that related to each module
                  */
-                this.modulesIntegration(compilation, stylableModules, assetsModules);
+                this.modulesIntegration(
+                    compiler.webpack,
+                    compilation,
+                    stylableModules,
+                    assetsModules
+                );
 
                 /**
                  * Handle things that related to chunking and bundling
@@ -206,7 +210,7 @@ export class StylableWebpackPlugin {
                 /**
                  * Here we inject our runtime code for the js modules and injection of css to head
                  */
-                injectRuntimeModules(StylableWebpackPlugin.name, compilation);
+                this.entities.injectRuntimeModules(StylableWebpackPlugin.name, compilation);
             }
         );
     }
@@ -250,6 +254,7 @@ export class StylableWebpackPlugin {
         );
     }
     private modulesIntegration(
+        webpack: Compiler['webpack'],
         compilation: Compilation,
         stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
@@ -259,7 +264,7 @@ export class StylableWebpackPlugin {
         /**
          * Here we are creating the context that our loader needs
          */
-        NormalModule.getCompilationHooks(compilation).loader.tap(
+        webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
             StylableWebpackPlugin.name,
             (webpackLoaderContext, module) => {
                 const loaderContext = webpackLoaderContext as StylableLoaderContext;
@@ -284,7 +289,7 @@ export class StylableWebpackPlugin {
                          * They might be used by other stylesheets so they might end up in the final build
                          */
                         for (const request of stylableBuildMeta.unusedImports) {
-                            module.addDependency(new UnusedDependency(request) as Dependency);
+                            module.addDependency(new this.entities.UnusedDependency(request));
                         }
 
                         /**
@@ -293,14 +298,16 @@ export class StylableWebpackPlugin {
                         if (this.options.assetsMode === 'url') {
                             for (const resourcePath of stylableBuildMeta.urls) {
                                 module.addDependency(
-                                    new CSSURLDependency(resourcePath) as Dependency
+                                    new this.entities.CSSURLDependency(resourcePath)
                                 );
                             }
                         }
                         /**
                          * This dependency is responsible for injecting the runtime to the main chunk and each module
                          */
-                        module.addDependency(new StylableRuntimeDependency(stylableBuildMeta));
+                        module.addDependency(
+                            new this.entities.StylableRuntimeDependency(stylableBuildMeta)
+                        );
                     };
                 }
             }
@@ -353,7 +360,11 @@ export class StylableWebpackPlugin {
         compilation.hooks.afterChunks.tap({ name: StylableWebpackPlugin.name, stage: 0 }, () => {
             const cache = new Map();
             for (const [module] of stylableModules) {
-                module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(module, compilation);
+                module.buildMeta.stylable.isUsed = findIfStylableModuleUsed(
+                    module,
+                    compilation,
+                    this.entities.UnusedDependency
+                );
                 module.buildMeta.stylable.depth = calcDepth(module, moduleGraph, [], cache);
 
                 const { css, urls, exports, namespace } = getStylableBuildMeta(module);
@@ -430,7 +441,7 @@ export class StylableWebpackPlugin {
                 compilation.hooks.processAssets.tap(
                     {
                         name: StylableWebpackPlugin.name,
-                        stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+                        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
                     },
                     () => {
                         const cssSource = createStaticCSS(
@@ -446,7 +457,7 @@ export class StylableWebpackPlugin {
                         ).join('\n');
 
                         const contentHash = outputOptionsAwareHashContent(
-                            util.createHash,
+                            webpack.util.createHash,
                             runtimeTemplate.outputOptions,
                             cssSource
                         );
@@ -462,7 +473,7 @@ export class StylableWebpackPlugin {
 
                         compilation.emitAsset(
                             cssBundleFilename,
-                            new sources.RawSource(cssSource, false)
+                            new webpack.sources.RawSource(cssSource, false)
                         );
                     }
                 );
@@ -484,6 +495,14 @@ export class StylableWebpackPlugin {
         stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
+        const {
+            StylableRuntimeDependency,
+            InjectDependencyTemplate,
+            CSSURLDependency,
+            NoopTemplate,
+            UnusedDependency,
+        } = this.entities;
+
         dependencyFactories.set(StylableRuntimeDependency, normalModuleFactory);
         dependencyTemplates.set(
             StylableRuntimeDependency,
@@ -496,10 +515,10 @@ export class StylableWebpackPlugin {
                 this.options.cssInjection
             )
         );
-        dependencyFactories.set(CSSURLDependency as DependencyClass, normalModuleFactory);
-        dependencyTemplates.set(CSSURLDependency as any, new CSSURLDependencyTemplate());
+        dependencyFactories.set(CSSURLDependency, normalModuleFactory);
+        dependencyTemplates.set(CSSURLDependency, new NoopTemplate());
 
-        dependencyFactories.set(UnusedDependency as DependencyClass, normalModuleFactory);
-        dependencyTemplates.set(UnusedDependency as any, new UnusedDependencyTemplate());
+        dependencyFactories.set(UnusedDependency, normalModuleFactory);
+        dependencyTemplates.set(UnusedDependency, new NoopTemplate());
     }
 }

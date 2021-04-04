@@ -6,6 +6,9 @@ import type {
     NormalModule,
     ChunkGraph,
     sources,
+    RuntimeModule,
+    Dependency,
+    dependencies,
 } from 'webpack';
 
 import type {
@@ -24,7 +27,7 @@ import { getReplacementToken } from './loader-utils';
 
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
-const entitiesCache = new WeakMap<Compiler['webpack'], DependencyTemplateContext>();
+const entitiesCache = new WeakMap<Compiler['webpack'], StylableWebpackEntities>();
 
 export interface DependencyTemplateContext {
     module: Module;
@@ -36,7 +39,40 @@ export interface DependencyTemplateContext {
     dependencyTemplates: DependencyTemplates;
 }
 
-export function getWebpackEntities(webpack: Compiler['webpack']) {
+type DependencyTemplate = InstanceType<typeof dependencies.ModuleDependency['Template']>;
+
+interface InjectDependencyTemplate {
+    new (
+        staticPublicPath: string,
+        stylableModules: Map<Module, BuildData | null>,
+        assetsModules: Map<string, NormalModule>,
+        runtimeStylesheetId: 'namespace' | 'module',
+        runtimeId: string,
+        cssInjection: 'js' | 'css' | 'mini-css' | 'none'
+    ): DependencyTemplate;
+    apply(
+        dependency: Dependency,
+        source: sources.ReplaceSource,
+        ctx: DependencyTemplateContext
+    ): void;
+}
+
+interface StylableRuntimeDependency {
+    new (stylableBuildMeta: StylableBuildMeta): Dependency;
+}
+
+export interface StylableWebpackEntities {
+    injectRuntimeModules: (name: string, compilation: Compilation) => void;
+    StylableRuntimeInject: typeof RuntimeModule;
+    InjectDependencyTemplate: InjectDependencyTemplate;
+    StylableRuntimeDependency: StylableRuntimeDependency;
+    StylableRuntimeStylesheet: typeof RuntimeModule;
+    CSSURLDependency: typeof dependencies.ModuleDependency;
+    NoopTemplate: typeof dependencies.ModuleDependency.Template;
+    UnusedDependency: typeof dependencies.ModuleDependency;
+}
+
+export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpackEntities {
     const {
         dependencies: { ModuleDependency },
         Dependency,
@@ -51,13 +87,22 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
     }
 
     class CSSURLDependency extends ModuleDependency {
-        type = 'url()';
-        category = 'url';
+        // @ts-ignore
+        get type() {
+            return 'url()';
+        }
+        // @ts-ignore
+        get category() {
+            return 'url';
+        }
     }
 
     class UnusedDependency extends ModuleDependency {
         weak = true;
-        type = '@st-unused-import';
+        // @ts-ignore
+        get type() {
+            return '@st-unused-import';
+        }
     }
 
     class NoopTemplate {
@@ -258,6 +303,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
         StylableRuntimeStylesheet,
         CSSURLDependency,
         NoopTemplate,
+        UnusedDependency,
     };
 
     entitiesCache.set(webpack, entities);
