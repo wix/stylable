@@ -28,8 +28,9 @@ export default createRule({
             projectRoot: process.cwd(),
             resolveModule: moduleResolver,
             requireModule: require,
+            resolverCache: new Map(),
         });
-
+           
         function reportDiagnostics(meta: StylableMeta, node: esTree.ImportDeclaration) {
             if (meta.transformDiagnostics?.reports.length || meta.diagnostics?.reports.length) {
                 context.report({
