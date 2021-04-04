@@ -244,6 +244,7 @@ export class StylableWebpackPlugin {
                     requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
+                    cssParser: parse,
                 },
                 compiler
             )
@@ -388,7 +389,7 @@ export class StylableWebpackPlugin {
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css);
+                    const ast = parse(css, { from: module.resource });
 
                     optimizer.optimizeAst(
                         optimizeOptions,
