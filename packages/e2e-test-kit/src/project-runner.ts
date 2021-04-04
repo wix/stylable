@@ -4,10 +4,10 @@ import playwright from 'playwright-core';
 import rimrafCallback from 'rimraf';
 import { promisify } from 'util';
 import webpack from 'webpack';
-import { createTempDirectorySync } from 'create-temp-directory';
 import { nodeFs } from '@file-services/node';
-import { symlinkSync } from 'fs';
+import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
 import { deferred } from 'promise-assist';
+import { tmpdir } from 'os';
 
 export interface Options {
     projectDir: string;
@@ -29,19 +29,23 @@ export class ProjectRunner {
         before: MochaHook,
         afterEach: MochaHook,
         after: MochaHook,
-        watch = false
+        watch = false,
+        watchedDir = ''
     ) {
         const disposeAfterEach: Set<() => void> = new Set();
         if (watch) {
             const projectToCopy = runnerOptions.projectDir;
-            const tempDir = createTempDirectorySync('local-test');
-            tempDir.path = nodeFs.realpathSync(tempDir.path);
-            const projectPath = join(tempDir.path, 'project');
-            disposeAfterEach.add(tempDir.remove);
+            if (watchedDir && existsSync(watchedDir)) {
+                rmdirSync(watchedDir, { recursive: true });
+            }
+            const tempPath = watchedDir || mkdtempSync(join(tmpdir(), 'local-test'));
+            const removeTemp = () => rmdirSync(tempPath, { recursive: true });
+            const projectPath = join(tempPath, 'project');
+            disposeAfterEach.add(removeTemp);
             nodeFs.copyDirectorySync(projectToCopy, projectPath);
             symlinkSync(
                 join(__dirname, '../../../node_modules'),
-                join(tempDir.path, 'node_modules'),
+                join(tempPath, 'node_modules'),
                 'junction'
             );
             runnerOptions.projectDir = projectPath;
