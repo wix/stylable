@@ -87,11 +87,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
     }
 
     class CSSURLDependency extends ModuleDependency {
-        // @ts-ignore
+        // @ts-expect-error
         get type() {
             return 'url()';
         }
-        // @ts-ignore
+        // @ts-expect-error
         get category() {
             return 'url';
         }
@@ -99,7 +99,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class UnusedDependency extends ModuleDependency {
         weak = true;
-        // @ts-ignore
+        // @ts-expect-error
         get type() {
             return '@st-unused-import';
         }
