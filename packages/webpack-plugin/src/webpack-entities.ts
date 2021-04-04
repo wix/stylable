@@ -24,7 +24,7 @@ import { getReplacementToken } from './loader-utils';
 
 const makeSerializable = require('webpack/lib/util/makeSerializable');
 
-const entitiesCache = new WeakMap();
+const entitiesCache = new WeakMap<Compiler['webpack'], DependencyTemplateContext>();
 
 export interface DependencyTemplateContext {
     module: Module;
