@@ -1,10 +1,8 @@
 import { basename, join } from 'path';
-import { Module, Compiler, Compilation, sources } from 'webpack';
+import type { Module, Compiler, Compilation } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 
 import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
-
-const { RawSource } = sources;
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
@@ -60,7 +58,10 @@ export class HTMLSnapshotPlugin {
         );
 
         if (!compilation.assets[targetPath]) {
-            compilation.assets[targetPath] = new RawSource(html, false);
+            compilation.assets[targetPath] = new compilation.compiler.webpack.sources.RawSource(
+                html,
+                false
+            );
         } else {
             compilation.errors.push(
                 new Error(
