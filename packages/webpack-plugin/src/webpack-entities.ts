@@ -9,6 +9,7 @@ import type {
 } from 'webpack';
 
 import type {
+    BuildData,
     DependencyTemplates,
     RuntimeTemplate,
     StringSortableSet,
@@ -17,7 +18,7 @@ import type {
 
 import { stylesheet, injectStyles } from './runtime';
 
-import { getStylableBuildMeta, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
+import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
 
 import { getReplacementToken } from './loader-utils';
 
@@ -37,15 +38,12 @@ export interface DependencyTemplateContext {
 
 export function getWebpackEntities(webpack: Compiler['webpack']) {
     const {
-        ModuleDependency,
-        sources,
+        dependencies: { ModuleDependency },
         Dependency,
         NormalModule,
         RuntimeModule,
         RuntimeGlobals,
     } = webpack;
-
-    
 
     let entities = entitiesCache.get(webpack);
     if (entities) {
@@ -53,31 +51,16 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
     }
 
     class CSSURLDependency extends ModuleDependency {
-        constructor(request: string) {
-            super(request);
-        }
-
-        get type() {
-            return 'url()';
-        }
-
-        get category() {
-            return 'url';
-        }
+        type = 'url()';
+        category = 'url';
     }
 
     class UnusedDependency extends ModuleDependency {
-        constructor(request: string) {
-            super(request);
-            this.weak = true;
-        }
-
-        get type() {
-            return '@st-unused-import';
-        }
+        weak = true;
+        type = '@st-unused-import';
     }
 
-    class NoOpTemplate {
+    class NoopTemplate {
         apply() {
             /** noop */
         }
@@ -102,7 +85,6 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
         serialize({ write }: any) {
             write(this.stylableBuildMeta);
         }
-
         deserialize({ read }: any) {
             this.stylableBuildMeta = read();
         }
@@ -111,13 +93,15 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
     class InjectDependencyTemplate {
         constructor(
             private staticPublicPath: string,
+            private stylableModules: Map<Module, BuildData | null>,
             private assetsModules: Map<string, NormalModule>,
             private runtimeStylesheetId: 'namespace' | 'module',
-            private runtimeId: string
+            private runtimeId: string,
+            private cssInjection: 'js' | 'css' | 'mini-css' | 'none'
         ) {}
         apply(
             _dependency: StylableRuntimeDependency,
-            source: typeof sources.ReplaceSource,
+            source: sources.ReplaceSource,
             {
                 module,
                 runtimeRequirements,
@@ -128,11 +112,11 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
                 dependencyTemplates,
             }: DependencyTemplateContext
         ) {
-            const stylableBuildMeta = getStylableBuildMeta(module);
-            if (!stylableBuildMeta.isUsed) {
+            const stylableBuildData = getStylableBuildData(this.stylableModules, module);
+            if (!stylableBuildData.isUsed) {
                 return;
             }
-            if (stylableBuildMeta.cssInjection === 'js') {
+            if (this.cssInjection === 'js') {
                 const css = replaceMappedCSSAssetPlaceholders({
                     assetsModules: this.assetsModules,
                     staticPublicPath: this.staticPublicPath,
@@ -141,7 +125,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
                     dependencyTemplates,
                     runtime,
                     runtimeTemplate,
-                    stylableBuildMeta,
+                    stylableBuildData,
                 });
 
                 if (!(module instanceof NormalModule)) {
@@ -161,7 +145,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
                     source,
                     '/* JS_INJECT */',
                     `__webpack_require__.sti(${id}, ${JSON.stringify(css)}, ${
-                        stylableBuildMeta.depth
+                        stylableBuildData.depth
                     }, ${JSON.stringify(this.runtimeId)});`
                 );
                 runtimeRequirements.add(StylableRuntimeInject.name);
@@ -202,27 +186,27 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
             replacePlaceholder(
                 source,
                 getReplacementToken('vars'),
-                JSON.stringify(stylableBuildMeta.exports.vars)
+                JSON.stringify(stylableBuildData.exports.vars)
             );
             replacePlaceholder(
                 source,
                 getReplacementToken('stVars'),
-                JSON.stringify(stylableBuildMeta.exports.stVars)
+                JSON.stringify(stylableBuildData.exports.stVars)
             );
             replacePlaceholder(
                 source,
                 getReplacementToken('keyframes'),
-                JSON.stringify(stylableBuildMeta.exports.keyframes)
+                JSON.stringify(stylableBuildData.exports.keyframes)
             );
             replacePlaceholder(
                 source,
                 getReplacementToken('classes'),
-                JSON.stringify(stylableBuildMeta.exports.classes)
+                JSON.stringify(stylableBuildData.exports.classes)
             );
             replacePlaceholder(
                 source,
                 getReplacementToken('namespace'),
-                JSON.stringify(stylableBuildMeta.namespace)
+                JSON.stringify(stylableBuildData.namespace)
             );
         }
     }
@@ -273,7 +257,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']) {
         StylableRuntimeDependency,
         StylableRuntimeStylesheet,
         CSSURLDependency,
-        NoOpTemplate,
+        NoopTemplate,
     };
 
     entitiesCache.set(webpack, entities);
