@@ -10,7 +10,6 @@ import type {
     Dependency,
     dependencies,
 } from 'webpack';
-
 import type {
     BuildData,
     DependencyTemplates,
@@ -18,15 +17,11 @@ import type {
     StringSortableSet,
     StylableBuildMeta,
 } from './types';
-
 import { stylesheet, injectStyles } from './runtime';
-
 import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
-
 import { getReplacementToken } from './loader-utils';
 
 const makeSerializable = require('webpack/lib/util/makeSerializable');
-
 const entitiesCache = new WeakMap<Compiler['webpack'], StylableWebpackEntities>();
 
 export interface DependencyTemplateContext {
@@ -127,11 +122,9 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
         updateHash(hash: any) {
             hash.update(JSON.stringify(this.stylableBuildMeta));
         }
-        serialize({ write }: any) {
-            write(this.stylableBuildMeta);
-        }
-        deserialize({ read }: any) {
-            this.stylableBuildMeta = read();
+        serialize(context: any) {
+            context.write(this.stylableBuildMeta);
+            super.serialize(context);
         }
     }
 
@@ -291,9 +284,15 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
             });
     }
 
-    makeSerializable(StylableRuntimeDependency, __filename, StylableRuntimeDependency.name);
-    makeSerializable(UnusedDependency, __filename, UnusedDependency.name);
-    makeSerializable(CSSURLDependency, __filename, CSSURLDependency.name);
+    registerSerialization(
+        webpack,
+        StylableRuntimeDependency,
+        (ctx) => [ctx.read()] as [StylableBuildMeta]
+    );
+
+    /* The request is empty for both dependencies and it will be overridden by the de-serialization process */
+    registerSerialization(webpack, UnusedDependency, () => [''] as [string]);
+    registerSerialization(webpack, CSSURLDependency, () => [''] as [string]);
 
     entities = {
         injectRuntimeModules,
@@ -321,4 +320,29 @@ function replacePlaceholder(
         throw new Error(`missing ${replacementPoint} from stylable loader source`);
     }
     source.replace(i, i + replacementPoint.length - 1, value, `${replacementPoint}`);
+}
+
+type SerializationContext = any;
+type Serializable = {
+    new (...args: any[]): {
+        serialize: (ctx: SerializationContext) => void;
+        deserialize: (ctx: SerializationContext) => void;
+    };
+};
+
+function registerSerialization<T extends Serializable>(
+    webpack: Compiler['webpack'],
+    Type: T,
+    getArgs: (context: SerializationContext) => ConstructorParameters<T>
+) {
+    webpack.util.serialization.register(Type, __filename, Type.name, {
+        serialize(instance: InstanceType<T>, context: SerializationContext) {
+            instance.serialize(context);
+        },
+        deserialize(context: SerializationContext) {
+            const instance = new Type(...getArgs(context));
+            instance.deserialize(context);
+            return instance;
+        },
+    });
 }

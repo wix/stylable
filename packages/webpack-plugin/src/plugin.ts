@@ -42,7 +42,7 @@ import type {
     StylableLoaderContext,
 } from './types';
 import { parse } from 'postcss';
-import { getWebpackEntities } from './webpack-entities';
+import { getWebpackEntities, StylableWebpackEntities } from './webpack-entities';
 
 type OptimizeOptions = OptimizeConfig & {
     minify?: boolean;
@@ -102,6 +102,9 @@ export interface StylableWebpackPluginOptions {
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
+    /**
+     * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
+     */
     assetsMode?: 'url' | 'loader';
 }
 
@@ -137,7 +140,7 @@ const defaultOptions = (
 export class StylableWebpackPlugin {
     stylable!: Stylable;
     options!: Required<StylableWebpackPluginOptions>;
-    entities!: ReturnType<typeof getWebpackEntities>;
+    entities!: StylableWebpackEntities;
     constructor(
         private userOptions: StylableWebpackPluginOptions = {},
         private injectConfigHooks = true
