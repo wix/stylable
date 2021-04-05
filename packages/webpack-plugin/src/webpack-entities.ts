@@ -21,7 +21,6 @@ import { stylesheet, injectStyles } from './runtime';
 import { getStylableBuildData, replaceMappedCSSAssetPlaceholders } from './plugin-utils';
 import { getReplacementToken } from './loader-utils';
 
-const makeSerializable = require('webpack/lib/util/makeSerializable');
 const entitiesCache = new WeakMap<Compiler['webpack'], StylableWebpackEntities>();
 
 export interface DependencyTemplateContext {
