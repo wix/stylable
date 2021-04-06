@@ -8,7 +8,7 @@ import {
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
-import { Compilation, Compiler, Dependency, NormalModule, util, sources } from 'webpack';
+import { Compilation, Compiler, Dependency, NormalModule, util } from 'webpack';
 
 import findConfig from 'find-config';
 import {
@@ -24,7 +24,7 @@ import {
     outputOptionsAwareHashContent,
     injectLoader,
     findIfStylableModuleUsed,
-    createStaticCSS,
+    staticCSSWith,
     getFileName,
     getStylableBuildMeta,
     getSortedModules,
@@ -419,51 +419,96 @@ export class StylableWebpackPlugin {
         stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
-        const { runtimeTemplate } = compilation;
-
         /**
          * As a work around unknown behavior
          * if this plugin will run inside a child compilation we do not emit css assets
          */
         if (!compilation.compiler.isChild()) {
             if (this.options.cssInjection === 'css') {
+                const createStaticCSS = staticCSSWith(
+                    staticPublicPath,
+                    assetsModules,
+                    compilation.chunkGraph!,
+                    compilation.moduleGraph,
+                    'CSS' /*runtime*/,
+                    compilation.runtimeTemplate,
+                    compilation.dependencyTemplates
+                );
+
                 compilation.hooks.processAssets.tap(
                     {
                         name: StylableWebpackPlugin.name,
                         stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
                     },
                     () => {
-                        const cssSource = createStaticCSS(
-                            staticPublicPath,
-                            stylableModules,
-                            assetsModules,
+                        const multiChunkBuild = true;
+                        if (multiChunkBuild) {
+                            const out = [];
+                            for (const [name, entryPoint] of compilation.entrypoints) {
+                                out.push({
+                                    name,
+                                    entryPoint,
+                                    modules: getEntryPointModules(entryPoint, isStylableModule),
+                                });
+                            }
 
-                            compilation.chunkGraph!,
-                            compilation.moduleGraph,
-                            'CSS' /*runtime*/,
-                            compilation.runtimeTemplate,
-                            compilation.dependencyTemplates
-                        ).join('\n');
+                            const commons = new Set<NormalModule>();
 
-                        const contentHash = outputOptionsAwareHashContent(
-                            util.createHash,
-                            runtimeTemplate.outputOptions,
-                            cssSource
+                            const [first, ...rest] = out;
+                            const modules = first.modules;
+
+                            findModule: for (const module of modules) {
+                                for (const info of rest) {
+                                    if (!info.modules.has(module)) {
+                                        continue findModule;
+                                    }
+                                }
+                                commons.add(module);
+                            }
+
+                            for (const module of commons) {
+                                const modulesToUse = new Map();
+                                modulesToUse.set(module, stylableModules.get(module));
+                                const cssBundleFilename = emitCSSFile(
+                                    compilation,
+                                    createStaticCSS(modulesToUse).join('\n'),
+                                    'commons.' + this.options.filename
+                                );
+
+                                out.forEach(({ entryPoint }) => {
+                                    entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                                });
+                            }
+
+                            for (const info of out) {
+                                const modulesToUse = new Map();
+                                for (const module of info.modules) {
+                                    if (!commons.has(module)) {
+                                        modulesToUse.set(module, stylableModules.get(module));
+                                    }
+                                }
+                                const cssBundleFilename = emitCSSFile(
+                                    compilation,
+                                    createStaticCSS(modulesToUse).join('\n'),
+                                    info.name + '.' + this.options.filename
+                                );
+                                info.entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                            }
+
+                            return;
+                        }
+
+                        const cssSource = createStaticCSS(stylableModules).join('\n');
+
+                        const cssBundleFilename = emitCSSFile(
+                            compilation,
+                            cssSource,
+                            this.options.filename
                         );
-
-                        const cssBundleFilename = getFileName(this.options.filename, {
-                            hash: compilation.hash!,
-                            contenthash: contentHash,
-                        });
 
                         compilation.entrypoints.forEach((entryPoint) => {
                             entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
                         });
-
-                        compilation.emitAsset(
-                            cssBundleFilename,
-                            new sources.RawSource(cssSource, false)
-                        );
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
@@ -502,4 +547,43 @@ export class StylableWebpackPlugin {
         dependencyFactories.set(UnusedDependency as DependencyClass, normalModuleFactory);
         dependencyTemplates.set(UnusedDependency as any, new UnusedDependencyTemplate());
     }
+}
+
+function emitCSSFile(compilation: Compilation, cssSource: string, filenameTemplate: string) {
+    const contentHash = outputOptionsAwareHashContent(
+        util.createHash,
+        compilation.runtimeTemplate.outputOptions,
+        cssSource
+    );
+
+    const filename = getFileName(filenameTemplate, {
+        hash: compilation.hash!,
+        contenthash: contentHash,
+    });
+
+    compilation.emitAsset(
+        filename,
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+    );
+
+    return filename;
+}
+
+function getEntryPointModules(entryPoint: any, filter: any) {
+    const modules = new Set<NormalModule>();
+    const entryChunk = entryPoint.getEntrypointChunk();
+
+    for (const entryModule of entryChunk.modulesIterable) {
+        if (filter(entryModule)) {
+            modules.add(entryModule);
+        }
+    }
+    for (const asyncChunk of entryChunk.getAllAsyncChunks()) {
+        for (const asyncModule of asyncChunk.modulesIterable) {
+            if (filter(asyncModule)) {
+                modules.add(asyncModule);
+            }
+        }
+    }
+    return modules;
 }

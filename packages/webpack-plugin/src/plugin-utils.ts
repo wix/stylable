@@ -208,11 +208,32 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
     return cache;
 }
 
+export function staticCSSWith(
+    staticPublicPath: string,
+    assetsModules: Map<string, NormalModule>,
+    chunkGraph: ChunkGraph,
+    moduleGraph: ModuleGraph,
+    runtime: string,
+    runtimeTemplate: RuntimeTemplate,
+    dependencyTemplates: DependencyTemplates
+) {
+    return (stylableModules: Map<Module, BuildData | null>) =>
+        createStaticCSS(
+            staticPublicPath,
+            stylableModules,
+            assetsModules,
+            chunkGraph,
+            moduleGraph,
+            runtime,
+            runtimeTemplate,
+            dependencyTemplates
+        );
+}
+
 export function createStaticCSS(
     staticPublicPath: string,
     stylableModules: Map<Module, BuildData | null>,
     assetsModules: Map<string, NormalModule>,
-
     chunkGraph: ChunkGraph,
     moduleGraph: ModuleGraph,
     runtime: string,
