@@ -1,8 +1,17 @@
-import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
+import {
+    Chunk,
+    ChunkGraph,
+    Compilation,
+    Compiler,
+    Module,
+    ModuleGraph,
+    NormalModule,
+} from 'webpack';
 import { UnusedDependency } from './unused-dependency';
 import type {
     BuildData,
     DependencyTemplates,
+    EntryPoint,
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
@@ -312,7 +321,7 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     return isInUse;
 }
 
-export function getFileName(filename: string, data: Record<string, string>) {
+export function getFileName(filename: string, data: Record<string, string | undefined>) {
     return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
         const [type, len] = inner.split(':');
         const value = data[type];
@@ -420,4 +429,57 @@ export function getStylableModules(
     compilation: Compilation
 ): Map<NormalModule, BuildData | null> | undefined {
     return (compilation as any)[Symbol.for('stylableModules')];
+}
+
+export function getOnlyChunk(compilation: Compilation) {
+    return compilation.entrypoints.size === 1
+        ? Array.from(compilation.entrypoints.values())[0].getEntrypointChunk()
+        : undefined;
+}
+
+export function emitCSSFile(
+    compilation: Compilation,
+    cssSource: string,
+    filenameTemplate: string,
+    createHash: WebpackCreateHash,
+    chunk?: Chunk
+) {
+    const contentHash = outputOptionsAwareHashContent(
+        createHash,
+        compilation.runtimeTemplate.outputOptions,
+        cssSource
+    );
+
+    const filename = getFileName(filenameTemplate, {
+        contenthash: contentHash,
+        hash: compilation.hash,
+        name: chunk?.name,
+    });
+
+    compilation.emitAsset(
+        filename,
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+    );
+
+    return filename;
+}
+
+export function getEntryPointModules(
+    entryPoint: EntryPoint,
+    chunkGraph: ChunkGraph,
+    stylableModules: Map<NormalModule, BuildData | null>
+) {
+    const modules = new Map<NormalModule, BuildData>();
+    const entryChunk = entryPoint.getEntrypointChunk();
+    const filter = (m: unknown): m is NormalModule => stylableModules.has(m as NormalModule);
+
+    for (const chunk of entryChunk.getAllReferencedChunks()) {
+        for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+            if (filter(module)) {
+                modules.set(module, getStylableBuildData(stylableModules, module));
+            }
+        }
+    }
+
+    return modules;
 }

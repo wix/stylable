@@ -8,7 +8,7 @@ import {
 import { StylableOptimizer } from '@stylable/optimizer';
 import cloneDeep from 'lodash.clonedeep';
 import { dirname, relative } from 'path';
-import { Compilation, Compiler, Dependency, NormalModule, util } from 'webpack';
+import { Compilation, Compiler, Dependency, NormalModule } from 'webpack';
 
 import findConfig from 'find-config';
 import {
@@ -21,11 +21,9 @@ import {
     isStylableModule,
     isAssetModule,
     isLoadedWithKnownAssetLoader,
-    outputOptionsAwareHashContent,
     injectLoader,
     findIfStylableModuleUsed,
     staticCSSWith,
-    getFileName,
     getStylableBuildMeta,
     getSortedModules,
     reportNamespaceCollision,
@@ -34,6 +32,9 @@ import {
     createDecacheRequire,
     createStylableResolverCacheMap,
     provideStylableModules,
+    emitCSSFile,
+    getEntryPointModules,
+    getOnlyChunk,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -108,6 +109,11 @@ export interface StylableWebpackPluginOptions {
     unsafeMuteDiagnostics?: {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
+    /**
+     * Set the strategy of how to spit the extracted css
+     * This option is only used when cssInjection is set to 'css'
+     */
+    extractMode?: 'single' | 'chunks';
     assetsMode?: 'url' | 'loader';
 }
 
@@ -138,6 +144,7 @@ const defaultOptions = (
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
     target: userOptions.target ?? 'modern',
+    extractMode: userOptions.extractMode ?? 'single',
 });
 
 export class StylableWebpackPlugin {
@@ -441,74 +448,40 @@ export class StylableWebpackPlugin {
                         stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
                     },
                     () => {
-                        const multiChunkBuild = true;
-                        if (multiChunkBuild) {
-                            const out = [];
-                            for (const [name, entryPoint] of compilation.entrypoints) {
-                                out.push({
-                                    name,
+                        if (this.options.extractMode === 'chunks') {
+                            for (const entryPoint of compilation.entrypoints.values()) {
+                                const entryChunk = entryPoint.getEntrypointChunk();
+                                const modules = getEntryPointModules(
                                     entryPoint,
-                                    modules: getEntryPointModules(entryPoint, isStylableModule),
-                                });
-                            }
-
-                            const commons = new Set<NormalModule>();
-
-                            const [first, ...rest] = out;
-                            const modules = first.modules;
-
-                            findModule: for (const module of modules) {
-                                for (const info of rest) {
-                                    if (!info.modules.has(module)) {
-                                        continue findModule;
-                                    }
-                                }
-                                commons.add(module);
-                            }
-
-                            for (const module of commons) {
-                                const modulesToUse = new Map();
-                                modulesToUse.set(module, stylableModules.get(module));
+                                    compilation.chunkGraph!,
+                                    stylableModules
+                                );
                                 const cssBundleFilename = emitCSSFile(
                                     compilation,
-                                    createStaticCSS(modulesToUse).join('\n'),
-                                    'commons.' + this.options.filename
+                                    createStaticCSS(modules).join('\n'),
+                                    this.options.filename,
+                                    webpack.util.createHash,
+                                    entryChunk
                                 );
-
-                                out.forEach(({ entryPoint }) => {
-                                    entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
-                                });
+                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
                             }
+                        } else if (this.options.extractMode === 'single') {
+                            const chunk = getOnlyChunk(compilation);
 
-                            for (const info of out) {
-                                const modulesToUse = new Map();
-                                for (const module of info.modules) {
-                                    if (!commons.has(module)) {
-                                        modulesToUse.set(module, stylableModules.get(module));
-                                    }
-                                }
-                                const cssBundleFilename = emitCSSFile(
-                                    compilation,
-                                    createStaticCSS(modulesToUse).join('\n'),
-                                    info.name + '.' + this.options.filename
-                                );
-                                info.entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                            const cssSource = createStaticCSS(stylableModules).join('\n');
+
+                            const cssBundleFilename = emitCSSFile(
+                                compilation,
+                                cssSource,
+                                this.options.filename,
+                                webpack.util.createHash,
+                                chunk
+                            );
+
+                            for (const entryPoint of compilation.entrypoints.values()) {
+                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
                             }
-
-                            return;
                         }
-
-                        const cssSource = createStaticCSS(stylableModules).join('\n');
-
-                        const cssBundleFilename = emitCSSFile(
-                            compilation,
-                            cssSource,
-                            this.options.filename
-                        );
-
-                        compilation.entrypoints.forEach((entryPoint) => {
-                            entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
-                        });
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {
@@ -547,43 +520,4 @@ export class StylableWebpackPlugin {
         dependencyFactories.set(UnusedDependency as DependencyClass, normalModuleFactory);
         dependencyTemplates.set(UnusedDependency as any, new UnusedDependencyTemplate());
     }
-}
-
-function emitCSSFile(compilation: Compilation, cssSource: string, filenameTemplate: string) {
-    const contentHash = outputOptionsAwareHashContent(
-        util.createHash,
-        compilation.runtimeTemplate.outputOptions,
-        cssSource
-    );
-
-    const filename = getFileName(filenameTemplate, {
-        hash: compilation.hash!,
-        contenthash: contentHash,
-    });
-
-    compilation.emitAsset(
-        filename,
-        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
-    );
-
-    return filename;
-}
-
-function getEntryPointModules(entryPoint: any, filter: any) {
-    const modules = new Set<NormalModule>();
-    const entryChunk = entryPoint.getEntrypointChunk();
-
-    for (const entryModule of entryChunk.modulesIterable) {
-        if (filter(entryModule)) {
-            modules.add(entryModule);
-        }
-    }
-    for (const asyncChunk of entryChunk.getAllAsyncChunks()) {
-        for (const asyncModule of asyncChunk.modulesIterable) {
-            if (filter(asyncModule)) {
-                modules.add(asyncModule);
-            }
-        }
-    }
-    return modules;
 }
