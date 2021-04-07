@@ -13,7 +13,7 @@ export function createDefaultResolver(fileSystem: MinimalFS, resolveOptions: any
         useSyncFileSystemCalls: true,
         cache: false,
         fileSystem,
-        extensions: ['.js', '.mjs', '.ts'],
+        extensions: Array.from(new Set(['.js', ...resolveOptions.extensions])),
     });
 
     return (directoryPath, request): string => {

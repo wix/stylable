@@ -3,7 +3,7 @@ import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
 import { CssParser, safeParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
-import { StylableResolverCache, StylableResolver } from './stylable-resolver';
+import { StylableResolverCache, StylableResolver, ResolverOptions } from './stylable-resolver';
 import {
     StylableResults,
     StylableTransformer,
@@ -21,11 +21,7 @@ export interface StylableConfig {
     onProcess?: (meta: StylableMeta, path: string) => StylableMeta;
     diagnostics?: Diagnostics;
     hooks?: TransformHooks;
-    resolveOptions?: {
-        alias: any;
-        symlinks: boolean;
-        [key: string]: any;
-    };
+    resolveOptions?: ResolverOptions;
     optimizer?: IStylableOptimizer;
     mode?: 'production' | 'development';
     resolveNamespace?: typeof processNamespace;

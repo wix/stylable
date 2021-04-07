@@ -27,6 +27,13 @@ export interface CSSResolve<T extends StylableSymbol = StylableSymbol> {
     meta: StylableMeta;
 }
 
+export interface ResolverOptions {
+    alias?: Record<string, string | false | string[]> | Record<string, string | false | string[]>[];
+    symlinks?: boolean;
+    extensions?: string[];
+    [key: string]: any;
+}
+
 export interface JSResolve {
     _kind: 'js';
     symbol: any;
