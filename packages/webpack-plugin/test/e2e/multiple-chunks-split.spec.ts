@@ -12,7 +12,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                headless: false,
+                // headless: false,
                 // devtools: true
             },
         },
