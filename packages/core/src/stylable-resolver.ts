@@ -51,7 +51,7 @@ export class StylableResolver {
         protected requireModule: (modulePath: string) => any,
         protected cache?: StylableResolverCache
     ) {}
-    private getModule({ context, from }: Imported): CachedModule {
+    private getModule({ context, from, request }: Imported): CachedModule {
         const key = `${context}${safePathDelimiter}${from}`;
         if (this.cache?.has(key)) {
             return this.cache.get(key)!;
@@ -65,7 +65,7 @@ export class StylableResolver {
             }
         } else {
             try {
-                res = this.requireModule(this.fileProcessor.resolvePath(from, context));
+                res = this.requireModule(this.fileProcessor.resolvePath(request, context));
             } catch {
                 res = null;
             }
