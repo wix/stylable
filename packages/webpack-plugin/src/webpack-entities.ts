@@ -44,11 +44,6 @@ interface InjectDependencyTemplate {
         runtimeId: string,
         cssInjection: 'js' | 'css' | 'mini-css' | 'none'
     ): DependencyTemplate;
-    apply(
-        dependency: Dependency,
-        source: sources.ReplaceSource,
-        ctx: DependencyTemplateContext
-    ): void;
 }
 
 interface StylableRuntimeDependency {
@@ -107,7 +102,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class StylableRuntimeStylesheet extends RuntimeModule {
         constructor() {
-            super('stylable stylesheet', 10);
+            super('stylable stylesheet', RuntimeModule.STAGE_ATTACH);
         }
         generate() {
             return `(${stylesheet})(__webpack_require__)`;
@@ -250,7 +245,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class StylableRuntimeInject extends RuntimeModule {
         constructor() {
-            super('stylable inject', 10);
+            super('stylable inject', RuntimeModule.STAGE_ATTACH);
         }
         generate() {
             return `(${injectStyles})(__webpack_require__)`;

@@ -159,7 +159,7 @@ type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'u
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
     if ('loaders' in module) {
-        return (module as any).loaders.some(({ loader }: { loader: string }) =>
+        return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
