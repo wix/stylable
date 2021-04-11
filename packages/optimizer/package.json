@@ -10,7 +10,7 @@
   "dependencies": {
     "@stylable/core": "^4.0.4",
     "csso": "^4.2.0",
-    "postcss": "^8.2.9"
+    "postcss": "^8.2.10"
   },
   "files": [
     "dist",
