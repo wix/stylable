@@ -12,7 +12,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                headless: false,
+                // headless: false,
             },
         },
         before,
@@ -45,7 +45,7 @@ describe(`(${project})`, () => {
         expect(values.color).to.eql('rgb(255, 0, 0)');
 
         expect(values.content).to.match(
-            /"class extending component '\.root => index\d+__root' in stylesheet 'index\.st\.css' was set on a node that does not extend '\.root => other\d+__root' from stylesheet 'other\.st\.css'"/
+            /"class extending component '\.root => comp\d+__root' in stylesheet 'comp\.st\.css' was set on a node that does not extend '\.root => other\d+__root' from stylesheet 'other\.st\.css'"/
         );
     });
 });

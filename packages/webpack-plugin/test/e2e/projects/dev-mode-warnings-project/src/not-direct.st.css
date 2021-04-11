@@ -1,6 +1,6 @@
 :import {
     -st-from: "./other.st.css";
-    -st-default: Blah;
+    -st-default: Other;
 }
 
-.root Blah {}
+.root Other {}

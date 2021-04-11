@@ -1,18 +1,18 @@
 :import {
     -st-from: "./other.st.css";
-    -st-default: Blah;
+    -st-default: Other;
 }
 
 :import {
     -st-from: "./not-direct.st.css";
-    -st-named: Blah as NotDirect;
+    -st-named: Other as NotDirect;
+}
+
+.root {
+    -st-extends: Other;
+    background-color: green;
 }
 
 .notDirect {
     -st-extends: NotDirect;
-}
-
-.root {
-    -st-extends: Blah;
-    background-color: green;
 }
