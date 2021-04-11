@@ -12,7 +12,7 @@ describe(`(${project})`, () => {
         {
             projectDir,
             launchOptions: {
-                // headless: false
+                headless: false,
             },
         },
         before,
@@ -29,6 +29,18 @@ describe(`(${project})`, () => {
                 content: computedStyle.content,
             };
         });
+
+        const notErrorValues = await page.evaluate(() => {
+            const computedStyle = getComputedStyle(
+                document.body.querySelector('[data-not-direct]')!,
+                '::before'
+            );
+            return {
+                content: computedStyle.content,
+            };
+        });
+
+        expect(notErrorValues.content).to.eql('none');
 
         expect(values.color).to.eql('rgb(255, 0, 0)');
 

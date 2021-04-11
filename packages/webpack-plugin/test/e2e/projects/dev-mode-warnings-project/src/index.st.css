@@ -3,7 +3,16 @@
     -st-default: Blah;
 }
 
+:import {
+    -st-from: "./not-direct.st.css";
+    -st-named: Blah as NotDirect;
+}
+
+.notDirect {
+    -st-extends: NotDirect;
+}
+
 .root {
     -st-extends: Blah;
-    background-color: green; 
+    background-color: green;
 }
