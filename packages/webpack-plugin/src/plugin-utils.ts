@@ -467,19 +467,11 @@ export function emitCSSFile(
 export function getEntryPointModules(
     entryPoint: EntryPoint,
     chunkGraph: ChunkGraph,
-    stylableModules: Map<NormalModule, BuildData | null>
+    onModule: (module: Module) => void
 ) {
-    const modules = new Map<NormalModule, BuildData>();
-    const entryChunk = entryPoint.getEntrypointChunk();
-    const filter = (m: unknown): m is NormalModule => stylableModules.has(m as NormalModule);
-
-    for (const chunk of entryChunk.getAllReferencedChunks()) {
+    for (const chunk of entryPoint.getEntrypointChunk().getAllReferencedChunks()) {
         for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
-            if (filter(module)) {
-                modules.set(module, getStylableBuildData(stylableModules, module));
-            }
+            onModule(module);
         }
     }
-
-    return modules;
 }

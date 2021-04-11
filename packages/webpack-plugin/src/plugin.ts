@@ -35,6 +35,7 @@ import {
     emitCSSFile,
     getEntryPointModules,
     getOnlyChunk,
+    getStylableBuildData,
 } from './plugin-utils';
 import { calcDepth } from './calc-depth';
 import { injectCssModules } from './mini-css-support';
@@ -451,10 +452,19 @@ export class StylableWebpackPlugin {
                         if (this.options.extractMode === 'entries') {
                             for (const entryPoint of compilation.entrypoints.values()) {
                                 const entryChunk = entryPoint.getEntrypointChunk();
-                                const modules = getEntryPointModules(
+                                const modules = new Map<NormalModule, BuildData | null>();
+                                getEntryPointModules(
                                     entryPoint,
                                     compilation.chunkGraph!,
-                                    stylableModules
+                                    (module) => {
+                                        const m = module as NormalModule;
+                                        if (stylableModules.has(m)) {
+                                            modules.set(
+                                                m,
+                                                getStylableBuildData(stylableModules, m)
+                                            );
+                                        }
+                                    }
                                 );
                                 const cssBundleFilename = emitCSSFile(
                                     compilation,
