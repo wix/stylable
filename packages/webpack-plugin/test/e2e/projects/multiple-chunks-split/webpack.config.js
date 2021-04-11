@@ -12,7 +12,7 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new StylableWebpackPlugin({
-            filename: '[name].[contenthash].css',
+            filename: '[name].css',
             cssInjection: 'css',
             extractMode: 'entries',
         }),
