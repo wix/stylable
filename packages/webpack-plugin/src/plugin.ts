@@ -113,7 +113,7 @@ export interface StylableWebpackPluginOptions {
      * Set the strategy of how to spit the extracted css
      * This option is only used when cssInjection is set to 'css'
      */
-    extractMode?: 'single' | 'chunks';
+    extractMode?: 'single' | 'entries';
     assetsMode?: 'url' | 'loader';
 }
 
@@ -448,7 +448,7 @@ export class StylableWebpackPlugin {
                         stage: Compilation.PROCESS_ASSETS_STAGE_DERIVED,
                     },
                     () => {
-                        if (this.options.extractMode === 'chunks') {
+                        if (this.options.extractMode === 'entries') {
                             for (const entryPoint of compilation.entrypoints.values()) {
                                 const entryChunk = entryPoint.getEntrypointChunk();
                                 const modules = getEntryPointModules(

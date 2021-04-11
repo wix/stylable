@@ -14,7 +14,7 @@ module.exports = {
         new StylableWebpackPlugin({
             filename: '[name].[contenthash].css',
             cssInjection: 'css',
-            extractMode: 'chunks',
+            extractMode: 'entries',
         }),
         new HtmlWebpackPlugin(),
     ],
