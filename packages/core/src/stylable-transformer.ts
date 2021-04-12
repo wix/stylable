@@ -792,7 +792,7 @@ export class StylableTransformer {
             if (resolved.length > 1) {
                 meta.outputAst!.walkRules('.' + this.scope(className, meta.namespace), (rule) => {
                     const a = resolved[0];
-                    const b = resolved[1];
+                    const b = resolved[resolved.length - 1];
                     rule.after(
                         createWarningRule(
                             b.symbol.name,

@@ -263,8 +263,8 @@ export function getNamedArgs(node: ParsedValue) {
 export function getFormatterArgs(
     node: ParsedValue,
     allowComments = false,
-    _reportWarning?: ReportWarning,
-    perserveQuotes = false
+    reportWarning?: ReportWarning,
+    preserveQuotes = false
 ) {
     const argsResult = [];
     let currentArg = '';
@@ -281,7 +281,7 @@ export function getFormatterArgs(
                     currentNode.resolvedValue || postcssValueParser.stringify(currentNode);
             }
         } else if (currentNode.type === 'string') {
-            currentArg += perserveQuotes
+            currentArg += preserveQuotes
                 ? postcssValueParser.stringify(currentNode)
                 : currentNode.value;
         } else {
@@ -302,8 +302,8 @@ export function getFormatterArgs(
     return argsResult;
 
     function checkEmptyArg() {
-        if (currentArg.trim() === '' && _reportWarning) {
-            _reportWarning(
+        if (reportWarning && currentArg.trim() === '') {
+            reportWarning(
                 `${postcssValueParser.stringify(
                     node as postcssValueParser.Node
                 )}: argument at index ${argIndex} is empty`
