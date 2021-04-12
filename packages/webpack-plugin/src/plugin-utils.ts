@@ -1,6 +1,14 @@
-import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
-import { UnusedDependency } from './unused-dependency';
 import type {
+    ChunkGraph,
+    Compilation,
+    Compiler,
+    dependencies,
+    Module,
+    ModuleGraph,
+    NormalModule,
+} from 'webpack';
+import type {
+    BuildData,
     DependencyTemplates,
     RuntimeTemplate,
     StringSortableSet,
@@ -57,7 +65,7 @@ export function getStaticPublicPath(compilation: Compilation) {
 }
 
 export function replaceCSSAssetPlaceholders(
-    { css, urls }: Pick<StylableBuildMeta, 'css' | 'urls'>,
+    { css, urls }: BuildData,
     publicPath: string,
     getAssetOutputPath: (resourcePath: string, publicPath: string) => string
 ) {
@@ -67,7 +75,7 @@ export function replaceCSSAssetPlaceholders(
 }
 
 interface ReplaceMappedCSSAssetPlaceholdersOptions {
-    stylableBuildMeta: StylableBuildMeta;
+    stylableBuildData: BuildData;
     staticPublicPath: string;
     assetsModules: Map<string, NormalModule>;
     chunkGraph: ChunkGraph;
@@ -78,7 +86,7 @@ interface ReplaceMappedCSSAssetPlaceholdersOptions {
 }
 
 export function replaceMappedCSSAssetPlaceholders({
-    stylableBuildMeta,
+    stylableBuildData,
     staticPublicPath,
     assetsModules,
     chunkGraph,
@@ -88,7 +96,7 @@ export function replaceMappedCSSAssetPlaceholders({
     dependencyTemplates,
 }: ReplaceMappedCSSAssetPlaceholdersOptions) {
     return replaceCSSAssetPlaceholders(
-        stylableBuildMeta,
+        stylableBuildData,
         staticPublicPath,
         (resourcePath, publicPath) => {
             const assetModule = assetsModules.get(resourcePath);
@@ -152,8 +160,8 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
 type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'url-loader' }] };
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
-    if (module instanceof NormalModule) {
-        return module.loaders.some(({ loader }) =>
+    if ('loaders' in module) {
+        return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
@@ -211,7 +219,7 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
 
 export function createStaticCSS(
     staticPublicPath: string,
-    stylableModules: Set<Module>,
+    stylableModules: Map<Module, BuildData | null>,
     assetsModules: Map<string, NormalModule>,
 
     chunkGraph: ChunkGraph,
@@ -220,19 +228,19 @@ export function createStaticCSS(
     runtimeTemplate: RuntimeTemplate,
     dependencyTemplates: DependencyTemplates
 ) {
-    const cssChunks = Array.from(stylableModules)
+    const cssChunks = Array.from(stylableModules.keys())
         .filter((m) => getStylableBuildMeta(m).isUsed !== false)
         .sort((m1, m2) => getStylableBuildMeta(m1).depth - getStylableBuildMeta(m2).depth)
         .map((m) => {
             return replaceMappedCSSAssetPlaceholders({
-                assetsModules: assetsModules,
+                assetsModules,
                 staticPublicPath,
                 chunkGraph,
                 moduleGraph,
                 dependencyTemplates,
                 runtime,
                 runtimeTemplate,
-                stylableBuildMeta: getStylableBuildMeta(m),
+                stylableBuildData: getStylableBuildData(stylableModules, m),
             });
         });
 
@@ -247,7 +255,22 @@ export function getStylableBuildMeta(module: Module): StylableBuildMeta {
     return meta;
 }
 
-export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
+export function getStylableBuildData(
+    stylableModules: Map<Module, BuildData | null>,
+    module: Module
+): BuildData {
+    const data = stylableModules.get(module);
+    if (!data) {
+        throw new Error(`Stylable module ${module.identifier()} does not contains build data`);
+    }
+    return data;
+}
+
+export function findIfStylableModuleUsed(
+    m: Module,
+    compilation: Compilation,
+    UnusedDependency: typeof dependencies.ModuleDependency
+) {
     const moduleGraph = compilation.moduleGraph;
     const chunkGraph = compilation.chunkGraph!;
     const inConnections = uniqueFilterMap(
@@ -297,8 +320,8 @@ export function getFileName(filename: string, data: Record<string, string>) {
 /**
  * sorts by depth, falling back to alpha numeric
  */
-export function getSortedModules(stylableModules: Set<NormalModule>) {
-    return Array.from(stylableModules).sort((m1, m2) => {
+export function getSortedModules(stylableModules: Map<NormalModule, BuildData | null>) {
+    return Array.from(stylableModules.keys()).sort((m1, m2) => {
         const depthDiff = getStylableBuildMeta(m2).depth - getStylableBuildMeta(m1).depth;
         if (depthDiff === 0) {
             if (m1.resource > m2.resource) {
@@ -398,4 +421,19 @@ export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthConte
 export function getCSSViewModuleWebpack(moduleGraph: ModuleGraph) {
     const context = createCalcDepthContext(moduleGraph);
     return (module: Module) => getCSSViewModule(module, context) as NormalModule | undefined;
+}
+/**
+ * Provide a simple way to share build meta with other plugins without using module state like WeakMap<Compilation, DATA>
+ */
+export function provideStylableModules(
+    compilation: Compilation,
+    stylableModules: Map<NormalModule, BuildData | null>
+) {
+    (compilation as any)[Symbol.for('stylableModules')] = stylableModules;
+}
+
+export function getStylableModules(
+    compilation: Compilation
+): Map<NormalModule, BuildData | null> | undefined {
+    return (compilation as any)[Symbol.for('stylableModules')];
 }

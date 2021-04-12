@@ -1,5 +1,5 @@
 import { basename, join } from 'path';
-import { Module, Compiler, Compilation, sources, ModuleGraph, NormalModule } from 'webpack';
+import type { Module, Compiler, Compilation, ModuleGraph, NormalModule } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 
 import {
@@ -8,7 +8,6 @@ import {
     uniqueFilterMap,
 } from '@stylable/webpack-plugin';
 
-const { RawSource } = sources;
 type GetLogicModule = (module: Module, moduleGraph: ModuleGraph) => NormalModule | undefined;
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
@@ -69,7 +68,10 @@ export class HTMLSnapshotPlugin {
         );
 
         if (!compilation.assets[targetPath]) {
-            compilation.assets[targetPath] = new RawSource(html, false);
+            compilation.assets[targetPath] = new compilation.compiler.webpack.sources.RawSource(
+                html,
+                false
+            );
         } else {
             compilation.errors.push(
                 new Error(
