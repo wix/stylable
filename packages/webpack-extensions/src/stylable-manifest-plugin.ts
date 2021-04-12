@@ -4,12 +4,9 @@ import { createMetadataForStylesheet } from './create-metadata-stylesheet';
 import { hashContent } from './hash-content-util';
 import { basename } from 'path';
 import { EOL } from 'os';
-import { sources } from 'webpack';
 import type { Compilation, Compiler, Module } from 'webpack';
 import type { ComponentsMetadata } from './component-metadata-builder';
 import type { Metadata, Manifest } from './types';
-
-const { RawSource } = sources;
 
 export interface Options {
     outputType: 'manifest' | 'fs-manifest';
@@ -119,7 +116,7 @@ export class StylableManifestPlugin {
         const contentHash = hashContent(manifestContent, this.options.contentHashLength);
         compilation.emitAsset(
             this.options.getOutputFileName(contentHash),
-            new RawSource(manifestContent, false)
+            new compilation.compiler.webpack.sources.RawSource(manifestContent, false)
         );
     }
 
