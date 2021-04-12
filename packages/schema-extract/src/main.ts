@@ -4,7 +4,7 @@ import {
     getCssDocsForSymbol,
     ImportSymbol,
     MappedStates,
-    safeParse,
+    cssParse,
     StateParsedValue,
     StylableMeta,
     StylableProcessor,
@@ -29,7 +29,7 @@ export function extractSchema(
     resolveNamespace?: (namespace: string, source: string) => string
 ) {
     const processor = new StylableProcessor(undefined, resolveNamespace);
-    const meta = processor.process(safeParse(css, { from: filePath }));
+    const meta = processor.process(cssParse(css, { from: filePath }));
     return generateSchema(meta, filePath, root, path);
 }
 
