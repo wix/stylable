@@ -244,7 +244,6 @@ export class StylableWebpackPlugin {
                     requireModule: compiler.watchMode ? createDecacheRequire(compiler) : require,
                     optimizer: this.options.optimizer,
                     resolverCache: createStylableResolverCacheMap(compiler),
-                    cssParser: parse,
                 },
                 compiler
             )
