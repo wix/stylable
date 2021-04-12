@@ -247,79 +247,73 @@ export function processDeclarationValue(
                     }
                 } else if (value === '') {
                     parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                } else {
-                    if (customValues[value]) {
-                        // no op resolved at the bottom
-                    } else if (value === 'url') {
-                        // postcss-value-parser treats url differently:
-                        // https://github.com/TrySound/postcss-value-parser/issues/34
+                } else if (customValues[value]) {
+                    // no op resolved at the bottom
+                } else if (value === 'url') {
+                    // postcss-value-parser treats url differently:
+                    // https://github.com/TrySound/postcss-value-parser/issues/34
 
-                        const url = parsedNode.nodes[0];
-                        if (
-                            (url.type === 'word' || url.type === 'string') &&
-                            url.value.startsWith('~')
-                        ) {
-                            const sourceDir = dirname(meta.source);
-                            url.value = assureRelativeUrlPrefix(
-                                relative(
-                                    sourceDir,
-                                    resolver.resolvePath(url.value.slice(1), sourceDir)
-                                ).replace(/\\/gm, '/')
-                            );
-                        }
-                    } else if (value === 'format') {
-                        // preserve native format function quotation
-                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
-                    } else {
-                        const formatterRef = meta.mappedSymbols[value];
-                        const formatter = resolver.deepResolve(formatterRef);
+                    const url = parsedNode.nodes[0];
+                    if (
+                        (url.type === 'word' || url.type === 'string') &&
+                        url.value.startsWith('~')
+                    ) {
+                        const sourceDir = dirname(meta.source);
+                        url.value = assureRelativeUrlPrefix(
+                            relative(
+                                sourceDir,
+                                resolver.resolvePath(url.value.slice(1), sourceDir)
+                            ).replace(/\\/gm, '/')
+                        );
+                    }
+                } else if (value === 'format') {
+                    // preserve native format function quotation
+                    parsedNode.resolvedValue = stringifyFunction(value, parsedNode, true);
+                } else {
+                    const formatter = resolver.deepResolve(meta.mappedSymbols[value]);
+                    if (formatter && formatter._kind === 'js') {
                         const formatterArgs = getFormatterArgs(parsedNode);
-                        if (formatter && formatter._kind === 'js') {
-                            try {
-                                parsedNode.resolvedValue = formatter.symbol.apply(
-                                    null,
-                                    formatterArgs
+                        try {
+                            parsedNode.resolvedValue = formatter.symbol.apply(null, formatterArgs);
+                            if (valueHook && typeof parsedNode.resolvedValue === 'string') {
+                                parsedNode.resolvedValue = valueHook(
+                                    parsedNode.resolvedValue,
+                                    { name: parsedNode.value, args: formatterArgs },
+                                    true,
+                                    passedThrough
                                 );
-                                if (valueHook && typeof parsedNode.resolvedValue === 'string') {
-                                    parsedNode.resolvedValue = valueHook(
+                            }
+                        } catch (error) {
+                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                            if (diagnostics && node) {
+                                diagnostics.warn(
+                                    node,
+                                    functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
                                         parsedNode.resolvedValue,
-                                        { name: parsedNode.value, args: formatterArgs },
-                                        true,
-                                        passedThrough
-                                    );
-                                }
-                            } catch (error) {
-                                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                                if (diagnostics && node) {
-                                    diagnostics.warn(
-                                        node,
-                                        functionWarnings.FAIL_TO_EXECUTE_FORMATTER(
-                                            parsedNode.resolvedValue,
-                                            error.message
-                                        ),
-                                        { word: (node as postcss.Declaration).value }
-                                    );
-                                }
+                                        error.message
+                                    ),
+                                    { word: (node as postcss.Declaration).value }
+                                );
                             }
-                        } else if (value === 'var') {
-                            const varWithPrefix = parsedNode.nodes[0].value;
-                            if (isCSSVarProp(varWithPrefix)) {
-                                if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
-                                    parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
-                                }
-                            }
-                            // handle default values
-                            if (parsedNode.nodes.length > 2) {
-                                parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                            }
-                        } else if (isCssNativeFunction(value)) {
-                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                        } else if (diagnostics && node) {
-                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
-                            diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
-                                word: value,
-                            });
                         }
+                    } else if (value === 'var') {
+                        const varWithPrefix = parsedNode.nodes[0].value;
+                        if (isCSSVarProp(varWithPrefix)) {
+                            if (cssVarsMapping && cssVarsMapping[varWithPrefix]) {
+                                parsedNode.nodes[0].value = cssVarsMapping[varWithPrefix];
+                            }
+                        }
+                        // handle default values
+                        if (parsedNode.nodes.length > 2) {
+                            parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                        }
+                    } else if (isCssNativeFunction(value)) {
+                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                    } else if (diagnostics && node) {
+                        parsedNode.resolvedValue = stringifyFunction(value, parsedNode);
+                        diagnostics.warn(node, functionWarnings.UNKNOWN_FORMATTER(value), {
+                            word: value,
+                        });
                     }
                 }
                 break;
@@ -353,7 +347,6 @@ export function processDeclarationValue(
         }
     }
     return { outputValue, topLevelType, typeError };
-    // }
     // TODO: handle calc (parse internals but maintain expression)
     // TODO: check this thing. native function that accent our function does not work
     // e.g: calc(getVarName())

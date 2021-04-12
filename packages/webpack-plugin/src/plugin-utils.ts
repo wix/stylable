@@ -1,13 +1,13 @@
-import {
+import type {
     Chunk,
     ChunkGraph,
     Compilation,
     Compiler,
+    dependencies,
     Module,
     ModuleGraph,
     NormalModule,
 } from 'webpack';
-import { UnusedDependency } from './unused-dependency';
 import type {
     BuildData,
     DependencyTemplates,
@@ -160,8 +160,8 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
 type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'url-loader' }] };
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
-    if (module instanceof NormalModule) {
-        return module.loaders.some(({ loader }) =>
+    if ('loaders' in module) {
+        return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
@@ -287,7 +287,11 @@ export function getStylableBuildData(
     return data;
 }
 
-export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
+export function findIfStylableModuleUsed(
+    m: Module,
+    compilation: Compilation,
+    UnusedDependency: typeof dependencies.ModuleDependency
+) {
     const moduleGraph = compilation.moduleGraph;
     const chunkGraph = compilation.chunkGraph!;
     const inConnections = uniqueFilterMap(

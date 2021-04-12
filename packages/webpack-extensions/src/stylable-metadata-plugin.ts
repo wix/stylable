@@ -1,7 +1,6 @@
 import { findFiles } from '@stylable/node';
 import { dirname, join } from 'path';
 import type { Compilation, Compiler } from 'webpack';
-import { sources } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
 
@@ -12,8 +11,6 @@ import {
     uniqueFilterMap,
 } from '@stylable/webpack-plugin';
 import { hashContent } from './hash-content-util';
-
-const RawSource = sources.RawSource;
 
 export interface MetadataOptions {
     name: string;
@@ -147,7 +144,10 @@ export class StylableMetadataPlugin {
                     ? `.${hashContent(fileContent, this.options.contentHashLength)}`
                     : ''
             }.metadata.json${!jsonMode ? '.js' : ''}`;
-            compilation.emitAsset(fileName, new RawSource(fileContent, false));
+            compilation.emitAsset(
+                fileName,
+                new compilation.compiler.webpack.sources.RawSource(fileContent, false)
+            );
         }
     }
 
