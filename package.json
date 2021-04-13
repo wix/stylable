@@ -41,7 +41,7 @@
     "@types/sinon-chai": "^3.2.5",
     "@types/validate-npm-package-name": "^3.0.2",
     "@types/yargs": "^16.0.1",
-    "@typescript-eslint/eslint-plugin": "^4.21.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.21.0",
     "autoprefixer": "^10.2.5",
     "chai": "^4.3.4",
