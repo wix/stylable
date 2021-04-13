@@ -270,7 +270,7 @@ export function findIfStylableModuleUsed(
     UnusedDependency: typeof dependencies.ModuleDependency
 ) {
     const moduleGraph = compilation.moduleGraph;
-    const chunkGraph = compilation.chunkGraph!;
+    const chunkGraph = compilation.chunkGraph;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
         ({ resolvedOriginModule, dependency }) =>

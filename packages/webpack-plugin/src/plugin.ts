@@ -452,7 +452,7 @@ export class StylableWebpackPlugin {
                             stylableModules,
                             assetsModules,
 
-                            compilation.chunkGraph!,
+                            compilation.chunkGraph,
                             compilation.moduleGraph,
                             'CSS' /*runtime*/,
                             compilation.runtimeTemplate,
