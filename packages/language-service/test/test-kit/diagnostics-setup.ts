@@ -1,5 +1,5 @@
 import { createMemoryFs } from '@file-services/memory';
-import { Stylable } from '@stylable/core';
+import { safeParse, Stylable } from '@stylable/core';
 import { StylableLanguageService } from '@stylable/language-service';
 
 export function createDiagnostics(files: { [filePath: string]: string }, filePath: string) {
@@ -7,7 +7,12 @@ export function createDiagnostics(files: { [filePath: string]: string }, filePat
 
     const stylableLSP = new StylableLanguageService({
         fs,
-        stylable: new Stylable('/', fs, require),
+        stylable: Stylable.create({
+            fileSystem: fs,
+            requireModule: require,
+            projectRoot: '/',
+            cssParser: safeParse,
+        }),
     });
 
     return stylableLSP.diagnose(filePath);

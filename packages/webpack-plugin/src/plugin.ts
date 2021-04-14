@@ -409,7 +409,7 @@ export class StylableWebpackPlugin {
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css);
+                    const ast = parse(css, { from: module.resource });
 
                     optimizer.optimizeAst(
                         optimizeOptions,
@@ -459,7 +459,7 @@ export class StylableWebpackPlugin {
                             stylableModules,
                             assetsModules,
 
-                            compilation.chunkGraph!,
+                            compilation.chunkGraph,
                             compilation.moduleGraph,
                             'CSS' /*runtime*/,
                             compilation.runtimeTemplate,

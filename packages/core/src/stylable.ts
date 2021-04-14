@@ -1,7 +1,7 @@
 import type { FileProcessor, MinimalFS } from './cached-process-file';
 import { createInfrastructure } from './create-infra-structure';
 import { Diagnostics } from './diagnostics';
-import { CssParser, safeParse } from './parser';
+import { CssParser, cssParse } from './parser';
 import { processNamespace, StylableMeta, StylableProcessor } from './stylable-processor';
 import { StylableResolverCache, StylableResolver } from './stylable-resolver';
 import {
@@ -80,7 +80,7 @@ export class Stylable {
         public resolveNamespace?: typeof processNamespace,
         protected timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
         protected resolveModule?: ModuleResolver,
-        protected cssParser: CssParser = safeParse,
+        protected cssParser: CssParser = cssParse,
         protected resolverCache?: StylableResolverCache
     ) {
         const { fileProcessor, resolvePath } = createInfrastructure(

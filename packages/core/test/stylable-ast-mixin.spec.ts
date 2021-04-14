@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { safeParse, createSubsetAst, scopeSelector } from '@stylable/core';
+import { cssParse, createSubsetAst, scopeSelector } from '@stylable/core';
 
 describe('scopeSelector', () => {
     const tests: Array<{ root: string; child: string; selector: string; only?: boolean }> = [
@@ -94,7 +94,7 @@ describe('createSubsetAst', () => {
 
     it('should extract all selectors that has given prefix in the first chunk', () => {
         const res = createSubsetAst(
-            safeParse(`
+            cssParse(`
             .i .x{}
             .i::x{}
             .i[data]{}
@@ -148,7 +148,7 @@ describe('createSubsetAst', () => {
 
     it('should extract global when creating root chunk', () => {
         const res = createSubsetAst(
-            safeParse(`
+            cssParse(`
             :global(.x){}
             :global(.x) .root{}
         `),
@@ -164,7 +164,7 @@ describe('createSubsetAst', () => {
 
     it('should parts under @media', () => {
         const res = createSubsetAst(
-            safeParse(`
+            cssParse(`
             .i {color: red}
             .i:hover {}
             @media (max-width: 300px) {
@@ -190,7 +190,7 @@ describe('createSubsetAst', () => {
 
     it('should not append empty media', () => {
         const res = createSubsetAst(
-            safeParse(`
+            cssParse(`
             .i {}
             @media (max-width: 300px) {
                 .x {}
