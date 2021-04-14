@@ -402,7 +402,7 @@ export class StylableWebpackPlugin {
 
                 try {
                     const buildData = stylableModules.get(module)!;
-                    const ast = parse(css);
+                    const ast = parse(css, { from: module.resource });
 
                     optimizer.optimizeAst(
                         optimizeOptions,

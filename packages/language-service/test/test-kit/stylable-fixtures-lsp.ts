@@ -1,6 +1,6 @@
 import fs from '@file-services/node';
 import path from 'path';
-import { Stylable } from '@stylable/core';
+import { safeParse, Stylable } from '@stylable/core';
 import { StylableLanguageService } from '@stylable/language-service';
 
 export const CASES_PATH = path.join(
@@ -16,5 +16,10 @@ function requireModule(request: string) {
 
 export const stylableLSP = new StylableLanguageService({
     fs,
-    stylable: new Stylable(CASES_PATH, fs, requireModule),
+    stylable: Stylable.create({
+        fileSystem: fs,
+        requireModule,
+        projectRoot: CASES_PATH,
+        cssParser: safeParse,
+    }),
 });
