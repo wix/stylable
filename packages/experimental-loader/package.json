@@ -1,6 +1,6 @@
 {
   "name": "@stylable/experimental-loader",
-  "version": "3.12.3",
+  "version": "3.12.4",
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
   "scripts": {
@@ -10,9 +10,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@stylable/core": "^3.12.3",
-    "@stylable/optimizer": "^3.12.3",
-    "@stylable/runtime": "^3.12.3",
+    "@stylable/core": "^3.12.4",
+    "@stylable/optimizer": "^3.12.4",
+    "@stylable/runtime": "^3.12.4",
     "css-loader": "^5.0.2",
     "decache": "^4.6.0"
   },
