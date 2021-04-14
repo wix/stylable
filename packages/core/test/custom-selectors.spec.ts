@@ -15,20 +15,37 @@ describe('@custom-selector', () => {
         expect(customSelectors[':--icon']).to.equal('.root > .icon');
     });
 
-    it('expand custom-selector before process (reflect on ast)', () => {
+    it.only('expand custom-selector before process (reflect on ast)', () => {
         const from = '/path/to/style.css';
         const { ast, classes } = processSource(
             `
-            @custom-selector :--icon .root > .icon;
-            :--icon, .class {
-                color: red;
-            }
+            @custom-selector :--t1 .root > .icon;
+            @custom-selector :--t2 div;
+            @custom-selector :--t3 .text;
+            @custom-selector :--t4 .x, div;
+            @custom-selector :--t5  div, .y;
+            @custom-selector :--3xl .3xl;
+
+            
+            :--t1, .class {}
+            .root:--t2 {}
+            :--t3:--t2 {}
+            :--t4 {}
+            div:--t2{}
+            :--t4:--t5 {}
+            :--3xl {}
+            :not(:--t3):not(:--t4){}
         `,
             { from }
         );
+        console.log(ast + '');
+        const [t1, t2, t3, t4, t5] = ast.nodes as postcss.Rule[];
+        expect(t1.selector).to.equal('.root > .icon, .class');
+        expect(t2.selector).to.equal('div.root');
+        expect(t3.selector).to.equal('div.text');
+        expect(t4.selector).to.equal('.x,div');
+        expect(t5.selector).to.equal('');
 
-        const [rule] = ast.nodes as [postcss.Rule];
-        expect(rule.selector).to.equal('.root > .icon, .class');
         expect(classes.icon).to.contain({ _kind: 'class', name: 'icon' });
     });
 

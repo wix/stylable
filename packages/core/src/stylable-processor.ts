@@ -26,13 +26,7 @@ import {
     StylableMeta,
     VarSymbol,
 } from './stylable-meta';
-import {
-    CUSTOM_SELECTOR_RE,
-    expandCustomSelectors,
-    getAlias,
-    isCSSVarProp,
-    scopeSelector,
-} from './stylable-utils';
+import { getAlias, isCSSVarProp, scopeSelector } from './stylable-utils';
 import {
     rootValueMapping,
     SBTypesParsers,
@@ -41,6 +35,7 @@ import {
     valueMapping,
 } from './stylable-value-parsers';
 import { deprecated, filename2varname, stripQuotation } from './utils';
+import { expandCustomSelectorsRules, processCustomSelector } from './expand-custom-selectors';
 export * from './stylable-meta'; /* TEMP EXPORT */
 
 const parseNamed = SBTypesParsers[valueMapping.named];
@@ -209,7 +204,7 @@ export class StylableProcessor {
     }
 
     public handleCustomSelectors(rule: postcss.Rule) {
-        expandCustomSelectors(rule, this.meta.customSelectors, this.meta.diagnostics);
+        rule.selector = expandCustomSelectorsRules(rule, this.meta.customSelectorsAsts);
     }
 
     protected handleAtRules(root: postcss.Root) {
@@ -246,16 +241,12 @@ export class StylableProcessor {
                     }
                     break;
                 case 'custom-selector': {
-                    const params = atRule.params.split(/\s/);
-                    const customName = params.shift();
-                    toRemove.push(atRule);
-                    if (customName && customName.match(CUSTOM_SELECTOR_RE)) {
-                        this.meta.customSelectors[customName] = atRule.params
-                            .replace(customName, '')
-                            .trim();
-                    } else {
-                        // TODO: add warn there are two types one is not valid name and the other is empty name.
+                    const res = processCustomSelector(atRule);
+                    if (res) {
+                        this.meta.customSelectorsAsts[res.name] = res.ast;
+                        this.meta.customSelectors[res.name] = res.selectors;
                     }
+                    toRemove.push(atRule);
                     break;
                 }
                 case 'st-scope':

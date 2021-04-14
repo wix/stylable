@@ -19,6 +19,7 @@ export class StylableMeta {
     public mappedSymbols: Record<string, StylableSymbol>;
     public mappedKeyframes: Record<string, KeyframesSymbol>;
     public customSelectors: Record<string, string>;
+    public customSelectorsAsts: Record<string, any>;
     public urls: string[];
     public parent?: StylableMeta;
     public transformDiagnostics: Diagnostics | null;
@@ -53,6 +54,7 @@ export class StylableMeta {
         };
         this.mappedKeyframes = {};
         this.customSelectors = {};
+        this.customSelectorsAsts = {};
         this.urls = [];
         this.scopes = [];
         this.simpleSelectors = {};
