@@ -38,6 +38,7 @@ import { injectCssModules } from './mini-css-support';
 import { loadStylableConfig } from './load-stylable-config';
 import type {
     BuildData,
+    EntryPoint,
     LoaderData,
     NormalModuleFactory,
     StylableBuildMeta,
@@ -465,6 +466,11 @@ export class StylableWebpackPlugin {
                     () => {
                         if (this.options.extractMode === 'entries') {
                             for (const entryPoint of compilation.entrypoints.values()) {
+                                if (
+                                    isDependOfAnotherEntryPoint(entryPoint, compilation.entrypoints)
+                                ) {
+                                    continue;
+                                }
                                 const entryChunk = entryPoint.getEntrypointChunk();
                                 const modules = new Map<NormalModule, BuildData | null>();
                                 getEntryPointModules(
@@ -552,4 +558,16 @@ export class StylableWebpackPlugin {
         dependencyFactories.set(UnusedDependency, normalModuleFactory);
         dependencyTemplates.set(UnusedDependency, new NoopTemplate());
     }
+}
+
+function isDependOfAnotherEntryPoint(entryPoint: EntryPoint, entrypoints: Map<string, EntryPoint>) {
+    // entryPoint.options.dependsOn is not in webpack types;
+    for (const parent of entryPoint.getParents()) {
+        for (const entry of entrypoints.values()) {
+            if (parent.id === entry.id) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
