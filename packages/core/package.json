@@ -11,7 +11,6 @@
     "css-selector-tokenizer": "^0.7.3",
     "deindent": "^0.1.0",
     "enhanced-resolve": "^5.7.0",
-    "is-url-superb": "^5.0.0",
     "is-vendor-prefixed": "^4.0.0",
     "jest-docblock": "^26.0.0",
     "lodash.clonedeep": "^4.5.0",
