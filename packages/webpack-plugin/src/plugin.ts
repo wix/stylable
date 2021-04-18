@@ -451,7 +451,7 @@ export class StylableWebpackPlugin {
                 const createStaticCSS = staticCSSWith(
                     staticPublicPath,
                     assetsModules,
-                    compilation.chunkGraph!,
+                    compilation.chunkGraph,
                     compilation.moduleGraph,
                     'CSS' /*runtime*/,
                     compilation.runtimeTemplate,
@@ -475,7 +475,7 @@ export class StylableWebpackPlugin {
                                 const modules = new Map<NormalModule, BuildData | null>();
                                 getEntryPointModules(
                                     entryPoint,
-                                    compilation.chunkGraph!,
+                                    compilation.chunkGraph,
                                     (module) => {
                                         const m = module as NormalModule;
                                         if (stylableModules.has(m)) {
