@@ -86,12 +86,17 @@ function transformSelector(selector: Node, customSelectors: Record<string, Selec
 const withoutSelectorStartMatch = /^(tag|universal)$/;
 const withoutSelectorEndMatch = /^(class|id|pseudo|tag|universal)$/;
 
-const isWithoutSelectorStart = (node: Node) => withoutSelectorStartMatch.test(Object(node).type);
-const isWithoutSelectorEnd = (node: Node) => withoutSelectorEndMatch.test(Object(node).type);
+const isWithoutSelectorStart = (node: Node) => withoutSelectorStartMatch.test(node.type);
+const isWithoutSelectorEnd = (node: Node) => withoutSelectorEndMatch.test(node.type);
 
 // adjust nodes by selector ends (so that .class:--h1 becomes h1.class rather than .classh1)
 const adjustNodesBySelectorEnds = (nodes: Node[], index: number) => {
-    if (index && isWithoutSelectorStart(nodes[index]) && isWithoutSelectorEnd(nodes[index - 1])) {
+    if (
+        index &&
+        nodes[index] &&
+        isWithoutSelectorStart(nodes[index]) &&
+        isWithoutSelectorEnd(nodes[index - 1])
+    ) {
         let safeIndex = index - 1;
 
         while (safeIndex && isWithoutSelectorEnd(nodes[safeIndex])) {
