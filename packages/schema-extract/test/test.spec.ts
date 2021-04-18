@@ -301,7 +301,7 @@ describe('Stylable JSON Schema Extractor', () => {
                 .root {
                     -st-extends: extended;
                 }
-            }`;
+            `;
 
             const res = extractSchema(css, '/entry.st.css', '/', path);
             expect(res.properties)

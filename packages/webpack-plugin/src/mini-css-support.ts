@@ -27,7 +27,7 @@ export function injectCssModules(
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
         const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
-        const chunkGraph = compilation.chunkGraph!;
+        const chunkGraph = compilation.chunkGraph;
 
         for (const [module] of stylableModules) {
             const cssModule = new CssModule({

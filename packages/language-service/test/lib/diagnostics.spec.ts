@@ -1,5 +1,5 @@
 import { createMemoryFs } from '@file-services/memory';
-import { Stylable } from '@stylable/core';
+import { safeParse, Stylable } from '@stylable/core';
 import { StylableLanguageService } from '@stylable/language-service';
 import { expect } from 'chai';
 import { createDiagnostics } from '../test-kit/diagnostics-setup';
@@ -36,7 +36,12 @@ describe('diagnostics', () => {
 
         const stylableLSP = new StylableLanguageService({
             fs,
-            stylable: new Stylable('/', fs, require),
+            stylable: Stylable.create({
+                fileSystem: fs,
+                requireModule: require,
+                projectRoot: '/',
+                cssParser: safeParse,
+            }),
         });
 
         const diagnostics1 = stylableLSP.diagnose(filePath);
