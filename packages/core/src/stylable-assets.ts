@@ -1,6 +1,5 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import isUrl from 'is-url-superb';
 import cssSelectorTokenizer from 'css-selector-tokenizer';
 import type { ParsedValue } from './types';
 
@@ -19,6 +18,19 @@ export function collectAssets(ast: postcss.Root) {
 
 export function isExternal(url: string) {
     return url === '' || url.startsWith('data:') || isUrl(url);
+}
+
+export function isUrl(maybeUrl: string) {
+    maybeUrl = maybeUrl.trim();
+    if (maybeUrl.includes(' ')) {
+        return false;
+    }
+    try {
+        new URL(maybeUrl);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 export function isAsset(url: string) {

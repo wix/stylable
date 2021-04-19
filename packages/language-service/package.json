@@ -15,7 +15,7 @@
     "@file-services/typescript": "^5.3.1",
     "@stylable/core": "^4.0.6",
     "css-selector-tokenizer": "^0.7.3",
-    "js-beautify": "^1.13.11",
+    "js-beautify": "^1.13.13",
     "postcss": "^8.2.10",
     "postcss-value-parser": "^4.1.0",
     "vscode-css-languageservice": "^5.1.0",
