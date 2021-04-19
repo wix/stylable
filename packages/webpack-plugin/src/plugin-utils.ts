@@ -505,3 +505,15 @@ export function getEntryPointModules(
         }
     }
 }
+
+export function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<EntryPoint>) {
+    // entryPoint.options.dependsOn is not in webpack types;
+    for (const parent of entryPoint.getParents()) {
+        for (const entry of entrypoints) {
+            if (parent.id === entry.id) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
