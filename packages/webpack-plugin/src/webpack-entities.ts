@@ -104,7 +104,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class StylableRuntimeStylesheet extends RuntimeModule {
         constructor() {
-            super('stylable stylesheet', RuntimeModule.STAGE_ATTACH);
+            super('stylable stylesheet', RuntimeModule.STAGE_NORMAL);
         }
         generate() {
             return `(${stylesheet})(__webpack_require__)`;
@@ -247,7 +247,7 @@ export function getWebpackEntities(webpack: Compiler['webpack']): StylableWebpac
 
     class StylableRuntimeInject extends RuntimeModule {
         constructor() {
-            super('stylable inject', RuntimeModule.STAGE_ATTACH);
+            super('stylable inject', RuntimeModule.STAGE_NORMAL);
         }
         generate() {
             return `(${injectStyles})(__webpack_require__)`;

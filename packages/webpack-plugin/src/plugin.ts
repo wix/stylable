@@ -18,11 +18,9 @@ import {
     isStylableModule,
     isAssetModule,
     isLoadedWithKnownAssetLoader,
-    outputOptionsAwareHashContent,
     injectLoader,
     findIfStylableModuleUsed,
-    createStaticCSS,
-    getFileName,
+    staticCSSWith,
     getStylableBuildMeta,
     reportNamespaceCollision,
     createOptimizationMapping,
@@ -31,10 +29,16 @@ import {
     createStylableResolverCacheMap,
     createCalcDepthContext,
     provideStylableModules,
+    emitCSSFile,
+    getEntryPointModules,
+    getOnlyChunk,
+    getStylableBuildData,
+    isDependencyOf,
 } from './plugin-utils';
 import { injectCssModules } from './mini-css-support';
 import type {
     BuildData,
+    EntryPoint,
     LoaderData,
     NormalModuleFactory,
     StylableBuildMeta,
@@ -102,6 +106,11 @@ export interface StylableWebpackPluginOptions {
         DUPLICATE_MODULE_NAMESPACE?: boolean;
     };
     /**
+     * Set the strategy of how to spit the extracted css
+     * This option is only used when cssInjection is set to 'css'
+     */
+    extractMode?: 'single' | 'entries';
+    /**
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
     assetsMode?: 'url' | 'loader';
@@ -134,6 +143,7 @@ const defaultOptions = (
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
     target: userOptions.target ?? 'modern',
+    extractMode: userOptions.extractMode ?? 'single',
 });
 
 export class StylableWebpackPlugin {
@@ -440,51 +450,74 @@ export class StylableWebpackPlugin {
         stylableModules: Map<NormalModule, BuildData | null>,
         assetsModules: Map<string, NormalModule>
     ) {
-        const { runtimeTemplate } = compilation;
-
         /**
          * As a work around unknown behavior
          * if this plugin will run inside a child compilation we do not emit css assets
          */
         if (!compilation.compiler.isChild()) {
             if (this.options.cssInjection === 'css') {
+                const createStaticCSS = staticCSSWith(
+                    staticPublicPath,
+                    assetsModules,
+                    compilation.chunkGraph,
+                    compilation.moduleGraph,
+                    'CSS' /*runtime*/,
+                    compilation.runtimeTemplate,
+                    compilation.dependencyTemplates
+                );
+
                 compilation.hooks.processAssets.tap(
                     {
                         name: StylableWebpackPlugin.name,
                         stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
                     },
                     () => {
-                        const cssSource = createStaticCSS(
-                            staticPublicPath,
-                            stylableModules,
-                            assetsModules,
+                        if (this.options.extractMode === 'entries') {
+                            for (const entryPoint of compilation.entrypoints.values()) {
+                                if (isDependencyOf(entryPoint, compilation.entrypoints.values())) {
+                                    continue;
+                                }
+                                const entryChunk = entryPoint.getEntrypointChunk();
+                                const modules = new Map<NormalModule, BuildData | null>();
+                                getEntryPointModules(
+                                    entryPoint,
+                                    compilation.chunkGraph,
+                                    (module) => {
+                                        const m = module as NormalModule;
+                                        if (stylableModules.has(m)) {
+                                            modules.set(
+                                                m,
+                                                getStylableBuildData(stylableModules, m)
+                                            );
+                                        }
+                                    }
+                                );
+                                const cssBundleFilename = emitCSSFile(
+                                    compilation,
+                                    createStaticCSS(modules).join('\n'),
+                                    this.options.filename,
+                                    webpack.util.createHash,
+                                    entryChunk
+                                );
+                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                            }
+                        } else if (this.options.extractMode === 'single') {
+                            const chunk = getOnlyChunk(compilation);
 
-                            compilation.chunkGraph,
-                            compilation.moduleGraph,
-                            'CSS' /*runtime*/,
-                            compilation.runtimeTemplate,
-                            compilation.dependencyTemplates
-                        ).join('\n');
+                            const cssSource = createStaticCSS(stylableModules).join('\n');
 
-                        const contentHash = outputOptionsAwareHashContent(
-                            webpack.util.createHash,
-                            runtimeTemplate.outputOptions,
-                            cssSource
-                        );
+                            const cssBundleFilename = emitCSSFile(
+                                compilation,
+                                cssSource,
+                                this.options.filename,
+                                webpack.util.createHash,
+                                chunk
+                            );
 
-                        const cssBundleFilename = getFileName(this.options.filename, {
-                            hash: compilation.hash!,
-                            contenthash: contentHash,
-                        });
-
-                        compilation.entrypoints.forEach((entryPoint) => {
-                            entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
-                        });
-
-                        compilation.emitAsset(
-                            cssBundleFilename,
-                            new webpack.sources.RawSource(cssSource, false)
-                        );
+                            for (const entryPoint of compilation.entrypoints.values()) {
+                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                            }
+                        }
                     }
                 );
             } else if (this.options.cssInjection === 'mini-css') {

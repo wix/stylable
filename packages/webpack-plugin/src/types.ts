@@ -34,6 +34,9 @@ export interface StylableLoaderContext extends LoaderContext {
 }
 
 /* webpack missing types */
+
+type MapType<T> = T extends Map<any, infer U> ? U : never;
+
 export type WebpackCreateHash = Compiler['webpack']['util']['createHash'];
 export type RuntimeTemplate = Compilation['runtimeTemplate'];
 export type WebpackOutputOptions = RuntimeTemplate['outputOptions'];
@@ -41,3 +44,4 @@ export type CompilationParams = Parameters<Compiler['newCompilation']>[0];
 export type NormalModuleFactory = CompilationParams['normalModuleFactory'];
 export type StringSortableSet = Chunk['idNameHints'];
 export type DependencyTemplates = Compilation['dependencyTemplates'];
+export type EntryPoint = MapType<Compilation['entrypoints']>;
