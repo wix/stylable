@@ -1,4 +1,5 @@
 import type {
+    Chunk,
     ChunkGraph,
     Compilation,
     Compiler,
@@ -10,6 +11,7 @@ import type {
 import type {
     BuildData,
     DependencyTemplates,
+    EntryPoint,
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
@@ -215,11 +217,32 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
     return cache;
 }
 
+export function staticCSSWith(
+    staticPublicPath: string,
+    assetsModules: Map<string, NormalModule>,
+    chunkGraph: ChunkGraph,
+    moduleGraph: ModuleGraph,
+    runtime: string,
+    runtimeTemplate: RuntimeTemplate,
+    dependencyTemplates: DependencyTemplates
+) {
+    return (stylableModules: Map<Module, BuildData | null>) =>
+        createStaticCSS(
+            staticPublicPath,
+            stylableModules,
+            assetsModules,
+            chunkGraph,
+            moduleGraph,
+            runtime,
+            runtimeTemplate,
+            dependencyTemplates
+        );
+}
+
 export function createStaticCSS(
     staticPublicPath: string,
     stylableModules: Map<Module, BuildData | null>,
     assetsModules: Map<string, NormalModule>,
-
     chunkGraph: ChunkGraph,
     moduleGraph: ModuleGraph,
     runtime: string,
@@ -302,7 +325,7 @@ export function findIfStylableModuleUsed(
     return isInUse;
 }
 
-export function getFileName(filename: string, data: Record<string, string>) {
+export function getFileName(filename: string, data: Record<string, string | undefined>) {
     return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
         const [type, len] = inner.split(':');
         const value = data[type];
@@ -410,4 +433,49 @@ export function getStylableModules(
     compilation: Compilation
 ): Map<NormalModule, BuildData | null> | undefined {
     return (compilation as any)[Symbol.for('stylableModules')];
+}
+
+export function getOnlyChunk(compilation: Compilation) {
+    return compilation.entrypoints.size === 1
+        ? Array.from(compilation.entrypoints.values())[0].getEntrypointChunk()
+        : undefined;
+}
+
+export function emitCSSFile(
+    compilation: Compilation,
+    cssSource: string,
+    filenameTemplate: string,
+    createHash: WebpackCreateHash,
+    chunk?: Chunk
+) {
+    const contentHash = outputOptionsAwareHashContent(
+        createHash,
+        compilation.runtimeTemplate.outputOptions,
+        cssSource
+    );
+
+    const filename = getFileName(filenameTemplate, {
+        contenthash: contentHash,
+        hash: compilation.hash,
+        name: chunk?.name,
+    });
+
+    compilation.emitAsset(
+        filename,
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+    );
+
+    return filename;
+}
+
+export function getEntryPointModules(
+    entryPoint: EntryPoint,
+    chunkGraph: ChunkGraph,
+    onModule: (module: Module) => void
+) {
+    for (const chunk of entryPoint.getEntrypointChunk().getAllReferencedChunks()) {
+        for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+            onModule(module);
+        }
+    }
 }

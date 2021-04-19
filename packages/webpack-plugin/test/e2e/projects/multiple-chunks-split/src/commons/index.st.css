@@ -1,0 +1,12 @@
+:import {
+    -st-from: "./c.st.css";
+    -st-default: C;
+}
+
+.root {
+    color: chocolate;
+}
+
+.root C {
+    font-size: 40px;
+}
