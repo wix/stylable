@@ -466,9 +466,7 @@ export class StylableWebpackPlugin {
                     () => {
                         if (this.options.extractMode === 'entries') {
                             for (const entryPoint of compilation.entrypoints.values()) {
-                                if (
-                                    isDependOfAnotherEntryPoint(entryPoint, compilation.entrypoints)
-                                ) {
+                                if (isDependencyOf(entryPoint, compilation.entrypoints.values())) {
                                     continue;
                                 }
                                 const entryChunk = entryPoint.getEntrypointChunk();
@@ -560,10 +558,10 @@ export class StylableWebpackPlugin {
     }
 }
 
-function isDependOfAnotherEntryPoint(entryPoint: EntryPoint, entrypoints: Map<string, EntryPoint>) {
+function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<EntryPoint>) {
     // entryPoint.options.dependsOn is not in webpack types;
     for (const parent of entryPoint.getParents()) {
-        for (const entry of entrypoints.values()) {
+        for (const entry of entrypoints) {
             if (parent.id === entry.id) {
                 return true;
             }
