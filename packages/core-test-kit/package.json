@@ -1,10 +1,10 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "4.0.6",
+  "version": "4.1.0",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "dependencies": {
-    "@stylable/core": "^4.0.6",
+    "@stylable/core": "^4.1.0",
     "chai": "^4.3.4",
     "flat": "^5.0.2",
     "postcss": "^8.2.10"
