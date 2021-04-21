@@ -1,7 +1,7 @@
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { expect } from 'chai';
 import { dirname } from 'path';
-import { Page } from 'playwright-core';
+import type { Page } from 'playwright-core';
 
 const project = 'multiple-chunks-split';
 const projectDir = dirname(
