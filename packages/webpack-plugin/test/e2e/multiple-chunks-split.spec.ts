@@ -27,6 +27,8 @@ describe(`(${project})`, () => {
 
         const a = projectRunner.getBuildAsset('a.css');
         const b = projectRunner.getBuildAsset('b.css');
+        expect(a).to.not.be.empty;
+        expect(b).to.not.be.empty;
         expect(a).to.not.equal(b);
 
         expect(await getComputedColor(page, 'Hello From Common')).to.eql(`rgb(210, 105, 30)`);
