@@ -143,7 +143,7 @@ export class Stylable {
         this.fileProcessor.add(meta.source, meta);
         return transformer.transform(meta);
     }
-    public process(fullpath: string, context?: string, ignoreCache?: boolean): StylableMeta {
-        return this.fileProcessor.process(fullpath, ignoreCache, context);
+    public process(fullPath: string, context?: string, ignoreCache?: boolean): StylableMeta {
+        return this.fileProcessor.process(fullPath, ignoreCache, context);
     }
 }
