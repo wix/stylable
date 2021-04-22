@@ -4,19 +4,22 @@ import { runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
 import { createTempProject, actAndWaitForBuild, waitForWatcherFinish } from './test-helpers';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import html from '@rollup/plugin-html';
 
-interface RollupRunnerOptions {
+export interface RollupRunnerOptions {
     projectPath: string;
     nodeModulesPath?: string;
     entry?: string;
     pluginOptions?: StylableRollupPluginOptions;
 }
-
+const rootNodeModulesFromHere = join(
+    dirname(require.resolve('../../../../../package.json')),
+    'node_modules'
+);
 export function rollupRunner({
     projectPath,
-    nodeModulesPath = join(__dirname, '../../../../node_modules'),
+    nodeModulesPath = rootNodeModulesFromHere,
     entry = 'index.js',
     pluginOptions,
 }: RollupRunnerOptions) {
