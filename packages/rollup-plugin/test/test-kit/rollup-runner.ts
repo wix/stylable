@@ -29,7 +29,7 @@ export function rollupRunner({
         entry
     );
 
-    const dist = context + '/dist';
+    const dist = join(context, 'dist');
 
     const watcher = watch({
         context,
