@@ -18,7 +18,9 @@ const getElementsStyles = () => {
     };
 };
 
-describe('StylableRollupPlugin', () => {
+describe('StylableRollupPlugin', function () {
+    this.timeout(20000);
+
     const project = 'simple-stylable';
 
     const runner = rollupRunner({
