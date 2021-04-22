@@ -1,4 +1,4 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import { RollupWatcherEvent, watch } from 'rollup';
 import { serve } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
