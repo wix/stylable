@@ -17,6 +17,7 @@ export function getImports(
     stylable: Stylable,
     meta: StylableMeta,
     projectRoot: string,
+    assetFilter: (url: string, context: string) => boolean,
     assetsMode: 'url' | 'loader'
 ) {
     const urls = handleUrlDependencies(meta, projectRoot);

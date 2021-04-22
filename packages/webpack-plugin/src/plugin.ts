@@ -111,6 +111,10 @@ export interface StylableWebpackPluginOptions {
      */
     extractMode?: 'single' | 'entries';
     /**
+     *
+     */
+    assetFilter?: (url: string, context: string) => boolean;
+    /**
      * @deprecated webpack 5 recommendation is to use AssetsModules for loading assets
      */
     assetsMode?: 'url' | 'loader';
@@ -143,6 +147,7 @@ const defaultOptions = (
         : defaultOptimizations(isProd),
     optimizer: userOptions.optimizer ?? new StylableOptimizer(),
     target: userOptions.target ?? 'modern',
+    assetFilter: userOptions.assetFilter ?? (() => true),
     extractMode: userOptions.extractMode ?? 'single',
 });
 
@@ -285,6 +290,7 @@ export class StylableWebpackPlugin {
                     loaderContext.assetsMode = this.options.assetsMode;
                     loaderContext.diagnosticsMode = this.options.diagnosticsMode;
                     loaderContext.target = this.options.target;
+                    loaderContext.assetFilter = this.options.assetFilter;
                     /**
                      * Every Stylable file that our loader handles will be call this function to add additional build data
                      */
