@@ -6,7 +6,7 @@ import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { mkdtempSync, rmdirSync, symlinkSync, existsSync } from 'fs';
 import { deferred } from 'promise-assist';
-import { serve } from './run-server';
+import { runServer } from './run-server';
 import { tmpdir } from 'os';
 
 export interface Options {
@@ -158,7 +158,7 @@ export class ProjectRunner {
     }
 
     public async serve() {
-        const { server, serverUrl } = await serve(this.outputDir, this.port, this.log);
+        const { server, serverUrl } = await runServer(this.outputDir, this.port, this.log);
         this.serverUrl = serverUrl;
         this.server = server;
     }

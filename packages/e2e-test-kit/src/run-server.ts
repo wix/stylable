@@ -1,33 +1,23 @@
 import { spawn } from 'child_process';
+import { once } from 'events';
 
-export async function serve(dir: string, port = 3000, log = console.log) {
+export async function runServer(dir: string, preferredPort = 3000, log = console.log) {
     log('Start Server');
-    return new Promise<{ server: { close(): void }; serverUrl: string }>((res) => {
-        const child = spawn(
-            'node',
-            ['./isolated-server', dir, port.toString()],
-            {
-                cwd: __dirname,
-                stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-            }
-        );
-
-        child.once('message', (port) => {
-            log(`Server Running (port: ${port})`);
-            const serverUrl = `http://localhost:${port}`;
-            const server = {
-                close: () => {
-                    try {
-                        child.kill();
-                    } catch (e) {
-                        log('Kill Server Error:' + e);
-                    }
-                },
-            };
-            res({ server, serverUrl });
-        });
-        child.once('error', (e) => {
-            log('Static Server Error: ' + e);
-        });
+    const args = [require.resolve('./isolated-server'), dir, preferredPort.toString()];
+    const child = spawn('node', args, {
+        stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
     });
+
+    const [port] = (await once(child, 'message')) as [number];
+    const serverUrl = `http://localhost:${port}`;
+    const server = {
+        close: () => {
+            try {
+                child.kill();
+            } catch (e) {
+                log('Kill Server Error:' + e);
+            }
+        },
+    };
+    return { server, serverUrl };
 }

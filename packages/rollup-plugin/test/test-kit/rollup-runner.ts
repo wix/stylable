@@ -1,6 +1,6 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { RollupWatcherEvent, watch } from 'rollup';
-import { serve } from '@stylable/e2e-test-kit';
+import { runServer } from '@stylable/e2e-test-kit';
 import playwright from 'playwright-core';
 import { stylableRollupPlugin, StylableRollupPluginOptions } from '@stylable/rollup-plugin';
 import { createTempProject, actAndWaitForBuild, waitForWatcherFinish } from './test-helpers';
@@ -74,7 +74,7 @@ export function rollupRunner({
         dist,
         watcher,
         async serve() {
-            const { server, serverUrl } = await serve(dist);
+            const { server, serverUrl } = await runServer(dist);
             disposables.push(() => server.close());
             return serverUrl;
         },
