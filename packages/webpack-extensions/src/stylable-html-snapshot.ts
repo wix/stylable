@@ -8,7 +8,8 @@ import {
     uniqueFilterMap,
 } from '@stylable/webpack-plugin';
 
-type GetLogicModule = (module: Module, moduleGraph: ModuleGraph) => NormalModule | undefined;
+export type GetLogicModule = (module: Module, moduleGraph: ModuleGraph) => NormalModule | undefined;
+
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
     render: (componentModule: any, component: any) => string | false;
