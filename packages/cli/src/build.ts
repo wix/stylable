@@ -8,6 +8,7 @@ import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
+import { createDTSContent } from './generate-dts';
 
 export interface BuildOptions {
     extension: string;
@@ -29,6 +30,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
+    dts?: boolean;
 }
 
 export function build({
@@ -51,6 +53,7 @@ export function build({
     optimize,
     minify,
     manifest,
+    dts,
 }: BuildOptions) {
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
@@ -88,7 +91,8 @@ export function build({
                   useSourceNamespace,
                   injectCSSRequest,
                   optimize,
-                  minify
+                  minify,
+                  dts
               );
     });
 
@@ -120,7 +124,8 @@ function buildSingleFile(
     useSourceNamespace = false,
     injectCSSRequest = false,
     optimize = false,
-    minify = false
+    minify = false,
+    dts = false
 ) {
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
@@ -198,7 +203,16 @@ function buildSingleFile(
         log('[Build]', 'output transpiled css');
         tryRun(() => fs.writeFileSync(cssAssetOutPath, cssCode), `Write File Error: ${outPath}`);
     }
-    // .d.ts?
+    // .d.ts
+    if (dts) {
+        const dtsContent = createDTSContent(res);
+
+        log('[Build]', 'output .d.ts');
+        tryRun(
+            () => fs.writeFileSync(outSrcPath + '.d.ts', dtsContent),
+            `Write File Error: ${outPath}`
+        );
+    }
 
     // copy assets?
     projectAssets.push(

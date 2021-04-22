@@ -260,4 +260,64 @@ describe('build stand alone', () => {
         );
         expect(fs.existsSync(resolve('/dist/comp.global.css'))).to.equal(true);
     });
+
+    it('DTS only parts', () => {
+        const fs = createFS({
+            '/main.st.css': `
+                .root   {}
+                .string {}`
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: resolve('/'),
+            moduleFormats:[],
+            log,
+            dts: true
+        });
+
+        [
+            '/main.st.css',
+            '/main.st.css.d.ts',
+        ].forEach((p) => {
+            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+        });
+    })
+
+    it('DTS with states', () => {
+        const fs = createFS({
+            '/main.st.css': `
+                .root   { -st-states: x; }
+                .string { -st-states: y(string); }
+                .number { -st-states: z(number); }
+                .enum   { -st-states: z(enum(on, off, default)); }`
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: resolve('/'),
+            moduleFormats:[],
+            log,
+            dts: true
+        });
+
+        [
+            '/main.st.css',
+            '/main.st.css.d.ts',
+        ].forEach((p) => {
+            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+        });
+    })
 });
