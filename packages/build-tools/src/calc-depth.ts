@@ -1,9 +1,9 @@
-export type CalcDepthContext<T> = {
+export interface CalcDepthContext<T> {
     getDependencies: (module: T) => Iterable<T>;
     getImporters: (module: T) => Iterable<T>;
     getModulePathNoExt: (module: T) => string;
     isStylableModule: (module: T) => boolean;
-};
+}
 
 export function calcDepth<T>(
     module: T,
