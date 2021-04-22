@@ -2,7 +2,7 @@ import type { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
 
 import { StylableWebpackPlugin } from './plugin';
-import { BuildData } from './types';
+import type { BuildData } from './types';
 
 export function injectCssModules(
     webpack: Compiler['webpack'],

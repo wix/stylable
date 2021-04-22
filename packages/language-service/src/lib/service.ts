@@ -1,6 +1,6 @@
 import type { IFileSystem, IFileSystemStats } from '@file-services/types';
 import { Stylable, safeParse } from '@stylable/core';
-import { Root } from 'postcss';
+import type { Root } from 'postcss';
 import type { HoverSettings } from 'vscode-css-languageservice';
 import type { ColorPresentationParams } from 'vscode-languageserver-protocol';
 import { Range, TextDocument } from 'vscode-languageserver-textdocument';

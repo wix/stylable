@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-    mode: 'development',
+    mode: 'production',
     entry: {
         a: './src/a',
         b: './src/b',

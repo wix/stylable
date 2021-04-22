@@ -469,46 +469,61 @@ export class StylableWebpackPlugin {
                     compilation.dependencyTemplates
                 );
 
-                compilation.hooks.processAssets.tap(
-                    {
-                        name: StylableWebpackPlugin.name,
-                        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
-                    },
-                    () => {
-                        if (this.options.extractMode === 'entries') {
-                            for (const entryPoint of compilation.entrypoints.values()) {
-                                if (isDependencyOf(entryPoint, compilation.entrypoints.values())) {
-                                    continue;
-                                }
-                                const entryChunk = entryPoint.getEntrypointChunk();
-                                const modules = new Map<NormalModule, BuildData | null>();
-                                getEntryPointModules(
-                                    entryPoint,
-                                    compilation.chunkGraph,
-                                    (module) => {
-                                        const m = module as NormalModule;
-                                        if (stylableModules.has(m)) {
-                                            modules.set(
-                                                m,
-                                                getStylableBuildData(stylableModules, m)
-                                            );
-                                        }
-                                    }
-                                );
-                                const cssBundleFilename = emitCSSFile(
-                                    compilation,
-                                    createStaticCSS(modules).join('\n'),
-                                    this.options.filename,
-                                    webpack.util.createHash,
-                                    entryChunk
-                                );
-                                entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
+                if (this.options.extractMode === 'entries') {
+                    let modulesPerChunks: Array<{
+                        entryPoint: EntryPoint;
+                        modules: Map<NormalModule, BuildData | null>;
+                    }>;
+                    compilation.hooks.afterOptimizeTree.tap(StylableWebpackPlugin.name, () => {
+                        modulesPerChunks = [];
+                        for (const entryPoint of compilation.entrypoints.values()) {
+                            if (isDependencyOf(entryPoint, compilation.entrypoints.values())) {
+                                continue;
                             }
-                        } else if (this.options.extractMode === 'single') {
+                            const modules = new Map<NormalModule, BuildData | null>();
+                            getEntryPointModules(entryPoint, compilation.chunkGraph, (module) => {
+                                const m = module as NormalModule;
+                                if (stylableModules.has(m)) {
+                                    modules.set(m, getStylableBuildData(stylableModules, m));
+                                }
+                            });
+                            if (modules.size) {
+                                modulesPerChunks.push({ entryPoint, modules });
+                            }
+                        }
+                    });
+                    compilation.hooks.processAssets.tap(
+                        {
+                            name: StylableWebpackPlugin.name,
+                            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+                        },
+                        () => {
+                            for (const { entryPoint, modules } of modulesPerChunks) {
+                                const entryChunk = entryPoint.getEntrypointChunk();
+                                entryChunk.files.add(
+                                    emitCSSFile(
+                                        compilation,
+                                        createStaticCSS(modules).join('\n'),
+                                        this.options.filename,
+                                        webpack.util.createHash,
+                                        entryChunk
+                                    )
+                                );
+                            }
+                        }
+                    );
+                } else if (this.options.extractMode === 'single') {
+                    compilation.hooks.processAssets.tap(
+                        {
+                            name: StylableWebpackPlugin.name,
+                            stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+                        },
+                        () => {
+                            if (!stylableModules.size) {
+                                return;
+                            }
                             const chunk = getOnlyChunk(compilation);
-
                             const cssSource = createStaticCSS(stylableModules).join('\n');
-
                             const cssBundleFilename = emitCSSFile(
                                 compilation,
                                 cssSource,
@@ -516,13 +531,12 @@ export class StylableWebpackPlugin {
                                 webpack.util.createHash,
                                 chunk
                             );
-
                             for (const entryPoint of compilation.entrypoints.values()) {
                                 entryPoint.getEntrypointChunk().files.add(cssBundleFilename);
                             }
                         }
-                    }
-                );
+                    );
+                }
             } else if (this.options.cssInjection === 'mini-css') {
                 injectCssModules(
                     webpack,
