@@ -1,5 +1,5 @@
 import { Stylable, StylableMeta, visitMetaCSSDependenciesBFS } from '@stylable/core';
-import { getUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
+import { processUrlDependencies, hasImportedSideEffects } from '@stylable/build-tools';
 
 export function getReplacementToken(token: string) {
     return `/* INJECT */ {__${token}__:true}`;
@@ -11,7 +11,7 @@ export function getImports(
     projectRoot: string,
     assetsMode: 'url' | 'loader'
 ) {
-    const urls = getUrlDependencies(meta, projectRoot);
+    const urls = processUrlDependencies(meta, projectRoot);
     const imports: string[] = [];
     const unusedImports: string[] = [];
     for (const imported of meta.imports) {

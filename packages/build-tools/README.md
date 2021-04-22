@@ -6,7 +6,7 @@ A collection of helper functions for Stylable based tooling.
 
 ## What's inside
 
-* getUrlDependencies - Collect all dependencies of Stylable meta
+* processUrlDependencies - Collect all dependencies of Stylable meta and replace them with placeholder
 * hasImportedSideEffects - Detect if a meta has imports with Stylable side effects
 * loadStylableConfig - Loads `stylable.config` file from package
 * sortModulesByDepth - Sort algorithm for Stylable modules 

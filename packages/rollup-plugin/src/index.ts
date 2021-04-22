@@ -7,7 +7,7 @@ import {
     DiagnosticsMode,
 } from '@stylable/core';
 import {
-    getUrlDependencies,
+    processUrlDependencies,
     sortModulesByDepth,
     calcDepth,
     CalcDepthContext,
@@ -200,7 +200,7 @@ function emitAssets(
     emittedAssets: Map<string, string>,
     inlineAssets: StylableRollupPluginOptions['inlineAssets']
 ): string[] {
-    const assets = getUrlDependencies(meta, stylable.projectRoot);
+    const assets = processUrlDependencies(meta, stylable.projectRoot);
     const assetsIds: string[] = [];
     for (const asset of assets) {
         const fileBuffer = fs.readFileSync(asset);

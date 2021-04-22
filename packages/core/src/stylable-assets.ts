@@ -1,17 +1,14 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import cssSelectorTokenizer from 'css-selector-tokenizer';
-import type { ParsedValue } from './types';
+import cssSelectorTokenizer, { AnyValueNode, UrlNode } from 'css-selector-tokenizer';
 
 const { parseValues, stringifyValues } = cssSelectorTokenizer;
 
-export type OnUrlCallback = (node: ParsedValue) => void;
+export type OnUrlCallback = (node: UrlNode) => void;
 
 export function collectAssets(ast: postcss.Root) {
     const assetDependencies: string[] = [];
-    const onUrl: OnUrlCallback = (node) => {
-        assetDependencies.push(node.url!);
-    };
+    const onUrl: OnUrlCallback = (node) => assetDependencies.push(node.url);
     ast.walkDecls((decl) => processDeclarationUrls(decl, onUrl, false));
     return assetDependencies;
 }
@@ -59,21 +56,20 @@ export function processDeclarationUrls(
 ) {
     const ast = parseValues(decl.value);
     ast.nodes.forEach((node) => {
-        node.nodes.forEach((node) => findUrls(node as ParsedValue, onUrl));
+        node.nodes.forEach((node) => findUrls(node, onUrl));
     });
     if (transform) {
         decl.value = stringifyValues(ast);
     }
 }
 
-function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
-    const { type, nodes = [] } = node;
-    switch (type) {
+function findUrls(node: AnyValueNode, onUrl: OnUrlCallback) {
+    switch (node.type) {
         case 'value':
-            nodes.forEach((_: ParsedValue) => findUrls(_, onUrl));
+            node.nodes.forEach((child) => findUrls(child, onUrl));
             break;
         case 'nested-item':
-            nodes.forEach((_: ParsedValue) => findUrls(_, onUrl));
+            node.nodes.forEach((child) => findUrls(child, onUrl));
             break;
         case 'url':
             onUrl(node);
@@ -82,26 +78,16 @@ function findUrls(node: ParsedValue, onUrl: OnUrlCallback) {
 }
 
 export function fixRelativeUrls(ast: postcss.Root, originPath: string, targetPath: string) {
-    ast.walkDecls((decl) =>
-        processDeclarationUrls(
-            decl,
-            (node) => {
-                if (node.url && isAsset(node.url)) {
-                    if (node.url.startsWith('.')) {
-                        const url = path
-                            .join(
-                                path.relative(path.dirname(targetPath), path.dirname(originPath)),
-                                node.url
-                            )
-                            .replace(/\\/gm, '/');
-                        node.url = assureRelativeUrlPrefix(url);
-                    }
-                }
-            },
-
-            true
-        )
-    );
+    const onUrl = (node: UrlNode) => {
+        if (!node.url || !isAsset(node.url) || !node.url.startsWith('.')) {
+            return;
+        }
+        const url = path
+            .join(path.relative(path.dirname(targetPath), path.dirname(originPath)), node.url)
+            .replace(/\\/gm, '/');
+        node.url = assureRelativeUrlPrefix(url);
+    };
+    ast.walkDecls((decl) => processDeclarationUrls(decl, onUrl, true));
 }
 
 export function assureRelativeUrlPrefix(url: string) {
