@@ -5,7 +5,7 @@ import {
     stringifySelector,
     traverseNode,
 } from '@stylable/core';
-import type { RuntimeStylesheet, StateValue } from '@stylable/runtime';
+import type { StateValue } from '@stylable/runtime';
 
 export interface PartialElement {
     querySelector: Element['querySelector'];
@@ -14,8 +14,13 @@ export interface PartialElement {
     classList: Element['classList'];
 }
 
+export type StylesheetHost = {
+    cssStates(o: Record<string, StateValue>): string;
+    classes: Record<string, string>;
+};
+
 export class StylableDOMUtil {
-    constructor(private stylesheet: RuntimeStylesheet, private root?: Element) {}
+    constructor(private stylesheet: StylesheetHost, private root?: Element) {}
     public select(selector?: string, element?: PartialElement): Element | null {
         const el = element || this.root;
         return el ? el.querySelector(this.scopeSelector(selector)) : null;
