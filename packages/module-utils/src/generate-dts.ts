@@ -82,9 +82,9 @@ declare const stVars: {${stVars}};
 
 declare const keyframes: {${keyframes}};
 
-declare function st<T extends string = keyof states>(
+declare function st<T = keyof states>(
     ctx: T | NullableString,
-    s?: GetStatesType<T>,
+    s?: T extends keyof states ? states[T] | NullableString : NullableString,
     ...rest: NullableString[]
 ): string;
 
@@ -108,17 +108,6 @@ export {
 
 /* HELPERS */
 type NullableString = string | undefined | null;
-
-type isString<T> = T extends string ? (string extends T ? true : false) : false;
-
-type GetStatesType<T> = T extends string
-    ? isString<T> extends false
-        ? T extends keyof states
-            ? states[T] | NullableString
-            : NullableString
-        : NullableString
-    : NullableString;
-
 `;
 }
 
