@@ -1,4 +1,8 @@
 import type { StylableResults } from '@stylable/core';
+import {
+    createDTSContent as generateDTSContent,
+    createDTSSourceMap as generateDTSSourceMap,
+} from './generate-dts';
 
 export function generateModuleSource(
     stylableResult: StylableResults,
@@ -56,7 +60,13 @@ export function createModuleSource(
 
     switch (moduleFormat) {
         case 'dts':
-            return generateTypescriptDefinition();
+            return generateDTSContent(stylableResult);
+        case 'dts.map':
+            return generateDTSSourceMap(
+                stylableResult.meta.source,
+                generateDTSContent(stylableResult),
+                stylableResult.meta
+            );
         case 'esm': {
             const importKey = renderableOnly ? 'createRenderable' : 'create';
             return generateModuleSource(
@@ -98,8 +108,4 @@ export function createModuleSource(
             );
     }
     throw new Error('Unknown module format ' + moduleFormat);
-}
-
-function generateTypescriptDefinition(): string {
-    throw new Error('Not implemented');
 }

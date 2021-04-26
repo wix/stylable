@@ -8,7 +8,6 @@ import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { nameTemplate } from './name-template';
-import { createDTSContent } from './generate-dts';
 
 export interface BuildOptions {
     extension: string;
@@ -31,6 +30,7 @@ export interface BuildOptions {
     optimize?: boolean;
     minify?: boolean;
     dts?: boolean;
+    dtsSourceMap?: boolean;
 }
 
 export function build({
@@ -54,6 +54,7 @@ export function build({
     minify,
     manifest,
     dts,
+    dtsSourceMap,
 }: BuildOptions) {
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(resolve(generatorPath))
@@ -92,7 +93,8 @@ export function build({
                   injectCSSRequest,
                   optimize,
                   minify,
-                  dts
+                  dts,
+                  dtsSourceMap
               );
     });
 
@@ -125,7 +127,8 @@ function buildSingleFile(
     injectCSSRequest = false,
     optimize = false,
     minify = false,
-    dts = false
+    dts = false,
+    dtsSourceMap = false
 ) {
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
     const outPath = outSrcPath + '.js';
@@ -205,13 +208,22 @@ function buildSingleFile(
     }
     // .d.ts
     if (dts) {
-        const dtsContent = createDTSContent(res);
+        const dtsContent = createModuleSource(res, 'dts', false);
 
         log('[Build]', 'output .d.ts');
         tryRun(
             () => fs.writeFileSync(outSrcPath + '.d.ts', dtsContent),
             `Write File Error: ${outPath}`
         );
+
+        if (dtsSourceMap) {
+            const dtsContent = createModuleSource(res, 'dts.map', false);
+
+            tryRun(
+                () => fs.writeFileSync(outSrcPath + '.d.ts.map', dtsContent),
+                `Write File Error: ${outPath}`
+            );
+        }
     }
 
     // copy assets?

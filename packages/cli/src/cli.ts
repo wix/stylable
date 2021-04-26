@@ -48,6 +48,12 @@ const { argv } = yargs
         description: 'output stylable definition files for sources (.st.css.d.ts)',
         default: false,
     })
+    .option('dtsSourceMap', {
+        type: 'boolean',
+        description:
+            'output source maps for stylable definition files for sources (.st.css.d.ts.map)',
+        default: false,
+    })
     .option('useNamespaceReference', {
         type: 'boolean',
         description:
@@ -153,6 +159,7 @@ const {
     css,
     stcss,
     dts,
+    dtsSourceMap,
     cssInJs,
     namespaceResolver,
     injectCSSRequest,
@@ -204,7 +211,8 @@ const { diagnosticsMessages } = build({
     minify,
     manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
-    dts: dts
+    dts,
+    dtsSourceMap,
 });
 
 if (diagnosticsMessages.length) {
