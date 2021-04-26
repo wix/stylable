@@ -1,6 +1,6 @@
 import path from 'path';
 import { cachedProcessFile, FileProcessor, MinimalFS } from './cached-process-file';
-import { CssParser, safeParse } from './parser';
+import { cssParse, CssParser } from './parser';
 import { process, processNamespace, StylableMeta } from './stylable-processor';
 import { timedCache, TimedCacheOptions } from './timed-cache';
 import { createDefaultResolver } from './module-resolver';
@@ -19,7 +19,7 @@ export function createInfrastructure(
     resolveNamespace?: typeof processNamespace,
     timedCacheOptions?: Omit<TimedCacheOptions, 'createKey'>,
     resolveModule = createDefaultResolver(fileSystem, resolveOptions),
-    cssParser: CssParser = safeParse,
+    cssParser: CssParser = cssParse,
     createDiagnostics?: (from: string) => Diagnostics
 ): StylableInfrastructure {
     let resolvePath = (context: string | undefined = projectRoot, moduleId: string) => {

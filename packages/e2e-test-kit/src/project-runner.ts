@@ -311,7 +311,7 @@ export class ProjectRunner {
         const chunkByName: Record<string, string[]> = {};
         compilation.chunks.forEach((chunk) => {
             const names = [];
-            const modules = compilation.chunkGraph!.getChunkModulesIterableBySourceType(
+            const modules = compilation.chunkGraph.getChunkModulesIterableBySourceType(
                 chunk,
                 'javascript'
             );

@@ -4,8 +4,19 @@ declare module 'deindent' {
 }
 
 declare module 'mini-css-extract-plugin' {
+    interface CssModule {
+        new (options: {
+            context: string | null;
+            identifier: string;
+            identifierIndex: number;
+            content: string;
+            media: string;
+            sourceMap: null;
+        }): import('webpack').Module;
+    }
     class MiniCssExtractPlugin {
         static loader: string;
+        static getCssModule(webpack: typeof import('webpack')): CssModule;
         apply(compiler: typeof import('webpack').Compiler): void;
     }
     export = MiniCssExtractPlugin;

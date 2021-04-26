@@ -1,6 +1,6 @@
 import { normalize } from 'path';
 import { expect } from 'chai';
-import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, safeParse } from '@stylable/core';
+import { collectAssets, fixRelativeUrls, isAsset, makeAbsolute, cssParse } from '@stylable/core';
 
 const css = `
     .a{
@@ -22,7 +22,7 @@ const css = `
 
 describe('stylable assets', () => {
     it('collect url assets', () => {
-        const ast = safeParse(css);
+        const ast = cssParse(css);
         expect(collectAssets(ast)).to.eql([
             './a.png',
             '/b.png',
@@ -33,7 +33,7 @@ describe('stylable assets', () => {
     });
 
     it('filter local assets', () => {
-        const ast = safeParse(css);
+        const ast = cssParse(css);
         expect(collectAssets(ast).filter(isAsset)).to.eql([
             './a.png',
             '/b.png',
@@ -42,7 +42,7 @@ describe('stylable assets', () => {
     });
 
     it('makeAbsolute', () => {
-        const ast = safeParse(css);
+        const ast = cssParse(css);
         expect(collectAssets(ast).map((_) => makeAbsolute(_, '/root', '/root/module'))).to.eql([
             normalize('/root/module/a.png'),
             normalize('/root/b.png'),
@@ -61,7 +61,7 @@ describe('stylable assets', () => {
     });
 
     it('fixRelativeUrls', () => {
-        const ast = safeParse(css);
+        const ast = cssParse(css);
 
         fixRelativeUrls(ast, '/root', '/root/module');
         const [relative, absolute, external, data, url] = collectAssets(ast);

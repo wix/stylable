@@ -1,18 +1,18 @@
 {
   "name": "@stylable/webpack-extensions",
-  "version": "4.0.5",
+  "version": "4.1.1",
   "description": "Experimental Stylable webpack plugins",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
   },
   "peerDependencies": {
-    "webpack": "^5.20.0"
+    "webpack": "^5.30.0"
   },
   "dependencies": {
-    "@stylable/core": "^4.0.4",
-    "@stylable/node": "^4.0.4",
-    "@stylable/webpack-plugin": "^4.0.4",
+    "@stylable/core": "^4.1.1",
+    "@stylable/node": "^4.1.1",
+    "@stylable/webpack-plugin": "^4.1.1",
     "loader-utils": "^2.0.0",
     "lodash.clonedeep": "^4.5.0"
   },

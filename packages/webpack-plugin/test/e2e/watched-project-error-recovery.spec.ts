@@ -56,7 +56,8 @@ describe(`(${project})`, () => {
                 const e = projectRunner.getBuildErrorMessages();
 
                 expect(e.length, 'one error').to.equal(1);
-                expect(e[0].constructor.name, 'one error').to.equal('CssSyntaxError');
+                expect(e[0].constructor.name, 'one error').to.equal('ModuleBuildError');
+                expect(e[0].message).to.match(/CssSyntaxError/);
                 expect(e[0].message).to.match(/Double colon/);
 
                 const color = await page.evaluate(() => getComputedStyle(document.body).color);

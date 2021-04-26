@@ -3,7 +3,7 @@ import fs from 'fs';
 import { expect } from 'chai';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
-import { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
+import type { ProviderRange } from '@stylable/language-service/dist/lib/completion-providers';
 import { Completion, Snippet } from '@stylable/language-service/dist/lib/completion-types';
 import { CASES_PATH, stylableLSP } from './stylable-fixtures-lsp';
 import { getCaretPosition } from './asserters';

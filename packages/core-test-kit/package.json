@@ -1,13 +1,13 @@
 {
   "name": "@stylable/core-test-kit",
-  "version": "4.0.4",
+  "version": "4.1.1",
   "description": "Stylable core test-kit",
   "main": "dist/index.js",
   "dependencies": {
-    "@stylable/core": "^4.0.4",
+    "@stylable/core": "^4.1.1",
     "chai": "^4.3.4",
     "flat": "^5.0.2",
-    "postcss": "^8.2.9"
+    "postcss": "^8.2.12"
   },
   "files": [
     "dist",

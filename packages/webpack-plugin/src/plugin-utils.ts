@@ -1,8 +1,17 @@
-import { ChunkGraph, Compilation, Compiler, Module, ModuleGraph, NormalModule } from 'webpack';
-import { UnusedDependency } from './unused-dependency';
+import type {
+    Chunk,
+    ChunkGraph,
+    Compilation,
+    Compiler,
+    dependencies,
+    Module,
+    ModuleGraph,
+    NormalModule,
+} from 'webpack';
 import type {
     BuildData,
     DependencyTemplates,
+    EntryPoint,
     RuntimeTemplate,
     StringSortableSet,
     StylableBuildMeta,
@@ -151,8 +160,8 @@ export function extractDataUrlFromAssetModuleSource(source: string): string {
 type AssetNormalModule = NormalModule & { loaders: [{ loader: 'file-loader' | 'url-loader' }] };
 
 export function isLoadedWithKnownAssetLoader(module: Module): module is AssetNormalModule {
-    if (module instanceof NormalModule) {
-        return module.loaders.some(({ loader }) =>
+    if ('loaders' in module) {
+        return (module as import('webpack').NormalModule).loaders.some(({ loader }) =>
             /[\\/](file-loader)|(url-loader)[\\/]/.test(loader)
         );
     }
@@ -208,11 +217,32 @@ export function createStylableResolverCacheMap(compiler: Compiler): StylableReso
     return cache;
 }
 
+export function staticCSSWith(
+    staticPublicPath: string,
+    assetsModules: Map<string, NormalModule>,
+    chunkGraph: ChunkGraph,
+    moduleGraph: ModuleGraph,
+    runtime: string,
+    runtimeTemplate: RuntimeTemplate,
+    dependencyTemplates: DependencyTemplates
+) {
+    return (stylableModules: Map<Module, BuildData | null>) =>
+        createStaticCSS(
+            staticPublicPath,
+            stylableModules,
+            assetsModules,
+            chunkGraph,
+            moduleGraph,
+            runtime,
+            runtimeTemplate,
+            dependencyTemplates
+        );
+}
+
 export function createStaticCSS(
     staticPublicPath: string,
     stylableModules: Map<Module, BuildData | null>,
     assetsModules: Map<string, NormalModule>,
-
     chunkGraph: ChunkGraph,
     moduleGraph: ModuleGraph,
     runtime: string,
@@ -257,9 +287,13 @@ export function getStylableBuildData(
     return data;
 }
 
-export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
+export function findIfStylableModuleUsed(
+    m: Module,
+    compilation: Compilation,
+    UnusedDependency: typeof dependencies.ModuleDependency
+) {
     const moduleGraph = compilation.moduleGraph;
-    const chunkGraph = compilation.chunkGraph!;
+    const chunkGraph = compilation.chunkGraph;
     const inConnections = uniqueFilterMap(
         moduleGraph.getIncomingConnections(m),
         ({ resolvedOriginModule, dependency }) =>
@@ -291,7 +325,7 @@ export function findIfStylableModuleUsed(m: Module, compilation: Compilation) {
     return isInUse;
 }
 
-export function getFileName(filename: string, data: Record<string, string>) {
+export function getFileName(filename: string, data: Record<string, string | undefined>) {
     return filename.replace(/\[(.*?)]/g, (fullMatch, inner) => {
         const [type, len] = inner.split(':');
         const value = data[type];
@@ -399,4 +433,49 @@ export function getStylableModules(
     compilation: Compilation
 ): Map<NormalModule, BuildData | null> | undefined {
     return (compilation as any)[Symbol.for('stylableModules')];
+}
+
+export function getOnlyChunk(compilation: Compilation) {
+    return compilation.entrypoints.size === 1
+        ? Array.from(compilation.entrypoints.values())[0].getEntrypointChunk()
+        : undefined;
+}
+
+export function emitCSSFile(
+    compilation: Compilation,
+    cssSource: string,
+    filenameTemplate: string,
+    createHash: WebpackCreateHash,
+    chunk?: Chunk
+) {
+    const contentHash = outputOptionsAwareHashContent(
+        createHash,
+        compilation.runtimeTemplate.outputOptions,
+        cssSource
+    );
+
+    const filename = getFileName(filenameTemplate, {
+        contenthash: contentHash,
+        hash: compilation.hash,
+        name: chunk?.name,
+    });
+
+    compilation.emitAsset(
+        filename,
+        new compilation.compiler.webpack.sources.RawSource(cssSource, false)
+    );
+
+    return filename;
+}
+
+export function getEntryPointModules(
+    entryPoint: EntryPoint,
+    chunkGraph: ChunkGraph,
+    onModule: (module: Module) => void
+) {
+    for (const chunk of entryPoint.getEntrypointChunk().getAllReferencedChunks()) {
+        for (const module of chunkGraph.getChunkModulesIterable(chunk)) {
+            onModule(module);
+        }
+    }
 }
