@@ -56,7 +56,7 @@ export function build({
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
 
-    validateConfiguration(outputSources, fullSrcDir, fullOutDir, outDir, srcDir);
+    validateConfiguration(outputSources, outDir, srcDir);
 
     const generator = getGenerator(stylable, log, generatorPath);
     const generated = new Set<string>();
@@ -193,14 +193,8 @@ function getGenerator(
     return new generatorModule.Generator(stylable, log);
 }
 
-function validateConfiguration(
-    outputSources: boolean | undefined,
-    fullSrcDir: string,
-    fullOutDir: string,
-    outDir: string,
-    srcDir: string
-) {
-    if (outputSources && fullSrcDir === fullOutDir) {
+function validateConfiguration(outputSources: boolean | undefined, outDir: string, srcDir: string) {
+    if (outputSources && srcDir === outDir) {
         throw new Error(
             'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
                 `\noutDir: ${outDir}` +
