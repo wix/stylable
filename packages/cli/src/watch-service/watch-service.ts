@@ -1,9 +1,9 @@
-import { IFileSystem, IWatchEvent } from '@file-services/types';
+import type { IFileSystem, IWatchEvent } from '@file-services/types';
 import { directoryDeepChildren, DirectoryItem } from './walk-fs';
 
-export interface DirectoryWatchServiceOptions {
+export interface DirectoryProcessServiceOptions {
     processFiles?(
-        watcher: DirectoryWatchService,
+        watcher: DirectoryProcessService,
         affectedFiles: Set<string>,
         changeOrigin?: IWatchEvent
     ): Promise<void> | void;
@@ -11,26 +11,25 @@ export interface DirectoryWatchServiceOptions {
     fileFilter?(filePath: string): boolean;
     onError?(error: Error): void;
     autoResetInvalidations?: boolean;
-    skipDirectoryWatching?: boolean;
+    // skipDirectoryWatching?: boolean;
 }
 
-export class DirectoryWatchService {
+export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
-    constructor(private fs: IFileSystem, private options: DirectoryWatchServiceOptions = {}) {
-        if (!options.skipDirectoryWatching) {
-            this.fs.watchService.addGlobalListener(this.watchHandler);
-        }
+    constructor(private fs: IFileSystem, private options: DirectoryProcessServiceOptions = {}) {
+        this.fs.watchService.addGlobalListener(this.watchHandler);
     }
-    public dispose() {
-        // this.fs.watchService.removeGlobalListener(this.watchHandler);
+    public async dispose() {
         this.invalidationMap.clear();
+        await this.fs.watchService.unwatchAllPaths();
     }
     public async watch(directoryPath: string) {
+        await this.fs.watchService.watchPath(directoryPath);
         const items = directoryDeepChildren(this.fs, directoryPath, this.filterWatchItems);
         const affectedFiles = new Set<string>();
         for await (const item of items) {
-            if (item.type === 'directory' && !this.options.skipDirectoryWatching) {
-                await this.fs.watchService.watchPath(item.path, this.watchHandler);
+            if (item.type === 'directory') {
+                await this.fs.watchService.watchPath(item.path);
             } else if (item.type === 'file') {
                 affectedFiles.add(item.path);
                 this.registerInvalidateOnChange(item.path);
@@ -99,6 +98,7 @@ export class DirectoryWatchService {
         return visited;
     }
     private watchHandler = (event: IWatchEvent) => {
+        console.log('WATCH!!!!');
         this.handleWatchChange(event).catch((error) => this.options.onError?.(error));
     };
     private filterWatchItems = (event: DirectoryItem): boolean => {

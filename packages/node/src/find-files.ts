@@ -1,16 +1,18 @@
-import { join, relative } from 'path';
+import type { IFileSystem } from '@file-services/types';
 
 export type FileSystem = any;
 
 export function findFiles(
-    fs: FileSystem,
+    fs: Pick<IFileSystem, 'readdirSync' | 'statSync'>,
+    join: IFileSystem['join'],
+    relative: IFileSystem['relative'],
     rootDirectory: string,
     ext: string,
     blacklist: Set<string>,
     useRelative = false
 ) {
     const errors: Error[] = [];
-    const result: string[] = [];
+    const result = new Set<string>();
     const folders = [rootDirectory];
     while (folders.length) {
         const current = folders.pop()!;
@@ -25,7 +27,7 @@ export function findFiles(
                     if (status.isDirectory()) {
                         folders.push(itemFullPath);
                     } else if (status.isFile() && itemFullPath.endsWith(ext)) {
-                        result.push(
+                        result.add(
                             useRelative ? relative(rootDirectory, itemFullPath) : itemFullPath
                         );
                     }

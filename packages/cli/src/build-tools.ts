@@ -27,7 +27,7 @@ export function tryRun<T>(fn: () => T, errorMessage: string): T {
     }
 }
 
-export function addDotSlash(p: string) {
+export function normalizeRelative(p: string) {
     p = p.replace(/\\/g, '/');
     return p.startsWith('.') ? p : './' + p;
 }
@@ -45,21 +45,4 @@ export function ensureDirectory(dir: string, fs: FileSystem) {
             fs.mkdirSync(dir);
         }
     }
-}
-
-export function ensureAssets(
-    projectAssetsMap: {
-        [key: string]: string;
-    },
-    fs: FileSystem
-) {
-    Object.keys(projectAssetsMap).map((assetOriginalPath) => {
-        if (fs.existsSync(assetOriginalPath)) {
-            const content = fs.readFileSync(assetOriginalPath);
-            const targetPath = projectAssetsMap[assetOriginalPath];
-            const targetDir = dirname(targetPath);
-            ensureDirectory(targetDir, fs);
-            fs.writeFileSync(targetPath, content);
-        }
-    });
 }

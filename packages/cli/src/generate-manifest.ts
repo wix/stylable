@@ -1,9 +1,10 @@
 import type { Stylable } from '@stylable/core';
 import { dirname, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
+
 export function generateManifest(
     rootDir: string,
-    filesToBuild: string[],
+    filesToBuild: Set<string>,
     manifestOutputPath = '',
     stylable: Stylable,
     log: (...args: string[]) => void,
@@ -13,7 +14,7 @@ export function generateManifest(
         return stylable.fileProcessor.process(filePath).namespace;
     }
     if (manifestOutputPath) {
-        const manifest = filesToBuild.reduce<{
+        const manifest = [...filesToBuild].reduce<{
             namespaceMapping: {
                 [key: string]: string;
             };

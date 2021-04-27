@@ -1,10 +1,10 @@
 import { createMemoryFs } from '@file-services/memory';
-import { DirectoryWatchService } from '../../src/watch-service';
+import type { IFileSystem } from '@file-services/types';
 import { expect, use } from 'chai';
 import { spy } from 'sinon';
 import sinonChai from 'sinon-chai';
 import { waitFor } from 'promise-assist';
-import { IFileSystem } from '@file-services/types';
+import { DirectoryProcessService } from '@stylable/cli/src/watch-service/watch-service';
 
 use(sinonChai);
 
@@ -36,7 +36,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should watch added files', async () => {
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -89,7 +89,7 @@ describe('DirectoryWatchService', () => {
         it('should handle directory added after watch started', async () => {
             const changeSpy = spy();
 
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, changeOrigin) {
                     for (const filePath of affectedFiles) {
@@ -126,7 +126,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle delete files', async () => {
-            new DirectoryWatchService(fs, {
+            new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -153,7 +153,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should handle delete dirs', async () => {
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -194,7 +194,7 @@ describe('DirectoryWatchService', () => {
         it('should report affectedFiles and no changeOrigin when watch started', async () => {
             const changeSpy = spy();
 
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(_watcher, affectedFiles, changeOrigin) {
                     changeSpy({
@@ -220,7 +220,7 @@ describe('DirectoryWatchService', () => {
         });
 
         it('should allow hooks to fill in the invalidationMap', async () => {
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -244,7 +244,7 @@ describe('DirectoryWatchService', () => {
 
         it('should report change for all files affected by the changeOrigin', async () => {
             const changeSpy = spy();
-            const watcher = new DirectoryWatchService(fs, {
+            const watcher = new DirectoryProcessService(fs, {
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, changeOrigin) {
                     for (const filePath of affectedFiles) {
@@ -362,7 +362,10 @@ function writeTemplateOutputToDist(fs: IFileSystem, filePath: string, value: str
     fs.writeFileSync(fs.join(outDir, fs.basename(filePath, '.template.js') + '.txt'), value);
 }
 
-function expectInvalidationMap(watcher: DirectoryWatchService, expected: Record<string, string[]>) {
+function expectInvalidationMap(
+    watcher: DirectoryProcessService,
+    expected: Record<string, string[]>
+) {
     const acutal: Record<string, string[]> = {};
     for (const [key, invalidationSet] of watcher.invalidationMap) {
         acutal[key] = Array.from(invalidationSet);

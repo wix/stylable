@@ -1,5 +1,5 @@
 import { findFiles } from '@stylable/node';
-import { dirname, join } from 'path';
+import { dirname, join, relative } from 'path';
 import type { Compilation, Compiler } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 import { ComponentConfig, ComponentMetadataBuilder } from './component-metadata-builder';
@@ -163,7 +163,9 @@ export class StylableMetadataPlugin {
             const variantsDir = join(componentDir, componentConfig.variantsPath);
 
             const { result: variants, errors } = findFiles(
-                compilation.inputFileSystem,
+                compilation.inputFileSystem as any,
+                join,
+                relative,
                 variantsDir,
                 '.st.css',
                 new Set(),

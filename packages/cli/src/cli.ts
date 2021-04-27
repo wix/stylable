@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-
-import fs from 'fs';
-import path from 'path';
 import yargs from 'yargs';
+import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
+
+const { join, resolve } = nodeFs;
 
 const { argv } = yargs
     .option('rootDir', {
@@ -130,6 +130,12 @@ const { argv } = yargs
         default: 'strict',
         choices: ['strict', 'loose'],
     })
+    .option('watch', {
+        alias: 'w',
+        type: 'boolean',
+        description: 'enable watch mode',
+        default: false,
+    })
     .alias('h', 'help')
     .help()
     .strict();
@@ -142,7 +148,7 @@ const {
     rootDir,
     ext,
     indexFile,
-    customGenerator: generatorPath,
+    customGenerator,
     esm,
     cjs,
     css,
@@ -159,6 +165,7 @@ const {
     useNamespaceReference,
     diagnosticsMode,
     diagnostics,
+    watch,
 } = argv;
 
 log('[Arguments]', argv);
@@ -171,7 +178,7 @@ for (const request of requires) {
 }
 
 const stylable = Stylable.create({
-    fileSystem: fs,
+    fileSystem: nodeFs,
     requireModule: require,
     projectRoot: rootDir,
     resolveNamespace: require(namespaceResolver).resolveNamespace,
@@ -180,14 +187,14 @@ const stylable = Stylable.create({
 
 const { diagnosticsMessages } = build({
     extension: ext,
-    fs,
+    fs: nodeFs,
     stylable,
     outDir,
     srcDir,
     rootDir,
     log,
     indexFile,
-    generatorPath,
+    generatorPath: customGenerator !== undefined ? resolve(customGenerator) : customGenerator,
     moduleFormats: getModuleFormats({ esm, cjs }),
     outputCSS: css,
     includeCSSInJS: cssInJs,
@@ -196,8 +203,9 @@ const { diagnosticsMessages } = build({
     outputCSSNameTemplate: cssFilename,
     optimize,
     minify,
-    manifest: manifest ? path.join(rootDir, outDir, manifestFilepath) : undefined,
+    manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
+    watch,
 });
 
 if (diagnosticsMessages.length) {

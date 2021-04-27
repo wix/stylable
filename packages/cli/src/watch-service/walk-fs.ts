@@ -1,4 +1,4 @@
-import { IFileSystem } from '@file-services/types';
+import type { IFileSystem } from '@file-services/types';
 
 export interface DirectoryItem {
     type: 'file' | 'directory';

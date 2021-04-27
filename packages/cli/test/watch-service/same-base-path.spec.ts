@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { normalize, sep, resolve, relative } from 'path';
+import { normalize, sep, resolve } from 'path';
 
 function normalSameParentPath(p: string, c: string, caseInsensitive = true): boolean {
     const np = normalize(caseInsensitive ? p.toLowerCase() : p)

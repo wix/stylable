@@ -1,17 +1,15 @@
-import { isAsset, Stylable } from '@stylable/core';
-import { createModuleSource } from '@stylable/module-utils';
-import { FileSystem, findFiles } from '@stylable/node';
-import { StylableOptimizer } from '@stylable/optimizer';
-import { basename, dirname, join, relative, resolve } from 'path';
-import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
+import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
+import { findFiles } from '@stylable/node';
+import type { IFileSystem } from '@file-services/types';
 import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
-import { nameTemplate } from './name-template';
+import { buildSingleFile } from './build-single-file';
+import { DirectoryProcessService } from './watch-service/watch-service';
 
 export interface BuildOptions {
     extension: string;
-    fs: FileSystem;
+    fs: IFileSystem;
     stylable: Stylable;
     rootDir: string;
     srcDir: string;
@@ -29,6 +27,7 @@ export interface BuildOptions {
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
+    watch?: boolean;
 }
 
 export function build({
@@ -51,157 +50,161 @@ export function build({
     optimize,
     minify,
     manifest,
+    watch,
 }: BuildOptions) {
-    const generatorModule: { Generator: typeof Generator } = generatorPath
-        ? require(resolve(generatorPath))
-        : require('./base-generator');
-    const generator = new generatorModule.Generator(stylable, log);
-    const blacklist = new Set<string>(['node_modules']);
+    const { join, relative } = fs;
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
-    const { result: filesToBuild } = findFiles(fs, fullSrcDir, extension, blacklist);
-    const assets: string[] = [];
+
+    validateConfiguration(outputSources, fullSrcDir, fullOutDir, outDir, srcDir);
+
+    const generator = getGenerator(stylable, log, generatorPath);
+    const generated = new Set<string>();
+    const sourceFiles = new Set<string>();
+    const assets = new Set<string>();
     const diagnosticsMessages: string[] = [];
 
-    if (filesToBuild.length === 0) {
-        log('[Build]', 'No stylable files found. build skipped.');
+    if (watch) {
+        new DirectoryProcessService(fs, {
+            autoResetInvalidations: true,
+            directoryFilter(dirPath) {
+                if (
+                    dirPath.startsWith(outDir) ||
+                    dirPath.includes('node_modules') ||
+                    dirPath.includes('.git')
+                ) {
+                    return false;
+                }
+                return true;
+            },
+            fileFilter(filePath) {
+                if (generated.has(filePath)) {
+                    return false;
+                }
+                return filePath.endsWith('.st.css');
+            },
+            onError(error) {
+                console.error(error);
+            },
+            processFiles(service, affectedFiles, changeOrigin) {
+                if (changeOrigin) {
+                    stylable.initCache();
+                }
+                buildFiles(affectedFiles);
+                updateWatcherDependencies();
+                buildAggregatedEntities();
+
+                function updateWatcherDependencies() {
+                    const resolver = stylable.createResolver({});
+                    for (const filePath of affectedFiles) {
+                        sourceFiles.add(filePath);
+                        const meta = stylable.process(filePath);
+                        visitMetaCSSDependenciesBFS(
+                            meta,
+                            ({ source }) => {
+                                service.registerInvalidateOnChange(source, filePath);
+                            },
+                            resolver
+                        );
+                    }
+                }
+            },
+        })
+            .watch(rootDir)
+            .then(() => {
+                console.log('watch started');
+            })
+            .catch((e) => {
+                console.error(e);
+            });
     } else {
-        log('[Build]', `Building ${filesToBuild.length} stylable files.`);
-    }
-    filesToBuild.forEach((filePath) => {
-        indexFile
-            ? generator.generateFileIndexEntry(filePath, fullOutDir)
-            : buildSingleFile(
-                  fullOutDir,
-                  filePath,
-                  fullSrcDir,
-                  log,
-                  fs,
-                  stylable,
-                  diagnosticsMessages,
-                  assets,
-                  moduleFormats || [],
-                  includeCSSInJS,
-                  outputCSS,
-                  outputCSSNameTemplate,
-                  outputSources,
-                  useSourceNamespace,
-                  injectCSSRequest,
-                  optimize,
-                  minify
-              );
-    });
+        // TODO: maybe can be removed and use the watcher files instead
+        const { result } = findFiles(
+            fs,
+            join,
+            relative,
+            fullSrcDir,
+            extension,
+            new Set<string>(['node_modules', '.git'])
+        );
+        for (const filePath of result) {
+            sourceFiles.add(filePath);
+        }
 
-    if (indexFile) {
-        generator.generateIndexFile(fs, fullOutDir, indexFile);
+        if (sourceFiles.size === 0) {
+            log('[Build]', 'No stylable files found. build skipped.');
+        } else {
+            log('[Build]', `Building ${sourceFiles.size} stylable files.`);
+        }
+
+        buildFiles(sourceFiles);
+        buildAggregatedEntities();
     }
 
-    if (!indexFile) {
-        handleAssets(assets, rootDir, srcDir, outDir, fs);
-        generateManifest(rootDir, filesToBuild, manifest, stylable, log, fs);
-    }
     return { diagnosticsMessages };
+
+    function buildFiles(filesToBuild: Set<string>) {
+        for (const filePath of filesToBuild) {
+            if (indexFile) {
+                generator.generateFileIndexEntry(filePath, fullOutDir);
+            } else {
+                buildSingleFile({
+                    fullOutDir,
+                    filePath,
+                    fullSrcDir,
+                    log,
+                    fs,
+                    stylable,
+                    diagnosticsMsg: diagnosticsMessages,
+                    projectAssets: assets,
+                    moduleFormats: moduleFormats || [],
+                    includeCSSInJS,
+                    outputCSS,
+                    outputCSSNameTemplate,
+                    outputSources,
+                    useSourceNamespace,
+                    injectCSSRequest,
+                    optimize,
+                    minify,
+                    generated,
+                });
+            }
+        }
+    }
+
+    function buildAggregatedEntities() {
+        if (indexFile) {
+            generator.generateIndexFile(fs, fullOutDir, indexFile);
+        } else {
+            handleAssets(assets, rootDir, srcDir, outDir, fs);
+            generateManifest(rootDir, sourceFiles, manifest, stylable, log, fs);
+        }
+    }
 }
 
-function buildSingleFile(
-    fullOutDir: string,
-    filePath: string,
-    fullSrcDir: string,
-    log: (...args: string[]) => void,
-    fs: any,
+function getGenerator(
     stylable: Stylable,
-    diagnosticsMsg: string[],
-    projectAssets: string[],
-    moduleFormats: string[],
-    includeCSSInJS = false,
-    outputCSS = false,
-    outputCSSNameTemplate = '[filename].css',
-    outputSources = false,
-    useSourceNamespace = false,
-    injectCSSRequest = false,
-    optimize = false,
-    minify = false
+    log: (...args: string[]) => void,
+    generatorPath?: string
 ) {
-    const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
-    const outPath = outSrcPath + '.js';
-    const fileDirectory = dirname(filePath);
-    const outDirPath = dirname(outPath);
-    const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
-        filename: basename(outSrcPath, '.st.css'),
-    });
-    const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
+    const generatorModule: { Generator: typeof Generator } = generatorPath
+        ? require(generatorPath)
+        : require('./base-generator');
+    return new generatorModule.Generator(stylable, log);
+}
 
-    log('[Build]', filePath + ' --> ' + outPath);
-    tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
-    let content: string = tryRun(
-        () => fs.readFileSync(filePath).toString(),
-        `Read File Error: ${filePath}`
-    );
-    const res = stylable.transform(content, filePath);
-    const optimizer = new StylableOptimizer();
-    if (optimize) {
-        optimizer.optimize(
-            {
-                removeComments: true,
-                removeEmptyNodes: true,
-                removeStylableDirectives: true,
-                classNameOptimizations: false,
-                removeUnusedComponents: false,
-            },
-            res,
-            {}
+function validateConfiguration(
+    outputSources: boolean | undefined,
+    fullSrcDir: string,
+    fullOutDir: string,
+    outDir: string,
+    srcDir: string
+) {
+    if (outputSources && fullSrcDir === fullOutDir) {
+        throw new Error(
+            'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
+                `\noutDir: ${outDir}` +
+                `\nsrcDir: ${srcDir}`
         );
     }
-    handleDiagnostics(res, diagnosticsMsg, filePath);
-    // st.css
-    if (outputSources) {
-        if (useSourceNamespace && !content.includes('st-namespace-reference')) {
-            const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
-                /\\/gm,
-                '/'
-            );
-            const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
-            content = srcNamespaceAnnotation + content;
-        }
-
-        log('[Build]', 'output .st.css source');
-        tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
-    }
-    // st.css.js
-    moduleFormats.forEach((format) => {
-        log('[Build]', 'moduleFormat', format);
-        const code = tryRun(
-            () =>
-                createModuleSource(
-                    res,
-                    format,
-                    includeCSSInJS,
-                    undefined,
-                    undefined,
-                    undefined,
-                    injectCSSRequest ? [`./${cssAssetFilename}`] : [],
-                    '@stylable/runtime'
-                ),
-            `Transform Error: ${filePath}`
-        );
-        tryRun(
-            () => fs.writeFileSync(outSrcPath + (format === 'esm' ? '.mjs' : '.js'), code),
-            `Write File Error: ${outPath}`
-        );
-    });
-    // .css
-    if (outputCSS) {
-        let cssCode = res.meta.outputAst!.toString();
-        if (minify) {
-            cssCode = optimizer.minifyCSS(cssCode);
-        }
-        log('[Build]', 'output transpiled css');
-        tryRun(() => fs.writeFileSync(cssAssetOutPath, cssCode), `Write File Error: ${outPath}`);
-    }
-    // .d.ts?
-
-    // copy assets?
-    projectAssets.push(
-        ...res.meta.urls.filter(isAsset).map((uri: string) => resolve(fileDirectory, uri))
-    );
 }

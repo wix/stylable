@@ -1,21 +1,21 @@
-import { join } from 'path';
-import { ensureAssets } from './build-tools';
+import type { IFileSystem } from '@file-services/types';
+import { ensureDirectory } from './build-tools';
 
 export function handleAssets(
-    assets: string[],
+    assets: Set<string>,
     rootDir: string,
     srcDir: string,
     outDir: string,
-    fs: any
+    fs: IFileSystem
 ) {
-    const projectAssetMapping: {
-        [key: string]: string;
-    } = {};
-    assets.forEach((originalPath: string) => {
-        projectAssetMapping[originalPath] = originalPath.replace(
-            join(rootDir, srcDir),
-            join(rootDir, outDir)
-        );
-    });
-    ensureAssets(projectAssetMapping, fs);
+    const { dirname, join } = fs;
+    for (const originalPath of assets) {
+        if (fs.existsSync(originalPath)) {
+            const content = fs.readFileSync(originalPath);
+            const targetPath = originalPath.replace(join(rootDir, srcDir), join(rootDir, outDir));
+            const targetDir = dirname(targetPath);
+            ensureDirectory(targetDir, fs);
+            fs.writeFileSync(targetPath, content);
+        }
+    }
 }
