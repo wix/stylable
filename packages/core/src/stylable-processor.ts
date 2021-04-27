@@ -151,6 +151,9 @@ export const processorWarnings = {
     INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
         return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
+    INVALID_NAMESPACE_REFERENCE() {
+        return 'st-namespace-reference dose not have any value';
+    },
 };
 
 export class StylableProcessor {
@@ -336,10 +339,15 @@ export class StylableProcessor {
         let pathToSource: string | undefined;
         this.meta.ast.walkComments((comment) => {
             if (comment.text.includes('st-namespace-reference')) {
-                const namespaceReferenceParts = comment.text.split('=');
-                pathToSource = stripQuotation(
-                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
-                );
+                const i = comment.text.indexOf('=');
+                if (i === -1) {
+                    this.diagnostics.error(
+                        comment,
+                        processorWarnings.INVALID_NAMESPACE_REFERENCE()
+                    );
+                } else {
+                    pathToSource = stripQuotation(comment.text.slice(i) + 1);
+                }
                 return false;
             }
             return undefined;
