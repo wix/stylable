@@ -343,7 +343,7 @@ export class StylableProcessor {
                 if (i === -1) {
                     this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
                 } else {
-                    pathToSource = stripQuotation(node.text.slice(i) + 1);
+                    pathToSource = stripQuotation(node.text.slice(i + 1));
                 }
                 break;
             }

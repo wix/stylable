@@ -75,7 +75,7 @@ describe('Stylable postcss process', () => {
         expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
-    it('use filename as default namespace prefix', () => {
+    it('use filename as default namespace prefix (empty)', () => {
         const from = resolve('/path/to/style.css');
 
         const result = processSource(
