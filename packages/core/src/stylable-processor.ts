@@ -337,21 +337,17 @@ export class StylableProcessor {
     }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        this.meta.ast.walkComments((comment) => {
-            if (comment.text.includes('st-namespace-reference')) {
-                const i = comment.text.indexOf('=');
+        for (const node of this.meta.ast.nodes) {
+            if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
+                const i = node.text.indexOf('=');
                 if (i === -1) {
-                    this.diagnostics.error(
-                        comment,
-                        processorWarnings.INVALID_NAMESPACE_REFERENCE()
-                    );
+                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
                 } else {
-                    pathToSource = stripQuotation(comment.text.slice(i) + 1);
+                    pathToSource = stripQuotation(node.text.slice(i) + 1);
                 }
-                return false;
+                break;
             }
-            return undefined;
-        });
+        }
 
         return this.resolveNamespace(
             namespace,
