@@ -82,7 +82,7 @@ declare const stVars: {${stVars}};
 
 declare const keyframes: {${keyframes}};
 
-declare function st<T = keyof states>(
+declare function st<T extends string = keyof states>(
     ctx: T | NullableString,
     s?: T extends keyof states ? states[T] | NullableString : NullableString,
     ...rest: NullableString[]
@@ -90,7 +90,7 @@ declare function st<T = keyof states>(
 
 declare const style: typeof st;
 
-declare function cssStates<T = keyof states>(
+declare function cssStates<T extends string = keyof states>(
     s: T extends keyof states ? states[T] : never,
     ctx?: T | string
 ): string;
