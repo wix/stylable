@@ -3,6 +3,7 @@ import yargs from 'yargs';
 import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
+import { createLogger } from './logger';
 
 const { join, resolve } = nodeFs;
 
@@ -226,12 +227,4 @@ function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
         formats.push('cjs');
     }
     return formats;
-}
-
-function createLogger(prefix: string, shouldLog: boolean) {
-    return function log(...messages: any[]) {
-        if (shouldLog) {
-            console.log(prefix, ...messages);
-        }
-    };
 }

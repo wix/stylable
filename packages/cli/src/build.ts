@@ -6,6 +6,7 @@ import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile } from './build-single-file';
 import { DirectoryProcessService } from './watch-service/watch-service';
+import { levels } from './logger';
 
 export const messages = {
     START_WATCHING: 'start watching...',
@@ -20,7 +21,7 @@ export interface BuildOptions {
     srcDir: string;
     outDir: string;
     manifest?: string;
-    log: (...args: string[]) => void;
+    log: (...args: Array<string | symbol>) => void;
     indexFile?: string;
     generatorPath?: string;
     moduleFormats?: Array<'cjs' | 'esm'>;
@@ -103,7 +104,8 @@ export function build({
                     '[Watch]',
                     `${messages.FINISHED_PROCESSING} ${affectedFiles.size} ${
                         affectedFiles.size === 1 ? 'file' : 'files'
-                    }`
+                    }${changeOrigin ? ', watching...' : ''}`,
+                    levels.info
                 );
                 function updateWatcherDependencies() {
                     const resolver = stylable.createResolver({});
@@ -123,7 +125,7 @@ export function build({
         })
             .watch(rootDir)
             .then(() => {
-                log('[Watch]', messages.START_WATCHING);
+                log('[Watch]', messages.START_WATCHING, levels.info);
             })
             .catch((e) => {
                 console.error(e);
