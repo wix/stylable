@@ -1,3 +1,4 @@
+import type { Plugin } from 'rollup';
 import fs from 'fs';
 import { join, parse } from 'path';
 import {
@@ -14,7 +15,6 @@ import {
 } from '@stylable/build-tools';
 import { resolveNamespace as resolveNamespaceNode } from '@stylable/node';
 import { StylableOptimizer } from '@stylable/optimizer';
-import { Plugin } from 'rollup';
 import {
     emitAssets,
     generateCssString,

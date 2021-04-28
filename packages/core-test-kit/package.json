@@ -7,7 +7,7 @@
     "@stylable/core": "^4.1.0-alpha.3",
     "chai": "^4.3.4",
     "flat": "^5.0.2",
-    "postcss": "^8.2.10"
+    "postcss": "^8.2.13"
   },
   "files": [
     "dist",

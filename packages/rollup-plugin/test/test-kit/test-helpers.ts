@@ -1,6 +1,6 @@
+import type { RollupWatcher, RollupWatcherEvent } from 'rollup';
 import { dirname, join } from 'path';
 import { nodeFs } from '@file-services/node';
-import { RollupWatcher, RollupWatcherEvent } from 'rollup';
 import { createTempDirectorySync } from 'create-temp-directory';
 import { deferred } from 'promise-assist';
 

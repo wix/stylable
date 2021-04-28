@@ -1,5 +1,5 @@
+import type { UrlNode } from 'css-selector-tokenizer';
 import { isAsset, makeAbsolute, processDeclarationUrls, StylableMeta } from '@stylable/core';
-import { UrlNode } from 'css-selector-tokenizer';
 import { dirname } from 'path';
 
 export function processUrlDependencies(meta: StylableMeta, rootContext: string) {

@@ -38,6 +38,7 @@ import {
 import { injectCssModules } from './mini-css-support';
 import type {
     BuildData,
+    EntryPoint,
     LoaderData,
     NormalModuleFactory,
     StylableBuildMeta,

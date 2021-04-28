@@ -1,11 +1,11 @@
-import { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import type { Stylable, StylableExports, StylableMeta } from '@stylable/core';
+import type { PluginContext } from 'rollup';
+import type { StylableRollupPluginOptions } from './index';
 import { processUrlDependencies } from '@stylable/build-tools';
 import fs from 'fs';
 import { basename, extname } from 'path';
 import { createHash } from 'crypto';
-import { PluginContext } from 'rollup';
 import { getType } from 'mime';
-import { StylableRollupPluginOptions } from './index';
 
 const runtimePath = JSON.stringify(require.resolve('@stylable/rollup-plugin/runtime'));
 const runtimeImport = `import { stc, sts } from ${runtimePath};`;

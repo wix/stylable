@@ -1,4 +1,4 @@
-import { Imported, Stylable, StylableMeta } from '@stylable/core';
+import type { Imported, Stylable, StylableMeta } from '@stylable/core';
 
 export function hasImportedSideEffects(stylable: Stylable, meta: StylableMeta, imported: Imported) {
     //keyframes
