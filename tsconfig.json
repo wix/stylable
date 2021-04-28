@@ -28,6 +28,8 @@
     { "path": "./packages/node/test" },
     { "path": "./packages/optimizer/src" },
     { "path": "./packages/optimizer/test" },
+    { "path": "./packages/rollup-plugin/src" },
+    { "path": "./packages/rollup-plugin/test" },
     { "path": "./packages/runtime/src" },
     { "path": "./packages/runtime/src/tsconfig.esm.json" },
     { "path": "./packages/runtime/test" },
@@ -38,8 +40,6 @@
     { "path": "./packages/webpack-extensions/src" },
     { "path": "./packages/webpack-extensions/test" },
     { "path": "./packages/webpack-plugin/src" },
-    { "path": "./packages/webpack-plugin/test" },
-    { "path": "./packages/rollup-plugin/src" },
-    { "path": "./packages/rollup-plugin/test" }
+    { "path": "./packages/webpack-plugin/test" }
   ]
 }
