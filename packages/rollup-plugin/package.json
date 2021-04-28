@@ -8,7 +8,7 @@
   },
   "peerDependencies": {
     "@stylable/core": "4.1.0-alpha.3",
-    "rollup": "^2.40.0"
+    "rollup": "^2.45.2"
   },
   "dependencies": {
     "@stylable/build-tools": "^4.1.0-alpha.3",
