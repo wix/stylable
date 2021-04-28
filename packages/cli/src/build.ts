@@ -7,6 +7,11 @@ import { handleAssets } from './handle-assets';
 import { buildSingleFile } from './build-single-file';
 import { DirectoryProcessService } from './watch-service/watch-service';
 
+export const messages = {
+    START_WATCHING: 'start watching...',
+    FINISHED_PROCESSING: 'finished processing',
+};
+
 export interface BuildOptions {
     extension: string;
     fs: IFileSystem;
@@ -69,7 +74,7 @@ export function build({
             autoResetInvalidations: true,
             directoryFilter(dirPath) {
                 if (
-                    dirPath.startsWith(outDir) ||
+                    dirPath.startsWith(fullOutDir) ||
                     dirPath.includes('node_modules') ||
                     dirPath.includes('.git')
                 ) {
@@ -94,6 +99,12 @@ export function build({
                 updateWatcherDependencies();
                 buildAggregatedEntities();
 
+                log(
+                    '[Watch]',
+                    `${messages.FINISHED_PROCESSING} ${affectedFiles.size} ${
+                        affectedFiles.size === 1 ? 'file' : 'files'
+                    }`
+                );
                 function updateWatcherDependencies() {
                     const resolver = stylable.createResolver({});
                     for (const filePath of affectedFiles) {
@@ -112,7 +123,7 @@ export function build({
         })
             .watch(rootDir)
             .then(() => {
-                console.log('watch started');
+                log('[Watch]', messages.START_WATCHING);
             })
             .catch((e) => {
                 console.error(e);

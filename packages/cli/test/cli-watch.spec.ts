@@ -1,10 +1,10 @@
 import { readdirSync, readFileSync, statSync, writeFileSync, existsSync } from 'fs';
 import { join, relative } from 'path';
-import { spawn } from 'child_process';
+import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { expect } from 'chai';
 import { on } from 'events';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import type { ChildProcessWithoutNullStreams } from 'node:child_process';
+import { messages } from '@stylable/cli';
 
 function runCli(cliArgs: string[] = [], cwd: string) {
     const cliPath = require.resolve('@stylable/cli/bin/stc.js');
@@ -18,7 +18,7 @@ interface Files {
 function loadDirSync(rootPath: string, dirPath: string = rootPath): Files {
     return readdirSync(dirPath).reduce<Files>((acc, entry) => {
         const fullPath = join(dirPath, entry);
-        const key = relative(rootPath, fullPath);
+        const key = relative(rootPath, fullPath).replace(/\\/g, '/');
         const stat = statSync(fullPath);
         if (stat.isFile()) {
             acc[key] = readFileSync(fullPath, 'utf8');
@@ -40,17 +40,18 @@ function populateDirectorySync(rootDir: string, files: Files) {
     }
 }
 
-describe.skip('Stylable Cli', () => {
+describe('Stylable Cli', () => {
     let tempDir: ITempDirectory;
-    let child: ChildProcessWithoutNullStreams;
+    const cliProcesses: ChildProcessWithoutNullStreams[] = [];
     beforeEach(async () => {
         tempDir = await createTempDirectory();
     });
     afterEach(async () => {
-        await tempDir.remove();
-        if (child) {
-            child.kill();
+        for (const cliProcess of cliProcesses) {
+            cliProcess.kill();
         }
+        cliProcesses.length = 0;
+        await tempDir.remove();
     });
 
     it('simple watch mode', async () => {
@@ -58,33 +59,71 @@ describe.skip('Stylable Cli', () => {
             'package.json': `{"name": "test", "version": "0.0.0"}`,
             'style.st.css': `
                 @st-import X from "./depend.st.css";
-                .root{color:red}
+                .root{ color:red; }
             `,
             'depend.st.css': `
-                .root{color:green}
+                .root{ color:green; }
             `,
         });
 
-        child = runCli(['--rootDir', tempDir.path, '--outDir', './dist', '-w'], tempDir.path);
+        await processCliOutput(
+            cliProcesses,
+            tempDir.path,
+            ['--cjs=false', '--stcss'],
+            [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'depend.st.css'),
+                            '.root{ color:yellow; }'
+                        );
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ]
+        );
 
-        for await (const e of on(child.stdout, 'data')) {
-            const msg = e.toString();
-            if (msg.includes('watch started')) {
-                writeToExistingFile(join(tempDir.path, 'depend.st.css'), '.root{color:yellow}');
-            }
-        }
-        function a() {
-            const dirContent = loadDirSync(tempDir.path);
-            expect(dirContent).eql({});
-        }
-        console.log(a);
+        expect(loadDirSync(tempDir.path)).to.contain({
+            'dist/depend.st.css': '.root{ color:yellow; }',
+        });
     });
 });
+
+async function processCliOutput(
+    cliProcesses: ChildProcessWithoutNullStreams[],
+    dirPath: string,
+    args: string[],
+    steps: Array<{ msg: string; action: () => boolean }>
+) {
+    const cliProcess = runCli(
+        ['--rootDir', dirPath, '--outDir', './dist', '-w', '--log', ...args],
+        dirPath
+    );
+    cliProcesses.push(cliProcess as any);
+    let index = 0;
+
+    for await (const e of on(cliProcess.stdout as any, 'data')) {
+        const { msg, action } = steps[index];
+        if (e.toString().includes(msg)) {
+            index++;
+            if (action() === false) {
+                break;
+            }
+        }
+    }
+}
 
 function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
         writeFileSync(filePath, content);
     } else {
-        throw new Error('file dose not exist');
+        throw new Error(`file ${filePath} does not exist`);
     }
 }

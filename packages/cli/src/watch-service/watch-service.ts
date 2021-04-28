@@ -98,7 +98,6 @@ export class DirectoryProcessService {
         return visited;
     }
     private watchHandler = (event: IWatchEvent) => {
-        console.log('WATCH!!!!');
         this.handleWatchChange(event).catch((error) => this.options.onError?.(error));
     };
     private filterWatchItems = (event: DirectoryItem): boolean => {

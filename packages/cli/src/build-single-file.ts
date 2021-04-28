@@ -54,7 +54,9 @@ export function buildSingleFile({
         filename: basename(outSrcPath, '.st.css'),
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
-    log('[Build]', filePath + ' --> ' + outPath);
+    const outputLogs: string[] = [];
+    log('[Build]', filePath);
+
     tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
     let content: string = tryRun(
         () => fs.readFileSync(filePath).toString(),
@@ -86,13 +88,12 @@ export function buildSingleFile({
             const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
             content = srcNamespaceAnnotation + content;
         }
-
-        log('[Build]', 'output .st.css source');
+        outputLogs.push(`.st.css source`);
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }
     // st.css.js
     moduleFormats.forEach((format) => {
-        log('[Build]', 'moduleFormat', format);
+        outputLogs.push(`${format} module`);
         const code = tryRun(
             () =>
                 createModuleSource(
@@ -118,13 +119,15 @@ export function buildSingleFile({
             cssCode = optimizer.minifyCSS(cssCode);
         }
         generated.add(cssAssetOutPath);
-        log('[Build]', 'output transpiled css');
+        outputLogs.push('transpiled css');
         tryRun(
             () => fs.writeFileSync(cssAssetOutPath, cssCode),
             `Write File Error: ${cssAssetOutPath}`
         );
     }
     // .d.ts?
+
+    log('[Build]', `output: [${outputLogs.join(', ')}]`);
     // copy assets
     for (const url of res.meta.urls) {
         if (isAsset(url)) {
