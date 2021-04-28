@@ -30,7 +30,7 @@ describe('Generate DTS', () => {
                 import { eq } from "./test-kit";
                 import { classes } from "./test.st.css";
                 
-                eq<"XXX__root">(classes.root);
+                eq<"test__root">(classes.root);
             `,
         });
 
