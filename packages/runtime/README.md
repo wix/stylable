@@ -87,8 +87,10 @@ Add the following file to your `/src` directory.
 ```ts
 // globals.d.ts
 declare module '*.st.css' {
-    const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
-    export = stylesheet;
+    export const defaultExport: never;
+
+    export * from '@stylable/runtime/stylesheet';
+    export default defaultExport;
 }
 ```
 

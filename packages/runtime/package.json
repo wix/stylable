@@ -12,6 +12,7 @@
     "dist",
     "!dist/test",
     "src",
+    "stylesheet.d.ts",
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
