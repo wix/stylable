@@ -1,0 +1,34 @@
+{
+  "name": "@stylable/esbuild",
+  "description": "esbuild plugin for Stylable modules",
+  "version": "4.1.1",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha \"./dist/test/**/*.spec.js\" --timeout 20000"
+  },
+  "peerDependencies": {
+    "@stylable/core": "^4.0.0",
+    "esbuild": "^0.11.16"
+  },
+  "dependencies": {
+    "@stylable/module-utils": "^4.1.1",
+    "@stylable/node": "^4.1.1",
+    "@stylable/optimizer": "^4.1.1",
+    "decache": "^4.6.0"
+  },
+  "files": [
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
+  ],
+  "engines": {
+    "node": ">=12"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/wix/stylable/tree/master/packages/esbuild",
+  "author": "Wix.com",
+  "license": "BSD-3-Clause"
+}

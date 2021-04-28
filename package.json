@@ -48,6 +48,7 @@
     "chai-subset": "^1.6.0",
     "create-listening-server": "^1.0.0",
     "create-temp-directory": "^1.1.1",
+    "esbuild": "^0.11.16",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.23.2",

@@ -18,14 +18,10 @@
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
       "preLaunchTask": "npm: build",
+      "outputCapture": "console",
       "internalConsoleOptions": "openOnSessionStart",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
     },
     {
       "type": "node",

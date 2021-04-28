@@ -12,6 +12,8 @@
     { "path": "./packages/dom-test-kit/src" },
     { "path": "./packages/dom-test-kit/test" },
     { "path": "./packages/e2e-test-kit/src" },
+    { "path": "./packages/esbuild/src" },
+    { "path": "./packages/esbuild/test" },
     { "path": "./packages/eslint-plugin-stylable/src" },
     { "path": "./packages/eslint-plugin-stylable/test" },
     { "path": "./packages/experimental-loader/src" },
