@@ -49,7 +49,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.watch('/');
+            await watcher.init('/');
 
             fs.writeFileSync('/0.template.js', `output('0()')`);
 
@@ -106,7 +106,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.watch('/');
+            await watcher.init('/');
 
             // Nothing happened
             expect(changeSpy).to.not.been.called;
@@ -204,7 +204,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.watch('/');
+            await watcher.init('/');
 
             expect(changeSpy).to.have.callCount(1);
 
@@ -232,7 +232,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.watch('/');
+            await watcher.init('/');
 
             expectInvalidationMap(watcher, {
                 '/0.template.js': [],
@@ -260,7 +260,7 @@ describe('DirectoryWatchService', () => {
                 },
             });
 
-            await watcher.watch('/');
+            await watcher.init('/');
 
             changeSpy.resetHistory();
 

@@ -11,25 +11,27 @@ export interface DirectoryProcessServiceOptions {
     fileFilter?(filePath: string): boolean;
     onError?(error: Error): void;
     autoResetInvalidations?: boolean;
-    // skipDirectoryWatching?: boolean;
+    watchMode?: boolean;
 }
 
 export class DirectoryProcessService {
     public invalidationMap = new Map<string, Set<string>>();
     constructor(private fs: IFileSystem, private options: DirectoryProcessServiceOptions = {}) {
-        this.fs.watchService.addGlobalListener(this.watchHandler);
+        if (this.options.watchMode) {
+            this.fs.watchService.addGlobalListener(this.watchHandler);
+        }
     }
     public async dispose() {
         this.invalidationMap.clear();
         await this.fs.watchService.unwatchAllPaths();
     }
-    public async watch(directoryPath: string) {
-        await this.fs.watchService.watchPath(directoryPath);
+    public async init(directoryPath: string) {
+        await this.watchPath(directoryPath);
         const items = directoryDeepChildren(this.fs, directoryPath, this.filterWatchItems);
         const affectedFiles = new Set<string>();
         for await (const item of items) {
             if (item.type === 'directory') {
-                await this.fs.watchService.watchPath(item.path);
+                await this.watchPath(item.path);
             } else if (item.type === 'file') {
                 affectedFiles.add(item.path);
                 this.registerInvalidateOnChange(item.path);
@@ -54,11 +56,16 @@ export class DirectoryProcessService {
             fileSet.add(filePathToInvalidate);
         }
     }
-
+    private watchPath(directoryPath: string) {
+        if (!this.options.watchMode) {
+            return;
+        }
+        return this.fs.watchService.watchPath(directoryPath);
+    }
     private async handleWatchChange(event: IWatchEvent) {
         if (event.stats?.isDirectory()) {
             if (this.options.directoryFilter?.(event.path) ?? true) {
-                return this.watch(event.path);
+                return this.init(event.path);
             }
             return;
         }

@@ -57,10 +57,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
+        runCli(['--rootDir', tempDir.path, '--nsr', testNsrPath]);
 
         const dirContent = loadDirSync(tempDir.path);
         expect(
@@ -100,8 +97,8 @@ describe('Stylable Cli', () => {
             './dist',
             '--unknownFlag',
         ]);
-
         expect(status, output.join('')).to.not.equal(0);
+        expect(output.join(''), 'output').to.match(/Unknown argument: unknownFlag/g);
     });
 
     it('single file build with all targets', () => {
@@ -110,7 +107,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -124,8 +121,6 @@ describe('Stylable Cli', () => {
         ]);
         const dirContent = loadDirSync(tempDir.path);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
         expect(Object.keys(dirContent)).to.eql([
             join('dist', 'style.css'),
             join('dist', 'style.st.css'),
@@ -143,10 +138,7 @@ describe('Stylable Cli', () => {
         });
 
         const nsr = require.resolve('@stylable/node');
-        const { stderr, stdout } = runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
+        runCli(['--rootDir', tempDir.path, '--nsr', nsr]);
 
         const dirContent = loadDirSync(tempDir.path);
 
@@ -164,7 +156,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCli([
             '--rootDir',
             tempDir.path,
             '--outDir',
@@ -172,9 +164,6 @@ describe('Stylable Cli', () => {
             '--stcss',
             '--useNamespaceReference',
         ]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const stylesheetContent = dirContent[join('dist', 'style.st.css')];
@@ -190,7 +179,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -199,9 +188,6 @@ describe('Stylable Cli', () => {
             './dist',
             '--manifest',
         ]);
-
-        expect(stderr).equal('');
-        expect(stdout).equal('');
 
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'stylable.manifest.json');
@@ -216,7 +202,7 @@ describe('Stylable Cli', () => {
             'style.st.css': `.root{color:red}`,
         });
 
-        const { stderr, stdout } = runCli([
+        runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -228,9 +214,6 @@ describe('Stylable Cli', () => {
             '/x/y/m.json',
         ]);
 
-        expect(stderr).equal('');
-        expect(stdout).equal('');
-
         const dirContent = loadDirSync(tempDir.path);
         const file = join('dist', 'x/y/m.json');
 
@@ -241,7 +224,7 @@ describe('Stylable Cli', () => {
     it('test require hook', () => {
         populateDirectorySync(tempDir.path, {});
         const requireHook = require.resolve('./fixtures/test-require-hook');
-        const { stderr, stdout } = runCli([
+        const { stdout } = runCli([
             '--rootDir',
             tempDir.path,
             '--nsr',
@@ -250,7 +233,6 @@ describe('Stylable Cli', () => {
             requireHook,
         ]);
 
-        expect(stderr).equal('');
         expect(stdout).to.contain('I HAVE BEEN REQUIRED');
     });
 
@@ -261,13 +243,12 @@ describe('Stylable Cli', () => {
                 'style.st.css': `.root{color:value(xxx)}`,
             });
 
-            const { stderr, stdout, status } = runCli(['--rootDir', tempDir.path]);
+            const { stdout, status } = runCli(['--rootDir', tempDir.path]);
 
             expect(status).to.equal(1);
-            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
-            expect(stderr, 'stderr').equal('');
         });
         it('(diagnosticsMode) should report diagnostics and ignore process process exit', () => {
             populateDirectorySync(tempDir.path, {
@@ -275,17 +256,16 @@ describe('Stylable Cli', () => {
                 'style.st.css': `.root{color:value(xxx)}`,
             });
 
-            const { stderr, stdout, status } = runCli([
+            const { stdout, status } = runCli([
                 '--rootDir',
                 tempDir.path,
                 '--diagnosticsMode=loose',
             ]);
 
             expect(status).to.equal(0);
-            expect(stdout, 'stdout').to.match(/Errors in file/);
+            expect(stdout, 'stdout').to.match(/\[Stylable Diagnostics\]/);
             expect(stdout, 'stdout').to.match(/style\.st\.css/);
             expect(stdout, 'stdout').to.match(/unknown var "xxx"/);
-            expect(stderr, 'stderr').equal('');
         });
     });
 });

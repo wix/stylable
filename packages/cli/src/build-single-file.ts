@@ -11,9 +11,10 @@ export interface BuildFileOptions {
     log: (...args: string[]) => void;
     fs: any;
     stylable: Stylable;
-    diagnosticsMsg: string[];
+    diagnosticsMessages: Map<string, string[]>;
     projectAssets: Set<string>;
     moduleFormats: string[];
+    mode?: string;
     includeCSSInJS?: boolean;
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
@@ -32,7 +33,7 @@ export function buildSingleFile({
     log,
     fs,
     stylable,
-    diagnosticsMsg,
+    diagnosticsMessages,
     projectAssets,
     moduleFormats,
     includeCSSInJS = false,
@@ -44,6 +45,7 @@ export function buildSingleFile({
     optimize = false,
     minify = false,
     generated = new Set<string>(),
+    mode = '[Build]',
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -55,7 +57,7 @@ export function buildSingleFile({
     });
     const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
     const outputLogs: string[] = [];
-    log('[Build]', filePath);
+    log(mode, filePath);
 
     tryRun(() => ensureDirectory(outDirPath, fs), `Ensure directory: ${outDirPath}`);
     let content: string = tryRun(
@@ -77,7 +79,7 @@ export function buildSingleFile({
             {}
         );
     }
-    handleDiagnostics(res, diagnosticsMsg, filePath);
+    handleDiagnostics(res, diagnosticsMessages, filePath);
     // st.css
     if (outputSources) {
         if (useSourceNamespace && !content.includes('st-namespace-reference')) {
@@ -88,6 +90,7 @@ export function buildSingleFile({
             const srcNamespaceAnnotation = `/* st-namespace-reference="${relativePathToSource}" */\n`;
             content = srcNamespaceAnnotation + content;
         }
+        generated.add(outSrcPath);
         outputLogs.push(`.st.css source`);
         tryRun(() => fs.writeFileSync(outSrcPath, content), `Write File Error: ${outSrcPath}`);
     }
@@ -127,7 +130,7 @@ export function buildSingleFile({
     }
     // .d.ts?
 
-    log('[Build]', `output: [${outputLogs.join(', ')}]`);
+    log(mode, `output: [${outputLogs.join(', ')}]`);
     // copy assets
     for (const url of res.meta.urls) {
         if (isAsset(url)) {

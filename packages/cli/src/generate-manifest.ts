@@ -7,6 +7,7 @@ export function generateManifest(
     filesToBuild: Set<string>,
     manifestOutputPath = '',
     stylable: Stylable,
+    mode: string,
     log: (...args: string[]) => void,
     fs: any
 ) {
@@ -30,7 +31,7 @@ export function generateManifest(
                 namespaceMapping: {},
             }
         );
-        log('[Build]', 'creating manifest file: ');
+        log(mode, 'creating manifest file: ');
         tryRun(
             () => ensureDirectory(dirname(manifestOutputPath), fs),
             `Ensure directory for manifest: ${manifestOutputPath}`

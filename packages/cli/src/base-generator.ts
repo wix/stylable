@@ -36,10 +36,9 @@ export class Generator {
         this.indexFileOutput.set(normalizeRelative(relative(fullOutDir, filePath)), reExports);
     }
 
-    public generateIndexFile(fs: IFileSystem, fullOutDir: string, indexFile: string) {
-        const indexFileTargetPath = fs.join(fullOutDir, indexFile);
+    public generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
         const indexFileContent = this.generateIndexSource(indexFileTargetPath);
-        ensureDirectory(fullOutDir, fs);
+        ensureDirectory(fs.dirname(indexFileTargetPath), fs);
         tryRun(
             () => fs.writeFileSync(indexFileTargetPath, '\n' + indexFileContent + '\n'),
             'Write Index File Error'

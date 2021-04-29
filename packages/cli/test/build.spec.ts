@@ -14,7 +14,7 @@ const log = () => {
 };
 
 describe('build stand alone', () => {
-    it('should create modules and copy source css files', () => {
+    it('should create modules and copy source css files', async () => {
         const fs = createMemoryFs({
             '/main.st.css': `
                 :import{
@@ -35,7 +35,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -60,7 +60,7 @@ describe('build stand alone', () => {
         expect(fs.existsSync('/lib/index.st.css'), '/lib/index.st.css').to.equal(false);
     });
 
-    it('should use "useNamespaceReference" to maintain a single namespace for all builds using it', () => {
+    it('should use "useNamespaceReference" to maintain a single namespace for all builds using it', async () => {
         const fs = createMemoryFs({
             '/src/main.st.css': `
                 :import{
@@ -91,7 +91,7 @@ describe('build stand alone', () => {
             },
         });
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -117,7 +117,7 @@ describe('build stand alone', () => {
             'st-namespace-reference="../src/main.st.css"'
         );
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -135,7 +135,7 @@ describe('build stand alone', () => {
         );
     });
 
-    it('should report errors originating from stylable (process + transform)', () => {
+    it('should report errors originating from stylable (process + transform)', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                 :import {
@@ -152,7 +152,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        const { diagnosticsMessages } = build({
+        const { diagnosticsMessages } = await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -162,16 +162,16 @@ describe('build stand alone', () => {
             log,
             moduleFormats: ['cjs'],
         });
-        const reportedError = diagnosticsMessages.join('\n\n');
+        const messages = diagnosticsMessages.get('/comp.st.css')!;
 
-        expect(reportedError).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
-        expect(reportedError).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
-        expect(reportedError).to.contain(
+        expect(messages[0]).to.contain(processorWarnings.CANNOT_RESOLVE_EXTEND('MissingComp'));
+        expect(messages[1]).to.contain(
             resolverWarnings.UNKNOWN_IMPORTED_FILE('./missing-file.st.css')
         );
+        expect(messages[2]).to.contain(functionWarnings.UNKNOWN_VAR('missingVar'));
     });
 
-    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', () => {
+    it('should optimize css (remove empty nodes, remove stylable-directives, remove comments)', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                 .root {
@@ -186,7 +186,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -206,7 +206,7 @@ describe('build stand alone', () => {
         expect(builtFile).to.not.contain(`.x`);
     });
 
-    it('should minify', () => {
+    it('should minify', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                 .root {
@@ -223,7 +223,7 @@ describe('build stand alone', () => {
             },
         });
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,
@@ -242,7 +242,7 @@ describe('build stand alone', () => {
         expect(builtFile).to.contain(`.test__root{color:red}`);
     });
 
-    it('should inject request to output module', () => {
+    it('should inject request to output module', async () => {
         const fs = createMemoryFs({
             '/comp.st.css': `
                 .root {
@@ -253,7 +253,7 @@ describe('build stand alone', () => {
 
         const stylable = new Stylable('/', fs, () => ({}));
 
-        build({
+        await build({
             extension: '.st.css',
             fs,
             stylable,

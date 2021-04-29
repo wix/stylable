@@ -1,5 +1,4 @@
 import { Stylable, visitMetaCSSDependenciesBFS } from '@stylable/core';
-import { findFiles } from '@stylable/node';
 import type { IFileSystem } from '@file-services/types';
 import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
@@ -7,10 +6,12 @@ import { handleAssets } from './handle-assets';
 import { buildSingleFile } from './build-single-file';
 import { DirectoryProcessService } from './watch-service/watch-service';
 import { levels } from './logger';
+import { reportDiagnostics } from './report-diagnostics';
 
 export const messages = {
     START_WATCHING: 'start watching...',
     FINISHED_PROCESSING: 'finished processing',
+    BUILD_SKIPPED: 'No stylable files found. build skipped.',
 };
 
 export interface BuildOptions {
@@ -34,9 +35,10 @@ export interface BuildOptions {
     optimize?: boolean;
     minify?: boolean;
     watch?: boolean;
+    diagnostics?: boolean;
 }
 
-export function build({
+export async function build({
     extension,
     fs,
     stylable,
@@ -57,101 +59,90 @@ export function build({
     minify,
     manifest,
     watch,
+    diagnostics,
 }: BuildOptions) {
-    const { join, relative } = fs;
+    const { join } = fs;
     const fullSrcDir = join(rootDir, srcDir);
     const fullOutDir = join(rootDir, outDir);
 
-    validateConfiguration(outputSources, outDir, srcDir);
-
-    const generator = getGenerator(stylable, log, generatorPath);
+    validateConfiguration(outputSources, fullOutDir, fullSrcDir);
+    const mode = watch ? '[Watch]' : '[Build]';
+    const generator = createGenerator(stylable, log, generatorPath);
     const generated = new Set<string>();
     const sourceFiles = new Set<string>();
     const assets = new Set<string>();
-    const diagnosticsMessages: string[] = [];
+    const diagnosticsMessages = new Map<string, string[]>();
+
+    const service = new DirectoryProcessService(fs, {
+        watchMode: watch,
+        autoResetInvalidations: true,
+        directoryFilter(dirPath) {
+            if (
+                // TODO: (watch && dirPath.startsWith(fullOutDir)) ||
+                dirPath.includes('node_modules') ||
+                dirPath.includes('.git')
+            ) {
+                return false;
+            }
+            return true;
+        },
+        fileFilter(filePath) {
+            if (generated.has(filePath)) {
+                return false;
+            }
+            return filePath.endsWith(extension);
+        },
+        onError(error) {
+            console.error(error);
+        },
+        processFiles(service, affectedFiles, changeOrigin) {
+            if (changeOrigin) {
+                stylable.initCache();
+            }
+
+            for (const filePath of diagnosticsMessages.keys()) {
+                affectedFiles.add(filePath);
+            }
+            diagnosticsMessages.clear();
+
+            buildFiles(affectedFiles);
+            updateWatcherDependencies();
+            buildAggregatedEntities();
+
+            if (diagnostics && diagnosticsMessages.size) {
+                reportDiagnostics(diagnosticsMessages);
+            }
+
+            log(
+                mode,
+                `${messages.FINISHED_PROCESSING} ${affectedFiles.size} ${
+                    affectedFiles.size === 1 ? 'file' : 'files'
+                }${changeOrigin ? ', watching...' : ''}`,
+                levels.info
+            );
+            function updateWatcherDependencies() {
+                const resolver = stylable.createResolver({});
+                for (const filePath of affectedFiles) {
+                    sourceFiles.add(filePath);
+                    const meta = stylable.process(filePath);
+                    visitMetaCSSDependenciesBFS(
+                        meta,
+                        ({ source }) => {
+                            service.registerInvalidateOnChange(source, filePath);
+                        },
+                        resolver
+                    );
+                }
+            }
+        },
+    });
+
+    await service.init(fullSrcDir);
 
     if (watch) {
-        new DirectoryProcessService(fs, {
-            autoResetInvalidations: true,
-            directoryFilter(dirPath) {
-                if (
-                    dirPath.startsWith(fullOutDir) ||
-                    dirPath.includes('node_modules') ||
-                    dirPath.includes('.git')
-                ) {
-                    return false;
-                }
-                return true;
-            },
-            fileFilter(filePath) {
-                if (generated.has(filePath)) {
-                    return false;
-                }
-                return filePath.endsWith('.st.css');
-            },
-            onError(error) {
-                console.error(error);
-            },
-            processFiles(service, affectedFiles, changeOrigin) {
-                if (changeOrigin) {
-                    stylable.initCache();
-                }
-                buildFiles(affectedFiles);
-                updateWatcherDependencies();
-                buildAggregatedEntities();
-
-                log(
-                    '[Watch]',
-                    `${messages.FINISHED_PROCESSING} ${affectedFiles.size} ${
-                        affectedFiles.size === 1 ? 'file' : 'files'
-                    }${changeOrigin ? ', watching...' : ''}`,
-                    levels.info
-                );
-                function updateWatcherDependencies() {
-                    const resolver = stylable.createResolver({});
-                    for (const filePath of affectedFiles) {
-                        sourceFiles.add(filePath);
-                        const meta = stylable.process(filePath);
-                        visitMetaCSSDependenciesBFS(
-                            meta,
-                            ({ source }) => {
-                                service.registerInvalidateOnChange(source, filePath);
-                            },
-                            resolver
-                        );
-                    }
-                }
-            },
-        })
-            .watch(rootDir)
-            .then(() => {
-                log('[Watch]', messages.START_WATCHING, levels.info);
-            })
-            .catch((e) => {
-                console.error(e);
-            });
-    } else {
-        // TODO: maybe can be removed and use the watcher files instead
-        const { result } = findFiles(
-            fs,
-            join,
-            relative,
-            fullSrcDir,
-            extension,
-            new Set<string>(['node_modules', '.git'])
-        );
-        for (const filePath of result) {
-            sourceFiles.add(filePath);
-        }
-
-        if (sourceFiles.size === 0) {
-            log('[Build]', 'No stylable files found. build skipped.');
-        } else {
-            log('[Build]', `Building ${sourceFiles.size} stylable files.`);
-        }
-
-        buildFiles(sourceFiles);
-        buildAggregatedEntities();
+        log(mode, messages.START_WATCHING, levels.info);
+    } else if (sourceFiles.size === 0) {
+        log(mode, messages.BUILD_SKIPPED, levels.info);
     }
 
     return { diagnosticsMessages };
@@ -168,7 +159,7 @@ export function build({
                     log,
                     fs,
                     stylable,
-                    diagnosticsMsg: diagnosticsMessages,
+                    diagnosticsMessages,
                     projectAssets: assets,
                     moduleFormats: moduleFormats || [],
                     includeCSSInJS,
@@ -187,15 +178,17 @@ export function build({
 
     function buildAggregatedEntities() {
         if (indexFile) {
-            generator.generateIndexFile(fs, fullOutDir, indexFile);
+            const indexFilePath = join(fullOutDir, indexFile);
+            generated.add(indexFilePath);
+            generator.generateIndexFile(fs, indexFilePath);
         } else {
             handleAssets(assets, rootDir, srcDir, outDir, fs);
-            generateManifest(rootDir, sourceFiles, manifest, stylable, log, fs);
+            generateManifest(rootDir, sourceFiles, manifest, stylable, mode, log, fs);
         }
     }
 }
 
-function getGenerator(
+function createGenerator(
     stylable: Stylable,
     log: (...args: string[]) => void,
     generatorPath?: string

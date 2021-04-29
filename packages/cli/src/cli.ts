@@ -4,6 +4,7 @@ import { nodeFs } from '@file-services/node';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 import { createLogger } from './logger';
+import { reportDiagnostics } from './report-diagnostics';
 
 const { join, resolve } = nodeFs;
 
@@ -186,7 +187,7 @@ const stylable = Stylable.create({
     resolverCache: new Map(),
 });
 
-const { diagnosticsMessages } = build({
+build({
     extension: ext,
     fs: nodeFs,
     stylable,
@@ -207,16 +208,22 @@ const { diagnosticsMessages } = build({
     manifest: manifest ? join(rootDir, outDir, manifestFilepath) : undefined,
     useSourceNamespace: useNamespaceReference,
     watch,
-});
-
-if (diagnosticsMessages.length) {
-    if (diagnostics) {
-        console.log('[Stylable Diagnostics]\n', diagnosticsMessages.join('\n\n'));
-    }
-    if (diagnosticsMode === 'strict') {
+    diagnostics,
+})
+    .then(({ diagnosticsMessages }) => {
+        if (!watch && diagnosticsMessages.size) {
+            if (diagnostics) {
+                reportDiagnostics(diagnosticsMessages);
+            }
+            if (diagnosticsMode === 'strict') {
+                process.exitCode = 1;
+            }
+        }
+    })
+    .catch((e) => {
         process.exitCode = 1;
-    }
-}
+        console.error(e);
+    });
 
 function getModuleFormats({ esm, cjs }: { [k: string]: boolean }) {
     const formats: Array<'esm' | 'cjs'> = [];

@@ -4,18 +4,20 @@ import { dirname } from 'path';
 
 export function handleDiagnostics(
     res: StylableResults,
-    diagnosticsMsg: string[],
+    diagnosticsMessages: Map<string, string[]>,
     filePath: string
 ) {
     const reports = res.meta.transformDiagnostics
         ? res.meta.diagnostics.reports.concat(res.meta.transformDiagnostics.reports)
         : res.meta.diagnostics.reports;
     if (reports.length) {
-        diagnosticsMsg.push(`Errors in file: ${filePath}`);
-        reports.forEach((report) => {
-            const err = report.node.error(report.message, report.options);
-            diagnosticsMsg.push(`${report.message}\n${err.showSourceCode()}`);
-        });
+        diagnosticsMessages.set(
+            filePath,
+            reports.map((report) => {
+                const err = report.node.error(report.message, report.options);
+                return `${report.message}\n${err.showSourceCode()}`;
+            })
+        );
     }
 }
 
