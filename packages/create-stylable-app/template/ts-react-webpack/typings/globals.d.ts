@@ -1,7 +1,7 @@
 declare module '*.st.css' {
-    export const defaultExport: never;
-
     export * from '@stylable/runtime/stylesheet';
+
+    const defaultExport: never;
     export default defaultExport;
 }
 

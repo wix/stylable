@@ -1,4 +1,4 @@
-type RuntimeStylesheet = import('@stylable/runtime').RuntimeStylesheet;
+import type { RuntimeStylesheet } from './dist';
 
 export const classes: RuntimeStylesheet['classes'];
 export const keyframes: RuntimeStylesheet['keyframes'];
