@@ -4,7 +4,7 @@ import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile } from './build-single-file';
-import { DirectoryProcessService } from './watch-service/watch-service';
+import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels } from './logger';
 import { reportDiagnostics } from './report-diagnostics';
 

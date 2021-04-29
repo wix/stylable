@@ -4,7 +4,7 @@ import { expect, use } from 'chai';
 import { spy } from 'sinon';
 import sinonChai from 'sinon-chai';
 import { waitFor } from 'promise-assist';
-import { DirectoryProcessService } from '@stylable/cli/src/watch-service/watch-service';
+import { DirectoryProcessService } from '@stylable/cli';
 
 use(sinonChai);
 
@@ -37,6 +37,7 @@ describe('DirectoryWatchService', () => {
 
         it('should watch added files', async () => {
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -90,6 +91,7 @@ describe('DirectoryWatchService', () => {
             const changeSpy = spy();
 
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, changeOrigin) {
                     for (const filePath of affectedFiles) {
@@ -127,6 +129,7 @@ describe('DirectoryWatchService', () => {
 
         it('should handle delete files', async () => {
             new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -154,6 +157,7 @@ describe('DirectoryWatchService', () => {
 
         it('should handle delete dirs', async () => {
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -195,6 +199,7 @@ describe('DirectoryWatchService', () => {
             const changeSpy = spy();
 
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(_watcher, affectedFiles, changeOrigin) {
                     changeSpy({
@@ -221,6 +226,7 @@ describe('DirectoryWatchService', () => {
 
         it('should allow hooks to fill in the invalidationMap', async () => {
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles) {
                     for (const filePath of affectedFiles) {
@@ -245,6 +251,7 @@ describe('DirectoryWatchService', () => {
         it('should report change for all files affected by the changeOrigin', async () => {
             const changeSpy = spy();
             const watcher = new DirectoryProcessService(fs, {
+                watchMode: true,
                 fileFilter: isTemplateFile,
                 processFiles(watcher, affectedFiles, changeOrigin) {
                     for (const filePath of affectedFiles) {
