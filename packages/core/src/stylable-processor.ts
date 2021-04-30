@@ -172,6 +172,14 @@ export class StylableProcessor {
 
         const stubs = this.insertCustomSelectorsStubs();
 
+        for (const node of root.nodes) {
+            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
+                const imported = this.handleImport(node);
+                this.meta.imports.push(imported);
+                this.addImportSymbols(imported);
+            }
+        }
+
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
                 this.handleCustomSelectors(rule);
@@ -272,9 +280,9 @@ export class StylableProcessor {
                         );
                         atRule.remove();
                     } else {
-                        const _import = this.handleStImport(atRule);
-                        this.meta.imports.push(_import);
-                        this.addImportSymbols(_import);
+                        const stImport = this.handleStImport(atRule);
+                        this.meta.imports.push(stImport);
+                        this.addImportSymbols(stImport);
                     }
 
                     break;
@@ -380,10 +388,7 @@ export class StylableProcessor {
                             rule.remove();
                             return false;
                         }
-
-                        const imported = this.handleImport(rule);
-                        this.meta.imports.push(imported);
-                        this.addImportSymbols(imported);
+                        rule.remove();
                         return false;
                     } else {
                         this.diagnostics.warn(
@@ -906,8 +911,6 @@ export class StylableProcessor {
         if (!importObj.from) {
             this.diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
         }
-
-        rule.remove();
 
         return importObj;
     }
