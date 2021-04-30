@@ -1033,6 +1033,11 @@
   dependencies:
     "@types/css-tree" "*"
 
+"@types/deindent@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@types/deindent/-/deindent-0.1.0.tgz#67775bc1841dfb260630f66cf29e8487dc92d8db"
+  integrity sha512-3by89NLVgO0itemyomWio5JoAKDYDtOuLtv562WVQZugsRWd7sjnI+4EaBzYGmN09nY0s5uVIrpM82/bAv+WqQ==
+
 "@types/eslint-scope@^3.7.0":
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.0.tgz#4792816e31119ebd506902a482caec4951fabd86"
@@ -1213,6 +1218,13 @@
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse5/-/parse5-6.0.0.tgz#38590dc2c3cf5717154064e3ee9b6947ee21b299"
   integrity sha512-oPwPSj4a1wu9rsXTEGIJz91ISU725t0BmSnUhb57sI+M8XEmvUop84lzuiYdq0Y5M6xLY8DBPg0C2xEQKLyvBA==
+
+"@types/postcss-safe-parser@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/postcss-safe-parser/-/postcss-safe-parser-5.0.0.tgz#673ec52df4e0efdb82d5d63f196d3905c7704413"
+  integrity sha512-ZVVjasBjRC3ZrXbrIZEd5fqSvdxAXKB2ise5Ysw+7XWKYPct/BiMwT8bZy8xbJiaZ5aqjn5s8RgtgoCbWmas4Q==
+  dependencies:
+    postcss "^8.1.0"
 
 "@types/prop-types@*":
   version "15.7.3"
