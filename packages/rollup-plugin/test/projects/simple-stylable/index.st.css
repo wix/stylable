@@ -1,0 +1,14 @@
+.root {
+    font-size: 120px;
+    font-family: monospace;
+    background: url("./asset.png");
+}
+
+.part {
+    -st-states: myState;
+    background: url("./dog.png");
+}
+
+.part:myState {
+    color: green;
+}

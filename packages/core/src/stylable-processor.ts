@@ -327,13 +327,7 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
-        processDeclarationUrls(
-            decl,
-            (node) => {
-                this.meta.urls.push(node.url!);
-            },
-            false
-        );
+        processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
     }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
