@@ -33,10 +33,10 @@ yarn create stylable-app <project-name>
 
 | Option       | Alias  | Description                                                         | Default Value      |
 | ------------ | ------ | ------------------------------------------------------------------- | ------------------ |
-| template     | `-t`   | project template to use (`ts-react-webpack` or `ts-react-rollup`)   | `ts-react-webpack` |
-| verboseNpm   |        | print verbose npm log                                               | `false`            |
-| help         | `-h`   | Show this help                                                      |                    |
-| version      |        | show `create-stylable-app` version number                           |                    |
+| `--template`     | `-t`   | project template to use (`ts-react-webpack` or `ts-react-rollup`)   | `ts-react-webpack` |
+| `--verboseNpm`   |        | print verbose npm log                                               | `false`            |
+| `--help`         | `-h`   | Show this help                                                      |                    |
+| `--version`      | `-v`   | show `create-stylable-app` version number                           |                    |
 
 ## License
 

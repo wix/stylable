@@ -131,6 +131,7 @@ const { argv } = yargs
         choices: ['strict', 'loose'],
     })
     .alias('h', 'help')
+    .alias('v', 'version')
     .help()
     .strict();
 

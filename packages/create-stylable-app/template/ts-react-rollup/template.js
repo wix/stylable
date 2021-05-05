@@ -33,7 +33,7 @@ module.exports = {
         scripts: {
             clean: 'rimraf dist',
             prebuild: 'npm run clean',
-            build: 'rollup -c --environment MODE:production',
+            build: 'rollup -c --environment NODE_ENV:production',
             start: 'rollup -c -w',
             serve: 'serve ./dist',
             lint: 'eslint . -f codeframe',

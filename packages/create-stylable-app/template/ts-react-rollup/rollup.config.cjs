@@ -8,7 +8,7 @@ const rollupTypescript = require('@rollup/plugin-typescript');
 const copy = require('rollup-plugin-copy');
 const serve = require('rollup-plugin-serve');
 
-const productionMode = process.env.MODE === 'production';
+const isProductionMode = process.env.NODE_ENV === 'production';
 
 /** @type {import('rollup').RollupOptions} */
 module.exports = {
@@ -16,12 +16,12 @@ module.exports = {
   output: {
     file: 'dist/bundle.js',
     format: 'umd',
-    sourcemap: !productionMode,
+    sourcemap: !isProductionMode,
   },
 
   plugins: [
     replace({
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       preventAssignment: true,
     }),
     image(),
@@ -29,11 +29,11 @@ module.exports = {
     commonjs(),
     html({}),
     rollupTypescript(),
-    stylableRollupPlugin({ optimization: { minify: productionMode } }),
+    stylableRollupPlugin({ optimization: { minify: isProductionMode } }),
     copy({
       targets: [{ src: 'favicon.ico', dest: 'dist' }],
     }),
-    !productionMode &&
+    !isProductionMode &&
       serve({
         open: true,
         contentBase: ['dist'],

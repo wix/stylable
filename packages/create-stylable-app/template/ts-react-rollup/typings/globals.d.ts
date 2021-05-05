@@ -1,6 +1,8 @@
 declare module '*.st.css' {
-    const stylesheet: import('@stylable/runtime').RuntimeStylesheet;
-    export = stylesheet;
+    export * from '@stylable/runtime/stylesheet';
+
+    const defaultExport: never;
+    export default defaultExport;
 }
 
 declare module '*.png' {
