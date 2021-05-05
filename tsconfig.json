@@ -1,6 +1,8 @@
 {
   "files": [],
   "references": [
+    { "path": "./packages/build-tools/test" },
+    { "path": "./packages/build-tools/src" },
     { "path": "./packages/cli/src" },
     { "path": "./packages/cli/test" },
     { "path": "./packages/core/src" },
@@ -26,7 +28,10 @@
     { "path": "./packages/node/test" },
     { "path": "./packages/optimizer/src" },
     { "path": "./packages/optimizer/test" },
+    { "path": "./packages/rollup-plugin/src" },
+    { "path": "./packages/rollup-plugin/test" },
     { "path": "./packages/runtime/src" },
+    { "path": "./packages/runtime/src/tsconfig.esm.json" },
     { "path": "./packages/runtime/test" },
     { "path": "./packages/schema-extract/src" },
     { "path": "./packages/schema-extract/test" },

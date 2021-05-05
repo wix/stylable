@@ -16,6 +16,103 @@ describe('Stylable postcss transform (General)', () => {
         expect(result.toString()).to.equal('');
     });
 
+    it('should hoist :imports', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        
+                        :import {
+                            -st-from:"./index.st.css";
+                            -st-named: Comp;
+                        }
+                        
+                        Comp{}
+
+                    `,
+                },
+                '/index.st.css': {
+                    namespace: 'index',
+                    content: `
+                        
+                        :import {
+                            -st-from:"./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        
+                        Comp{}
+                        
+                        :import {
+                            -st-from:"./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        
+                        Comp{}
+                    `,
+                },
+                '/comp.st.css': {
+                    namespace: 'comp',
+                    content: `
+                        .root{}                        
+                    `,
+                },
+            },
+        });
+
+        expect(result.nodes[0].toString()).to.equal('.comp__root{}');
+    });
+
+    it('should hoist :imports and support different import symbols', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    content: `
+                        
+                        :import {
+                            -st-from:"./index.st.css";
+                            -st-named: Comp, part;
+                        }
+                        
+                        Comp{}
+                        .part{}
+
+                    `,
+                },
+                '/index.st.css': {
+                    namespace: 'index',
+                    content: `
+                        
+                        :import {
+                            -st-from:"./comp.st.css";
+                            -st-default: Comp;
+                        }
+                        
+                        Comp{}
+                        
+                        :import {
+                            -st-from:"./comp.st.css";
+                            -st-named: part;
+                        }
+                        
+                        .part{}
+                    `,
+                },
+                '/comp.st.css': {
+                    namespace: 'comp',
+                    content: `
+                        .root{}                        
+                        .part{}                        
+                    `,
+                },
+            },
+        });
+
+        expect(result.nodes[0].toString()).to.equal('.comp__root{}');
+        expect(result.nodes[1].toString()).to.equal('.comp__part{}');
+    });
+
     it('should not output :import', () => {
         const result = generateStylableRoot({
             entry: `/a/b/style.st.css`,

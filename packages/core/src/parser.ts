@@ -1,4 +1,4 @@
-import postcss, { ProcessOptions, Root } from 'postcss';
+import postcss, { ProcessOptions, Root, parse as cssParse } from 'postcss';
 import postcssNested from 'postcss-nested';
 import postcssJS from 'postcss-js';
 import safeParser from 'postcss-safe-parser';
@@ -15,3 +15,5 @@ export type CssParser = typeof safeParse;
 export function safeParse(css: string, options: ProcessOptions = { from: 'style.css' }): Root {
     return safeParser(css, options);
 }
+
+export { cssParse };

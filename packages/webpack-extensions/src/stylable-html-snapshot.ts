@@ -1,10 +1,14 @@
 import { basename, join } from 'path';
-import { Module, Compiler, Compilation, sources } from 'webpack';
+import type { Module, Compiler, Compilation, ModuleGraph, NormalModule } from 'webpack';
 import { compileAsEntry, exec } from './compile-as-entry';
 
-import { getCSSViewModules, isStylableModule, uniqueFilterMap } from '@stylable/webpack-plugin';
+import {
+    getCSSViewModuleWebpack,
+    isStylableModule,
+    uniqueFilterMap,
+} from '@stylable/webpack-plugin';
 
-const { RawSource } = sources;
+export type GetLogicModule = (module: Module, moduleGraph: ModuleGraph) => NormalModule | undefined;
 
 export interface HTMLSnapshotPluginOptions {
     outDir: string;
@@ -14,18 +18,17 @@ export interface HTMLSnapshotPluginOptions {
      * have stylesheet `a.st.css`, which is imported by a few files. By default, this method
      * will attempt to find `a.tsx`.
      */
-    getLogicModule?: typeof getCSSViewModules;
+    getLogicModule?: GetLogicModule;
 }
 
 export class HTMLSnapshotPlugin {
     private outDir: string;
     private render: (componentModule: any, component: any) => string | false;
-    private getLogicModule: typeof getCSSViewModules;
-
+    private userGetLogicModule: GetLogicModule | undefined;
     constructor(options: Partial<HTMLSnapshotPluginOptions>) {
         this.outDir = options.outDir || '';
         this.render = options.render || (() => false);
-        this.getLogicModule = options.getLogicModule || getCSSViewModules;
+        this.userGetLogicModule = options.getLogicModule;
     }
     public apply(compiler: Compiler) {
         compiler.hooks.thisCompilation.tap('HTMLSnapshotPlugin', (compilation) => {
@@ -33,14 +36,20 @@ export class HTMLSnapshotPlugin {
                 const stylableModules = uniqueFilterMap(compilation.modules, (m) => {
                     return isStylableModule(m) ? m : null;
                 });
+                const getLogicModule =
+                    this.userGetLogicModule || getCSSViewModuleWebpack(compilation.moduleGraph);
                 for (const module of stylableModules) {
-                    await this.snapShotStylableModule(compilation, module);
+                    await this.snapShotStylableModule(compilation, module, getLogicModule);
                 }
             });
         });
     }
-    public async snapShotStylableModule(compilation: Compilation, module: Module) {
-        const component = this.getLogicModule(module, compilation.moduleGraph);
+    private async snapShotStylableModule(
+        compilation: Compilation,
+        module: Module,
+        getLogicModule: GetLogicModule
+    ) {
+        const component = getLogicModule(module, compilation.moduleGraph);
         if (!component || !component.context) {
             return;
         }
@@ -60,7 +69,10 @@ export class HTMLSnapshotPlugin {
         );
 
         if (!compilation.assets[targetPath]) {
-            compilation.assets[targetPath] = new RawSource(html, false);
+            compilation.assets[targetPath] = new compilation.compiler.webpack.sources.RawSource(
+                html,
+                false
+            );
         } else {
             compilation.errors.push(
                 new Error(

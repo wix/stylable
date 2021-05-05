@@ -1,4 +1,4 @@
-export { safeParse } from './parser';
+export * from './parser';
 export * from './cached-process-file';
 export * from './stylable-processor';
 export * from './stylable-transformer';

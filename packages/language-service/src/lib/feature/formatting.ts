@@ -1,5 +1,5 @@
 import { css } from 'js-beautify';
-import { FormattingOptions } from 'vscode-languageserver';
+import type { FormattingOptions } from 'vscode-languageserver';
 
 export interface JSBeautifyFormatCSSOptions {
     indent_size?: number;

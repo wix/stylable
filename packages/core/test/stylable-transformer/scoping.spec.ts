@@ -192,6 +192,67 @@ describe('Stylable postcss transform (Scoping)', () => {
             expect(result.nodes.length).to.equal(2);
         });
 
+        it('should add a warning rule while in development mode that targets a broken inheritance structure (deep import)', () => {
+            const result = generateStylableRoot({
+                entry: `/style.st.css`,
+                files: {
+                    '/style.st.css': {
+                        namespace: 'style',
+                        content: `
+                            :import {
+                                -st-from: "./index.st.css";
+                                -st-named: Inner;
+                            }
+                            .root {
+                                -st-extends: Inner;
+                            }
+                        `,
+                    },
+                    '/inner.st.css': {
+                        namespace: 'inner',
+                        content: `
+                        `,
+                    },
+                    '/index.st.css': {
+                        namespace: 'index',
+                        content: `
+                            :import {
+                                -st-from: './inner.st.css';
+                                -st-default: Inner;
+                            }
+                            .root Inner {}
+                        `,
+                    },
+                },
+                mode: 'development',
+            });
+
+            expect((result.nodes[0] as postcss.Rule).selector).to.equal('.style__root');
+            expect((result.nodes[1] as postcss.Rule).selector).to.equal(
+                '.style__root:not(.inner__root)::before'
+            );
+
+            (createWarningRule(
+                'root',
+                'inner__root',
+                'inner.st.css',
+                'root',
+                'style__root',
+                'style.st.css'
+            ).nodes as postcss.Declaration[]).forEach(
+                (decl: postcss.Declaration, index: number) => {
+                    expect(
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
+                    ).to.eql(decl.prop);
+                    expect(
+                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
+                            .value
+                    ).to.eql(decl.value);
+                }
+            );
+            expect(result.nodes.length).to.equal(2);
+        });
+
         it('should not add a warning rule while in development when apply with mixin', () => {
             const result = generateStylableRoot({
                 entry: `/entry.st.css`,
