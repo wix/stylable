@@ -1,8 +1,19 @@
 import path from 'path';
 import type * as postcss from 'postcss';
-import cssSelectorTokenizer, { AnyValueNode, UrlNode } from 'css-selector-tokenizer';
+import cssSelectorTokenizer from 'css-selector-tokenizer';
 
 const { parseValues, stringifyValues } = cssSelectorTokenizer;
+
+export interface UrlNode {
+    type: 'url';
+    url: string;
+    stringType?: string;
+    name?: string;
+    before?: string;
+    after?: string;
+    innerSpacingBefore?: string;
+    innerSpacingAfter?: string;
+}
 
 export type OnUrlCallback = (node: UrlNode) => void;
 
@@ -63,7 +74,7 @@ export function processDeclarationUrls(
     }
 }
 
-function findUrls(node: AnyValueNode, onUrl: OnUrlCallback) {
+function findUrls(node: cssSelectorTokenizer.AnyValueNode, onUrl: OnUrlCallback) {
     switch (node.type) {
         case 'value':
             node.nodes.forEach((child) => findUrls(child, onUrl));
