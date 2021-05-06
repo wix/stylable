@@ -109,6 +109,11 @@ interface StylableWebpackPluginOptions {
      * entries - extract file per entry which does not depend on another entry
      */
     extractMode?: 'single' | 'entries';
+    /**
+     * Allow filter for url asset processing.
+     * Filtered asset will not be processed and remain untouched.
+     */
+    assetFilter?: (url: string, context: string) => boolean;
 }
 
 ```

@@ -2,12 +2,20 @@ import type { UrlNode } from 'css-selector-tokenizer';
 import { isAsset, makeAbsolute, processDeclarationUrls, StylableMeta } from '@stylable/core';
 import { dirname } from 'path';
 
-export function processUrlDependencies(meta: StylableMeta, rootContext: string) {
+function defaultFilter() {
+    return true;
+}
+
+export function processUrlDependencies(
+    meta: StylableMeta,
+    rootContext: string,
+    filter: (url: string, context: string) => boolean = defaultFilter
+) {
     const importerDir = dirname(meta.source);
     const urls: string[] = [];
     const onUrl = (node: UrlNode) => {
         const { url } = node;
-        if (url && isAsset(url)) {
+        if (url && isAsset(url) && filter(url, importerDir)) {
             node.stringType = '"';
             delete node.innerSpacingBefore;
             delete node.innerSpacingAfter;

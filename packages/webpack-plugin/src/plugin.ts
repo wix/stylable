@@ -115,7 +115,8 @@ export interface StylableWebpackPluginOptions {
      */
     extractMode?: 'single' | 'entries';
     /**
-     *
+     * Allow filter for url asset processing.
+     * Filtered asset will not be processed and remain untouched.
      */
     assetFilter?: (url: string, context: string) => boolean;
     /**
