@@ -151,6 +151,9 @@ export const processorWarnings = {
     INVALID_CUSTOM_PROPERTY_AS_VALUE(name: string, as: string) {
         return `invalid alias for custom property "${name}" as "${as}"; custom properties must be prefixed with "--" (double-dash)`;
     },
+    INVALID_NAMESPACE_REFERENCE() {
+        return 'st-namespace-reference dose not have any value';
+    },
 };
 
 export class StylableProcessor {
@@ -168,6 +171,14 @@ export class StylableProcessor {
         this.handleAtRules(root);
 
         const stubs = this.insertCustomSelectorsStubs();
+
+        for (const node of root.nodes) {
+            if (node.type === 'rule' && node.selector === rootValueMapping.import) {
+                const imported = this.handleImport(node);
+                this.meta.imports.push(imported);
+                this.addImportSymbols(imported);
+            }
+        }
 
         root.walkRules((rule) => {
             if (!isChildOfAtRule(rule, 'keyframes')) {
@@ -269,9 +280,9 @@ export class StylableProcessor {
                         );
                         atRule.remove();
                     } else {
-                        const _import = this.handleStImport(atRule);
-                        this.meta.imports.push(_import);
-                        this.addImportSymbols(_import);
+                        const stImport = this.handleStImport(atRule);
+                        this.meta.imports.push(stImport);
+                        this.addImportSymbols(stImport);
                     }
 
                     break;
@@ -324,26 +335,21 @@ export class StylableProcessor {
         this.meta.namespace = this.handleNamespaceReference(namespace);
     }
     private collectUrls(decl: postcss.Declaration) {
-        processDeclarationUrls(
-            decl,
-            (node) => {
-                this.meta.urls.push(node.url!);
-            },
-            false
-        );
+        processDeclarationUrls(decl, (node) => this.meta.urls.push(node.url), false);
     }
     private handleNamespaceReference(namespace: string): string {
         let pathToSource: string | undefined;
-        this.meta.ast.walkComments((comment) => {
-            if (comment.text.includes('st-namespace-reference')) {
-                const namespaceReferenceParts = comment.text.split('=');
-                pathToSource = stripQuotation(
-                    namespaceReferenceParts[namespaceReferenceParts.length - 1]
-                );
-                return false;
+        for (const node of this.meta.ast.nodes) {
+            if (node.type === 'comment' && node.text.includes('st-namespace-reference')) {
+                const i = node.text.indexOf('=');
+                if (i === -1) {
+                    this.diagnostics.error(node, processorWarnings.INVALID_NAMESPACE_REFERENCE());
+                } else {
+                    pathToSource = stripQuotation(node.text.slice(i + 1));
+                }
+                break;
             }
-            return undefined;
-        });
+        }
 
         return this.resolveNamespace(
             namespace,
@@ -376,10 +382,7 @@ export class StylableProcessor {
                             rule.remove();
                             return false;
                         }
-
-                        const imported = this.handleImport(rule);
-                        this.meta.imports.push(imported);
-                        this.addImportSymbols(imported);
+                        rule.remove();
                         return false;
                     } else {
                         this.diagnostics.warn(
@@ -902,8 +905,6 @@ export class StylableProcessor {
         if (!importObj.from) {
             this.diagnostics.error(rule, processorWarnings.FROM_PROP_MISSING_IN_IMPORT());
         }
-
-        rule.remove();
 
         return importObj;
     }

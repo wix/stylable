@@ -20,6 +20,8 @@ import type {
 } from './types';
 import type { IStylableOptimizer, StylableResolverCache } from '@stylable/core';
 import decache from 'decache';
+import { CalcDepthContext, getCSSViewModule } from '@stylable/build-tools';
+import { join, parse } from 'path';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
@@ -419,6 +421,30 @@ export function getTopLevelInputFilesystem(compiler: Compiler) {
     return fileSystem;
 }
 
+export function createCalcDepthContext(moduleGraph: ModuleGraph): CalcDepthContext<Module> {
+    return {
+        getDependencies: (module) =>
+            uniqueFilterMap(moduleGraph.getOutgoingConnections(module), ({ module }) => module),
+        getImporters: (module) =>
+            uniqueFilterMap(
+                moduleGraph.getIncomingConnections(module),
+                ({ originModule }) => originModule
+            ),
+        getModulePathNoExt: (module) => {
+            if (isStylableModule(module)) {
+                return module.resource.replace(/\.st\.css/g, '');
+            }
+            const { dir, name } = parse((module as NormalModule)?.resource || '');
+            return join(dir, name);
+        },
+        isStylableModule: (module) => isStylableModule(module),
+    };
+}
+
+export function getCSSViewModuleWebpack(moduleGraph: ModuleGraph) {
+    const context = createCalcDepthContext(moduleGraph);
+    return (module: Module) => getCSSViewModule(module, context) as NormalModule | undefined;
+}
 /**
  * Provide a simple way to share build meta with other plugins without using module state like WeakMap<Compilation, DATA>
  */
@@ -478,4 +504,16 @@ export function getEntryPointModules(
             onModule(module);
         }
     }
+}
+
+export function isDependencyOf(entryPoint: EntryPoint, entrypoints: Iterable<EntryPoint>) {
+    // entryPoint.options.dependsOn is not in webpack types;
+    for (const parent of entryPoint.getParents()) {
+        for (const entry of entrypoints) {
+            if (parent.id === entry.id) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
