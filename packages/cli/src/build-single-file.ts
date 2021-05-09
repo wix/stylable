@@ -82,6 +82,9 @@ export function buildSingleFile({
     handleDiagnostics(res, diagnosticsMessages, filePath);
     // st.css
     if (outputSources) {
+        if (outSrcPath === filePath) {
+            throw new Error(`Attempt to override source file ${outSrcPath}`);
+        }
         if (useSourceNamespace && !content.includes('st-namespace-reference')) {
             const relativePathToSource = relative(dirname(outSrcPath), filePath).replace(
                 /\\/gm,
