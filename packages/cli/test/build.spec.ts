@@ -83,11 +83,11 @@ describe('build stand alone', () => {
             projectRoot: '/',
             fileSystem: fs,
             resolveNamespace(n, s) {
-                const fixedWidnowsRoot = fs.relative(
+                const fixedWindowsRoot = fs.relative(
                     '/',
-                    s.replace('C:\\', '/').replace('c:\\', '/').replace('\\', '/')
+                    s.replace(/^\w:\\/, '/').replace('\\', '/')
                 );
-                return n + murmurhash3_32_gc(fixedWidnowsRoot);
+                return n + murmurhash3_32_gc(fixedWindowsRoot);
             },
         });
 
