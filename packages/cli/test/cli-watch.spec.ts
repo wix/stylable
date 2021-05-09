@@ -59,4 +59,47 @@ describe('Stylable Cli', () => {
             'dist/depend.st.css': '.root{ color:yellow; }',
         });
     });
+
+    it('should re-build derived files deep', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `
+                @st-import [color] from "./depend.st.css";
+                .root{ color:value(color); }
+            `,
+            'depend.st.css': `
+                @st-import [color] from "./deep.st.css";
+            `,
+            'deep.st.css': `
+                :vars {
+                    color: red;
+                }
+            `,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--cjs=false', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        writeToExistingFile(
+                            join(tempDir.path, 'deep.st.css'),
+                            ':vars { color: green; }'
+                        );
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style.css']).to.include('color:green');
+    });
 });
