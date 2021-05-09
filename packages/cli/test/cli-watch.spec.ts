@@ -1,3 +1,4 @@
+import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
@@ -101,5 +102,69 @@ describe('Stylable Cli', () => {
         });
         const files = loadDirSync(tempDir.path);
         expect(files['dist/style.css']).to.include('color:green');
+    });
+
+    it('should build newly added files', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--cjs=false', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style.css']).to.include('color:green');
+    });
+
+    it('should re-build indexes', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--indexFile', 'index.st.css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        writeFileSync(join(tempDir.path, 'comp.st.css'), `.root{ color:green }`);
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/index.st.css']).to.include('style.st.css');
+        expect(files['dist/index.st.css']).to.include('comp.st.css');
     });
 });

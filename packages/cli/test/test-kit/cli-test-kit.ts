@@ -43,6 +43,7 @@ export function createCliTester() {
         },
     };
 }
+
 export function writeToExistingFile(filePath: string, content: string) {
     if (existsSync(filePath)) {
         writeFileSync(filePath, content);
