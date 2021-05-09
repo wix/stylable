@@ -1,8 +1,3 @@
-declare module 'deindent' {
-    function deindent(parts: string | TemplateStringsArray): string;
-    export = deindent;
-}
-
 declare module 'mini-css-extract-plugin' {
     interface CssModule {
         new (options: {
@@ -35,14 +30,6 @@ declare module 'is-vendor-prefixed' {
 declare module 'postcss-js' {
     const postcssJs: import('postcss').Parser;
     export = postcssJs;
-}
-
-declare module 'postcss-safe-parser' {
-    function postcssSafeParser(
-        css: string,
-        options: import('postcss').ProcessOptions
-    ): import('postcss').Root;
-    export = postcssSafeParser;
 }
 
 declare module 'postcss-selector-matches/dist/replaceRuleSelector' {

@@ -1,6 +1,6 @@
 {
   "name": "@stylable/runtime",
-  "version": "4.1.1",
+  "version": "4.2.1",
   "description": "Stylable runtime DOM integration",
   "main": "dist/index.js",
   "scripts": {
@@ -10,8 +10,10 @@
   },
   "files": [
     "dist",
+    "esm",
     "!dist/test",
     "src",
+    "stylesheet.d.ts",
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {

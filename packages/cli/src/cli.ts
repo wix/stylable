@@ -139,6 +139,7 @@ const { argv } = yargs
         default: false,
     })
     .alias('h', 'help')
+    .alias('v', 'version')
     .help()
     .strict();
 
