@@ -4,6 +4,7 @@ import camelcase from 'lodash.camelcase';
 import upperfirst from 'lodash.upperfirst';
 import { basename, relative } from 'path';
 import { normalizeRelative, ensureDirectory, tryRun } from './build-tools';
+import type { Log } from './logger';
 
 export interface ReExports {
     root: string;
@@ -17,7 +18,7 @@ export class Generator {
     private indexFileOutput = new Map<string, ReExports>();
     private collisionDetector = new NameCollisionDetector<string>();
 
-    constructor(public stylable: Stylable, private log: (...args: string[]) => void) {}
+    constructor(public stylable: Stylable, private log: Log) {}
 
     public generateReExports(filePath: string): ReExports {
         return {

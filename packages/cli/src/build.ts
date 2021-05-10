@@ -5,7 +5,7 @@ import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
 import { buildSingleFile } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
-import { levels } from './logger';
+import { levels, Log } from './logger';
 import { reportDiagnostics } from './report-diagnostics';
 
 export const messages = {
@@ -22,7 +22,7 @@ export interface BuildOptions {
     srcDir: string;
     outDir: string;
     manifest?: string;
-    log: (...args: Array<string | symbol>) => void;
+    log: Log;
     indexFile?: string;
     generatorPath?: string;
     moduleFormats?: Array<'cjs' | 'esm'>;
@@ -106,7 +106,7 @@ export async function build({
             diagnosticsMessages.clear();
 
             buildFiles(affectedFiles);
-            updateWatcherDependencies();
+            updateWatcherDependencies(stylable, service, affectedFiles, sourceFiles);
             buildAggregatedEntities();
 
             if (diagnostics && diagnosticsMessages.size) {
@@ -120,20 +120,6 @@ export async function build({
                 }${changeOrigin ? ', watching...' : ''}`,
                 levels.info
             );
-            function updateWatcherDependencies() {
-                const resolver = stylable.createResolver({});
-                for (const filePath of affectedFiles) {
-                    sourceFiles.add(filePath);
-                    const meta = stylable.process(filePath);
-                    visitMetaCSSDependenciesBFS(
-                        meta,
-                        ({ source }) => {
-                            service.registerInvalidateOnChange(source, filePath);
-                        },
-                        resolver
-                    );
-                }
-            }
         },
     });
 
@@ -188,11 +174,7 @@ export async function build({
     }
 }
 
-function createGenerator(
-    stylable: Stylable,
-    log: (...args: string[]) => void,
-    generatorPath?: string
-) {
+function createGenerator(stylable: Stylable, log: Log, generatorPath?: string) {
     const generatorModule: { Generator: typeof Generator } = generatorPath
         ? require(generatorPath)
         : require('./base-generator');
@@ -205,6 +187,26 @@ function validateConfiguration(outputSources: boolean | undefined, outDir: strin
             'Invalid configuration: When using "stcss" outDir and srcDir must be different.' +
                 `\noutDir: ${outDir}` +
                 `\nsrcDir: ${srcDir}`
+        );
+    }
+}
+
+function updateWatcherDependencies(
+    stylable: Stylable,
+    service: DirectoryProcessService,
+    affectedFiles: Set<string>,
+    sourceFiles: Set<string>
+) {
+    const resolver = stylable.createResolver();
+    for (const filePath of affectedFiles) {
+        sourceFiles.add(filePath);
+        const meta = stylable.process(filePath);
+        visitMetaCSSDependenciesBFS(
+            meta,
+            ({ source }) => {
+                service.registerInvalidateOnChange(source, filePath);
+            },
+            resolver
         );
     }
 }

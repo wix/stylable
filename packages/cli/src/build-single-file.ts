@@ -3,12 +3,13 @@ import { createModuleSource } from '@stylable/module-utils';
 import { StylableOptimizer } from '@stylable/optimizer';
 import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
+import type { Log } from './logger';
 
 export interface BuildFileOptions {
     fullOutDir: string;
     filePath: string;
     fullSrcDir: string;
-    log: (...args: string[]) => void;
+    log: Log;
     fs: any;
     stylable: Stylable;
     diagnosticsMessages: Map<string, string[]>;

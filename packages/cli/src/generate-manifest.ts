@@ -1,6 +1,7 @@
 import type { Stylable } from '@stylable/core';
 import { dirname, relative } from 'path';
 import { ensureDirectory, tryRun } from './build-tools';
+import type { Log } from './logger';
 
 export function generateManifest(
     rootDir: string,
@@ -8,7 +9,7 @@ export function generateManifest(
     manifestOutputPath = '',
     stylable: Stylable,
     mode: string,
-    log: (...args: string[]) => void,
+    log: Log,
     fs: any
 ) {
     function getBuildNamespace(stylable: Stylable, filePath: string): string {
