@@ -171,24 +171,23 @@ describe('Stylable postcss transform (Scoping)', () => {
                 '.ns__root:not(.ns1__root)::before'
             );
 
-            (createWarningRule(
-                'root',
-                'ns1__root',
-                'inner.st.css',
-                'root',
-                'ns__root',
-                'style.st.css'
-            ).nodes as postcss.Declaration[]).forEach(
-                (decl: postcss.Declaration, index: number) => {
-                    expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
-                    ).to.eql(decl.prop);
-                    expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
-                            .value
-                    ).to.eql(decl.value);
-                }
-            );
+            (
+                createWarningRule(
+                    'root',
+                    'ns1__root',
+                    'inner.st.css',
+                    'root',
+                    'ns__root',
+                    'style.st.css'
+                ).nodes as postcss.Declaration[]
+            ).forEach((decl: postcss.Declaration, index: number) => {
+                expect(
+                    ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
+                ).to.eql(decl.prop);
+                expect(
+                    ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).value
+                ).to.eql(decl.value);
+            });
             expect(result.nodes.length).to.equal(2);
         });
 
@@ -232,24 +231,23 @@ describe('Stylable postcss transform (Scoping)', () => {
                 '.style__root:not(.inner__root)::before'
             );
 
-            (createWarningRule(
-                'root',
-                'inner__root',
-                'inner.st.css',
-                'root',
-                'style__root',
-                'style.st.css'
-            ).nodes as postcss.Declaration[]).forEach(
-                (decl: postcss.Declaration, index: number) => {
-                    expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
-                    ).to.eql(decl.prop);
-                    expect(
-                        ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration)
-                            .value
-                    ).to.eql(decl.value);
-                }
-            );
+            (
+                createWarningRule(
+                    'root',
+                    'inner__root',
+                    'inner.st.css',
+                    'root',
+                    'style__root',
+                    'style.st.css'
+                ).nodes as postcss.Declaration[]
+            ).forEach((decl: postcss.Declaration, index: number) => {
+                expect(
+                    ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).prop
+                ).to.eql(decl.prop);
+                expect(
+                    ((result.nodes[1] as postcss.Rule).nodes[index] as postcss.Declaration).value
+                ).to.eql(decl.value);
+            });
             expect(result.nodes.length).to.equal(2);
         });
 

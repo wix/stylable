@@ -9,6 +9,5 @@ export function resolveNamespaceFactory(
     return packageNamespaceFactory(findConfig, require, { dirname, relative }, hashSalt, prefix);
 }
 
-export const resolveNamespace: ReturnType<
-    typeof packageNamespaceFactory
-> = resolveNamespaceFactory();
+export const resolveNamespace: ReturnType<typeof packageNamespaceFactory> =
+    resolveNamespaceFactory();

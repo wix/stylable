@@ -42,9 +42,11 @@ export async function createProjectFromTemplate({
 
     // package name validation
     const targetDirectoryName = path.basename(targetDirectoryPath);
-    const { validForNewPackages, warnings = [], errors = [] } = validatePackageName(
-        targetDirectoryName
-    );
+    const {
+        validForNewPackages,
+        warnings = [],
+        errors = [],
+    } = validatePackageName(targetDirectoryName);
     if (!validForNewPackages) {
         console.error(`[!] "${targetDirectoryName}" is not a valid npm package name:`);
         for (const namingIssue of [...errors, ...warnings]) {

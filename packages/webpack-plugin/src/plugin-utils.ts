@@ -25,7 +25,7 @@ import { join, parse } from 'path';
 
 export function* uniqueFilterMap<T, O = T>(
     iter: Iterable<T>,
-    map = (item: T): O => (item as unknown) as O,
+    map = (item: T): O => item as unknown as O,
     filter = (item: O): item is NonNullable<O> => item !== undefined && item !== null
 ) {
     const s = new Set();
@@ -308,7 +308,9 @@ export function findIfStylableModuleUsed(
     for (const connectionModule of inConnections) {
         if (connectionModule.buildMeta.sideEffectFree) {
             const info = moduleGraph.getExportsInfo(connectionModule);
-            const usedExports = (info.getUsedExports as any)(/*if passed undefined it finds usages in all chunks*/);
+            const usedExports = (
+                info.getUsedExports as any
+            )(/*if passed undefined it finds usages in all chunks*/);
             if (usedExports === false) {
                 continue;
             } else if (usedExports === true || usedExports === null) {

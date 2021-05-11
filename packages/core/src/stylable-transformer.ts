@@ -493,13 +493,8 @@ export class StylableTransformer {
         return outputAst;
     }
     private handleChunkNode(context: ScopeContext) {
-        const {
-            currentAnchor,
-            metaParts,
-            node,
-            originMeta,
-            transformGlobals,
-        } = context as Required<ScopeContext>;
+        const { currentAnchor, metaParts, node, originMeta, transformGlobals } =
+            context as Required<ScopeContext>;
         const { type, name } = node;
         if (type === 'class') {
             const resolved = metaParts.class[name] || [
@@ -724,10 +719,8 @@ export class StylableTransformer {
     private resolveMetaParts(meta: StylableMeta): MetaParts {
         let metaParts = this.metaParts.get(meta);
         if (!metaParts) {
-            const resolvedClasses: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
+            const resolvedClasses: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
+                {};
             for (const className of Object.keys(meta.classes)) {
                 resolvedClasses[className] = this.resolver.resolveExtends(
                     meta,
@@ -774,10 +767,8 @@ export class StylableTransformer {
                 );
             }
 
-            const resolvedElements: Record<
-                string,
-                Array<CSSResolve<ClassSymbol | ElementSymbol>>
-            > = {};
+            const resolvedElements: Record<string, Array<CSSResolve<ClassSymbol | ElementSymbol>>> =
+                {};
             for (const k of Object.keys(meta.elements)) {
                 resolvedElements[k] = this.resolver.resolveExtends(meta, k, true);
             }
@@ -860,9 +851,11 @@ function trimLeftSelectorAst(n: SelectorAstNode, i = 0) {
     }
 }
 
-function anyElementAnchor(
-    meta: StylableMeta
-): { type: 'class' | 'element'; name: string; resolved: Array<CSSResolve<ElementSymbol>> } {
+function anyElementAnchor(meta: StylableMeta): {
+    type: 'class' | 'element';
+    name: string;
+    resolved: Array<CSSResolve<ElementSymbol>>;
+} {
     return {
         type: 'element',
         name: '*',

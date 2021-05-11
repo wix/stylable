@@ -1,9 +1,7 @@
 import MemoryFS from 'memory-fs';
 
 export interface CustomMemoryFs extends MemoryFS {
-    statSync(
-        path: string
-    ): {
+    statSync(path: string): {
         isFile: () => boolean;
         isDirectory: () => boolean;
         isBlockDevice: () => boolean;

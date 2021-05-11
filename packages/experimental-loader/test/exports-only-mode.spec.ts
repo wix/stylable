@@ -24,8 +24,8 @@ describe(`(${project})`, () => {
         const { page } = await projectRunner.openInBrowser();
         const { classes, styleFunctionType } = await page.evaluate(() => {
             const classes = document.querySelector('.exports-classes')!.textContent;
-            const styleFunctionType = document.querySelector('.exports-style-function')!
-                .textContent;
+            const styleFunctionType =
+                document.querySelector('.exports-style-function')!.textContent;
 
             return {
                 classes,

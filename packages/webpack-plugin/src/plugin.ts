@@ -415,11 +415,8 @@ export class StylableWebpackPlugin {
                 (m) => m.resource
             );
 
-            const {
-                usageMapping,
-                namespaceMapping,
-                namespaceToFileMapping,
-            } = createOptimizationMapping(sortedModules, optimizer);
+            const { usageMapping, namespaceMapping, namespaceToFileMapping } =
+                createOptimizationMapping(sortedModules, optimizer);
 
             if (!this.options.unsafeMuteDiagnostics.DUPLICATE_MODULE_NAMESPACE) {
                 reportNamespaceCollision(namespaceToFileMapping, compilation.errors);
@@ -591,9 +588,7 @@ export class StylableWebpackPlugin {
     }
 }
 
-function isWebpackConfigProcessor(
-    config: any
-): config is {
+function isWebpackConfigProcessor(config: any): config is {
     webpackPlugin: (
         options: Required<StylableWebpackPluginOptions>,
         compiler: Compiler

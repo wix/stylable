@@ -23,11 +23,12 @@ export function rollupRunner({
     entry = 'index.js',
     pluginOptions,
 }: RollupRunnerOptions) {
-    const { context, projectDir, input, dispose: removeProject } = createTempProject(
-        projectPath,
-        nodeModulesPath,
-        entry
-    );
+    const {
+        context,
+        projectDir,
+        input,
+        dispose: removeProject,
+    } = createTempProject(projectPath, nodeModulesPath, entry);
 
     const dist = join(context, 'dist');
 

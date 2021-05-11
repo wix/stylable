@@ -21,9 +21,9 @@ export function injectCssModules(
         );
     }
 
-    const CssModule = (MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')).getCssModule(
-        webpack
-    );
+    const CssModule = (
+        MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')
+    ).getCssModule(webpack);
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
         const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;
