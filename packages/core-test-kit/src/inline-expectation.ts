@@ -1,12 +1,12 @@
 import type * as postcss from 'postcss';
 
-type RuleCheck = {
+interface RuleCheck {
     rule: postcss.Rule;
     msg?: string;
     expectedSelector: string;
     expectedDeclarations: [string, string][];
     declarationCheck: 'full' | 'none';
-};
+}
 
 /**
  * Test transformed stylesheets inline expectation comments
