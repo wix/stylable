@@ -1,7 +1,7 @@
 import fs, { writeFileSync } from 'fs';
 import { join } from 'path';
 import { Stylable } from '@stylable/core';
-import { createDTSContent } from '@stylable/module-utils';
+import { generateDTSContent } from '@stylable/module-utils';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { expect } from 'chai';
 import {
@@ -75,7 +75,7 @@ class DTSKit {
         });
         const genDTS = (internalPath: string) => {
             const results = stylable.transform(stylable.process(sourcePath(internalPath)));
-            write(internalPath + '.d.ts', createDTSContent(results));
+            write(internalPath + '.d.ts', generateDTSContent(results));
         };
         const typecheck = (internalPath: string) => {
             const filePath = sourcePath(internalPath);

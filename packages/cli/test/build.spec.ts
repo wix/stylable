@@ -265,7 +265,7 @@ describe('build stand alone', () => {
         const fs = createFS({
             '/main.st.css': `
                 .root   {}
-                .string {}`
+                .string {}`,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -277,18 +277,15 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: resolve('/'),
-            moduleFormats:[],
+            moduleFormats: [],
             log,
-            dts: true
+            dts: true,
         });
 
-        [
-            '/main.st.css',
-            '/main.st.css.d.ts',
-        ].forEach((p) => {
+        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
-    })
+    });
 
     it('DTS with states', () => {
         const fs = createFS({
@@ -296,7 +293,7 @@ describe('build stand alone', () => {
                 .root   { -st-states: x; }
                 .string { -st-states: y(string); }
                 .number { -st-states: z(number); }
-                .enum   { -st-states: z(enum(on, off, default)); }`
+                .enum   { -st-states: z(enum(on, off, default)); }`,
         });
 
         const stylable = new Stylable('/', fs, () => ({}));
@@ -308,16 +305,54 @@ describe('build stand alone', () => {
             outDir: '.',
             srcDir: '.',
             rootDir: resolve('/'),
-            moduleFormats:[],
+            moduleFormats: [],
             log,
-            dts: true
+            dts: true,
         });
 
-        [
-            '/main.st.css',
-            '/main.st.css.d.ts',
-        ].forEach((p) => {
+        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
             expect(fs.existsSync(resolve(p)), p).to.equal(true);
         });
-    })
+    });
+
+    it.only('DTS with mapping', () => {
+        const fs = createFS({
+            '/main.st.css': `
+                @keyframes blah {
+                    0% {}
+                    100% {}
+                }
+                :vars {
+                    v1: red;
+                    v2: green;
+                }
+                .root   { 
+                    -st-states: a, b, w;
+                    --c1: red;
+                    --c2: green;
+                 }
+                .string { -st-states: x(string); }
+                .number { -st-states: y(number); }
+                .enum   { -st-states: z(enum(on, off, default)); }`,
+        });
+
+        const stylable = new Stylable('/', fs, () => ({}));
+
+        build({
+            extension: '.st.css',
+            fs,
+            stylable,
+            outDir: '.',
+            srcDir: '.',
+            rootDir: resolve('/'),
+            moduleFormats: [],
+            log,
+            dts: true,
+            dtsSourceMap: true,
+        });
+
+        ['/main.st.css', '/main.st.css.d.ts'].forEach((p) => {
+            expect(fs.existsSync(resolve(p)), p).to.equal(true);
+        });
+    });
 });

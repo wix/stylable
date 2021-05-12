@@ -1,7 +1,4 @@
 import { StateParsedValue, StylableMeta, StylableResults } from '@stylable/core';
-import { SourceMapGenerator } from 'source-map';
-import { basename } from 'path';
-// import { SourceNode } from 'source-map';
 
 const SPACING = ' '.repeat(4);
 const asString = (v: string) => JSON.stringify(v);
@@ -61,7 +58,7 @@ function scope(name: string, namespace: string, delimiter = '__') {
     return namespace ? namespace + delimiter + name : name;
 }
 
-export function createDTSContent({ exports, meta }: StylableResults) {
+export function generateDTSContent({ exports, meta }: StylableResults) {
     const namespace = asString(meta.namespace);
     const classes = wrapNL(stringifyClasses(exports.classes, meta.namespace));
     const vars = wrapNL(stringifyStringRecord(exports.vars));
@@ -109,48 +106,4 @@ export {
 /* HELPERS */
 type NullableString = string | undefined | null;
 `;
-}
-
-export function createDTSSourceMap(srcFilename: string, _dtsContent: string, _meta: StylableMeta) {
-    const filename = basename(srcFilename);
-    const map = new SourceMapGenerator({
-        file: `${filename}.d.ts`,
-    });
-    console.log(filename);
-
-    const newNode = {
-        generated: {
-            line: 9,
-            column: 5,
-        },
-        source: filename,
-        original: {
-            line: 6,
-            column: 1,
-        },
-        name: 'root',
-    };
-    // const newNode2 = {
-    //     generated: {
-    //         line: 9,
-    //         column: 9,
-    //     },
-    //     source: null,
-    //     original: null,
-    // };
-    // const node = new SourceNode(6, 1, filename, 'root');
-
-    // node.toString();
-
-    // map.addMapping({
-    //     source: filename,
-    //     generated: { line: 1, column: 0 },
-    //     original: { line: 1, column: 0 },
-    // });
-
-    map.addMapping(newNode);
-    // // @ts-expect-error sasyhgduyhguyh
-    // map.addMapping(newNode2);
-
-    return map.toString();
 }

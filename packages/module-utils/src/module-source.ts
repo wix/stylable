@@ -1,8 +1,6 @@
 import type { StylableResults } from '@stylable/core';
-import {
-    createDTSContent as generateDTSContent,
-    createDTSSourceMap as generateDTSSourceMap,
-} from './generate-dts';
+import { generateDTSContent } from './generate-dts';
+import { generateDTSSourceMap } from './generate-dts-sourcemaps';
 
 export function generateModuleSource(
     stylableResult: StylableResults,
