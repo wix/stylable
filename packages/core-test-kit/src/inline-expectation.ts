@@ -8,25 +8,34 @@ type RuleCheck = {
     declarationCheck: 'full' | 'none';
 };
 
-
 /**
  * Test transformed stylesheets inline expectation comments
  * rule checking (place just before rule)
- * 
+ *
  * full options:
  * @check(label)[5] .selector {decl: value}
- * 
+ *
  * basic:
  * @check .selector
- * 
+ *
  * with declarations (will check full match and order):
  * @check .selector {decl1: value; decl2: value}
- * 
- * Label for check:
+ *
+ * label for check:
  * @check(label for test) .selector
- * 
+ *
  * target generated rules (mixin):
- * @check[4] selector
+ * @check[4] .selector
+ *
+ * support multi line declarations:
+ * @check .selector {
+ *     decl1: value;
+ *     decl2: value;
+ * }
+ *
+ * support multi checks:
+ * @check .selector
+ * @check[1] .selector:hover
  */
 export function testInlineExpects(
     result: postcss.Root,
@@ -83,7 +92,11 @@ export function testInlineExpects(
     }
 }
 
-function createRuleCheck(rule: postcss.Rule, expectInput: string, errors: string[]): RuleCheck | undefined {
+function createRuleCheck(
+    rule: postcss.Rule,
+    expectInput: string,
+    errors: string[]
+): RuleCheck | undefined {
     const { msg, ruleIndex, expectedSelector, expectedBody } = expectInput.match(
         /(?<msg>\(.*\))*(\[(?<ruleIndex>\d+)\])*(?<expectedSelector>[^{}]*)\s*(?<expectedBody>.*)/s
     )!.groups!;
