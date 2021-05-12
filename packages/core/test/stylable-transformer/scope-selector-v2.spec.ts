@@ -90,8 +90,7 @@ describe('Stylable scope-selector v2', () => {
                         }
 
                         /* 
-                            ALIAS CHECK
-                            @check .style__root .base__base
+                            @check(ALIAS CHECK) .style__root .base__base
                         */
                         .root::base{}
 
