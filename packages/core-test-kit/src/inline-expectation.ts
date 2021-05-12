@@ -60,7 +60,6 @@ export function testInlineExpects(
                     }
                 }
             }
-            // const m = p.text.match(/@check(.*)/s);
         }
     });
     // check
