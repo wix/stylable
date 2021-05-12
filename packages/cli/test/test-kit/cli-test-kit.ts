@@ -14,11 +14,9 @@ export function createCliTester() {
         dirPath: string;
         args: string[];
         steps: Array<{ msg: string; action: () => boolean }>;
+        errors?: Array<{ msg: string; action: () => boolean }>;
     }) {
-        const cliProcess = runCli(
-            ['--rootDir', dirPath, '--outDir', './dist', '-w', '--log', ...args],
-            dirPath
-        );
+        const cliProcess = runCli(['--rootDir', dirPath, '--log', ...args], dirPath);
         cliProcesses.push(cliProcess as any);
         let index = 0;
 

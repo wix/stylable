@@ -7,10 +7,11 @@ import {
     createCliTester,
     loadDirSync,
     populateDirectorySync,
+    runCliSync,
     writeToExistingFile,
 } from './test-kit/cli-test-kit';
 
-describe('Stylable Cli', () => {
+describe('Stylable Cli Watch', () => {
     let tempDir: ITempDirectory;
     const { run, cleanup } = createCliTester();
     beforeEach(async () => {
@@ -35,7 +36,7 @@ describe('Stylable Cli', () => {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--cjs=false', '--stcss'],
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--stcss'],
             steps: [
                 {
                     msg: messages.START_WATCHING,
@@ -80,7 +81,7 @@ describe('Stylable Cli', () => {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--cjs=false', '--css'],
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
                     msg: messages.START_WATCHING,
@@ -111,7 +112,7 @@ describe('Stylable Cli', () => {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--cjs=false', '--css'],
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
             steps: [
                 {
                     msg: messages.START_WATCHING,
@@ -139,7 +140,7 @@ describe('Stylable Cli', () => {
 
         await run({
             dirPath: tempDir.path,
-            args: ['--indexFile', 'index.st.css'],
+            args: ['--outDir', './dist', '-w', '--indexFile', 'index.st.css'],
             steps: [
                 {
                     msg: messages.START_WATCHING,
@@ -166,5 +167,26 @@ describe('Stylable Cli', () => {
         const files = loadDirSync(tempDir.path);
         expect(files['dist/index.st.css']).to.include('style.st.css');
         expect(files['dist/index.st.css']).to.include('comp.st.css');
+    });
+
+    it('should error when source dir match out dir and output sources enabled', () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+        });
+
+        const res = runCliSync([
+            '--rootDir',
+            tempDir.path,
+            '--outDir',
+            './',
+            '--srcDir',
+            './',
+            '-w',
+            '--stcss',
+            '--cjs=false',
+        ]);
+        expect(res.stderr).to.contain(
+            'Error: Invalid configuration: When using "stcss" outDir and srcDir must be different.'
+        );
     });
 });
