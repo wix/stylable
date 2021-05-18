@@ -15,6 +15,7 @@
     "@stylable/node": "^4.2.2",
     "@stylable/optimizer": "^4.2.2",
     "@stylable/runtime": "^4.2.2",
+    "decache": "4.6.0",
     "mime": "^2.5.2",
     "toky": "^0.1.0"
   },

@@ -1,3 +1,5 @@
+@st-import [jsColor] from "./js-function.js";
+
 .root {
     font-size: 120px;
     font-family: monospace;
@@ -11,4 +13,5 @@
 
 .part:myState {
     color: green;
+    border: 5px solid jsColor(yellow);
 }
