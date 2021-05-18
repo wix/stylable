@@ -134,7 +134,61 @@ describe('inline-expectations', () => {
             ])
         );
     });
-    it('should throw when for keyframes nested rules', () => {
+    it('should throw for at rules params', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /* @check entry__anim */
+                        @keyframes animX {}
+
+                        /* @check(no body) "no-body" */
+                        @charset "utf-8";
+
+                        /* @check(complex) screen and (min-width: 8px) */
+                        @media screen and (min-width: 900px) {
+                            article {
+                              padding: 1rem 3rem;
+                            }
+                        }
+                    `,
+                },
+            },
+        });
+
+        expect(() => testInlineExpects(result)).to.throw(
+            testInlineExpectsErrors.combine([
+                testInlineExpectsErrors.atruleParams(`entry__anim`, `entry__animX`),
+                testInlineExpectsErrors.atruleParams(`"no-body"`, `"utf-8"`, `(no body): `),
+                testInlineExpectsErrors.atruleParams(
+                    `screen and (min-width: 8px)`,
+                    `screen and (min-width: 900px)`,
+                    `(complex): `
+                ),
+            ])
+        );
+    });
+    it('should throw for multi check on at rules', () => {
+        const result = generateStylableRoot({
+            entry: `/style.st.css`,
+            files: {
+                '/style.st.css': {
+                    namespace: 'entry',
+                    content: `
+                        /* @check entry__anim @check[1] entry__anim */
+                        @keyframes animX {}
+                    `,
+                },
+            },
+        });
+
+        expect(() => testInlineExpects(result)).to.throw(
+            testInlineExpectsErrors.atRuleMultiTest(`@check entry__anim @check[1] entry__anim`)
+        );
+    });
+    it('should throw for keyframes nested rules', () => {
         const result = generateStylableRoot({
             entry: `/style.st.css`,
             files: {

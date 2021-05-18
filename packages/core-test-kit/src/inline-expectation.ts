@@ -1,11 +1,18 @@
 import type * as postcss from 'postcss';
 
 interface RuleCheck {
+    kind: `rule`;
     rule: postcss.Rule;
     msg?: string;
     expectedSelector: string;
     expectedDeclarations: [string, string][];
     declarationCheck: 'full' | 'none';
+}
+interface AtRuleCheck {
+    kind: `atrule`;
+    rule: postcss.AtRule;
+    msg?: string;
+    expectedParams: string;
 }
 
 /**
@@ -36,6 +43,9 @@ interface RuleCheck {
  * support multi checks:
  * @check .selector
  * @check[1] .selector:hover
+ *
+ * support atrule params (anything between the @atrule and body or semicolon)
+ * @check screen and (min-width: 900px)
  */
 export function testInlineExpects(
     result: postcss.Root,
@@ -44,43 +54,67 @@ export function testInlineExpects(
     if (expectedTestsCount === 0) {
         throw new Error('no tests found try to add @check comments before any selector');
     }
-    const checks: RuleCheck[] = [];
+    const checks: Array<RuleCheck | AtRuleCheck> = [];
     const errors: string[] = [];
 
     // collect checks
-    result.walkRules((rule) => {
-        const p = rule.prev();
-        if (p && p.type === 'comment') {
-            const checksInput = p.text.split(`@check`);
-            for (const checkInput of checksInput) {
-                if (checkInput.trim()) {
-                    const check = createRuleCheck(rule, checkInput, errors);
-                    if (check) {
-                        checks.push(check);
+    result.walkComments((comment) => {
+        const checksInput = comment.text.split(`@check`);
+        const rule = comment.next();
+        if (checksInput.length > 1 && rule) {
+            if (rule.type === `rule`) {
+                for (const checkInput of checksInput) {
+                    if (checkInput.trim()) {
+                        const check = createRuleCheck(rule, checkInput, errors);
+                        if (check) {
+                            checks.push(check);
+                        }
                     }
+                }
+            }
+            if (rule.type === `atrule`) {
+                if (checksInput.length > 2) {
+                    errors.push(testInlineExpectsErrors.atRuleMultiTest(comment.text));
+                }
+                const check = createAtRuleCheck(rule, checksInput[1]);
+                if (check) {
+                    checks.push(check);
                 }
             }
         }
     });
     // check
-    checks.forEach(({ msg, rule, expectedSelector, expectedDeclarations, declarationCheck }) => {
-        const prefix = msg ? msg + `: ` : ``;
-        if (rule.selector !== expectedSelector) {
-            errors.push(testInlineExpectsErrors.selector(expectedSelector, rule.selector, prefix));
-        }
-        if (declarationCheck === `full`) {
-            const actualDecl = rule.nodes.map((x) => x.toString()).join(`; `);
-            const expectedDecl = expectedDeclarations
-                .map(([prop, value]) => `${prop}: ${value}`)
-                .join(`; `);
-            if (actualDecl !== expectedDecl) {
+    checks.forEach((check) => {
+        if (check.kind === `rule`) {
+            const { msg, rule, expectedSelector, expectedDeclarations, declarationCheck } = check;
+            const prefix = msg ? msg + `: ` : ``;
+            if (rule.selector !== expectedSelector) {
                 errors.push(
-                    testInlineExpectsErrors.declarations(
-                        expectedDecl,
-                        actualDecl,
-                        rule.selector,
-                        prefix
-                    )
+                    testInlineExpectsErrors.selector(expectedSelector, rule.selector, prefix)
+                );
+            }
+            if (declarationCheck === `full`) {
+                const actualDecl = rule.nodes.map((x) => x.toString()).join(`; `);
+                const expectedDecl = expectedDeclarations
+                    .map(([prop, value]) => `${prop}: ${value}`)
+                    .join(`; `);
+                if (actualDecl !== expectedDecl) {
+                    errors.push(
+                        testInlineExpectsErrors.declarations(
+                            expectedDecl,
+                            actualDecl,
+                            rule.selector,
+                            prefix
+                        )
+                    );
+                }
+            }
+        } else if (check.kind === `atrule`) {
+            const { msg, rule, expectedParams } = check;
+            const prefix = msg ? msg + `: ` : ``;
+            if (rule.params !== expectedParams) {
+                errors.push(
+                    testInlineExpectsErrors.atruleParams(expectedParams, rule.params, prefix)
                 );
             }
         }
@@ -123,11 +157,22 @@ function createRuleCheck(
         }
     }
     return {
+        kind: `rule`,
         msg,
         rule: targetRule,
         expectedSelector: expectedSelector.trim(),
         expectedDeclarations,
         declarationCheck,
+    };
+}
+function createAtRuleCheck(rule: postcss.AtRule, expectInput: string): AtRuleCheck | undefined {
+    const { msg, expectedParams } = expectInput.match(/(?<msg>\([^)]*\))*(?<expectedParams>.*)/)!
+        .groups!;
+    return {
+        kind: `atrule`,
+        msg,
+        rule,
+        expectedParams: expectedParams.trim(),
     };
 }
 
@@ -155,5 +200,8 @@ export const testInlineExpectsErrors = {
     unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
     malformedDecl: (decl: string, expectInput: string) =>
         `error in expectation "${decl}" of "${expectInput}"`,
+    atruleParams: (expectedParams: string, actualParams: string, label = ``) =>
+        `${label}expected ${actualParams} to transform to ${expectedParams}`,
+    atRuleMultiTest: (comment: string) => `atrule multi test is not supported (${comment})`,
     combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
 };

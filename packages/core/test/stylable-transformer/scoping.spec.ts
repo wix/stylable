@@ -1180,16 +1180,22 @@ describe('Stylable postcss transform (Scoping)', () => {
                     '/entry.st.css': {
                         namespace: 'entry',
                         content: `
+                            /* @check entry__name */
                             @keyframes name {
                                 from {}
                                 to {}
                             }
-
+                            
+                            /* @check entry__name2 */
                             @keyframes name2 {
                                 from {}
                                 to {}
                             }
 
+                            /* @check .entry__selector {
+                                animation: 2s entry__name infinite, 1s entry__name2 infinite;
+                                animation-name: entry__name;
+                            }*/
                             .selector {
                                 animation: 2s name infinite, 1s name2 infinite;
                                 animation-name: name;
@@ -1199,14 +1205,8 @@ describe('Stylable postcss transform (Scoping)', () => {
                     },
                 },
             });
-            expect((result.nodes[0] as postcss.AtRule).params).to.equal('entry__name');
-            expect((result.nodes[1] as postcss.AtRule).params).to.equal('entry__name2');
-            expect((result.nodes[2] as postcss.Rule).nodes[0].toString()).to.equal(
-                'animation: 2s entry__name infinite, 1s entry__name2 infinite'
-            );
-            expect((result.nodes[2] as postcss.Rule).nodes[1].toString()).to.equal(
-                'animation-name: entry__name'
-            );
+
+            testInlineExpects(result);
         });
 
         it('scope imported animation and animation name', () => {
