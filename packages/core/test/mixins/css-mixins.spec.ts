@@ -5,6 +5,7 @@ import {
     generateStylableRoot,
     matchAllRulesAndDeclarations,
     matchRuleAndDeclaration,
+    testInlineExpects,
 } from '@stylable/core-test-kit';
 import { processorWarnings } from '@stylable/core';
 
@@ -19,6 +20,7 @@ describe('CSS Mixins', () => {
                 .my-mixin {
                     color: red;
                 }
+                /* @check .entry__container {color: red;} */
                 .container {
                     -st-mixin: my-mixin;
                 }
@@ -27,7 +29,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry__container', 'color: red');
+        testInlineExpects(result);
     });
 
     it('last mixin wins with warning', () => {
@@ -43,6 +45,7 @@ describe('CSS Mixins', () => {
                 .my-mixin2 {
                     color: green;
                 }
+                /* @check .entry__container {color: green;} */
                 .container {
                     -st-mixin: my-mixin1;
                     -st-mixin: my-mixin2;
@@ -54,7 +57,7 @@ describe('CSS Mixins', () => {
 
         const report = result.meta.diagnostics.reports[0];
         expect(report.message).to.equal(processorWarnings.OVERRIDE_MIXIN('-st-mixin'));
-        matchRuleAndDeclaration(result.meta.outputAst!, 2, '.entry__container', 'color: green');
+        testInlineExpects(result.meta.outputAst!);
     });
 
     it('Mixin with function arguments with multiple params (comma separated)', () => {
@@ -62,12 +65,14 @@ describe('CSS Mixins', () => {
             entry: `/style.st.css`,
             files: {
                 '/style.st.css': {
+                    namespace: 'entry',
                     content: `
                         :import {
                             -st-from: "./formatter";
                             -st-default: formatter;
                         }
                         
+                        /* @check .entry__container {color: color-1, color-2} */
                         .container {
                             -st-mixin: Text(ZZZ formatter(color-1, color-2));
                         }
@@ -86,8 +91,8 @@ describe('CSS Mixins', () => {
                 },
             },
         });
-        const rule = result.nodes[0] as postcss.Rule;
-        expect(rule.nodes[0].toString()).to.equal('color: color-1, color-2');
+
+        testInlineExpects(result);
     });
 
     it('transform state form imported element', () => {
@@ -101,6 +106,7 @@ describe('CSS Mixins', () => {
                             -st-from: "./design.st.css";
                             -st-named: Base;
                         }
+                        /* @check[1] .entry__y.base--disabled { color: red; } */
                         .y {
                            -st-mixin: Base;
                         }
@@ -130,7 +136,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
+        testInlineExpects(result);
     });
 
     it('transform state form extended root when used as mixin', () => {
@@ -144,6 +150,7 @@ describe('CSS Mixins', () => {
                             -st-from: "./design.st.css";
                             -st-default: Design;
                         }
+                        /* @check[1] .entry__y.base--disabled {color: red;} */
                         .y {
                            -st-mixin: Design;
                         }
@@ -173,7 +180,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 1, '.entry__y.base--disabled', 'color: red');
+        testInlineExpects(result);
     });
 
     it.skip('mixin with multiple rules in keyframes', () => {
@@ -221,6 +228,7 @@ describe('CSS Mixins', () => {
                 .y {
                     -st-mixin: x;
                 }
+                /* @check .entry__container {color: red;} */
                 .container {
                     -st-mixin: y;
                 }
@@ -229,7 +237,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 2, '.entry__container', 'color: red');
+        testInlineExpects(result);
     });
 
     it('apply simple class mixin with circular refs to the same selector', () => {
@@ -239,10 +247,12 @@ describe('CSS Mixins', () => {
                 '/entry.st.css': {
                     namespace: 'entry',
                     content: `
+                /* @check .entry__x {color: red; color: red;} */
                 .x {
                     color: red;
                     -st-mixin: y;
                 }
+                /* @check .entry__y {color: red;} */
                 .y {
                     -st-mixin: x;
                 }
@@ -251,9 +261,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
-
-        matchRuleAndDeclaration(result, 1, '.entry__y', 'color: red');
+        testInlineExpects(result);
     });
 
     it('apply simple class mixin with circular refs from multiple files', () => {
@@ -267,6 +275,7 @@ describe('CSS Mixins', () => {
                             -st-from: "./style1.st.css";
                             -st-named: y;
                         }
+                        /* @check .entry__x {color: red; color: red;} */
                         .x {
                             color: red;
                             -st-mixin: y;
@@ -288,7 +297,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red;color: red');
+        testInlineExpects(result);
     });
 
     it('append complex selector that starts with the mixin name', () => {
@@ -305,6 +314,10 @@ describe('CSS Mixins', () => {
                 .my-mixin .my-other-class {
                     color: green;
                 }
+                /* 
+                    @check[1] .entry__container:hover {color: blue;} 
+                    @check[2] .entry__container .entry__my-other-class {color: green;}
+                */
                 .container {
                     -st-mixin: my-mixin;
                 }
@@ -313,14 +326,7 @@ describe('CSS Mixins', () => {
             },
         });
 
-        matchRuleAndDeclaration(result, 3, '.entry__container:hover', 'color: blue');
-
-        matchRuleAndDeclaration(
-            result,
-            4,
-            '.entry__container .entry__my-other-class',
-            'color: green'
-        );
+        testInlineExpects(result);
     });
 
     it('should scope @keyframes from local mixin without duplicating the animation', () => {
