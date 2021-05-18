@@ -66,28 +66,31 @@ export function testInlineExpects(
     checks.forEach(({ msg, rule, expectedSelector, expectedDeclarations, declarationCheck }) => {
         const prefix = msg ? msg + `: ` : ``;
         if (rule.selector !== expectedSelector) {
-            errors.push(`${prefix}expected ${rule.selector} to transform to ${expectedSelector}`);
+            errors.push(testInlineExpectsErrors.selector(expectedSelector, rule.selector, prefix));
         }
         if (declarationCheck === `full`) {
-            const actualDecl = rule.nodes.map((x) => x.toString()).join(`;`);
+            const actualDecl = rule.nodes.map((x) => x.toString()).join(`; `);
             const expectedDecl = expectedDeclarations
                 .map(([prop, value]) => `${prop}: ${value}`)
-                .join(`;`);
+                .join(`; `);
             if (actualDecl !== expectedDecl) {
                 errors.push(
-                    `${prefix}expected ${rule.selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`
+                    testInlineExpectsErrors.declarations(
+                        expectedDecl,
+                        actualDecl,
+                        rule.selector,
+                        prefix
+                    )
                 );
             }
         }
     });
     // report errors
     if (errors.length) {
-        throw new Error('\n' + errors.join('\n'));
+        throw new Error(testInlineExpectsErrors.combine(errors));
     }
     if (expectedTestsCount !== checks.length) {
-        throw new Error(
-            `Expected ${expectedTestsCount} checks to run but there was ${checks.length}`
-        );
+        throw new Error(testInlineExpectsErrors.matchAmount(expectedTestsCount, checks.length));
     }
 }
 
@@ -101,7 +104,7 @@ function createRuleCheck(
     )!.groups!;
     const targetRule = ruleIndex ? getNextMixinRule(rule, Number(ruleIndex)) : rule;
     if (!targetRule) {
-        errors.push(`cannot locate mixed-in rule for "${expectInput}"`);
+        errors.push(testInlineExpectsErrors.unfoundMixin(expectInput));
         return;
     }
     const expectedDeclarations: RuleCheck[`expectedDeclarations`] = [];
@@ -114,7 +117,7 @@ function createRuleCheck(
                 if (prop && value) {
                     expectedDeclarations.push([prop.trim(), value.trim()]);
                 } else {
-                    errors.push(`error in expectation "${decl}" of "${expectInput}"`);
+                    errors.push(testInlineExpectsErrors.malformedDecl(decl, expectInput));
                 }
             }
         }
@@ -141,3 +144,16 @@ function getNextMixinRule(currentRule: postcss.Rule, count: number): postcss.Rul
     }
     return currentRule && count === 0 ? currentRule : undefined;
 }
+
+export const testInlineExpectsErrors = {
+    matchAmount: (expectedAmount: number, actualAmount: number) =>
+        `Expected ${expectedAmount} checks to run but there was ${actualAmount}`,
+    selector: (expectedSelector: string, actualSelector: string, label = ``) =>
+        `${label}expected ${actualSelector} to transform to ${expectedSelector}`,
+    declarations: (expectedDecl: string, actualDecl: string, selector: string, label = ``) =>
+        `${label}expected ${selector} to have declaration {${expectedDecl}}, but got {${actualDecl}}`,
+    unfoundMixin: (expectInput: string) => `cannot locate mixed-in rule for "${expectInput}"`,
+    malformedDecl: (decl: string, expectInput: string) =>
+        `error in expectation "${decl}" of "${expectInput}"`,
+    combine: (errors: string[]) => `\n${errors.join(`\n`)}`,
+};
