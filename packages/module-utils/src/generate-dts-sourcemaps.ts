@@ -104,7 +104,7 @@ function createLineMapping(
 function findTokenForLine(line: number, dstTokens: TokenizedDtsEntry[]) {
     for (const typedTokens of dstTokens) {
         for (const token of typedTokens.tokens) {
-            if (token.line === line) {
+            if ('line' in token && token.line === line) {
                 return { type: typedTokens.type, token: token };
             }
         }
@@ -124,29 +124,33 @@ export function generateDTSSourceMap(_srcFilename: string, dtsContent: string, m
 
         if (resToken) {
             let currentSrcLocation;
-            const tokenName = stripQuotes(resToken.token.value);
-            switch (resToken.type) {
-                case 'classes':
-                    currentSrcLocation = getClassSrcLine(tokenName, meta);
-                    break;
-                case 'vars':
-                    currentSrcLocation = getVarsSrcLine(tokenName, meta);
-                    break;
-                case 'stVars':
-                    currentSrcLocation = getStVarsSrcLine(tokenName, meta);
-                    break;
-                case 'keyframes':
-                    currentSrcLocation = getKeyframeSrcLine(tokenName, meta);
-                    break;
-            }
+            if ('type' in resToken.token) {
+                const tokenName = stripQuotes(resToken.token.value);
+                switch (resToken.type) {
+                    case 'classes':
+                        currentSrcLocation = getClassSrcLine(tokenName, meta);
+                        break;
+                    case 'vars':
+                        currentSrcLocation = getVarsSrcLine(tokenName, meta);
+                        break;
+                    case 'stVars':
+                        currentSrcLocation = getStVarsSrcLine(tokenName, meta);
+                        break;
+                    case 'keyframes':
+                        currentSrcLocation = getKeyframeSrcLine(tokenName, meta);
+                        break;
+                }
 
-            if (currentSrcLocation) {
-                mapping[dtsLine] = createLineMapping(
-                    5,
-                    currentSrcLocation.line - lastSrcLocation.line,
-                    currentSrcLocation.column - lastSrcLocation.column
-                );
-                lastSrcLocation = { ...currentSrcLocation };
+                if (currentSrcLocation) {
+                    mapping[dtsLine] = createLineMapping(
+                        5,
+                        currentSrcLocation.line - lastSrcLocation.line,
+                        currentSrcLocation.column - lastSrcLocation.column
+                    );
+                    lastSrcLocation = { ...currentSrcLocation };
+                }
+            } else {
+                throw 'Implement states!!!';
             }
         } else {
             mapping[dtsLine] = [];

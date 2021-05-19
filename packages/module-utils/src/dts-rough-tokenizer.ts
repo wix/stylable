@@ -56,6 +56,20 @@ export function tokenizeDTS(source: string) {
     );
 }
 
+export function getLocalClassStates(local: string, tokens: TokenizedDtsEntry[]) {
+    const classes = tokens.find(({ type }) => type === 'classes') as ClassesToken;
+    const token = classes?.tokens.find(({ value }) => value === `"${local}"`);
+    if (token?.outputValue) {
+        const stateName = token?.outputValue.value;
+        const states = tokens.find(({ type }) => type === 'states') as StatesToken;
+        const classStates = states?.tokens.find(({ className: { value } }) => value === stateName);
+        if (classStates) {
+            return classStates.classStates;
+        }
+    }
+    throw new Error(`Could not find states for class ${local}`);
+}
+
 const isDelimiter = (char: string) =>
     char === ':' ||
     char === ';' ||
@@ -83,17 +97,31 @@ const isDelimiter = (char: string) =>
     char === '!' ||
     char === '\n';
 
-export type TokenizedDtsEntry = ClassesToken | VarsToken | StVarsToken | KeyframesToken;
+export type TokenizedDtsEntry =
+    | ClassesToken
+    | VarsToken
+    | StVarsToken
+    | KeyframesToken
+    | StatesToken;
 export type RelevantKeys = 'classes' | 'vars' | 'stVars' | 'keyframes';
 
 export interface DtsToken extends DTSCodeToken {
     line: number;
+    outputValue?: DtsToken;
 }
+
+export type ClassStateToken = { stateName: DtsToken; type: DtsToken[] };
 
 export type ClassesToken = { type: 'classes'; tokens: DtsToken[]; start: number; end: number };
 export type VarsToken = { type: 'vars'; tokens: DtsToken[]; start: number; end: number };
 export type StVarsToken = { type: 'stVars'; tokens: DtsToken[]; start: number; end: number };
 export type KeyframesToken = { type: 'keyframes'; tokens: DtsToken[]; start: number; end: number };
+export type StatesToken = {
+    type: 'states';
+    tokens: { className: DtsToken; classStates: ClassStateToken[] }[];
+    start: number;
+    end: number;
+};
 
 const shouldAddToken = (type: DTSCodeToken['type']) =>
     isComment(type) || type === 'space' ? false : true;
@@ -102,10 +130,10 @@ function isRelevantKey(name: string): name is RelevantKeys {
     return name === 'classes' || name === 'vars' || name === 'stVars' || name === 'keyframes';
 }
 
-export function findDtsTokens(tokens: DTSCodeToken[]) {
+function findDtsTokens(tokens: DTSCodeToken[]) {
     const s = new Seeker(tokens);
-    let t;
     const dtsTokens: TokenizedDtsEntry[] = [];
+    let t;
     let lineCount = 0;
 
     while ((t = s.next())) {
@@ -115,17 +143,19 @@ export function findDtsTokens(tokens: DTSCodeToken[]) {
 
         if (t.type === '\n') {
             lineCount += 1;
-        } else if (
-            t.value === 'declare' &&
-            s.peek().value === 'const' &&
-            isRelevantKey(s.peek(2).value)
-        ) {
+        } else if (t.value === 'type' && s.peek().value === 'states') {
             const start = t.start;
-            s.next();
-            const declareType = s.next();
-            s.next();
+            s.next(); // states
+            s.next(); // =
 
-            const resTokens: DtsToken[] = [];
+            const states: StatesToken = {
+                type: 'states',
+                tokens: [],
+                start,
+                end: -1,
+            };
+            dtsTokens.push(states);
+
             while ((t = s.next())) {
                 if (!t.type || t.type === '}') {
                     break;
@@ -134,11 +164,69 @@ export function findDtsTokens(tokens: DTSCodeToken[]) {
                 if (t.type === '\n') {
                     lineCount += 1;
                 } else if (t.type === 'string') {
-                    resTokens.push({ ...t, line: lineCount });
+                    const className: DtsToken = { ...t, line: lineCount };
+                    const classStates: ClassStateToken[] = [];
+                    let current: { stateName?: DtsToken; type: DtsToken[] } = {
+                        stateName: undefined,
+                        type: [],
+                    };
+                    while ((t = s.next())) {
+                        if (!t.type || t.type === '}') {
+                            break;
+                        }
 
-                    s.next();
-                    s.next();
-                    s.next();
+                        if (t.type === '\n') {
+                            lineCount += 1;
+                        } else if (t.type === ';') {
+                            current = {
+                                stateName: undefined,
+                                type: [],
+                            };
+                        } else if (current.stateName) {
+                            current.type.push({ ...t, line: lineCount });
+                        } else if (t.type === 'string') {
+                            current.stateName = { ...t, line: lineCount };
+                            classStates.push(current as Required<typeof current>);
+                            s.next(); // ?
+                            s.next(); // :
+                        }
+                    }
+
+                    states.tokens.push({
+                        className,
+                        classStates,
+                    });
+                }
+            }
+
+            states.end = t.end;
+        } else if (
+            t.value === 'declare' &&
+            s.peek().value === 'const' &&
+            isRelevantKey(s.peek(2).value)
+        ) {
+            const start = t.start;
+            s.next(); // const
+            const declareType = s.next(); // name
+            s.next(); // ;
+
+            const resTokens: DtsToken[] = []; // {...resTokens[]}
+            while ((t = s.next())) {
+                if (!t.type || t.type === '}') {
+                    break;
+                }
+
+                if (t.type === '\n') {
+                    lineCount += 1;
+                } else if (t.type === 'string') {
+                    s.next(); // :
+                    const value = s.next(); // value
+                    s.next(); // ;
+                    resTokens.push({
+                        ...t,
+                        line: lineCount,
+                        outputValue: { ...value, line: lineCount },
+                    });
                 }
             }
 
