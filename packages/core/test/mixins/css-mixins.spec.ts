@@ -921,6 +921,55 @@ describe('CSS Mixins', () => {
         matchRuleAndDeclaration(result, 2, '.entry__x:hover', 'color: blue');
     });
 
+    it('apply mixin with @supports', () => {
+        const result = generateStylableRoot({
+            entry: `/entry.st.css`,
+            files: {
+                '/entry.st.css': {
+                    namespace: 'entry',
+                    content: `
+                :import {
+                    -st-from: "./imported.st.css";
+                    -st-named: i;
+                }
+                .x {
+                    -st-mixin: i;
+                }
+            `,
+                },
+                '/imported.st.css': {
+                    namespace: 'imported',
+                    content: `
+                        .y {background: #000}
+                        .i {color: red;}
+                        @supports not (appearance: auto) {
+                            .y {background: #000}
+                            .i {color: yellow;}
+                            .i:hover {color: red;}
+                        }
+                        .i:hover {color: blue;}
+                    `,
+                },
+            },
+        });
+
+        matchRuleAndDeclaration(result, 0, '.entry__x', 'color: red');
+
+        const supports = result.nodes[1] as postcss.AtRule;
+        expect(supports.params, 'supports params').to.equal('not (appearance: auto)');
+
+        matchAllRulesAndDeclarations(
+            supports,
+            [
+                ['.entry__x', 'color: yellow'],
+                ['.entry__x:hover', 'color: red'],
+            ],
+            '@supports'
+        );
+
+        matchRuleAndDeclaration(result, 2, '.entry__x:hover', 'color: blue');
+    });
+
     it('apply mixin from root style sheet', () => {
         const result = generateStylableRoot({
             entry: `/entry.st.css`,
