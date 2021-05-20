@@ -996,7 +996,9 @@ describe('CSS Mixins', () => {
                        .root{color:yellow;}
                        .y{color:gold;}
                     }
-
+                    @supports not (appearance: auto) {
+                        .i {color:purple;}
+                    }
                 `,
                 },
             },
@@ -1007,6 +1009,8 @@ describe('CSS Mixins', () => {
         const media = result.nodes[2] as postcss.AtRule;
         matchRuleAndDeclaration(media, 0, '.entry__x', 'color:yellow', '@media');
         matchRuleAndDeclaration(media, 1, '.entry__x .imported__y', 'color:gold', '@media');
+        const supports = result.nodes[3] as postcss.AtRule;
+        matchRuleAndDeclaration(supports, 0, '.entry__x .imported__i', 'color:purple', '@supports');
     });
 
     it('apply named mixin with extends and conflicting pseudo-element class at mixin deceleration level', () => {
