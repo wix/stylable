@@ -37,6 +37,10 @@ export class Generator {
         this.indexFileOutput.set(normalizeRelative(relative(fullOutDir, filePath)), reExports);
     }
 
+    public removeEntryFromIndex(filePath: string, fullOutDir: string) {
+        this.indexFileOutput.delete(normalizeRelative(relative(fullOutDir, filePath)));
+    }
+
     public generateIndexFile(fs: IFileSystem, indexFileTargetPath: string) {
         const indexFileContent = this.generateIndexSource(indexFileTargetPath);
         ensureDirectory(fs.dirname(indexFileTargetPath), fs);

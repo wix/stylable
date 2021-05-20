@@ -5,26 +5,29 @@ import { ensureDirectory, handleDiagnostics, tryRun } from './build-tools';
 import { nameTemplate } from './name-template';
 import type { Log } from './logger';
 
-export interface BuildFileOptions {
+export interface BuildCommonOptions {
     fullOutDir: string;
     filePath: string;
     fullSrcDir: string;
     log: Log;
     fs: any;
-    stylable: Stylable;
-    diagnosticsMessages: Map<string, string[]>;
-    projectAssets: Set<string>;
     moduleFormats: string[];
-    mode?: string;
-    includeCSSInJS?: boolean;
     outputCSS?: boolean;
     outputCSSNameTemplate?: string;
     outputSources?: boolean;
+    generated?: Set<string>;
+    mode?: string;
+}
+
+export interface BuildFileOptions extends BuildCommonOptions {
+    stylable: Stylable;
+    diagnosticsMessages: Map<string, string[]>;
+    projectAssets: Set<string>;
+    includeCSSInJS?: boolean;
     useSourceNamespace?: boolean;
     injectCSSRequest?: boolean;
     optimize?: boolean;
     minify?: boolean;
-    generated?: Set<string>;
 }
 
 export function buildSingleFile({
@@ -33,20 +36,21 @@ export function buildSingleFile({
     fullSrcDir,
     log,
     fs,
-    stylable,
-    diagnosticsMessages,
-    projectAssets,
     moduleFormats,
-    includeCSSInJS = false,
     outputCSS = false,
     outputCSSNameTemplate = '[filename].css',
     outputSources = false,
+    generated = new Set<string>(),
+    mode = '[Build]',
+    // build specific
+    stylable,
+    includeCSSInJS = false,
+    diagnosticsMessages,
+    projectAssets,
     useSourceNamespace = false,
     injectCSSRequest = false,
     optimize = false,
     minify = false,
-    generated = new Set<string>(),
-    mode = '[Build]',
 }: BuildFileOptions) {
     const { basename, dirname, join, relative, resolve } = fs;
     const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
@@ -141,4 +145,53 @@ export function buildSingleFile({
             projectAssets.add(resolve(fileDirectory, url));
         }
     }
+}
+
+export function removeBuildProducts({
+    fullOutDir,
+    filePath,
+    fullSrcDir,
+    log,
+    fs,
+    moduleFormats,
+    outputCSS = false,
+    outputCSSNameTemplate = '[filename].css',
+    outputSources = false,
+    generated = new Set<string>(),
+    mode = '[Build]',
+}: BuildCommonOptions) {
+    const { basename, dirname, join } = fs;
+    const outSrcPath = join(fullOutDir, filePath.replace(fullSrcDir, ''));
+    const cssAssetFilename = nameTemplate(outputCSSNameTemplate, {
+        filename: basename(outSrcPath, '.st.css'),
+    });
+    const cssAssetOutPath = join(dirname(outSrcPath), cssAssetFilename);
+    const outputLogs: string[] = [];
+    log(mode, filePath);
+
+    // st.css
+    if (outputSources) {
+        if (outSrcPath === filePath) {
+            throw new Error(`Attempt to override source file ${outSrcPath}`);
+        }
+        generated.delete(outSrcPath);
+        outputLogs.push(`.st.css source`);
+        tryRun(() => fs.unlinkSync(outSrcPath), `Unlink File Error: ${outSrcPath}`);
+    }
+    // st.css.js
+    moduleFormats.forEach((format) => {
+        outputLogs.push(`${format} module`);
+        const outFilePath = outSrcPath + (format === 'esm' ? '.mjs' : '.js');
+        generated.delete(outFilePath);
+        tryRun(() => fs.unlinkSync(outFilePath), `Unlink File Error: ${outFilePath}`);
+    });
+    // .css
+    if (outputCSS) {
+        generated.delete(cssAssetOutPath);
+        outputLogs.push('transpiled css');
+        tryRun(() => fs.unlinkSync(cssAssetOutPath), `Unlink File Error: ${cssAssetOutPath}`);
+    }
+    // .d.ts?
+
+    log(mode, `removed: [${outputLogs.join(', ')}]`);
 }

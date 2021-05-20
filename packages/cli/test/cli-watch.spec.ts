@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { expect } from 'chai';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
@@ -118,6 +118,35 @@ describe('Stylable Cli Watch', () => {
                     msg: messages.START_WATCHING,
                     action() {
                         writeFileSync(join(tempDir.path, 'style.st.css'), `.root{ color:green }`);
+                        return true;
+                    },
+                },
+                {
+                    msg: messages.FINISHED_PROCESSING,
+                    action() {
+                        return false;
+                    },
+                },
+            ],
+        });
+        const files = loadDirSync(tempDir.path);
+        expect(files['dist/style.css']).to.include('color:green');
+    });
+
+    it.only('should handle deleted files', async () => {
+        populateDirectorySync(tempDir.path, {
+            'package.json': `{"name": "test", "version": "0.0.0"}`,
+            'style.st.css': `.root{ color: red }`,
+        });
+
+        await run({
+            dirPath: tempDir.path,
+            args: ['--outDir', './dist', '-w', '--cjs=false', '--css'],
+            steps: [
+                {
+                    msg: messages.START_WATCHING,
+                    action() {
+                        unlinkSync(join(tempDir.path, 'style.st.css'));
                         return true;
                     },
                 },

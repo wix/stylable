@@ -3,7 +3,7 @@ import type { IFileSystem } from '@file-services/types';
 import type { Generator } from './base-generator';
 import { generateManifest } from './generate-manifest';
 import { handleAssets } from './handle-assets';
-import { buildSingleFile } from './build-single-file';
+import { buildSingleFile, removeBuildProducts } from './build-single-file';
 import { DirectoryProcessService } from './directory-process-service/directory-process-service';
 import { levels, Log } from './logger';
 import { reportDiagnostics } from './report-diagnostics';
@@ -98,6 +98,22 @@ export async function build({
         processFiles(service, affectedFiles, changeOrigin) {
             if (changeOrigin) {
                 stylable.initCache();
+                if (!changeOrigin.stats) {
+                    diagnosticsMessages.delete(changeOrigin.path);
+                    generator.removeEntryFromIndex(changeOrigin.path, fullOutDir);
+                    removeBuildProducts({
+                        fullOutDir,
+                        fullSrcDir,
+                        filePath: changeOrigin.path,
+                        log,
+                        fs,
+                        moduleFormats: moduleFormats || [],
+                        outputCSS,
+                        outputCSSNameTemplate,
+                        outputSources,
+                        generated,
+                    });
+                }
             }
 
             for (const filePath of diagnosticsMessages.keys()) {
