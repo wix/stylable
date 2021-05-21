@@ -6,7 +6,7 @@ import yargs from 'yargs';
 import { Stylable } from '@stylable/core';
 import { build } from './build';
 
-const { argv } = yargs
+const argv = yargs
     .option('rootDir', {
         type: 'string',
         description: 'root directory of project',
@@ -133,7 +133,8 @@ const { argv } = yargs
     .alias('h', 'help')
     .alias('v', 'version')
     .help()
-    .strict();
+    .strict()
+    .parseSync();
 
 const log = createLogger('[Stylable]', argv.log);
 
