@@ -1,5 +1,3 @@
-// const { ProvidePlugin } = require('webpack');
-
 module.exports.baseConfig = () => {
     /** @type {import('webpack').Configuration} */
     const base = {
