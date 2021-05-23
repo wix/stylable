@@ -1,4 +1,4 @@
-const { ProvidePlugin } = require('webpack');
+// const { ProvidePlugin } = require('webpack');
 
 module.exports.baseConfig = () => {
     /** @type {import('webpack').Configuration} */
@@ -7,9 +7,9 @@ module.exports.baseConfig = () => {
         resolve: {
             alias: {
                 jsdom: require.resolve('./jsdom-browser.js'),
+                path: require.resolve('@file-services/path'),
             },
             fallback: {
-                path: require.resolve('@file-services/path'),
                 os: false,
             },
         },
@@ -22,11 +22,6 @@ module.exports.baseConfig = () => {
                 },
             ],
         },
-        plugins: [
-            new ProvidePlugin({
-                process: ['util', 'process'],
-            }),
-        ],
         devServer: { host: 'localhost' },
     };
     return base;
