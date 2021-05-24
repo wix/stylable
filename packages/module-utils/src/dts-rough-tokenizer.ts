@@ -107,6 +107,7 @@ export type RelevantKeys = 'classes' | 'vars' | 'stVars' | 'keyframes';
 
 export interface DtsToken extends DTSCodeToken {
     line: number;
+    column: number;
     outputValue?: DtsToken;
 }
 
@@ -134,7 +135,7 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
     const s = new Seeker(tokens);
     const dtsTokens: TokenizedDtsEntry[] = [];
     let t;
-    let lineCount = 0;
+    const lastNewLinePosition = { line: 0, columm: 0 };
 
     while ((t = s.next())) {
         if (!t.type) {
@@ -142,7 +143,8 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
         }
 
         if (t.type === '\n') {
-            lineCount += 1;
+            lastNewLinePosition.line += 1;
+            lastNewLinePosition.columm = t.end;
         } else if (t.value === 'type' && s.peek().value === 'states') {
             const start = t.start;
             s.next(); // states
@@ -162,9 +164,14 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
                 }
 
                 if (t.type === '\n') {
-                    lineCount += 1;
+                    lastNewLinePosition.line += 1;
+                    lastNewLinePosition.columm = t.end;
                 } else if (t.type === 'string') {
-                    const className: DtsToken = { ...t, line: lineCount };
+                    const className: DtsToken = {
+                        ...t,
+                        line: lastNewLinePosition.line,
+                        column: t.start - lastNewLinePosition.columm,
+                    };
                     const classStates: ClassStateToken[] = [];
                     let current: { stateName?: DtsToken; type: DtsToken[] } = {
                         stateName: undefined,
@@ -176,16 +183,25 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
                         }
 
                         if (t.type === '\n') {
-                            lineCount += 1;
+                            lastNewLinePosition.line += 1;
+                            lastNewLinePosition.columm = t.end;
                         } else if (t.type === ';') {
                             current = {
                                 stateName: undefined,
                                 type: [],
                             };
                         } else if (current.stateName) {
-                            current.type.push({ ...t, line: lineCount });
+                            current.type.push({
+                                ...t,
+                                line: lastNewLinePosition.line,
+                                column: t.start - lastNewLinePosition.columm,
+                            });
                         } else if (t.type === 'string') {
-                            current.stateName = { ...t, line: lineCount };
+                            current.stateName = {
+                                ...t,
+                                line: lastNewLinePosition.line,
+                                column: t.start - lastNewLinePosition.columm,
+                            };
                             classStates.push(current as Required<typeof current>);
                             s.next(); // ?
                             s.next(); // :
@@ -217,15 +233,21 @@ function findDtsTokens(tokens: DTSCodeToken[]) {
                 }
 
                 if (t.type === '\n') {
-                    lineCount += 1;
+                    lastNewLinePosition.line += 1;
+                    lastNewLinePosition.columm = t.end;
                 } else if (t.type === 'string') {
                     s.next(); // :
                     const value = s.next(); // value
                     s.next(); // ;
                     resTokens.push({
                         ...t,
-                        line: lineCount,
-                        outputValue: { ...value, line: lineCount },
+                        line: lastNewLinePosition.line,
+                        column: t.start - lastNewLinePosition.columm,
+                        outputValue: {
+                            ...value,
+                            line: lastNewLinePosition.line,
+                            column: value.start - lastNewLinePosition.columm,
+                        },
                     });
                 }
             }

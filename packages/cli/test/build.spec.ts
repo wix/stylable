@@ -261,6 +261,7 @@ describe('build stand alone', () => {
         expect(fs.existsSync(resolve('/dist/comp.global.css'))).to.equal(true);
     });
 
+    // Todo: fix d.ts test expectations
     it('DTS only parts', () => {
         const fs = createFS({
             '/main.st.css': `

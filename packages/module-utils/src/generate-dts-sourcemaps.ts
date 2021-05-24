@@ -1,14 +1,16 @@
 import { basename } from 'path';
-import { StylableMeta } from '@stylable/core';
-import { TokenizedDtsEntry, tokenizeDTS } from './dts-rough-tokenizer';
+import { StylableMeta, valueMapping } from '@stylable/core';
 import { encode } from 'vlq';
+import {
+    ClassesToken,
+    ClassStateToken,
+    TokenizedDtsEntry,
+    tokenizeDTS,
+} from './dts-rough-tokenizer';
 
 type LineMapping = Array<Array<number>>;
 
-function getClassSrcLine(
-    className: string,
-    meta: StylableMeta
-): { line: number; column: number } | undefined {
+function getClassSrcPosition(className: string, meta: StylableMeta): Position | undefined {
     const cls = meta.classes[className];
     let res;
 
@@ -26,10 +28,7 @@ function getClassSrcLine(
     return res;
 }
 
-function getVarsSrcLine(
-    varName: string,
-    meta: StylableMeta
-): { line: number; column: number } | undefined {
+function getVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
     const cssVar = meta.cssVars[`--${varName}`];
     let res;
 
@@ -47,10 +46,7 @@ function getVarsSrcLine(
     return res;
 }
 
-function getStVarsSrcLine(
-    varName: string,
-    meta: StylableMeta
-): { line: number; column: number } | undefined {
+function getStVarsSrcPosition(varName: string, meta: StylableMeta): Position | undefined {
     const stVar = meta.vars.find((v) => v.name === varName);
     let res;
 
@@ -73,10 +69,7 @@ function getStVarsSrcLine(
     return res;
 }
 
-function getKeyframeSrcLine(
-    keyframeName: string,
-    meta: StylableMeta
-): { line: number; column: number } | undefined {
+function getKeyframeSrcPosition(keyframeName: string, meta: StylableMeta): Position | undefined {
     const keyframe = meta.keyframes.find((keyframe) => keyframe.params === keyframeName);
 
     if (keyframe && keyframe.source && keyframe.source.start) {
@@ -93,20 +86,94 @@ function stripQuotes(name: string) {
     return name.slice(1, name.length - 1);
 }
 
-function createLineMapping(
+type LinePartMapping = [number, number, number, number];
+
+function createLinePartMapping(
     dtsOffset: number,
     srcLine: number,
     srcCol: number
-): [[number, number, number, number]] {
-    return [[dtsOffset, 0, srcLine, srcCol]];
+): LinePartMapping {
+    return [dtsOffset, 0, srcLine, srcCol];
+}
+
+function createLineMapping(dtsOffset: number, srcLine: number, srcCol: number): LinePartMapping[] {
+    return [createLinePartMapping(dtsOffset, srcLine, srcCol)];
+}
+
+type Position = {
+    line: number;
+    column: number;
+};
+
+function createStateLineMapping(
+    stateTokens: ClassStateToken[],
+    srcClassName: string,
+    lastSrcLocation: Position,
+    meta: StylableMeta
+) {
+    const res: { mapping: LinePartMapping[]; lastSrcPosition: Position } = {
+        mapping: [],
+        lastSrcPosition: lastSrcLocation,
+    };
+    let prevDtsColumn = 0;
+    for (const stateToken of stateTokens) {
+        let stateSourcePosition: Position | undefined;
+
+        meta.rawAst.walkRules(`.${srcClassName}`, (rule) => {
+            return rule.walkDecls(valueMapping.states, (decl) => {
+                if (decl.source && decl.source.start)
+                    stateSourcePosition = {
+                        line: decl.source.start.line - 1,
+                        column: decl.source.start.column - 1,
+                    };
+                return false;
+            });
+        });
+
+        if (stateSourcePosition) {
+            res.mapping.push(
+                createLinePartMapping(
+                    stateToken.stateName.column - prevDtsColumn,
+                    stateSourcePosition.line - res.lastSrcPosition.line,
+                    stateSourcePosition.column - res.lastSrcPosition.column
+                )
+            );
+
+            prevDtsColumn = stateToken.stateName.column;
+            res.lastSrcPosition = {
+                line: stateSourcePosition.line,
+                column: stateSourcePosition.column,
+            };
+        }
+    }
+
+    return res;
 }
 
 function findTokenForLine(line: number, dstTokens: TokenizedDtsEntry[]) {
     for (const typedTokens of dstTokens) {
         for (const token of typedTokens.tokens) {
-            if ('line' in token && token.line === line) {
+            if ('line' in token) {
+                if (token.line === line) {
+                    return { type: typedTokens.type, token: token };
+                }
+            } else if (
+                token.classStates &&
+                token.classStates.length &&
+                token.classStates[0].stateName.line === line
+            ) {
                 return { type: typedTokens.type, token: token };
             }
+        }
+    }
+
+    return;
+}
+
+function getClassSourceName(targetName: string, classTokens: ClassesToken): string | undefined {
+    for (const classToken of classTokens.tokens) {
+        if (classToken.outputValue?.value === targetName) {
+            return classToken.value;
         }
     }
 
@@ -117,40 +184,54 @@ export function generateDTSSourceMap(_srcFilename: string, dtsContent: string, m
     const tokens = tokenizeDTS(dtsContent);
     const mapping: Record<number, LineMapping> = {};
     const lines = dtsContent.split('\n');
-    let lastSrcLocation = { line: 0, column: 0 };
+    let lastSrcLocation: Position = { line: 0, column: 0 };
 
     for (const dtsLine of lines.keys()) {
         const resToken = findTokenForLine(dtsLine, tokens);
 
         if (resToken) {
-            let currentSrcLocation;
+            let currentSrcPosition: Position | undefined;
             if ('type' in resToken.token) {
                 const tokenName = stripQuotes(resToken.token.value);
                 switch (resToken.type) {
                     case 'classes':
-                        currentSrcLocation = getClassSrcLine(tokenName, meta);
+                        currentSrcPosition = getClassSrcPosition(tokenName, meta);
                         break;
                     case 'vars':
-                        currentSrcLocation = getVarsSrcLine(tokenName, meta);
+                        currentSrcPosition = getVarsSrcPosition(tokenName, meta);
                         break;
                     case 'stVars':
-                        currentSrcLocation = getStVarsSrcLine(tokenName, meta);
+                        currentSrcPosition = getStVarsSrcPosition(tokenName, meta);
                         break;
                     case 'keyframes':
-                        currentSrcLocation = getKeyframeSrcLine(tokenName, meta);
+                        currentSrcPosition = getKeyframeSrcPosition(tokenName, meta);
                         break;
                 }
 
-                if (currentSrcLocation) {
+                if (currentSrcPosition) {
                     mapping[dtsLine] = createLineMapping(
                         5,
-                        currentSrcLocation.line - lastSrcLocation.line,
-                        currentSrcLocation.column - lastSrcLocation.column
+                        currentSrcPosition.line - lastSrcLocation.line,
+                        currentSrcPosition.column - lastSrcLocation.column
                     );
-                    lastSrcLocation = { ...currentSrcLocation };
+                    lastSrcLocation = { ...currentSrcPosition };
                 }
-            } else {
-                throw 'Implement states!!!';
+            } else if (resToken.type === 'states') {
+                const classSourceName = getClassSourceName(
+                    resToken.token.className.value,
+                    tokens[1] as ClassesToken
+                );
+
+                if (classSourceName) {
+                    const stateRes = createStateLineMapping(
+                        resToken.token.classStates,
+                        stripQuotes(classSourceName),
+                        lastSrcLocation,
+                        meta
+                    );
+                    lastSrcLocation = stateRes.lastSrcPosition;
+                    mapping[dtsLine] = stateRes.mapping;
+                }
             }
         } else {
             mapping[dtsLine] = [];
@@ -165,7 +246,7 @@ export function generateDTSSourceMap(_srcFilename: string, dtsContent: string, m
             sources: [stylesheetName],
             names: [],
             mappings: Object.values(mapping)
-                .map((segment) => (segment.length ? encode(segment[0]) : ''))
+                .map((segment) => (segment.length ? segment.map((s) => encode(s)).join(',') : ''))
                 .join(';'),
         },
         null,
