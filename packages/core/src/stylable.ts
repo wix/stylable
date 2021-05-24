@@ -103,7 +103,7 @@ export class Stylable {
     public createResolver({
         requireModule,
         resolverCache,
-    }: Pick<StylableConfig, 'requireModule' | 'resolverCache'>) {
+    }: Pick<StylableConfig, 'requireModule' | 'resolverCache'> = {}) {
         return new StylableResolver(
             this.fileProcessor,
             requireModule || this.requireModule,

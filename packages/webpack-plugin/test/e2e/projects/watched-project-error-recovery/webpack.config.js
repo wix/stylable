@@ -6,5 +6,8 @@ module.exports = {
     mode: 'development',
     context: __dirname,
     devtool: 'source-map',
-    plugins: [new StylableWebpackPlugin({ cssInjection: 'css', filename: 'stylable.[contenthash].css' }), new HtmlWebpackPlugin()],
+    plugins: [
+        new StylableWebpackPlugin({ cssInjection: 'css', filename: 'stylable.[contenthash].css' }),
+        new HtmlWebpackPlugin(),
+    ],
 };

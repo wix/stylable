@@ -41,8 +41,7 @@ describe(`(${project})`, () => {
                 id: './src/index.st.css',
                 depth: '3',
 
-                css:
-                    '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}',
+                css: '.global1{background:gray}.global1 .global2{background-color:#e4e4e4}.s0.o0--x{font-family:MyFont}.s1{background:#00f}',
             },
         ]);
     });

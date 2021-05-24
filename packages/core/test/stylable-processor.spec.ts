@@ -70,12 +70,12 @@ describe('Stylable postcss process', () => {
             { from: distFrom }
         );
 
-        // assure namesapce generated with st-namespace-reference
+        // assure namespace generated with st-namespace-reference
         // is identical between source and dist with the relative correction
         expect(result.namespace).to.eql(processNamespace('style', from));
     });
 
-    it('use filename as default namespace prefix', () => {
+    it('use filename as default namespace prefix (empty)', () => {
         const from = resolve('/path/to/style.css');
 
         const result = processSource(

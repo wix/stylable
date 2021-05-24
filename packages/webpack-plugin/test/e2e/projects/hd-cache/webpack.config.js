@@ -9,5 +9,5 @@ module.exports = {
     devtool: 'source-map',
     plugins: [new StylableWebpackPlugin(), new HtmlWebpackPlugin()],
     cache: { type: 'filesystem', cacheDirectory: join(__dirname, '.cache') },
-    optimization: { usedExports: true, sideEffects: true, providedExports: true, },
+    optimization: { usedExports: true, sideEffects: true, providedExports: true },
 };

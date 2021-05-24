@@ -3,5 +3,10 @@
   "compilerOptions": {
     "outDir": "../dist"
   },
-  "references": [{ "path": "../../core/src" }, { "path": "../../optimizer/src" }]
+  "references": [
+    { "path": "../../build-tools/src" },
+    { "path": "../../core/src" },
+    { "path": "../../optimizer/src" },
+    { "path": "../../runtime/src" }
+  ]
 }

@@ -24,7 +24,19 @@ yarn create stylable-app <project-name>
 
 ## Options
 
-`--verbose` can be passed to see the output of each executed command.
+### Choosing a template
+`create-stylable-app` can generate a project from a set of different templates:
+- `ts-react-webpack` (default) - generate a project based on React, TypeScript and webpack
+- `ts-react-rollup` - generate a project based on React, TypeScript and Rollup
+
+### Options description
+
+| Option       | Alias  | Description                                                         | Default Value      |
+| ------------ | ------ | ------------------------------------------------------------------- | ------------------ |
+| `--template`     | `-t`   | project template to use (`ts-react-webpack` or `ts-react-rollup`)   | `ts-react-webpack` |
+| `--verboseNpm`   |        | print verbose npm log                                               | `false`            |
+| `--help`         | `-h`   | Show this help                                                      |                    |
+| `--version`      | `-v`   | show `create-stylable-app` version number                           |                    |
 
 ## License
 

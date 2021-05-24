@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist"
+  },
+  "references": [
+    { "path": "../../build-tools/src" },
+    { "path": "../../runtime/src" },
+    { "path": "../../core/src" },
+    { "path": "../../optimizer/src" }
+  ]
+}

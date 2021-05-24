@@ -49,6 +49,7 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | [create-stylable-app](./packages/create-stylable-app) | `create-stylable-app`        |        [![npm version](https://img.shields.io/npm/v/create-stylable-app.svg)](https://www.npmjs.com/package/create-stylable-app)        | Boilerplate generator CLI                                                                  |
 | [schema-extract](./packages/schema-extract)           | `@stylable/schema-extract`   |   [![npm version](https://img.shields.io/npm/v/@stylable/schema-extract.svg)](https://www.npmjs.com/package/@stylable/schema-extract)   | JSON Schema convertor for Stylable stylesheets                                             |
 | [language-service](./packages/language-service)       | `@stylable/language-service` | [![npm version](https://img.shields.io/npm/v/@stylable/language-service.svg)](https://www.npmjs.com/package/@stylable/language-service) | Language service protocol provider, business logic for the stylable-intelligence extension |
+| [build-tools](./packages/build-tools)       | `@stylable/build-tools` | [![npm version](https://img.shields.io/npm/v/@stylable/build-tools.svg)](https://www.npmjs.com/package/@stylable/build-tools) | A collection of tools used during build-time by our `webpack` and `rollup` plugins |
 
 ### Integrations
 
@@ -57,8 +58,9 @@ This repository is a `mono-repo` containing multiple `packages` that together co
 | [jest](./packages/jest)                               | `@stylable/jest`                |                [![npm version](https://img.shields.io/npm/v/@stylable/jest.svg)](https://www.npmjs.com/package/@stylable/jest)                | Jest Stylable processor plugin                                     |
 | [node](./packages/node)                               | `@stylable/node`                |                [![npm version](https://img.shields.io/npm/v/@stylable/node.svg)](https://www.npmjs.com/package/@stylable/node)                | `require` hook and Node module factory                             |
 | [webpack-extensions](./packages/webpack-extensions)   | `@stylable/webpack-extensions`  |  [![npm version](https://img.shields.io/npm/v/@stylable/webpack-extensions.svg)](https://www.npmjs.com/package/@stylable/webpack-extensions)  | Experimental features for `webpack` integration                    |
-| [webpack-plugin](./packages/webpack-plugin)           | `@stylable/webpack-plugin`      |      [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)      | `webpack` (`v4.x`) integration plugin                              |
+| [webpack-plugin](./packages/webpack-plugin)           | `@stylable/webpack-plugin`      |      [![npm version](https://img.shields.io/npm/v/@stylable/webpack-plugin.svg)](https://www.npmjs.com/package/@stylable/webpack-plugin)      | `webpack` (`^5.20.0`) integration plugin                              |
 | [experimental-loader](./packages/experimental-loader) | `@stylable/experimental-loader` | [![npm version](https://img.shields.io/npm/v/@stylable/experimental-loader.svg)](https://www.npmjs.com/package/@stylable/experimental-loader) | experimental `webpack` loader - not recommended for production use |
+| [rollup-plugin](./packages/rollup-plugin) | `@stylable/rollup-plugin` | [![npm version](https://img.shields.io/npm/v/@stylable/rollup-plugin.svg)](https://www.npmjs.com/package/@stylable/rollup-plugin) | Rollup (`v2.x`) integration plugine |
 
 ### Test-kits
 

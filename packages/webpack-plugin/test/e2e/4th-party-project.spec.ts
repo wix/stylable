@@ -1,4 +1,3 @@
-// import { expect } from 'chai';
 import { StylableProjectRunner } from '@stylable/e2e-test-kit';
 import { dirname } from 'path';
 

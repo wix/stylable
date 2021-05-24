@@ -353,8 +353,9 @@ export const ValueDirectiveProvider: CompletionProvider & {
             !this.isInsideValueDirective(fullLineText, position.character) &&
             fullLineText.includes(':')
         ) {
-            const parsed = postcssValueParser(fullLineText.slice(fullLineText.indexOf(':') + 1))
-                .nodes;
+            const parsed = postcssValueParser(
+                fullLineText.slice(fullLineText.indexOf(':') + 1)
+            ).nodes;
             const node = parsed[parsed.length - 1];
             if (
                 node &&
@@ -729,9 +730,11 @@ export const NamedCompletionProvider: CompletionProvider & {
                 (astAtCursor as postcss.Rule).nodes &&
                 (astAtCursor as postcss.Rule).nodes.length
             ) {
-                importName = ((astAtCursor as postcss.Rule).nodes.find(
-                    (n) => (n as postcss.Declaration).prop === valueMapping.from
-                ) as postcss.Declaration).value.replace(/'|"/g, '');
+                importName = (
+                    (astAtCursor as postcss.Rule).nodes.find(
+                        (n) => (n as postcss.Declaration).prop === valueMapping.from
+                    ) as postcss.Declaration
+                ).value.replace(/'|"/g, '');
             } else if (
                 astAtCursor.type === 'atrule' &&
                 astAtCursor.name === topLevelDirectives.stImport.slice(1)
@@ -1407,9 +1410,8 @@ export const StateEnumCompletionProvider: CompletionProvider = {
                         return states && states[stateName] && states[stateName].type === 'enum';
                     });
                     if (resolvedStateNode) {
-                        const resolvedState = resolvedStateNode.symbol[valueMapping.states]![
-                            stateName
-                        ];
+                        const resolvedState =
+                            resolvedStateNode.symbol[valueMapping.states]![stateName];
                         let existingInput = fullLineText.slice(0, position.character);
                         existingInput = existingInput.slice(existingInput.lastIndexOf('(') + 1);
 

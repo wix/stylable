@@ -2,7 +2,7 @@ import type { Compilation, Compiler, NormalModule } from 'webpack';
 import { replaceMappedCSSAssetPlaceholders, getStylableBuildData } from './plugin-utils';
 
 import { StylableWebpackPlugin } from './plugin';
-import { BuildData } from './types';
+import type { BuildData } from './types';
 
 export function injectCssModules(
     webpack: Compiler['webpack'],
@@ -21,9 +21,9 @@ export function injectCssModules(
         );
     }
 
-    const CssModule = (MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')).getCssModule(
-        webpack
-    );
+    const CssModule = (
+        MiniCssExtractPlugin.constructor as typeof import('mini-css-extract-plugin')
+    ).getCssModule(webpack);
 
     compilation.hooks.afterChunks.tap(StylableWebpackPlugin.name, () => {
         const { moduleGraph, dependencyTemplates, runtimeTemplate } = compilation;

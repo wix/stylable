@@ -17,10 +17,12 @@ export const nativePseudoClasses = [
     'focus',
     'focus-within',
     'focus-visible',
+    'has',
     'hover',
     'indeterminate',
     'in-range',
     'invalid',
+    'is',
     'lang',
     'last-child',
     'last-of-type',
@@ -45,6 +47,7 @@ export const nativePseudoClasses = [
     'target',
     'valid',
     'visited',
+    'where',
 ];
 
 export const nativePseudoElements = [
